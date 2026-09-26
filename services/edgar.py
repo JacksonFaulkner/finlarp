@@ -26,10 +26,13 @@ FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
 # revenue under.
 REVENUE_CONCEPTS = [
     "RevenueFromContractWithCustomerExcludingAssessedTax",
+    # CRWD, NEE, AKAM, VRNS and others tag revenue only with this one.
+    "RevenueFromContractWithCustomerIncludingAssessedTax",
     "Revenues",
     "SalesRevenueNet",
 ]
 EPS_CONCEPTS = ["EarningsPerShareDiluted", "EarningsPerShareBasic"]
+NET_INCOME_CONCEPTS = ["NetIncomeLoss"]
 
 
 def _session() -> requests.Session:
@@ -124,6 +127,17 @@ def get_quarterly_revenue(symbol: str) -> list[dict]:
         return []
     rows = _single_quarter_series(facts, REVENUE_CONCEPTS)
     return [{"quarter_end": r["end"], "revenue": r["val"]} for r in rows]
+
+
+def get_quarterly_net_income(symbol: str) -> list[dict]:
+    """[{quarter_end, net_income}, ...] oldest -> newest, up to 8 quarters —
+    same NetIncomeLoss tag every filer uses, so this is a cheap add next to
+    revenue rather than a new data source."""
+    facts = get_company_facts(symbol)
+    if not facts:
+        return []
+    rows = _single_quarter_series(facts, NET_INCOME_CONCEPTS)
+    return [{"quarter_end": r["end"], "net_income": r["val"]} for r in rows]
 
 
 def get_annual_series(symbol: str) -> list[dict]:

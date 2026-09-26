@@ -1,7 +1,8 @@
 // CANSLIM scorecard screen — reads the JSON blob `services/canslim.py`
 // wrote into canslim_cache directly out of DuckDB (same no-IPC pattern as
-// the portfolio history screen) and renders one bordered gauge panel per
-// letter, wide enough to show the raw numbers a score came from.
+// the portfolio history screen) and renders a master/detail view: one
+// compact row per letter on the left, the selected letter's raw numbers
+// on the right.
 
 use std::io;
 use std::path::Path;
@@ -12,21 +13,41 @@ use ratatui::backend::CrosstermBackend;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Color, Style, Stylize};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Bar, BarChart, BarGroup, Block, Borders, Clear, Gauge, Paragraph};
+use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
 use ratatui::Terminal;
 use serde_json::Value;
 
-/// Per-letter drill-down content for the Enter-expanded popup. Each variant
+/// Per-letter drill-down content rendered inline under the letter's numbers. Each variant
 /// is a small reusable chart/list shape — new letters add a variant here
 /// instead of inventing a one-off widget layout each time.
 enum Detail {
-    Bars(Vec<BarPoint>),
+    Earnings(EarningsDetail),
 }
 
 struct BarPoint {
     label: String,
     actual: f64,
     estimate: f64,
+}
+
+/// C's full drill-down: paired EPS actual-vs-estimate bars (existing),
+/// filed quarterly revenue as its own bar series (the "sales confirms
+/// earnings" half of IBD's rule), and the estimate-revision trend
+/// (90d/30d/7d/current) as a sparkline — is Wall St. raising or cutting
+/// numbers lately.
+struct EarningsDetail {
+    eps_bars: Vec<BarPoint>,
+    revenue_bars: Vec<RevenueBar>,
+    eps_revision_trend: Vec<f64>,
+    as_of: String,
+}
+
+struct RevenueBar {
+    label: String,
+    revenue: f64,
+    qoq_growth_pct: Option<f64>,
+    yoy_growth_pct: Option<f64>,
+    net_margin_pct: Option<f64>,
 }
 
 fn f(v: &Value, path: &[&str]) -> Option<f64> {
@@ -68,8 +89,14 @@ fn build_letters(card: &Value) -> Vec<Letter> {
     let l = &card["l"];
     let i = &card["i"];
     let m = &card["m"];
+    let as_of = card.get("as_of").and_then(|v| v.as_str()).unwrap_or("-").to_string();
 
-    let fwd_growth = f(c, &["forward_qtr_eps_growth_pct"]);
+    // Growth off a negative or zero base is not meaningful (-650% "growth"
+    // for a name going from -0.01 to -0.06) — drop it from both the line
+    // and the score rather than let one garbage ratio dominate.
+    let eps_current = f(c, &["eps_estimate_current"]);
+    let eps_negative_base = eps_current.map(|v| v <= 0.0).unwrap_or(false);
+    let fwd_growth = if eps_negative_base { None } else { f(c, &["forward_qtr_eps_growth_pct"]) };
     let earnings_yoy = f(a, &["trailing_yoy_earnings_growth_pct"]);
     let pct_off_high = f(n, &["pct_off_high"]);
     let vol_surge = f(sup, &["volume_surge_ratio"]);
@@ -96,16 +123,43 @@ fn build_letters(card: &Value) -> Vec<Letter> {
     // IBD's actual C rule wants revenue confirming earnings growth, not
     // just EPS estimate drift — filed revenue YoY (real 10-Q data, not an
     // analyst guess) from the latest quarter in revenue_history.
-    let latest_rev_yoy = c
+    let revenue_bars: Vec<RevenueBar> = c
         .get("revenue_history")
         .and_then(|v| v.as_array())
-        .and_then(|a| a.last())
-        .and_then(|q| q.get("yoy_growth_pct"))
-        .and_then(|v| v.as_f64());
+        .map(|history| {
+            history
+                .iter()
+                .filter_map(|q| {
+                    let label = q.get("quarter_end")?.as_str()?.to_string();
+                    let revenue = q.get("revenue")?.as_f64()?;
+                    let qoq_growth_pct = q.get("qoq_growth_pct").and_then(|v| v.as_f64());
+                    let yoy_growth_pct = q.get("yoy_growth_pct").and_then(|v| v.as_f64());
+                    let net_margin_pct = q.get("net_margin_pct").and_then(|v| v.as_f64());
+                    Some(RevenueBar { label, revenue, qoq_growth_pct, yoy_growth_pct, net_margin_pct })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+    let latest_rev_yoy = revenue_bars.last().and_then(|r| r.yoy_growth_pct);
+    let eps_revision_trend: Vec<f64> = [
+        f(c, &["eps_estimate_90d_ago"]),
+        f(c, &["eps_estimate_30d_ago"]),
+        f(c, &["eps_estimate_7d_ago"]),
+        f(c, &["eps_estimate_current"]),
+    ]
+    .into_iter()
+    .flatten()
+    .collect();
+    // Bounds calibrated against real filed/estimate data across a spread
+    // of symbols (MU, NVDA, GOOGL, WEN, GME) after fixing a unit bug where
+    // these came out of Yahoo/EDGAR ~10x too small (see services/canslim.py
+    // _raw_pct). IBD's floor is 25% for both; 100%+ EPS growth is common
+    // for names with real operating leverage, 50%+ revenue growth is rarer
+    // so gets a tighter ceiling.
     let c_score = match (fwd_growth, latest_rev_yoy) {
-        (Some(eps), Some(rev)) => (clamp_pct(eps, 0.0, 25.0) + clamp_pct(rev, 0.0, 25.0)) / 2,
-        (Some(eps), None) => clamp_pct(eps, 0.0, 25.0),
-        (None, Some(rev)) => clamp_pct(rev, 0.0, 25.0),
+        (Some(eps), Some(rev)) => (clamp_pct(eps, 0.0, 100.0) + clamp_pct(rev, 0.0, 50.0)) / 2,
+        (Some(eps), None) => clamp_pct(eps, 0.0, 100.0),
+        (None, Some(rev)) => clamp_pct(rev, 0.0, 50.0),
         (None, None) => 0,
     };
 
@@ -116,21 +170,44 @@ fn build_letters(card: &Value) -> Vec<Letter> {
             score: c_score,
             lines: vec![
                 format!(
-                    "eps est: {}  (7d: {}  30d: {}  90d: {})   fwd qoq: {}",
-                    fmt_opt(f(c, &["eps_estimate_current"]), ""),
-                    fmt_opt(f(c, &["eps_estimate_7d_ago"]), ""),
-                    fmt_opt(f(c, &["eps_estimate_30d_ago"]), ""),
-                    fmt_opt(f(c, &["eps_estimate_90d_ago"]), ""),
-                    fmt_opt(fwd_growth, "%"),
+                    "eps est: {}  (7d: {}  30d: {}  90d: {})",
+                    fmt_eps(eps_current),
+                    fmt_eps(f(c, &["eps_estimate_7d_ago"])),
+                    fmt_eps(f(c, &["eps_estimate_30d_ago"])),
+                    fmt_eps(f(c, &["eps_estimate_90d_ago"])),
+                ),
+                format!(
+                    "fwd qoq: {}{}",
+                    if eps_negative_base { "n/m (negative EPS)".to_string() } else { fmt_opt(fwd_growth, "%") },
+                    // Thin analyst coverage (small/recent names especially)
+                    // means a dramatic-looking % is one guess, not a
+                    // consensus — shown inline instead of a bare number
+                    // that reads as more authoritative than it is.
+                    match c.get("num_analysts").and_then(|v| v.as_i64()) {
+                        Some(n) if n <= 3 => format!("  ({n} analysts — thin coverage)"),
+                        Some(n) => format!("  ({n} analysts)"),
+                        None => String::new(),
+                    },
                 ),
                 format!("filed revenue YoY (SEC): {}", fmt_opt(latest_rev_yoy, "%")),
             ],
-            detail: if earnings_bars.is_empty() { None } else { Some(Detail::Bars(earnings_bars)) },
+            detail: if earnings_bars.is_empty() && revenue_bars.is_empty() {
+                None
+            } else {
+                Some(Detail::Earnings(EarningsDetail {
+                    eps_bars: earnings_bars,
+                    revenue_bars,
+                    eps_revision_trend,
+                    as_of: as_of.clone(),
+                }))
+            },
         },
         Letter {
             key: 'A',
             title: "Annual Growth",
-            score: earnings_yoy.map(|v| clamp_pct(v, 0.0, 40.0)).unwrap_or(0),
+            // IBD floor is 25% annual growth; 50%+ is a strong CANSLIM
+            // candidate, so that's the ceiling for a full-green gauge.
+            score: earnings_yoy.map(|v| clamp_pct(v, 0.0, 50.0)).unwrap_or(0),
             lines: vec![
                 format!(
                     "earnings YoY: {}   revenue YoY: {}   ROE: {}",
@@ -235,6 +312,15 @@ fn fmt_opt(v: Option<f64>, suffix: &str) -> String {
     }
 }
 
+/// EPS-scale numbers are cents, not percents — one decimal turns -0.04 into
+/// a misleading "-0.0".
+fn fmt_eps(v: Option<f64>) -> String {
+    match v {
+        Some(v) => format!("{:.2}", v),
+        None => "-".to_string(),
+    }
+}
+
 fn fmt_shares(v: Option<f64>) -> String {
     match v {
         Some(v) if v >= 1e9 => format!("{:.2}B", v / 1e9),
@@ -305,7 +391,6 @@ pub fn run(
     let mut card = load_scorecard(db_path, symbol).unwrap_or(None);
     let mut selected: usize = 0;
     let mut refreshed_at: Option<std::time::Instant> = None;
-    let mut popup_open = false;
 
     loop {
         terminal.draw(|frame| {
@@ -329,71 +414,46 @@ pub fn run(
                 .map(|t| t.elapsed() < Duration::from_millis(1200))
                 .unwrap_or(false);
             let header = Line::from(vec![
-                Span::styled(format!(" {symbol} "), bg_style.fg(Color::White).bold()),
-                Span::styled("CANSLIM Scorecard  ", bg_style.fg(Color::DarkGray)),
-                Span::styled(fmt_opt(price, " "), bg_style.fg(Color::White)),
-                Span::styled(format!("  as of {as_of}"), bg_style.fg(Color::DarkGray)),
+                Span::styled(format!(" {symbol} "), bg_style.fg(Color::Gray).bold()),
+                Span::styled("CANSLIM Scorecard  ", bg_style.fg(Color::Gray)),
+                Span::styled(fmt_opt(price, " "), bg_style.fg(Color::Gray)),
+                Span::styled(format!("  as of {as_of}"), bg_style.fg(Color::Gray)),
                 Span::styled(
                     if just_refreshed { "  refreshed" } else { "  r refresh" },
-                    bg_style.fg(if just_refreshed { Color::Rgb(0x4d, 0x93, 0x75) } else { Color::DarkGray }),
+                    bg_style.fg(if just_refreshed { Color::Rgb(0x4d, 0x93, 0x75) } else { Color::Gray }),
                 ),
             ]);
 
-            let mut constraints = vec![Constraint::Length(1)];
-            constraints.extend(letters.iter().map(|l| Constraint::Length(3 + l.lines.len() as u16)));
-            constraints.push(Constraint::Length(1));
-            let chunks = Layout::vertical(constraints).split(area);
+            let chunks = Layout::vertical([
+                Constraint::Length(1),
+                Constraint::Length(1),
+                Constraint::Min(0),
+                Constraint::Length(1),
+            ])
+            .split(area);
 
             frame.render_widget(Paragraph::new(header).style(bg_style), chunks[0]);
 
-            for (idx, letter) in letters.iter().enumerate() {
-                let focused = idx == selected;
-                let border_color = if focused { Color::White } else { Color::DarkGray };
-                let block = Block::default()
-                    .borders(Borders::ALL)
-                    .title(format!(" {} — {} ", letter.key, letter.title))
-                    .title_style(bg_style.fg(Color::White).bold())
-                    .style(bg_style.fg(border_color));
+            // Top band: compact list of all seven letters (one row each,
+            // mini bar + score + title) with the selected letter's raw
+            // numbers beside it. Below a full-width rule, the selected
+            // letter's charts get the whole remaining width. Replaces the
+            // old stack of seven bordered gauge panels.
+            let list_h = letters.len() as u16;
+            let bands = Layout::vertical([Constraint::Length(list_h), Constraint::Length(1), Constraint::Min(0)])
+                .split(chunks[2]);
+            let top = Layout::horizontal([Constraint::Length(40), Constraint::Min(0)]).split(bands[0]);
+            render_letter_list(frame, top[0], &letters, selected, bg_style);
+            render_letter_lines(frame, top[1], &letters[selected], bg_style);
+            frame.render_widget(
+                Block::default().borders(Borders::TOP).style(bg_style.fg(Color::Gray)),
+                bands[1],
+            );
+            render_letter_detail(frame, bands[2], &letters[selected], bg_style);
 
-                let inner = block.inner(chunks[idx + 1]);
-                frame.render_widget(block, chunks[idx + 1]);
-
-                let rows = Layout::vertical(
-                    std::iter::once(Constraint::Length(1))
-                        .chain(letter.lines.iter().map(|_| Constraint::Length(1)))
-                        .collect::<Vec<_>>(),
-                )
-                .split(inner);
-
-                let gauge = Gauge::default()
-                    .gauge_style(Style::default().fg(gauge_color(letter.score)).bg(bg_style.bg.unwrap_or(Color::Reset)))
-                    .percent(letter.score)
-                    .label(format!("{}%", letter.score));
-                frame.render_widget(gauge, rows[0]);
-
-                for (li, line) in letter.lines.iter().enumerate() {
-                    frame.render_widget(
-                        Paragraph::new(line.as_str()).style(bg_style.fg(Color::Gray)),
-                        rows[li + 1],
-                    );
-                }
-            }
-
-            let footer_text = if popup_open {
-                " s close "
-            } else if letters[selected].detail.is_some() {
-                " ↑↓ select   a expand   s search   q quit "
-            } else {
-                " ↑↓ select   s search   q quit "
-            };
-            let footer = Line::from(vec![Span::styled(footer_text, bg_style.fg(Color::DarkGray))]);
-            frame.render_widget(Paragraph::new(footer).style(bg_style), chunks[chunks.len() - 1]);
-
-            if popup_open {
-                if let Some(detail) = &letters[selected].detail {
-                    render_detail_popup(frame, area, &letters[selected], detail, bg_style);
-                }
-            }
+            let footer_text = " ↑↓ select   s search   q quit ";
+            let footer = Line::from(vec![Span::styled(footer_text, bg_style.fg(Color::Gray))]);
+            frame.render_widget(Paragraph::new(footer).style(bg_style), chunks[3]);
         })?;
 
         if event::poll(Duration::from_millis(200))? {
@@ -408,35 +468,20 @@ pub fn run(
                     continue;
                 }
                 match key.code {
-                    KeyCode::Char('s') if popup_open => {
-                        popup_open = false;
-                    }
                     KeyCode::Char('s') => return Ok(true),
-                    KeyCode::Char('q') | KeyCode::Esc if popup_open => {
-                        popup_open = false;
-                    }
                     KeyCode::Char('q') | KeyCode::Esc => return Ok(false),
                     KeyCode::Char('c')
                         if key.modifiers.contains(crossterm::event::KeyModifiers::CONTROL) =>
                     {
                         return Ok(false);
                     }
-                    KeyCode::Char('a') if !popup_open => {
-                        let has_detail = card
-                            .as_ref()
-                            .map(|c| build_letters(c)[selected].detail.is_some())
-                            .unwrap_or(false);
-                        if has_detail {
-                            popup_open = true;
-                        }
-                    }
-                    KeyCode::Up | KeyCode::Char('k') if !popup_open => {
+                    KeyCode::Up | KeyCode::Char('k') => {
                         selected = selected.saturating_sub(1);
                     }
-                    KeyCode::Down | KeyCode::Char('j') if !popup_open => {
+                    KeyCode::Down | KeyCode::Char('j') => {
                         selected = (selected + 1).min(6);
                     }
-                    KeyCode::Char('r') if !popup_open => {
+                    KeyCode::Char('r') => {
                         // Cheap local DB re-read — picks up whatever a
                         // background `services/canslim.py` refresh wrote,
                         // without blocking the TUI on the network fetch
@@ -451,82 +496,258 @@ pub fn run(
     }
 }
 
-/// Renders whichever `Detail` variant a letter carries, centered over the
-/// whole screen. New variants (a price line chart for N, a holder list for
-/// I, ...) add a match arm here — the popup shell (Clear + Block + sizing)
-/// stays the same for all of them.
-fn render_detail_popup(
-    frame: &mut ratatui::Frame,
-    area: Rect,
-    letter: &Letter,
-    detail: &Detail,
-    bg_style: Style,
-) {
-    let popup_area = centered_pct(area, 70, 60);
-    frame.render_widget(Clear, popup_area);
+/// One row per letter: key, ten-cell mini bar, score, title. The selected
+/// row is bold with a marker.
+fn render_letter_list(frame: &mut ratatui::Frame, area: Rect, letters: &[Letter], selected: usize, bg_style: Style) {
+    let mut lines = Vec::with_capacity(letters.len());
+    for (idx, letter) in letters.iter().enumerate() {
+        let focused = idx == selected;
+        let color = gauge_color(letter.score);
+        let filled = ((letter.score as usize) * 10 / 100).min(10);
+        let bar = format!("{}{}", "▰".repeat(filled), "▱".repeat(10 - filled));
+        let text_style = if focused { bg_style.fg(Color::Gray).bold() } else { bg_style.fg(Color::Gray) };
+        lines.push(Line::from(vec![
+            Span::styled(if focused { "▶ " } else { "  " }, text_style),
+            Span::styled(format!("{} ", letter.key), text_style),
+            Span::styled(bar, bg_style.fg(color)),
+            Span::styled(format!(" {:>3}%  ", letter.score), bg_style.fg(color)),
+            Span::styled(letter.title, text_style),
+        ]));
+    }
+    frame.render_widget(Paragraph::new(lines).style(bg_style), area);
+}
 
-    let block = Block::default()
-        .borders(Borders::ALL)
-        .title(format!(" {} — {} detail ", letter.key, letter.title))
-        .title_style(bg_style.fg(Color::White).bold())
-        .style(bg_style.fg(Color::White));
-    let inner = block.inner(popup_area);
-    frame.render_widget(block, popup_area);
+/// The selected letter's raw numbers, wrapped, beside the list.
+fn render_letter_lines(frame: &mut ratatui::Frame, area: Rect, letter: &Letter, bg_style: Style) {
+    let mut lines = vec![Line::from(Span::styled(
+        format!("{} — {}", letter.key, letter.title),
+        bg_style.fg(Color::Gray).bold(),
+    ))];
+    for l in &letter.lines {
+        lines.push(Line::from(Span::styled(l.as_str(), bg_style.fg(Color::Gray))));
+    }
+    let text_area = Rect { x: area.x + 2, width: area.width.saturating_sub(3), ..area };
+    frame.render_widget(Paragraph::new(lines).style(bg_style).wrap(Wrap { trim: false }), text_area);
+}
 
-    match detail {
-        Detail::Bars(points) => {
-            let up = Color::Rgb(0x4d, 0x93, 0x75);
-            let down = Color::Rgb(0xc2, 0x5c, 0x5c);
-            let bars: Vec<Bar> = points
-                .iter()
-                .flat_map(|p| {
-                    let beat = p.actual >= p.estimate;
-                    vec![
-                        Bar::default()
-                            .value((p.estimate.max(0.0) * 100.0) as u64)
-                            .text_value(format!("{:.2}", p.estimate))
-                            .label(Line::from(format!("{} est", p.label)))
-                            .style(Style::default().fg(Color::DarkGray)),
-                        Bar::default()
-                            .value((p.actual.max(0.0) * 100.0) as u64)
-                            .text_value(format!("{:.2}", p.actual))
-                            .label(Line::from("actual"))
-                            .style(Style::default().fg(if beat { up } else { down })),
-                    ]
-                })
-                .collect();
-
-            let chart = BarChart::default()
-                .data(BarGroup::default().bars(&bars))
-                .bar_width(9)
-                .bar_gap(1)
-                .style(bg_style);
-            frame.render_widget(chart, Rect { height: inner.height.saturating_sub(2), ..inner });
-
-            let legend = Line::from(vec![
-                Span::styled("actual EPS ", bg_style.fg(Color::Gray)),
-                Span::styled("green = beat estimate  ", bg_style.fg(up)),
-                Span::styled("red = missed", bg_style.fg(down)),
-            ]);
-            frame.render_widget(
-                Paragraph::new(legend),
-                Rect { y: inner.y + inner.height.saturating_sub(1), height: 1, ..inner },
-            );
+/// The selected letter's drill-down charts, or a placeholder for letters
+/// that have none yet.
+fn render_letter_detail(frame: &mut ratatui::Frame, area: Rect, letter: &Letter, bg_style: Style) {
+    let inner = Rect { y: area.y + 1, height: area.height.saturating_sub(1), ..area };
+    match &letter.detail {
+        Some(Detail::Earnings(d)) => render_earnings_detail(frame, inner, d, bg_style),
+        None => {
+            let msg = Paragraph::new(format!("no drill-down for {} yet", letter.key))
+                .style(bg_style.fg(Color::DarkGray))
+                .centered();
+            frame.render_widget(msg, centered(inner, 1));
         }
     }
 }
 
-/// Centers a `Rect` covering `pct_w`%/`pct_h`% of `area`.
-fn centered_pct(area: Rect, pct_w: u16, pct_h: u16) -> Rect {
-    let w = area.width * pct_w / 100;
-    let h = area.height * pct_h / 100;
-    Rect {
-        x: area.x + (area.width.saturating_sub(w)) / 2,
-        y: area.y + (area.height.saturating_sub(h)) / 2,
-        width: w,
-        height: h,
+fn render_earnings_detail(frame: &mut ratatui::Frame, area: Rect, d: &EarningsDetail, bg_style: Style) {
+    let up = Color::Rgb(0x4d, 0x93, 0x75);
+    let down = Color::Rgb(0xc2, 0x5c, 0x5c);
+
+    let gold = Color::Rgb(0xd9, 0xa5, 0x2c);
+
+    // Two columns. Left: EPS estimate revision on top, EPS actual-vs-
+    // estimate by quarter under it, each with its own legend. Right: the
+    // filed revenue table gets the full height (it has the most rows).
+    let cols = Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)]).split(area);
+    let trend_h = 2 + 4; // border + four checkpoints
+    let eps_h = 2 + (d.eps_bars.len() as u16) * 3;
+    let left = Layout::vertical([
+        Constraint::Length(trend_h), // estimate-revision bars
+        Constraint::Length(1),       // revision legend
+        Constraint::Length(1),       // spacer
+        Constraint::Length(eps_h),   // EPS actual vs estimate bars
+        Constraint::Length(1),       // EPS legend + date
+        Constraint::Min(0),
+    ])
+    .split(Rect { width: cols[0].width.saturating_sub(1), ..cols[0] });
+    let trend_area = left[0];
+    let trend_legend_area = left[1];
+    let eps_area = left[3];
+    let eps_legend_area = left[4];
+    let right = Layout::vertical([Constraint::Min(0), Constraint::Length(1)]).split(cols[1]);
+    let revenue_area = right[0];
+    let revenue_legend_area = right[1];
+
+
+    // EPS actual vs estimate — horizontal ▰▱ bars, two per quarter (est
+    // in gray, actual in green/red), same glyph bars as the letter list
+    // so the whole screen reads as one style. Lengths are scaled to the
+    // widest value; negative values are shifted up by the set's floor so
+    // a loss-making name still gets visible, correctly-ordered bars while
+    // the number label carries the true signed value.
+    let eps_block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(bg_style.fg(Color::Gray))
+        .title(" EPS: estimate (gray) vs actual (green/red) — by quarter ")
+        .title_style(bg_style.fg(Color::Gray).bold());
+    let eps_inner = eps_block.inner(eps_area);
+    frame.render_widget(eps_block, eps_area);
+
+    let eps_floor = d
+        .eps_bars
+        .iter()
+        .flat_map(|p| [p.actual, p.estimate])
+        .fold(0.0_f64, f64::min);
+    let eps_ceil = d
+        .eps_bars
+        .iter()
+        .flat_map(|p| [p.actual, p.estimate])
+        .fold(f64::MIN, f64::max)
+        .max(eps_floor + f64::EPSILON);
+    // "2025-09-30  est  " prefix (17) + "  -12.34" suffix (8)
+    let bar_w = eps_inner.width.saturating_sub(17 + 8).max(1) as usize;
+    let glyph_bar = |v: f64| {
+        let filled = (((v - eps_floor) / (eps_ceil - eps_floor)) * bar_w as f64).round() as usize;
+        let filled = filled.min(bar_w);
+        format!("{}{}", "▰".repeat(filled), "▱".repeat(bar_w - filled))
+    };
+    let mut eps_lines = Vec::with_capacity(d.eps_bars.len() * 3);
+    for p in &d.eps_bars {
+        let beat = p.actual >= p.estimate;
+        let act_color = if beat { up } else { down };
+        eps_lines.push(Line::from(vec![
+            Span::styled(format!("{:<12}est  ", p.label), bg_style.fg(Color::Gray)),
+            Span::styled(glyph_bar(p.estimate), bg_style.fg(Color::Gray)),
+            Span::styled(format!("  {:>6.2}", p.estimate), bg_style.fg(Color::Gray)),
+        ]));
+        eps_lines.push(Line::from(vec![
+            Span::styled(format!("{:<12}act  ", ""), bg_style.fg(Color::Gray)),
+            Span::styled(glyph_bar(p.actual), bg_style.fg(act_color)),
+            Span::styled(format!("  {:>6.2}", p.actual), bg_style.fg(act_color).bold()),
+        ]));
+        eps_lines.push(Line::from(""));
     }
+    frame.render_widget(Paragraph::new(eps_lines).style(bg_style), eps_inner);
+    let eps_latest_date = d.eps_bars.last().map(|p| p.label.as_str()).unwrap_or("-");
+    frame.render_widget(
+        Paragraph::new(Line::from(vec![
+            Span::styled("green", bg_style.fg(up)),
+            Span::styled("=beat  ", bg_style.fg(Color::Gray)),
+            Span::styled("red", bg_style.fg(down)),
+            Span::styled("=missed", bg_style.fg(Color::Gray)),
+            Span::styled(format!("    latest quarter: {eps_latest_date}"), bg_style.fg(Color::Gray)),
+        ])),
+        eps_legend_area,
+    );
+
+    // Filed quarterly revenue (SEC) — a table, one row per quarter: date,
+    // revenue as a glyph bar scaled to the biggest quarter, then QoQ / YoY
+    // / net margin as aligned columns. Row colored by YoY sign — the
+    // "sales confirms earnings" half of IBD's C rule.
+    let rev_block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(bg_style.fg(Color::Gray))
+        .title(" Revenue (SEC filed) — by quarter ")
+        .title_style(bg_style.fg(Color::Gray).bold());
+    let rev_inner = rev_block.inner(revenue_area);
+    frame.render_widget(rev_block, revenue_area);
+
+    let fmt_pct = |v: Option<f64>| v.map(|v| format!("{v:+.1}%")).unwrap_or_else(|| "-".to_string());
+    let rev_max = d.revenue_bars.iter().map(|r| r.revenue).fold(0.0_f64, f64::max).max(f64::EPSILON);
+    // "2025-09-30  " (12) + bar + "  1.87B" (7) + three 9-wide columns
+    let rev_bar_w = rev_inner.width.saturating_sub(12 + 7 + 27).max(1) as usize;
+    let rev_bar = |v: f64| {
+        let filled = ((v / rev_max) * rev_bar_w as f64).round().max(0.0) as usize;
+        let filled = filled.min(rev_bar_w);
+        format!("{}{}", "▰".repeat(filled), "▱".repeat(rev_bar_w - filled))
+    };
+    let mut rev_lines = vec![Line::from(Span::styled(
+        format!("{:<12}{:<w$}{:>7}{:>9}{:>9}{:>9}", "quarter", "revenue", "", "QoQ", "YoY", "margin", w = rev_bar_w),
+        bg_style.fg(Color::DarkGray),
+    ))];
+    for r in &d.revenue_bars {
+        let growing = r.yoy_growth_pct.map(|g| g >= 0.0).unwrap_or(true);
+        let color = if growing { up } else { down };
+        rev_lines.push(Line::from(vec![
+            Span::styled(format!("{:<12}", r.label), bg_style.fg(Color::Gray)),
+            Span::styled(rev_bar(r.revenue), bg_style.fg(color)),
+            Span::styled(format!("{:>7}", fmt_shares(Some(r.revenue))), bg_style.fg(color).bold()),
+            Span::styled(format!("{:>9}", fmt_pct(r.qoq_growth_pct)), bg_style.fg(Color::Gray)),
+            Span::styled(format!("{:>9}", fmt_pct(r.yoy_growth_pct)), bg_style.fg(color)),
+            Span::styled(format!("{:>9}", fmt_pct(r.net_margin_pct)), bg_style.fg(Color::Gray)),
+        ]));
+    }
+    frame.render_widget(Paragraph::new(rev_lines).style(bg_style), rev_inner);
+    let revenue_latest_date = d.revenue_bars.last().map(|r| r.label.as_str()).unwrap_or("-");
+    frame.render_widget(
+        Paragraph::new(Line::from(vec![
+            Span::styled("green", bg_style.fg(up)),
+            Span::styled("=YoY growing  ", bg_style.fg(Color::Gray)),
+            Span::styled("red", bg_style.fg(down)),
+            Span::styled("=YoY shrinking", bg_style.fg(Color::Gray)),
+            Span::styled(format!("    latest filed quarter: {revenue_latest_date}"), bg_style.fg(Color::Gray)),
+        ])),
+        revenue_legend_area,
+    );
+
+    // Estimate-revision trend (90d -> current): is Wall St. raising or
+    // cutting numbers lately. Same glyph bars as everything else, one row
+    // per checkpoint, with the delta vs the prior checkpoint colored by
+    // direction.
+    let trend_block = Block::default()
+        .borders(Borders::ALL)
+        .border_style(bg_style.fg(Color::Gray))
+        .title(" EPS estimate revision — next quarter consensus ")
+        .title_style(bg_style.fg(Color::Gray).bold());
+    let trend_inner = trend_block.inner(trend_area);
+    frame.render_widget(trend_block, trend_area);
+
+    let trend_labels = ["90d ago", "30d ago", "7d ago", "now"];
+    let t_floor = d.eps_revision_trend.iter().copied().fold(0.0_f64, f64::min);
+    let t_ceil = d
+        .eps_revision_trend
+        .iter()
+        .copied()
+        .fold(f64::MIN, f64::max)
+        .max(t_floor + f64::EPSILON);
+    // "90d ago  " (9) + bar + "  -0.01" (7) + "  +0.10 ▲" (10)
+    let t_bar_w = trend_inner.width.saturating_sub(9 + 7 + 10).max(1) as usize;
+    let t_bar = |v: f64| {
+        let filled = (((v - t_floor) / (t_ceil - t_floor)) * t_bar_w as f64).round() as usize;
+        let filled = filled.min(t_bar_w);
+        format!("{}{}", "▰".repeat(filled), "▱".repeat(t_bar_w - filled))
+    };
+    let mut trend_lines = Vec::with_capacity(4);
+    let mut prev: Option<f64> = None;
+    for (i, label) in trend_labels.iter().enumerate() {
+        let v = d.eps_revision_trend.get(i).copied();
+        let (delta_text, delta_color) = match (prev, v) {
+            (Some(a), Some(b)) if b > a + 1e-9 => (format!("  {:+.2} ▲", b - a), up),
+            (Some(a), Some(b)) if b < a - 1e-9 => (format!("  {:+.2} ▼", b - a), down),
+            (Some(a), Some(b)) => (format!("  {:+.2}  ", b - a), Color::Gray),
+            _ => (String::new(), Color::Gray),
+        };
+        trend_lines.push(Line::from(vec![
+            Span::styled(format!("{:<9}", label), bg_style.fg(Color::Gray)),
+            Span::styled(v.map(&t_bar).unwrap_or_else(|| "▱".repeat(t_bar_w)), bg_style.fg(gold)),
+            Span::styled(
+                format!("  {:>5}", v.map(|v| format!("{v:.2}")).unwrap_or_else(|| "-".to_string())),
+                bg_style.fg(gold).bold(),
+            ),
+            Span::styled(delta_text, bg_style.fg(delta_color)),
+        ]));
+        prev = v;
+    }
+    frame.render_widget(Paragraph::new(trend_lines).style(bg_style), trend_inner);
+    frame.render_widget(
+        Paragraph::new(Line::from(vec![
+            Span::styled("gold", bg_style.fg(gold)),
+            Span::styled(" = consensus EPS estimate   ", bg_style.fg(Color::Gray)),
+            Span::styled("▲", bg_style.fg(up)),
+            Span::styled("/", bg_style.fg(Color::Gray)),
+            Span::styled("▼", bg_style.fg(down)),
+            Span::styled(format!(" = raised/cut vs prior    as of: {}", d.as_of), bg_style.fg(Color::Gray)),
+        ])),
+        trend_legend_area,
+    );
 }
+
 
 fn centered(area: Rect, height: u16) -> Rect {
     let y = area.y + area.height.saturating_sub(height) / 2;

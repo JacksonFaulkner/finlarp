@@ -25,6 +25,8 @@ class RevenueQuarter(BaseModel):
     revenue: float | None
     qoq_growth_pct: float | None
     yoy_growth_pct: float | None
+    net_income: float | None = None
+    net_margin_pct: float | None = None
 
 
 class CurrentEarnings(BaseModel):
@@ -35,6 +37,11 @@ class CurrentEarnings(BaseModel):
     eps_estimate_30d_ago: float | None
     eps_estimate_90d_ago: float | None
     forward_qtr_eps_growth_pct: float | None
+    # A growth % from 1-3 analysts (small/thinly-covered names) deserves
+    # much less confidence than the same number from 20+ — surfaced so a
+    # dramatic-looking figure like AEHR's 833% (near-zero base, 3 analysts)
+    # reads as "thin coverage" instead of misleadingly authoritative.
+    num_analysts: int | None
     history: list[EarningsQuarter] = []
     # SEC-filed quarterly revenue — the "sales must confirm earnings" half
     # of IBD's actual C rule, which pure EPS-estimate tracking above misses
