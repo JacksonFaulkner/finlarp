@@ -1,9 +1,41 @@
 local M = {}
 
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h")
-local binary_path = plugin_dir .. "/portfolio_chart/target/release/portfolio_chart"
+local crate_dir = plugin_dir .. "/portfolio_chart"
+local binary_path = crate_dir .. "/target/release/portfolio_chart"
 
---- @return string "#rrggbb"
+--- Rebuilds the release binary if any Rust source is newer than it, so
+--- editing canslim.rs and reopening the popup picks up the change without
+--- a manual `cargo build --release` — the stale-binary trap this plugin
+--- kept hitting since nvim just execs whatever's on disk.
+local function ensure_built()
+  local bin_mtime = vim.fn.getftime(binary_path) -- -1 if missing
+  local srcs = vim.fn.glob(crate_dir .. "/src/*.rs", false, true)
+  table.insert(srcs, crate_dir .. "/Cargo.toml")
+  local stale = bin_mtime < 0
+  for _, f in ipairs(srcs) do
+    if vim.fn.getftime(f) > bin_mtime then
+      stale = true
+      break
+    end
+  end
+  if not stale then
+    return
+  end
+  vim.notify("security_spread: rebuilding portfolio_chart binary...", vim.log.levels.INFO)
+  local result = vim.fn.system({ "cargo", "build", "--release", "--manifest-path", crate_dir .. "/Cargo.toml" })
+  if vim.v.shell_error ~= 0 then
+    vim.notify("security_spread: cargo build failed:\n" .. result, vim.log.levels.ERROR)
+  end
+end
+
+--- @return string "#rrggbb", or `fallback` (often "" for "no explicit
+--- color, let the terminal's own default show through") when the
+--- highlight group doesn't set that attribute — many colorschemes leave
+--- Normal's bg unset on purpose to inherit terminal transparency, and
+--- treating that as "missing, substitute a hardcoded hex" would paint an
+--- opaque color that doesn't match the terminal everything else in nvim
+--- renders against.
 local function hl_hex(name, attr, fallback)
   local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
   local val = ok and hl and hl[attr]
@@ -17,6 +49,7 @@ end
 --- :terminal — a real terminal-rendered TUI nested inside nvim, not an
 --- image. Colors are pulled from the current colorscheme so it blends in.
 function M.show()
+  ensure_built()
   if vim.fn.executable(binary_path) ~= 1 then
     vim.notify(
       "security_spread: portfolio_chart binary not built — run `cargo build --release` in "
@@ -26,7 +59,7 @@ function M.show()
     return
   end
 
-  local bg = hl_hex("Normal", "bg", "#1a1b26")
+  local bg = hl_hex("Normal", "bg", "")
   local fg_up = hl_hex("SecuritySpreadUp", "fg", "#4d9375")
   local fg_down = hl_hex("SecuritySpreadDown", "fg", "#c25c5c")
 
@@ -66,8 +99,10 @@ end
 --- Fallback for when nvim isn't running inside tmux: same floating
 --- :terminal approach as M.show(), nested-emulator latency and all.
 local function show_canslim_in_nvim_terminal(symbol, bg, fg_up, fg_down)
-  local width = math.floor(vim.o.columns * 0.85)
-  local height = math.floor(vim.o.lines * 0.85)
+  -- Full editor width/height (minus the border): the scorecard lays out
+  -- four+ side-by-side cards per row and the legends clip at 85%.
+  local width = vim.o.columns - 2
+  local height = vim.o.lines - vim.o.cmdheight - 3
 
   local buf = vim.api.nvim_create_buf(false, true)
   vim.bo[buf].bufhidden = "wipe"
@@ -111,6 +146,7 @@ end
 --- mechanism as the existing <leader>fw sessionx popup), so the rust
 --- binary renders directly to it with no nvim redraw path in between.
 function M.show_canslim(symbol)
+  ensure_built()
   if vim.fn.executable(binary_path) ~= 1 then
     vim.notify(
       "security_spread: portfolio_chart binary not built — run `cargo build --release` in "
@@ -120,7 +156,7 @@ function M.show_canslim(symbol)
     return
   end
 
-  local bg = hl_hex("Normal", "bg", "#1a1b26")
+  local bg = hl_hex("Normal", "bg", "")
   local fg_up = hl_hex("SecuritySpreadUp", "fg", "#4d9375")
   local fg_down = hl_hex("SecuritySpreadDown", "fg", "#c25c5c")
 
@@ -153,7 +189,7 @@ function M.show_canslim(symbol)
 
   vim.fn.jobstart({
     "tmux", "display-popup", "-E",
-    "-w", "85%", "-h", "85%",
+    "-w", "100%", "-h", "100%",
     "-T", " " .. symbol .. " canslim ",
     run_binary .. back_to_picker,
   }, { detach = true })

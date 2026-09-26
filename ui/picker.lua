@@ -4,7 +4,7 @@ local M = {}
 --- the treemap tiles float on top of it, `relative = "win"`), and returns
 --- its window id. Real split = native resize, <C-w> layout, closes with `q`.
 --- @param slot "left"|"right"|nil
-local function host_win_for_slot(slot)
+function M.host_win_for_slot(slot)
   if slot == "left" then
     vim.cmd("leftabove vsplit")
   elseif slot == "right" then
@@ -45,7 +45,7 @@ function M.pick(slot)
         if not entry then
           return
         end
-        local win = host_win_for_slot(slot)
+        local win = M.host_win_for_slot(slot)
         require("custom_plugins.security_spread").show_entry(entry, { win = win })
       end,
     },

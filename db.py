@@ -71,6 +71,34 @@ def _conn() -> duckdb.DuckDBPyConnection:
             fetched_at DOUBLE
         )
     """)
+    # SEC Financial Statement Data Sets — one bulk zip per calendar quarter
+    # covering every filer. Only dimensional (segment) revenue rows are kept;
+    # undimensioned totals already come from companyfacts. See
+    # services/edgar_fsds.py.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS edgar_fsds_loaded (
+            quarter VARCHAR PRIMARY KEY,   -- e.g. '2026q2'
+            loaded_at DOUBLE,
+            row_count INTEGER
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS edgar_segment_revenue (
+            adsh VARCHAR,
+            cik INTEGER,
+            form VARCHAR,
+            fy INTEGER,
+            fp VARCHAR,
+            filed DATE,
+            tag VARCHAR,
+            ddate DATE,
+            qtrs INTEGER,
+            axis VARCHAR,       -- 'ProductOrService', 'BusinessSegments', ... or '' for the total
+            member VARCHAR,     -- 'DRAMProducts', ... or '' for the total
+            value DOUBLE,
+            PRIMARY KEY (adsh, tag, ddate, qtrs, axis, member)
+        )
+    """)
     con.execute("""
         CREATE TABLE IF NOT EXISTS edgar_cik_map_cache (
             id INTEGER PRIMARY KEY,
@@ -337,3 +365,226 @@ def put_cached_edgar_cik_map(cik_map: dict) -> None:
         )
     finally:
         con.close()
+
+
+# --- AI universe --------------------------------------------------------
+#
+# ai_stocks_reviewed.json is the backbone list of AI-exposed securities.
+# The JSON carries a lot of reviewer boilerplate (disclaimers, "not a
+# measure of" lists, per-field audit notes); only the signal lands here:
+# identity, listing status, category weights, and the one-line rationale.
+# Every per-security metric table added later (CANSLIM, EDGAR facts, ...)
+# joins on `ticker`.
+
+UNIVERSE_JSON = Path(__file__).resolve().parent / "ai_stocks_reviewed.json"
+
+
+def _ensure_universe_tables(con: duckdb.DuckDBPyConnection) -> None:
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS ai_universe (
+            ticker VARCHAR PRIMARY KEY,
+            name VARCHAR,
+            region VARCHAR,
+            primary_category VARCHAR,
+            security_status VARCHAR,
+            eligible BOOLEAN,
+            category_confidence VARCHAR,
+            rationale VARCHAR,
+            source_url VARCHAR,
+            reviewed_on VARCHAR
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS ai_universe_category (
+            ticker VARCHAR,
+            level VARCHAR,
+            category VARCHAR,
+            weight DOUBLE,
+            PRIMARY KEY (ticker, level, category)
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS ai_taxonomy (
+            sub_category VARCHAR PRIMARY KEY,
+            primary_category VARCHAR,
+            description VARCHAR
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS ai_universe_meta (
+            id INTEGER PRIMARY KEY,
+            source_mtime DOUBLE,
+            loaded_at DOUBLE,
+            record_count INTEGER
+        )
+    """)
+
+
+def _dominant(weights: dict) -> str | None:
+    if not weights:
+        return None
+    return max(weights.items(), key=lambda kv: kv[1])[0]
+
+
+def load_universe(path: Path = UNIVERSE_JSON, force: bool = False) -> dict:
+    """(Re)load the reviewed JSON into DuckDB. Skips when the file hasn't
+    changed since the last load unless `force`."""
+    mtime = path.stat().st_mtime
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        row = con.execute("SELECT source_mtime, record_count FROM ai_universe_meta WHERE id = 0").fetchone()
+        if row is not None and not force and row[0] == mtime:
+            return {"loaded": False, "record_count": row[1]}
+
+        data = json.loads(path.read_text())
+        meta = data.get("_meta", {})
+        stocks = data["stocks"]
+
+        universe_rows = []
+        category_rows = []
+        for s in stocks:
+            sec = s.get("security", {})
+            west = s.get("weight_estimation", {})
+            rev = s.get("review", {})
+            rationale = " ".join(west.get("rationale") or [])
+            sources = s.get("sources") or []
+            source_url = sources[0].get("url") if sources else None
+            universe_rows.append([
+                s["ticker"],
+                s.get("name"),
+                s.get("region"),
+                _dominant(s.get("primary", {})),
+                sec.get("status"),
+                sec.get("eligible_as_current_security"),
+                west.get("category_assignment_confidence"),
+                rationale,
+                source_url,
+                rev.get("reviewed_on") or meta.get("reviewed_on"),
+            ])
+            for cat, w in (s.get("primary") or {}).items():
+                category_rows.append([s["ticker"], "primary", cat, float(w)])
+            for cat, w in (s.get("subs") or {}).items():
+                category_rows.append([s["ticker"], "sub", cat, float(w)])
+
+        taxonomy_rows = []
+        ext_desc = meta.get("taxonomy_extensions", {})
+        clar = meta.get("taxonomy_scope_clarifications", {})
+        for primary, subs in meta.get("taxonomy", {}).items():
+            for sub in subs:
+                desc = ext_desc.get(primary, {}).get(sub) or clar.get(sub)
+                taxonomy_rows.append([sub, primary, desc])
+
+        con.execute("BEGIN")
+        con.execute("DELETE FROM ai_universe")
+        con.execute("DELETE FROM ai_universe_category")
+        con.execute("DELETE FROM ai_taxonomy")
+        con.executemany("INSERT INTO ai_universe VALUES (?,?,?,?,?,?,?,?,?,?)", universe_rows)
+        con.executemany("INSERT INTO ai_universe_category VALUES (?,?,?,?)", category_rows)
+        con.executemany("INSERT INTO ai_taxonomy VALUES (?,?,?)", taxonomy_rows)
+        con.execute(
+            "INSERT INTO ai_universe_meta VALUES (0, ?, ?, ?) "
+            "ON CONFLICT (id) DO UPDATE SET source_mtime = excluded.source_mtime, "
+            "loaded_at = excluded.loaded_at, record_count = excluded.record_count",
+            [mtime, time.time(), len(universe_rows)],
+        )
+        con.execute("COMMIT")
+        return {"loaded": True, "record_count": len(universe_rows)}
+    finally:
+        con.close()
+
+
+def universe_groups() -> list[dict]:
+    """Every pickable group: primary buckets, sub buckets, and regions,
+    with member counts (eligible securities only)."""
+    load_universe()
+    con = _conn()
+    try:
+        rows = con.execute("""
+            SELECT 'primary' AS level, c.category, NULL AS parent, count(*) AS n,
+                   list(u.ticker ORDER BY c.weight DESC, u.ticker) AS tickers
+            FROM ai_universe_category c JOIN ai_universe u USING (ticker)
+            WHERE c.level = 'primary' AND u.eligible IS DISTINCT FROM false
+            GROUP BY c.category
+            UNION ALL
+            SELECT 'sub', c.category, t.primary_category, count(*),
+                   list(u.ticker ORDER BY c.weight DESC, u.ticker)
+            FROM ai_universe_category c
+            JOIN ai_universe u USING (ticker)
+            LEFT JOIN ai_taxonomy t ON t.sub_category = c.category
+            WHERE c.level = 'sub' AND u.eligible IS DISTINCT FROM false
+            GROUP BY c.category, t.primary_category
+            UNION ALL
+            SELECT 'region', region, NULL, count(*), list(ticker ORDER BY ticker)
+            FROM ai_universe WHERE eligible IS DISTINCT FROM false
+            GROUP BY region
+            ORDER BY 1, 3 NULLS FIRST, 4 DESC
+        """).fetchall()
+    finally:
+        con.close()
+    return [
+        {"level": lv, "category": cat, "parent": parent, "count": n, "tickers": tickers}
+        for lv, cat, parent, n, tickers in rows
+    ]
+
+
+def universe_members(level: str, category: str) -> list[dict]:
+    """Securities in a group, heaviest exposure first. Region groups have
+    no weight so they come back weight=1."""
+    load_universe()
+    con = _conn()
+    try:
+        if level == "region":
+            rows = con.execute(
+                "SELECT ticker, name, 1.0::DOUBLE FROM ai_universe "
+                "WHERE region = ? AND eligible IS DISTINCT FROM false ORDER BY ticker",
+                [category],
+            ).fetchall()
+        else:
+            rows = con.execute(
+                "SELECT u.ticker, u.name, c.weight FROM ai_universe_category c "
+                "JOIN ai_universe u USING (ticker) "
+                "WHERE c.level = ? AND c.category = ? AND u.eligible IS DISTINCT FROM false "
+                "ORDER BY c.weight DESC, u.ticker",
+                [level, category],
+            ).fetchall()
+    finally:
+        con.close()
+    return [{"ticker": t, "name": n, "weight": w} for t, n, w in rows]
+
+
+# --- FSDS segment revenue -------------------------------------------------
+
+def fsds_loaded_quarters() -> set[str]:
+    con = _conn()
+    try:
+        return {r[0] for r in con.execute("SELECT quarter FROM edgar_fsds_loaded").fetchall()}
+    finally:
+        con.close()
+
+
+def get_segment_revenue(cik: int) -> list[dict]:
+    """All kept revenue rows for a filer, oldest -> newest. Includes the
+    undimensioned total (axis='') so callers can sum-check members."""
+    con = _conn()
+    try:
+        rows = con.execute(
+            """
+            SELECT adsh, form, fy, fp, filed, tag, ddate, qtrs, axis, member, value
+            FROM edgar_segment_revenue
+            WHERE cik = ?
+            ORDER BY ddate, filed, axis, member
+            """,
+            [cik],
+        ).fetchall()
+    finally:
+        con.close()
+    keys = ["adsh", "form", "fy", "fp", "filed", "tag", "ddate", "qtrs", "axis", "member", "value"]
+    out = []
+    for r in rows:
+        d = dict(zip(keys, r))
+        d["filed"] = d["filed"].isoformat()
+        d["ddate"] = d["ddate"].isoformat()
+        out.append(d)
+    return out
+

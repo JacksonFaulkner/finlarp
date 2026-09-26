@@ -68,13 +68,17 @@ def cmd_quote(symbols: str) -> dict:
     # /v7/finance/spark batches all symbols into one request (no auth needed),
     # unlike /v8/finance/chart which is one request per symbol — that serial
     # loop was the main source of dashboard-open latency (~400ms/symbol).
-    resp = session.get(
-        "https://query1.finance.yahoo.com/v7/finance/spark",
-        params={"symbols": symbols, "range": "1d", "interval": "1d"},
-        timeout=10,
-    )
-    resp.raise_for_status()
-    data = resp.json()["spark"]["result"]
+    # Yahoo returns 400 for more than 20 symbols per spark request, so chunk.
+    syms = [s for s in symbols.split(",") if s]
+    data = []
+    for i in range(0, len(syms), 20):
+        resp = session.get(
+            "https://query1.finance.yahoo.com/v7/finance/spark",
+            params={"symbols": ",".join(syms[i:i + 20]), "range": "1d", "interval": "1d"},
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data.extend(resp.json()["spark"]["result"])
 
     result = []
     for entry in data:
@@ -184,6 +188,14 @@ def main() -> None:
     history_p.add_argument("--range", dest="range_", default="6mo")
     history_p.add_argument("--interval", default="1d")
 
+    universe_p = sub.add_parser("universe")
+    universe_sub = universe_p.add_subparsers(dest="universe_cmd", required=True)
+    universe_sub.add_parser("groups")
+    members_p = universe_sub.add_parser("members")
+    members_p.add_argument("level", choices=["primary", "sub", "region"])
+    members_p.add_argument("category")
+    reload_p = universe_sub.add_parser("reload")
+
     args = parser.parse_args()
 
     if args.cmd == "quote":
@@ -192,6 +204,15 @@ def main() -> None:
         output = cmd_screen(args.sector, args.industry, args.top)
     elif args.cmd == "history":
         output = cmd_history(args.symbol, args.range_, args.interval)
+    elif args.cmd == "universe":
+        import db
+
+        if args.universe_cmd == "groups":
+            output = {"groups": db.universe_groups()}
+        elif args.universe_cmd == "members":
+            output = {"members": db.universe_members(args.level, args.category)}
+        else:
+            output = db.load_universe(force=True)
     else:
         print(f"unknown command: {args.cmd}", file=sys.stderr)
         sys.exit(1)

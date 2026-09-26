@@ -6,9 +6,9 @@ Usage:
     uv run etrade_client.py quote AAPL,MSFT
 
 Requires PROD_KEY / PROD_SECRET in the environment (see .env at repo root).
-Access token is cached at ~/.local/share/nvim/etrade_token.json and renewed
-in place; falls back to an interactive browser OAuth flow only when the
-cached token can no longer be renewed (after ET midnight rollover).
+Access token is cached at ~/.local/share/nvim/etrade_token.json. Every run
+tries to renew it first; if renew fails, or any API call returns 401, the
+cache is dropped and a fresh OAuth login is requested.
 """
 
 from __future__ import annotations
@@ -22,6 +22,7 @@ import webbrowser
 from pathlib import Path
 from urllib.parse import quote
 
+import requests
 from rauth import OAuth1Service
 
 import db
@@ -107,10 +108,9 @@ def finish_login(request_token: str, request_token_secret: str, verifier: str):
     return session
 
 
-# E*TRADE's idle timer is 2hr; renewing well under that (with margin for
-# clock skew/slow calls) lets most invocations skip the renew round-trip
-# entirely instead of paying it on every single call.
-RENEW_MARGIN_SECONDS = 60 * 60
+def _drop_token() -> None:
+    if TOKEN_PATH.exists():
+        TOKEN_PATH.unlink()
 
 
 def get_session(interactive: bool = True):
@@ -121,15 +121,16 @@ def get_session(interactive: bool = True):
 
     session = etrade.get_session((cached["access_token"], cached["access_token_secret"]))
 
-    renewed_at = cached.get("renewed_at", 0)
-    if time.time() - renewed_at < RENEW_MARGIN_SECONDS:
-        return session
-
-    # Renew resets the 2hr idle timer without a browser round-trip. If the
-    # token has rolled past ET midnight, E*TRADE rejects the renew and we
-    # fall back to a fresh login.
-    resp = session.get(BASE_URL + "/oauth/renew_access_token", params={})
-    if resp.status_code != 200:
+    # Always attempt a renew: it resets the 2hr idle timer without a browser
+    # round-trip, and it is the only reliable check that the token is still
+    # alive. A recently-renewed token still dies at ET midnight rollover, so
+    # trusting a timestamp alone leads to a 401 on the first real call.
+    try:
+        resp = session.get(BASE_URL + "/oauth/renew_access_token", params={})
+    except Exception:
+        resp = None
+    if resp is None or resp.status_code != 200:
+        _drop_token()
         return _interactive_login(etrade, interactive)
     _touch_renewed_at()
     return session
@@ -406,22 +407,44 @@ def main() -> None:
         }))
         return
 
+    try:
+        output = _dispatch(cmd, session)
+    except requests.HTTPError as e:
+        if e.response is None or e.response.status_code != 401:
+            raise
+        # Renew succeeded but the API still rejected the token (e.g. ET
+        # midnight rollover between renew and call). Drop the cache and
+        # hand the caller a fresh login payload instead of a traceback.
+        _drop_token()
+        try:
+            get_session(interactive=False)
+        except AuthRequired as e2:
+            print(json.dumps({
+                "auth_required": True,
+                "authorize_url": e2.authorize_url,
+                "request_token": e2.request_token,
+                "request_token_secret": e2.request_token_secret,
+            }))
+            return
+        raise
+
+    print(json.dumps(output))
+
+
+def _dispatch(cmd: str, session) -> dict:
     if cmd == "positions":
-        output = cmd_positions(session)
-    elif cmd == "orders":
-        output = cmd_orders(session)
-    elif cmd == "quote":
+        return cmd_positions(session)
+    if cmd == "orders":
+        return cmd_orders(session)
+    if cmd == "quote":
         if len(sys.argv) < 3:
             print("usage: etrade_client.py quote SYMBOL1,SYMBOL2", file=sys.stderr)
             sys.exit(1)
-        output = cmd_quote(session, sys.argv[2])
-    elif cmd == "transactions":
-        output = cmd_transactions(session)
-    else:
-        print(f"unknown command: {cmd}", file=sys.stderr)
-        sys.exit(1)
-
-    print(json.dumps(output))
+        return cmd_quote(session, sys.argv[2])
+    if cmd == "transactions":
+        return cmd_transactions(session)
+    print(f"unknown command: {cmd}", file=sys.stderr)
+    sys.exit(1)
 
 
 if __name__ == "__main__":

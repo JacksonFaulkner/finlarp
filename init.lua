@@ -180,6 +180,30 @@ function M.screen_yahoo(filters, callback)
   end)
 end
 
+--- @param callback fun(ok: boolean, groups_or_err: any) groups: { { level, category, parent, count } }
+function M.universe_groups(callback)
+  run("config.py", { "universe", "groups" }, function(ok, data)
+    if ok then
+      callback(true, data.groups)
+    else
+      callback(false, data)
+    end
+  end)
+end
+
+--- @param level "primary"|"sub"|"region"
+--- @param category string
+--- @param callback fun(ok: boolean, members_or_err: any) members: { { ticker, name, weight } }
+function M.universe_members(level, category, callback)
+  run("config.py", { "universe", "members", level, category }, function(ok, data)
+    if ok then
+      callback(true, data.members)
+    else
+      callback(false, data)
+    end
+  end)
+end
+
 --- @param symbol string e.g. "NVDA"
 --- @param callback fun(ok: boolean, points_or_err: any) points: { { t, close }, ... }
 function M.history_yahoo(symbol, callback)
@@ -303,6 +327,42 @@ function M.show_symbols(name, symbols, opts)
       }
     end
     M.show_quotes(name, merged, opts)
+  end)
+end
+
+--- Treemap of one AI-universe group, tiles sized by each member's weight
+--- to that bucket (region groups are equal-sized).
+--- @param group table { level, category }
+--- @param opts table|nil region to dock into
+function M.show_universe_group(group, opts)
+  M.universe_members(group.level, group.category, function(ok, members)
+    if not ok then
+      vim.notify("security_spread: " .. tostring(members), vim.log.levels.ERROR)
+      return
+    end
+    local weight_of, symbols = {}, {}
+    for _, m in ipairs(members) do
+      weight_of[m.ticker] = m.weight
+      symbols[#symbols + 1] = m.ticker
+    end
+    local name = "AI: " .. group.category
+    M.quote_yahoo(symbols, function(qok, quotes)
+      if not qok then
+        vim.notify("security_spread: " .. tostring(quotes), vim.log.levels.ERROR)
+        return
+      end
+      local merged = {}
+      for _, q in ipairs(quotes) do
+        merged[#merged + 1] = {
+          symbol = q.symbol,
+          value = weight_of[q.symbol] or 1,
+          last_price = q.last_trade,
+          change_close = q.change_close,
+          change_close_pct = q.change_close_pct,
+        }
+      end
+      M.show_quotes(name, merged, opts)
+    end)
   end)
 end
 
@@ -456,6 +516,11 @@ function M.pick(slot)
   require("custom_plugins.security_spread.ui.picker").pick(slot)
 end
 
+--- Opens the fzf-lua AI-universe group picker (primary/sub buckets, regions).
+function M.pick_universe(slot)
+  require("custom_plugins.security_spread.ui.universe").pick(slot)
+end
+
 --- Lists currently open dashboard session names.
 function M.list_open()
   return require("custom_plugins.security_spread.ui.window").list_open()
@@ -498,28 +563,20 @@ function M.show_portfolio_history()
   require("custom_plugins.security_spread.ui.portfolio_chart").show()
 end
 
---- Opens the ratatui CANSLIM scorecard screen for a symbol immediately —
---- it reads whatever's already cached in canslim_cache (or shows "no data"
---- if this symbol has never been scored) — then kicks off a background
---- services/canslim.py fetch to populate/refresh the cache. Press `r`
---- inside the TUI once the "fetching..." notification resolves to pick up
---- the new data; the window never blocks on the network round trip.
---- Prompts for a symbol if none given.
+--- Opens the CANSLIM scorecard TUI for a symbol. Fetches (--force, so a
+--- manual open always gets current data and picks up schema changes)
+--- and only then opens the TUI, so the screen is populated on first paint
+--- — no "press r to reload" round trip. Prompts for a symbol if none given.
 --- @param symbol string|nil
 function M.show_canslim(symbol)
   local function open(sym)
-    require("custom_plugins.security_spread.ui.portfolio_chart").show_canslim(sym)
-    vim.notify("security_spread: fetching " .. sym .. " (press r once done)...", vim.log.levels.INFO)
-    -- --force: a manual open is an explicit "get me current data" signal,
-    -- and without it this just re-reads the still-fresh cache — meaning
-    -- schema changes (new fields) silently don't show up until the cache's
-    -- own TTL expires on its own, hours later.
+    vim.notify("security_spread: fetching " .. sym .. " canslim...", vim.log.levels.INFO)
     run("services/canslim.py", { sym, "--force" }, function(ok, data)
       if not ok then
         vim.notify("security_spread: canslim fetch failed: " .. tostring(data), vim.log.levels.ERROR)
         return
       end
-      vim.notify("security_spread: " .. sym .. " scorecard ready — press r to reload", vim.log.levels.INFO)
+      require("custom_plugins.security_spread.ui.portfolio_chart").show_canslim(sym)
     end)
   end
 
@@ -532,6 +589,12 @@ function M.show_canslim(symbol)
       end
     end)
   end
+end
+
+--- Live full-text search over pulled SEC filings / earnings text.
+--- @param initial string|nil prefilled query, e.g. "t:MRVL "
+function M.pick_search(initial)
+  require("custom_plugins.security_spread.ui.search").pick(initial)
 end
 
 --- fzf-lua picker over held symbols (from cached transaction history) —

@@ -23,10 +23,14 @@ local HELP_LINES = {
   " <Space>     select tile (up to 4, colored)",
   " r           refresh now (live E*TRADE pull)",
   " R           toggle auto-refresh (every 2s)",
+  " c           CANSLIM scorecard for focused tile",
+  " f           search filings for focused tile",
+  " <leader>sf  search filings (all)",
   " <leader>sg  chart selected/focused symbol",
   " <leader>sh  daily % change history",
   " <leader>st  search transaction history",
-  " <leader>sw  switch open dashboards",
+  " <leader>sw  AI universe: pick bucket/sub/region",
+  " <leader>so  switch open dashboards",
   " q / <Esc>   close this dashboard",
   " ?           toggle this help",
 }
@@ -367,6 +371,12 @@ local function open_tile(tile, region, name)
   end, { buffer = buf, silent = true })
   vim.keymap.set("n", "R", function()
     require("custom_plugins.security_spread").toggle_auto_refresh(name)
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "c", function()
+    require("custom_plugins.security_spread").show_canslim(tile.item.symbol)
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "f", function()
+    require("custom_plugins.security_spread").pick_search("t:" .. tile.item.symbol .. " ")
   end, { buffer = buf, silent = true })
 
   return win

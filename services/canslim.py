@@ -53,6 +53,18 @@ def _raw(field):
     return field
 
 
+def _raw_pct(field):
+    """Some Yahoo fields (financialData.earningsGrowth/revenueGrowth,
+    earningsTrend...earningsEstimate.growth) come back as a fraction where
+    `fmt` confirms `raw * 100 == fmt%` (e.g. raw=9.35, fmt="934.79%") — NOT
+    a plain 0-1 ratio like returnOnEquity. Every other `_pct`-suffixed
+    field in this codebase is already a real percentage, so these need the
+    same *100 to match that convention (and to not silently read as ~10x
+    too small everywhere they're displayed)."""
+    v = _raw(field)
+    return v * 100 if v is not None else None
+
+
 def _pct_return(points, days):
     if len(points) < days + 1:
         return None
@@ -112,6 +124,10 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
         edgar_annual = edgar.get_annual_series(symbol)
     except Exception:
         edgar_annual = []
+    try:
+        edgar_quarterly_net_income = edgar.get_quarterly_net_income(symbol)
+    except Exception:
+        edgar_quarterly_net_income = []
 
     current_price = _raw(price_mod.get("regularMarketPrice"))
     fifty_high = _raw(sd.get("fiftyTwoWeekHigh"))
@@ -166,21 +182,46 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
     # edgar_quarterly_revenue is oldest -> newest; QoQ compares each
     # quarter to the one immediately before it, YoY to 4 quarters back
     # (same set skips a quarter if EDGAR's filed series has a gap).
+    def _nearest_prior(quarters, idx, target_days, tolerance_days):
+        """Find the filed quarter closest to `target_days` before
+        quarters[idx], within tolerance. Small/irregular filers (odd fiscal
+        year-ends, a skipped 10-Q) don't file exactly every 90 days — AEHR's
+        filed quarters have real multi-month gaps — so a fixed "4 quarters
+        back = idx-4" offset silently compares against the wrong quarter
+        once there's a gap. Matching by actual elapsed days is correct
+        regardless of gaps; it just returns None if nothing's close enough."""
+        target_end = date.fromisoformat(quarters[idx]["quarter_end"])
+        best = None
+        best_diff = None
+        for j in range(idx):
+            candidate_end = date.fromisoformat(quarters[j]["quarter_end"])
+            days = (target_end - candidate_end).days
+            diff = abs(days - target_days)
+            if diff <= tolerance_days and (best_diff is None or diff < best_diff):
+                best, best_diff = quarters[j], diff
+        return best
+
+    net_income_by_end = {r["quarter_end"]: r["net_income"] for r in edgar_quarterly_net_income}
+
     revenue_history = []
     for idx, q in enumerate(edgar_quarterly_revenue):
         qoq = None
-        if idx > 0 and edgar_quarterly_revenue[idx - 1]["revenue"]:
-            prev = edgar_quarterly_revenue[idx - 1]["revenue"]
-            qoq = (q["revenue"] - prev) / prev * 100
+        prior_q = _nearest_prior(edgar_quarterly_revenue, idx, target_days=90, tolerance_days=20)
+        if prior_q and prior_q["revenue"]:
+            qoq = (q["revenue"] - prior_q["revenue"]) / prior_q["revenue"] * 100
         yoy = None
-        if idx >= 4 and edgar_quarterly_revenue[idx - 4]["revenue"]:
-            prev_year = edgar_quarterly_revenue[idx - 4]["revenue"]
-            yoy = (q["revenue"] - prev_year) / prev_year * 100
+        prior_y = _nearest_prior(edgar_quarterly_revenue, idx, target_days=365, tolerance_days=30)
+        if prior_y and prior_y["revenue"]:
+            yoy = (q["revenue"] - prior_y["revenue"]) / prior_y["revenue"] * 100
+        net_income = net_income_by_end.get(q["quarter_end"])
+        net_margin = (net_income / q["revenue"] * 100) if net_income is not None and q["revenue"] else None
         revenue_history.append(RevenueQuarter(
             quarter_end=q["quarter_end"],
             revenue=q["revenue"],
             qoq_growth_pct=qoq,
             yoy_growth_pct=yoy,
+            net_income=net_income,
+            net_margin_pct=net_margin,
         ))
 
     annual_history = [
@@ -196,13 +237,14 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
             eps_estimate_7d_ago=_raw(eps_trend.get("7daysAgo")),
             eps_estimate_30d_ago=_raw(eps_trend.get("30daysAgo")),
             eps_estimate_90d_ago=_raw(eps_trend.get("90daysAgo")),
-            forward_qtr_eps_growth_pct=_raw(eps_estimate.get("growth")),
+            forward_qtr_eps_growth_pct=_raw_pct(eps_estimate.get("growth")),
+            num_analysts=_raw(eps_estimate.get("numberOfAnalysts")),
             history=earnings_history,
             revenue_history=revenue_history,
         ),
         a=AnnualEarnings(
-            trailing_yoy_earnings_growth_pct=_raw(fd.get("earningsGrowth")),
-            trailing_yoy_revenue_growth_pct=_raw(fd.get("revenueGrowth")),
+            trailing_yoy_earnings_growth_pct=_raw_pct(fd.get("earningsGrowth")),
+            trailing_yoy_revenue_growth_pct=_raw_pct(fd.get("revenueGrowth")),
             return_on_equity_pct=_raw(fd.get("returnOnEquity")),
             history=annual_history,
         ),
