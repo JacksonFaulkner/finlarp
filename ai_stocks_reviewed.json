@@ -14899,12 +14899,18 @@
         }
       ],
       "security": {
-        "status": "bankruptcy_asset_sale_legacy_equity_unresolved",
-        "ticker_usage": "legacy_symbol_residual_equity_unresolved",
-        "eligible_as_current_security": null,
+        "status": "bankruptcy_deregistered",
+        "ticker_usage": "historical_not_current",
+        "eligible_as_current_security": false,
         "verification_scope": "A company/product website is not an exchange security-master check. True means the cited source identifies this listing, not a trade recommendation or guarantee of broker access.",
         "historical_record_retained_reason": "Preserved for auditability; do not include this identifier as an unchanged current standalone investment.",
-        "current_instrument_requires_resolution": true
+        "current_instrument_requires_resolution": false,
+        "status_effective_date": "2026-04-07",
+        "resolution": {
+          "verified_on": "2026-09-26",
+          "method": "SEC EDGAR submissions (deregistration forms)",
+          "evidence": "EDGAR CIK 1758057: Form 25-NSE 2026-01-23, Form 15-12G 2026-04-07"
+        }
       },
       "exposure_assessment": {
         "classification_scope": "Normalized attribution of the researched business/AI-stack themes; not a whole-company financial partition.",
@@ -14950,7 +14956,14 @@
         "limitations": [
           "Automation, remote operation and robotics are not automatically autonomous AI; conventional products can dominate reported sales."
         ],
-        "changes": [],
+        "changes": [
+          {
+            "field": "security.status",
+            "before": "bankruptcy_asset_sale_legacy_equity_unresolved",
+            "after": "bankruptcy_deregistered",
+            "on": "2026-09-26"
+          }
+        ],
         "original_record": {
           "ticker": "LAZR",
           "name": "Luminar Technologies",
@@ -15281,7 +15294,13 @@
         "eligible_as_current_security": false,
         "verification_scope": "A company/product website is not an exchange security-master check. True means the cited source identifies this listing, not a trade recommendation or guarantee of broker access.",
         "historical_record_retained_reason": "Preserved for auditability; do not include this identifier as an unchanged current standalone investment.",
-        "current_instrument_requires_resolution": true
+        "current_instrument_requires_resolution": false,
+        "status_effective_date": "2024-02-08",
+        "resolution": {
+          "verified_on": "2026-09-26",
+          "method": "SEC EDGAR submissions (deregistration forms)",
+          "evidence": "EDGAR CIK 1823593: Form 25 2024-01-29, Form 15-12G 2024-02-08"
+        }
       },
       "exposure_assessment": {
         "classification_scope": "Normalized attribution of the researched business/AI-stack themes; not a whole-company financial partition.",
@@ -15351,6 +15370,12 @@
             "after": {
               "gaming": 1.0
             }
+          },
+          {
+            "field": "security.status",
+            "before": "legacy_nasdaq_symbol_delisted",
+            "after": "legacy_nasdaq_symbol_delisted",
+            "on": "2026-09-26"
           }
         ],
         "original_record": {
@@ -15805,8 +15830,8 @@
       }
     },
     {
-      "ticker": "ABB",
-      "name": "ABB Ltd",
+      "ticker": "ABBNY",
+      "name": "ABB Ltd (OTC ADR)",
       "region": "US",
       "primary": {
         "infrastructure": 0.6,
@@ -15839,12 +15864,17 @@
         }
       ],
       "security": {
-        "status": "legacy_us_symbol_delisted_current_instrument_unresolved",
-        "ticker_usage": "historical_not_current",
-        "eligible_as_current_security": false,
+        "status": "otc_in_reviewed_source",
+        "ticker_usage": "source_supported_identifier",
+        "eligible_as_current_security": true,
         "verification_scope": "A company/product website is not an exchange security-master check. True means the cited source identifies this listing, not a trade recommendation or guarantee of broker access.",
         "historical_record_retained_reason": "Preserved for auditability; do not include this identifier as an unchanged current standalone investment.",
-        "current_instrument_requires_resolution": true
+        "current_instrument_requires_resolution": false,
+        "resolution": {
+          "verified_on": "2026-09-26",
+          "method": "SEC EDGAR submissions",
+          "evidence": "EDGAR CIK 1091587 lists current tickers ABLZF, ABBNY; NYSE listing ended (Form 25, 2023-05-12)"
+        }
       },
       "exposure_assessment": {
         "classification_scope": "Normalized attribution of the researched business/AI-stack themes; not a whole-company financial partition.",
@@ -15921,6 +15951,18 @@
               "electrical_cooling_equipment": 0.6,
               "robotics_automation": 0.4
             }
+          },
+          {
+            "field": "ticker",
+            "before": "ABB",
+            "after": "ABBNY",
+            "on": "2026-09-26"
+          },
+          {
+            "field": "security.status",
+            "before": "legacy_us_symbol_delisted_current_instrument_unresolved",
+            "after": "otc_in_reviewed_source",
+            "on": "2026-09-26"
           }
         ],
         "original_record": {
@@ -15936,7 +15978,8 @@
             "electrical_cooling_equipment": 0.4
           }
         }
-      }
+      },
+      "former_ticker": "ABB"
     },
     {
       "ticker": "ROK",
@@ -19065,11 +19108,18 @@
         }
       ],
       "security": {
-        "status": "corporate_action_or_listing_unresolved",
-        "ticker_usage": "provisional_identifier_not_trade_validated",
-        "eligible_as_current_security": null,
+        "status": "acquired_private",
+        "ticker_usage": "historical_not_current",
+        "eligible_as_current_security": false,
         "verification_scope": "A company/product website is not an exchange security-master check. True means the cited source identifies this listing, not a trade recommendation or guarantee of broker access.",
-        "unresolved_check": "Continued public-security status was not independently resolved; the investor URL redirected to a corporate product site."
+        "unresolved_check": "Continued public-security status was not independently resolved; the investor URL redirected to a corporate product site.",
+        "status_effective_date": "2026-08-14",
+        "current_instrument_requires_resolution": false,
+        "resolution": {
+          "verified_on": "2026-09-26",
+          "method": "SEC EDGAR submissions (deregistration forms)",
+          "evidence": "EDGAR CIK 712515: Form 15-12G 2026-08-14"
+        }
       },
       "exposure_assessment": {
         "classification_scope": "Normalized attribution of the researched business/AI-stack themes; not a whole-company financial partition.",
@@ -19116,7 +19166,14 @@
           "Using AI in a product or operation does not establish that the entire application business is AI-derived.",
           "Current exchange listing and corporate-action continuity were not independently certified."
         ],
-        "changes": [],
+        "changes": [
+          {
+            "field": "security.status",
+            "before": "corporate_action_or_listing_unresolved",
+            "after": "acquired_private",
+            "on": "2026-09-26"
+          }
+        ],
         "original_record": {
           "ticker": "EA",
           "name": "Electronic Arts",
@@ -40106,11 +40163,18 @@
         }
       ],
       "security": {
-        "status": "corporate_action_or_listing_unresolved",
-        "ticker_usage": "provisional_identifier_not_trade_validated",
-        "eligible_as_current_security": null,
+        "status": "deregistered",
+        "ticker_usage": "historical_not_current",
+        "eligible_as_current_security": false,
         "verification_scope": "A company/product website is not an exchange security-master check. True means the cited source identifies this listing, not a trade recommendation or guarantee of broker access.",
-        "unresolved_check": "Current corporate-action and listing status requires an exchange/filing check beyond the corporate website."
+        "unresolved_check": "Current corporate-action and listing status requires an exchange/filing check beyond the corporate website.",
+        "status_effective_date": "2026-08-10",
+        "current_instrument_requires_resolution": false,
+        "resolution": {
+          "verified_on": "2026-09-26",
+          "method": "SEC EDGAR submissions (deregistration forms)",
+          "evidence": "EDGAR CIK 1819974: Form 25-NSE 2026-07-31, Form 15-12G 2026-08-10"
+        }
       },
       "exposure_assessment": {
         "classification_scope": "Normalized attribution of the researched business/AI-stack themes; not a whole-company financial partition.",
@@ -40157,7 +40221,14 @@
           "Supplying semiconductors, equipment or components to an AI-capable value chain does not make all product sales AI-specific.",
           "Current exchange listing and corporate-action continuity were not independently certified."
         ],
-        "changes": [],
+        "changes": [
+          {
+            "field": "security.status",
+            "before": "corporate_action_or_listing_unresolved",
+            "after": "deregistered",
+            "on": "2026-09-26"
+          }
+        ],
         "original_record": {
           "ticker": "SKYT",
           "name": "SkyWater Technology",
@@ -45477,11 +45548,18 @@
         }
       ],
       "security": {
-        "status": "corporate_action_or_listing_unresolved",
-        "ticker_usage": "provisional_identifier_not_trade_validated",
-        "eligible_as_current_security": null,
+        "status": "deregistered",
+        "ticker_usage": "historical_not_current",
+        "eligible_as_current_security": false,
         "verification_scope": "A company/product website is not an exchange security-master check. True means the cited source identifies this listing, not a trade recommendation or guarantee of broker access.",
-        "unresolved_check": "Current merger/listing status could not be resolved from the limited legacy website."
+        "unresolved_check": "Current merger/listing status could not be resolved from the limited legacy website.",
+        "status_effective_date": "2026-05-19",
+        "current_instrument_requires_resolution": false,
+        "resolution": {
+          "verified_on": "2026-09-26",
+          "method": "SEC EDGAR submissions (deregistration forms)",
+          "evidence": "EDGAR CIK 858470: Form 25-NSE 2026-05-07, Form 15-12G 2026-05-19"
+        }
       },
       "exposure_assessment": {
         "classification_scope": "Normalized attribution of the researched business/AI-stack themes; not a whole-company financial partition.",
@@ -45539,6 +45617,12 @@
             "after": {
               "gas_production": 1.0
             }
+          },
+          {
+            "field": "security.status",
+            "before": "corporate_action_or_listing_unresolved",
+            "after": "deregistered",
+            "on": "2026-09-26"
           }
         ],
         "original_record": {

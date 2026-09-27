@@ -1,0 +1,2022 @@
+{
+  "symbol": "MRVL",
+  "as_of": "2026-09-27",
+  "c": {
+    "eps_estimate_current": 1.09978,
+    "eps_estimate_7d_ago": 1.10038,
+    "eps_estimate_30d_ago": 1.07629,
+    "eps_estimate_90d_ago": 1.072,
+    "forward_qtr_eps_growth_pct": 44.709998,
+    "num_analysts": 34,
+    "history": [
+      {
+        "quarter_end": "2025-10-31",
+        "eps_actual": 0.76,
+        "eps_estimate": 0.73778,
+        "surprise_pct": 0.0301
+      },
+      {
+        "quarter_end": "2026-01-31",
+        "eps_actual": 0.8,
+        "eps_estimate": 0.79165,
+        "surprise_pct": 0.0105
+      },
+      {
+        "quarter_end": "2026-04-30",
+        "eps_actual": 0.8,
+        "eps_estimate": 0.79495,
+        "surprise_pct": 0.0064
+      },
+      {
+        "quarter_end": "2026-07-31",
+        "eps_actual": 0.94,
+        "eps_estimate": 0.93077,
+        "surprise_pct": 0.0099
+      }
+    ],
+    "revenue_history": [
+      {
+        "quarter_end": "2024-05-04",
+        "revenue": 1160900000.0,
+        "qoq_growth_pct": null,
+        "yoy_growth_pct": null,
+        "net_income": -215600000.0,
+        "net_margin_pct": -18.57179774313033
+      },
+      {
+        "quarter_end": "2024-08-03",
+        "revenue": 1272900000.0,
+        "qoq_growth_pct": 9.647687139288482,
+        "yoy_growth_pct": null,
+        "net_income": -193300000.0,
+        "net_margin_pct": -15.185796213371042
+      },
+      {
+        "quarter_end": "2024-11-02",
+        "revenue": 1516100000.0,
+        "qoq_growth_pct": 19.10597847434991,
+        "yoy_growth_pct": null,
+        "net_income": -676300000.0,
+        "net_margin_pct": -44.60787546995581
+      },
+      {
+        "quarter_end": "2025-05-03",
+        "revenue": 1895300000.0,
+        "qoq_growth_pct": null,
+        "yoy_growth_pct": 63.26126281333448,
+        "net_income": 177900000.0,
+        "net_margin_pct": 9.386376826887565
+      },
+      {
+        "quarter_end": "2025-08-02",
+        "revenue": 2006100000.0,
+        "qoq_growth_pct": 5.846040204716931,
+        "yoy_growth_pct": 57.60075418336083,
+        "net_income": 194800000.0,
+        "net_margin_pct": 9.710383330840935
+      },
+      {
+        "quarter_end": "2025-11-01",
+        "revenue": 2074500000.0,
+        "qoq_growth_pct": 3.4096007178106778,
+        "yoy_growth_pct": 36.83134357891959,
+        "net_income": 1901300000.0,
+        "net_margin_pct": 91.65100024102193
+      },
+      {
+        "quarter_end": "2026-05-02",
+        "revenue": 2417800000.0,
+        "qoq_growth_pct": null,
+        "yoy_growth_pct": 27.568195008705747,
+        "net_income": 34500000.0,
+        "net_margin_pct": 1.4269170320125735
+      },
+      {
+        "quarter_end": "2026-08-01",
+        "revenue": 2739300000.0,
+        "qoq_growth_pct": 13.297212341798328,
+        "yoy_growth_pct": 36.54852699267235,
+        "net_income": 308000000.0,
+        "net_margin_pct": 11.243748402876648
+      }
+    ]
+  },
+  "a": {
+    "trailing_yoy_earnings_growth_pct": 50.0,
+    "trailing_yoy_revenue_growth_pct": 36.5,
+    "return_on_equity_pct": 0.16523,
+    "history": [
+      {
+        "fiscal_year_end": "2023-01-28",
+        "eps": -0.19,
+        "revenue": 5919600000.0
+      },
+      {
+        "fiscal_year_end": "2024-02-03",
+        "eps": -1.08,
+        "revenue": 5507700000.0
+      },
+      {
+        "fiscal_year_end": "2025-02-01",
+        "eps": -1.02,
+        "revenue": 5767300000.0
+      },
+      {
+        "fiscal_year_end": "2026-01-31",
+        "eps": 3.07,
+        "revenue": 8194600000.0
+      }
+    ]
+  },
+  "n": {
+    "price_current": 261.935,
+    "fifty_two_week_high": 329.88,
+    "fifty_two_week_low": 70.69,
+    "pct_off_high": 20.596883715290407
+  },
+  "s": {
+    "shares_outstanding": 876926613.0,
+    "short_pct_of_float": 0.0418,
+    "avg_volume_10d": 17682270.0,
+    "avg_volume_3mo": 23585692.0,
+    "volume_surge_ratio": 0.749703252293806
+  },
+  "l": {
+    "symbol_return_pct": -1.8105434536034297,
+    "benchmark_return_pct": 5.810777365810399,
+    "relative_strength_score": -7.621320819413828
+  },
+  "i": {
+    "held_pct_institutions": 0.81798,
+    "top_holders": [
+      {
+        "organization": "Blackrock Inc.",
+        "pct_held": 0.09770001,
+        "value": 22432420702.0
+      },
+      {
+        "organization": "Vanguard Capital Management LLC",
+        "pct_held": 0.066,
+        "value": 15165748754.0
+      },
+      {
+        "organization": "FMR, LLC",
+        "pct_held": 0.064899996,
+        "value": 14912761717.0
+      },
+      {
+        "organization": "State Street Corporation",
+        "pct_held": 0.0477,
+        "value": 10957859934.0
+      },
+      {
+        "organization": "Invesco Ltd.",
+        "pct_held": 0.0345,
+        "value": 7932872444.0
+      }
+    ],
+    "net_insider_shares_purchased": 1486735.0,
+    "recommendation_key": "strong_buy",
+    "target_mean_price": 289.10992
+  },
+  "m": {
+    "index_symbol": "SPY",
+    "price_vs_ma50": 9.784177246093805,
+    "price_vs_ma200": 52.89797607421872,
+    "trend": "uptrend"
+  },
+  "overall": {
+    "score": 60,
+    "grade": "B",
+    "src": {
+      "label": "overall (mean of letter gauges)",
+      "formula": "C 59 + A 100 + N 31 + S 17 + L 31 + I 82 + M 100 / 7 = 60",
+      "inputs": [
+        {
+          "label": "C score (gauge; A≥80 B≥60 C≥40 D≥20)",
+          "formula": "(clamp((44.71 − 0) / (100 − 0)) + clamp((36.55 − 0) / (50 − 0))) / 2 × 100 = 59",
+          "inputs": [
+            {
+              "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.growth (fraction × 100)",
+              "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+            },
+            {
+              "label": "YoY revenue growth, quarter ending 2026-08-01",
+              "formula": "(2,739.3 − 2,006.1) / 2,006.1 × 100 = +36.5%",
+              "inputs": [
+                {
+                  "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                  "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                },
+                {
+                  "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                  "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "A score (gauge; A≥80 B≥60 C≥40 D≥20)",
+          "formula": "clamp((50.00 − 0) / (50 − 0)) × 100 = 100",
+          "inputs": [
+            {
+              "label": "Yahoo Finance key-statistics · financialData.earningsGrowth (fraction × 100)",
+              "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+            }
+          ]
+        },
+        {
+          "label": "N score (gauge; A≥80 B≥60 C≥40 D≥20)",
+          "formula": "clamp((9.40 − 0) / (30 − 0)) × 100 = 31",
+          "inputs": [
+            {
+              "label": "% off 52-week high",
+              "formula": "(329.88 − 261.94) / 329.88 × 100 = 20.6%",
+              "inputs": [
+                {
+                  "label": "Yahoo Finance quote · summaryDetail.fiftyTwoWeekHigh",
+                  "url": "https://finance.yahoo.com/quote/MRVL/"
+                },
+                {
+                  "label": "Yahoo Finance quote · price.regularMarketPrice",
+                  "url": "https://finance.yahoo.com/quote/MRVL/"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "S score (gauge; A≥80 B≥60 C≥40 D≥20)",
+          "formula": "clamp((0.75 − 0.5) / (2 − 0.5)) × 100 = 17",
+          "inputs": [
+            {
+              "label": "volume surge (10-day avg / 3-month avg)",
+              "formula": "17,682,270 / 23,585,692 = 0.75x",
+              "inputs": [
+                {
+                  "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume10days",
+                  "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                },
+                {
+                  "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume",
+                  "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "L score (gauge; A≥80 B≥60 C≥40 D≥20)",
+          "formula": "clamp((-7.62 − -20) / (20 − -20)) × 100 = 31",
+          "inputs": [
+            {
+              "label": "relative strength (MRVL return − SPY return, 63 sessions)",
+              "formula": "-1.8 − +5.8 = -7.6",
+              "inputs": [
+                {
+                  "label": "MRVL 63-session return",
+                  "formula": "(261.94 − 266.77) / 266.77 × 100 = -1.8%",
+                  "inputs": [
+                    {
+                      "label": "Yahoo daily close MRVL 2026-06-26: 266.77",
+                      "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1782437400&period2=1782523800"
+                    },
+                    {
+                      "label": "Yahoo daily close MRVL 2026-09-25: 261.94",
+                      "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1790299800&period2=1790386200"
+                    }
+                  ]
+                },
+                {
+                  "label": "SPY 63-session return",
+                  "formula": "(771.35 − 728.99) / 728.99 × 100 = +5.8%",
+                  "inputs": [
+                    {
+                      "label": "Yahoo daily close SPY 2026-06-26: 728.99",
+                      "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1782437400&period2=1782523800"
+                    },
+                    {
+                      "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                      "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": "I score (gauge; A≥80 B≥60 C≥40 D≥20)",
+          "formula": "clamp((81.80 − 0) / (100 − 0)) × 100 = 82",
+          "inputs": [
+            {
+              "label": "Yahoo Finance holders · defaultKeyStatistics.heldPercentInstitutions (fraction × 100)",
+              "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+            }
+          ]
+        },
+        {
+          "label": "M score (gauge)",
+          "formula": "trend uptrend: uptrend = 100, correction = 50, downtrend = 0",
+          "inputs": [
+            {
+              "label": "market trend",
+              "formula": "price 771.35 vs MA50 761.57 vs MA200 718.45: price > MA50 > MA200 = uptrend; price < MA50 < MA200 = downtrend; else correction",
+              "inputs": [
+                {
+                  "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                  "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                },
+                {
+                  "label": "SPY 50-day simple moving average",
+                  "formula": "sum of last 50 closes / 50 = 761.57",
+                  "inputs": [
+                    {
+                      "label": "Yahoo daily closes SPY 2026-07-17..2026-09-25 (50 sessions)",
+                      "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1784251800&period2=1790386200"
+                    }
+                  ]
+                },
+                {
+                  "label": "SPY 200-day simple moving average",
+                  "formula": "sum of last 200 closes / 200 = 718.45",
+                  "inputs": [
+                    {
+                      "label": "Yahoo daily closes SPY 2025-12-09..2026-09-25 (200 sessions)",
+                      "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1765247400&period2=1790386200"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "sections": [
+    {
+      "id": "c",
+      "title": "C Current earnings",
+      "new": false,
+      "badge": "C 59",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Headline",
+          "rows": [
+            {
+              "label": "fwd qtr EPS growth",
+              "value": "+44.7%  (34 analysts)",
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.growth (fraction × 100)",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "analysts",
+              "value": "34",
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.numberOfAnalysts",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "filed revenue YoY (SEC)",
+              "value": "+36.5%",
+              "src": {
+                "label": "YoY revenue growth, quarter ending 2026-08-01",
+                "formula": "(2,739.3 − 2,006.1) / 2,006.1 × 100 = +36.5%",
+                "inputs": [
+                  {
+                    "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                  },
+                  {
+                    "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "EPS estimate revision — next-quarter consensus (▲ raised / ▼ cut vs prior checkpoint)",
+          "rows": [
+            {
+              "label": "EPS est 90d ago",
+              "value": "1.07",
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.90daysAgo",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "EPS est 30d ago",
+              "value": "1.08  +0.00 ▲",
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.30daysAgo",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/",
+                "formula": "1.08 − 1.07 = +0.00 vs 90d ago",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.30daysAgo",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  },
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.90daysAgo",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  }
+                ]
+              }
+            },
+            {
+              "label": "EPS est 7d ago",
+              "value": "1.10  +0.02 ▲",
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.7daysAgo",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/",
+                "formula": "1.10 − 1.08 = +0.02 vs 30d ago",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.7daysAgo",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  },
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.30daysAgo",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  }
+                ]
+              }
+            },
+            {
+              "label": "EPS est now",
+              "value": "1.10  -0.00 ▼",
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.avg",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/",
+                "formula": "1.10 − 1.10 = -0.00 vs 7d ago",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.avg",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  },
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.7daysAgo",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "series",
+          "title": "EPS estimate revision trend (90d → now)",
+          "unit": "$/sh",
+          "points": [
+            {
+              "x": "90d ago",
+              "y": 1.072,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.90daysAgo",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "x": "30d ago",
+              "y": 1.07629,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.30daysAgo",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "x": "7d ago",
+              "y": 1.10038,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].epsTrend.7daysAgo",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "x": "now",
+              "y": 1.09978,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.avg",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            }
+          ]
+        },
+        {
+          "type": "bars",
+          "title": "EPS actual vs estimate by quarter (compare = estimate) · latest 2026-07-31",
+          "unit": "$/sh",
+          "items": [
+            {
+              "label": "2025-10-31",
+              "value": 0.76,
+              "compare": 0.73778,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2025-10-31: actual 0.76, estimate 0.74, surprisePercent +3.0%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "2026-01-31",
+              "value": 0.8,
+              "compare": 0.79165,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2026-01-31: actual 0.80, estimate 0.79, surprisePercent +1.1%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "2026-04-30",
+              "value": 0.8,
+              "compare": 0.79495,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2026-04-30: actual 0.80, estimate 0.79, surprisePercent +0.6%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "2026-07-31",
+              "value": 0.94,
+              "compare": 0.93077,
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2026-07-31: actual 0.94, estimate 0.93, surprisePercent +1.0%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "EPS surprise by quarter",
+          "cols": [
+            "quarter",
+            "estimate",
+            "actual",
+            "surprise",
+            "beat?"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "2025-10-31",
+                "0.74",
+                "0.76",
+                "+3.0%",
+                "beat"
+              ],
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2025-10-31: actual 0.76, estimate 0.74, surprisePercent +3.0%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "cells": [
+                "2026-01-31",
+                "0.79",
+                "0.80",
+                "+1.1%",
+                "beat"
+              ],
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2026-01-31: actual 0.80, estimate 0.79, surprisePercent +1.1%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "cells": [
+                "2026-04-30",
+                "0.79",
+                "0.80",
+                "+0.6%",
+                "beat"
+              ],
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2026-04-30: actual 0.80, estimate 0.79, surprisePercent +0.6%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "cells": [
+                "2026-07-31",
+                "0.93",
+                "0.94",
+                "+1.0%",
+                "beat"
+              ],
+              "src": {
+                "label": "Yahoo Finance analysis · earningsHistory 2026-07-31: actual 0.94, estimate 0.93, surprisePercent +1.0%",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            }
+          ]
+        },
+        {
+          "type": "series",
+          "title": "Revenue (SEC filed, RevenueFromContractWithCustomerExcludingAssessedTax) · latest filed quarter 2026-08-01",
+          "unit": "$M",
+          "points": [
+            {
+              "x": "2024-05-04",
+              "y": 1160.9,
+              "src": {
+                "label": "10-Q Q1 FY2026 filed 2025-05-30 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-02-04..2024-05-04",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000117/mrvl-20250503.htm"
+              }
+            },
+            {
+              "x": "2024-08-03",
+              "y": 1272.9,
+              "src": {
+                "label": "10-Q Q2 FY2026 filed 2025-08-29 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-05-05..2024-08-03",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000189/mrvl-20250802.htm"
+              }
+            },
+            {
+              "x": "2024-11-02",
+              "y": 1516.1,
+              "src": {
+                "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-08-04..2024-11-02",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+              }
+            },
+            {
+              "x": "2025-05-03",
+              "y": 1895.3,
+              "src": {
+                "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2025-05-03",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+              }
+            },
+            {
+              "x": "2025-08-02",
+              "y": 2006.1,
+              "src": {
+                "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+              }
+            },
+            {
+              "x": "2025-11-01",
+              "y": 2074.5,
+              "src": {
+                "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-08-03..2025-11-01",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+              }
+            },
+            {
+              "x": "2026-05-02",
+              "y": 2417.8,
+              "src": {
+                "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-02-01..2026-05-02",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+              }
+            },
+            {
+              "x": "2026-08-01",
+              "y": 2739.3,
+              "src": {
+                "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Revenue by quarter (SEC filed; YoY ≥ 0 growing / < 0 shrinking)",
+          "cols": [
+            "quarter",
+            "revenue",
+            "QoQ",
+            "YoY",
+            "net margin"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "2024-05-04",
+                "1.16B",
+                "—",
+                "—",
+                "-18.6%"
+              ],
+              "src": {
+                "label": "10-Q Q1 FY2026 filed 2025-05-30 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-02-04..2024-05-04",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000117/mrvl-20250503.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "net margin, quarter ending 2024-05-04",
+                    "formula": "-215.6 / 1,160.9 × 100 = -18.6%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · NetIncomeLoss · 2024-02-04..2024-05-04",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2026 filed 2025-05-30 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-02-04..2024-05-04",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000117/mrvl-20250503.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2024-08-03",
+                "1.27B",
+                "+9.6%",
+                "—",
+                "-15.2%"
+              ],
+              "src": {
+                "label": "10-Q Q2 FY2026 filed 2025-08-29 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-05-05..2024-08-03",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000189/mrvl-20250802.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "QoQ revenue growth, quarter ending 2024-08-03",
+                    "formula": "(1,272.9 − 1,160.9) / 1,160.9 × 100 = +9.6%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2026 filed 2025-08-29 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-05-05..2024-08-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000189/mrvl-20250802.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2026 filed 2025-05-30 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-02-04..2024-05-04",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000117/mrvl-20250503.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2024-08-03",
+                    "formula": "-193.3 / 1,272.9 × 100 = -15.2%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · NetIncomeLoss · 2024-05-05..2024-08-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2026 filed 2025-08-29 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-05-05..2024-08-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000189/mrvl-20250802.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2024-11-02",
+                "1.52B",
+                "+19.1%",
+                "—",
+                "-44.6%"
+              ],
+              "src": {
+                "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-08-04..2024-11-02",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "QoQ revenue growth, quarter ending 2024-11-02",
+                    "formula": "(1,516.1 − 1,272.9) / 1,272.9 × 100 = +19.1%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-08-04..2024-11-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2026 filed 2025-08-29 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-05-05..2024-08-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000189/mrvl-20250802.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2024-11-02",
+                    "formula": "-676.3 / 1,516.1 × 100 = -44.6%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · NetIncomeLoss · 2024-08-04..2024-11-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-08-04..2024-11-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2025-05-03",
+                "1.90B",
+                "—",
+                "+63.3%",
+                "9.4%"
+              ],
+              "src": {
+                "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2025-05-03",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "YoY revenue growth, quarter ending 2025-05-03",
+                    "formula": "(1,895.3 − 1,160.9) / 1,160.9 × 100 = +63.3%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2025-05-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2026 filed 2025-05-30 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-02-04..2024-05-04",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000117/mrvl-20250503.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2025-05-03",
+                    "formula": "177.9 / 1,895.3 × 100 = 9.4%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · NetIncomeLoss · 2025-02-02..2025-05-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2025-05-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2025-08-02",
+                "2.01B",
+                "+5.8%",
+                "+57.6%",
+                "9.7%"
+              ],
+              "src": {
+                "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "QoQ revenue growth, quarter ending 2025-08-02",
+                    "formula": "(2,006.1 − 1,895.3) / 1,895.3 × 100 = +5.8%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2025-05-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "YoY revenue growth, quarter ending 2025-08-02",
+                    "formula": "(2,006.1 − 1,272.9) / 1,272.9 × 100 = +57.6%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2026 filed 2025-08-29 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-05-05..2024-08-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000189/mrvl-20250802.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2025-08-02",
+                    "formula": "194.8 / 2,006.1 × 100 = 9.7%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · NetIncomeLoss · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2025-11-01",
+                "2.07B",
+                "+3.4%",
+                "+36.8%",
+                "91.7%"
+              ],
+              "src": {
+                "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-08-03..2025-11-01",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "QoQ revenue growth, quarter ending 2025-11-01",
+                    "formula": "(2,074.5 − 2,006.1) / 2,006.1 × 100 = +3.4%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-08-03..2025-11-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "YoY revenue growth, quarter ending 2025-11-01",
+                    "formula": "(2,074.5 − 1,516.1) / 1,516.1 × 100 = +36.8%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-08-03..2025-11-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-08-04..2024-11-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2025-11-01",
+                    "formula": "1,901.3 / 2,074.5 × 100 = 91.7%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · NetIncomeLoss · 2025-08-03..2025-11-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      },
+                      {
+                        "label": "10-Q Q3 FY2026 filed 2025-12-03 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-08-03..2025-11-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2026-05-02",
+                "2.42B",
+                "—",
+                "+27.6%",
+                "1.4%"
+              ],
+              "src": {
+                "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-02-01..2026-05-02",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "YoY revenue growth, quarter ending 2026-05-02",
+                    "formula": "(2,417.8 − 1,895.3) / 1,895.3 × 100 = +27.6%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-02-01..2026-05-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2025-05-03",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2026-05-02",
+                    "formula": "34.5 / 2,417.8 × 100 = 1.4%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · NetIncomeLoss · 2026-02-01..2026-05-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-02-01..2026-05-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "2026-08-01",
+                "2.74B",
+                "+13.3%",
+                "+36.5%",
+                "11.2%"
+              ],
+              "src": {
+                "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm",
+                "formula": "QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
+                "inputs": [
+                  {
+                    "label": "QoQ revenue growth, quarter ending 2026-08-01",
+                    "formula": "(2,739.3 − 2,417.8) / 2,417.8 × 100 = +13.3%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q1 FY2027 filed 2026-05-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-02-01..2026-05-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "YoY revenue growth, quarter ending 2026-08-01",
+                    "formula": "(2,739.3 − 2,006.1) / 2,006.1 × 100 = +36.5%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "net margin, quarter ending 2026-08-01",
+                    "formula": "308.0 / 2,739.3 × 100 = 11.2%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · NetIncomeLoss · 2026-05-03..2026-08-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "59/100  grade C",
+              "src": {
+                "label": "C score (gauge; A≥80 B≥60 C≥40 D≥20)",
+                "formula": "(clamp((44.71 − 0) / (100 − 0)) + clamp((36.55 − 0) / (50 − 0))) / 2 × 100 = 59",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance analysis · earningsTrend[0q ending 2026-10-31].earningsEstimate.growth (fraction × 100)",
+                    "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+                  },
+                  {
+                    "label": "YoY revenue growth, quarter ending 2026-08-01",
+                    "formula": "(2,739.3 − 2,006.1) / 2,006.1 × 100 = +36.5%",
+                    "inputs": [
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2026-05-03..2026-08-01",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      },
+                      {
+                        "label": "10-Q Q2 FY2027 filed 2026-08-28 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-05-04..2025-08-02",
+                        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "Current quarterly EPS up ≥25% YoY, ideally accelerating, with sales confirming (≥25% or accelerating). Gauge: next-quarter consensus EPS growth over 0..100% and latest filed revenue YoY over 0..50%, averaged. Growth off a ≤0 EPS base is excluded. Thin analyst coverage (≤3) is flagged.",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "a",
+      "title": "A Annual growth",
+      "new": false,
+      "badge": "A 100",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Headline",
+          "rows": [
+            {
+              "label": "earnings growth YoY (Yahoo, latest qtr)",
+              "value": "+50.0%",
+              "src": {
+                "label": "Yahoo Finance key-statistics · financialData.earningsGrowth (fraction × 100)",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            },
+            {
+              "label": "revenue growth YoY (Yahoo, latest qtr)",
+              "value": "+36.5%",
+              "src": {
+                "label": "Yahoo Finance key-statistics · financialData.revenueGrowth (fraction × 100)",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            },
+            {
+              "label": "return on equity",
+              "value": "16.5%",
+              "src": {
+                "label": "Yahoo Finance key-statistics · financialData.returnOnEquity (fraction × 100)",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            }
+          ]
+        },
+        {
+          "type": "series",
+          "title": "SEC filed annual EPS (EarningsPerShareDiluted)",
+          "unit": "$/sh",
+          "points": [
+            {
+              "x": "FY23",
+              "y": -0.19,
+              "src": {
+                "label": "10-K FY2025 filed 2025-03-12 · EarningsPerShareDiluted · 2022-01-30..2023-01-28",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000057/mrvl-20250201.htm"
+              }
+            },
+            {
+              "x": "FY24",
+              "y": -1.08,
+              "src": {
+                "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2023-01-29..2024-02-03",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+              }
+            },
+            {
+              "x": "FY25",
+              "y": -1.02,
+              "src": {
+                "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2024-02-04..2025-02-01",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+              }
+            },
+            {
+              "x": "FY26",
+              "y": 3.07,
+              "src": {
+                "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2025-02-02..2026-01-31",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "SEC filed annual (10-K)",
+          "cols": [
+            "fiscal year",
+            "EPS",
+            "revenue",
+            "EPS YoY"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "FY23 (2023-01-28)",
+                "$-0.19",
+                "5.92B",
+                "—"
+              ],
+              "src": {
+                "label": "10-K FY2025 filed 2025-03-12 · EarningsPerShareDiluted · 2022-01-30..2023-01-28",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000057/mrvl-20250201.htm",
+                "formula": "EPS YoY = EPS / prior-year EPS − 1 (n/m off ≤0 base)",
+                "inputs": [
+                  {
+                    "label": "10-K FY2025 filed 2025-03-12 · EarningsPerShareDiluted · 2022-01-30..2023-01-28",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000057/mrvl-20250201.htm"
+                  },
+                  {
+                    "label": "10-K FY2025 filed 2025-03-12 · RevenueFromContractWithCustomerExcludingAssessedTax · 2022-01-30..2023-01-28",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000057/mrvl-20250201.htm"
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "FY24 (2024-02-03)",
+                "$-1.08",
+                "5.51B",
+                "—"
+              ],
+              "src": {
+                "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2023-01-29..2024-02-03",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm",
+                "formula": "EPS YoY = EPS / prior-year EPS − 1 (n/m off ≤0 base)",
+                "inputs": [
+                  {
+                    "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2023-01-29..2024-02-03",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+                  },
+                  {
+                    "label": "10-K FY2026 filed 2026-03-11 · RevenueFromContractWithCustomerExcludingAssessedTax · 2023-01-29..2024-02-03",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "FY25 (2025-02-01)",
+                "$-1.02",
+                "5.77B",
+                "—"
+              ],
+              "src": {
+                "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2024-02-04..2025-02-01",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm",
+                "formula": "EPS YoY = EPS / prior-year EPS − 1 (n/m off ≤0 base)",
+                "inputs": [
+                  {
+                    "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2024-02-04..2025-02-01",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+                  },
+                  {
+                    "label": "10-K FY2026 filed 2026-03-11 · RevenueFromContractWithCustomerExcludingAssessedTax · 2024-02-04..2025-02-01",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+                  }
+                ]
+              }
+            },
+            {
+              "cells": [
+                "FY26 (2026-01-31)",
+                "$3.07",
+                "8.19B",
+                "—"
+              ],
+              "src": {
+                "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2025-02-02..2026-01-31",
+                "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm",
+                "formula": "EPS YoY = EPS / prior-year EPS − 1 (n/m off ≤0 base)",
+                "inputs": [
+                  {
+                    "label": "10-K FY2026 filed 2026-03-11 · EarningsPerShareDiluted · 2025-02-02..2026-01-31",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+                  },
+                  {
+                    "label": "10-K FY2026 filed 2026-03-11 · RevenueFromContractWithCustomerExcludingAssessedTax · 2025-02-02..2026-01-31",
+                    "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "100/100  grade A",
+              "src": {
+                "label": "A score (gauge; A≥80 B≥60 C≥40 D≥20)",
+                "formula": "clamp((50.00 − 0) / (50 − 0)) × 100 = 100",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance key-statistics · financialData.earningsGrowth (fraction × 100)",
+                    "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "Annual EPS up ≥25% in each of the last 3 years, ROE ≥17%. Gauge: Yahoo earnings growth YoY over 0..50%. The 10-K series shows the real multi-year trend.",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "n",
+      "title": "N New high",
+      "new": false,
+      "badge": "D 31",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Headline",
+          "rows": [
+            {
+              "label": "price",
+              "value": "261.94",
+              "src": {
+                "label": "Yahoo Finance quote · price.regularMarketPrice",
+                "url": "https://finance.yahoo.com/quote/MRVL/"
+              }
+            },
+            {
+              "label": "52-week high",
+              "value": "329.88",
+              "src": {
+                "label": "Yahoo Finance quote · summaryDetail.fiftyTwoWeekHigh",
+                "url": "https://finance.yahoo.com/quote/MRVL/"
+              }
+            },
+            {
+              "label": "52-week low",
+              "value": "70.69",
+              "src": {
+                "label": "Yahoo Finance quote · summaryDetail.fiftyTwoWeekLow",
+                "url": "https://finance.yahoo.com/quote/MRVL/"
+              }
+            },
+            {
+              "label": "off high",
+              "value": "-20.6%",
+              "src": {
+                "label": "% off 52-week high",
+                "formula": "(329.88 − 261.94) / 329.88 × 100 = 20.6%",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance quote · summaryDetail.fiftyTwoWeekHigh",
+                    "url": "https://finance.yahoo.com/quote/MRVL/"
+                  },
+                  {
+                    "label": "Yahoo Finance quote · price.regularMarketPrice",
+                    "url": "https://finance.yahoo.com/quote/MRVL/"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "31/100  grade D",
+              "src": {
+                "label": "N score (gauge; A≥80 B≥60 C≥40 D≥20)",
+                "formula": "clamp((9.40 − 0) / (30 − 0)) × 100 = 31",
+                "inputs": [
+                  {
+                    "label": "% off 52-week high",
+                    "formula": "(329.88 − 261.94) / 329.88 × 100 = 20.6%",
+                    "inputs": [
+                      {
+                        "label": "Yahoo Finance quote · summaryDetail.fiftyTwoWeekHigh",
+                        "url": "https://finance.yahoo.com/quote/MRVL/"
+                      },
+                      {
+                        "label": "Yahoo Finance quote · price.regularMarketPrice",
+                        "url": "https://finance.yahoo.com/quote/MRVL/"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "New products, management or price highs: buy as the stock emerges from a sound base toward new highs, not near lows. Gauge: 30 − % off the 52-week high over 0..30 (at the high = 100, ≥30% off = 0).",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "s",
+      "title": "S Supply / demand",
+      "new": false,
+      "badge": "F 17",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Headline",
+          "rows": [
+            {
+              "label": "shares outstanding",
+              "value": "876.93M",
+              "src": {
+                "label": "Yahoo Finance key-statistics · defaultKeyStatistics.sharesOutstanding",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            },
+            {
+              "label": "short % of float",
+              "value": "4.2%",
+              "src": {
+                "label": "Yahoo Finance key-statistics · defaultKeyStatistics.shortPercentOfFloat (fraction × 100)",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            },
+            {
+              "label": "avg volume 10d",
+              "value": "17.68M",
+              "src": {
+                "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume10days",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            },
+            {
+              "label": "avg volume 3mo",
+              "value": "23.59M",
+              "src": {
+                "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume",
+                "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+              }
+            },
+            {
+              "label": "volume surge (10d / 3mo)",
+              "value": "0.75x",
+              "src": {
+                "label": "volume surge (10-day avg / 3-month avg)",
+                "formula": "17,682,270 / 23,585,692 = 0.75x",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume10days",
+                    "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                  },
+                  {
+                    "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume",
+                    "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "17/100  grade F",
+              "src": {
+                "label": "S score (gauge; A≥80 B≥60 C≥40 D≥20)",
+                "formula": "clamp((0.75 − 0.5) / (2 − 0.5)) × 100 = 17",
+                "inputs": [
+                  {
+                    "label": "volume surge (10-day avg / 3-month avg)",
+                    "formula": "17,682,270 / 23,585,692 = 0.75x",
+                    "inputs": [
+                      {
+                        "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume10days",
+                        "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                      },
+                      {
+                        "label": "Yahoo Finance key-statistics · summaryDetail.averageVolume",
+                        "url": "https://finance.yahoo.com/quote/MRVL/key-statistics/"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "Demand shows up as volume: big-volume up days on breakouts, light volume on pullbacks. Gauge: 10-day / 3-month average volume over 0.5..2.0x.",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "l",
+      "title": "L Leader / laggard",
+      "new": false,
+      "badge": "D 31",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Headline (63 sessions ≈ 3 months)",
+          "rows": [
+            {
+              "label": "MRVL 3mo return",
+              "value": "-1.8%",
+              "src": {
+                "label": "MRVL 63-session return",
+                "formula": "(261.94 − 266.77) / 266.77 × 100 = -1.8%",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily close MRVL 2026-06-26: 266.77",
+                    "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1782437400&period2=1782523800"
+                  },
+                  {
+                    "label": "Yahoo daily close MRVL 2026-09-25: 261.94",
+                    "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1790299800&period2=1790386200"
+                  }
+                ]
+              }
+            },
+            {
+              "label": "SPY 3mo return",
+              "value": "+5.8%",
+              "src": {
+                "label": "SPY 63-session return",
+                "formula": "(771.35 − 728.99) / 728.99 × 100 = +5.8%",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily close SPY 2026-06-26: 728.99",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1782437400&period2=1782523800"
+                  },
+                  {
+                    "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                  }
+                ]
+              }
+            },
+            {
+              "label": "relative strength",
+              "value": "-7.6",
+              "src": {
+                "label": "relative strength (MRVL return − SPY return, 63 sessions)",
+                "formula": "-1.8 − +5.8 = -7.6",
+                "inputs": [
+                  {
+                    "label": "MRVL 63-session return",
+                    "formula": "(261.94 − 266.77) / 266.77 × 100 = -1.8%",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily close MRVL 2026-06-26: 266.77",
+                        "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1782437400&period2=1782523800"
+                      },
+                      {
+                        "label": "Yahoo daily close MRVL 2026-09-25: 261.94",
+                        "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1790299800&period2=1790386200"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "SPY 63-session return",
+                    "formula": "(771.35 − 728.99) / 728.99 × 100 = +5.8%",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily close SPY 2026-06-26: 728.99",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1782437400&period2=1782523800"
+                      },
+                      {
+                        "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "31/100  grade D",
+              "src": {
+                "label": "L score (gauge; A≥80 B≥60 C≥40 D≥20)",
+                "formula": "clamp((-7.62 − -20) / (20 − -20)) × 100 = 31",
+                "inputs": [
+                  {
+                    "label": "relative strength (MRVL return − SPY return, 63 sessions)",
+                    "formula": "-1.8 − +5.8 = -7.6",
+                    "inputs": [
+                      {
+                        "label": "MRVL 63-session return",
+                        "formula": "(261.94 − 266.77) / 266.77 × 100 = -1.8%",
+                        "inputs": [
+                          {
+                            "label": "Yahoo daily close MRVL 2026-06-26: 266.77",
+                            "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1782437400&period2=1782523800"
+                          },
+                          {
+                            "label": "Yahoo daily close MRVL 2026-09-25: 261.94",
+                            "url": "https://finance.yahoo.com/quote/MRVL/history/?period1=1790299800&period2=1790386200"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "SPY 63-session return",
+                        "formula": "(771.35 − 728.99) / 728.99 × 100 = +5.8%",
+                        "inputs": [
+                          {
+                            "label": "Yahoo daily close SPY 2026-06-26: 728.99",
+                            "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1782437400&period2=1782523800"
+                          },
+                          {
+                            "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                            "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "Buy leaders (IBD RS rating ≥80), avoid laggards. This is a simplified RS: 3-month return minus SPY's, not IBD's 12-month weighted percentile. Gauge: RS over −20..+20.",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "i",
+      "title": "I Institutional",
+      "new": false,
+      "badge": "A 82",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Headline",
+          "rows": [
+            {
+              "label": "held by institutions",
+              "value": "81.8%",
+              "src": {
+                "label": "Yahoo Finance holders · defaultKeyStatistics.heldPercentInstitutions (fraction × 100)",
+                "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+              }
+            },
+            {
+              "label": "analyst recommendation",
+              "value": "strong_buy",
+              "src": {
+                "label": "Yahoo Finance analysis · financialData.recommendationKey",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "target mean price",
+              "value": "289.11",
+              "src": {
+                "label": "Yahoo Finance analysis · financialData.targetMeanPrice",
+                "url": "https://finance.yahoo.com/quote/MRVL/analysis/"
+              }
+            },
+            {
+              "label": "net insider shares purchased (6mo)",
+              "value": "1.49M",
+              "src": {
+                "label": "Yahoo Finance insider-transactions · netSharePurchaseActivity.netShares",
+                "url": "https://finance.yahoo.com/quote/MRVL/insider-transactions/"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Top institutional holders",
+          "cols": [
+            "holder",
+            "% held",
+            "value",
+            "reported"
+          ],
+          "rows": [
+            {
+              "cells": [
+                "Blackrock Inc.",
+                "9.77%",
+                "$22.43B",
+                "2026-06-30"
+              ],
+              "src": {
+                "label": "Yahoo Finance holders · institutionOwnership.ownershipList[0] Blackrock Inc. (13F as of 2026-06-30)",
+                "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+              }
+            },
+            {
+              "cells": [
+                "Vanguard Capital Management LLC",
+                "6.60%",
+                "$15.17B",
+                "2026-06-30"
+              ],
+              "src": {
+                "label": "Yahoo Finance holders · institutionOwnership.ownershipList[1] Vanguard Capital Management LLC (13F as of 2026-06-30)",
+                "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+              }
+            },
+            {
+              "cells": [
+                "FMR, LLC",
+                "6.49%",
+                "$14.91B",
+                "2026-06-30"
+              ],
+              "src": {
+                "label": "Yahoo Finance holders · institutionOwnership.ownershipList[2] FMR, LLC (13F as of 2026-06-30)",
+                "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+              }
+            },
+            {
+              "cells": [
+                "State Street Corporation",
+                "4.77%",
+                "$10.96B",
+                "2026-06-30"
+              ],
+              "src": {
+                "label": "Yahoo Finance holders · institutionOwnership.ownershipList[3] State Street Corporation (13F as of 2026-06-30)",
+                "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+              }
+            },
+            {
+              "cells": [
+                "Invesco Ltd.",
+                "3.45%",
+                "$7.93B",
+                "2026-06-30"
+              ],
+              "src": {
+                "label": "Yahoo Finance holders · institutionOwnership.ownershipList[4] Invesco Ltd. (13F as of 2026-06-30)",
+                "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "82/100  grade A",
+              "src": {
+                "label": "I score (gauge; A≥80 B≥60 C≥40 D≥20)",
+                "formula": "clamp((81.80 − 0) / (100 − 0)) × 100 = 82",
+                "inputs": [
+                  {
+                    "label": "Yahoo Finance holders · defaultKeyStatistics.heldPercentInstitutions (fraction × 100)",
+                    "url": "https://finance.yahoo.com/quote/MRVL/holders/"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "Look for increasing sponsorship by quality institutions, but not over-owned. Gauge: % held by institutions over 0..100.",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    },
+    {
+      "id": "m",
+      "title": "M Market direction",
+      "new": false,
+      "badge": "A 100",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "SPY",
+          "rows": [
+            {
+              "label": "SPY close",
+              "value": "771.35",
+              "src": {
+                "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+              }
+            },
+            {
+              "label": "50-day MA",
+              "value": "761.57",
+              "src": {
+                "label": "SPY 50-day simple moving average",
+                "formula": "sum of last 50 closes / 50 = 761.57",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily closes SPY 2026-07-17..2026-09-25 (50 sessions)",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1784251800&period2=1790386200"
+                  }
+                ]
+              }
+            },
+            {
+              "label": "200-day MA",
+              "value": "718.45",
+              "src": {
+                "label": "SPY 200-day simple moving average",
+                "formula": "sum of last 200 closes / 200 = 718.45",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily closes SPY 2025-12-09..2026-09-25 (200 sessions)",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1765247400&period2=1790386200"
+                  }
+                ]
+              }
+            },
+            {
+              "label": "SPY vs MA50",
+              "value": "+9.78",
+              "src": {
+                "label": "SPY − MA50",
+                "formula": "771.35 − 761.57 = +9.78",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                  },
+                  {
+                    "label": "SPY 50-day simple moving average",
+                    "formula": "sum of last 50 closes / 50 = 761.57",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily closes SPY 2026-07-17..2026-09-25 (50 sessions)",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1784251800&period2=1790386200"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "label": "SPY vs MA200",
+              "value": "+52.90",
+              "src": {
+                "label": "SPY − MA200",
+                "formula": "771.35 − 718.45 = +52.90",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                  },
+                  {
+                    "label": "SPY 200-day simple moving average",
+                    "formula": "sum of last 200 closes / 200 = 718.45",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily closes SPY 2025-12-09..2026-09-25 (200 sessions)",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1765247400&period2=1790386200"
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "label": "trend",
+              "value": "uptrend",
+              "src": {
+                "label": "market trend",
+                "formula": "price 771.35 vs MA50 761.57 vs MA200 718.45: price > MA50 > MA200 = uptrend; price < MA50 < MA200 = downtrend; else correction",
+                "inputs": [
+                  {
+                    "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                    "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                  },
+                  {
+                    "label": "SPY 50-day simple moving average",
+                    "formula": "sum of last 50 closes / 50 = 761.57",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily closes SPY 2026-07-17..2026-09-25 (50 sessions)",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1784251800&period2=1790386200"
+                      }
+                    ]
+                  },
+                  {
+                    "label": "SPY 200-day simple moving average",
+                    "formula": "sum of last 200 closes / 200 = 718.45",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily closes SPY 2025-12-09..2026-09-25 (200 sessions)",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1765247400&period2=1790386200"
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Score",
+          "rows": [
+            {
+              "label": "score",
+              "value": "100/100  grade A",
+              "src": {
+                "label": "M score (gauge)",
+                "formula": "trend uptrend: uptrend = 100, correction = 50, downtrend = 0",
+                "inputs": [
+                  {
+                    "label": "market trend",
+                    "formula": "price 771.35 vs MA50 761.57 vs MA200 718.45: price > MA50 > MA200 = uptrend; price < MA50 < MA200 = downtrend; else correction",
+                    "inputs": [
+                      {
+                        "label": "Yahoo daily close SPY 2026-09-25: 771.35",
+                        "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1790299800&period2=1790386200"
+                      },
+                      {
+                        "label": "SPY 50-day simple moving average",
+                        "formula": "sum of last 50 closes / 50 = 761.57",
+                        "inputs": [
+                          {
+                            "label": "Yahoo daily closes SPY 2026-07-17..2026-09-25 (50 sessions)",
+                            "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1784251800&period2=1790386200"
+                          }
+                        ]
+                      },
+                      {
+                        "label": "SPY 200-day simple moving average",
+                        "formula": "sum of last 200 closes / 200 = 718.45",
+                        "inputs": [
+                          {
+                            "label": "Yahoo daily closes SPY 2025-12-09..2026-09-25 (200 sessions)",
+                            "url": "https://finance.yahoo.com/quote/SPY/history/?period1=1765247400&period2=1790386200"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Rule",
+          "text": "Three of four stocks follow the market: buy in a confirmed uptrend, raise cash in corrections. Trend: SPY > MA50 > MA200 = uptrend, SPY < MA50 < MA200 = downtrend, otherwise correction.",
+          "src": {
+            "label": "IBD University · CAN SLIM (William O'Neil)",
+            "url": "https://www.investors.com/ibd-university/can-slim/"
+          }
+        }
+      ]
+    }
+  ]
+}

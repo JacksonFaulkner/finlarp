@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 dependencies = [
     "duckdb>=1.5.5",
     "matplotlib>=3.11.2",
+    "mcp>=1.2",
     "pydantic>=2.9.0",
     "rauth>=0.7.3",
     "requests>=2.34.2",

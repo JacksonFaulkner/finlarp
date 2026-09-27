@@ -597,10 +597,43 @@ function M.pick_search(initial)
   require("custom_plugins.security_spread.ui.search").pick(initial)
 end
 
---- fzf-lua picker over held symbols (from cached transaction history) —
---- selecting one opens its CANSLIM scorecard. Same instant-paint pattern
---- as pick_transactions: uses whatever's cached, no live E*TRADE pull.
-function M.pick_canslim()
+--- Opens the per-ticker research dossier TUI (portfolio_chart `dossier`
+--- screen). Rebuilds services/dossier.py's cache first if it's missing,
+--- older than 12h, or older than the data it's built from; otherwise opens
+--- instantly. Prompts for a symbol if none given.
+--- @param symbol string|nil
+function M.show_dossier(symbol)
+  local function open(sym)
+    sym = sym:upper()
+    local chart = require("custom_plugins.security_spread.ui.portfolio_chart")
+    run("services/dossier.py", { sym, "--if-stale", "12" }, function(ok, data)
+      if not ok then
+        -- still open: the screen explains a missing cache itself
+        vim.notify("security_spread: dossier build failed: " .. tostring(data), vim.log.levels.ERROR)
+      elseif type(data) == "table" and (data.unsourced or 0) > 0 then
+        vim.notify(("security_spread: %s dossier has %d unsourced values"):format(sym, data.unsourced), vim.log.levels.WARN)
+      end
+      chart.open_screen("dossier", sym, { title = " " .. sym .. " dossier " })
+    end)
+  end
+
+  if symbol and symbol ~= "" then
+    open(symbol)
+  else
+    vim.ui.input({ prompt = "Dossier symbol: " }, function(input)
+      if input and input ~= "" then
+        open(input)
+      end
+    end)
+  end
+end
+
+--- fzf-lua picker over held symbols (from cached transaction history).
+--- Same instant-paint pattern as pick_transactions: uses whatever's
+--- cached, no live E*TRADE pull.
+--- @param prompt string
+--- @param on_pick fun(symbol: string)
+local function pick_held(prompt, on_pick)
   local ok, fzf = pcall(require, "fzf-lua")
   if not ok then
     vim.notify("security_spread: fzf-lua not installed", vim.log.levels.ERROR)
@@ -628,16 +661,26 @@ function M.pick_canslim()
     end
 
     fzf.fzf_exec(symbols, {
-      prompt = "CANSLIM> ",
+      prompt = prompt,
       actions = {
         ["default"] = function(selected)
           if selected[1] then
-            M.show_canslim(selected[1])
+            on_pick(selected[1])
           end
         end,
       },
     })
   end)
+end
+
+--- Held-symbol picker -> CANSLIM scorecard.
+function M.pick_canslim()
+  pick_held("CANSLIM> ", M.show_canslim)
+end
+
+--- Held-symbol picker -> research dossier.
+function M.pick_dossier()
+  pick_held("Dossier> ", M.show_dossier)
 end
 
 return M

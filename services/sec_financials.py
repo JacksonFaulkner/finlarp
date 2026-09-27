@@ -433,8 +433,8 @@ def quarterly_series(ticker: str, concepts: str | list[str] = "revenue", unit: s
     """[{fy, fq, start, end, val, concept, derived, ...}] oldest -> newest,
     one per fiscal quarter. Discrete ~3-month facts are used as filed;
     quarters that are only implied (Q4 = FY - 9M, cash-flow YTD tagging)
-    are derived from two cumulative periods sharing a start date and
-    flagged derived=True. Instant concepts return every period-end value.
+    are derived from two cumulative periods sharing a start date, flagged
+    derived=True, with both facts in `derived_from` [longer, shorter]. Instant concepts return every period-end value.
     20-F filers generally have no quarters (only annual/semiannual)."""
     rows = _load(ticker, _parse_concepts(concepts))
     unit = unit or _pick_unit(rows)
@@ -466,7 +466,7 @@ def quarterly_series(ticker: str, concepts: str | list[str] = "revenue", unit: s
                 gap = (b["end"] - a["end"]).days
                 if 80 <= gap <= 100 and b["end"] not in have:
                     have[b["end"]] = b | {"start": a["end"] + timedelta(days=1),
-                                          "val": b["val"] - a["val"], "derived": True}
+                                          "val": b["val"] - a["val"], "derived": True, "parts": (b, a)}
         for end, r in have.items():
             cands.setdefault(end, []).append((pri, r))
     picked = _stitch(cands)
@@ -484,7 +484,13 @@ def quarterly_series(ticker: str, concepts: str | list[str] = "revenue", unit: s
             k = (e - last).days
             fy = _fy_label(last) + 1 + (k - 1) // 371
             fq = min(4, max(1, round((((k - 1) % 371) + 1) / 91.3)))
-        out.append(_out(r, fy=fy, fq=fq, derived=r["derived"]))
+        extra = {}
+        if r["derived"]:  # the two cumulative facts subtracted, so callers can cite both filings
+            extra["derived_from"] = [
+                {"start": x["start"].isoformat(), "end": x["end"].isoformat(), "val": x["val"],
+                 "concept": x["concept"], "filed": x["filed"].isoformat() if x["filed"] else None, "accn": x["accn"]}
+                for x in r["parts"]]
+        out.append(_out(r, fy=fy, fq=fq, derived=r["derived"], **extra))
     return out
 
 

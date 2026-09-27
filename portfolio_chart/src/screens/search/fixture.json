@@ -1,0 +1,137 @@
+{
+ "query": {
+  "id": 1,
+  "terms": [
+   "guidance"
+  ],
+  "results": [
+   {
+    "id": 149731,
+    "ticker": "MRVL",
+    "type": "filing",
+    "section": "mda",
+    "form": "10-K",
+    "date": "2026-03-11",
+    "accn": "0001835632-26-000011",
+    "seq": 28,
+    "text": "On January 5, 2026, the OECD released a comprehensive package of administrative guidance, including the \u201cside-by-side system\u201d that exempts U.S. parented multinational businesses from certain provisions of Pillar Two, specifically the Income Inclusion Rule and the Undertaxed Profits Rule. The OECD guidance provides that the side-by-side system will be effective for fiscal years beginning on or afte",
+    "score": 2.605041868837233,
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/0001835632-26-000011-index.htm"
+   },
+   {
+    "id": 149666,
+    "ticker": "MRVL",
+    "type": "filing",
+    "section": "risk_factors",
+    "form": "10-K",
+    "date": "2026-03-11",
+    "accn": "0001835632-26-000011",
+    "seq": 82,
+    "text": "On January 5, 2026, the OECD released a comprehensive package of administrative guidance, including the \u201cside-by-side system\u201d that exempts U.S. parented multinational businesses from certain provisions of Pillar Two specifically the Income Inclusion Rule and the Undertaxed Profits Rule. The OECD guidance provides that the side-by-side system will be effective for fiscal years beginning on or after",
+    "score": 2.4248673255124964,
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/0001835632-26-000011-index.htm"
+   },
+   {
+    "id": 181329,
+    "ticker": "MRVL",
+    "type": "earnings",
+    "section": "release",
+    "form": "8-K",
+    "date": "2026-05-27",
+    "accn": "0001835632-26-000014",
+    "seq": 1,
+    "text": "Marvell\u2019s financial results include the results of Celestial and XConn for the period from the dates of acquisition through the first quarter of fiscal 2027. \u201cMarvell delivered record first-quarter fiscal 2027 revenue of $2.418 billion, up 28% year-over-year, and guided second-quarter revenue to $2.7 billion at the mid-point, representing 35% year-over-year growth. We expect revenue growth to cont",
+    "score": 2.113483679080959,
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000014/0001835632-26-000014-index.htm"
+   }
+  ],
+  "facets": {
+   "section": [
+    [
+     "risk_factors",
+     8
+    ],
+    [
+     "release",
+     7
+    ],
+    [
+     "mda",
+     3
+    ]
+   ],
+   "ticker": [
+    [
+     "MRVL",
+     22
+    ]
+   ],
+   "type": [
+    [
+     "filing",
+     12
+    ],
+    [
+     "earnings",
+     7
+    ],
+    [
+     "new_risk",
+     3
+    ]
+   ],
+   "year": [
+    [
+     "2026",
+     14
+    ],
+    [
+     "2025",
+     8
+    ]
+   ]
+  },
+  "ms": 280
+ },
+ "get": {
+  "id": 2,
+  "rows": [
+   {
+    "id": 181328,
+    "ticker": "MRVL",
+    "type": "earnings",
+    "section": "release",
+    "form": "8-K",
+    "date": "2026-05-27",
+    "accn": "0001835632-26-000014",
+    "seq": 0,
+    "text": "EX-99.1 2 q127_8kx522026ex-991.htm EXHIBIT 99.1 Exhibit 99.1 Marvell Technology, Inc. Reports First Quarter of Fiscal Year 2027 Financial Results \u2022Q1 Net Revenue: $2.418 billion, a new record, grew by 28% year-on-year \u2022Q1 Gross Margin: 52.1% GAAP gross margin; 58.9% non-GAAP gross margin \u2022Q1 Diluted income per share: $0.04 GAAP diluted income per share; $0.80 non-GAAP diluted income per share Sant",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000014/0001835632-26-000014-index.htm"
+   },
+   {
+    "id": 181329,
+    "ticker": "MRVL",
+    "type": "earnings",
+    "section": "release",
+    "form": "8-K",
+    "date": "2026-05-27",
+    "accn": "0001835632-26-000014",
+    "seq": 1,
+    "text": "Marvell\u2019s financial results include the results of Celestial and XConn for the period from the dates of acquisition through the first quarter of fiscal 2027. \u201cMarvell delivered record first-quarter fiscal 2027 revenue of $2.418 billion, up 28% year-over-year, and guided second-quarter revenue to $2.7 billion at the mid-point, representing 35% year-over-year growth. We expect revenue growth to cont",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000014/0001835632-26-000014-index.htm"
+   },
+   {
+    "id": 181330,
+    "ticker": "MRVL",
+    "type": "earnings",
+    "section": "release",
+    "form": "8-K",
+    "date": "2026-05-27",
+    "accn": "0001835632-26-000014",
+    "seq": 2,
+    "text": "This improved outlook is being driven by strong demand across a broad set of Marvell solutions, including 800G and 1.6T scale-out optics, 51.2T Ethernet scale-out switches, scale-up optical solutions for NPO and CPO applications, scale-across datacenter interconnect modules, and custom XPU and XPU-attach solutions.\u201d Second Quarter of Fiscal 2027 Financial Outlook \u2022Net revenue is expected to be $2.",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000014/0001835632-26-000014-index.htm"
+   }
+  ]
+ }
+}
