@@ -64,6 +64,15 @@ def _conn() -> duckdb.DuckDBPyConnection:
             fetched_at DOUBLE
         )
     """)
+    # Per-ticker research dossier (services/dossier.py) read straight out of
+    # DuckDB by the portfolio_chart `dossier` screen, same as canslim_cache.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS dossier_cache (
+            symbol VARCHAR PRIMARY KEY,
+            dossier_json VARCHAR,
+            fetched_at DOUBLE
+        )
+    """)
     con.execute("""
         CREATE TABLE IF NOT EXISTS edgar_facts_cache (
             symbol VARCHAR PRIMARY KEY,
@@ -258,6 +267,19 @@ def put_cached_history(symbol: str, range_: str, interval: str, points: list[dic
             "ON CONFLICT (symbol, range, interval) DO UPDATE SET "
             "points_json = excluded.points_json, fetched_at = excluded.fetched_at",
             [symbol, range_, interval, json.dumps(points), time.time()],
+        )
+    finally:
+        con.close()
+
+
+def put_cached_dossier(symbol: str, dossier: dict) -> None:
+    con = _conn()
+    try:
+        con.execute(
+            "INSERT INTO dossier_cache VALUES (?, ?, ?) "
+            "ON CONFLICT (symbol) DO UPDATE SET "
+            "dossier_json = excluded.dossier_json, fetched_at = excluded.fetched_at",
+            [symbol, json.dumps(dossier, default=str), time.time()],
         )
     finally:
         con.close()

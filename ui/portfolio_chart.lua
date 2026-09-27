@@ -1,17 +1,34 @@
+-- Launcher for the ratatui binary (portfolio_chart/): one binary, several
+-- screens (chart | canslim | dossier | search), all opened through
+-- M.open_screen. Inside tmux the binary runs in a full-size
+-- `tmux display-popup` (a real terminal pane, no nested libvterm redraw
+-- lag); outside tmux it falls back to a floating :terminal.
+--
+-- Handoff protocol: the binary can't call back into nvim, so when a screen
+-- wants nvim to do something (open a document, a search chunk, another
+-- screen, a picker) it writes one JSON line to $SECURITY_SPREAD_ACTION_FILE
+-- and exits. `display-popup -E` blocks until the popup closes and passes the
+-- binary's exit code through, so the jobstart on_exit here fires then and
+-- M.dispatch runs the action. Exit code 90 is the legacy "back to picker".
+
 local M = {}
 
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h")
 local crate_dir = plugin_dir .. "/portfolio_chart"
 local binary_path = crate_dir .. "/target/release/portfolio_chart"
+local root = "custom_plugins.security_spread"
+
+local EXIT_BACK_TO_PICKER = 90
 
 --- Rebuilds the release binary if any Rust source is newer than it, so
---- editing canslim.rs and reopening the popup picks up the change without
+--- editing a screen and reopening the popup picks up the change without
 --- a manual `cargo build --release` — the stale-binary trap this plugin
 --- kept hitting since nvim just execs whatever's on disk.
 local function ensure_built()
   local bin_mtime = vim.fn.getftime(binary_path) -- -1 if missing
-  local srcs = vim.fn.glob(crate_dir .. "/src/*.rs", false, true)
+  local srcs = vim.fn.glob(crate_dir .. "/src/**/*.rs", false, true)
   table.insert(srcs, crate_dir .. "/Cargo.toml")
+  table.insert(srcs, crate_dir .. "/Cargo.lock")
   local stale = bin_mtime < 0
   for _, f in ipairs(srcs) do
     if vim.fn.getftime(f) > bin_mtime then
@@ -45,68 +62,107 @@ local function hl_hex(name, attr, fallback)
   return string.format("#%06x", val)
 end
 
---- Opens the ratatui portfolio-history binary inside a floating
---- :terminal — a real terminal-rendered TUI nested inside nvim, not an
---- image. Colors are pulled from the current colorscheme so it blends in.
-function M.show()
-  ensure_built()
-  if vim.fn.executable(binary_path) ~= 1 then
-    vim.notify(
-      "security_spread: portfolio_chart binary not built — run `cargo build --release` in "
-      .. plugin_dir .. "/portfolio_chart",
-      vim.log.levels.ERROR
-    )
+--- Calls require(mod)[fn](...) if it exists; notifies instead of erroring
+--- when another part of the plugin hasn't grown that function yet.
+local function call(mod, fn, ...)
+  local ok, m = pcall(require, mod)
+  if not ok or type(m) ~= "table" or type(m[fn]) ~= "function" then
+    vim.notify(("security_spread: %s.%s not available"):format(mod, fn), vim.log.levels.WARN)
     return
   end
-
-  local bg = hl_hex("Normal", "bg", "")
-  local fg_up = hl_hex("SecuritySpreadUp", "fg", "#4d9375")
-  local fg_down = hl_hex("SecuritySpreadDown", "fg", "#c25c5c")
-
-  local width = math.min(100, vim.o.columns - 6)
-  local height = math.min(30, vim.o.lines - 6)
-
-  local buf = vim.api.nvim_create_buf(false, true)
-  vim.bo[buf].bufhidden = "wipe"
-
-  local win = vim.api.nvim_open_win(buf, true, {
-    relative = "editor",
-    row = math.floor((vim.o.lines - height) / 2),
-    col = math.floor((vim.o.columns - width) / 2),
-    width = width,
-    height = height,
-    style = "minimal",
-    border = "rounded",
-    title = " portfolio history ",
-    title_pos = "center",
-    zindex = 100,
-  })
-
-  vim.api.nvim_create_autocmd("TermClose", {
-    buffer = buf,
-    once = true,
-    callback = function()
-      if vim.api.nvim_win_is_valid(win) then
-        vim.api.nvim_win_close(win, true)
-      end
-    end,
-  })
-
-  vim.fn.termopen({ binary_path, bg, fg_up, fg_down })
-  vim.cmd("startinsert")
+  local cok, err = pcall(m[fn], ...)
+  if not cok then
+    vim.notify(("security_spread: %s.%s failed: %s"):format(mod, fn, tostring(err)), vim.log.levels.ERROR)
+  end
 end
 
---- Fallback for when nvim isn't running inside tmux: same floating
---- :terminal approach as M.show(), nested-emulator latency and all.
-local function show_canslim_in_nvim_terminal(symbol, bg, fg_up, fg_down)
-  -- Full editor width/height (minus the border): the scorecard lays out
-  -- four+ side-by-side cards per row and the legends clip at 85%.
+--- Screen name -> how to open it from nvim. Screens that need a fetch
+--- first (canslim) go through init.lua, not straight to open_screen.
+local screens = {
+  chart = function()
+    M.show()
+  end,
+  canslim = function(arg)
+    call(root, "show_canslim", arg)
+  end,
+  dossier = function(arg)
+    call(root, "show_dossier", arg)
+  end,
+  search = function(arg)
+    call(root .. ".ui.search", "pick_tui", arg)
+  end,
+}
+
+--- Runs one NvimAction table ({action = "docview"|"chunk"|"screen"|"picker", ...})
+--- as written by the binary (src/app.rs NvimAction). Public so a
+--- --remote-send fallback can call it too.
+--- @param a table
+function M.dispatch(a)
+  if type(a) ~= "table" then
+    return
+  end
+  if a.action == "docview" then
+    call(root .. ".ui.docview", "open", a.url, a.quote)
+  elseif a.action == "chunk" then
+    call(root .. ".ui.search", "open_chunk", a.id)
+  elseif a.action == "screen" then
+    local open = screens[a.screen]
+    if open then
+      open(a.arg)
+    else
+      vim.notify("security_spread: unknown screen " .. tostring(a.screen), vim.log.levels.WARN)
+    end
+  elseif a.action == "picker" then
+    call(root, "pick_" .. tostring(a.screen))
+  else
+    vim.notify("security_spread: unknown action " .. vim.inspect(a), vim.log.levels.WARN)
+  end
+end
+
+--- Reads and deletes the action file; nil if the binary wrote none.
+local function take_action(path)
+  local f = io.open(path, "r")
+  if not f then
+    return nil
+  end
+  local s = f:read("*a")
+  f:close()
+  os.remove(path)
+  if not s or s == "" then
+    return nil
+  end
+  local ok, a = pcall(vim.json.decode, s, { luanil = { object = true, array = true } })
+  if not ok then
+    vim.notify("security_spread: bad action file: " .. s, vim.log.levels.ERROR)
+    return nil
+  end
+  return a
+end
+
+--- After the binary exits: opts.on_exit(code, action) first, then the
+--- default handling (picker on 90, else dispatch the action).
+local function finish(code, action_file, screen, opts)
+  vim.schedule(function()
+    local action = take_action(action_file)
+    if opts.on_exit then
+      local ok, err = pcall(opts.on_exit, code, action)
+      if not ok then
+        vim.notify("security_spread: on_exit failed: " .. tostring(err), vim.log.levels.ERROR)
+      end
+    end
+    if code == EXIT_BACK_TO_PICKER then
+      call(root, "pick_" .. screen)
+    elseif action then
+      M.dispatch(action)
+    end
+  end)
+end
+
+local function open_in_float(cmd, env, title, on_exit)
   local width = vim.o.columns - 2
   local height = vim.o.lines - vim.o.cmdheight - 3
-
   local buf = vim.api.nvim_create_buf(false, true)
   vim.bo[buf].bufhidden = "wipe"
-
   local win = vim.api.nvim_open_win(buf, true, {
     relative = "editor",
     row = math.floor((vim.o.lines - height) / 2),
@@ -115,84 +171,100 @@ local function show_canslim_in_nvim_terminal(symbol, bg, fg_up, fg_down)
     height = height,
     style = "minimal",
     border = "rounded",
-    title = " " .. symbol .. " canslim ",
+    title = title,
     title_pos = "center",
     zindex = 100,
   })
-
   vim.api.nvim_create_autocmd("TermClose", {
     buffer = buf,
     once = true,
     callback = function()
+      local code = vim.v.event.status
       if vim.api.nvim_win_is_valid(win) then
         vim.api.nvim_win_close(win, true)
       end
+      on_exit(code)
     end,
   })
-
-  vim.fn.termopen({ binary_path, bg, fg_up, fg_down, "canslim", symbol })
+  vim.fn.jobstart(cmd, { term = true, env = env })
   vim.cmd("startinsert")
 end
 
---- Opens the CANSLIM scorecard screen for one symbol. Assumes
---- `uv run services/canslim.py <symbol>` has already been run at least
---- once (cached in canslim_cache) — this just renders whatever's there.
----
---- Prefers a real `tmux display-popup` over nvim's own floating
---- :terminal: nvim's built-in terminal is a fairly naive VT100 emulator
---- (libvterm-based) and redrawing a full-screen ratatui frame — 7 gauge
---- widgets plus borders — on every keypress inside that nested emulator
---- was visibly laggy. A tmux popup is a real terminal pane (same
---- mechanism as the existing <leader>fw sessionx popup), so the rust
---- binary renders directly to it with no nvim redraw path in between.
-function M.show_canslim(symbol)
+--- Opens a screen of the binary.
+--- @param screen string "chart" | "canslim" | "dossier" | "search"
+--- @param arg string|nil screen argument (symbol, query, range)
+--- @param opts table|nil { title = string, on_exit = fun(code: integer, action: table|nil) }
+function M.open_screen(screen, arg, opts)
+  opts = opts or {}
+  screen = screen or "chart"
   ensure_built()
   if vim.fn.executable(binary_path) ~= 1 then
     vim.notify(
-      "security_spread: portfolio_chart binary not built — run `cargo build --release` in "
-      .. plugin_dir .. "/portfolio_chart",
+      "security_spread: portfolio_chart binary not built — run `cargo build --release` in " .. crate_dir,
       vim.log.levels.ERROR
     )
     return
   end
 
-  local bg = hl_hex("Normal", "bg", "")
-  local fg_up = hl_hex("SecuritySpreadUp", "fg", "#4d9375")
-  local fg_down = hl_hex("SecuritySpreadDown", "fg", "#c25c5c")
+  local cmd = {
+    binary_path,
+    hl_hex("Normal", "bg", ""),
+    hl_hex("SecuritySpreadUp", "fg", "#4d9375"),
+    hl_hex("SecuritySpreadDown", "fg", "#c25c5c"),
+    screen,
+  }
+  if arg and arg ~= "" then
+    cmd[#cmd + 1] = arg
+  end
+  local title = opts.title or (" " .. (arg and (arg .. " ") or "") .. screen .. " ")
+  local action_file = vim.fn.tempname()
+  local env = { SECURITY_SPREAD_ACTION_FILE = action_file }
+  if vim.env.SECURITY_SPREAD_DB then
+    env.SECURITY_SPREAD_DB = vim.env.SECURITY_SPREAD_DB
+  end
+  local function on_exit(code)
+    finish(code, action_file, screen, opts)
+  end
 
   if not vim.env.TMUX then
-    show_canslim_in_nvim_terminal(symbol, bg, fg_up, fg_down)
+    open_in_float(cmd, env, title, on_exit)
     return
   end
 
-  local run_binary = table.concat(
-    vim.tbl_map(vim.fn.shellescape, { binary_path, bg, fg_up, fg_down, "canslim", symbol }),
-    " "
-  )
-
-  -- The binary runs in its own tmux pane, outside nvim's process — it
-  -- can't call back into the picker directly. Pressing `s` on the main
-  -- scorecard screen exits it with code 90 as a signal; this wrapper
-  -- watches for that and re-invokes the fzf-lua picker in the parent
-  -- nvim over its RPC server (`--remote-send`) once the pane closes.
-  local servername = vim.v.servername
-  local back_to_picker = ""
-  if servername and servername ~= "" then
-    local remote_send = vim.fn.shellescape(
-      "<Cmd>lua require('custom_plugins.security_spread').pick_canslim()<CR>"
-    )
-    back_to_picker = string.format(
-      "; if [ \"$?\" = \"90\" ]; then %s --server %s --remote-send %s; fi",
-      vim.fn.shellescape(vim.v.progpath), vim.fn.shellescape(servername), remote_send
-    )
+  -- The popup's shell gets the tmux server's environment, not this job's,
+  -- so the env vars go on the command line.
+  local parts = { "env" }
+  for k, v in pairs(env) do
+    parts[#parts + 1] = vim.fn.shellescape(k .. "=" .. v)
   end
-
+  for _, c in ipairs(cmd) do
+    parts[#parts + 1] = vim.fn.shellescape(c)
+  end
+  -- No detach: display-popup -E blocks until the popup closes and exits
+  -- with the binary's code, so on_exit fires exactly then.
   vim.fn.jobstart({
     "tmux", "display-popup", "-E",
     "-w", "100%", "-h", "100%",
-    "-T", " " .. symbol .. " canslim ",
-    run_binary .. back_to_picker,
-  }, { detach = true })
+    "-T", title,
+    table.concat(parts, " "),
+  }, {
+    on_exit = function(_, code)
+      on_exit(code)
+    end,
+  })
+end
+
+--- Portfolio history line chart (reads DuckDB portfolio_history directly).
+--- @param range string|nil "1M" | "3M" | "6M" | "1Y" | "ALL"
+function M.show(range)
+  M.open_screen("chart", range, { title = " portfolio history " })
+end
+
+--- CANSLIM scorecard for one symbol. Assumes `uv run services/canslim.py
+--- <symbol>` has already cached it (init.lua show_canslim does the fetch).
+--- @param symbol string
+function M.show_canslim(symbol)
+  M.open_screen("canslim", symbol, { title = " " .. symbol .. " canslim " })
 end
 
 return M

@@ -25,6 +25,7 @@ local HELP_LINES = {
   " R           toggle auto-refresh (every 2s)",
   " c           CANSLIM scorecard for focused tile",
   " f           search filings for focused tile",
+  " p           research dossier for focused tile",
   " <leader>sf  search filings (all)",
   " <leader>sg  chart selected/focused symbol",
   " <leader>sh  daily % change history",
@@ -377,6 +378,9 @@ local function open_tile(tile, region, name)
   end, { buffer = buf, silent = true })
   vim.keymap.set("n", "f", function()
     require("custom_plugins.security_spread").pick_search("t:" .. tile.item.symbol .. " ")
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "p", function()
+    require("custom_plugins.security_spread").show_dossier(tile.item.symbol)
   end, { buffer = buf, silent = true })
 
   return win

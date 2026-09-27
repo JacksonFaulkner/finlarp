@@ -163,7 +163,8 @@ def ensure_recent(n: int = 6) -> dict[str, int]:
 
 def holdings_sql() -> str:
     """Effective long-share holdings per (cik, period, cusip) as a SQL
-    subquery over the Parquet files."""
+    subquery over the Parquet files. `acc` is the base 13F-HR accession
+    (a NEW HOLDINGS amendment can add rows under a later one)."""
     d = DATA_DIR
     return f"""(
         WITH f AS (
@@ -179,7 +180,8 @@ def holdings_sql() -> str:
             WHERE f.amend_type = 'NEW HOLDINGS' AND f.filed >= b.filed
         ),
         eff AS (SELECT acc, cik, mgr, period FROM base UNION ALL SELECT acc, cik, mgr, period FROM adds)
-        SELECT e.cik, any_value(e.mgr) mgr, e.period, h.cusip, sum(h.sh) sh, sum(h.val) val
+        SELECT e.cik, any_value(e.mgr) mgr, e.period, h.cusip, sum(h.sh) sh, sum(h.val) val,
+               min(e.acc) acc  -- base filing's accession, for linking back to the 13F-HR
         FROM eff e JOIN read_parquet('{d}/holdings/*.parquet') h USING (acc)
         WHERE h.pc IS NULL
         GROUP BY e.cik, e.period, h.cusip

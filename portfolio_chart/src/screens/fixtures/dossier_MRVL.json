@@ -1,0 +1,2485 @@
+{
+ "ticker": "MRVL",
+ "name": "Marvell Technology, Inc.",
+ "industry": "Semiconductors",
+ "country": "United States",
+ "market_cap": 235402199040,
+ "employees": 7480,
+ "header_src": {
+  "label": "Yahoo Finance profile",
+  "url": "https://finance.yahoo.com/quote/MRVL/profile"
+ },
+ "built_at": "2026-09-27T10:13:24",
+ "freshness": [
+  {
+   "source": "events",
+   "pulled": "2026-09-26T16:20"
+  },
+  {
+   "source": "earnings",
+   "pulled": "2026-09-26T16:54"
+  },
+  {
+   "source": "financials",
+   "pulled": "2026-09-26T16:27"
+  },
+  {
+   "source": "segments",
+   "pulled": "2026-09-26T16:21"
+  },
+  {
+   "source": "insiders",
+   "pulled": "2026-09-26T16:11"
+  },
+  {
+   "source": "filing_text",
+   "pulled": "2026-09-26T16:45"
+  },
+  {
+   "source": "patents",
+   "pulled": "2026-09-26T23:52"
+  },
+  {
+   "source": "profiles",
+   "pulled": "2026-09-26T23:42"
+  },
+  {
+   "source": "13f",
+   "pulled": "2026-09-26T15:58"
+  }
+ ],
+ "sections": [
+  {
+   "id": "events",
+   "title": "Events",
+   "blocks": [
+    {
+     "type": "table",
+     "title": "8-K high-signal items, 180 days",
+     "cols": [
+      "filed",
+      "item",
+      "what"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "2026-08-27",
+        "2.02",
+        "Results of Operations and Financial Condition"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 item 2.02",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/mrvl-20260827.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-08-19",
+        "1.01",
+        "Entry into a Material Definitive Agreement"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-19 item 1.01",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000119312526356217/d412696d8k.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-06-11",
+        "5.02",
+        "Departure/Election of Directors or Officers; Compensatory Arrangements"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-06-11 item 5.02",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000119312526267688/d151562d8k.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-05-27",
+        "2.02",
+        "Results of Operations and Financial Condition"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-05-27 item 2.02",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000014/mrvl-20260527.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-15",
+        "1.01",
+        "Entry into a Material Definitive Agreement"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-04-15 item 1.01",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000119312526157134/d123910d8k.htm"
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "earnings",
+   "title": "Earnings & guidance",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Revenue",
+       "value": "$2.739 billion",
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm \u00b7 \"\u2022Q2 Net Revenue: $2.739 billion, a new record, grew by 37% year-on-yea\"",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Q2%20Net%20Revenue%3A%20%242.739%20billion%2C%20a%20new%20record%2C"
+       }
+      },
+      {
+       "label": "EPS GAAP",
+       "value": "$0.33",
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm \u00b7 \"\u2022Q2 Diluted income per share: $0.33 GAAP diluted income per share; $0.\"",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Q2%20Diluted%20income%20per%20share%3A%20%240.33%20GAAP%20diluted"
+       }
+      },
+      {
+       "label": "EPS non-GAAP",
+       "value": "$0.94",
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm \u00b7 \"Non-GAAP net income for the second quarter of fiscal 2027 was $865.9 m\"",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Non-GAAP%20net%20income%20for%20the%20second%20quarter%20of"
+       }
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "title": "Guidance (as written in the release)",
+     "cols": [
+      "line"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "Net revenue is expected to be $3.150 billion +/- 5%."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Net%20revenue%20is%20expected%20to%20be%20%243.150%20billion"
+       }
+      },
+      {
+       "cells": [
+        "GAAP gross margin is expected to be 52.9% to 53.9%."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=GAAP%20gross%20margin%20is%20expected%20to%20be%2052.9%25"
+       }
+      },
+      {
+       "cells": [
+        "Non-GAAP gross margin is expected to be 57.5% to 58.5%."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Non-GAAP%20gross%20margin%20is%20expected%20to%20be%2057.5%25"
+       }
+      },
+      {
+       "cells": [
+        "GAAP operating expenses are expected to be approximately $1.015 billion."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=GAAP%20operating%20expenses%20are%20expected%20to%20be%20approximately"
+       }
+      },
+      {
+       "cells": [
+        "Non-GAAP operating expenses are expected to be approximately $655 million."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Non-GAAP%20operating%20expenses%20are%20expected%20to%20be%20approximately"
+       }
+      },
+      {
+       "cells": [
+        "GAAP diluted net income per share is expected to be $0.53 +/- $0.05 per share."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=GAAP%20diluted%20net%20income%20per%20share%20is%20expected"
+       }
+      },
+      {
+       "cells": [
+        "Non-GAAP diluted net income per share is expected to be $1.10 +/- $0.05 per share."
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Non-GAAP%20diluted%20net%20income%20per%20share%20is%20expected"
+       }
+      },
+      {
+       "cells": [
+        "GAAP net revenue | $3,150 +/- 5%"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=GAAP%20net%20revenue%20%7C%20%243%2C150%20%2B%2F-%205%25"
+       }
+      },
+      {
+       "cells": [
+        "Non-GAAP net revenue | $3,150 +/- 5%"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Non-GAAP%20net%20revenue%20%7C%20%243%2C150%20%2B%2F-%205%25"
+       }
+      },
+      {
+       "cells": [
+        "GAAP diluted net income per share | $0.53 +/- $0.05"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=GAAP%20diluted%20net%20income%20per%20share%20%7C%20%240.53"
+       }
+      },
+      {
+       "cells": [
+        "Non-GAAP diluted net income per share | $1.10 +/- $0.05"
+       ],
+       "new": false,
+       "src": {
+        "label": "8-K 2026-08-27 q227_8kx812026ex-991.htm",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm#:~:text=Non-GAAP%20diluted%20net%20income%20per%20share%20%7C%20%241.10"
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "revenue",
+   "title": "Revenue & segments",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Latest Q2 FY2027",
+       "value": "$2.74B",
+       "src": {
+        "label": "10-Q filed 2026-08-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q2 FY2027",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+       }
+      },
+      {
+       "label": "  YoY",
+       "value": "+36.5%",
+       "src": {
+        "label": "YoY growth",
+        "formula": "2,739.3 / 2,006.1 \u2212 1",
+        "inputs": [
+         {
+          "label": "10-Q filed 2026-08-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q2 FY2027",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+         },
+         {
+          "label": "10-Q filed 2026-08-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q2 FY2026",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+         }
+        ]
+       }
+      },
+      {
+       "label": "FY2026",
+       "value": "$8.19B",
+       "src": {
+        "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2026",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "label": "  YoY",
+       "value": "+42.1%",
+       "src": {
+        "label": "YoY growth",
+        "formula": "8,194.6 / 5,767.3 \u2212 1",
+        "inputs": [
+         {
+          "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2026",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+         },
+         {
+          "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2025",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "series",
+     "title": "Quarterly revenue",
+     "unit": "$M",
+     "points": [
+      {
+       "x": "Q3'25",
+       "y": 1516.1,
+       "src": {
+        "label": "10-Q filed 2025-12-03 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q3 FY2025",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+       }
+      },
+      {
+       "x": "Q4'25",
+       "y": 1817.4,
+       "src": {
+        "label": "Q4 FY2025 derived: no discrete quarterly fact filed",
+        "formula": "[2024-02-04..2025-02-01] 5,767.3 \u2212 [2024-02-04..2024-11-02] 3,949.9",
+        "inputs": [
+         {
+          "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 2024-02-04..2025-02-01",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+         },
+         {
+          "label": "10-Q filed 2025-12-03 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 2024-02-04..2024-11-02",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+         }
+        ]
+       }
+      },
+      {
+       "x": "Q1'26",
+       "y": 1895.3,
+       "src": {
+        "label": "10-Q filed 2026-05-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q1 FY2026",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+       }
+      },
+      {
+       "x": "Q2'26",
+       "y": 2006.1,
+       "src": {
+        "label": "10-Q filed 2026-08-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q2 FY2026",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+       }
+      },
+      {
+       "x": "Q3'26",
+       "y": 2074.5,
+       "src": {
+        "label": "10-Q filed 2025-12-03 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q3 FY2026",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+       }
+      },
+      {
+       "x": "Q4'26",
+       "y": 2218.7,
+       "src": {
+        "label": "Q4 FY2026 derived: no discrete quarterly fact filed",
+        "formula": "[2025-02-02..2026-01-31] 8,194.6 \u2212 [2025-02-02..2025-11-01] 5,975.9",
+        "inputs": [
+         {
+          "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 2025-02-02..2026-01-31",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+         },
+         {
+          "label": "10-Q filed 2025-12-03 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 2025-02-02..2025-11-01",
+          "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000197/mrvl-20251101.htm"
+         }
+        ]
+       }
+      },
+      {
+       "x": "Q1'27",
+       "y": 2417.8,
+       "src": {
+        "label": "10-Q filed 2026-05-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q1 FY2027",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+       }
+      },
+      {
+       "x": "Q2'27",
+       "y": 2739.3,
+       "src": {
+        "label": "10-Q filed 2026-08-28 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 Q2 FY2027",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+       }
+      }
+     ]
+    },
+    {
+     "type": "series",
+     "title": "Annual revenue",
+     "unit": "$M",
+     "points": [
+      {
+       "x": "FY2022",
+       "y": 4462.4,
+       "src": {
+        "label": "10-K filed 2024-03-13 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2022",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563224000009/mrvl-20240203.htm"
+       }
+      },
+      {
+       "x": "FY2023",
+       "y": 5919.6,
+       "src": {
+        "label": "10-K filed 2025-03-12 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2023",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563225000057/mrvl-20250201.htm"
+       }
+      },
+      {
+       "x": "FY2024",
+       "y": 5507.7,
+       "src": {
+        "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2024",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "x": "FY2025",
+       "y": 5767.3,
+       "src": {
+        "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2025",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "x": "FY2026",
+       "y": 8194.6,
+       "src": {
+        "label": "10-K filed 2026-03-11 \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 FY2026",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      }
+     ]
+    },
+    {
+     "type": "bars",
+     "title": "Sales channel (FY ending 2026-01-31)",
+     "unit": "$M",
+     "items": [
+      {
+       "label": "Direct to consumer",
+       "value": 4630.4,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 ContractWithCustomerSalesChannelAxis=SalesChannelDirectlyToConsumerMember",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "label": "Through intermediary",
+       "value": 3564.2,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 ContractWithCustomerSalesChannelAxis=SalesChannelThroughIntermediaryMember",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      }
+     ]
+    },
+    {
+     "type": "bars",
+     "title": "Product / service (FY ending 2026-01-31)",
+     "unit": "$M",
+     "items": [
+      {
+       "label": "Data Center",
+       "value": 6100.3,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 ProductOrServiceAxis=DataCenterMember",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "label": "Communications and Other",
+       "value": 2094.3,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 ProductOrServiceAxis=CommunicationsAndOtherMember",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      }
+     ]
+    },
+    {
+     "type": "bars",
+     "title": "Geography (FY ending 2026-01-31)",
+     "unit": "$M",
+     "items": [
+      {
+       "label": "CN",
+       "value": 2969.9,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 StatementGeographicalAxis=CN",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "label": "Other Countries",
+       "value": 2393.3,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 StatementGeographicalAxis=OtherCountriesMember",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "label": "TW",
+       "value": 1657.3,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 StatementGeographicalAxis=TW",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      },
+      {
+       "label": "US",
+       "value": 1174.1,
+       "src": {
+        "label": "10-K \u00b7 RevenueFromContractWithCustomerExcludingAssessedTax \u00b7 StatementGeographicalAxis=US",
+        "url": "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "holders",
+   "title": "Institutions (13F)",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Holders",
+       "value": "1,519 \u2192 2,178 (+43.4%)",
+       "src": {
+        "label": "count of managers holding",
+        "formula": "13F-HR filings for periods 2026-03-31 and 2026-06-30; only managers that filed both periods; CUSIPs 573874104; top holder dropped if >3.0\u00d7 runner-up (typo filter)",
+        "inputs": [
+         {
+          "label": "SEC Form 13F data sets (2026-03-31)",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
+         },
+         {
+          "label": "SEC Form 13F data sets (2026-06-30)",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
+         }
+        ]
+       }
+      },
+      {
+       "label": "New / exited positions",
+       "value": "767 / 108",
+       "src": {
+        "label": "new = held now not before",
+        "formula": "13F-HR filings for periods 2026-03-31 and 2026-06-30; only managers that filed both periods; CUSIPs 573874104; top holder dropped if >3.0\u00d7 runner-up (typo filter)",
+        "inputs": [
+         {
+          "label": "SEC Form 13F data sets (2026-03-31)",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
+         },
+         {
+          "label": "SEC Form 13F data sets (2026-06-30)",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Shares held",
+       "value": "708.9M \u2192 696.7M (-1.7%)",
+       "src": {
+        "label": "sum of reported shares",
+        "formula": "13F-HR filings for periods 2026-03-31 and 2026-06-30; only managers that filed both periods; CUSIPs 573874104; top holder dropped if >3.0\u00d7 runner-up (typo filter)",
+        "inputs": [
+         {
+          "label": "SEC Form 13F data sets (2026-03-31)",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
+         },
+         {
+          "label": "SEC Form 13F data sets (2026-06-30)",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "title": "Biggest adds",
+     "cols": [
+      "manager",
+      "2026-03-31",
+      "2026-06-30",
+      "\u0394 shares"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "BlackRock, Inc.",
+        "63.84M",
+        "85.64M",
+        "+21.80M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 BlackRock, Inc.",
+        "url": "https://www.sec.gov/Archives/edgar/data/2012383/000201238326003238/0002012383-26-003238-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/2012383/000201238326001841/0002012383-26-001841-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "VANGUARD CAPITAL MANAGEMENT LLC",
+        "39.11M",
+        "57.90M",
+        "+18.79M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 VANGUARD CAPITAL MANAGEMENT LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/2100119/000210011926001527/0002100119-26-001527-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/2100119/000210011926001311/0002100119-26-001311-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "STATE STREET CORP",
+        "23.34M",
+        "41.83M",
+        "+18.50M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 STATE STREET CORP",
+        "url": "https://www.sec.gov/Archives/edgar/data/93751/000009375126000507/0000093751-26-000507-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/93751/000009375126000315/0000093751-26-000315-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "NORGES BANK",
+        "new",
+        "14.20M",
+        "+14.20M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 NORGES BANK",
+        "url": "https://www.sec.gov/Archives/edgar/data/1374170/000137417026000069/0001374170-26-000069-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "PRICE T ROWE ASSOCIATES INC /MD/",
+        "1.70M",
+        "13.83M",
+        "+12.13M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 PRICE T ROWE ASSOCIATES INC /MD/",
+        "url": "https://www.sec.gov/Archives/edgar/data/80255/000008025526000519/0000080255-26-000519-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/80255/000008025526000381/0000080255-26-000381-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "GEODE CAPITAL MANAGEMENT, LLC",
+        "12.58M",
+        "21.13M",
+        "+8.54M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 GEODE CAPITAL MANAGEMENT, LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/1214717/000121471726000008/0001214717-26-000008-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/1214717/000121471726000006/0001214717-26-000006-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "JPMORGAN CHASE & CO",
+        "5.82M",
+        "13.89M",
+        "+8.07M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 JPMORGAN CHASE & CO",
+        "url": "https://www.sec.gov/Archives/edgar/data/19617/000001961726000325/0000019617-26-000325-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/19617/000001961726000225/0000019617-26-000225-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "SG Americas Securities, LLC",
+        "0.74M",
+        "7.80M",
+        "+7.07M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 SG Americas Securities, LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/1313360/000131336026000003/0001313360-26-000003-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/1313360/000131336026000002/0001313360-26-000002-index.htm"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "title": "Biggest cuts",
+     "cols": [
+      "manager",
+      "2026-03-31",
+      "2026-06-30",
+      "\u0394 shares"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "FMR LLC",
+        "131.26M",
+        "56.93M",
+        "-74.32M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 FMR LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/315066/000031506626002260/0000315066-26-002260-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/315066/000031506626001390/0000315066-26-001390-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "VANGUARD PORTFOLIO MANAGEMENT LLC",
+        "33.22M",
+        "21.02M",
+        "-12.20M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 VANGUARD PORTFOLIO MANAGEMENT LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/2100121/000210012126001018/0002100121-26-001018-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/2100121/000210012126000861/0002100121-26-000861-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "AMERIPRISE FINANCIAL INC",
+        "20.84M",
+        "9.10M",
+        "-11.75M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 AMERIPRISE FINANCIAL INC",
+        "url": "https://www.sec.gov/Archives/edgar/data/820027/000119312526351426/0001193125-26-351426-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/820027/000119312526307051/0001193125-26-307051-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "JANE STREET GROUP, LLC",
+        "9.95M",
+        "1.23M",
+        "-8.73M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 JANE STREET GROUP, LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/1595888/000159588826000108/0001595888-26-000108-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/1595888/000159588826000043/0001595888-26-000043-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "FIL Ltd",
+        "9.23M",
+        "1.37M",
+        "-7.86M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 FIL Ltd",
+        "url": "https://www.sec.gov/Archives/edgar/data/318989/000031898926000150/0000318989-26-000150-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/318989/000031898926000089/0000318989-26-000089-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "MILLENNIUM MANAGEMENT LLC",
+        "6.11M",
+        "0.34M",
+        "-5.78M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 MILLENNIUM MANAGEMENT LLC",
+        "url": "https://www.sec.gov/Archives/edgar/data/1273087/000127308726000007/0001273087-26-000007-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/1273087/000127308726000004/0001273087-26-000004-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "FRANKLIN RESOURCES INC",
+        "11.37M",
+        "5.99M",
+        "-5.38M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 FRANKLIN RESOURCES INC",
+        "url": "https://www.sec.gov/Archives/edgar/data/38777/000003877726000222/0000038777-26-000222-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/38777/000003877726000124/0000038777-26-000124-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "cells": [
+        "Boston Partners",
+        "6.17M",
+        "1.75M",
+        "-4.41M"
+       ],
+       "src": {
+        "label": "13F-HR 2026-06-30 \u00b7 Boston Partners",
+        "url": "https://www.sec.gov/Archives/edgar/data/1386060/000138606026000035/0001386060-26-000035-index.htm",
+        "inputs": [
+         {
+          "label": "13F-HR 2026-03-31",
+          "url": "https://www.sec.gov/Archives/edgar/data/1386060/000138606026000017/0001386060-26-000017-index.htm"
+         }
+        ]
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "insiders",
+   "title": "Insiders",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Open-market buys (365d)",
+       "value": "0 \u00b7 $0",
+       "src": {
+        "label": "sum of Form 4 code P",
+        "formula": "\u03a3 value of non-derivative code-P transactions",
+        "inputs": [
+         {
+          "label": "SEC insider transactions data sets, MRVL, last 365 days",
+          "url": "https://www.sec.gov/data-research/sec-markets-data/insider-transactions-data-sets"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Sales (365d)",
+       "value": "19 \u00b7 $36.09M",
+       "src": {
+        "label": "sum of Form 4 code S",
+        "formula": "\u03a3 value of non-derivative code-S transactions",
+        "inputs": [
+         {
+          "label": "Form 4 2026-06-23 \u00b7 Durn Daniel",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026044905/0001628280-26-044905-index.htm"
+         },
+         {
+          "label": "Form 4 2026-06-17 \u00b7 Bharathi Sandeep",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026044030/0001628280-26-044030-index.htm"
+         },
+         {
+          "label": "Form 4 2026-06-16 \u00b7 MURPHY MATTHEW J",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026043503/0001628280-26-043503-index.htm"
+         },
+         {
+          "label": "Form 4 2026-06-01 \u00b7 Koopmans Chris",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026039656/0001628280-26-039656-index.htm"
+         },
+         {
+          "label": "Form 4 2026-05-18 \u00b7 Meintjes Willem A",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026035865/0001628280-26-035865-index.htm"
+         },
+         {
+          "label": "Form 4 2026-05-14 \u00b7 MURPHY MATTHEW J",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026034988/0001628280-26-034988-index.htm"
+         },
+         {
+          "label": "Form 4 2026-05-04 \u00b7 Koopmans Chris",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026029789/0001628280-26-029789-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-21 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026026152/0001628280-26-026152-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-16 \u00b7 Bharathi Sandeep",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026025592/0001628280-26-025592-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-17 \u00b7 MURPHY MATTHEW J",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026025675/0001628280-26-025675-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-16 \u00b7 Meintjes Willem A",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026025578/0001628280-26-025578-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-07 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026024047/0001628280-26-024047-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-06 \u00b7 Koopmans Chris",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023978/0001628280-26-023978-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-02 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023325/0001628280-26-023325-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-02 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023325/0001628280-26-023325-index.htm"
+         },
+         {
+          "label": "Form 4 2026-03-27 \u00b7 Bharathi Sandeep",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026021836/0001628280-26-021836-index.htm"
+         },
+         {
+          "label": "Form 4 2026-03-26 \u00b7 MURPHY MATTHEW J",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026021531/0001628280-26-021531-index.htm"
+         },
+         {
+          "label": "Form 4 2026-01-07 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026001239/0001628280-26-001239-index.htm"
+         },
+         {
+          "label": "Form 4 2025-12-08 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828025055852/0001628280-25-055852-index.htm"
+         }
+        ]
+       }
+      },
+      {
+       "label": "  discretionary (not 10b5-1)",
+       "value": "$5.23M",
+       "src": {
+        "label": "code S without a 10b5-1 plan flag",
+        "formula": "\u03a3 value where is_10b5_1 = false",
+        "inputs": [
+         {
+          "label": "Form 4 2026-06-23 \u00b7 Durn Daniel",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026044905/0001628280-26-044905-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-21 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026026152/0001628280-26-026152-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-07 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026024047/0001628280-26-024047-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-02 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023325/0001628280-26-023325-index.htm"
+         },
+         {
+          "label": "Form 4 2026-04-02 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023325/0001628280-26-023325-index.htm"
+         },
+         {
+          "label": "Form 4 2026-01-07 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026001239/0001628280-26-001239-index.htm"
+         },
+         {
+          "label": "Form 4 2025-12-08 \u00b7 Casper Mark",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828025055852/0001628280-25-055852-index.htm"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "title": "Open-market transactions (bulk data lags 0\u20133 months)",
+     "cols": [
+      "date",
+      "who",
+      "role",
+      "",
+      "shares",
+      "price",
+      "value",
+      "plan"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "2026-06-23",
+        "Durn Daniel",
+        "Chief Financial Officer",
+        "sell",
+        "2,250",
+        "$281.01",
+        "$632.27K",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-06-23 \u00b7 Durn Daniel",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026044905/0001628280-26-044905-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-06-16",
+        "Bharathi Sandeep",
+        "President, Data Center Group",
+        "sell",
+        "2,231",
+        "$299.13",
+        "$667.36K",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-06-17 \u00b7 Bharathi Sandeep",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026044030/0001628280-26-044030-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-06-15",
+        "MURPHY MATTHEW J",
+        "Chairman of the Board and CEO",
+        "sell",
+        "7,500",
+        "$298.76",
+        "$2.24M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-06-16 \u00b7 MURPHY MATTHEW J",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026043503/0001628280-26-043503-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-06-01",
+        "Koopmans Chris",
+        "President and COO",
+        "sell",
+        "10,000",
+        "$205.87",
+        "$2.06M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-06-01 \u00b7 Koopmans Chris",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026039656/0001628280-26-039656-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-05-15",
+        "Meintjes Willem A",
+        "Chief Financial Officer",
+        "sell",
+        "4,000",
+        "$175.24",
+        "$700.96K",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-05-18 \u00b7 Meintjes Willem A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026035865/0001628280-26-035865-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-05-13",
+        "MURPHY MATTHEW J",
+        "Chairman of the Board and CEO",
+        "sell",
+        "7,500",
+        "$177.26",
+        "$1.33M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-05-14 \u00b7 MURPHY MATTHEW J",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026034988/0001628280-26-034988-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-05-01",
+        "Koopmans Chris",
+        "President and COO",
+        "sell",
+        "10,000",
+        "$162.76",
+        "$1.63M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-05-04 \u00b7 Koopmans Chris",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026029789/0001628280-26-029789-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-17",
+        "Casper Mark",
+        "EVP & Chief Legal Officer",
+        "sell",
+        "10,000",
+        "$135.50",
+        "$1.35M",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-21 \u00b7 Casper Mark",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026026152/0001628280-26-026152-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-16",
+        "Bharathi Sandeep",
+        "President, Data Center Group",
+        "sell",
+        "66,892",
+        "$130.35",
+        "$8.72M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-16 \u00b7 Bharathi Sandeep",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026025592/0001628280-26-025592-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-15",
+        "MURPHY MATTHEW J",
+        "Chairman of the Board and CEO",
+        "sell",
+        "7,500",
+        "$134.46",
+        "$1.01M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-17 \u00b7 MURPHY MATTHEW J",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026025675/0001628280-26-025675-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-15",
+        "Meintjes Willem A",
+        "Chief Financial Officer",
+        "sell",
+        "30,000",
+        "$134.01",
+        "$4.02M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-16 \u00b7 Meintjes Willem A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026025578/0001628280-26-025578-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-06",
+        "Casper Mark",
+        "EVP & Chief Legal Officer",
+        "sell",
+        "6,900",
+        "$109.45",
+        "$755.21K",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-07 \u00b7 Casper Mark",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026024047/0001628280-26-024047-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-06",
+        "Koopmans Chris",
+        "President and COO",
+        "sell",
+        "10,000",
+        "$110.24",
+        "$1.10M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-06 \u00b7 Koopmans Chris",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023978/0001628280-26-023978-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-02",
+        "Casper Mark",
+        "EVP & Chief Legal Officer",
+        "sell",
+        "10,854",
+        "$107.01",
+        "$1.16M",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-02 \u00b7 Casper Mark",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023325/0001628280-26-023325-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-04-01",
+        "Casper Mark",
+        "EVP & Chief Legal Officer",
+        "sell",
+        "7,000",
+        "$105.11",
+        "$735.77K",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-04-02 \u00b7 Casper Mark",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026023325/0001628280-26-023325-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-03-26",
+        "Bharathi Sandeep",
+        "President, Data Center Group",
+        "sell",
+        "44,414",
+        "$99.61",
+        "$4.42M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-03-27 \u00b7 Bharathi Sandeep",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026021836/0001628280-26-021836-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-03-26",
+        "MURPHY MATTHEW J",
+        "Chairman of the Board and CEO",
+        "sell",
+        "30,000",
+        "$98.70",
+        "$2.96M",
+        "10b5-1"
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-03-26 \u00b7 MURPHY MATTHEW J",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026021531/0001628280-26-021531-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2026-01-05",
+        "Casper Mark",
+        "EVP & Chief Legal Officer",
+        "sell",
+        "5,000",
+        "$93.08",
+        "$465.40K",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2026-01-07 \u00b7 Casper Mark",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828026001239/0001628280-26-001239-index.htm"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-05",
+        "Casper Mark",
+        "EVP & Chief Legal Officer",
+        "sell",
+        "1,253",
+        "$101.00",
+        "$126.55K",
+        ""
+       ],
+       "new": false,
+       "src": {
+        "label": "Form 4 filed 2025-12-08 \u00b7 Casper Mark",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000162828025055852/0001628280-25-055852-index.htm"
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "risks",
+   "title": "New risk factors",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Risk sentences added / removed vs prior year",
+       "value": "81 / 26",
+       "new": false,
+       "src": {
+        "label": "sentence diff of Item 1A",
+        "formula": "sentences in this 1A not in prior-year 1A",
+        "inputs": [
+         {
+          "label": "10-K filed 2026-03-11",
+          "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+         }
+        ]
+       }
+      },
+      {
+       "label": "AI mentions in annual report",
+       "value": "74",
+       "src": {
+        "label": "10-K filed 2026-03-11",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm"
+       }
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "title": "Most novel added sentences (10-K 2026-03-11)",
+     "cols": [
+      "sentence"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "Further, the current level of capital expenditure (capex) on AI infrastructure may not be sustainable over the long term and a significant reduction in AI-related spending will likely harm our financial results."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=Further%2C%20the%20current%20level%20of%20capital%20expenditure%20%28capex%29"
+       }
+      },
+      {
+       "cells": [
+        "In addition, rapidly evolving technologies, including AI, could change the business needs of our customers in the data center and communications markets in ways we are not yet able to predict."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=In%20addition%2C%20rapidly%20evolving%20technologies%2C%20including%20AI%2C%20could"
+       }
+      },
+      {
+       "cells": [
+        "Rapid advances in artificial intelligence (\u201cAI\u201d) and machine learning (\u201cML\u201d) technologies, including generative AI, could fundamentally alter the semiconductor industry and disrupt our business model and operations."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=Rapid%20advances%20in%20artificial%20intelligence%20%28%E2%80%9CAI%E2%80%9D%29%20and%20machine"
+       }
+      },
+      {
+       "cells": [
+        "AI-driven tools and platforms are increasingly being deployed across the integrated circuit (\u201cIC\u201d) development lifecycle, including in chip architecture design, electronic design automation (\u201cEDA\u201d), layout optimization, verification, testing, and process node development."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=AI-driven%20tools%20and%20platforms%20are%20increasingly%20being%20deployed"
+       }
+      },
+      {
+       "cells": [
+        "AI-driven design tools may lower traditional barriers to entry in the semiconductor industry by enabling new market participants, including technology companies that have not historically engaged in chip design, to develop high-performance, custom semiconductor solutions in-house with reduced reliance on third-party chip suppliers."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=AI-driven%20design%20tools%20may%20lower%20traditional%20barriers%20to"
+       }
+      },
+      {
+       "cells": [
+        "In particular, large cloud computing providers, automotive original equipment manufacturers, and other technology-focused enterprises have already begun investing in proprietary chip design capabilities, and advancements in AI may accelerate this trend."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=In%20particular%2C%20large%20cloud%20computing%20providers%2C%20automotive%20original"
+       }
+      },
+      {
+       "cells": [
+        "AI and ML technologies may enable our existing competitors to achieve design and manufacturing efficiencies that we are unable to match, thereby diminishing or eliminating our current technological or cost advantages."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=AI%20and%20ML%20technologies%20may%20enable%20our%20existing"
+       }
+      },
+      {
+       "cells": [
+        "Competitors that more effectively integrate AI into their IC development workflows may be able to bring products to market faster, at lower cost, or with superior performance characteristics compared to our offerings."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=Competitors%20that%20more%20effectively%20integrate%20AI%20into%20their"
+       }
+      },
+      {
+       "cells": [
+        "AI-generated efficiencies may compress product development cycles across the industry, which could shorten the useful commercial life of our existing products and reduce the return on our research and development investments."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=AI-generated%20efficiencies%20may%20compress%20product%20development%20cycles%20across"
+       }
+      },
+      {
+       "cells": [
+        "As AI tools enable more rapid iteration and optimization of chip designs, customers may expect faster product refresh cycles, placing additional pressure on our research and development resources and potentially leading to accelerated inventory obsolescence."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=As%20AI%20tools%20enable%20more%20rapid%20iteration%20and"
+       }
+      },
+      {
+       "cells": [
+        "Our investment in AI-related capabilities may not yield the anticipated benefits."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=Our%20investment%20in%20AI-related%20capabilities%20may%20not%20yield"
+       }
+      },
+      {
+       "cells": [
+        "Developing, acquiring, or integrating AI-driven tools and talent into our operations will require significant capital expenditures and operational resources, and there is no assurance that these investments will generate a return sufficient to justify their cost."
+       ],
+       "new": false,
+       "src": {
+        "label": "10-K 2026-03-11 \u00b7 Item 1A",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/mrvl-20260131.htm#:~:text=Developing%2C%20acquiring%2C%20or%20integrating%20AI-driven%20tools%20and%20talent"
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "patents",
+   "title": "Patents",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Granted US patents",
+       "value": "8,483 (thru 2025-12-23)",
+       "src": {
+        "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+        "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+       }
+      }
+     ]
+    },
+    {
+     "type": "series",
+     "title": "Grants per year",
+     "unit": "patents",
+     "points": [
+      {
+       "x": "2012",
+       "y": 677,
+       "src": {
+        "label": "MRVL grants in 2012",
+        "formula": "count(patent_id) where grant year = 2012",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2013",
+       "y": 746,
+       "src": {
+        "label": "MRVL grants in 2013",
+        "formula": "count(patent_id) where grant year = 2013",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2014",
+       "y": 822,
+       "src": {
+        "label": "MRVL grants in 2014",
+        "formula": "count(patent_id) where grant year = 2014",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2015",
+       "y": 771,
+       "src": {
+        "label": "MRVL grants in 2015",
+        "formula": "count(patent_id) where grant year = 2015",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2016",
+       "y": 564,
+       "src": {
+        "label": "MRVL grants in 2016",
+        "formula": "count(patent_id) where grant year = 2016",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2017",
+       "y": 503,
+       "src": {
+        "label": "MRVL grants in 2017",
+        "formula": "count(patent_id) where grant year = 2017",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2018",
+       "y": 408,
+       "src": {
+        "label": "MRVL grants in 2018",
+        "formula": "count(patent_id) where grant year = 2018",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2019",
+       "y": 323,
+       "src": {
+        "label": "MRVL grants in 2019",
+        "formula": "count(patent_id) where grant year = 2019",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2020",
+       "y": 311,
+       "src": {
+        "label": "MRVL grants in 2020",
+        "formula": "count(patent_id) where grant year = 2020",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2021",
+       "y": 272,
+       "src": {
+        "label": "MRVL grants in 2021",
+        "formula": "count(patent_id) where grant year = 2021",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2022",
+       "y": 253,
+       "src": {
+        "label": "MRVL grants in 2022",
+        "formula": "count(patent_id) where grant year = 2022",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2023",
+       "y": 264,
+       "src": {
+        "label": "MRVL grants in 2023",
+        "formula": "count(patent_id) where grant year = 2023",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2024",
+       "y": 224,
+       "src": {
+        "label": "MRVL grants in 2024",
+        "formula": "count(patent_id) where grant year = 2024",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2025",
+       "y": 238,
+       "src": {
+        "label": "MRVL grants in 2025",
+        "formula": "count(patent_id) where grant year = 2025",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "series",
+     "title": "AI share of grants (strict, thru 2023)",
+     "unit": "%",
+     "points": [
+      {
+       "x": "2012",
+       "y": 12.2,
+       "src": {
+        "label": "AI share 2012",
+        "formula": "83 AI-flagged / 678 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2013",
+       "y": 13.1,
+       "src": {
+        "label": "AI share 2013",
+        "formula": "98 AI-flagged / 746 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2014",
+       "y": 11.8,
+       "src": {
+        "label": "AI share 2014",
+        "formula": "97 AI-flagged / 822 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2015",
+       "y": 13.0,
+       "src": {
+        "label": "AI share 2015",
+        "formula": "100 AI-flagged / 770 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2016",
+       "y": 19.2,
+       "src": {
+        "label": "AI share 2016",
+        "formula": "108 AI-flagged / 562 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2017",
+       "y": 17.1,
+       "src": {
+        "label": "AI share 2017",
+        "formula": "86 AI-flagged / 503 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2018",
+       "y": 18.9,
+       "src": {
+        "label": "AI share 2018",
+        "formula": "77 AI-flagged / 408 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2019",
+       "y": 12.4,
+       "src": {
+        "label": "AI share 2019",
+        "formula": "40 AI-flagged / 323 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2020",
+       "y": 15.1,
+       "src": {
+        "label": "AI share 2020",
+        "formula": "47 AI-flagged / 311 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2021",
+       "y": 18.4,
+       "src": {
+        "label": "AI share 2021",
+        "formula": "50 AI-flagged / 271 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2022",
+       "y": 22.5,
+       "src": {
+        "label": "AI share 2022",
+        "formula": "57 AI-flagged / 253 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "x": "2023",
+       "y": 19.3,
+       "src": {
+        "label": "AI share 2023",
+        "formula": "51 AI-flagged / 264 grants",
+        "inputs": [
+         {
+          "label": "USPTO AI Patent Dataset 2023_r1 (model predictions, \u22650.93 any-AI)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
+         },
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "bars",
+     "title": "Technology mix, grants 2023+ (WIPO field)",
+     "unit": "patents",
+     "items": [
+      {
+       "label": "Digital communication",
+       "value": 373,
+       "src": {
+        "label": "WIPO 'Digital communication'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Computer technology",
+       "value": 252,
+       "src": {
+        "label": "WIPO 'Computer technology'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Telecommunications",
+       "value": 141,
+       "src": {
+        "label": "WIPO 'Telecommunications'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Basic communication processes",
+       "value": 81,
+       "src": {
+        "label": "WIPO 'Basic communication processes'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Optics",
+       "value": 74,
+       "src": {
+        "label": "WIPO 'Optics'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Semiconductors",
+       "value": 51,
+       "src": {
+        "label": "WIPO 'Semiconductors'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Audio-visual technology",
+       "value": 44,
+       "src": {
+        "label": "WIPO 'Audio-visual technology'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      },
+      {
+       "label": "Measurement",
+       "value": 41,
+       "src": {
+        "label": "WIPO 'Measurement'",
+        "formula": "count of 2023+ grants tagged with this field",
+        "inputs": [
+         {
+          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
+         }
+        ]
+       }
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "title": "Latest grants",
+     "cols": [
+      "granted",
+      "title",
+      "CPC"
+     ],
+     "rows": [
+      {
+       "cells": [
+        "2025-12-23",
+        "Method and apparatus for scheduling packets for transmission",
+        "H04L"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12506676",
+        "url": "https://patents.google.com/patent/US12506676"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-23",
+        "Methods and systems for secure network communication",
+        "H04L"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12506599",
+        "url": "https://patents.google.com/patent/US12506599"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-16",
+        "Printed circuit board via structures with reduced insertion loss distortion",
+        "H05K"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12501549",
+        "url": "https://patents.google.com/patent/US12501549"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-16",
+        "Optimized path selection for multi-path groups",
+        "H04L"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12500835",
+        "url": "https://patents.google.com/patent/US12500835"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-16",
+        "Setup and training of links between host devices and optical modules including menu-based and multi-stage link training",
+        "H04B"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12500668",
+        "url": "https://patents.google.com/patent/US12500668"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-16",
+        "System and method for payment hardware system module (HSM) integration",
+        "G06Q"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12499441",
+        "url": "https://patents.google.com/patent/US12499441"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-16",
+        "System and methods for firmware update mechanism",
+        "G06F"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12498912",
+        "url": "https://patents.google.com/patent/US12498912"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-09",
+        "Handling interface clock rate mismatches between network devices",
+        "H04L"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12494943",
+        "url": "https://patents.google.com/patent/US12494943"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-09",
+        "Preserving access to optical components on a wafer package with sacrificial die",
+        "G02B"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12494403",
+        "url": "https://patents.google.com/patent/US12494403"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-09",
+        "Clock gating for scan shift clock in a mesh clock environment",
+        "G06F"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12493318",
+        "url": "https://patents.google.com/patent/US12493318"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-09",
+        "Preserving access to optical components on a wafer package with sacrificial cap",
+        "G02B"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12493155",
+        "url": "https://patents.google.com/patent/US12493155"
+       }
+      },
+      {
+       "cells": [
+        "2025-12-02",
+        "Method and apparatus for transferring data between a host computer and a solid state memory",
+        "G06F"
+       ],
+       "new": false,
+       "src": {
+        "label": "US12487776",
+        "url": "https://patents.google.com/patent/US12487776"
+       }
+      }
+     ]
+    },
+    {
+     "type": "bars",
+     "title": "Most active inventors, grants 2021+",
+     "unit": "patents",
+     "items": [
+      {
+       "label": "Hongyuan Zhang",
+       "value": 136,
+       "src": {
+        "label": "Google Patents: inventor Hongyuan Zhang",
+        "url": "https://patents.google.com/?inventor=Hongyuan%20Zhang&after=priority:20150101"
+       }
+      },
+      {
+       "label": "Liwen Chu",
+       "value": 103,
+       "src": {
+        "label": "Google Patents: inventor Liwen Chu",
+        "url": "https://patents.google.com/?inventor=Liwen%20Chu&after=priority:20150101"
+       }
+      },
+      {
+       "label": "Hui-Ling Lou",
+       "value": 95,
+       "src": {
+        "label": "Google Patents: inventor Hui-Ling Lou",
+        "url": "https://patents.google.com/?inventor=Hui-Ling%20Lou&after=priority:20150101"
+       }
+      },
+      {
+       "label": "Radhakrishnan L. Nagarajan",
+       "value": 60,
+       "src": {
+        "label": "Google Patents: inventor Radhakrishnan L. Nagarajan",
+        "url": "https://patents.google.com/?inventor=Radhakrishnan%20L.%20Nagarajan&after=priority:20150101"
+       }
+      },
+      {
+       "label": "William Brad Matthews",
+       "value": 57,
+       "src": {
+        "label": "Google Patents: inventor William Brad Matthews",
+        "url": "https://patents.google.com/?inventor=William%20Brad%20Matthews&after=priority:20150101"
+       }
+      },
+      {
+       "label": "Puneet Agarwal",
+       "value": 54,
+       "src": {
+        "label": "Google Patents: inventor Puneet Agarwal",
+        "url": "https://patents.google.com/?inventor=Puneet%20Agarwal&after=priority:20150101"
+       }
+      },
+      {
+       "label": "Rui Cao",
+       "value": 46,
+       "src": {
+        "label": "Google Patents: inventor Rui Cao",
+        "url": "https://patents.google.com/?inventor=Rui%20Cao&after=priority:20150101"
+       }
+      },
+      {
+       "label": "Hong Jik Kim",
+       "value": 45,
+       "src": {
+        "label": "Google Patents: inventor Hong Jik Kim",
+        "url": "https://patents.google.com/?inventor=Hong%20Jik%20Kim&after=priority:20150101"
+       }
+      }
+     ]
+    }
+   ],
+   "new": false,
+   "badge": ""
+  },
+  {
+   "id": "profile",
+   "title": "Profile",
+   "blocks": [
+    {
+     "type": "kv",
+     "rows": [
+      {
+       "label": "Sector / industry",
+       "value": "Technology / Semiconductors",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "Country",
+       "value": "United States",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "Employees",
+       "value": "7,480",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "Website",
+       "value": "https://www.marvell.com",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "CEO & Chairman",
+       "value": "Mr. Matthew J. Murphy",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "President & COO",
+       "value": "Mr. Christopher R. Koopmans",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "CFO, Executive VP & Principal Financial Officer",
+       "value": "Mr. Daniel J. Durn",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      },
+      {
+       "label": "Executive VP, Secretary & Chief Legal Officer",
+       "value": "Mr. Mark J. Casper Esq.",
+       "src": {
+        "label": "Yahoo Finance profile",
+        "url": "https://finance.yahoo.com/quote/MRVL/profile"
+       }
+      }
+     ]
+    },
+    {
+     "type": "text",
+     "text": "Marvell Technology, Inc., together with its subsidiaries, provides data infrastructure semiconductor solutions and spanning the data center core to network edge in the United States, Argentina, China, India, Israel, Japan, Singapore, South Korea, Taiwan, Vietnam, and internationally. The company develops and scales system-on-a-chip architectures, integrating analog, mixed-signal, and digital signal processing functionality. It offers a portfolio of ethernet solutions, including spanning controllers, network adapters, physical transceivers, and switches; single or multiple core processors; and custom application specific integrated circuits, interconnects, fibre channel adapters, and processors. The company also provides interconnect products, including pulse amplitude modulation, coherent and coherent-lite digital signal processors (DSPs), laser drivers, trans-impedance amplifiers, silicon photonics, co-packaged optics, linear pluggable optics chipsets, data center interconnect, active electrical cable DSPs and peripheral component interconnect express retimer solutions; fibre channel products comprising host bus adapters and controllers for server and storage system connectivity; storage controllers for hard disk drives and solid-state-drives; host system interfaces, including serial advanced technology attachment and serial attached SCSI, peripheral component interconnect express, compute express link switches, non-volatile memory express (NVMe), and NVMe over fabrics; and develops ultra accelerator linkTM switches and ethernet for scale-up networking switches. The company serves data centers, communications, and other markets. It offers its products through direct customers and distributors. Marvell Technology, Inc. was incorporated in 1995 and is headquartered in Wilmington, Delaware.",
+     "src": {
+      "label": "Yahoo Finance profile",
+      "url": "https://finance.yahoo.com/quote/MRVL/profile"
+     }
+    }
+   ],
+   "new": false,
+   "badge": ""
+  }
+ ],
+ "unsourced": []
+}
