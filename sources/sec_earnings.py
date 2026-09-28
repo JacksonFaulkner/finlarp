@@ -487,7 +487,7 @@ def ingest_company(stock: dict, st: dict) -> dict:
         cs["reason"] = None if any(v == "ok" for v in seen.values()) else "exhibit_not_found"
     elif sixk:
         hits = 0
-        for cik, accn, form, filed, pdesc in sixk[:MAX_6K_SCAN]:
+        for cik, accn, form, filed, _pdesc in sixk[:MAX_6K_SCAN]:
             if hits >= N_RELEASES:
                 break
             if accn in seen:

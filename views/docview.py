@@ -188,7 +188,7 @@ def _table_md(fragment: str) -> str:
     data = [g for g in grid if any(_NUM.match(c) for c in g[1:])] or grid
     keep = [j for j in range(len(cols)) if j == 0 or any(g[j] for g in data)]   # header-only columns are spacers
     for sp in spans:                                   # re-home text that sat on a dropped column
-        for t, under in sp:
+        for _t, under in sp:
             if under and not any(j in keep for j in under):
                 keep.append(under[0])
     keep.sort()
