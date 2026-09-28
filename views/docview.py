@@ -33,7 +33,6 @@ from urllib.parse import unquote, urljoin, urlparse
 
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sources import universe
 

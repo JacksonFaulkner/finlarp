@@ -13,14 +13,12 @@ from __future__ import annotations
 
 import json
 import os
-import sys
 import threading
 import time
 from pathlib import Path
 
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import db
 from sources.edgar import UA
@@ -31,7 +29,7 @@ ALIASES_PATH = ROOT / "data" / "cik_aliases.json"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 DATA_ROOT = db.DB_PATH.parent / "security_spread"
 
-_RPS = float(os.environ.get("SEC_RPS", "1.5"))
+RPS = float(os.environ.get("SEC_RPS", "1.5"))
 _lock = threading.Lock()
 _last = 0.0
 _session = requests.Session()
@@ -52,7 +50,7 @@ def sec_get(url: str, timeout: int = 60) -> requests.Response:
     global _last
     for attempt in range(5):
         with _lock:
-            wait = _last + 1.0 / _RPS - time.monotonic()
+            wait = _last + 1.0 / RPS - time.monotonic()
             if wait > 0:
                 time.sleep(wait)
             _last = time.monotonic()

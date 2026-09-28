@@ -4,7 +4,7 @@ Reads JSON on stdin: { "series": [ { "symbol": str, "closes": [float, ...] }, ..
 "width_px": int, "height_px": int }. Writes { "path": str } on stdout — the PNG is
 written to a temp file (caller is responsible for cleanup once displayed).
 
-Kept as a separate script from config.py so importing matplotlib (a real
+Kept as a separate script from sources/yahoo.py so importing matplotlib (a real
 startup cost) only happens when a chart is actually opened, not on every quote/
 screen call.
 """

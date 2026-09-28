@@ -18,15 +18,12 @@ Register with Claude Code:
 from __future__ import annotations
 
 import json
-import sys
 from datetime import date, timedelta
-from pathlib import Path
 
 import duckdb
 from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
 from views import search as fts

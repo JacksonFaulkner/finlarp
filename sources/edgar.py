@@ -10,11 +10,9 @@ from __future__ import annotations
 
 import sys
 from datetime import date
-from pathlib import Path
 
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import db
 
@@ -41,7 +39,7 @@ def _session() -> requests.Session:
     return s
 
 
-def _ticker_to_cik(symbol: str) -> int | None:
+def ticker_to_cik(symbol: str) -> int | None:
     cik_map = db.get_cached_edgar_cik_map()
     if cik_map is None:
         resp = _session().get(TICKERS_URL, timeout=15)
@@ -57,7 +55,7 @@ def get_company_facts(symbol: str, use_cache: bool = True) -> dict | None:
         if cached is not None:
             return cached
 
-    cik = _ticker_to_cik(symbol)
+    cik = ticker_to_cik(symbol)
     if cik is None:
         return None
     resp = _session().get(FACTS_URL.format(cik=cik), timeout=15)

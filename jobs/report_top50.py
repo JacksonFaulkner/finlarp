@@ -12,7 +12,6 @@ import concurrent.futures
 import datetime as dt
 import json
 import re
-import sys
 import threading
 import time
 from pathlib import Path
@@ -21,11 +20,10 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[4]
 PLUGIN = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(PLUGIN))
-from models.earnings_scrape import SecurityReportPanels  # noqa: E402
-import config  # noqa: E402
-from sources import universe  # noqa: E402
-from sources.sec_earnings import html_to_text  # noqa: E402
+from models.earnings_scrape import SecurityReportPanels
+from sources import yahoo
+from sources import universe
+from sources.sec_earnings import html_to_text
 
 MODEL = "gpt-6-luna"
 WORKERS = 4  # bounded so Exa stays well below its default QPS ceiling
@@ -373,7 +371,7 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     # This is the repo's named watchlist: Technology, top 50, sorted by market cap.
-    companies = config.cmd_screen(sector="Technology", industry=None, top=50)["quotes"]
+    companies = yahoo.cmd_screen(sector="Technology", industry=None, top=50)["quotes"]
     companies.sort(key=lambda c: c.get("market_cap") or 0, reverse=True)
     summary = []
     failures = []

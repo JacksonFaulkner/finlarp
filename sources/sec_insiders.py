@@ -31,7 +31,6 @@ from pathlib import Path
 
 import duckdb
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sources import universe
 
@@ -78,7 +77,7 @@ def _download(stem: str, url: str) -> Path:
         return dest
     # Stream the zip with the shared session; one request, so a plain
     # throttle sleep is enough to stay inside the shared SEC budget.
-    time.sleep(1.0 / universe._RPS)
+    time.sleep(1.0 / universe.RPS)
     part = dest.with_suffix(".part")
     try:
         with universe._session.get(url, timeout=600, stream=True) as resp:

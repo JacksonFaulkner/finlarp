@@ -29,7 +29,6 @@ from pathlib import Path
 
 import duckdb
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sources import universe
 
