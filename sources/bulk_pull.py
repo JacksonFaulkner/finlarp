@@ -21,7 +21,6 @@ from pathlib import Path
 
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from sources.edgar import UA
 from sources.universe import data_dir

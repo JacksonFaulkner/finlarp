@@ -37,12 +37,10 @@ import re
 import sys
 import time
 from datetime import date, datetime, timedelta
-from pathlib import Path
 from urllib.parse import quote
 
 import duckdb
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import db
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe

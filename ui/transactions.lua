@@ -1,6 +1,6 @@
 local M = {}
 
---- @param t table one transaction from etrade_client.py's cmd_transactions
+--- @param t table one transaction from sources/etrade.py's cmd_transactions
 --- @return string fzf-lua row: fixed-width columns so alignment stays fuzzy-searchable
 local function format_row(t)
   local date = t.date and os.date("%Y-%m-%d %H:%M:%S", math.floor(t.date / 1000)) or "?"

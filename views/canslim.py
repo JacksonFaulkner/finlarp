@@ -20,11 +20,9 @@ from __future__ import annotations
 import json
 import sys
 from datetime import date, datetime, timezone
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import config
+from sources import yahoo
 import db
 import sources.edgar as edgar
 from models.canslim import (
@@ -140,7 +138,7 @@ class SecFacts:
         self.facts = None
         self.docs: dict[str, str] = {}
         try:
-            self.cik = edgar._ticker_to_cik(symbol)
+            self.cik = edgar.ticker_to_cik(symbol)
             self.facts = edgar.get_company_facts(symbol)
         except Exception:
             return
@@ -299,11 +297,11 @@ def _growth(cur: float, prior: float, label: str, s_cur: dict, s_prior: dict) ->
 
 def _fetch_scorecard(symbol: str) -> CanslimScorecard:
     S = symbol
-    session = config._session()
-    crumb = config._crumb(session)
+    session = yahoo.new_session()
+    crumb = yahoo.get_crumb(session)
     qs = _quote_summary(session, crumb, symbol)
-    hist = config.cmd_history(symbol, "1y", "1d")["points"]
-    spy_hist = config.cmd_history("SPY", "1y", "1d")["points"]
+    hist = yahoo.cmd_history(symbol, "1y", "1d")["points"]
+    spy_hist = yahoo.cmd_history("SPY", "1y", "1d")["points"]
 
     et = qs.get("earningsTrend", {}).get("trend", [])
     current_trend = et[0] if et else {}

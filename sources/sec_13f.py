@@ -29,7 +29,6 @@ from pathlib import Path
 import duckdb
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import db
 from sources.edgar import UA

@@ -5,7 +5,7 @@ local env_file = plugin_dir .. "/.env"
 
 local run -- forward-declared: start_reauth retries through `run` itself
 
---- E*TRADE's token expired and nvim isn't a TTY etrade_client.py can block
+--- E*TRADE's token expired and nvim isn't a TTY sources/etrade.py can block
 --- on for input() — it hands back an `auth_required` payload instead of
 --- erroring, and this drives the two-step login: open the browser (you
 --- look at the page yourself and copy the code), then an explicit
@@ -28,7 +28,7 @@ local function start_reauth(decoded, retry)
       vim.notify("security_spread: re-auth cancelled", vim.log.levels.WARN)
       return
     end
-    run("etrade_client.py", { "auth_finish", decoded.request_token, decoded.request_token_secret, code },
+    run("sources/etrade.py", { "auth_finish", decoded.request_token, decoded.request_token_secret, code },
       function(fok, fdata)
         if not fok then
           vim.notify("security_spread: re-auth failed: " .. tostring(fdata), vim.log.levels.ERROR)
@@ -41,10 +41,10 @@ local function start_reauth(decoded, retry)
 end
 
 --- Runs `uv run <script> <args>` async and decodes the JSON stdout. If the
---- script is etrade_client.py and the cached token expired, transparently
+--- script is sources/etrade.py and the cached token expired, transparently
 --- drives the re-auth flow and retries the original call once it succeeds
 --- — callers never see an auth failure, just a slower first response.
---- @param script string e.g. "etrade_client.py" or "config.py"
+--- @param script string e.g. "sources/etrade.py" or "sources/yahoo.py"
 --- @param args string[] extra CLI args, e.g. { "quote", "AAPL,MSFT" }
 --- @param callback fun(ok: boolean, data_or_err: any)
 run = function(script, args, callback)
@@ -76,7 +76,7 @@ end
 
 --- @param callback fun(ok: boolean, positions_or_err: any)
 function M.positions(callback)
-  run("etrade_client.py", { "positions" }, function(ok, data)
+  run("sources/etrade.py", { "positions" }, function(ok, data)
     if ok then
       callback(true, data.positions)
     else
@@ -89,7 +89,7 @@ end
 --- last live `positions` pull. `callback` gets nil if nothing's cached yet.
 --- @param callback fun(ok: boolean, positions_or_err: any)
 function M.positions_cached(callback)
-  run("etrade_client.py", { "positions_cached" }, function(ok, data)
+  run("sources/etrade.py", { "positions_cached" }, function(ok, data)
     if ok then
       callback(true, data.positions)
     else
@@ -100,7 +100,7 @@ end
 
 --- @param callback fun(ok: boolean, orders_or_err: any)
 function M.orders(callback)
-  run("etrade_client.py", { "orders" }, function(ok, data)
+  run("sources/etrade.py", { "orders" }, function(ok, data)
     if ok then
       callback(true, data.orders)
     else
@@ -111,7 +111,7 @@ end
 
 --- @param callback fun(ok: boolean, transactions_or_err: any)
 function M.transactions(callback)
-  run("etrade_client.py", { "transactions" }, function(ok, data)
+  run("sources/etrade.py", { "transactions" }, function(ok, data)
     if ok then
       callback(true, data.transactions)
     else
@@ -123,7 +123,7 @@ end
 --- Local-only read (no network/OAuth) from the DuckDB cache — instant.
 --- @param callback fun(ok: boolean, transactions_or_err: any)
 function M.transactions_cached(callback)
-  run("etrade_client.py", { "transactions_cached" }, function(ok, data)
+  run("sources/etrade.py", { "transactions_cached" }, function(ok, data)
     if ok then
       callback(true, data.transactions)
     else
@@ -135,7 +135,7 @@ end
 --- @param symbols string[] e.g. { "AAPL", "MSFT" }
 --- @param callback fun(ok: boolean, quotes_or_err: any)
 function M.quote(symbols, callback)
-  run("etrade_client.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
+  run("sources/etrade.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
     if ok then
       callback(true, data.quotes)
     else
@@ -147,7 +147,7 @@ end
 --- @param symbols string[] e.g. { "NVDA", "AMD" }
 --- @param callback fun(ok: boolean, quotes_or_err: any)
 function M.quote_yahoo(symbols, callback)
-  run("config.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
+  run("sources/yahoo.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
     if ok then
       callback(true, data.quotes)
     else
@@ -171,7 +171,7 @@ function M.screen_yahoo(filters, callback)
   if filters.top then
     vim.list_extend(args, { "--top", tostring(filters.top) })
   end
-  run("config.py", args, function(ok, data)
+  run("sources/yahoo.py", args, function(ok, data)
     if ok then
       callback(true, data.quotes)
     else
@@ -182,7 +182,7 @@ end
 
 --- @param callback fun(ok: boolean, groups_or_err: any) groups: { { level, category, parent, count } }
 function M.universe_groups(callback)
-  run("config.py", { "universe", "groups" }, function(ok, data)
+  run("sources/yahoo.py", { "universe", "groups" }, function(ok, data)
     if ok then
       callback(true, data.groups)
     else
@@ -195,7 +195,7 @@ end
 --- @param category string
 --- @param callback fun(ok: boolean, members_or_err: any) members: { { ticker, name, weight } }
 function M.universe_members(level, category, callback)
-  run("config.py", { "universe", "members", level, category }, function(ok, data)
+  run("sources/yahoo.py", { "universe", "members", level, category }, function(ok, data)
     if ok then
       callback(true, data.members)
     else
@@ -207,7 +207,7 @@ end
 --- @param symbol string e.g. "NVDA"
 --- @param callback fun(ok: boolean, points_or_err: any) points: { { t, close }, ... }
 function M.history_yahoo(symbol, callback)
-  run("config.py", { "history", symbol }, function(ok, data)
+  run("sources/yahoo.py", { "history", symbol }, function(ok, data)
     if ok then
       callback(true, data.points)
     else
@@ -223,12 +223,12 @@ end
 --- @param height_px integer
 --- @param callback fun(ok: boolean, path_or_err: any)
 function M.render_chart(series, width_px, height_px, callback)
-  local cmd = { "uv", "run", "--env-file", env_file, "chart_render.py" }
+  local cmd = { "uv", "run", "--env-file", env_file, "views/chart_render.py" }
   local payload = vim.json.encode({ series = series, width_px = width_px, height_px = height_px })
   vim.system(cmd, { cwd = plugin_dir, text = true, stdin = payload }, function(result)
     vim.schedule(function()
       if result.code ~= 0 then
-        callback(false, result.stderr ~= "" and result.stderr or "chart_render.py exited " .. result.code)
+        callback(false, result.stderr ~= "" and result.stderr or "views/chart_render.py exited " .. result.code)
         return
       end
       local ok, decoded = pcall(vim.json.decode, result.stdout)
@@ -558,7 +558,7 @@ end
 --- binary (portfolio_chart/), run inside a floating :terminal so it's
 --- genuinely rendered by the terminal, not an image. It reads DuckDB
 --- directly (no JSON handoff) for the day_change_pct/total_value series
---- that etrade_client.py's cmd_positions upserts on every live `$` refresh.
+--- that sources/etrade.py's cmd_positions upserts on every live `$` refresh.
 function M.show_portfolio_history()
   require("custom_plugins.security_spread.ui.portfolio_chart").show()
 end

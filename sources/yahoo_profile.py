@@ -11,16 +11,13 @@ a legal long name, sector/industry, country, website and business summary.
 from __future__ import annotations
 
 import json
-import sys
 import time
-from pathlib import Path
 from urllib.parse import urlparse
 
 import duckdb
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import config
+from sources import yahoo
 from sources import universe
 
 OUT = universe.data_dir("profiles")
@@ -64,8 +61,8 @@ def row(ticker: str, res: dict) -> dict:
 
 
 def main() -> None:
-    session = config._session()
-    crumb = config._crumb(session)
+    session = yahoo.new_session()
+    crumb = yahoo.get_crumb(session)
     rows, missing = [], []
     for s in universe.stocks():
         res = fetch(session, crumb, s["ticker"])

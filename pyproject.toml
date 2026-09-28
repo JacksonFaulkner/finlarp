@@ -1,7 +1,7 @@
 [project]
 name = "security-spread"
 version = "0.1.0"
-description = "Add your description here"
+description = "SEC/market data pipeline behind the security_spread nvim plugin"
 requires-python = ">=3.12"
 dependencies = [
     "duckdb>=1.5.5",
@@ -11,3 +11,13 @@ dependencies = [
     "rauth>=0.7.3",
     "requests>=2.34.2",
 ]
+
+# Editable install puts the plugin root on sys.path (hatch dev-mode-dirs
+# default), so any script can `import db` / `from sources import ...`
+# without a sys.path hack, whatever its own directory or cwd.
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["sources", "views", "jobs", "models"]

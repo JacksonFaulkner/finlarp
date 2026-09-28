@@ -7,7 +7,7 @@ your stock holdings (from Bought/Sold/Stock Split quantities) and your
 cash balance (every transaction's `amount` is E*TRADE's own signed cash
 effect — buys negative, sells/dividends/interest/transfers positive —
 so summing it chronologically IS the cash balance). Total account value
-is cash + stock value, matching what etrade_client.py's live cmd_positions
+is cash + stock value, matching what sources/etrade.py's live cmd_positions
 pulls from balance.json for "today". Online Transfer amounts (deposits/
 withdrawals) are excluded from the day-over-day % change — adding money
 isn't a gain.
@@ -21,12 +21,10 @@ from __future__ import annotations
 import sys
 import time
 from collections import defaultdict
-from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import db
-import config
+from sources import yahoo
 
 SHARE_AFFECTING_TYPES = {"Bought", "Sold", "Stock Split"}
 
@@ -38,7 +36,7 @@ def _epoch_ms_to_date(ms: int) -> str:
 def main() -> None:
     transactions = db.get_all_cached_transactions()
     if not transactions:
-        print("no cached transactions — run `uv run etrade_client.py transactions` first", file=sys.stderr)
+        print("no cached transactions — run `uv run sources/etrade.py transactions` first", file=sys.stderr)
         sys.exit(1)
     transactions = [t for t in transactions if t.get("date")]
     transactions.sort(key=lambda t: t["date"])
@@ -81,7 +79,7 @@ def main() -> None:
     closes_by_symbol: dict[str, dict[str, float]] = {}
     for symbol in symbols:
         try:
-            result = config.cmd_history(symbol, "2y", "1d")
+            result = yahoo.cmd_history(symbol, "2y", "1d")
         except Exception as e:
             print(f"  skipping {symbol}: {e}", file=sys.stderr)
             continue

@@ -1,9 +1,9 @@
 """E*TRADE data client: cached OAuth1 session, JSON on stdout.
 
 Usage:
-    uv run etrade_client.py positions
-    uv run etrade_client.py orders
-    uv run etrade_client.py quote AAPL,MSFT
+    uv run sources/etrade.py positions
+    uv run sources/etrade.py orders
+    uv run sources/etrade.py quote AAPL,MSFT
 
 Requires PROD_KEY / PROD_SECRET in the environment (see .env at repo root).
 Access token is cached at ~/.local/share/nvim/etrade_token.json. Every run
@@ -367,14 +367,14 @@ def cmd_transactions(session) -> dict:
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("usage: etrade_client.py <positions|orders|transactions|quote SYMBOLS|auth_finish TOKEN SECRET CODE>", file=sys.stderr)
+        print("usage: sources/etrade.py <positions|orders|transactions|quote SYMBOLS|auth_finish TOKEN SECRET CODE>", file=sys.stderr)
         sys.exit(1)
 
     cmd = sys.argv[1]
 
     if cmd == "auth_finish":
         if len(sys.argv) < 5:
-            print("usage: etrade_client.py auth_finish REQUEST_TOKEN REQUEST_TOKEN_SECRET CODE", file=sys.stderr)
+            print("usage: sources/etrade.py auth_finish REQUEST_TOKEN REQUEST_TOKEN_SECRET CODE", file=sys.stderr)
             sys.exit(1)
         finish_login(sys.argv[2], sys.argv[3], sys.argv[4])
         print(json.dumps({"ok": True}))
@@ -438,7 +438,7 @@ def _dispatch(cmd: str, session) -> dict:
         return cmd_orders(session)
     if cmd == "quote":
         if len(sys.argv) < 3:
-            print("usage: etrade_client.py quote SYMBOL1,SYMBOL2", file=sys.stderr)
+            print("usage: sources/etrade.py quote SYMBOL1,SYMBOL2", file=sys.stderr)
             sys.exit(1)
         return cmd_quote(session, sys.argv[2])
     if cmd == "transactions":

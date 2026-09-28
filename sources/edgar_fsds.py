@@ -25,10 +25,9 @@ from pathlib import Path
 
 import requests
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import db
-from sources.edgar import REVENUE_CONCEPTS, UA, _ticker_to_cik
+from sources.edgar import REVENUE_CONCEPTS, UA, ticker_to_cik
 
 ZIP_URL = "https://www.sec.gov/files/dera/data/financial-statement-data-sets/{quarter}.zip"
 CACHE_DIR = db.DB_PATH.parent / "edgar_fsds"
@@ -171,7 +170,7 @@ def ensure_recent(n: int = 8) -> dict[str, int]:
 
 
 def get_segment_revenue(symbol: str) -> list[dict]:
-    cik = _ticker_to_cik(symbol)
+    cik = ticker_to_cik(symbol)
     if cik is None:
         return []
     return db.get_segment_revenue(cik)

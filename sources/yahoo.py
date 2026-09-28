@@ -5,8 +5,8 @@ crumb, obtained via a throwaway cookie+crumb handshake (cached in-memory
 per invocation, cheap enough to redo each run).
 
 Usage:
-    uv run config.py quote AAPL,MSFT
-    uv run config.py screen --sector Technology --industry "Semiconductors" --top 25
+    uv run sources/yahoo.py quote AAPL,MSFT
+    uv run sources/yahoo.py screen --sector Technology --industry "Semiconductors" --top 25
 """
 
 from __future__ import annotations
@@ -33,7 +33,7 @@ CRUMB_CACHE_PATH = Path(os.path.expanduser("~/.local/share/nvim/yahoo_crumb.json
 CRUMB_CACHE_TTL_SECONDS = 12 * 60 * 60
 
 
-def _session() -> requests.Session:
+def new_session() -> requests.Session:
     s = requests.Session()
     s.headers["User-Agent"] = UA
     return s
@@ -46,7 +46,7 @@ def _fetch_crumb(session: requests.Session) -> tuple[str, dict]:
     return resp.text, requests.utils.dict_from_cookiejar(session.cookies)
 
 
-def _crumb(session: requests.Session) -> str:
+def get_crumb(session: requests.Session) -> str:
     if CRUMB_CACHE_PATH.exists():
         cached = json.loads(CRUMB_CACHE_PATH.read_text())
         if time.time() - cached.get("fetched_at", 0) < CRUMB_CACHE_TTL_SECONDS:
@@ -64,7 +64,7 @@ def _crumb(session: requests.Session) -> str:
 
 
 def cmd_quote(symbols: str) -> dict:
-    session = _session()
+    session = new_session()
     # /v7/finance/spark batches all symbols into one request (no auth needed),
     # unlike /v8/finance/chart which is one request per symbol — that serial
     # loop was the main source of dashboard-open latency (~400ms/symbol).
@@ -99,7 +99,7 @@ def cmd_history(symbol: str, range_: str, interval: str) -> dict:
     if cached is not None:
         return {"symbol": symbol, "points": cached}
 
-    session = _session()
+    session = new_session()
     resp = session.get(
         f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}",
         params={"range": range_, "interval": interval},
@@ -130,8 +130,8 @@ def _screen_request(session: requests.Session, crumb: str, body: dict) -> dict:
 
 
 def cmd_screen(sector: str | None, industry: str | None, top: int) -> dict:
-    session = _session()
-    crumb = _crumb(session)
+    session = new_session()
+    crumb = get_crumb(session)
 
     operands = [{"operator": "eq", "operands": ["region", "us"]}]
     if sector:
