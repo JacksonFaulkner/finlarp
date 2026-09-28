@@ -10,6 +10,7 @@
 //      SECURITY_SPREAD_ACTION_FILE receives an NvimAction on handoff (app.rs).
 
 mod app;
+mod db;
 mod model;
 mod screens;
 mod ui;
@@ -78,6 +79,10 @@ fn main() {
         Ok(code) => std::process::exit(code),
         Err(e) => {
             eprintln!("portfolio_chart: {e}");
+            // stderr dies with the popup/float; hand the message to nvim too
+            if let Ok(path) = env::var(app::ACTION_FILE_ENV) {
+                let _ = std::fs::write(path, serde_json::json!({ "error": e.to_string() }).to_string());
+            }
             std::process::exit(1);
         }
     }

@@ -9,10 +9,27 @@
 //             row, cell group, point or bar carries its own Source.
 //   Section — a titled list of Blocks (one entry in a screen's nav list).
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize};
+
+// Python writes JSON null where a value is missing (e.g. an unnamed patent
+// inventor); `#[serde(default)]` only covers an *absent* key, and one null
+// String anywhere made the whole dossier fail to load. These treat null
+// (and null list elements) as empty.
+fn null_str<'de, D: Deserializer<'de>>(d: D) -> Result<String, D::Error> {
+    Ok(Option::<String>::deserialize(d)?.unwrap_or_default())
+}
+
+fn null_strs<'de, D: Deserializer<'de>>(d: D) -> Result<Vec<String>, D::Error> {
+    Ok(Option::<Vec<Option<String>>>::deserialize(d)?
+        .unwrap_or_default()
+        .into_iter()
+        .map(Option::unwrap_or_default)
+        .collect())
+}
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq)]
 pub struct Source {
+    #[serde(default, deserialize_with = "null_str")]
     pub label: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub url: Option<String>,
@@ -86,6 +103,7 @@ impl Source {
 /// A table row: cells left to right, one Source for the row.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Row {
+    #[serde(default, deserialize_with = "null_strs")]
     pub cells: Vec<String>,
     /// Flagged as recent (< 30 days) by the producer; drawn with a ● marker.
     #[serde(default)]
@@ -96,7 +114,9 @@ pub struct Row {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct KvRow {
+    #[serde(default, deserialize_with = "null_str")]
     pub label: String,
+    #[serde(default, deserialize_with = "null_str")]
     pub value: String,
     #[serde(default)]
     pub new: bool,
@@ -106,6 +126,7 @@ pub struct KvRow {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Point {
+    #[serde(default, deserialize_with = "null_str")]
     pub x: String,
     /// None = missing observation (drawn as a gap, never as zero).
     pub y: Option<f64>,
@@ -115,6 +136,7 @@ pub struct Point {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct BarItem {
+    #[serde(default, deserialize_with = "null_str")]
     pub label: String,
     pub value: f64,
     /// Optional comparison value drawn beside `value` (e.g. EPS estimate vs actual).
@@ -128,33 +150,35 @@ pub struct BarItem {
 #[serde(tag = "type", rename_all = "lowercase")]
 pub enum Block {
     Table {
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         title: String,
+        #[serde(default, deserialize_with = "null_strs")]
         cols: Vec<String>,
         rows: Vec<Row>,
     },
     Kv {
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         title: String,
         rows: Vec<KvRow>,
     },
     Series {
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         title: String,
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         unit: String,
         points: Vec<Point>,
     },
     Bars {
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         title: String,
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         unit: String,
         items: Vec<BarItem>,
     },
     Text {
-        #[serde(default)]
+        #[serde(default, deserialize_with = "null_str")]
         title: String,
+        #[serde(default, deserialize_with = "null_str")]
         text: String,
         #[serde(default)]
         src: Option<Source>,
@@ -201,10 +225,12 @@ impl Block {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Section {
+    #[serde(default, deserialize_with = "null_str")]
     pub id: String,
+    #[serde(default, deserialize_with = "null_str")]
     pub title: String,
     /// Compact label for tab strips when `title` doesn't fit ("C Earnings").
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_str")]
     pub short: String,
     #[serde(default)]
     pub blocks: Vec<Block>,
@@ -212,7 +238,7 @@ pub struct Section {
     #[serde(default)]
     pub new: bool,
     /// Short right-aligned note in the nav list ("3 new", "A+").
-    #[serde(default)]
+    #[serde(default, deserialize_with = "null_str")]
     pub badge: String,
 }
 

@@ -149,11 +149,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
 }
 
 fn load_json(db_path: &Path, symbol: &str) -> Result<Option<String>, String> {
-    let cfg = duckdb::Config::default()
-        .access_mode(duckdb::AccessMode::ReadOnly)
-        .map_err(|e| e.to_string())?;
-    let conn = duckdb::Connection::open_with_flags(db_path, cfg)
-        .map_err(|e| format!("can't open {}: {e}", db_path.display()))?;
+    let conn = crate::db::open_read_only(db_path)?;
     let mut stmt = match conn.prepare("SELECT dossier_json FROM dossier_cache WHERE symbol = ?") {
         Ok(s) => s,
         Err(_) => return Ok(None), // table not created yet = nothing cached

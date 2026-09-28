@@ -429,7 +429,7 @@ def sec_patents_(t: str, con) -> dict | None:
         WHERE m.date >= DATE '2021-01-01' GROUP BY 1 ORDER BY n DESC LIMIT 8""").fetchall()
     if inv:
         blocks.append({"type": "bars", "title": "Most active inventors, grants 2021+", "unit": "patents", "items": [
-            {"label": n, "value": k, "src": src(f"Google Patents: inventor {n}",
+            {"label": n or "(unnamed)", "value": k, "src": src(f"Google Patents: inventor {n}",
                                                 f"https://patents.google.com/?inventor={quote(n or '')}&after=priority:20150101")}
             for n, k in inv]})
     return {"id": "patents", "title": "Patents", "blocks": blocks}

@@ -182,11 +182,7 @@ fn money(v: f64) -> String {
 }
 
 fn load_history(path: &Path) -> Result<Vec<Snapshot>, String> {
-    let cfg = duckdb::Config::default()
-        .access_mode(duckdb::AccessMode::ReadOnly)
-        .map_err(|e| e.to_string())?;
-    let conn = duckdb::Connection::open_with_flags(path, cfg)
-        .map_err(|e| format!("{}: {e}", path.display()))?;
+    let conn = crate::db::open_read_only(path)?;
     let mut stmt = conn
         .prepare("SELECT CAST(date AS VARCHAR), total_value FROM portfolio_history ORDER BY date")
         .map_err(|e| e.to_string())?;
