@@ -15,7 +15,7 @@ local run -- forward-declared: start_reauth retries through `run` itself
 --- actually type/paste into the prompt yourself.
 --- @param decoded table { authorize_url, request_token, request_token_secret }
 --- @param retry fun() re-runs the original call once login completes
-local function start_reauth(decoded, retry)
+local function start_reauth(decoded, retry, fail)
   vim.notify("security_spread: E*TRADE session expired — opening browser to re-authorize", vim.log.levels.WARN)
   if vim.ui.open then
     vim.ui.open(decoded.authorize_url)
@@ -26,12 +26,14 @@ local function start_reauth(decoded, retry)
   vim.ui.input({ prompt = "E*TRADE verification code: " }, function(code)
     if not code or code == "" then
       vim.notify("security_spread: re-auth cancelled", vim.log.levels.WARN)
+      fail("re-auth cancelled")
       return
     end
     run("sources/etrade.py", { "auth_finish", decoded.request_token, decoded.request_token_secret, code },
       function(fok, fdata)
         if not fok then
           vim.notify("security_spread: re-auth failed: " .. tostring(fdata), vim.log.levels.ERROR)
+          fail("re-auth failed")
           return
         end
         vim.notify("security_spread: re-authorized", vim.log.levels.INFO)
@@ -58,7 +60,7 @@ run = function(script, args, callback)
         callback(false, result.stderr ~= "" and result.stderr or script .. " exited " .. result.code)
         return
       end
-      local ok, decoded = pcall(vim.json.decode, result.stdout)
+      local ok, decoded = pcall(vim.json.decode, result.stdout, { luanil = { object = true, array = true } })
       if not ok then
         callback(false, "failed to decode JSON: " .. result.stdout)
         return
@@ -66,6 +68,8 @@ run = function(script, args, callback)
       if type(decoded) == "table" and decoded.auth_required then
         start_reauth(decoded, function()
           run(script, args, callback)
+        end, function(err)
+          callback(false, err) -- settle the caller (auto-refresh's in_flight)
         end)
         return
       end
@@ -231,7 +235,7 @@ function M.render_chart(series, width_px, height_px, callback)
         callback(false, result.stderr ~= "" and result.stderr or "views/chart_render.py exited " .. result.code)
         return
       end
-      local ok, decoded = pcall(vim.json.decode, result.stdout)
+      local ok, decoded = pcall(vim.json.decode, result.stdout, { luanil = { object = true, array = true } })
       if not ok then
         callback(false, "failed to decode JSON: " .. result.stdout)
         return
@@ -413,6 +417,21 @@ local auto_refresh = {}
 function M.show_portfolio(name, opts)
   name = name or "My Portfolio"
   opts = opts or {}
+  local window = require("custom_plugins.security_spread.ui.window")
+  local opened = false
+  --- Draw unless the user already closed this dashboard (or its docked
+  --- split): cached, live and auto-refresh results all land async, and a
+  --- late one would otherwise reopen it or draw into a dead window.
+  local function show(quotes)
+    if opened and not window.get_session(name) then
+      return
+    end
+    if opts.win and not vim.api.nvim_win_is_valid(opts.win) then
+      return
+    end
+    opened = true
+    M.show_quotes(name, quotes, opts)
+  end
 
   --- @param done fun()|nil called once the pull settles, ok or not — lets
   ---   the auto-refresh timer know it's safe to fire the next tick instead
@@ -424,7 +443,7 @@ function M.show_portfolio(name, opts)
       elseif #positions == 0 then
         vim.notify("security_spread: no positions found", vim.log.levels.WARN)
       else
-        M.show_quotes(name, merge_positions(positions), opts)
+        show(merge_positions(positions))
       end
       if done then
         done()
@@ -435,7 +454,7 @@ function M.show_portfolio(name, opts)
 
   M.positions_cached(function(cok, cached)
     if cok and cached and #cached > 0 then
-      M.show_quotes(name, merge_positions(cached), opts)
+      show(merge_positions(cached))
     end
   end)
 
