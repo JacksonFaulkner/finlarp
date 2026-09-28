@@ -40,6 +40,7 @@ import duckdb
 
 
 from sources import universe
+from sources import pq
 
 ROOT = Path(__file__).resolve().parent.parent
 MANUAL = ROOT / "data" / "patent_aliases.json"
@@ -184,8 +185,8 @@ def build() -> None:
                     {"o": [r[0] for r in rows], "t": [r[1] for r in rows],
                      "v": [r[2] for r in rows], "n": [r[3] for r in rows]})
         maps[kind] = len(rows)
-    con.execute(f"""COPY (SELECT 'raw' AS kind, * FROM raw_map UNION ALL SELECT 'cluster', * FROM cluster_map)
-                    TO '{OUT}/assignee_map.parquet' (FORMAT parquet)""")
+    pq.copy_atomic(con, "SELECT 'raw' AS kind, * FROM raw_map UNION ALL SELECT 'cluster', * FROM cluster_map",
+                   f"{OUT}/assignee_map.parquet")
 
     con.execute(f"""
         CREATE TABLE pt AS
@@ -196,7 +197,7 @@ def build() -> None:
         LEFT JOIN raw_map rm ON rm.org = r.raw_assignee_organization
         LEFT JOIN cluster_map cm ON cm.org = d.disambig_assignee_organization
         WHERE coalesce(rm.ticker, cm.ticker) IS NOT NULL""")
-    con.execute(f"COPY pt TO '{OUT}/patent_ticker.parquet' (FORMAT parquet)")
+    pq.copy_atomic(con, "SELECT * FROM pt", f"{OUT}/patent_ticker.parquet")
     con.execute("CREATE TABLE ids AS SELECT DISTINCT patent_id FROM pt")
 
     queries = {
@@ -221,7 +222,7 @@ def build() -> None:
             FROM {_csv(tsv['inventor_disambiguated'])} SEMI JOIN ids USING (patent_id)""",
     }
     for name, q in queries.items():
-        con.execute(f"COPY ({q}) TO '{OUT}/{name}.parquet' (FORMAT parquet)")
+        pq.copy_atomic(con, q, f"{OUT}/{name}.parquet")
         print(f"{name}: {con.execute(f'SELECT count(*) FROM read_parquet(\'{OUT}/{name}.parquet\')').fetchone()[0]:,}", flush=True)
 
     n_t, n_p = con.execute("SELECT count(DISTINCT ticker), count(DISTINCT patent_id) FROM pt").fetchone()

@@ -282,7 +282,10 @@ def run_ticker(company: dict, openai_key: str, exa_key: str, out_dir: Path) -> d
             for leaf in leaves:
                 ev = leaf.evidence
                 src = source_map.get(ev.source_id)
-                if src and ev.quote.strip() and quote_key(ev.quote) in quote_key(src["text"]):
+                # >= 8 alnum chars: a quote of only punctuation/"—" keys to ""
+                # (or a 2-char key) and would match any source
+                key = quote_key(ev.quote)
+                if src and len(key) >= 8 and key in quote_key(src["text"]):
                     valid.append(leaf)
                     referenced.add(ev.source_id)
                 else:

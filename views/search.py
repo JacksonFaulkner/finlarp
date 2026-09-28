@@ -347,7 +347,11 @@ def get(chunk_id: int, context: int = 0, con: duckdb.DuckDBPyConnection | None =
     try:
         rows = con.execute("""
             SELECT n.id, n.ticker, n.type, n.section, n.form, n.date, n.accn, n.seq, n.text
-            FROM chunks c JOIN chunks n USING (accn, type, section)
+            -- IS NOT DISTINCT FROM: profiles have no accn and patents no
+            -- section, and a plain = (or USING) never matches NULL to NULL.
+            FROM chunks c JOIN chunks n
+              ON n.ticker IS NOT DISTINCT FROM c.ticker AND n.type IS NOT DISTINCT FROM c.type
+             AND n.accn IS NOT DISTINCT FROM c.accn AND n.section IS NOT DISTINCT FROM c.section
             WHERE c.id = ? AND n.seq BETWEEN c.seq - ? AND c.seq + ? ORDER BY n.seq
         """, [chunk_id, context, context]).fetchall()
     finally:

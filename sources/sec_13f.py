@@ -31,6 +31,7 @@ import requests
 
 import db
 from sources import sec_http
+from sources import pq
 
 INDEX_URL = "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
 OPENFIGI_URL = "https://api.openfigi.com/v3/mapping"
@@ -278,7 +279,7 @@ def build_cusip_map() -> dict[str, int]:
     con = duckdb.connect()
     con.execute("CREATE TABLE m (ticker VARCHAR, cusip VARCHAR, method VARCHAR, issuer VARCHAR, figi_name VARCHAR)")
     con.executemany("INSERT INTO m VALUES (?, ?, ?, ?, ?)", rows)
-    con.execute(f"COPY m TO '{DATA_DIR}/cusip_map.parquet' (FORMAT parquet)")
+    pq.copy_atomic(con, "SELECT * FROM m", DATA_DIR / "cusip_map.parquet")
     con.close()
     return counts
 
@@ -301,7 +302,7 @@ def summary(tickers: list[str] | None = None) -> list[dict]:
             ),
             clean AS (
                 SELECT * FROM ranked
-                WHERE NOT (rn = 1 AND sh > {SUSPECT_MULTIPLE} * runner_up)
+                WHERE NOT coalesce(rn = 1 AND sh > {SUSPECT_MULTIPLE} * runner_up, false)
                   AND period IN ($prev, $cur) AND cik IN (SELECT cik FROM panel)
             ),
             w AS (

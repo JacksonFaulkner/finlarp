@@ -67,8 +67,17 @@ def _duration_days(entry: dict) -> int | None:
 def _single_quarter_series(facts: dict, concepts: list[str]) -> list[dict]:
     """Last 8 single-quarter (not YTD-cumulative) filed values for the
     first matching concept tag, deduped by period end date (a later
-    amended filing for the same quarter wins)."""
+    amended filing for the same quarter wins). Of the concepts, the one
+    with the most recent period wins: filers switch tags (NVDA moved from
+    Revenues to RevenueFromContractWithCustomer...), and the first tag with
+    any data can be years stale.
+
+    Q4 has no 10-Q, so it's taken from a 3-month fact in the 10-K when the
+    filer tags one, else derived as FY - (Q1+Q2+Q3) and marked derived=True.
+    Without it the latest quarter would stay Q3 for ~3 months after every
+    10-K, and Q1's YoY/QoQ would compare against the wrong quarter."""
     us_gaap = facts.get("facts", {}).get("us-gaap", {})
+    best: list[dict] = []
     for concept in concepts:
         node = us_gaap.get(concept)
         if not node:
@@ -76,21 +85,34 @@ def _single_quarter_series(facts: dict, concepts: list[str]) -> list[dict]:
         entries = node.get("units", {}).get("USD") or []
         quarters = [
             e for e in entries
-            if e.get("form", "").startswith("10-Q") and 80 <= (_duration_days(e) or 0) <= 100
+            if e.get("form", "").startswith(("10-Q", "10-K")) and 80 <= (_duration_days(e) or 0) <= 100
         ]
         by_end: dict[str, dict] = {}
         for e in quarters:
             by_end[e["end"]] = e  # last one wins — later filings supersede
+        annual = [e for e in entries if e.get("form", "").startswith("10-K") and 350 <= (_duration_days(e) or 0) <= 380]
+        for fy in annual:
+            if fy["end"] in by_end:
+                continue
+            inside = [q for q in by_end.values() if fy["start"] <= q["start"] and q["end"] < fy["end"]]
+            if len(inside) == 3:
+                by_end[fy["end"]] = fy | {
+                    "start": max(q["end"] for q in inside),
+                    "val": fy["val"] - sum(q["val"] for q in inside),
+                    "derived": True,
+                }
         rows = sorted(by_end.values(), key=lambda e: e["end"])
-        if rows:
-            return rows[-8:]
-    return []
+        if rows and (not best or rows[-1]["end"] > best[-1]["end"]):
+            best = rows[-8:]
+    return best
 
 
 def _annual_series(facts: dict, concepts: list[str], unit: str) -> list[dict]:
     """Last 4 fiscal-year (10-K, ~360-370 day duration for EPS/revenue
-    which are duration concepts) filed values."""
+    which are duration concepts) filed values, from the freshest concept
+    (see _single_quarter_series)."""
     us_gaap = facts.get("facts", {}).get("us-gaap", {})
+    best: list[dict] = []
     for concept in concepts:
         node = us_gaap.get(concept)
         if not node:
@@ -104,9 +126,9 @@ def _annual_series(facts: dict, concepts: list[str], unit: str) -> list[dict]:
         for e in annual:
             by_end[e["end"]] = e
         rows = sorted(by_end.values(), key=lambda e: e["end"])
-        if rows:
-            return rows[-4:]
-    return []
+        if rows and (not best or rows[-1]["end"] > best[-1]["end"]):
+            best = rows[-4:]
+    return best
 
 
 def get_quarterly_revenue(symbol: str) -> list[dict]:

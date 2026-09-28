@@ -44,7 +44,11 @@ def get(url: str, timeout: int = 60) -> requests.Response:
                 raise
             time.sleep(2 ** attempt * 5)
             continue
-        if resp.status_code == 429 or resp.status_code >= 500:
+        # SEC signals its rate limit with a 403 "Request Rate Threshold
+        # Exceeded" page as often as with a 429; callers cache a failed
+        # fetch as permanent, so back off and retry it like a 429.
+        throttled = resp.status_code == 403 and "Rate Threshold" in resp.text
+        if throttled or resp.status_code == 429 or resp.status_code >= 500:
             time.sleep(2 ** attempt * 5)
             continue
         return resp

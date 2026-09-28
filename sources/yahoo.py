@@ -46,7 +46,11 @@ def _fetch_crumb(session: requests.Session) -> tuple[str, dict]:
     return resp.text, requests.utils.dict_from_cookiejar(session.cookies)
 
 
-def get_crumb(session: requests.Session) -> str:
+def get_crumb(session: requests.Session, refresh: bool = False) -> str:
+    """Cached crumb (+ its cookies onto session); refresh=True after a 401
+    drops the cache and does the handshake again."""
+    if refresh:
+        CRUMB_CACHE_PATH.unlink(missing_ok=True)
     if CRUMB_CACHE_PATH.exists():
         cached = json.loads(CRUMB_CACHE_PATH.read_text())
         if time.time() - cached.get("fetched_at", 0) < CRUMB_CACHE_TTL_SECONDS:
@@ -125,6 +129,8 @@ def _screen_request(session: requests.Session, crumb: str, body: dict) -> dict:
         json=body,
         timeout=15,
     )
+    if resp.status_code == 401:  # stale crumb: let cmd_screen refresh + retry
+        return {"finance": {"error": "401 Unauthorized"}}
     resp.raise_for_status()
     return resp.json()
 
@@ -151,9 +157,7 @@ def cmd_screen(sector: str | None, industry: str | None, top: int) -> dict:
     if data["finance"].get("error"):
         # Cached crumb/cookies went stale early — refetch once and retry
         # before giving up, instead of failing the whole call.
-        CRUMB_CACHE_PATH.unlink(missing_ok=True)
-        crumb, cookies = _fetch_crumb(session)
-        session.cookies.update(cookies)
+        crumb = get_crumb(session, refresh=True)
         data = _screen_request(session, crumb, body)
         if data["finance"].get("error"):
             raise RuntimeError(data["finance"]["error"])
