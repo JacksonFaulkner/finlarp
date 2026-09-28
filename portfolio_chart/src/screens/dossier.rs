@@ -448,8 +448,8 @@ impl Screen for Dossier {
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         self.flash = None;
-        if self.palette.open {
-            if let Some(command) = self.palette.handle(key) {
+        if self.palette.open
+            && let Some(command) = self.palette.handle(key) {
                 return match command {
                     Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
                         screen: screen.into(),
@@ -465,7 +465,6 @@ impl Screen for Dossier {
                     _ => Action::None,
                 };
             }
-        }
         if self.doc.is_none() {
             return Action::Quit;
         }

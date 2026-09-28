@@ -536,8 +536,8 @@ impl Screen for Search {
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.palette.open {
-            if let Some(command) = self.palette.handle(key) {
+        if self.palette.open
+            && let Some(command) = self.palette.handle(key) {
                 return match command {
                     Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
                         screen: screen.into(),
@@ -554,7 +554,6 @@ impl Screen for Search {
                     _ => Action::None,
                 };
             }
-        }
         if self.show_help {
             self.show_help = false;
             return Action::None;
