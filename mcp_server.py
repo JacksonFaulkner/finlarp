@@ -120,8 +120,16 @@ _view_desc: dict[str, str] = {}
 def _db() -> duckdb.DuckDBPyConnection:
     global _con, _view_desc
     if _con is None:
-        _con = duckdb.connect()
-        _view_desc = _views(_con)
+        con = duckdb.connect()
+        _view_desc = _views(con)
+        # `sql` takes arbitrary SELECTs, and read_text()/read_csv() would
+        # otherwise read any file (.env, the E*TRADE token) into the LLM's
+        # context. Views resolve lazily, so allow just their data dirs, then
+        # lock the config so a query can't turn access back on.
+        con.execute(f"SET allowed_directories=['{D}/', '{sec_13f.DATA_DIR}/']")
+        con.execute("SET enable_external_access=false")
+        con.execute("SET lock_configuration=true")
+        _con = con
     return _con
 
 
