@@ -33,8 +33,7 @@ from urllib.parse import unquote, urljoin, urlparse
 
 import requests
 
-
-from sources import universe
+from sources import keys, sec_http, universe
 
 DOCS = universe.data_dir("docs")
 BROWSER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/128 Safari/537.36"
@@ -67,7 +66,7 @@ def cache_dir(url: str) -> Path:
 
 def fetch(url: str) -> requests.Response:
     if "sec.gov" in urlparse(url).netloc:
-        r = universe.sec_get(url)   # SEC UA + shared throttle
+        r = sec_http.get(url)   # SEC UA + shared throttle
     else:
         r = requests.get(url, headers={"User-Agent": BROWSER_UA}, timeout=60)
     r.raise_for_status()
@@ -313,9 +312,8 @@ ODP_DOCS = "https://api.uspto.gov/api/v1/patent/applications/{}/documents"
 
 def _odp_drawings(app: str, d: Path) -> Path | None:
     """Latest 'DRW' (drawings) PDF from the ODP file wrapper for an application."""
-    from sources.bulk_pull import api_key
     try:
-        key = api_key()
+        key = keys.require("USPTO_API_KEY")
         r = requests.get(ODP_DOCS.format(app), headers={"X-API-Key": key}, timeout=60)
         r.raise_for_status()
         drw = [x for x in r.json().get("documentBag", []) if x.get("documentCode") == "DRW"]

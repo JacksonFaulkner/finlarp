@@ -21,10 +21,10 @@ import json
 import sys
 from datetime import date, datetime, timezone
 
-
 from sources import yahoo
 import db
 import sources.edgar as edgar
+from sources import sec_http
 from models.canslim import (
     AnnualEarnings,
     AnnualPeriod,
@@ -145,7 +145,7 @@ class SecFacts:
         if self.cik is None:
             return
         try:
-            resp = edgar._session().get(SUBMISSIONS_URL.format(cik=self.cik), timeout=15)
+            resp = sec_http.get(SUBMISSIONS_URL.format(cik=self.cik), timeout=15)
             if resp.status_code == 200:
                 recent = resp.json().get("filings", {}).get("recent", {})
                 self.docs = dict(zip(recent.get("accessionNumber", []), recent.get("primaryDocument", [])))

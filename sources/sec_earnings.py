@@ -36,8 +36,7 @@ from pathlib import Path
 
 import duckdb
 
-
-from sources import universe
+from sources import sec_http, universe
 
 N_RELEASES = 4
 LOOKBACK_DAYS = 550
@@ -176,7 +175,7 @@ def filing_docs(cik: int, accn: str) -> list[dict]:
     """[{seq, desc, name, url, type, size}] from the first ('Document Format
     Files') table of the filing's -index.htm."""
     url = f"{ARCHIVES}/{cik}/{accn.replace('-', '')}/{accn}-index.htm"
-    resp = universe.sec_get(url)
+    resp = sec_http.get(url)
     if resp.status_code != 200:
         return []
     body = resp.text
@@ -437,7 +436,7 @@ def candidates(ciks: list[int]) -> tuple[list[tuple], list[tuple]]:
 
 
 def _fetch_text(doc: dict) -> str | None:
-    resp = universe.sec_get(doc["url"])
+    resp = sec_http.get(doc["url"])
     if resp.status_code != 200:
         return None
     raw = resp.content.decode("utf-8", errors="replace") if resp.encoding is None else resp.text

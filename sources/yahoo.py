@@ -194,7 +194,7 @@ def main() -> None:
     members_p = universe_sub.add_parser("members")
     members_p.add_argument("level", choices=["primary", "sub", "region"])
     members_p.add_argument("category")
-    reload_p = universe_sub.add_parser("reload")
+    universe_sub.add_parser("reload")
 
     args = parser.parse_args()
 

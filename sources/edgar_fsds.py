@@ -23,11 +23,9 @@ import zipfile
 from datetime import date
 from pathlib import Path
 
-import requests
-
-
 import db
-from sources.edgar import REVENUE_CONCEPTS, UA, ticker_to_cik
+from sources import sec_http
+from sources.edgar import REVENUE_CONCEPTS, ticker_to_cik
 
 ZIP_URL = "https://www.sec.gov/files/dera/data/financial-statement-data-sets/{quarter}.zip"
 CACHE_DIR = db.DB_PATH.parent / "edgar_fsds"
@@ -61,7 +59,7 @@ def _download(quarter: str) -> Path | None:
     dest = CACHE_DIR / f"{quarter}.zip"
     if dest.exists():
         return dest
-    resp = requests.get(ZIP_URL.format(quarter=quarter), headers={"User-Agent": UA}, timeout=300, stream=True)
+    resp = sec_http.stream(ZIP_URL.format(quarter=quarter), timeout=300)
     if resp.status_code != 200:
         return None
     tmp = dest.with_suffix(".part")

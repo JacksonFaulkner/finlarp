@@ -11,12 +11,9 @@ from __future__ import annotations
 import sys
 from datetime import date
 
-import requests
-
-
 import db
+from sources import sec_http
 
-UA = "security_spread (personal nvim tool) contact: jackson.faulkner1@gmail.com"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
 
@@ -33,16 +30,10 @@ EPS_CONCEPTS = ["EarningsPerShareDiluted", "EarningsPerShareBasic"]
 NET_INCOME_CONCEPTS = ["NetIncomeLoss"]
 
 
-def _session() -> requests.Session:
-    s = requests.Session()
-    s.headers["User-Agent"] = UA
-    return s
-
-
 def ticker_to_cik(symbol: str) -> int | None:
     cik_map = db.get_cached_edgar_cik_map()
     if cik_map is None:
-        resp = _session().get(TICKERS_URL, timeout=15)
+        resp = sec_http.get(TICKERS_URL, timeout=15)
         resp.raise_for_status()
         cik_map = {v["ticker"].upper(): v["cik_str"] for v in resp.json().values()}
         db.put_cached_edgar_cik_map(cik_map)
@@ -58,7 +49,7 @@ def get_company_facts(symbol: str, use_cache: bool = True) -> dict | None:
     cik = ticker_to_cik(symbol)
     if cik is None:
         return None
-    resp = _session().get(FACTS_URL.format(cik=cik), timeout=15)
+    resp = sec_http.get(FACTS_URL.format(cik=cik), timeout=15)
     if resp.status_code != 200:
         return None
     facts = resp.json()

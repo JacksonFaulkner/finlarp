@@ -12,17 +12,13 @@ import concurrent.futures
 import datetime as dt
 import json
 import re
-import threading
-import time
 from pathlib import Path
 
 import requests
 
-ROOT = Path(__file__).resolve().parents[4]
 PLUGIN = Path(__file__).resolve().parents[1]
 from models.earnings_scrape import SecurityReportPanels
-from sources import yahoo
-from sources import universe
+from sources import keys, sec_http, universe, yahoo
 from sources.sec_earnings import html_to_text
 
 MODEL = "gpt-6-luna"
@@ -30,32 +26,12 @@ WORKERS = 4  # bounded so Exa stays well below its default QPS ceiling
 EXA_RESULTS = 3
 OUT_ROOT = PLUGIN / "research" / "top50_runs"
 SEC_ID_PREFIX = "sec_"
-SEC_RATE_LOCK = threading.Lock()
-_sec_last = 0.0
-UA = "security_spread research report; contact: jackson.faulkner1@gmail.com"
 
 
-def read_keys() -> dict[str, str]:
-    out = {}
-    for path in (ROOT / ".env", PLUGIN / ".env"):
-        if path.exists():
-            for line in path.read_text().splitlines():
-                if "=" in line and not line.lstrip().startswith("#"):
-                    k, v = line.split("=", 1)
-                    out[k.strip()] = v.strip().strip("\"'")
-    return out
-
-
-def sec_get(url: str) -> requests.Response:
-    global _sec_last
-    with SEC_RATE_LOCK:
-        wait = _sec_last + 0.75 - time.monotonic()
-        if wait > 0:
-            time.sleep(wait)
-        _sec_last = time.monotonic()
-    r = requests.get(url, headers={"User-Agent": UA}, timeout=60)
+def _sec_text(url: str) -> str:
+    r = sec_http.get(url)
     r.raise_for_status()
-    return r
+    return r.text
 
 
 def latest_filing(ticker: str) -> dict:
@@ -207,7 +183,7 @@ def run_ticker(company: dict, openai_key: str, exa_key: str, out_dir: Path) -> d
         # Some Yahoo US listings are foreign OTC tickers absent from SEC's
         # ticker map. Still produce a useful, explicitly web-sourced report.
         filing = None
-    filing_text = html_to_text(sec_get(filing["url"]).text) if filing else ""
+    filing_text = html_to_text(_sec_text(filing["url"])) if filing else ""
     filing_id = f"{SEC_ID_PREFIX}{ticker.lower()}_{filing['form'].lower().replace('-', '')}" if filing else None
     sources = []
     if filing:
@@ -361,9 +337,8 @@ def run_ticker(company: dict, openai_key: str, exa_key: str, out_dir: Path) -> d
 
 
 def main() -> None:
-    keys = read_keys()
-    openai_key = keys.get("OPENAI_API_KEY") or keys.get("OPENAI_KEY")
-    exa_key = keys.get("EXA_API_KEY") or keys.get("EXA_KEY")
+    openai_key = keys.get("OPENAI_API_KEY")
+    exa_key = keys.get("EXA_API_KEY")
     if not openai_key or not exa_key:
         raise SystemExit("OPENAI_API_KEY and EXA_API_KEY are required in .env")
     today = dt.date.today().isoformat()
