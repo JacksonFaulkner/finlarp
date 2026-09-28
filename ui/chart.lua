@@ -1,7 +1,5 @@
 local M = {}
 
-local ns = vim.api.nvim_create_namespace("security_spread_chart")
-
 --- Resamples `closes` to `cols` evenly-spaced points (used for the crosshair
 --- readout — the PNG itself plots full-resolution data, this is just for
 --- mapping a cursor column back to a price).
@@ -67,7 +65,6 @@ function M.show(symbols)
     local width_px = cols * cell_w
     local height_px = chart_rows * cell_h
 
-    local header_line = 1
     local image_line = 2 -- image occupies `chart_rows` lines starting here
     local crosshair_line = image_line + chart_rows + 1
 

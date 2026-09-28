@@ -20,7 +20,7 @@ function M.normalize_sizes(sizes, dx, dy)
   return out
 end
 
-local function layoutrow(sizes, x, y, dx, dy)
+local function layoutrow(sizes, x, y, _dx, dy)
   local covered_area = sum(sizes)
   local width = covered_area / dy
   local rects = {}
@@ -33,7 +33,7 @@ local function layoutrow(sizes, x, y, dx, dy)
   return rects
 end
 
-local function layoutcol(sizes, x, y, dx, dy)
+local function layoutcol(sizes, x, y, dx, _dy)
   local covered_area = sum(sizes)
   local height = covered_area / dx
   local rects = {}

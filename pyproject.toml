@@ -21,3 +21,16 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["sources", "views", "jobs", "models"]
+
+[dependency-groups]
+dev = ["ruff>=0.12"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["research"]
+
+[tool.ruff.lint]
+# pyflakes + syntax errors + bugbear; zip(strict=) not enforced (B905)
+select = ["E9", "F", "B"]
+ignore = ["B905"]
