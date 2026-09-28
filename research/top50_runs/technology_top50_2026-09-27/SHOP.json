@@ -1,0 +1,456 @@
+{
+  "ticker": "SHOP",
+  "company": "SHOP",
+  "market_cap_usd": 184591368192,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-05",
+    "accession": "0001594805-26-000047",
+    "url": "https://www.sec.gov/Archives/edgar/data/1594805/000159480526000047/shop-20260630.htm"
+  },
+  "generated_at": "2026-09-27T19:15:32+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 1,
+  "sources": [
+    {
+      "source_id": "sec_shop_10q",
+      "label": "SHOP 10-Q filed 2026-08-05",
+      "url": "https://www.sec.gov/Archives/edgar/data/1594805/000159480526000047/shop-20260630.htm",
+      "kind": "sec_filing"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Revenue model",
+          "text": "Shopify describes two revenue components: recurring subscription solutions and merchant success-based merchant solutions.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "Our business model has two revenue components: a recurring subscription component we call subscription solutions and a merchant success-based component we call merchant solutions."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Merchant solutions revenue",
+          "text": "Merchant solutions revenue is principally generated from Shopify Payments processing and currency conversion fees, alongside lending and financial products, partner referral fees, shipping labels, POS hardware, app-store advertising, and Shop Campaigns.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "We principally generate merchant solutions revenues from payment processing fees and currency conversion fees from Shopify Payments."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Transaction-linked exposure",
+          "text": "The filing says most merchant solutions revenue is directionally correlated with GMV processed through the platform.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "The majority of our merchant solutions revenues are directionally correlated with the level of GMV that our merchants process through our platform."
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Subscriptions and commerce tools",
+          "text": "Subscription solutions include platform subscriptions and variable platform fees, POS Pro, apps, themes, and domain-name registration. Shopify Plus is described as serving merchants scaling globally, with additional functionality and support including B2B features and ecommerce automation.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "Revenue from subscription solutions is generated through the sale of subscriptions to our platform, including variable platform fees, as well as through the sale of subscriptions to our POS Pro offering, the sale of apps, the sale of themes and the registration of domain names."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Payments and other merchant services",
+          "text": "Shopify Payments is described as a fully integrated payment solution; other disclosed services include lending, shipping labels, POS hardware, partner referrals, app-store advertising, and Shop Campaigns.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "Shopify Payments is a fully integrated payment solution."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Applications",
+          "text": "The filing describes merchants with direct-to-consumer and/or B2B operations and identifies platform use across commerce functions including payments, POS, and ecommerce automation.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "companies with large-scale, direct-to-consumer or business to business (\"B2B\") operations, or both"
+          }
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "GMV and MRR",
+          "cols": [
+            "Metric (US$ millions)",
+            "Three months ended June 30, 2026",
+            "Three months ended June 30, 2025",
+            "Six months ended June 30, 2026",
+            "Six months ended June 30, 2025"
+          ],
+          "rows": [
+            {
+              "id": "gmv",
+              "cells": [
+                "Gross merchandise volume",
+                "115,567",
+                "87,837",
+                "216,310",
+                "162,587"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Gross Merchandise Volume | 115,567 | 87,837 | 216,310 | 162,587"
+              }
+            },
+            {
+              "id": "mrr",
+              "cells": [
+                "Monthly recurring revenue",
+                "221",
+                "185",
+                "221",
+                "185"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Monthly Recurring Revenue | 221 | 185 | 221 | 185"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Reported six-month GMV growth",
+          "text": "For the six months ended June 30, 2026, platform GMV was reported at $216.3 billion, up 33% from the six months ended June 30, 2025.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "In the six months ended June 30, 2026, our platform facilitated gross merchandise volume (\"GMV\") of $216.3 billion, representing an increase of 33% from the six months ended June 30, 2025."
+          }
+        },
+        {
+          "type": "table",
+          "title": "Revenue by merchant location",
+          "cols": [
+            "Geography",
+            "Three months ended June 30, 2026 revenue (US$ millions)",
+            "Share of revenue"
+          ],
+          "rows": [
+            {
+              "id": "geo_us",
+              "cells": [
+                "United States",
+                "2,283",
+                "63%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "United States | 2,283 | 63%"
+              }
+            },
+            {
+              "id": "geo_canada",
+              "cells": [
+                "Canada",
+                "171",
+                "5%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Canada | 171 | 5%"
+              }
+            },
+            {
+              "id": "geo_europe",
+              "cells": [
+                "Europe",
+                "721",
+                "20%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Europe | 721 | 20%"
+              }
+            },
+            {
+              "id": "geo_apac",
+              "cells": [
+                "APAC",
+                "346",
+                "10%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "APAC | 346 | 10%"
+              }
+            },
+            {
+              "id": "geo_rest_world",
+              "cells": [
+                "Rest of World",
+                "62",
+                "2%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Rest of World | 62 | 2%"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customer_channel_map",
+      "title": "Customers and channels",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Documented merchant facts",
+          "text": "Shopify describes its merchants as spanning retail verticals, business sizes, and geographies, and reports that no single merchant has ever represented more than 5% of total revenue in a single reporting period.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "Our merchants represent a wide array of retail verticals, business sizes and geographies, and no single merchant has ever represented more than five percent of our total revenues in a single reporting period."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Inferred buyer archetypes",
+          "text": "Inferred archetypes from the filing are entrepreneurs and larger-scale merchants, including businesses operating direct-to-consumer, B2B, or both. These are buyer categories, not named customers.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "from aspirational entrepreneurs to companies with large-scale, direct-to-consumer or business to business (\"B2B\") operations, or both"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Channel disclosures",
+          "text": "The filing names POS Pro, Shopify Payments, the Shopify App Store, and Shop Campaigns among its offerings; it does not provide channel-level sales shares in the supplied excerpt.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "the sale of subscriptions to our POS Pro offering"
+          }
+        }
+      ]
+    },
+    {
+      "id": "financials_cash_flow",
+      "title": "Quarterly financials and cash flow",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Selected income statement lines (US$ millions)",
+          "cols": [
+            "Line item",
+            "Three months ended June 30, 2026",
+            "Three months ended June 30, 2025",
+            "Six months ended June 30, 2026",
+            "Six months ended June 30, 2025"
+          ],
+          "rows": [
+            {
+              "id": "subscription_revenue",
+              "cells": [
+                "Subscription solutions revenue",
+                "802",
+                "656",
+                "1,552",
+                "1,276"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Subscription solutions | 802 | 656 | 1,552 | 1,276"
+              }
+            },
+            {
+              "id": "merchant_revenue",
+              "cells": [
+                "Merchant solutions revenue",
+                "2,781",
+                "2,024",
+                "5,201",
+                "3,764"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Merchant solutions | 2,781 | 2,024 | 5,201 | 3,764"
+              }
+            },
+            {
+              "id": "total_revenue",
+              "cells": [
+                "Total revenue",
+                "3,583",
+                "2,680",
+                "6,753",
+                "5,040"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "3,583 | 2,680 | 6,753 | 5,040"
+              }
+            },
+            {
+              "id": "cost_revenue",
+              "cells": [
+                "Total cost of revenues",
+                "1,875",
+                "1,378",
+                "3,499",
+                "2,569"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "1,875 | 1,378 | 3,499 | 2,569"
+              }
+            },
+            {
+              "id": "gross_profit",
+              "cells": [
+                "Gross profit",
+                "1,708",
+                "1,302",
+                "3,254",
+                "2,471"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Gross profit | 1,708 | 1,302 | 3,254 | 2,471"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Net cash provided by operating activities (US$ millions)",
+          "cols": [
+            "Three months ended June 30, 2026",
+            "Three months ended June 30, 2025",
+            "Six months ended June 30, 2026",
+            "Six months ended June 30, 2025"
+          ],
+          "rows": [
+            {
+              "id": "operating_cash_flow",
+              "cells": [
+                "658",
+                "428",
+                "1,139",
+                "795"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_shop_10q",
+                "quote": "Net cash provided by operating activities | 658 | 428 | 1,139 | 795"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Growth drivers identified by management",
+          "text": "Management identifies merchant-base expansion and retention, localization, additional sales channels, expanded platform functionality, merchant sales growth, AI, ecosystem and partner programs, and merchant support as factors in future success.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "our future success depends on many factors, including our ability to expand our merchant base; localize features for specific geographies; retain merchants as they grow their businesses on our platform"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Foreign-exchange exposure",
+          "text": "The filing reports foreign-currency exposure in operations and assets and liabilities; it says derivatives are used to mitigate a portion of the remaining exposure.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "The Company's results of operations and foreign currency assets and liabilities are exposed to foreign currency fluctuations."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Investment valuation risk",
+          "text": "Equity and other investments are exposed to market-related risks that may change their fair values; Shopify also reports concentration of risk in a small number of these investments.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "The Company has a high concentration of risk associated with a small number of equity and other investments that are impacted by fluctuations in their fair values or by observable changes or impairments."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Forward-looking uncertainty",
+          "text": "The filing cautions that forward-looking statements are uncertain and actual results may differ materially from expressed or implied future results.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_shop_10q",
+            "quote": "No forward-looking statement is a guarantee of future results."
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 0,
+    "sourced_items": 27
+  },
+  "usage": {
+    "input_tokens": 29470,
+    "cached_input_tokens": 2190,
+    "output_tokens": 9988,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0077439,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0477439
+  }
+}

@@ -1,0 +1,453 @@
+{
+  "ticker": "SNDK",
+  "company": "SNDK",
+  "market_cap_usd": 260303716352,
+  "as_of": "2026-07-03",
+  "filing": {
+    "form": "10-K",
+    "filed": "2026-08-17",
+    "accession": "0001628280-26-057406",
+    "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026057406/sndk-20260703.htm"
+  },
+  "generated_at": "2026-09-27T19:14:19+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 3,
+  "sources": [
+    {
+      "source_id": "sec_sndk_10k",
+      "label": "SNDK 10-K filed 2026-08-17",
+      "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026057406/sndk-20260703.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "sndk_results_1",
+      "label": "Sandisk Reports Fiscal Fourth Quarter 2026 Financial ...",
+      "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026053346/sndkq4-26ex991xpressrelease.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "sndk_results_2",
+      "label": "sndk-20260805",
+      "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026053346/sndk-20260805.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model and operations",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Operating model",
+          "rows": [
+            {
+              "id": "integrated_model",
+              "label": "Business model",
+              "value": "Sandisk describes itself as a vertically integrated semiconductor memory company, spanning chip design and IP, manufacturing, and systems engineering and design.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "We are a vertically integrated solutions provider with ownership of chip-level design and IP, front and back-end manufacturing, as well as systems engineering and design."
+              }
+            },
+            {
+              "id": "wafer_supply",
+              "label": "Flash memory supply",
+              "value": "All flash-based memory is obtained from joint ventures with Kioxia; Flash Ventures output is generally shared equally between the partners.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "All of our flash-based memory is obtained from our joint ventures with Kioxia"
+              }
+            },
+            {
+              "id": "venture_interest",
+              "label": "Flash Ventures ownership",
+              "value": "Sandisk holds a 49.9% ownership position in each Flash Ventures entity and jointly controls their operations with Kioxia.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "We hold a 49.9% ownership position in each of the Flash Ventures entities. We jointly control the operations of Flash Ventures with Kioxia"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Portfolio described in the filing",
+          "cols": [
+            "Portfolio area",
+            "Applications described"
+          ],
+          "rows": [
+            {
+              "id": "datacenter_products",
+              "cells": [
+                "Enterprise SSDs",
+                "Enterprise servers, online transactions, AI-related workloads, data analysis and other enterprise applications"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "primarily for use in enterprise servers and supporting high-volume online transactions, AI-related workloads, data analysis and other enterprise applications."
+              }
+            },
+            {
+              "id": "edge_products",
+              "cells": [
+                "SSDs and embedded flash storage",
+                "PCs, gaming consoles, set top boxes, mobile devices, automotive, Internet of Things, industrial and connected-home applications"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "automotive applications, Internet of Things, and industrial and connected home applications."
+              }
+            },
+            {
+              "id": "consumer_products",
+              "cells": [
+                "SSDs, removable cards and USB flash drives",
+                "Consumer devices including mobile phones, tablets, imaging systems, gaming devices, cameras and smart video systems"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "Our removable cards are designed primarily for use in consumer devices, such as mobile phones, tablets, imaging systems, gaming devices, cameras and smart video systems."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Markets and demand drivers",
+          "cols": [
+            "Market or driver",
+            "Reported description"
+          ],
+          "rows": [
+            {
+              "id": "datacenter_market",
+              "cells": [
+                "Datacenter",
+                "Primarily public or private cloud environments and enterprise customers"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "Datacenter represents a large and growing end market comprised primarily of products for public or private cloud environments and enterprise customers."
+              }
+            },
+            {
+              "id": "edge_market",
+              "cells": [
+                "Edge",
+                "OEM and channel solutions across PC, mobile, gaming, automotive, physical AI, at-home entertainment and industrial spaces"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "across personal computer, mobile, gaming, automotive, physical AI, at-home entertainment, and industrial spaces."
+              }
+            },
+            {
+              "id": "demand_drivers",
+              "cells": [
+                "Storage demand",
+                "The filing identifies AI, cloud computing, connected devices and edge devices as drivers of growth in digital content to be stored and used."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "advancements in AI, along with growth in cloud computing applications, connected mobile devices and Internet-connected products, and edge devices are driving substantial growth in the volume of digital content"
+              }
+            },
+            {
+              "id": "fy_datacenter_growth",
+              "cells": [
+                "Fiscal year 2026",
+                "Datacenter was up 437%; the release also cited a mix shift toward higher-value customers and higher pricing."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "Revenue outperformance was driven by both our mix shift toward higher-value customers, with Datacenter up 437%, and higher pricing."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customer and channel map",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented routes to market and buyer archetypes",
+          "cols": [
+            "Evidence type",
+            "Fact or archetype"
+          ],
+          "rows": [
+            {
+              "id": "documented_customers",
+              "cells": [
+                "Documented customers",
+                "Computer manufacturers and OEMs, cloud service providers, resellers, distributors and retailers"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "We sell our products to computer manufacturers and OEMs, cloud service providers, resellers, distributors and retailers throughout the world."
+              }
+            },
+            {
+              "id": "customer_concentration",
+              "cells": [
+                "Concentration",
+                "No customer accounted for more than 10% of net revenue in 2026, 2025 or 2024."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "For 2026, 2025 and 2024, no customer accounted for more than 10% of our net revenue."
+              }
+            },
+            {
+              "id": "archetype_enterprise",
+              "cells": [
+                "Inferred buyer archetype",
+                "Enterprise or cloud-storage buyers, inferred from the disclosed enterprise SSD applications and cloud-service-provider customers."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "products for datacenters, cloud service providers, and private cloud customers."
+              }
+            },
+            {
+              "id": "archetype_device_oem",
+              "cells": [
+                "Inferred buyer archetype",
+                "Device OEMs, inferred from the disclosed OEM customer route and embedded storage applications."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "we provide our original equipment manufacturer (“OEM”) and channel customers a broad array of high-performance flash solutions"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest quarter financials",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Fiscal fourth quarter ended July 3, 2026 (GAAP)",
+          "cols": [
+            "Metric",
+            "Period",
+            "Value"
+          ],
+          "rows": [
+            {
+              "id": "quarter_period",
+              "cells": [
+                "Reporting period",
+                "Fiscal fourth quarter",
+                "Ended July 3, 2026"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_2",
+                "quote": "financial results for the fiscal fourth quarter ended July 3, 2026."
+              }
+            },
+            {
+              "id": "q4_revenue",
+              "cells": [
+                "Revenue",
+                "Q4 2026",
+                "$8,965 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "|Revenue|$8,965||$5,950||up 51%"
+              }
+            },
+            {
+              "id": "q4_gross_margin",
+              "cells": [
+                "Gross margin",
+                "Q4 2026",
+                "84.6%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "|Gross Margin|84.6%"
+              }
+            },
+            {
+              "id": "q4_operating_expenses",
+              "cells": [
+                "Operating expenses",
+                "Q4 2026",
+                "$545 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "|Operating Expenses|$545"
+              }
+            },
+            {
+              "id": "q4_operating_income",
+              "cells": [
+                "Operating income",
+                "Q4 2026",
+                "$7,037 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "|Operating Income |$7,037"
+              }
+            },
+            {
+              "id": "q4_net_income",
+              "cells": [
+                "Net income",
+                "Q4 2026",
+                "$6,903 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "|Net Income|$6,903"
+              }
+            },
+            {
+              "id": "q4_eps",
+              "cells": [
+                "Diluted net income per share",
+                "Q4 2026",
+                "$43.97"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sndk_results_1",
+                "quote": "$43.97||$23.03||up 91%"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported strategic drivers and risks",
+          "cols": [
+            "Type",
+            "Item"
+          ],
+          "rows": [
+            {
+              "id": "innovation_driver",
+              "cells": [
+                "Driver",
+                "The company identifies technology innovation and manufacturing leadership as foundational strategy elements."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "Technology Innovation and Manufacturing Leadership"
+              }
+            },
+            {
+              "id": "demand_volatility_risk",
+              "cells": [
+                "Risk",
+                "Operating results may fluctuate with demand, industry cycles, customer deployment timing and demand-forecasting challenges, including for AI-related data-center investments."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "Our operating results may fluctuate due to changes in demand, industry cycles and the timing of customer deployments, including AI-related data center investments"
+              }
+            },
+            {
+              "id": "competition_risk",
+              "cells": [
+                "Risk",
+                "The filing identifies declining average selling prices, volatile demand, technological change and supply constraints among competitive risks."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "including declining average selling prices, volatile demand, technological change"
+              }
+            },
+            {
+              "id": "supply_risk",
+              "cells": [
+                "Risk",
+                "Dependence on a limited number of qualified suppliers and possible supply disruption or component-cost increases could negatively affect the business."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sndk_10k",
+                "quote": "We are dependent on a limited number of qualified suppliers"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 0,
+    "sourced_items": 25
+  },
+  "usage": {
+    "input_tokens": 30404,
+    "cached_input_tokens": 16294,
+    "output_tokens": 7850,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.00549894,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.04549894
+  }
+}

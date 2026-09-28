@@ -4,4 +4,5 @@
 pub mod canslim;
 pub mod chart;
 pub mod dossier;
+pub mod earnings_report;
 pub mod search;

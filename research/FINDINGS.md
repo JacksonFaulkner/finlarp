@@ -1,7 +1,7 @@
 # Public SEC data: what's actually useful (universe-wide, 2026-09-26)
 
 428 stocks (15 deregistered tickers moved to `_meta.delisted`, 9 renamed), 406 with SEC CIKs.
-Data under `~/.local/share/nvim/security_spread/` (+ `sec_13f/`). Pull scripts in `services/sec_*.py`.
+Data under `~/.local/share/nvim/security_spread/` (+ `sec_13f/`). Pull scripts in `sources/sec_*.py`.
 
 | Source | Module | Size | Coverage | Verdict |
 |---|---|---|---|---|
@@ -16,5 +16,5 @@ Data under `~/.local/share/nvim/security_spread/` (+ `sec_13f/`). Pull scripts i
 | AI Patent Dataset (USPTO AIPD 2023_r1) | patents_ai | 96MB parquet | 99.7% of coverable universe grants | **Medium-high.** Grants thru 2023-12-26 only (no 2024-25, no design). predict50 `any_ai` is generous (enterprise software 90%+ via "hardware"/planning components); use `pct_ai93` or `ml` share for ranking. Trends look right (NVDA 31→54% ai93 2015→2023, IBM 44→66%). |
 | Yahoo profiles | yahoo_profile | <1MB | 427/428 | **High, cheap.** Legal long name (only name for non-SEC filers), sector/industry (`i:` search filter), summary (`type:profile`). |
 
-Search: `services/search.py` (BM25, DuckDB fts) over filing text + new risks + earnings + guidance
+Search: `views/search.py` (BM25, DuckDB fts) over filing text + new risks + earnings + guidance
 + profiles + patents since 2016 (patents only with `type:patent`), 867k chunks, 850MB index, ~0.2–0.8s/query. `<leader>sf`, `f` on a heatmap tile.

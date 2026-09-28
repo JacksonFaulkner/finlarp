@@ -1,5 +1,5 @@
 // Query-string helpers for the search screen. Parsing proper stays in
-// services/search.py (one parser); this only does the lexical work the UI
+// views/search.py (one parser); this only does the lexical work the UI
 // needs without a round trip:
 //
 //   toggle()      facet click -> rewrite the t: / type: / sec: / since:+until:

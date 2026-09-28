@@ -1,5 +1,5 @@
 // Full-text search over SEC filing chunks, patents and profiles
-// (services/search.py BM25 index), as a live ratatui screen. The fzf picker
+// (views/search.py BM25 index), as a live ratatui screen. The fzf picker
 // in ui/search.lua is the other front end over the same engine.
 //
 //   ┌ search › t:MRVL guidance▏                              searching… ┐
@@ -27,15 +27,16 @@ use std::collections::HashMap;
 use std::io;
 use std::time::{Duration, Instant};
 
+use ratatui::Frame;
 use ratatui::crossterm::event::{Event, KeyCode, KeyEvent, KeyModifiers};
 use ratatui::widgets::ListState;
-use ratatui::Frame;
-use tui_input::backend::crossterm::EventHandler;
 use tui_input::Input;
+use tui_input::backend::crossterm::EventHandler;
 
 use crate::app::{Action, Ctx, NvimAction, Screen};
 use crate::model::Source;
-use crate::ui::help::{key, Key};
+use crate::ui::command_palette::{self, Command, Entry, Palette};
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 use client::{Client, Hit, Reply, Request};
@@ -55,6 +56,7 @@ const QUOTE_WORDS: usize = 10;
 const FLASH_FOR: Duration = Duration::from_secs(2);
 
 pub const KEYS: &[Key] = &[
+    key("^p", "command palette"),
     key("↵", "open chunk in nvim"),
     key("M-v", "open source doc at passage"),
     key("^o", "open in browser"),
@@ -79,10 +81,16 @@ pub enum Pane {
 }
 
 impl Pane {
-    fn cycle(self, back: bool) -> Self {
-        const ORDER: [Pane; 4] = [Pane::Input, Pane::Facets, Pane::Results, Pane::Preview];
-        let i = ORDER.iter().position(|p| *p == self).unwrap_or(0);
-        ORDER[if back { (i + 3) % 4 } else { (i + 1) % 4 }]
+    fn cycle(self, back: bool, compact: bool) -> Self {
+        const ALL: [Pane; 4] = [Pane::Input, Pane::Facets, Pane::Results, Pane::Preview];
+        const WIDE: [Pane; 3] = [Pane::Input, Pane::Results, Pane::Preview];
+        let order: &[Pane] = if compact { &ALL } else { &WIDE };
+        let i = order.iter().position(|p| *p == self).unwrap_or(0);
+        order[if back {
+            (i + order.len() - 1) % order.len()
+        } else {
+            (i + 1) % order.len()
+        }]
     }
 }
 
@@ -133,10 +141,17 @@ pub struct Search {
 
     show_help: bool,
     flash: Option<(String, Instant)>,
+    palette: Palette,
+    last_width: u16,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Search> {
-    Ok(Search::new(arg.unwrap_or_default(), ctx.theme, Client::spawn(), History::load()))
+    Ok(Search::new(
+        arg.unwrap_or_default(),
+        ctx.theme,
+        Client::spawn(),
+        History::load(),
+    ))
 }
 
 impl Search {
@@ -169,6 +184,8 @@ impl Search {
             preview_jump: false,
             show_help: false,
             flash: None,
+            palette: Palette::default(),
+            last_width: 120,
         };
         // the initial query goes out immediately (server start overlaps it)
         s.send_query();
@@ -183,7 +200,16 @@ impl Search {
     fn send_query(&mut self) {
         let q = self.input.value().to_string();
         let id = self.id();
-        if self.client.tx.send(Request::Query { id, q: q.clone(), k: K }).is_ok() {
+        if self
+            .client
+            .tx
+            .send(Request::Query {
+                id,
+                q: q.clone(),
+                k: K,
+            })
+            .is_ok()
+        {
             self.sent = Some((id, q));
             self.loading = true;
         }
@@ -225,7 +251,10 @@ impl Search {
             self.results = r.results;
             self.terms = r.terms;
             self.ms = r.ms;
-            self.total = r.facets.get("type").map_or(0, |v| v.iter().map(|(_, c)| c).sum());
+            self.total = r
+                .facets
+                .get("type")
+                .map_or(0, |v| v.iter().map(|(_, c)| c).sum());
             self.facets = Dim::ALL
                 .iter()
                 .flat_map(|d| {
@@ -234,13 +263,23 @@ impl Search {
                         .get(d.name())
                         .into_iter()
                         .flatten()
-                        .filter_map(|(v, c)| v.clone().map(|value| FacetRow::Item { dim: *d, value, count: *c }))
+                        .filter_map(|(v, c)| {
+                            v.clone().map(|value| FacetRow::Item {
+                                dim: *d,
+                                value,
+                                count: *c,
+                            })
+                        })
                         .collect();
                     let head = (!items.is_empty()).then_some(FacetRow::Header(*d));
                     head.into_iter().chain(items)
                 })
                 .collect();
-            self.list.select(if self.results.is_empty() { None } else { Some(0) });
+            self.list.select(if self.results.is_empty() {
+                None
+            } else {
+                Some(0)
+            });
             *self.list.offset_mut() = 0;
             self.clamp_facet();
             self.selection_changed();
@@ -276,12 +315,16 @@ impl Search {
     fn clamp_facet(&mut self) {
         let item = |i: usize| matches!(self.facets.get(i), Some(FacetRow::Item { .. }));
         let cur = self.facet_state.selected().unwrap_or(0);
-        let pick = (cur..self.facets.len()).find(|i| item(*i)).or_else(|| (0..cur).rev().find(|i| item(*i)));
+        let pick = (cur..self.facets.len())
+            .find(|i| item(*i))
+            .or_else(|| (0..cur).rev().find(|i| item(*i)));
         self.facet_state.select(pick);
     }
 
     fn move_facet(&mut self, down: bool) {
-        let Some(cur) = self.facet_state.selected() else { return self.clamp_facet() };
+        let Some(cur) = self.facet_state.selected() else {
+            return self.clamp_facet();
+        };
         let item = |i: &usize| matches!(self.facets.get(*i), Some(FacetRow::Item { .. }));
         let next = if down {
             (cur + 1..self.facets.len()).find(item)
@@ -294,14 +337,19 @@ impl Search {
     }
 
     fn toggle_facet(&mut self) {
-        let Some(FacetRow::Item { dim, value, .. }) = self.facet_state.selected().and_then(|i| self.facets.get(i))
+        let Some(FacetRow::Item { dim, value, .. }) =
+            self.facet_state.selected().and_then(|i| self.facets.get(i))
         else {
             return;
         };
         let q = query::toggle(self.input.value(), *dim, value);
         self.set_query(q);
         // facet clicks are deliberate: no need to wait for more typing
-        self.edited_at = Some(Instant::now().checked_sub(self.debounce).unwrap_or_else(Instant::now));
+        self.edited_at = Some(
+            Instant::now()
+                .checked_sub(self.debounce)
+                .unwrap_or_else(Instant::now),
+        );
     }
 
     fn scroll_preview(&mut self, delta: i32) {
@@ -315,7 +363,9 @@ impl Search {
     }
 
     fn open_chunk(&mut self) -> Action {
-        let Some(id) = self.selected().map(|h| h.id) else { return Action::None };
+        let Some(id) = self.selected().map(|h| h.id) else {
+            return Action::None;
+        };
         self.remember();
         Action::Nvim(NvimAction::Chunk { id: id.to_string() })
     }
@@ -325,7 +375,10 @@ impl Search {
             Some(src) if src.url.is_some() => {
                 self.remember();
                 let url = src.doc_url().unwrap_or_default().to_string();
-                Action::Nvim(NvimAction::Docview { url, quote: src.quote() })
+                Action::Nvim(NvimAction::Docview {
+                    url,
+                    quote: src.quote(),
+                })
             }
             Some(_) => self.flash_msg("no source document for this hit"),
             None => Action::None,
@@ -333,14 +386,22 @@ impl Search {
     }
 
     fn open_browser(&mut self) -> Action {
-        match self.selected_source().as_ref().and_then(|s| s.doc_url().map(str::to_string)) {
+        match self
+            .selected_source()
+            .as_ref()
+            .and_then(|s| s.doc_url().map(str::to_string))
+        {
             Some(u) => Action::OpenBrowser(u),
             None => self.flash_msg("no source document for this hit"),
         }
     }
 
     fn copy_url(&mut self) -> Action {
-        match self.selected_source().as_ref().and_then(|s| s.doc_url().map(str::to_string)) {
+        match self
+            .selected_source()
+            .as_ref()
+            .and_then(|s| s.doc_url().map(str::to_string))
+        {
             Some(u) => Action::Copy(u),
             None => self.flash_msg("no source url"),
         }
@@ -383,7 +444,11 @@ impl Search {
 }
 
 fn hit_source(h: &Hit) -> Source {
-    let date = h.date.as_deref().map(|d| d.get(..10).unwrap_or(d)).unwrap_or("");
+    let date = h
+        .date
+        .as_deref()
+        .map(|d| d.get(..10).unwrap_or(d))
+        .unwrap_or("");
     let mut label = format!("{} {}", h.ticker, h.form.as_deref().unwrap_or(&h.kind));
     if let Some(s) = h.section.as_deref() {
         label.push_str(&format!(" · {s}"));
@@ -399,9 +464,17 @@ fn hit_source(h: &Hit) -> Source {
     }
     let url = h.url.as_ref().map(|u| {
         let quote = query::first_words(&h.text, QUOTE_WORDS);
-        if quote.is_empty() { u.clone() } else { format!("{u}#:~:text={}", query::encode_fragment(&quote)) }
+        if quote.is_empty() {
+            u.clone()
+        } else {
+            format!("{u}#:~:text={}", query::encode_fragment(&quote))
+        }
     });
-    Source { label, url, ..Source::default() }
+    Source {
+        label,
+        url,
+        ..Source::default()
+    }
 }
 
 impl Screen for Search {
@@ -414,25 +487,45 @@ impl Screen for Search {
             self.apply(r);
         }
         if self.edited_at.is_some_and(|t| t.elapsed() >= self.debounce) {
-            if self.sent.as_ref().is_some_and(|(_, q)| q == self.input.value()) {
+            if self
+                .sent
+                .as_ref()
+                .is_some_and(|(_, q)| q == self.input.value())
+            {
                 self.edited_at = None;
             } else {
                 self.send_query();
             }
         }
-        if self.selected_at.is_some_and(|t| t.elapsed() >= PREVIEW_DELAY) {
+        if self
+            .selected_at
+            .is_some_and(|t| t.elapsed() >= PREVIEW_DELAY)
+        {
             self.selected_at = None;
             if let Some(chunk) = self.selected().map(|h| h.id) {
                 let pending = self.context_req.is_some_and(|(_, c)| c == chunk);
                 if !self.context.contains_key(&chunk) && !pending {
                     let id = self.id();
-                    if self.client.tx.send(Request::Get { id, get: chunk, context: CONTEXT }).is_ok() {
+                    if self
+                        .client
+                        .tx
+                        .send(Request::Get {
+                            id,
+                            get: chunk,
+                            context: CONTEXT,
+                        })
+                        .is_ok()
+                    {
                         self.context_req = Some((id, chunk));
                     }
                 }
             }
         }
-        if self.flash.as_ref().is_some_and(|(_, t)| t.elapsed() > FLASH_FOR) {
+        if self
+            .flash
+            .as_ref()
+            .is_some_and(|(_, t)| t.elapsed() > FLASH_FOR)
+        {
             self.flash = None;
         }
         Action::None
@@ -443,12 +536,43 @@ impl Screen for Search {
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
+        if self.palette.open {
+            if let Some(command) = self.palette.handle(key) {
+                return match command {
+                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                        screen: screen.into(),
+                        arg: Some(self.input.value().to_string()),
+                    }),
+                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                        screen: screen.into(),
+                    }),
+                    Some(Command::Pane(pane)) => {
+                        self.focus = [Pane::Input, Pane::Facets, Pane::Results, Pane::Preview]
+                            [(pane as usize).min(3)];
+                        Action::None
+                    }
+                    _ => Action::None,
+                };
+            }
+        }
         if self.show_help {
             self.show_help = false;
             return Action::None;
         }
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
         let alt = key.modifiers.contains(KeyModifiers::ALT);
+        if key.code == KeyCode::Char('p') && ctrl {
+            let mut entries = command_palette::destinations("", "search");
+            entries.extend([
+                Entry::new("Focus search input", "", Command::Pane(0)),
+                Entry::new("Show facets", "compact view", Command::Pane(1)),
+                Entry::new("Show results", "", Command::Pane(2)),
+                Entry::new("Show preview", "", Command::Pane(3)),
+            ]);
+            self.palette.show(entries);
+            return Action::None;
+        }
+        let compact = self.last_width < 120;
         // keys that mean the same in every pane
         match key.code {
             KeyCode::Esc => {
@@ -456,11 +580,11 @@ impl Screen for Search {
                 return Action::Quit;
             }
             KeyCode::Tab => {
-                self.focus = self.focus.cycle(false);
+                self.focus = self.focus.cycle(false, compact);
                 return Action::None;
             }
             KeyCode::BackTab => {
-                self.focus = self.focus.cycle(true);
+                self.focus = self.focus.cycle(true, compact);
                 return Action::None;
             }
             KeyCode::Char('j' | 'n') if ctrl => {

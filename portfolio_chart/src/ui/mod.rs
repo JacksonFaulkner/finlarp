@@ -5,8 +5,11 @@
 //
 //   theme        colours + semantic styles (from nvim's colorscheme args)
 //   layout       standard screen frames (header / nav / detail / source bar)
+//   block_grid   blocks as a grid of bordered containers, spatial hjkl (dashboards)
 //   block_view   renders model::Block lists with a row/cell cursor (Table, Kv, Series, Bars, Text)
-//   section_list left nav: List + ListState over model::Section
+//   section_list left nav: List + ListState over model::Section (long lists)
+//   section_tabs top nav: one row of tabs over model::Section (few, short sections)
+//   spacing      padding / gap tokens by screen size (theme.spacing)
 //   source_bar   one-line source of the selection + SourceInspector popup (formula + inputs)
 //   charts       grouped bars, sparklines with gaps, line chart helpers
 //   help         `?` keymap overlay + footer key hints
@@ -15,11 +18,15 @@
 // A component library: not every screen uses every helper.
 #![allow(dead_code)]
 
+pub mod block_grid;
 pub mod block_view;
 pub mod charts;
+pub mod command_palette;
 pub mod help;
 pub mod layout;
 pub mod section_list;
+pub mod section_tabs;
 pub mod source_bar;
+pub mod spacing;
 pub mod text;
 pub mod theme;

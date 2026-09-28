@@ -1614,7 +1614,7 @@
        "label": "Granted US patents",
        "value": "8,483 (thru 2025-12-23)",
        "src": {
-        "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+        "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
         "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
        }
       }
@@ -1633,7 +1633,7 @@
         "formula": "count(patent_id) where grant year = 2012",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1647,7 +1647,7 @@
         "formula": "count(patent_id) where grant year = 2013",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1661,7 +1661,7 @@
         "formula": "count(patent_id) where grant year = 2014",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1675,7 +1675,7 @@
         "formula": "count(patent_id) where grant year = 2015",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1689,7 +1689,7 @@
         "formula": "count(patent_id) where grant year = 2016",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1703,7 +1703,7 @@
         "formula": "count(patent_id) where grant year = 2017",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1717,7 +1717,7 @@
         "formula": "count(patent_id) where grant year = 2018",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1731,7 +1731,7 @@
         "formula": "count(patent_id) where grant year = 2019",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1745,7 +1745,7 @@
         "formula": "count(patent_id) where grant year = 2020",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1759,7 +1759,7 @@
         "formula": "count(patent_id) where grant year = 2021",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1773,7 +1773,7 @@
         "formula": "count(patent_id) where grant year = 2022",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1787,7 +1787,7 @@
         "formula": "count(patent_id) where grant year = 2023",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1801,7 +1801,7 @@
         "formula": "count(patent_id) where grant year = 2024",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1815,7 +1815,7 @@
         "formula": "count(patent_id) where grant year = 2025",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1840,7 +1840,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1858,7 +1858,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1876,7 +1876,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1894,7 +1894,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1912,7 +1912,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1930,7 +1930,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1948,7 +1948,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1966,7 +1966,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -1984,7 +1984,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2002,7 +2002,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2020,7 +2020,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2038,7 +2038,7 @@
           "url": "https://data.uspto.gov/bulkdata/datasets/ecopatai"
          },
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2059,7 +2059,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2073,7 +2073,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2087,7 +2087,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2101,7 +2101,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2115,7 +2115,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2129,7 +2129,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2143,7 +2143,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]
@@ -2157,7 +2157,7 @@
         "formula": "count of 2023+ grants tagged with this field",
         "inputs": [
          {
-          "label": "PatentsView granted patents, assignee names matched to MRVL (services/patents.py; audit: patent_assignees view)",
+          "label": "PatentsView granted patents, assignee names matched to MRVL (sources/patents.py; audit: patent_assignees view)",
           "url": "https://data.uspto.gov/bulkdata/datasets/pvgpatdis"
          }
         ]

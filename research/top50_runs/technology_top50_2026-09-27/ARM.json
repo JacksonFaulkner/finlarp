@@ -1,0 +1,266 @@
+{
+  "ticker": "ARM",
+  "company": "ARM",
+  "market_cap_usd": 331421319168,
+  "as_of": "2026-09-18",
+  "filing": {
+    "form": "6-K",
+    "filed": "2026-09-18",
+    "accession": "0001973239-26-000135",
+    "url": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000135/arm-20260918.htm"
+  },
+  "generated_at": "2026-09-27T18:52:22+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 5,
+  "sources": [
+    {
+      "source_id": "arm_business_1",
+      "label": "Products – Intelligent computing everywhere – Arm®",
+      "url": "https://www.arm.com/products",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "arm_business_2",
+      "label": "Markets – Arm®",
+      "url": "https://www.arm.com/markets",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "arm_results_1",
+      "label": "Licensing revenue grew 29% year-over-year to $819 million",
+      "url": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/exhibit992fye26q431-marx26.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "arm_results_2",
+      "label": "arm-20260630",
+      "url": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000114/arm-20260630.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "arm_results_3",
+      "label": "Document",
+      "url": "https://www.sec.gov/Archives/edgar/data/1973239/000197323926000062/exhibit991fye26q431-marx26.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Platform and adoption model",
+          "text": "Arm’s platform spans core IP, compute subsystems and purpose-built silicon, giving technology companies options to design, build and deploy computing products.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_3",
+            "quote": "Arm’s platform spans core IP, advanced compute subsystems and purpose-built silicon"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Ecosystem",
+          "text": "Arm describes its ecosystem as including more than 22 million developers.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_3",
+            "quote": "including over 22 million developers"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Compute platform",
+          "text": "Arm CPUs perform systems-level orchestration, coordinating specialized compute, workloads and memory.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_business_1",
+            "quote": "Arm CPUs play a crucial systems-level orchestration role"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Application areas",
+          "text": "Arm describes applications across cloud and data center, autonomous machines, mobile and PC, and wearables, smart home, industrial and embedded devices.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_business_1",
+            "quote": "Cloud and data center"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Shipped chips",
+          "text": "Arm reports more than 350 billion Arm-based chips shipped to date.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_business_1",
+            "quote": "350B+ Arm-based chips shipped to date"
+          }
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Reported demand drivers",
+          "text": "In the quarter reported in May 2026, royalty revenue growth was attributed to smartphones, Edge AI, Physical AI and Cloud AI; data center royalty revenue more than doubled year over year.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_1",
+            "quote": "Royalty revenue grew 11% to $671 million, driven by growth across smartphones, Edge AI, Physical AI, and Cloud AI, where our data center royalty more than doubled year-over-year."
+          }
+        },
+        {
+          "type": "text",
+          "title": "AI markets",
+          "text": "Arm identifies cloud AI, edge AI and physical AI as the three domains for its compute platform.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_business_2",
+            "quote": "the three domains shaping the future of computing: cloud AI, physical AI, and edge AI"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_map",
+      "title": "Customer and channel facts; buyer archetypes",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Documented partner fact",
+          "text": "Arm identified Meta as the lead partner and co-developer for the Arm AGI CPU.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_1",
+            "quote": "Meta is our lead partner and co-developer"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Documented ecosystem support",
+          "text": "Arm said more than 50 companies supported expansion of the Arm compute platform into silicon; the cited examples include AWS, Broadcom, Google Cloud, Microsoft and NVIDIA.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_1",
+            "quote": "more than 50 leading companies supporting the expansion of the Arm compute platform into silicon, including AWS, Broadcom, Google Cloud, Marvell, Microsoft"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Inferred buyer archetypes",
+          "text": "Likely buyer archetypes include data-center operators and providers of mobile, PC, automotive/autonomous, and embedded systems. These are inferred from the application markets Arm describes, not identified customer relationships.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "arm_business_1",
+            "quote": "Cloud and data center"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Adoption routes",
+          "text": "Arm says customers can adopt its compute platform through IP, CSS and silicon.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_1",
+            "quote": "Customers can consume the Arm compute platform using IP, CSS and now silicon"
+          }
+        }
+      ]
+    },
+    {
+      "id": "financials_cash",
+      "title": "Latest supplied quarterly filing: financials and cash/debt",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Period identified in supplied quarterly filing extract",
+          "text": "The supplied quarterly-filing extract identifies the reporting period as the three months ended June 30, 2026. It lists income statements, balance sheets and cash flow statements, but the supplied extract does not include their values.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_2",
+            "quote": "Quarterly report for the three months ended June 30, 2026."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Income statement values",
+          "text": "Not disclosed in the supplied extract.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_2",
+            "quote": "Condensed Consolidated Income Statements for the three months ended June 30, 2026 and 2025"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Cash flow and debt values",
+          "text": "Cash flow values and debt amounts are not disclosed in the supplied extract.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_2",
+            "quote": "Condensed Consolidated Statements of Cash Flows for the three months ended June 30, 2026 and 2025"
+          }
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Growth driver described by Arm",
+          "text": "Arm said agentic AI workloads increase the need for CPUs to coordinate orchestration, data movement, memory, security and workloads.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_1",
+            "quote": "CPUs are critical in managing the orchestration, data movement, memory, security, and workload coordination required by agentic AI."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Risk factors identified in filing extract",
+          "text": "Identified risk factors include dependence on semiconductor and electronics industries and customer-product demand, compatibility with customer manufacturing and design processes, demand forecasting, and intense competition.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "arm_results_2",
+            "quote": "Arm's dependence on the semiconductor and electronics industries and the demand for the products of its customers and customers’ customers; Arm's dependence on the compatibility of its products with the manufacturing and design processes of its customers; Arm’s ability to forecast demand for new products; intense competition"
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 16
+  },
+  "usage": {
+    "input_tokens": 4795,
+    "cached_input_tokens": 1095,
+    "output_tokens": 2896,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00182895,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02182895
+  }
+}

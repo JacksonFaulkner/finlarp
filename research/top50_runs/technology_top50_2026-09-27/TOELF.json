@@ -1,0 +1,406 @@
+{
+  "ticker": "TOELF",
+  "company": "TOELF",
+  "market_cap_usd": 163592306688,
+  "as_of": null,
+  "filing": null,
+  "generated_at": "2026-09-27T19:18:54+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 4,
+  "sources": [
+    {
+      "source_id": "toelf_business_1",
+      "label": "Tokyo Electron Limited (TOELF) company profile and facts - Yahoo Finance",
+      "url": "https://sg.finance.yahoo.com/quote/TOELF/profile/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "toelf_business_2",
+      "label": "TOELF: Tokyo Electron Ltd - Stock Price, Quote and News - CNBC",
+      "url": "https://www.cnbc.com/quotes/TOELF",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "toelf_business_3",
+      "label": "TOELF Stock Price Quote | Morningstar",
+      "url": "https://kessler-prod.reta52d8.eas.morningstar.com/stocks/pinx/toelf/quote",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "toelf_results_1",
+      "label": "fy27q1tanshin-e",
+      "url": "https://www.tel.com/ir/irta3a00000006g5-att/fy27q1tanshin-e.pdf",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Core activities and services",
+          "text": "Tokyo Electron and its subsidiaries develop, manufacture, and sell semiconductor production equipment across multiple regions; it also provides related engineering and aftermarket services.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "toelf_business_1",
+            "quote": "develops, manufactures, and sells semiconductor production equipment"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Aftermarket offerings",
+          "text": "Reported services include engineering, spare parts and repairs, upgrades and modifications, and used products.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "toelf_business_1",
+            "quote": "engineering services; spare parts/repairs; upgrades/modification; and used products"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported equipment categories",
+          "cols": [
+            "Category",
+            "Reported products"
+          ],
+          "rows": [
+            {
+              "id": "wafer_process",
+              "cells": [
+                "Semiconductor production",
+                "Coaters/developers; plasma etch; cleaning; deposition; test; 3D integration; SiC Epitaxial CVD; gas cluster beam systems"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_1",
+                "quote": "coaters/developers, plasma etch systems, cleaning systems, deposition systems, test systems, 3D integration systems"
+              }
+            },
+            {
+              "id": "other_products",
+              "cells": [
+                "Other",
+                "Other deposition and lithography products"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_1",
+                "quote": "other deposition and lithography and other products"
+              }
+            },
+            {
+              "id": "fpd",
+              "cells": [
+                "Flat panel display production",
+                "FPD production equipment"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_2",
+                "quote": "semiconductor production equipment and flat panel display (FPD) production equipment"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "markets",
+      "title": "End-market exposure and demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Markets evidenced in supplied sources",
+          "cols": [
+            "Market",
+            "Evidence"
+          ],
+          "rows": [
+            {
+              "id": "semiconductor",
+              "cells": [
+                "Semiconductor manufacturing",
+                "The company profile identifies semiconductor production equipment as a primary business."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_2",
+                "quote": "primarily semiconductor production equipment"
+              }
+            },
+            {
+              "id": "fpd",
+              "cells": [
+                "Flat panel display manufacturing",
+                "The profile also identifies FPD production equipment."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_2",
+                "quote": "flat panel display (FPD) production equipment"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Demand trend",
+          "text": "The supplied company and investor excerpts do not provide a quantified end-market demand trend or customer spending forecast.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "toelf_business_2",
+            "quote": "Tokyo Electron Ltd is a Japan-based company mainly engaged in the manufacture and sale"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customers",
+      "title": "Customer and buyer map",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented customer facts and inferred buyer archetypes",
+          "cols": [
+            "Type",
+            "Finding"
+          ],
+          "rows": [
+            {
+              "id": "named_customers",
+              "cells": [
+                "Named customers (source-reported)",
+                "Samsung Electronics, Intel, TSMC, and SK Hynix"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_3",
+                "quote": "Customers include leading-edge logic, foundry, and memory chipmakers such as Samsung Electronics, Intel, TSMC, and SK Hynix."
+              }
+            },
+            {
+              "id": "buyer_archetypes",
+              "cells": [
+                "Inferred buyer archetypes",
+                "Leading-edge logic, foundry, and memory chipmakers; these are buyer categories, not additional named customers."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "toelf_business_3",
+                "quote": "leading-edge logic, foundry, and memory chipmakers"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest reported quarter and financial position",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Consolidated results — three months ended June 30, 2026",
+          "cols": [
+            "Metric",
+            "Period",
+            "Value",
+            "Unit"
+          ],
+          "rows": [
+            {
+              "id": "sales",
+              "cells": [
+                "Net sales",
+                "Three months ended June 30, 2026",
+                "732,388",
+                "Millions of yen"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "732,388"
+              }
+            },
+            {
+              "id": "operating_income",
+              "cells": [
+                "Operating income",
+                "Three months ended June 30, 2026",
+                "211,407",
+                "Millions of yen"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "211,407"
+              }
+            },
+            {
+              "id": "ordinary_income",
+              "cells": [
+                "Ordinary income",
+                "Three months ended June 30, 2026",
+                "215,626",
+                "Millions of yen"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "215,626"
+              }
+            },
+            {
+              "id": "net_income",
+              "cells": [
+                "Net income attributable to owners of parent",
+                "Three months ended June 30, 2026",
+                "164,341",
+                "Millions of yen"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "164,341"
+              }
+            },
+            {
+              "id": "assets",
+              "cells": [
+                "Total assets",
+                "As of June 30, 2026",
+                "2,860,997",
+                "Millions of yen"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "2,860,997"
+              }
+            },
+            {
+              "id": "net_assets",
+              "cells": [
+                "Total net assets",
+                "As of June 30, 2026",
+                "2,069,996",
+                "Millions of yen"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "2,069,996"
+              }
+            },
+            {
+              "id": "equity_ratio",
+              "cells": [
+                "Equity ratio",
+                "As of June 30, 2026",
+                "71.5",
+                "Percent"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "71.5"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Cash and debt",
+          "text": "Cash and debt balances are not included in the supplied excerpt of the latest financial results.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "toelf_results_1",
+            "quote": "(2) Consolidated Financial Position"
+          }
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported outlook and uncertainty indicators",
+          "cols": [
+            "Item",
+            "Finding"
+          ],
+          "rows": [
+            {
+              "id": "first_half_forecast",
+              "cells": [
+                "First-half FY ending March 31, 2027 forecast",
+                "Net sales: 1,620,000 million yen; operating income: 458,000 million yen; ordinary income: 464,000 million yen; net income attributable to owners of parent: 349,000 million yen."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "1,620,000 37.3 458,000 51.1 464,000 51.2 349,000 44.4"
+              }
+            },
+            {
+              "id": "forecast_revision",
+              "cells": [
+                "Forecast revision",
+                "The release states that the forecast was revised from the most recently announced forecast."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_results_1",
+                "quote": "Revision to the financial forecasts most recently announced: Yes"
+              }
+            },
+            {
+              "id": "valuation_uncertainty",
+              "cells": [
+                "External assessment",
+                "Morningstar reports uncertainty as High; this is a valuation uncertainty indicator, not a company-reported operating risk."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "toelf_business_3",
+                "quote": "Uncertainty High"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 0,
+    "sourced_items": 21
+  },
+  "usage": {
+    "input_tokens": 26122,
+    "cached_input_tokens": 14153,
+    "output_tokens": 6552,
+    "exa_search_calls": 6,
+    "exa_content_pages": 18,
+    "estimated_openai_usd": 0.00461443,
+    "estimated_exa_usd": 0.06,
+    "estimated_total_usd": 0.06461443
+  }
+}

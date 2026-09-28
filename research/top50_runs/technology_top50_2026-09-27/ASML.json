@@ -1,0 +1,445 @@
+{
+  "ticker": "ASML",
+  "company": "ASML",
+  "market_cap_usd": 669847322624,
+  "as_of": "2026-06-28",
+  "filing": {
+    "form": "6-K",
+    "filed": "2026-07-15",
+    "accession": "0001628280-26-048235",
+    "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/form6-kquarterlyfilings.htm"
+  },
+  "generated_at": "2026-09-27T19:13:31+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 5,
+  "sources": [
+    {
+      "source_id": "asml_business_1",
+      "label": "ASML products & services | Supplying the semiconductor ...",
+      "url": "https://www.asml.com/en/products",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asml_business_2",
+      "label": "ASML | The world's supplier to the semiconductor industry",
+      "url": "https://www.asml.com/en",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asml_business_3",
+      "label": "EUV lithography systems – Products | ASML",
+      "url": "https://www.asml.com/en/products/euv-lithography-systems",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asml_results_1",
+      "label": "Document",
+      "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/pressreleasefinancialresul.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asml_results_2",
+      "label": "financialstatementsusgaa",
+      "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "How ASML earns revenue",
+          "text": "ASML supplies lithography systems and related products and services that enable chipmakers to mass-produce microchip patterns on silicon wafers.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "asml_business_1",
+            "quote": "we provide our customers with everything they need to mass produce microchip patterns on silicon wafers"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Integrated offering",
+          "text": "ASML describes its holistic lithography approach as combining computational modeling, optical metrology and e-beam inspection with lithography systems.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "asml_business_1",
+            "quote": "integrates computational modeling, optical metrology and e-beam inspection with lithography systems"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Product families and uses",
+          "cols": [
+            "Area",
+            "Reported description"
+          ],
+          "rows": [
+            {
+              "id": "euv",
+              "cells": [
+                "EUV lithography",
+                "High-resolution systems used for advanced microchips; EUV prints intricate chip layers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_3",
+                "quote": "EUV systems are used to print the most intricate layers on a chip"
+              }
+            },
+            {
+              "id": "duv",
+              "cells": [
+                "DUV lithography",
+                "Dry and immersion systems used in high-volume manufacturing across advanced Logic and Memory chips and other chip innovation."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_1",
+                "quote": "used for high-volume manufacturing of the most advanced Logic and Memory chips"
+              }
+            },
+            {
+              "id": "metrology",
+              "cells": [
+                "Metrology and inspection",
+                "Systems covering chip manufacturing from R&D to mass production."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_1",
+                "quote": "covers every step in the chip manufacturing process, from R&D to mass production"
+              }
+            },
+            {
+              "id": "support",
+              "cells": [
+                "Customer support",
+                "Support employees help keep ASML systems operating in customer fabs."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_1",
+                "quote": "we make sure our systems in our customers’ fabs are running smoothly"
+              }
+            },
+            {
+              "id": "applications",
+              "cells": [
+                "Applications enabled by EUV",
+                "ASML identifies smart technology, augmented reality and artificial intelligence among applications enabled by EUV-made chips."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_3",
+                "quote": "enabling smart technology (cars, phones and homes), augmented reality, artificial intelligence and much more"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demand_customers",
+      "title": "End-market demand and customer/channel facts",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Demand conditions",
+          "text": "ASML attributed stronger demand for advanced Logic and Memory chips to ongoing AI-related investment and progress in AI technologies; it said customers continued to accelerate capacity expansion plans.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "asml_results_1",
+            "quote": "Ongoing AI-related investments and continued progress in AI technologies are driving demand for advanced Logic and Memory chips"
+          }
+        },
+        {
+          "type": "table",
+          "title": "Customer facts and inferred buyer archetypes",
+          "cols": [
+            "Classification",
+            "Fact"
+          ],
+          "rows": [
+            {
+              "id": "customer-us",
+              "cells": [
+                "Documented customer relationship",
+                "ASML says its US locations service Intel and other customers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_2",
+                "quote": "Our US locations service Intel and other customers"
+              }
+            },
+            {
+              "id": "customer-korea",
+              "cells": [
+                "Documented customer relationship",
+                "ASML says its South Korea teams work closely with Samsung and other customers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_business_2",
+                "quote": "Our teams in South Korea work closely with Samsung and other customers"
+              }
+            },
+            {
+              "id": "archetype",
+              "cells": [
+                "Inferred buyer archetypes",
+                "Chipmakers producing Logic and Memory chips are inferred buyer archetypes for ASML lithography systems; this does not identify additional named customers."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "asml_business_1",
+                "quote": "used for high-volume manufacturing of the most advanced Logic and Memory chips"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest-quarter financials",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "US GAAP income statement (€ millions, except per-share data)",
+          "cols": [
+            "Line item",
+            "Three months ended Jun 28, 2026",
+            "Six months ended Jun 28, 2026"
+          ],
+          "rows": [
+            {
+              "id": "sales",
+              "cells": [
+                "Total net sales",
+                "9,326.5",
+                "18,093.4"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Total net sales 7,691.7 9,326.5 15,433.2 18,093.4"
+              }
+            },
+            {
+              "id": "gross-profit",
+              "cells": [
+                "Gross profit",
+                "5,035.4",
+                "9,680.4"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Gross profit 4,129.5 5,035.4 8,309.2 9,680.4"
+              }
+            },
+            {
+              "id": "rd",
+              "cells": [
+                "Research and development costs",
+                "(1,276.6)",
+                "(2,461.5)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Research and development costs (1,166.7) (1,276.6) (2,327.8) (2,461.5)"
+              }
+            },
+            {
+              "id": "sga",
+              "cells": [
+                "Selling, general and administrative costs",
+                "(302.7)",
+                "(605.0)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Selling, general and administrative costs (298.7) (302.7) (579.4) (605.0)"
+              }
+            },
+            {
+              "id": "operating-income",
+              "cells": [
+                "Income from operations",
+                "3,456.1",
+                "6,613.9"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Income from operations 2,664.1 3,456.1 5,402.0 6,613.9"
+              }
+            },
+            {
+              "id": "income-before-tax",
+              "cells": [
+                "Income before income taxes",
+                "3,486.1",
+                "6,684.8"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Income before income taxes 2,688.9 3,486.1 5,476.0 6,684.8"
+              }
+            },
+            {
+              "id": "net-income",
+              "cells": [
+                "Net income",
+                "2,917.6",
+                "5,674.3"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Net income 2,290.3 2,917.6 4,645.3 5,674.3"
+              }
+            },
+            {
+              "id": "eps",
+              "cells": [
+                "Basic net income per ordinary share (€)",
+                "7.59",
+                "14.74"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Basic net income per ordinary share 5.90 7.59 11.90 14.74"
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Balance-sheet cash (€, millions)",
+          "rows": [
+            {
+              "id": "cash",
+              "label": "Cash and cash equivalents at Jun 28, 2026",
+              "value": "6,671.9",
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Cash and cash equivalents 12,916.0 6,671.9"
+              }
+            },
+            {
+              "id": "short-investments",
+              "label": "Short-term investments at Jun 28, 2026",
+              "value": "909.6",
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_2",
+                "quote": "Short-term investments 405.9 909.6"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers, outlook and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported drivers and outlook",
+          "cols": [
+            "Item",
+            "Reported information"
+          ],
+          "rows": [
+            {
+              "id": "installed-base",
+              "cells": [
+                "Q2 performance driver",
+                "ASML said Q2 sales and gross margin were above guidance, driven primarily by higher-than-expected Installed Base Management sales."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_1",
+                "quote": "driven primarily by higher than expected Installed Base Management sales"
+              }
+            },
+            {
+              "id": "order-intake",
+              "cells": [
+                "Demand visibility",
+                "ASML reported extremely strong order intake in the first half of 2026 and customer commitments across its product portfolio."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_1",
+                "quote": "Our order intake remained extremely strong in the first half of the year"
+              }
+            },
+            {
+              "id": "2026-outlook",
+              "cells": [
+                "2026 outlook",
+                "Total net sales: €43 billion to €45 billion; gross margin: 54% to 56%."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asml_results_1",
+                "quote": "expects 2026 total net sales to be between €43 billion and €45 billion, with a gross margin between 54% and 56%"
+              }
+            },
+            {
+              "id": "risk-inference",
+              "cells": [
+                "Inferred demand risk",
+                "ASML’s outlook is exposed to customer capacity plans: if those plans do not materialize, demand could be weaker than expected."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "asml_results_1",
+                "quote": "Our customers, in turn, continue to accelerate their capacity expansion plans"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 0,
+    "sourced_items": 25
+  },
+  "usage": {
+    "input_tokens": 12755,
+    "cached_input_tokens": 2190,
+    "output_tokens": 7682,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0049194,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0449194
+  }
+}

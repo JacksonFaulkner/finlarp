@@ -3,23 +3,24 @@
 // preview, source bar, footer); the detail pane is split here into results
 // and preview, side by side when wide and stacked when narrow.
 
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Position, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, List, ListItem, Paragraph};
-use ratatui::Frame;
 
 use super::client::Hit;
 use super::query;
-use super::{FacetRow, Pane, Search, KEYS};
+use super::{FacetRow, KEYS, Pane, Search};
 use crate::ui::help::{render_footer, render_overlay};
-use crate::ui::layout::{render_frame, Focus, FrameTitles, PaneOpts};
+use crate::ui::layout::{Focus, FrameTitles, PaneOpts, render_frame};
 use crate::ui::source_bar::render_source_bar_with;
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
 const PROMPT: &str = " search › ";
-const PLACEHOLDER: &str = "t:TICK s:sector type:10k|risk|new|earn|guid|patent sec:mda since:2025 \"phrase\" -word";
+const PLACEHOLDER: &str =
+    "t:TICK s:sector type:10k|risk|new|earn|guid|patent sec:mda since:2025 \"phrase\" -word";
 /// Below this width the preview goes under the results.
 const SIDE_BY_SIDE: u16 = 120;
 
@@ -34,25 +35,39 @@ fn type_style(kind: &str, theme: &Theme) -> Style {
 }
 
 fn short_date(h: &Hit) -> &str {
-    h.date.as_deref().map(|d| d.get(..10).unwrap_or(d)).unwrap_or("")
+    h.date
+        .as_deref()
+        .map(|d| d.get(..10).unwrap_or(d))
+        .unwrap_or("")
 }
 
 /// `text` as spans with `terms` highlighted over `base`.
 fn hl_spans<'a>(text: &'a str, terms: &[String], base: Style, theme: &Theme) -> Vec<Span<'a>> {
-    let hit = base.fg(theme.accent).add_modifier(Modifier::BOLD | Modifier::UNDERLINED);
-    query::highlight(text, terms).into_iter().map(|(s, m)| Span::styled(s, if m { hit } else { base })).collect()
+    let hit = base
+        .fg(theme.accent)
+        .add_modifier(Modifier::BOLD | Modifier::UNDERLINED);
+    query::highlight(text, terms)
+        .into_iter()
+        .map(|(s, m)| Span::styled(s, if m { hit } else { base }))
+        .collect()
 }
 
 impl Search {
     pub(super) fn render(&mut self, frame: &mut Frame) {
         let area = frame.area();
+        self.last_width = area.width;
         let theme = self.theme;
         frame.render_widget(Block::new().style(theme.base()), area);
+        let compact = area.width < 120;
+        if !compact && self.focus == Pane::Facets {
+            self.focus = Pane::Results;
+        }
         let opts = PaneOpts {
-            nav_width: if area.width >= 90 { 24 } else { 0 },
+            nav_width: if compact { 0 } else { 24 },
             source_height: 3,
             header_height: 1,
             footer_height: 1,
+            ..PaneOpts::default()
         };
         let status = match (&self.error, self.loading) {
             (Some(_), _) => String::new(),
@@ -60,7 +75,11 @@ impl Search {
             (None, _) => {
                 let shown = self.results.len() as u64;
                 let ms = self.ms.map(|m| format!(" · {m}ms")).unwrap_or_default();
-                if self.total > shown { format!(" {shown} of {}{ms} ", self.total) } else { format!(" {shown}{ms} ") }
+                if self.total > shown {
+                    format!(" {shown} of {}{ms} ", self.total)
+                } else {
+                    format!(" {shown}{ms} ")
+                }
             }
         };
         let titles = FrameTitles {
@@ -80,38 +99,72 @@ impl Search {
         }
 
         let wide = panes.detail.width >= SIDE_BY_SIDE - 24;
-        let (results, preview, sep) = if wide {
-            let [r, p] = Layout::horizontal([Constraint::Percentage(48), Constraint::Fill(1)]).areas(panes.detail);
-            (r, p, Borders::LEFT)
+        if compact {
+            match self.focus {
+                Pane::Facets => self.render_facets(frame, panes.detail),
+                Pane::Preview => self.render_preview(frame, panes.detail),
+                Pane::Input | Pane::Results => self.render_results(frame, panes.detail),
+            }
         } else {
-            let [r, p] = Layout::vertical([Constraint::Percentage(45), Constraint::Fill(1)]).areas(panes.detail);
-            (r, p, Borders::TOP)
-        };
-        self.render_results(frame, results);
-        let pb = Block::new().borders(sep).border_style(theme.border());
-        let inner = pb.inner(preview);
-        frame.render_widget(pb, preview);
-        self.render_preview(frame, inner);
+            let (results, preview, sep) = if wide {
+                let [r, p] = Layout::horizontal([Constraint::Percentage(48), Constraint::Fill(1)])
+                    .areas(panes.detail);
+                (r, p, Borders::LEFT)
+            } else {
+                let [r, p] = Layout::vertical([Constraint::Percentage(45), Constraint::Fill(1)])
+                    .areas(panes.detail);
+                (r, p, Borders::TOP)
+            };
+            self.render_results(frame, results);
+            let pb = Block::new().borders(sep).border_style(theme.border());
+            let inner = pb.inner(preview);
+            frame.render_widget(pb, preview);
+            self.render_preview(frame, inner);
+        }
 
         let src = self.selected_source();
-        let hints = [("↵", "chunk"), ("alt-v", "nvim"), ("ctrl-o", "browser"), ("y", "copy")];
+        let hints = [
+            ("↵", "chunk"),
+            ("alt-v", "nvim"),
+            ("ctrl-o", "browser"),
+            ("y", "copy"),
+        ];
         render_source_bar_with(frame, panes.source, src.as_ref(), &hints, &theme);
         let flash = self.flash.as_ref().map(|(m, _)| m.as_str());
         render_footer(frame, panes.footer, KEYS, flash, &theme);
         if self.show_help {
             render_overlay(frame, area, "search", KEYS, &theme);
         }
+        if self.palette.open {
+            self.palette.render(frame, area, &theme);
+        }
     }
 
     fn render_input(&self, frame: &mut Frame, area: Rect) {
         let theme = &self.theme;
-        let err = self.error.as_deref().map(|e| format!(" {} ", text::truncate(e, (area.width / 2) as usize)));
+        let err = self
+            .error
+            .as_deref()
+            .map(|e| format!(" {} ", text::truncate(e, (area.width / 2) as usize)));
         let busy = self.loading && !self.results.is_empty();
-        let right = err.clone().unwrap_or_else(|| if busy { " searching… ".into() } else { String::new() });
-        let [left, status] =
-            Layout::horizontal([Constraint::Fill(1), Constraint::Length(text::width(&right) as u16)]).areas(area);
+        let right = err.clone().unwrap_or_else(|| {
+            if busy {
+                " searching… ".into()
+            } else {
+                String::new()
+            }
+        });
+        let [left, status] = Layout::horizontal([
+            Constraint::Fill(1),
+            Constraint::Length(text::width(&right) as u16),
+        ])
+        .areas(area);
         let focused = self.focus == Pane::Input && !self.show_help;
-        let prompt_style = if focused { theme.accent().add_modifier(Modifier::BOLD) } else { theme.dim() };
+        let prompt_style = if focused {
+            theme.accent().add_modifier(Modifier::BOLD)
+        } else {
+            theme.dim()
+        };
         let pw = text::width(PROMPT) as u16;
         let avail = left.width.saturating_sub(pw + 1) as usize;
         let scroll = self.input.visual_scroll(avail);
@@ -119,15 +172,32 @@ impl Search {
         let body = if value.is_empty() {
             Span::styled(PLACEHOLDER, theme.dim())
         } else {
-            let visible: String = value.chars().skip(scroll).collect();
-            Span::styled(text::truncate(&visible, avail + 1), theme.base())
+            Span::styled(value, theme.base())
         };
-        frame.render_widget(Paragraph::new(Line::from(vec![Span::styled(PROMPT, prompt_style), body])), left);
-        let st = if err.is_some() { theme.down() } else { theme.accent() };
+        let input_rect = Rect {
+            x: left.x.saturating_add(pw),
+            width: left.width.saturating_sub(pw),
+            ..left
+        };
+        frame.render_widget(Paragraph::new(body).scroll((0, scroll as u16)), input_rect);
+        frame.render_widget(
+            Paragraph::new(Line::from(Span::styled(PROMPT, prompt_style))),
+            left,
+        );
+        let st = if err.is_some() {
+            theme.down()
+        } else {
+            theme.accent()
+        };
         frame.render_widget(Paragraph::new(right).style(st), status);
         if focused {
-            let x = left.x + pw + (self.input.visual_cursor().saturating_sub(scroll)) as u16;
-            frame.set_cursor_position(Position::new(x.min(left.right().saturating_sub(1)), left.y));
+            let x = input_rect.x + (self.input.visual_cursor().saturating_sub(scroll)) as u16;
+            if input_rect.width > 0 {
+                frame.set_cursor_position(Position::new(
+                    x.min(input_rect.right().saturating_sub(1)),
+                    input_rect.y,
+                ));
+            }
         }
     }
 
@@ -139,11 +209,16 @@ impl Search {
             .facets
             .iter()
             .map(|f| match f {
-                FacetRow::Header(d) => ListItem::new(Line::styled(d.name().to_uppercase(), theme.dim())),
+                FacetRow::Header(d) => {
+                    ListItem::new(Line::styled(d.name().to_uppercase(), theme.dim()))
+                }
                 FacetRow::Item { dim, value, count } => {
                     let active = query::is_active(q, *dim, value);
-                    let label =
-                        if *dim == query::Dim::Type { format!("{} {value}", query::badge(value)) } else { value.clone() };
+                    let label = if *dim == query::Dim::Type {
+                        format!("{} {value}", query::badge(value))
+                    } else {
+                        value.clone()
+                    };
                     let n = count.to_string();
                     let name_w = w.saturating_sub(n.len() + 3);
                     ListItem::new(Line::from(vec![
@@ -157,13 +232,21 @@ impl Search {
                 }
             })
             .collect();
-        let hl = if self.focus == Pane::Facets { theme.selected() } else { theme.base() };
+        let hl = if self.focus == Pane::Facets {
+            theme.selected()
+        } else {
+            theme.base()
+        };
         let list = if items.is_empty() {
             List::new([ListItem::new(Line::styled("  (none)", theme.dim()))])
         } else {
             List::new(items)
         };
-        frame.render_stateful_widget(list.style(theme.base()).highlight_style(hl), area, &mut self.facet_state);
+        frame.render_stateful_widget(
+            list.style(theme.base()).highlight_style(hl),
+            area,
+            &mut self.facet_state,
+        );
     }
 
     fn render_results(&mut self, frame: &mut Frame, area: Rect) {
@@ -174,8 +257,17 @@ impl Search {
                 (None, true) => "searching…".into(),
                 (None, false) => "no matches".into(),
             };
-            let style = if self.error.is_some() { theme.down() } else { theme.dim() };
-            frame.render_widget(Paragraph::new(format!(" {msg}")).style(style).wrap(Default::default()), area);
+            let style = if self.error.is_some() {
+                theme.down()
+            } else {
+                theme.dim()
+            };
+            frame.render_widget(
+                Paragraph::new(format!(" {msg}"))
+                    .style(style)
+                    .wrap(Default::default()),
+                area,
+            );
             return;
         }
         let snip_w = area.width.saturating_sub(4) as usize;
@@ -186,7 +278,10 @@ impl Search {
                 let mut head = vec![
                     Span::styled(text::fit(&h.ticker, 6, false), theme.title()),
                     Span::raw(" "),
-                    Span::styled(query::badge(&h.kind).to_string(), type_style(&h.kind, theme)),
+                    Span::styled(
+                        query::badge(&h.kind).to_string(),
+                        type_style(&h.kind, theme),
+                    ),
                     Span::raw(" "),
                     Span::styled(format!("{:<10}", short_date(h)), theme.dim()),
                     Span::raw(" "),
@@ -200,9 +295,11 @@ impl Search {
                 }
                 let snip = query::snippet(&h.text, &self.terms, snip_w);
                 let mut body = vec![Span::raw("  ")];
-                body.extend(hl_spans(&snip, &self.terms, theme.base(), theme).into_iter().map(|s| {
-                    Span::styled(s.content.into_owned(), s.style)
-                }));
+                body.extend(
+                    hl_spans(&snip, &self.terms, theme.base(), theme)
+                        .into_iter()
+                        .map(|s| Span::styled(s.content.into_owned(), s.style)),
+                );
                 ListItem::new(vec![Line::from(head), Line::from(body)])
             })
             .collect();
@@ -211,7 +308,10 @@ impl Search {
         } else {
             theme.base().add_modifier(Modifier::BOLD)
         };
-        let list = List::new(items).style(theme.base()).highlight_symbol("▌").highlight_style(hl);
+        let list = List::new(items)
+            .style(theme.base())
+            .highlight_symbol("▌")
+            .highlight_style(hl);
         frame.render_stateful_widget(list, area, &mut self.list);
     }
 
@@ -227,7 +327,8 @@ impl Search {
             Some(r) => (r.clone(), true),
             None => (vec![hit.clone()], false),
         };
-        let [head, body] = Layout::vertical([Constraint::Length(1), Constraint::Fill(1)]).areas(area);
+        let [head, body] =
+            Layout::vertical([Constraint::Length(1), Constraint::Fill(1)]).areas(area);
         let focused = self.focus == Pane::Preview;
         let note = match (loaded, rows.len()) {
             (false, _) => "loading context…".to_string(),
@@ -236,8 +337,14 @@ impl Search {
         };
         frame.render_widget(
             Paragraph::new(Line::from(vec![
-                Span::styled(" preview ", if focused { theme.accent() } else { theme.dim() }),
-                Span::styled(format!("{} {} · {note}", hit.ticker, query::badge(&hit.kind)), theme.dim()),
+                Span::styled(
+                    " preview ",
+                    if focused { theme.accent() } else { theme.dim() },
+                ),
+                Span::styled(
+                    format!("{} {} · {note}", hit.ticker, query::badge(&hit.kind)),
+                    theme.dim(),
+                ),
             ])),
             head,
         );
@@ -257,7 +364,10 @@ impl Search {
                 short_date(r),
                 r.seq.unwrap_or(0)
             );
-            let mut h = vec![Span::styled(meta, if is_hit { theme.title() } else { theme.dim() })];
+            let mut h = vec![Span::styled(
+                meta,
+                if is_hit { theme.title() } else { theme.dim() },
+            )];
             if is_hit && rows.len() > 1 {
                 h.push(Span::styled("◀ match", theme.accent()));
             }
@@ -279,7 +389,14 @@ impl Search {
             self.preview_scroll = match_line;
             self.preview_jump = false;
         }
-        self.preview_scroll = self.preview_scroll.min(self.preview_len.saturating_sub(self.preview_height));
-        frame.render_widget(Paragraph::new(lines).style(theme.base()).scroll((self.preview_scroll, 0)), body);
+        self.preview_scroll = self
+            .preview_scroll
+            .min(self.preview_len.saturating_sub(self.preview_height));
+        frame.render_widget(
+            Paragraph::new(lines)
+                .style(theme.base())
+                .scroll((self.preview_scroll, 0)),
+            body,
+        );
     }
 }

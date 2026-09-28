@@ -149,7 +149,31 @@ local function navigate(dir)
   end
 
   if best then
+    s.focus_symbol = best.symbol
     vim.api.nvim_set_current_win(best.win)
+  end
+end
+
+--- Best ticker to act on when a dashboard key is pressed outside a tile.
+local function focused_symbol(name)
+  local s = sessions[name]
+  if not s then return nil end
+  local cur = vim.api.nvim_get_current_win()
+  for _, t in ipairs(s.tiles) do
+    if t.win == cur then
+      s.focus_symbol = t.symbol
+      return t.symbol
+    end
+  end
+  if s.focus_symbol then return s.focus_symbol end
+  if s.selected and s.selected[1] then return s.selected[1].symbol end
+  return s.tiles[1] and s.tiles[1].symbol or nil
+end
+
+local function open_focused_dossier(name)
+  local symbol = focused_symbol(name)
+  if symbol then
+    require("custom_plugins.security_spread").show_dossier(symbol)
   end
 end
 
@@ -380,8 +404,18 @@ local function open_tile(tile, region, name)
     require("custom_plugins.security_spread").pick_search("t:" .. tile.item.symbol .. " ")
   end, { buffer = buf, silent = true })
   vim.keymap.set("n", "p", function()
+    local s = sessions[name]
+    if s then s.focus_symbol = tile.item.symbol end
     require("custom_plugins.security_spread").show_dossier(tile.item.symbol)
   end, { buffer = buf, silent = true })
+
+  vim.api.nvim_create_autocmd("WinEnter", {
+    buffer = buf,
+    callback = function()
+      local s = sessions[name]
+      if s then s.focus_symbol = tile.item.symbol end
+    end,
+  })
 
   return win
 end
@@ -491,6 +525,7 @@ local function draw(name)
       break
     end
   end
+  focus_symbol = focus_symbol or s.focus_symbol
   local is_initial_open = #s.tiles == 0
 
   close_session(name)
@@ -553,6 +588,9 @@ local function draw(name)
     end
     if target and vim.api.nvim_win_is_valid(target) then
       vim.api.nvim_set_current_win(target)
+      for _, t in ipairs(s.tiles) do
+        if t.win == target then s.focus_symbol = t.symbol; break end
+      end
     end
   elseif is_initial_open or not vim.api.nvim_win_is_valid(cur_win) then
     -- Either the very first draw (floats just opened on top of whatever
@@ -563,6 +601,9 @@ local function draw(name)
     -- tile.
     if s.wins[1] and vim.api.nvim_win_is_valid(s.wins[1]) then
       vim.api.nvim_set_current_win(s.wins[1])
+      for _, t in ipairs(s.tiles) do
+        if t.win == s.wins[1] then s.focus_symbol = t.symbol; break end
+      end
     end
   end
 end
@@ -628,6 +669,9 @@ function M.open(name, quotes, opts)
   end, { buffer = background_buf, silent = true })
   vim.keymap.set("n", "R", function()
     require("custom_plugins.security_spread").toggle_auto_refresh(name)
+  end, { buffer = background_buf, silent = true })
+  vim.keymap.set("n", "p", function()
+    open_focused_dossier(name)
   end, { buffer = background_buf, silent = true })
 
   if not resize_augroup then

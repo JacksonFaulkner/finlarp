@@ -129,7 +129,7 @@ class CanslimScorecard(BaseModel):
     l: LeaderLaggard
     i: InstitutionalSponsorship
     m: MarketDirection
-    # Sourced view of the letters above (services/canslim.py): model-shaped
+    # Sourced view of the letters above (views/canslim.py): model-shaped
     # Sections, one per letter, every value with a Source. Rendered by the
     # portfolio_chart `canslim` screen.
     overall: dict | None = None

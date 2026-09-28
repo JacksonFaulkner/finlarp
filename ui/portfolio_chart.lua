@@ -88,6 +88,9 @@ local screens = {
   dossier = function(arg)
     call(root, "show_dossier", arg)
   end,
+  earnings = function(arg)
+    M.open_screen("earnings", arg or "MRVL", { title = " " .. (arg or "MRVL") .. " research report " })
+  end,
   search = function(arg)
     call(root .. ".ui.search", "pick_tui", arg)
   end,
@@ -219,6 +222,14 @@ function M.open_screen(screen, arg, opts)
   local title = opts.title or (" " .. (arg and (arg .. " ") or "") .. screen .. " ")
   local action_file = vim.fn.tempname()
   local env = { SECURITY_SPREAD_ACTION_FILE = action_file }
+  -- cursor highlight follows the colorscheme (faint, like nvim's own cursorline)
+  local cursor_bg = hl_hex("CursorLine", "bg", "")
+  if cursor_bg == "" then
+    cursor_bg = hl_hex("Visual", "bg", "")
+  end
+  if cursor_bg ~= "" then
+    env.SECURITY_SPREAD_CURSOR_BG = cursor_bg
+  end
   if vim.env.SECURITY_SPREAD_DB then
     env.SECURITY_SPREAD_DB = vim.env.SECURITY_SPREAD_DB
   end
@@ -260,7 +271,7 @@ function M.show(range)
   M.open_screen("chart", range, { title = " portfolio history " })
 end
 
---- CANSLIM scorecard for one symbol. Assumes `uv run services/canslim.py
+--- CANSLIM scorecard for one symbol. Assumes `uv run views/canslim.py
 --- <symbol>` has already cached it (init.lua show_canslim does the fetch).
 --- @param symbol string
 function M.show_canslim(symbol)

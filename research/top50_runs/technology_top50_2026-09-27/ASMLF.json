@@ -1,0 +1,478 @@
+{
+  "ticker": "ASMLF",
+  "company": "ASMLF",
+  "market_cap_usd": 664546770944,
+  "as_of": "2026-06-28",
+  "filing": {
+    "form": "6-K",
+    "filed": "2026-07-15",
+    "accession": "0001628280-26-048235",
+    "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/form6-kquarterlyfilings.htm"
+  },
+  "generated_at": "2026-09-27T18:51:19+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 4,
+  "sources": [
+    {
+      "source_id": "asmlf_business_1",
+      "label": "ASML products & services | Supplying the semiconductor industry",
+      "url": "https://www.asml.com/en/products",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asmlf_results_1",
+      "label": "Document",
+      "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/pressreleasefinancialresul.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asmlf_results_2",
+      "label": "financialstatementsusgaa",
+      "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/financialstatementsusgaa.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "asmlf_results_3",
+      "label": "presentationinvestorrela",
+      "url": "https://www.sec.gov/Archives/edgar/data/937966/000162828026048235/presentationinvestorrela.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "How ASML describes its business",
+          "text": "ASML supplies lithography systems and related capabilities to semiconductor manufacturers. Its offering combines systems with computational modeling, metrology, inspection, and customer support.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "asmlf_business_1",
+            "quote": "we provide our customers with everything they need to mass produce microchip patterns on silicon wafers. Our holistic approach integrates computational modeling, optical metrology and e-beam inspection with lithography systems"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Portfolio and stated applications",
+          "cols": [
+            "Portfolio area",
+            "Stated application or role"
+          ],
+          "rows": [
+            {
+              "id": "euv",
+              "cells": [
+                "EUV lithography systems",
+                "High-volume manufacturing; enables more transistors on a chip."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "Our extreme ultraviolet (EUV) lithography systems provide the highest resolution in high-volume manufacturing. By enabling chipmakers to squeeze even more transistors onto a single chip"
+              }
+            },
+            {
+              "id": "duv",
+              "cells": [
+                "DUV lithography systems",
+                "High-volume manufacturing of advanced Logic and Memory chips, as well as other chip innovation."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "The dry and immersion DUV systems in our portfolio are used for high-volume manufacturing of the most advanced Logic and Memory chips, novel chip innovation and everything in between."
+              }
+            },
+            {
+              "id": "refurbished",
+              "cells": [
+                "Refurbished systems",
+                "Refurbished PAS 5500 and TWINSCAN systems."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "We refurbish ‘classic’ PAS 5500 and TWINSCAN lithography systems"
+              }
+            },
+            {
+              "id": "metrology_inspection",
+              "cells": [
+                "Metrology and inspection",
+                "Applications span R&D through mass production."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "our metrology and inspection portfolio covers every step in the chip manufacturing process, from R&D to mass production."
+              }
+            },
+            {
+              "id": "computational",
+              "cells": [
+                "Computational lithography",
+                "Minimizes physical and chemical effects that interfere with chip quality."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "which minimizes the physical and chemical effects that interfere with the quality of a chip."
+              }
+            },
+            {
+              "id": "support",
+              "cells": [
+                "Customer support",
+                "Support for systems operating in customer fabs."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "we make sure our systems in our customers’ fabs are running smoothly."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Management’s demand commentary",
+          "text": "ASML attributed demand for advanced Logic and Memory chips to AI-related investment and progress in AI technologies, and said customers were accelerating capacity expansion plans. This is management commentary, not a quantified market forecast.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "asmlf_results_1",
+            "quote": "Ongoing AI-related investments and continued progress in AI technologies are driving demand for advanced Logic and Memory chips, further strengthening the semiconductor industry's growth outlook. Our customers, in turn, continue to accelerate their capacity expansion plans."
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customer and channel facts",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed relationships and buyer archetypes",
+          "cols": [
+            "Type",
+            "Fact"
+          ],
+          "rows": [
+            {
+              "id": "chipmakers",
+              "cells": [
+                "Documented customer group",
+                "ASML describes chipmakers as users of its lithography systems."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "used for high-volume manufacturing of the most advanced Logic and Memory chips"
+              }
+            },
+            {
+              "id": "intel_collaboration",
+              "cells": [
+                "Named collaboration",
+                "Presentation describes technical collaboration between Intel and ASML on High NA EUV; it does not establish customer status in this excerpt."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_3",
+                "quote": "This milestone reflects the close technical collaboration between Intel and ASML"
+              }
+            },
+            {
+              "id": "buyer_archetype",
+              "cells": [
+                "Inferred buyer archetype",
+                "Semiconductor manufacturers operating fabs are a buyer archetype inferred from ASML’s description of its customers and systems in customer fabs."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "asmlf_business_1",
+                "quote": "our systems in our customers’ fabs are running smoothly."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quarterly_financials",
+      "title": "Latest-quarter income statement",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "US GAAP results (€ millions, except per-share data)",
+          "cols": [
+            "Metric",
+            "Three months ended Jun 28, 2026",
+            "Three months ended Jun 29, 2025",
+            "Six months ended Jun 28, 2026"
+          ],
+          "rows": [
+            {
+              "id": "sales",
+              "cells": [
+                "Total net sales",
+                "9,326.5",
+                "7,691.7",
+                "18,093.4"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Total net sales 7,691.7 9,326.5 15,433.2 18,093.4"
+              }
+            },
+            {
+              "id": "cost_sales",
+              "cells": [
+                "Total cost of sales",
+                "(4,291.1)",
+                "(3,562.2)",
+                "(8,413.0)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Total cost of sales (3,562.2) (4,291.1) (7,124.0) (8,413.0)"
+              }
+            },
+            {
+              "id": "gross_profit",
+              "cells": [
+                "Gross profit",
+                "5,035.4",
+                "4,129.5",
+                "9,680.4"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Gross profit 4,129.5 5,035.4 8,309.2 9,680.4"
+              }
+            },
+            {
+              "id": "research_development",
+              "cells": [
+                "Research and development costs",
+                "(1,276.6)",
+                "(1,166.7)",
+                "(2,461.5)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Research and development costs (1,166.7) (1,276.6) (2,327.8) (2,461.5)"
+              }
+            },
+            {
+              "id": "selling_admin",
+              "cells": [
+                "Selling, general and administrative costs",
+                "(302.7)",
+                "(298.7)",
+                "(605.0)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Selling, general and administrative costs (298.7) (302.7) (579.4) (605.0)"
+              }
+            },
+            {
+              "id": "operating_income",
+              "cells": [
+                "Income from operations",
+                "3,456.1",
+                "2,664.1",
+                "6,613.9"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Income from operations 2,664.1 3,456.1 5,402.0 6,613.9"
+              }
+            },
+            {
+              "id": "interest_other",
+              "cells": [
+                "Interest and other, net",
+                "30.0",
+                "24.8",
+                "70.9"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Interest and other, net 24.8 30.0 74.0 70.9"
+              }
+            },
+            {
+              "id": "income_tax",
+              "cells": [
+                "Income tax expense",
+                "(609.6)",
+                "(487.4)",
+                "(1,156.2)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Income tax expense (487.4) (609.6) (952.5) (1,156.2)"
+              }
+            },
+            {
+              "id": "net_income",
+              "cells": [
+                "Net income",
+                "2,917.6",
+                "2,290.3",
+                "5,674.3"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Net income 2,290.3 2,917.6 4,645.3 5,674.3"
+              }
+            },
+            {
+              "id": "basic_eps",
+              "cells": [
+                "Basic net income per ordinary share (€)",
+                "7.59",
+                "5.90",
+                "14.74"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Basic net income per ordinary share 5.90 7.59 11.90 14.74"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cash_balance",
+      "title": "Cash and investments",
+      "category": "balance_sheet",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Balance sheet (€ millions)",
+          "cols": [
+            "Item",
+            "Dec 31, 2025",
+            "Jun 28, 2026"
+          ],
+          "rows": [
+            {
+              "id": "cash_equivalents",
+              "cells": [
+                "Cash and cash equivalents",
+                "12,916.0",
+                "6,671.9"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Cash and cash equivalents 12,916.0 6,671.9"
+              }
+            },
+            {
+              "id": "short_term_investments",
+              "cells": [
+                "Short-term investments",
+                "405.9",
+                "909.6"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_2",
+                "quote": "Short-term investments 405.9 909.6"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed drivers and challenges",
+          "cols": [
+            "Type",
+            "Disclosure"
+          ],
+          "rows": [
+            {
+              "id": "capacity_plans",
+              "cells": [
+                "Driver / planned capacity",
+                "ASML said it planned to add 30% to 2026 low NA EUV capacity for 2027 and was investigating another 30% increase for 2028; it stated similar plans for DUV immersion capacity."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_1",
+                "quote": "we are planning to add 30% to our 2026 low NA EUV capacity of around 65 for 2027, and we are investigating to increase capacity with another 30% for 2028. Similarly, we plan to add 30% to our 2026 DUV immersion capacity of around 130 for 2027"
+              }
+            },
+            {
+              "id": "ai_challenges",
+              "cells": [
+                "Industry challenge",
+                "ASML’s presentation identifies AI power consumption and cost challenges requiring innovation; the excerpt does not quantify their company-specific financial impact."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "asmlf_results_3",
+                "quote": "The industry will require major innovations to address AI power consumption and cost challenges"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 25
+  },
+  "usage": {
+    "input_tokens": 6780,
+    "cached_input_tokens": 1095,
+    "output_tokens": 3337,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00224795,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02224795
+  }
+}

@@ -1,0 +1,379 @@
+{
+  "ticker": "WDC",
+  "company": "WDC",
+  "market_cap_usd": 164698701824,
+  "as_of": "2026-07-03",
+  "filing": {
+    "form": "10-K",
+    "filed": "2026-08-14",
+    "accession": "0001628280-26-057139",
+    "url": "https://www.sec.gov/Archives/edgar/data/106040/000162828026057139/wdc-20260703.htm"
+  },
+  "generated_at": "2026-09-27T18:54:39+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 1,
+  "sources": [
+    {
+      "source_id": "sec_wdc_10k",
+      "label": "WDC 10-K filed 2026-08-14",
+      "url": "https://www.sec.gov/Archives/edgar/data/106040/000162828026057139/wdc-20260703.htm",
+      "kind": "sec_filing"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business",
+      "title": "Business model and products",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Business model",
+          "text": "Western Digital develops, manufactures, and provides HDD-based data storage devices and solutions.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_wdc_10k",
+            "quote": "a leading developer, manufacturer, and provider of data storage devices and solutions based on hard disk drive (“HDD”) technology."
+          }
+        },
+        {
+          "type": "table",
+          "title": "Products and applications",
+          "cols": [
+            "Offering or market",
+            "Reported applications"
+          ],
+          "rows": [
+            {
+              "id": "cloud_hdd",
+              "cells": [
+                "High-capacity enterprise HDDs",
+                "Cloud data centers, enterprise storage systems, and smart video systems"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "We provide the Cloud end market with an array of high-capacity enterprise HDDs."
+              }
+            },
+            {
+              "id": "client_hdd",
+              "cells": [
+                "HDD solutions for OEM and channel customers",
+                "Desktop and notebook computers"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "a broad array of high-performance HDD solutions across desktop and notebooks."
+              }
+            },
+            {
+              "id": "consumer_hdd",
+              "cells": [
+                "External HDD storage products",
+                "Personal content storage"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "a portfolio of HDD external storage products"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_markets",
+      "title": "End markets and demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "End-market descriptions",
+          "cols": [
+            "End market",
+            "Reported description"
+          ],
+          "rows": [
+            {
+              "id": "cloud_market",
+              "cells": [
+                "Cloud",
+                "Primarily public or private cloud environments and enterprise customers; the company identifies it as its largest and fastest-growing end market."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "Cloud represents our largest and fastest growing end market"
+              }
+            },
+            {
+              "id": "client_market",
+              "cells": [
+                "Client",
+                "OEM and channel HDD solutions for desktop and notebook computers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "Through the Client end market, we provide our original equipment manufacturer (“OEM”) and channel customers"
+              }
+            },
+            {
+              "id": "consumer_market",
+              "cells": [
+                "Consumer",
+                "External HDD products sold globally through retail and channel partners."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "offer globally through our retail and channel partners."
+              }
+            }
+          ]
+        },
+        {
+          "type": "bars",
+          "title": "Cloud share of net revenue",
+          "unit": "% of net revenue, year ended July 3, 2026",
+          "items": [
+            {
+              "id": "cloud_revenue_share",
+              "label": "Cloud",
+              "value": 89.0,
+              "compare": null,
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "the Cloud end market accounted for 89% of our net revenue"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Demand context",
+          "text": "The filing describes data growth associated with AI, cloud computing, connected devices, and edge devices as driving storage demand.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_wdc_10k",
+            "quote": "growth in cloud computing applications, connected mobile devices and Internet-connected products and edge devices is driving rapid growth in the volume of digital content"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customers_channels",
+      "title": "Documented customers and channels",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported customer and channel facts",
+          "cols": [
+            "Fact",
+            "Disclosure"
+          ],
+          "rows": [
+            {
+              "id": "buyer_types",
+              "cells": [
+                "Customer types",
+                "Hyperscale cloud service providers, neoclouds, computer manufacturers and OEMs, resellers, distributors, and retailers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "We sell our products to hyperscale cloud service providers, neoclouds, computer manufacturers and OEMs, resellers, distributors and retailers"
+              }
+            },
+            {
+              "id": "agreements",
+              "cells": [
+                "Customer agreements",
+                "The company reports long-term agreements with certain customers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "utilizing long-term agreements with certain customers."
+              }
+            },
+            {
+              "id": "customer_concentration",
+              "cells": [
+                "Customer concentration, 2026",
+                "Three customers accounted for 16%, 15%, and 13% of net revenue, respectively."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "For 2026, three customers accounted for 16%, 15%, and 13%, respectively, of our net revenue."
+              }
+            },
+            {
+              "id": "top_ten_concentration",
+              "cells": [
+                "Top 10 customers, year ended July 3, 2026",
+                "73% of net revenue."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "our top 10 customers accounted for 73% of our net revenue"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "buyer_archetypes",
+      "title": "Inferred buyer archetypes",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Interpretations, not named customers",
+          "cols": [
+            "Inferred archetype",
+            "Basis"
+          ],
+          "rows": [
+            {
+              "id": "cloud_operator",
+              "cells": [
+                "Cloud data-center operator",
+                "Inferred from the disclosed cloud environments, hyperscale providers, and high-capacity enterprise HDD use."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "enable cloud, Internet and social media infrastructure players to build more powerful, cost-effective and efficient data centers."
+              }
+            },
+            {
+              "id": "computer_oem",
+              "cells": [
+                "Computer OEM or manufacturer",
+                "Inferred from the company’s reported OEM and computer-manufacturer customer groups and client HDD applications."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "computer manufacturers and OEMs"
+              }
+            },
+            {
+              "id": "retail_consumer_channel",
+              "cells": [
+                "Retail or channel intermediary serving consumer storage buyers",
+                "Inferred from the disclosed retail/channel distribution of external HDD products."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "through our retail and channel partners."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Filing-identified factors",
+          "cols": [
+            "Type",
+            "Factor"
+          ],
+          "rows": [
+            {
+              "id": "ai_data_driver",
+              "cells": [
+                "Driver",
+                "Growth in data and AI-related storage needs are identified as supporting HDD demand."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "HDDs are critical components in the worldwide data infrastructure market, powering the AI-driven digital economy."
+              }
+            },
+            {
+              "id": "cloud_concentration_risk",
+              "cells": [
+                "Risk",
+                "Revenue concentration in Cloud and among large customers exposes results to reduced demand or lower customer investment."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "There is significant revenue concentration in our Cloud end market and among our top customers."
+              }
+            },
+            {
+              "id": "technology_transition_risk",
+              "cells": [
+                "Risk",
+                "Failure to manage technology transitions or develop and qualify products successfully could harm competitiveness and results."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "If we do not properly manage technology transitions and product development and introduction, our competitiveness and operating results may be negatively affected."
+              }
+            },
+            {
+              "id": "supplier_risk",
+              "cells": [
+                "Risk",
+                "Reliance on limited or sole-source suppliers can expose production to supply disruption, shortages, and cost increases."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "we source some of our components from a limited number of sole or single source providers."
+              }
+            },
+            {
+              "id": "long_term_contract_risk",
+              "cells": [
+                "Risk",
+                "Long-term customer commitments can limit the company’s ability to benefit from more favorable prices or sales opportunities."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_wdc_10k",
+                "quote": "we may be unable to take full advantage of periods of rising prices, increased demand, or supply shortages."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 21
+  },
+  "usage": {
+    "input_tokens": 14884,
+    "cached_input_tokens": 1095,
+    "output_tokens": 3578,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00317885,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02317885
+  }
+}

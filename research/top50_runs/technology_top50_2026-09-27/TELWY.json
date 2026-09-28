@@ -1,0 +1,392 @@
+{
+  "ticker": "TELWY",
+  "company": "TELWY",
+  "market_cap_usd": 164446388224,
+  "as_of": null,
+  "filing": null,
+  "generated_at": "2026-09-27T19:18:25+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 5,
+  "sources": [
+    {
+      "source_id": "telwy_business_1",
+      "label": "Products and Services(semiconductor production process) | Tokyo Electron Ltd.",
+      "url": "https://www.tel.com/product/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "telwy_business_2",
+      "label": "Deposition TELINDY™ Series | Products and Service(products) | Tokyo Electron Ltd.",
+      "url": "https://www.tel.com/product/telindy.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "telwy_business_3",
+      "label": "TELWY - Tokyo Electron Ltd. | Company Profile | OTC Markets",
+      "url": "https://www.otcmarkets.com/stock/TELWY/profile",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "telwy_results_1",
+      "label": "Earnings Release | Investor Relations",
+      "url": "https://www.tel.com/ir/library/report/index.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "telwy_results_2",
+      "label": "fy27q1tanshin-e",
+      "url": "https://www.tel.com/ir/library/report/i242su0000000goz-att/fy27q1tanshin-e.pdf",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business-model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Core activity",
+          "text": "Tokyo Electron describes itself as a manufacturer offering system solutions for all four sequential patterning processes.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_business_1",
+            "quote": "a manufacturer offering system solutions for all four sequential patterning processes"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Equipment and services",
+          "text": "The supplied company profile describes equipment sales alongside engineering services, spare parts and repairs, upgrades and modifications, and used products.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_business_3",
+            "quote": "engineering services; spare parts/repairs; upgrades/modification; and used products"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products-applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed equipment and uses",
+          "cols": [
+            "Area",
+            "Reported application or capability"
+          ],
+          "rows": [
+            {
+              "id": "deposition",
+              "cells": [
+                "Deposition",
+                "Deposits dielectric or metal thin films on wafer surfaces before device structures and wiring are formed."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_business_1",
+                "quote": "dielectric or metal thin films are deposited on the wafer surface preparatory to forming device structures and wiring"
+              }
+            },
+            {
+              "id": "telindy",
+              "cells": [
+                "TELINDY PLUS™",
+                "Batch platform for oxidation, anneal and LPCVD deposition; applications also include ALD films and radical oxidation."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_business_2",
+                "quote": "applications range from traditional silicon treatments"
+              }
+            },
+            {
+              "id": "lithography",
+              "cells": [
+                "Lithography",
+                "Coating photoresist, exposing a circuit pattern, and developing the resist are described as lithography steps."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_business_1",
+                "quote": "photoresist coating, exposure, and development"
+              }
+            },
+            {
+              "id": "other-equipment",
+              "cells": [
+                "Other equipment in company profile",
+                "Coaters/developers, plasma etch, cleaning, test, 3D integration, SiC Epitaxial CVD, gas cluster beam, and display production equipment."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_business_3",
+                "quote": "plasma etch systems, cleaning systems, deposition systems, test systems, 3D integration systems"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Application context",
+          "text": "The company says advanced device scaling and dense 3D structures increasingly desire low-temperature thin-film deposition.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_business_2",
+            "quote": "increasingly desired for advanced device scaling and dense 3D structures"
+          }
+        }
+      ]
+    },
+    {
+      "id": "end-market-demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Demand context",
+          "text": "The supplied sources link equipment applications to semiconductor manufacturing, shrinking device structures, and advanced scaling; they do not quantify market demand.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_business_2",
+            "quote": "required by ever shrinking device structures"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Geographic presence in company profile",
+          "text": "The OTC Markets company profile describes operations in Japan, South Korea, Taiwan, China, North America, Europe, and internationally. The profile states it was last verified 02/2013.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_business_3",
+            "quote": "Last Verified 02/2013"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer-channel",
+      "title": "Customer and channel facts",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Documented customer/channel facts",
+          "text": "The supplied excerpts do not identify named customers or describe a sales channel; the company profile describes selling equipment across listed geographies.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_business_3",
+            "quote": "develops, manufactures, and sells semiconductor production equipment in Japan, South Korea, Taiwan, China, North America, Europe, and internationally"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Inferred buyer archetype",
+          "text": "Inferred buyer archetype: semiconductor manufacturers operating wafer-fabrication processes; this is an application-based inference, not a disclosed customer list.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "telwy_business_1",
+            "quote": "core processes in semiconductor manufacturing"
+          }
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest-quarter financials and balance sheet",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Consolidated results — three months ended June 30, 2026",
+          "cols": [
+            "Measure",
+            "June 30, 2026",
+            "Comparison period: June 30, 2025"
+          ],
+          "rows": [
+            {
+              "id": "sales",
+              "cells": [
+                "Net sales (millions of yen)",
+                "732,388",
+                "549,586"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "Net sales (Millions of yen)"
+              }
+            },
+            {
+              "id": "operating-income",
+              "cells": [
+                "Operating income (millions of yen)",
+                "211,407",
+                "144,694"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "Operating income (Millions of yen)"
+              }
+            },
+            {
+              "id": "ordinary-income",
+              "cells": [
+                "Ordinary income (millions of yen)",
+                "215,626",
+                "147,347"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "Ordinary income (Millions of yen)"
+              }
+            },
+            {
+              "id": "parent-net-income",
+              "cells": [
+                "Net income attributable to owners of parent (millions of yen)",
+                "164,341",
+                "117,801"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "Net income attributable to owners of parent (Millions of yen)"
+              }
+            },
+            {
+              "id": "basic-eps",
+              "cells": [
+                "Basic net income per share (yen)",
+                "361.36",
+                "257.13"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "Net income per share of common stock (Yen): Basic"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Financial position — as of June 30, 2026",
+          "cols": [
+            "Measure",
+            "Reported value"
+          ],
+          "rows": [
+            {
+              "id": "assets",
+              "cells": [
+                "Total assets (millions of yen)",
+                "2,860,997"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "As of June 30, 2026 2,860,997"
+              }
+            },
+            {
+              "id": "equity-ratio",
+              "cells": [
+                "Equity ratio",
+                "71.5%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "71.5"
+              }
+            },
+            {
+              "id": "equity",
+              "cells": [
+                "Equity (millions of yen)",
+                "2,118,056"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "telwy_results_2",
+                "quote": "Equity: 2,118,056 million yen (as of June 30, 2026)"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Cash and debt",
+          "text": "Cash and debt values are not included in the supplied FY2027 Q1 excerpt.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_results_2",
+            "quote": "(2) Consolidated Financial Position"
+          }
+        }
+      ]
+    },
+    {
+      "id": "drivers-risks",
+      "title": "Drivers and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Near-term catalyst",
+          "text": "The FY2027 first-half financial forecast was revised; the supplied release excerpt gives the revised forecast period as April 1 to September 30, 2026.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_results_1",
+            "quote": "Financial Forecast for the First Half of FY2027 and Interim Dividend Forecast for FY2027 have been revised"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Reported first-half forecast",
+          "text": "For the six months ending September 30, 2026 (cumulative), the forecast lists net sales of 1,620,000 million yen and operating income of 458,000 million yen.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_results_2",
+            "quote": "Six months ending September 30, 2026 (Cumulative)"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Quarterly risk signal",
+          "text": "Net sales for the three months ended June 30, 2026 were down 1.0% year on year, as reported in the release; this is a reported-period comparison, not a full-year trend.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "telwy_results_2",
+            "quote": "June 30, 2026 % (1.0) 732,388"
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 1,
+    "sourced_items": 23
+  },
+  "usage": {
+    "input_tokens": 14826,
+    "cached_input_tokens": 8505,
+    "output_tokens": 5167,
+    "exa_search_calls": 6,
+    "exa_content_pages": 18,
+    "estimated_openai_usd": 0.00330065,
+    "estimated_exa_usd": 0.06,
+    "estimated_total_usd": 0.06330065
+  }
+}

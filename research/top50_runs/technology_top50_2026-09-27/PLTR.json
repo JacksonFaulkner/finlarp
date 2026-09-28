@@ -1,0 +1,599 @@
+{
+  "ticker": "PLTR",
+  "company": "PLTR",
+  "market_cap_usd": 455788101632,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-04",
+    "accession": "0001321655-26-000041",
+    "url": "https://www.sec.gov/Archives/edgar/data/1321655/000132165526000041/pltr-20260630.htm"
+  },
+  "generated_at": "2026-09-27T19:13:55+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 3,
+  "sources": [
+    {
+      "source_id": "sec_pltr_10q",
+      "label": "PLTR 10-Q filed 2026-08-04",
+      "url": "https://www.sec.gov/Archives/edgar/data/1321655/000132165526000041/pltr-20260630.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "pltr_business_1",
+      "label": "Palantir Offerings",
+      "url": "https://www.palantir.com/offerings/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "pltr_results_1",
+      "label": "Palantir Reports Q2 2026 US Comm Revenue Growth ...",
+      "url": "https://www.sec.gov/Archives/edgar/data/1321655/000132165526000039/a2026q2ex991pressrelease.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Revenue model",
+          "text": "Customers pay to use Palantir’s software platforms. Contracts are generally one to five years, though some are shorter; revenue is generally recognized ratably over the contract term, and many contracts allow termination for convenience.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_pltr_10q",
+            "quote": "Our customers pay us to use the software platforms we have built. While we generally offer contract terms of one to five years in length, our customers sometimes enter into shorter-term contracts. Revenue is generally recognized ratably over the contract term. Many of our customer contracts contain termination for convenience provisions."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Core proposition",
+          "text": "Palantir describes its software as helping organizations integrate data, decisions, and operations at scale.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_pltr_10q",
+            "quote": "We build software that empowers organizations to effectively integrate their data, decisions, and operations at scale."
+          }
+        }
+      ]
+    },
+    {
+      "id": "products",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Platforms described in the 10-Q",
+          "cols": [
+            "Platform",
+            "Description"
+          ],
+          "rows": [
+            {
+              "id": "foundry",
+              "cells": [
+                "Foundry",
+                "Foundational data operations platform for data management, logic authoring, Ontology mapping, analytics, and workflow development."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Foundry is our foundational data operations platform, which provides the core capabilities for data management, logic authoring, systemic mapping development through our Ontology, analytics, and workflow development."
+              }
+            },
+            {
+              "id": "apollo",
+              "cells": [
+                "Apollo",
+                "Continuous delivery platform for orchestrating upgrades of services and assets and managing underlying infrastructure."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Apollo is our continuous delivery platform, enabling the orchestration of upgrades of services and assets every day to manage the underlying infrastructure that hosts our other platforms."
+              }
+            },
+            {
+              "id": "gotham",
+              "cells": [
+                "Gotham",
+                "Integrates with other platforms and defense offerings for missions across allied defense and intelligence operations."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Gotham integrates with our other platforms, as well as our broader defense offerings, to power a wide array of missions across allied defense and intelligence operations."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_markets",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported revenue by segment and geography",
+          "cols": [
+            "Measure",
+            "Period",
+            "Revenue",
+            "Evidence context"
+          ],
+          "rows": [
+            {
+              "id": "government_q2",
+              "cells": [
+                "Government revenue",
+                "Three Months Ended June 30, 2026",
+                "$990,032 thousand",
+                "Segment revenue"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Government revenue | $990,032 | $552,983 | $1,848,442 | $1,039,946"
+              }
+            },
+            {
+              "id": "commercial_q2",
+              "cells": [
+                "Commercial revenue",
+                "Three Months Ended June 30, 2026",
+                "$945,432 thousand",
+                "Segment revenue"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Commercial revenue | 945,432 | 450,714 | 1,719,605 | 847,606"
+              }
+            },
+            {
+              "id": "us_geo_q2",
+              "cells": [
+                "United States",
+                "Three Months Ended June 30, 2026",
+                "$1,573,047 thousand (81% of revenue)",
+                "Geographic revenue"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "United States | $1,573,047 | 81% | $732,592 | 73% | $2,855,113 | 80% | $1,361,086 | 72%"
+              }
+            },
+            {
+              "id": "row_geo_q2",
+              "cells": [
+                "Rest of world",
+                "Three Months Ended June 30, 2026",
+                "$362,417 thousand (19% of revenue)",
+                "Geographic revenue"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Rest of world (1) | 362,417 | 19% | 271,105 | 27% | 712,934 | 20% | 526,466 | 28%"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Applications shown in company offerings",
+          "text": "The offerings catalog includes examples such as defense, financial services, energy, life sciences, supply chain, and hospital operations.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "pltr_business_1",
+            "quote": "Defense | A tactical edge — by land, air, sea, and space."
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_map",
+      "title": "Customer and buyer map",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented customer facts",
+          "cols": [
+            "Fact",
+            "Reported detail"
+          ],
+          "rows": [
+            {
+              "id": "revenue_concentration",
+              "cells": [
+                "Revenue concentration",
+                "No customer represented more than 10% of revenue in the three or six months ended June 30, 2026 or 2025."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "For the three and six months ended June 30, 2026 and 2025, no customer represented more than 10% of total revenue."
+              }
+            },
+            {
+              "id": "ar_concentration",
+              "cells": [
+                "Accounts receivable concentration",
+                "Customer I represented 27% of total accounts receivable as of June 30, 2026."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Customer I represented 27% and 25% of total accounts receivable as of June 30, 2026 and December 31, 2025, respectively."
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Inferred buyer archetypes",
+          "text": "Inferred buyer archetypes are government organizations and commercial enterprises; the filing describes customers in both sectors but does not identify named customers in the cited passage.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sec_pltr_10q",
+            "quote": "AIP, which is designed for customers across the commercial and government sectors"
+          }
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest-quarter financials and liquidity",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Condensed consolidated statements of operations (in thousands, except per-share amounts)",
+          "cols": [
+            "Line item",
+            "Three Months Ended June 30, 2026",
+            "Three Months Ended June 30, 2025",
+            "Six Months Ended June 30, 2026",
+            "Six Months Ended June 30, 2025"
+          ],
+          "rows": [
+            {
+              "id": "revenue",
+              "cells": [
+                "Revenue",
+                "$1,935,464",
+                "$1,003,697",
+                "$3,568,047",
+                "$1,887,552"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Revenue | $1,935,464 | $1,003,697 | $3,568,047 | $1,887,552"
+              }
+            },
+            {
+              "id": "cost_of_revenue",
+              "cells": [
+                "Cost of revenue",
+                "$296,870",
+                "$192,934",
+                "$512,668",
+                "$365,904"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Cost of revenue | 296,870 | 192,934 | 512,668 | 365,904"
+              }
+            },
+            {
+              "id": "gross_profit",
+              "cells": [
+                "Gross profit",
+                "$1,638,594",
+                "$810,763",
+                "$3,055,379",
+                "$1,521,648"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Gross profit | 1,638,594 | 810,763 | 3,055,379 | 1,521,648"
+              }
+            },
+            {
+              "id": "sales_marketing",
+              "cells": [
+                "Sales and marketing",
+                "$339,500",
+                "$243,788",
+                "$658,720",
+                "$480,097"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Sales and marketing | 339,500 | 243,788 | 658,720 | 480,097"
+              }
+            },
+            {
+              "id": "research_development",
+              "cells": [
+                "Research and development",
+                "$192,513",
+                "$135,043",
+                "$353,494",
+                "$269,932"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Research and development | 192,513 | 135,043 | 353,494 | 269,932"
+              }
+            },
+            {
+              "id": "general_administrative",
+              "cells": [
+                "General and administrative",
+                "$194,577",
+                "$162,615",
+                "$377,163",
+                "$326,254"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "General and administrative | 194,577 | 162,615 | 377,163 | 326,254"
+              }
+            },
+            {
+              "id": "total_operating_expenses",
+              "cells": [
+                "Total operating expenses",
+                "$726,590",
+                "$541,446",
+                "$1,389,377",
+                "$1,076,283"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Total operating expenses | 726,590 | 541,446 | 1,389,377 | 1,076,283"
+              }
+            },
+            {
+              "id": "income_operations",
+              "cells": [
+                "Income from operations",
+                "$912,004",
+                "$269,317",
+                "$1,666,002",
+                "$445,365"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Income from operations | 912,004 | 269,317 | 1,666,002 | 445,365"
+              }
+            },
+            {
+              "id": "interest_income",
+              "cells": [
+                "Interest income",
+                "$77,505",
+                "$56,255",
+                "$143,899",
+                "$106,696"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Interest income | 77,505 | 56,255 | 143,899 | 106,696"
+              }
+            },
+            {
+              "id": "other_income",
+              "cells": [
+                "Other income (expense), net",
+                "$91,836",
+                "$6,596",
+                "$160,045",
+                "$3,423"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Other income (expense), net | 91,836 | 6,596 | 160,045 | 3,423"
+              }
+            },
+            {
+              "id": "income_before_tax",
+              "cells": [
+                "Income before provision for income taxes",
+                "$1,081,345",
+                "$332,168",
+                "$1,969,946",
+                "$555,484"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Income before provision for income taxes | 1,081,345 | 332,168 | 1,969,946 | 555,484"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Cash and debt facts",
+          "cols": [
+            "Fact",
+            "As reported"
+          ],
+          "rows": [
+            {
+              "id": "cash_end_period",
+              "cells": [
+                "Cash, cash equivalents, and restricted cash at end of period",
+                "$2,063,358 thousand"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Cash, cash equivalents, and restricted cash - end of period | $2,063,358 | $951,234"
+              }
+            },
+            {
+              "id": "credit_facility_balance",
+              "cells": [
+                "Outstanding debt under 2014 Credit Facility as of June 30, 2026",
+                "None"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "As of June 30, 2026, the Company had no outstanding debt balances under the 2014 Credit Facility."
+              }
+            },
+            {
+              "id": "facility_commitments",
+              "cells": [
+                "2014 Credit Facility revolving commitments",
+                "$500 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "provides for aggregate revolving commitments of $500 million"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Demand indicators and outlook",
+          "cols": [
+            "Item",
+            "Reported detail"
+          ],
+          "rows": [
+            {
+              "id": "us_commercial_growth",
+              "cells": [
+                "U.S. commercial revenue",
+                "Q2 2026 grew 149% year over year."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "pltr_results_1",
+                "quote": "U.S. commercial revenue grew 149% year-over-year"
+              }
+            },
+            {
+              "id": "q3_guidance",
+              "cells": [
+                "Q3 2026 revenue outlook",
+                "$2.160–$2.164 billion"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "pltr_results_1",
+                "quote": "Revenue of between $2.160 – $2.164 billion."
+              }
+            },
+            {
+              "id": "fy_guidance",
+              "cells": [
+                "FY 2026 revenue outlook",
+                "$8.150–$8.158 billion"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "pltr_results_1",
+                "quote": "We are raising our revenue guidance to between $8.150 – $8.158 billion."
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Disclosed risks and exposures",
+          "cols": [
+            "Risk",
+            "Filing disclosure"
+          ],
+          "rows": [
+            {
+              "id": "termination",
+              "cells": [
+                "Contract duration / revenue visibility",
+                "Many customer contracts contain termination-for-convenience provisions."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Many of our customer contracts contain termination for convenience provisions."
+              }
+            },
+            {
+              "id": "receivables_concentration",
+              "cells": [
+                "Receivables concentration",
+                "Customer I was 27% of accounts receivable at June 30, 2026."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "Customer I represented 27% and 25% of total accounts receivable as of June 30, 2026 and December 31, 2025, respectively."
+              }
+            },
+            {
+              "id": "competition",
+              "cells": [
+                "Competition",
+                "The filing identifies the ability to compete with existing and new competitors as a forward-looking risk area."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_pltr_10q",
+                "quote": "our ability to compete with existing and new competitors in existing and new markets and products"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 1,
+    "sourced_items": 33
+  },
+  "usage": {
+    "input_tokens": 32304,
+    "cached_input_tokens": 17244,
+    "output_tokens": 10598,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.00697744,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.04697744
+  }
+}

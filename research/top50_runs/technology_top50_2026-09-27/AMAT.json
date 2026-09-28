@@ -1,0 +1,488 @@
+{
+  "ticker": "AMAT",
+  "company": "AMAT",
+  "market_cap_usd": 384894763008,
+  "as_of": "2026-07-26",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-20",
+    "accession": "0001628280-26-058235",
+    "url": "https://www.sec.gov/Archives/edgar/data/6951/000162828026058235/amat-20260726.htm"
+  },
+  "generated_at": "2026-09-27T18:52:18+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 3,
+  "sources": [
+    {
+      "source_id": "sec_amat_10q",
+      "label": "AMAT 10-Q filed 2026-08-20",
+      "url": "https://www.sec.gov/Archives/edgar/data/6951/000162828026058235/amat-20260726.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "amat_business_3",
+      "label": "About - Applied Materials",
+      "url": "https://www.appliedmaterials.com/us/en/about.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "amat_results_1",
+      "label": "Applied Materials",
+      "url": "https://www.sec.gov/Archives/edgar/data/6951/000162828026056699/exhibit991q32026earningsre.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported business lines",
+          "cols": [
+            "Business line",
+            "Description"
+          ],
+          "rows": [
+            {
+              "id": "semiconductor_systems",
+              "cells": [
+                "Semiconductor Systems",
+                "Semiconductor capital equipment for materials-engineering steps."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "The Semiconductor Systems segment includes semiconductor capital equipment to enable materials engineering steps"
+              }
+            },
+            {
+              "id": "ags",
+              "cells": [
+                "Applied Global Services (AGS)",
+                "Solutions to optimize equipment and fab performance and productivity, including services, spares and factory automation software."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "The AGS segment provides integrated solutions to optimize equipment and fab performance and productivity, including services, spares and factory automation software"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Revenue recognition",
+          "text": "Semiconductor Systems revenue is recognized at a point in time; AGS recognizes tangible-goods revenue at a point in time and service-agreement revenue over time.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_amat_10q",
+            "quote": "Semiconductor Systems revenue is recognized at a point in time. AGS revenue is recognized at a point in time for tangible goods"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Equipment categories and uses",
+          "cols": [
+            "Category",
+            "Reported scope"
+          ],
+          "rows": [
+            {
+              "id": "equipment_processes",
+              "cells": [
+                "Semiconductor equipment",
+                "Etch, rapid thermal processing, deposition, chemical mechanical planarization, metrology and inspection, wafer packaging, and ion implantation."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "including etch, rapid thermal processing, deposition, chemical mechanical planarization, metrology and inspection, wafer packaging, and ion implantation"
+              }
+            },
+            {
+              "id": "chipmaking_application",
+              "cells": [
+                "Application",
+                "Systems make semiconductor devices (chips) used in electronics."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_business_3",
+                "quote": "Our systems make semiconductor devices called chips—the brains of the electronics used in almost every aspect of our lives."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported demand indicators",
+          "cols": [
+            "Indicator",
+            "Period or context",
+            "Reported fact"
+          ],
+          "rows": [
+            {
+              "id": "ai_demand",
+              "cells": [
+                "AI-related demand",
+                "Q3 FY2026 management commentary",
+                "CEO said global AI adoption was driving unprecedented demand for materials-engineering solutions."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "As the rapid global adoption of AI drives unprecedented demand for our materials engineering solutions"
+              }
+            },
+            {
+              "id": "second_half_demand",
+              "cells": [
+                "DRAM, leading-edge foundry-logic and advanced packaging",
+                "Second half of calendar 2026 outlook",
+                "CFO expected continued strong revenue growth, particularly in these areas."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "We expect continued strong revenue growth in the second half of the calendar year, particularly in DRAM as well as leading-edge foundry-logic and advanced packaging."
+              }
+            },
+            {
+              "id": "geographic_revenue",
+              "cells": [
+                "Revenue by customer-facility region",
+                "Nine months ended July 26, 2026",
+                "Asia Pacific: $20,022 million (84%); United States: $2,964 million (12%)."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Asia Pacific | 7,265 | 80% | 6,459 | 89% | 12% | 20,022 | 84% | 18,418 | 85% | 9% United States | 1,367 | 15% | 683 | 9% | 100% | 2,964 | 12% | 2,408 | 11% | 23%"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customer_map",
+      "title": "Customers and buyer archetypes",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented customer facts",
+          "cols": [
+            "Fact",
+            "Reported detail"
+          ],
+          "rows": [
+            {
+              "id": "customer_type",
+              "cells": [
+                "Customer type",
+                "Products are sold principally to manufacturers within the semiconductor industry."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "We sell our products principally to manufacturers within the semiconductor industry."
+              }
+            },
+            {
+              "id": "customer_concentration",
+              "cells": [
+                "Revenue concentration",
+                "For the nine months ended July 26, 2026, two customers accounted for approximately 20% and 14% of revenue, respectively; no other customer exceeded 10%."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Two customers accounted for approximately 20% and 14%, respectively, of our revenue for the nine months ended July 26, 2026."
+              }
+            },
+            {
+              "id": "remaining_obligations",
+              "cells": [
+                "Remaining performance obligations",
+                "Approximately $1.0 billion on contracts with original estimated duration of one year or more as of July 26, 2026; approximately 73% expected to be recognized within 12 months."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "approximately $1.0 billion, of which approximately 73% is expected to be recognized within 12 months"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Inferred buyer archetypes (not named customers)",
+          "cols": [
+            "Archetype",
+            "Basis"
+          ],
+          "rows": [
+            {
+              "id": "manufacturer_buyer",
+              "cells": [
+                "Semiconductor-manufacturer equipment buyers",
+                "Inferred from the disclosed customer type and the reported semiconductor capital-equipment business; specific buyer roles are not identified."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "We sell our products principally to manufacturers within the semiconductor industry."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest-quarter financials and liquidity",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Income statement and operating results",
+          "cols": [
+            "Metric",
+            "Three months ended July 26, 2026"
+          ],
+          "rows": [
+            {
+              "id": "q3_revenue",
+              "cells": [
+                "Revenue",
+                "$9,115 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Revenue | $9,115"
+              }
+            },
+            {
+              "id": "q3_gross_margin",
+              "cells": [
+                "GAAP gross margin",
+                "50.3%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "GAAP gross margin 50.3 percent"
+              }
+            },
+            {
+              "id": "q3_operating_income",
+              "cells": [
+                "Operating income",
+                "$3,075 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Operating income (loss) | $2,657 | $536 | $(118) | $3,075"
+              }
+            },
+            {
+              "id": "q3_net_income",
+              "cells": [
+                "GAAP net income",
+                "$2,538 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "Net income | $ | 2,538"
+              }
+            },
+            {
+              "id": "q3_eps",
+              "cells": [
+                "GAAP diluted EPS",
+                "$3.17"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "Diluted earnings per share | $ | 3.17"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Cash and debt",
+          "cols": [
+            "Metric",
+            "Amount and period"
+          ],
+          "rows": [
+            {
+              "id": "q3_operating_cash",
+              "cells": [
+                "Cash from operations",
+                "$3.04 billion; Q3 FY2026"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "The company generated record cash from operations of $3.04 billion"
+              }
+            },
+            {
+              "id": "cash_balance",
+              "cells": [
+                "Cash and cash equivalents",
+                "$7,037 million as of July 26, 2026"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Cash and cash equivalents | $7,037 | $5,384"
+              }
+            },
+            {
+              "id": "short_term_debt",
+              "cells": [
+                "Short-term debt",
+                "$1,299 million as of July 26, 2026"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Short-term debt | $1,299 | $100"
+              }
+            },
+            {
+              "id": "long_term_debt",
+              "cells": [
+                "Long-term debt",
+                "$5,245 million as of July 26, 2026"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Total long-term debt | $5,245 | $6,455"
+              }
+            },
+            {
+              "id": "ytd_cash_financing",
+              "cells": [
+                "Cash used in financing activities",
+                "$(2,634) million; nine months ended July 26, 2026"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Cash used in financing activities | (2,634) | (5,146)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported drivers and risk factors",
+          "cols": [
+            "Type",
+            "Claim"
+          ],
+          "rows": [
+            {
+              "id": "capacity_driver",
+              "cells": [
+                "Driver / management outlook",
+                "Company said it was investing in additional manufacturing capacity to support projected demand through the end of the decade."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "amat_results_1",
+                "quote": "we are making additional manufacturing capacity investments to support projected demand through the end of the decade."
+              }
+            },
+            {
+              "id": "export_controls_risk",
+              "cells": [
+                "Risk / compliance",
+                "A February 2026 settlement with BIS addressed an inquiry relating to certain China customer shipments and export-controls compliance; the agreement requires audits, training and reporting mechanisms."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "to resolve its inquiry relating to certain China customer shipments and export controls compliance"
+              }
+            },
+            {
+              "id": "customer_liquidity_risk",
+              "cells": [
+                "Risk / customer credit",
+                "The filing says changes in a major customer's ability to pay or payment trends may require adjustments to estimates of receivable recoverability."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "an unexpected material adverse change in a major customer’s ability to meet its financial obligation to us or its payment trends"
+              }
+            },
+            {
+              "id": "period_caution",
+              "cells": [
+                "Caution",
+                "The filing states that results for the three and nine months ended July 26, 2026 are not necessarily indicative of future operating results."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_amat_10q",
+                "quote": "Our results of operations for the three and nine months ended July 26, 2026 are not necessarily indicative of future operating results."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 26
+  },
+  "usage": {
+    "input_tokens": 16612,
+    "cached_input_tokens": 1095,
+    "output_tokens": 4128,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00362665,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02362665
+  }
+}

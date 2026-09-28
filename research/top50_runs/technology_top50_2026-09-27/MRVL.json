@@ -1,0 +1,503 @@
+{
+  "ticker": "MRVL",
+  "company": "MRVL",
+  "market_cap_usd": 235402199040,
+  "as_of": "2026-08-01",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-28",
+    "accession": "0001835632-26-000025",
+    "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm"
+  },
+  "generated_at": "2026-09-27T18:53:37+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 5,
+  "sources": [
+    {
+      "source_id": "sec_mrvl_10q",
+      "label": "MRVL 10-Q filed 2026-08-28",
+      "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000025/mrvl-20260801.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "mrvl_business_1",
+      "label": "Corporate Overview",
+      "url": "https://filecache.investorroom.com/mr5ir_marvell/281/2023_11_30_corporate_overview_public_FINAL.pdf",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "mrvl_business_2",
+      "label": "Investor Relations | Marvell Technology, Inc. (MRVL)",
+      "url": "https://investor.marvell.com/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "mrvl_business_3",
+      "label": "Marvell Demonstrates Industry's Leading 2nm Silicon for Accelerated Infrastructure | Marvell Technology, Inc. (MRVL)",
+      "url": "https://investor.marvell.com/news-events/press-releases/detail/110/marvell-demonstrates-industrys-leading-2nm-silicon-for-accelerated-infrastructure",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "mrvl_results_1",
+      "label": "Marvell Technology, Inc.",
+      "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000022/q227_8kx812026ex-991.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Business model facts",
+          "rows": [
+            {
+              "id": "fabless_supplier",
+              "label": "Company model",
+              "value": "Fabless semiconductor supplier focused on data infrastructure.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_business_1",
+                "quote": "Global fabless semiconductor supplier"
+              }
+            },
+            {
+              "id": "current_positioning",
+              "label": "Current positioning",
+              "value": "Marvell says its optimized silicon powers AI, cloud, carrier and enterprise infrastructure.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_business_2",
+                "quote": "Marvell optimized silicon powers AI, cloud, carrier and enterprise infrastructure."
+              }
+            },
+            {
+              "id": "revenue_source",
+              "label": "Revenue source",
+              "value": "The majority of revenue is generated from product sales.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "The majority of the Company’s revenue is generated from sales of the Company’s products."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed portfolio and applications",
+          "cols": [
+            "Area",
+            "Disclosed description"
+          ],
+          "rows": [
+            {
+              "id": "portfolio",
+              "cells": [
+                "Networking, accelerated compute, storage and security",
+                "Portfolio areas described by Marvell as supporting AI applications and industry advancements."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_business_2",
+                "quote": "the networking, accelerated compute, storage, and security solutions developed by Marvell play a crucial role in enabling AI applications"
+              }
+            },
+            {
+              "id": "legacy_portfolio_examples",
+              "cells": [
+                "Data infrastructure silicon",
+                "The 2023 overview lists storage controllers, processors, security processors, automotive Ethernet, electro-optics and networking products."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_business_1",
+                "quote": "Storage HDD, SSD and Fibre Channel controllers"
+              }
+            },
+            {
+              "id": "celestial",
+              "cells": [
+                "Celestial AI",
+                "Acquired Photonic Fabric technology platform, purpose-built for next-generation scale-up interconnect; expected to advance connectivity for next-generation AI and cloud data centers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "a provider of a Photonic FabricTM technology platform purpose-built for next-generation scale-up interconnect"
+              }
+            },
+            {
+              "id": "xconn",
+              "cells": [
+                "XConn",
+                "Acquired PCIe and CXL switching silicon; the filing says it expands the switching portfolio and augments the UALink scale-up switch team."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "a provider of advanced peripheral component interconnect express (“PCIe”) and compute express link (“CXL”) switching silicon"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "demand_customers",
+      "title": "End-market demand and customer/channel facts",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Demand and channel",
+          "rows": [
+            {
+              "id": "data_center_growth",
+              "label": "Data Center demand",
+              "value": "Management reported Data Center revenue growth of 46% year over year in Q2 FY2027.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_results_1",
+                "quote": "Data Center portfolio, where revenue growth accelerated to 46% year over year"
+              }
+            },
+            {
+              "id": "ai_bookings",
+              "label": "AI-related bookings",
+              "value": "Management described AI-related bookings as exceptionally robust.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_results_1",
+                "quote": "AI-related bookings remain exceptionally robust"
+              }
+            },
+            {
+              "id": "q2_direct_channel",
+              "label": "Q2 FY2027 customer type",
+              "value": "Direct customers: $1,364.9 million (50%); distributors: $1,374.4 million (50%).",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Direct customers | $1,364.9 | 50%"
+              }
+            },
+            {
+              "id": "buyer_archetypes",
+              "label": "Buyer archetypes (inferred, not named customers)",
+              "value": "Hyperscalers and cloud service providers are plausible buyer archetypes for accelerated infrastructure; the supplied sources do not establish specific customer identities.",
+              "status": "inferred",
+              "evidence": {
+                "source_id": "mrvl_business_3",
+                "quote": "hyperscalers to dramatically boost the performance and efficiency of their infrastructure"
+              }
+            },
+            {
+              "id": "shipment_geography_caveat",
+              "label": "Interpreting shipment destinations",
+              "value": "Shipment destination is not necessarily the end-customer location; the filing says many China shipments relate to non-China-based customers with factories or contract manufacturing operations in China.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "These destinations of shipment are not necessarily indicative of the geographic location of the Company’s end customers"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quarter_financials",
+      "title": "Latest-quarter income statement",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Unaudited results (USD millions, except as noted)",
+          "cols": [
+            "Line item",
+            "Three months ended August 1, 2026",
+            "Six months ended August 1, 2026"
+          ],
+          "rows": [
+            {
+              "id": "revenue",
+              "cells": [
+                "Net revenue",
+                "2,739.3",
+                "5,157.1"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Net revenue | $2,739.3 | $2,006.1 | $5,157.1 | $3,901.4"
+              }
+            },
+            {
+              "id": "cogs",
+              "cells": [
+                "Cost of goods sold",
+                "1,283.7",
+                "2,440.7"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Cost of goods sold | 1,283.7 | 995.5 | 2,440.7 | 1,938.4"
+              }
+            },
+            {
+              "id": "gross_profit",
+              "cells": [
+                "Gross profit",
+                "1,455.6",
+                "2,716.4"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Gross profit | 1,455.6 | 1,010.6 | 2,716.4 | 1,963.0"
+              }
+            },
+            {
+              "id": "rd",
+              "cells": [
+                "Research and development",
+                "741.1",
+                "1,393.4"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Research and development | 741.1 | 519.0 | 1,393.4 | 1,026.7"
+              }
+            },
+            {
+              "id": "sga",
+              "cells": [
+                "Selling, general and administrative",
+                "257.6",
+                "516.0"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Selling, general and administrative | 257.6 | 192.8 | 516.0 | 379.2"
+              }
+            },
+            {
+              "id": "operating_income",
+              "cells": [
+                "Operating income",
+                "459.7",
+                "799.1"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Operating income | 459.7 | 290.1 | 799.1 | 560.7"
+              }
+            },
+            {
+              "id": "interest_other_loss",
+              "cells": [
+                "Interest and other loss, net",
+                "(81.4)",
+                "(337.5)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Interest and other loss, net | (81.4) | (56.4) | (337.5) | (111.1)"
+              }
+            },
+            {
+              "id": "q2_net_income",
+              "cells": [
+                "GAAP net income (USD millions)",
+                "308.0",
+                "Not stated in the supplied excerpt"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_results_1",
+                "quote": "GAAP net income for the second quarter of fiscal 2027 was $308.0 million"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cash_balance_sheet",
+      "title": "Cash, cash flow and debt",
+      "category": "cash_flow",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Selected cash and debt facts (USD millions)",
+          "cols": [
+            "Item",
+            "Period/date",
+            "Amount or status"
+          ],
+          "rows": [
+            {
+              "id": "cash_balance",
+              "cells": [
+                "Cash and cash equivalents",
+                "August 1, 2026",
+                "3,932.8"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Cash and cash equivalents | $3,932.8 | $2,638.8"
+              }
+            },
+            {
+              "id": "q2_cfo",
+              "cells": [
+                "Cash flow from operations",
+                "Q2 FY2027",
+                "605.5"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_results_1",
+                "quote": "Cash flow from operations for the second quarter was $605.5 million."
+              }
+            },
+            {
+              "id": "six_month_cash_increase",
+              "cells": [
+                "Net increase in cash and cash equivalents",
+                "Six months ended August 1, 2026",
+                "1,294.0"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Net increase in cash and cash equivalents | 1,294.0 | 276.1"
+              }
+            },
+            {
+              "id": "net_debt_carrying",
+              "cells": [
+                "Net carrying amount of debt",
+                "August 1, 2026",
+                "4,962.9"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Net carrying amount of debt | $4,962.9 | $4,470.6"
+              }
+            },
+            {
+              "id": "revolver",
+              "cells": [
+                "2025 Revolving Credit Facility",
+                "August 1, 2026",
+                "Undrawn; $1.5 billion borrowing capacity"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "As of August 1, 2026, the 2025 Revolving Credit Facility was undrawn"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Selected catalysts and risk factors",
+          "rows": [
+            {
+              "id": "demand_driver",
+              "label": "Reported growth driver",
+              "value": "Management cited strong Data Center demand, including strength in Connectivity and an expected acceleration in the Custom business beginning in the second half of fiscal 2027.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "mrvl_results_1",
+                "quote": "strong demand in Connectivity and a significant acceleration in our Custom business beginning in the second half of fiscal 2027"
+              }
+            },
+            {
+              "id": "acquisition_execution",
+              "label": "Acquisition-related uncertainty",
+              "value": "Celestial contingent consideration depends on revenue milestones; the liability is remeasured at fair value and valuation uses forecast revenue and probability of achievement.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "Critical estimates and inputs used for the valuation of contingent consideration include forecasted revenue, probability of achievement"
+              }
+            },
+            {
+              "id": "supply_commitments",
+              "label": "Supply and commitment exposure",
+              "value": "Commitments include wafer purchases and capacity reservations; canceling outstanding foundry purchase orders can require payment of incurred costs and may involve additional fees or lost capacity priority.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "cancellation of outstanding purchase orders is allowed but requires payment of all costs and expenses incurred"
+              }
+            },
+            {
+              "id": "estimation_risk",
+              "label": "Estimate uncertainty",
+              "value": "The filing says estimates in the current macroeconomic environment may require increased judgment and carry greater variability and volatility; actual results may differ.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "these estimates could require increased judgment and carry a higher degree of variability and volatility"
+              }
+            },
+            {
+              "id": "legal_risk",
+              "label": "Legal proceedings",
+              "value": "The company says an unfavorable legal outcome could require damages or prevent sales of some products in certain jurisdictions; it cannot predict final outcomes.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_mrvl_10q",
+                "quote": "An unfavorable outcome in a Legal Matter could require the Company to pay damages or could prevent the Company from selling some of its products"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 30
+  },
+  "usage": {
+    "input_tokens": 16628,
+    "cached_input_tokens": 1095,
+    "output_tokens": 4776,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00395225,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02395225
+  }
+}

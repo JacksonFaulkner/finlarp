@@ -7,7 +7,8 @@
 //   Table  -> ratatui Table, content-sized columns (long text truncated with
 //             …; the cursor row wraps to show everything), h/l cell cursor
 //   Kv     -> two-column Table, values right-aligned
-//   Series -> SparkBars row (None = gap) over an x / value table
+//   Series -> x / value table with SparkBars beside it (None = gap), or a
+//             SparkBars row over the table when the width is too narrow
 //   Bars   -> horizontal bars: label, bar, value; `compare` as a dim second
 //             bar; negative values grow left from a shared zero column
 //   Text   -> wrapped paragraph (the whole text is one item)
@@ -24,16 +25,16 @@
 
 use std::borrow::Cow;
 
+use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Rect};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span, Text};
 use ratatui::widgets::{
-    Cell, HighlightSpacing, Paragraph, Row as TRow, Scrollbar, ScrollbarOrientation, ScrollbarState, StatefulWidget,
-    Table, TableState, Widget,
+    Cell, HighlightSpacing, Paragraph, Row as TRow, Scrollbar, ScrollbarOrientation,
+    ScrollbarState, StatefulWidget, Table, TableState, Widget,
 };
-use ratatui::Frame;
 
 use crate::model::{BarItem, Block, KvRow, Point, Row, Source};
 use crate::ui::charts::SparkBars;
@@ -66,7 +67,10 @@ impl BlockView {
 
     /// Reset when the underlying blocks change (e.g. new section selected).
     pub fn reset(&mut self) {
-        *self = Self { audit: self.audit, ..Self::default() };
+        *self = Self {
+            audit: self.audit,
+            ..Self::default()
+        };
     }
 
     pub fn selected_source<'a>(&self, blocks: &'a [Block]) -> Option<&'a Source> {
@@ -76,7 +80,11 @@ impl BlockView {
     /// Full text of the selected table cell (with h/l), else None.
     pub fn selected_cell<'a>(&self, blocks: &'a [Block]) -> Option<&'a str> {
         match blocks.get(self.cursor.block)? {
-            Block::Table { rows, .. } => rows.get(self.cursor.item)?.cells.get(self.col?).map(String::as_str),
+            Block::Table { rows, .. } => rows
+                .get(self.cursor.item)?
+                .cells
+                .get(self.col?)
+                .map(String::as_str),
             _ => None,
         }
     }
@@ -84,10 +92,14 @@ impl BlockView {
     /// Move to the next selectable item, crossing (and skipping empty) blocks.
     pub fn next(&mut self, blocks: &[Block]) {
         self.clamp(blocks);
-        let Some(b) = blocks.get(self.cursor.block) else { return };
+        let Some(b) = blocks.get(self.cursor.block) else {
+            return;
+        };
         if self.cursor.item + 1 < b.len() {
             self.cursor.item += 1;
-        } else if let Some(nb) = (self.cursor.block + 1..blocks.len()).find(|&i| !blocks[i].is_empty()) {
+        } else if let Some(nb) =
+            (self.cursor.block + 1..blocks.len()).find(|&i| !blocks[i].is_empty())
+        {
             self.cursor = Cursor { block: nb, item: 0 };
             self.col = None;
         }
@@ -97,20 +109,32 @@ impl BlockView {
         self.clamp(blocks);
         if self.cursor.item > 0 {
             self.cursor.item -= 1;
-        } else if let Some(pb) = (0..self.cursor.block).rev().find(|&i| !blocks[i].is_empty()) {
-            self.cursor = Cursor { block: pb, item: blocks[pb].len() - 1 };
+        } else if let Some(pb) = (0..self.cursor.block)
+            .rev()
+            .find(|&i| !blocks[i].is_empty())
+        {
+            self.cursor = Cursor {
+                block: pb,
+                item: blocks[pb].len() - 1,
+            };
             self.col = None;
         }
     }
 
     pub fn first(&mut self, blocks: &[Block]) {
-        self.cursor = Cursor { block: blocks.iter().position(|b| !b.is_empty()).unwrap_or(0), item: 0 };
+        self.cursor = Cursor {
+            block: blocks.iter().position(|b| !b.is_empty()).unwrap_or(0),
+            item: 0,
+        };
         self.col = None;
     }
 
     pub fn last(&mut self, blocks: &[Block]) {
         if let Some(i) = blocks.iter().rposition(|b| !b.is_empty()) {
-            self.cursor = Cursor { block: i, item: blocks[i].len() - 1 };
+            self.cursor = Cursor {
+                block: i,
+                item: blocks[i].len() - 1,
+            };
             self.col = None;
         }
     }
@@ -127,7 +151,10 @@ impl BlockView {
     pub fn previous_block(&mut self, blocks: &[Block]) {
         if self.cursor.item > 0 {
             self.cursor.item = 0;
-        } else if let Some(pb) = (0..self.cursor.block).rev().find(|&i| !blocks[i].is_empty()) {
+        } else if let Some(pb) = (0..self.cursor.block)
+            .rev()
+            .find(|&i| !blocks[i].is_empty())
+        {
             self.cursor = Cursor { block: pb, item: 0 };
         }
         self.col = None;
@@ -136,7 +163,11 @@ impl BlockView {
     /// Move `n` items down / up (half-page keys).
     pub fn move_by(&mut self, blocks: &[Block], n: isize) {
         for _ in 0..n.unsigned_abs() {
-            if n > 0 { self.next(blocks) } else { self.previous(blocks) }
+            if n > 0 {
+                self.next(blocks)
+            } else {
+                self.previous(blocks)
+            }
         }
     }
 
@@ -174,7 +205,9 @@ impl BlockView {
             KeyCode::Tab => self.next_block(blocks),
             KeyCode::BackTab => self.previous_block(blocks),
             KeyCode::Char('l') | KeyCode::Right => {
-                let Some(Block::Table { cols, .. }) = blocks.get(self.cursor.block) else { return false };
+                let Some(Block::Table { cols, .. }) = blocks.get(self.cursor.block) else {
+                    return false;
+                };
                 let last = cols.len().saturating_sub(1);
                 self.col = Some(self.col.map_or(0, |c| (c + 1).min(last)));
             }
@@ -304,7 +337,13 @@ struct Cx<'a> {
 
 fn cx<'a>(st: &BlockView, bi: usize, width: u16, th: &'a Theme) -> Cx<'a> {
     let here = st.cursor.block == bi;
-    Cx { th, audit: st.audit, width, sel: here.then_some(st.cursor.item), col: if here { st.col } else { None } }
+    Cx {
+        th,
+        audit: st.audit,
+        width,
+        sel: here.then_some(st.cursor.item),
+        col: if here { st.col } else { None },
+    }
 }
 
 const GUTTER: u16 = 2;
@@ -322,11 +361,15 @@ fn measure(blocks: &[Block], st: &BlockView, width: u16, th: &Theme) -> Page {
         out.push((y, g));
         y = y.saturating_add(out[i].1.height);
     }
-    Page { blocks: out, total: y }
+    Page {
+        blocks: out,
+        total: y,
+    }
 }
 
 fn has_header(b: &Block) -> bool {
-    !b.title().is_empty() || matches!(b, Block::Series { unit, .. } | Block::Bars { unit, .. } if !unit.is_empty())
+    !b.title().is_empty()
+        || matches!(b, Block::Series { unit, .. } | Block::Bars { unit, .. } if !unit.is_empty())
 }
 
 /// Geometry without drawing (a dry run of `body`).
@@ -341,16 +384,30 @@ fn geom(b: &Block, cx: &Cx) -> Geom {
 fn draw_block(b: &Block, cx: &Cx, buf: &mut Buffer) {
     let hdr = u16::from(has_header(b));
     if hdr == 1 {
-        header(b, cx).render(Rect { height: 1, ..buf.area }, buf);
+        header(b, cx).render(
+            Rect {
+                height: 1,
+                ..buf.area
+            },
+            buf,
+        );
     }
-    let area = Rect { y: buf.area.y + hdr, height: buf.area.height.saturating_sub(hdr), ..buf.area };
+    let area = Rect {
+        y: buf.area.y + hdr,
+        height: buf.area.height.saturating_sub(hdr),
+        ..buf.area
+    };
     body(b, cx, Some((buf, area)), hdr);
 }
 
 /// "Title  $M" in bold (accent while the cursor is in this block).
 fn header<'a>(b: &'a Block, cx: &Cx) -> Line<'a> {
     let th = cx.th;
-    let style = if cx.sel.is_some() { th.title().fg(th.accent) } else { th.title() };
+    let style = if cx.sel.is_some() {
+        th.title().fg(th.accent)
+    } else {
+        th.title()
+    };
     let mut spans = vec![Span::styled(b.title(), style)];
     if let Block::Series { unit, .. } | Block::Bars { unit, .. } = b
         && !unit.is_empty()
@@ -376,6 +433,47 @@ fn body(b: &Block, cx: &Cx, out: Option<(&mut Buffer, Rect)>, hdr: u16) -> Geom 
     g
 }
 
+/// For other layouts (ui::block_grid): one block's body (no title line) at
+/// `width`: its height and each item's (line offset, height).
+pub(crate) fn body_geom(
+    b: &Block,
+    width: u16,
+    sel: Option<usize>,
+    audit: bool,
+    th: &Theme,
+) -> (u16, Vec<(u16, u16)>) {
+    let g = body(
+        b,
+        &Cx {
+            th,
+            audit,
+            width,
+            sel,
+            col: None,
+        },
+        None,
+        0,
+    );
+    (g.height, g.items)
+}
+
+/// Draw one block's body (no title line) into the whole of `buf`.
+pub(crate) fn draw_body(b: &Block, buf: &mut Buffer, sel: Option<usize>, audit: bool, th: &Theme) {
+    let area = buf.area;
+    body(
+        b,
+        &Cx {
+            th,
+            audit,
+            width: area.width,
+            sel,
+            col: None,
+        },
+        Some((buf, area)),
+        0,
+    );
+}
+
 // ---------------------------------------------------------------- grid (table / kv / series rows)
 
 /// One row of a grid: display cells + the provenance bits the gutter needs.
@@ -395,7 +493,11 @@ struct GridSpec<'a> {
 
 /// Width of the audit source-label column.
 fn src_col_width(cx: &Cx) -> u16 {
-    if cx.audit { (cx.width / 4).clamp(8, 40) } else { 0 }
+    if cx.audit {
+        (cx.width / 4).clamp(8, 40)
+    } else {
+        0
+    }
 }
 
 /// Column widths fitting `avail`: each column gets its natural width unless
@@ -421,7 +523,11 @@ fn fit_widths(natural: &[u16], avail: u16) -> Vec<u16> {
 /// Gutter cell: ● new, then the audit marker.
 fn gutter<'a>(new: bool, src: Option<&Source>, cx: &Cx) -> Line<'a> {
     let th = cx.th;
-    let a = if new { Span::styled("●", th.new_marker()) } else { Span::raw(" ") };
+    let a = if new {
+        Span::styled("●", th.new_marker())
+    } else {
+        Span::raw(" ")
+    };
     let b = match (cx.audit, src) {
         (false, _) => Span::raw(" "),
         (true, None) => Span::styled("✗", th.down()),
@@ -435,7 +541,10 @@ fn gutter<'a>(new: bool, src: Option<&Source>, cx: &Cx) -> Line<'a> {
 fn src_label<'a>(src: Option<&Source>, w: usize, th: &Theme) -> Line<'a> {
     match src {
         None => Line::styled(text::truncate("no source", w), th.down()),
-        Some(s) if s.is_derived() => Line::styled(text::truncate(&format!("ƒ {}", s.label), w), th.dim().add_modifier(Modifier::ITALIC)),
+        Some(s) if s.is_derived() => Line::styled(
+            text::truncate(&format!("ƒ {}", s.label), w),
+            th.dim().add_modifier(Modifier::ITALIC),
+        ),
         Some(s) => Line::styled(text::truncate(&s.label, w), th.dim()),
     }
 }
@@ -449,29 +558,79 @@ fn grid(spec: &GridSpec, rows: &[GridRow], cx: &Cx, out: Option<(&mut Buffer, Re
         if let Some((buf, area)) = out {
             Line::styled("  (none)", th.dim()).render(area, buf);
         }
-        return Geom { height: 1, items: vec![] };
+        return Geom {
+            height: 1,
+            items: vec![],
+        };
     }
     let ncols = spec.right.len();
     let srcw = src_col_width(cx);
-    // spacing: 1 between every column incl. gutter and source column
-    let spacing = ncols as u16 + u16::from(srcw > 0);
-    let avail = cx.width.saturating_sub(GUTTER + srcw + spacing);
-    let natural: Vec<u16> = (0..ncols)
+    // Available content width before table column separators.
+    let avail = cx.width.saturating_sub(GUTTER + srcw);
+    // With a table cell selected, preserve readable column widths and reveal
+    // the selected column plus following columns in a horizontal window.
+    // Without cell selection, keep the compact all-columns overview.
+    let display_cols: Vec<usize> = if let Some(selected) = cx.col.filter(|_| spec.header.is_some())
+    {
+        let mut used = 0u16;
+        let mut cols = Vec::new();
+        for c in selected.min(ncols.saturating_sub(1))..ncols {
+            let w = spec
+                .header
+                .and_then(|h| h.get(c))
+                .map_or(0, |s| text::width(s))
+                .max(
+                    rows.iter()
+                        .map(|r| r.cells.get(c).map_or(0, |s| text::width(s)))
+                        .max()
+                        .unwrap_or(0),
+                )
+                .clamp(1, 28) as u16;
+            let next = used
+                .saturating_add(w)
+                .saturating_add(u16::from(!cols.is_empty()));
+            if !cols.is_empty() && next > avail {
+                break;
+            }
+            cols.push(c);
+            used = next;
+        }
+        cols
+    } else {
+        (0..ncols).collect()
+    };
+    let natural: Vec<u16> = display_cols
+        .iter()
+        .copied()
         .map(|c| {
-            let h = spec.header.and_then(|h| h.get(c)).map_or(0, |s| text::width(s));
-            let body = rows.iter().map(|r| r.cells.get(c).map_or(0, |s| text::width(s))).max().unwrap_or(0);
+            let h = spec
+                .header
+                .and_then(|h| h.get(c))
+                .map_or(0, |s| text::width(s));
+            let body = rows
+                .iter()
+                .map(|r| r.cells.get(c).map_or(0, |s| text::width(s)))
+                .max()
+                .unwrap_or(0);
             h.max(body).min(u16::MAX as usize) as u16
         })
         .collect();
+    let spacing = display_cols.len() as u16 + u16::from(srcw > 0);
+    let avail = cx.width.saturating_sub(GUTTER + srcw + spacing);
     let widths = fit_widths(&natural, avail);
 
     // cursor row wraps when something in it was truncated
     let sel_lines: Vec<Vec<String>> = match cx.sel.and_then(|i| rows.get(i)) {
-        Some(r) => (0..ncols)
-            .map(|c| {
+        Some(r) => display_cols
+            .iter()
+            .enumerate()
+            .map(|(visible, &c)| {
                 let s = r.cells.get(c).map_or("", |s| s.as_ref());
-                if text::width(s) > widths[c] as usize && widths[c] > 0 {
-                    text::wrap(s, widths[c] as usize).into_iter().take(MAX_ROW_LINES).collect()
+                if text::width(s) > widths[visible] as usize && widths[visible] > 0 {
+                    text::wrap(s, widths[visible] as usize)
+                        .into_iter()
+                        .take(MAX_ROW_LINES)
+                        .collect()
                 } else {
                     vec![s.to_string()]
                 }
@@ -491,20 +650,34 @@ fn grid(spec: &GridSpec, rows: &[GridRow], cx: &Cx, out: Option<(&mut Buffer, Re
     let geom = Geom { height: y, items };
     let Some((buf, area)) = out else { return geom };
 
-    let align = |line: Line<'static>, c: usize| if spec.right[c] { line.right_aligned() } else { line };
+    let align = |line: Line<'static>, c: usize| {
+        if spec.right[display_cols[c]] {
+            line.right_aligned()
+        } else {
+            line
+        }
+    };
     let trows: Vec<TRow> = rows
         .iter()
         .enumerate()
         .map(|(i, r)| {
             let mut cells = vec![Cell::from(gutter(r.new, r.src, cx))];
-            for c in 0..ncols {
+            for (visible, &c) in display_cols.iter().enumerate() {
                 let style = (spec.cell_style)(i, c);
                 let text: Text = if cx.sel == Some(i) {
-                    let lines = sel_lines.get(c).cloned().unwrap_or_default();
-                    Text::from(lines.into_iter().map(|l| align(Line::styled(l, style), c)).collect::<Vec<_>>())
+                    let lines = sel_lines.get(visible).cloned().unwrap_or_default();
+                    Text::from(
+                        lines
+                            .into_iter()
+                            .map(|l| align(Line::styled(l, style), visible))
+                            .collect::<Vec<_>>(),
+                    )
                 } else {
                     let s = r.cells.get(c).map_or("", |s| s.as_ref());
-                    Text::from(align(Line::styled(text::truncate(s, widths[c] as usize), style), c))
+                    Text::from(align(
+                        Line::styled(text::truncate(s, widths[visible] as usize), style),
+                        visible,
+                    ))
                 };
                 cells.push(Cell::from(text));
             }
@@ -512,7 +685,11 @@ fn grid(spec: &GridSpec, rows: &[GridRow], cx: &Cx, out: Option<(&mut Buffer, Re
                 cells.push(Cell::from(src_label(r.src, srcw as usize, th)));
             }
             let row = TRow::new(cells).height(items_h(&geom, i));
-            if cx.audit && r.src.is_some_and(Source::is_derived) { row.style(th.derived()) } else { row }
+            if cx.audit && r.src.is_some_and(Source::is_derived) {
+                row.style(th.derived())
+            } else {
+                row
+            }
         })
         .collect();
 
@@ -525,22 +702,36 @@ fn grid(spec: &GridSpec, rows: &[GridRow], cx: &Cx, out: Option<(&mut Buffer, Re
         .column_spacing(1)
         .style(th.base())
         .row_highlight_style(th.selected())
-        .cell_highlight_style(th.accent().add_modifier(Modifier::REVERSED | Modifier::BOLD))
+        .cell_highlight_style(
+            th.on_cursor(th.accent())
+                .add_modifier(Modifier::BOLD | Modifier::UNDERLINED),
+        )
         .highlight_spacing(HighlightSpacing::Never);
     if let Some(h) = spec.header {
-        let cells = (0..ncols).map(|c| {
+        let cells = display_cols.iter().enumerate().map(|(visible, &c)| {
             let s = h.get(c).map_or("", String::as_str);
-            Cell::from(align(Line::styled(text::truncate(s, widths[c] as usize), th.dim().add_modifier(Modifier::BOLD)), c))
+            Cell::from(align(
+                Line::styled(
+                    text::truncate(s, widths[visible] as usize),
+                    th.dim().add_modifier(Modifier::BOLD),
+                ),
+                visible,
+            ))
         });
         let mut hc = vec![Cell::from("")];
         hc.extend(cells);
         if srcw > 0 {
-            hc.push(Cell::from(Line::styled("source", th.dim().add_modifier(Modifier::BOLD))));
+            hc.push(Cell::from(Line::styled(
+                "source",
+                th.dim().add_modifier(Modifier::BOLD),
+            )));
         }
         table = table.header(TRow::new(hc));
     }
     // column index in the widget includes the gutter column
-    let mut state = TableState::default().with_selected(cx.sel).with_selected_column(cx.col.map(|c| c + 1));
+    let mut state = TableState::default()
+        .with_selected(cx.sel)
+        .with_selected_column(cx.col.map(|_| 1));
     StatefulWidget::render(table, area, buf, &mut state);
     geom
 }
@@ -553,61 +744,111 @@ fn items_h(g: &Geom, i: usize) -> u16 {
 fn is_numeric(s: &str) -> bool {
     let s = s.trim();
     let b = s.as_bytes();
-    let is_date = b.len() >= 10 && b[4] == b'-' && b[7] == b'-' && b[..4].iter().all(u8::is_ascii_digit);
+    let is_date =
+        b.len() >= 10 && b[4] == b'-' && b[7] == b'-' && b[..4].iter().all(u8::is_ascii_digit);
     !s.is_empty()
         && !is_date
         && s.chars().any(|c| c.is_ascii_digit())
-        && s.chars().all(|c| c.is_ascii_digit() || ",.$%+-−()KMBkx× ".contains(c))
+        && s.chars()
+            .all(|c| c.is_ascii_digit() || ",.$%+-−()KMBkx× ".contains(c))
 }
 
 fn table(cols: &[String], rows: &[Row], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     let right: Vec<bool> = (0..cols.len())
         .map(|c| {
             // mostly numeric ("new", "n/a" placeholders don't flip the column)
-            let vals: Vec<&String> = rows.iter().filter_map(|r| r.cells.get(c)).filter(|s| !s.trim().is_empty()).collect();
+            let vals: Vec<&String> = rows
+                .iter()
+                .filter_map(|r| r.cells.get(c))
+                .filter(|s| !s.trim().is_empty())
+                .collect();
             let num = vals.iter().filter(|s| is_numeric(s)).count();
             num > 0 && num * 4 >= vals.len() * 3
         })
         .collect();
     let grows: Vec<GridRow> = rows
         .iter()
-        .map(|r| GridRow { cells: r.cells.iter().map(|s| Cow::Borrowed(s.as_str())).collect(), new: r.new, src: r.src.as_ref() })
+        .map(|r| GridRow {
+            cells: r.cells.iter().map(|s| Cow::Borrowed(s.as_str())).collect(),
+            new: r.new,
+            src: r.src.as_ref(),
+        })
         .collect();
     let th = cx.th;
     // signed columns (Δ, +x / -x) get up/down colour
     let style = |i: usize, c: usize| {
-        let s = rows.get(i).and_then(|r| r.cells.get(c)).map_or("", String::as_str).trim();
+        let s = rows
+            .get(i)
+            .and_then(|r| r.cells.get(c))
+            .map_or("", String::as_str)
+            .trim();
         match s.chars().next() {
             Some('+') if right[c] => th.up(),
             Some('-' | '−') if right[c] => th.down(),
             _ => th.base(),
         }
     };
-    grid(&GridSpec { header: Some(cols), right: right.clone(), cell_style: &style }, &grows, cx, out)
+    grid(
+        &GridSpec {
+            header: Some(cols),
+            right: right.clone(),
+            cell_style: &style,
+        },
+        &grows,
+        cx,
+        out,
+    )
 }
 
 fn kv(rows: &[KvRow], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     let grows: Vec<GridRow> = rows
         .iter()
-        .map(|r| GridRow { cells: vec![Cow::Borrowed(r.label.as_str()), Cow::Borrowed(r.value.as_str())], new: r.new, src: r.src.as_ref() })
+        .map(|r| GridRow {
+            cells: vec![
+                Cow::Borrowed(r.label.as_str()),
+                Cow::Borrowed(r.value.as_str()),
+            ],
+            new: r.new,
+            src: r.src.as_ref(),
+        })
         .collect();
     let th = cx.th;
     let style = |_: usize, c: usize| if c == 0 { th.dim() } else { th.base() };
-    grid(&GridSpec { header: None, right: vec![false, true], cell_style: &style }, &grows, cx, out)
+    grid(
+        &GridSpec {
+            header: None,
+            right: vec![false, true],
+            cell_style: &style,
+        },
+        &grows,
+        cx,
+        out,
+    )
 }
 
 /// Rows the sparkline takes above the series table.
 const SPARK_H: u16 = 2;
+/// Side-by-side series: columns between the rows and the chart, and the
+/// narrowest chart worth drawing beside them.
+const SIDE_GAP: u16 = 3;
+const SIDE_MIN_CHART: u16 = 12;
 
 fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     let th = cx.th;
-    let spark = if points.iter().any(|p| p.y.is_some()) { SPARK_H } else { 0 };
+    let spark = if points.iter().any(|p| p.y.is_some()) {
+        SPARK_H
+    } else {
+        0
+    };
     let ys: Vec<f64> = points.iter().filter_map(|p| p.y).collect();
     let mut fmt = text::fmt_nums(&ys).into_iter();
     let grows: Vec<GridRow> = points
         .iter()
         .map(|p| GridRow {
-            cells: vec![Cow::Borrowed(p.x.as_str()), Cow::Owned(p.y.and_then(|_| fmt.next()).unwrap_or_else(|| "–".into()))],
+            cells: vec![
+                Cow::Borrowed(p.x.as_str()),
+                Cow::Owned(p.y.and_then(|_| fmt.next()).unwrap_or_else(|| "–".into())),
+            ],
             new: false,
             src: p.src.as_ref(),
         })
@@ -617,13 +858,72 @@ fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
         (_, None) => th.dim(),
         _ => th.base(),
     };
-    let spec = GridSpec { header: None, right: vec![false, true], cell_style: &style };
+    let spec = GridSpec {
+        header: None,
+        right: vec![false, true],
+        cell_style: &style,
+    };
+
+    // Side by side when there's room: x / value rows on the left, a chart as
+    // tall as the rows on the right. Otherwise the sparkline sits on top.
+    let col_w = |c: usize| {
+        grows
+            .iter()
+            .map(|r| text::width(&r.cells[c]) as u16)
+            .max()
+            .unwrap_or(0)
+    };
+    let table_w = GUTTER + 2 + col_w(0) + col_w(1);
+    let chart_room = cx.width.saturating_sub(table_w + SIDE_GAP);
+    if spark > 0 && !cx.audit && chart_room >= SIDE_MIN_CHART {
+        let tcx = Cx {
+            th,
+            audit: false,
+            width: table_w,
+            sel: cx.sel,
+            col: None,
+        };
+        let Some((buf, area)) = out else {
+            return grid(&spec, &grows, &tcx, None);
+        };
+        let g = grid(&spec, &grows, &tcx, Some((buf, Rect { width: table_w.min(area.width), ..area })));
+        let bars = SparkBars {
+            points,
+            selected: cx.sel,
+            theme: th,
+        };
+        let (per, _) = bars.geometry(chart_room);
+        let chart_w = (per * points.len() as u16).clamp(1, chart_room);
+        let chart = Rect {
+            x: area.x + table_w + SIDE_GAP,
+            width: chart_w,
+            height: g.height.min(area.height),
+            ..area
+        };
+        bars.render(chart.intersection(area), buf);
+        return g;
+    }
+
     let mut g = match out {
         None => grid(&spec, &grows, cx, None),
         Some((buf, area)) => {
-            let spark_r = Rect { x: area.x + GUTTER, width: area.width.saturating_sub(GUTTER), height: spark.min(area.height), ..area };
-            SparkBars { points, selected: cx.sel, theme: th }.render(spark_r, buf);
-            let rest = Rect { y: area.y + spark, height: area.height.saturating_sub(spark), ..area };
+            let spark_r = Rect {
+                x: area.x + GUTTER,
+                width: area.width.saturating_sub(GUTTER),
+                height: spark.min(area.height),
+                ..area
+            };
+            SparkBars {
+                points,
+                selected: cx.sel,
+                theme: th,
+            }
+            .render(spark_r, buf);
+            let rest = Rect {
+                y: area.y + spark,
+                height: area.height.saturating_sub(spark),
+                ..area
+            };
             grid(&spec, &grows, cx, Some((buf, rest)))
         }
     };
@@ -636,7 +936,11 @@ fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
 
 fn bars(items: &[BarItem], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     let th = cx.th;
-    let per = if items.iter().any(|i| i.compare.is_some()) { 2 } else { 1 };
+    let per = if items.iter().any(|i| i.compare.is_some()) {
+        2
+    } else {
+        1
+    };
     let geom = Geom {
         height: (items.len() as u16 * per).max(1),
         items: (0..items.len() as u16).map(|i| (i * per, per)).collect(),
@@ -648,16 +952,37 @@ fn bars(items: &[BarItem], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     }
     let srcw = src_col_width(cx);
     // values and compares share one decimal count so the column lines up
-    let nums: Vec<f64> = items.iter().map(|i| i.value).chain(items.iter().filter_map(|i| i.compare)).collect();
+    let nums: Vec<f64> = items
+        .iter()
+        .map(|i| i.value)
+        .chain(items.iter().filter_map(|i| i.compare))
+        .collect();
     let mut fmt = text::fmt_nums(&nums).into_iter();
     let vals: Vec<String> = fmt.by_ref().take(items.len()).collect();
-    let cmps: Vec<String> = items.iter().map(|i| i.compare.and_then(|_| fmt.next()).unwrap_or_default()).collect();
-    let vw = vals.iter().chain(&cmps).map(|s| text::width(s)).max().unwrap_or(0) as u16;
-    let lw = (items.iter().map(|i| text::width(&i.label)).max().unwrap_or(0) as u16).min(28).min(cx.width / 3);
+    let cmps: Vec<String> = items
+        .iter()
+        .map(|i| i.compare.and_then(|_| fmt.next()).unwrap_or_default())
+        .collect();
+    let vw = vals
+        .iter()
+        .chain(&cmps)
+        .map(|s| text::width(s))
+        .max()
+        .unwrap_or(0) as u16;
+    let lw = (items
+        .iter()
+        .map(|i| text::width(&i.label))
+        .max()
+        .unwrap_or(0) as u16)
+        .min(28)
+        .min(cx.width / 3);
     let fixed = GUTTER + lw + 1 + 1 + vw + if srcw > 0 { srcw + 1 } else { 0 };
     let bw = area.width.saturating_sub(fixed);
     // shared scale with a zero column so mixed signs line up
-    let all = items.iter().flat_map(|i| [Some(i.value), i.compare]).flatten();
+    let all = items
+        .iter()
+        .flat_map(|i| [Some(i.value), i.compare])
+        .flatten();
     let (lo, hi) = all.fold((0.0_f64, 0.0_f64), |(l, h), v| (l.min(v), h.max(v)));
     let span = (hi - lo).max(f64::EPSILON);
     let zero = ((-lo / span) * bw as f64).round() as u16;
@@ -668,27 +993,115 @@ fn bars(items: &[BarItem], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
         if y >= area.bottom() {
             break;
         }
-        let row = |dy: u16| Rect { x: area.x, y: y + dy, width: area.width, height: 1 };
+        let row = |dy: u16| Rect {
+            x: area.x,
+            y: y + dy,
+            width: area.width,
+            height: 1,
+        };
         let x_label = area.x + GUTTER;
         let x_bar = x_label + lw + 1;
         let x_val = x_bar + bw + 1;
+        if sel {
+            // faint band across the whole item (both rows when there's a compare bar)
+            buf.set_style(
+                Rect {
+                    height: per.min(area.bottom() - y),
+                    ..row(0)
+                },
+                th.selected(),
+            );
+        }
         gutter(false, it.src.as_ref(), cx).render(row(0), buf);
         let lstyle = if sel { th.selected() } else { th.base() };
-        let lstyle = if cx.audit && it.src.as_ref().is_some_and(Source::is_derived) { lstyle.patch(th.derived()) } else { lstyle };
-        buf.set_stringn(x_label, y, text::fit(&it.label, lw as usize, false), lw as usize, lstyle);
-        let bar_style = if sel { th.accent() } else { th.signed(it.value) };
-        hbar(buf, Rect { x: x_bar, y, width: bw, height: 1 }, zero, it.value / span * bw as f64, bar_style);
-        buf.set_stringn(x_val, y, text::fit(&vals[i], vw as usize, true), vw as usize, if sel { th.selected() } else { th.signed(it.value) });
+        let lstyle = if cx.audit && it.src.as_ref().is_some_and(Source::is_derived) {
+            lstyle.patch(th.derived())
+        } else {
+            lstyle
+        };
+        buf.set_stringn(
+            x_label,
+            y,
+            text::fit(&it.label, lw as usize, false),
+            lw as usize,
+            lstyle,
+        );
+        let bar_style = if sel {
+            th.on_cursor(th.accent())
+        } else {
+            th.signed(it.value)
+        };
+        hbar(
+            buf,
+            Rect {
+                x: x_bar,
+                y,
+                width: bw,
+                height: 1,
+            },
+            zero,
+            it.value / span * bw as f64,
+            bar_style,
+        );
+        buf.set_stringn(
+            x_val,
+            y,
+            text::fit(&vals[i], vw as usize, true),
+            vw as usize,
+            if sel {
+                th.on_cursor(th.signed(it.value))
+            } else {
+                th.signed(it.value)
+            },
+        );
         if srcw > 0 {
-            src_label(it.src.as_ref(), srcw as usize, th).render(Rect { x: x_val + vw + 1, y, width: srcw, height: 1 }.intersection(area), buf);
+            src_label(it.src.as_ref(), srcw as usize, th).render(
+                Rect {
+                    x: x_val + vw + 1,
+                    y,
+                    width: srcw,
+                    height: 1,
+                }
+                .intersection(area),
+                buf,
+            );
         }
-        if per == 2 && y + 1 < area.bottom()
+        if per == 2
+            && y + 1 < area.bottom()
             && let Some(c) = it.compare
         {
-            buf.set_stringn(x_label, y + 1, text::fit("vs", lw as usize, true), lw as usize, th.dim());
+            let dim = if sel {
+                th.on_cursor(th.dim())
+            } else {
+                th.dim()
+            };
+            buf.set_stringn(
+                x_label,
+                y + 1,
+                text::fit("vs", lw as usize, true),
+                lw as usize,
+                dim,
+            );
             {
-                hbar(buf, Rect { x: x_bar, y: y + 1, width: bw, height: 1 }, zero, c / span * bw as f64, th.dim());
-                buf.set_stringn(x_val, y + 1, text::fit(&cmps[i], vw as usize, true), vw as usize, th.dim());
+                hbar(
+                    buf,
+                    Rect {
+                        x: x_bar,
+                        y: y + 1,
+                        width: bw,
+                        height: 1,
+                    },
+                    zero,
+                    c / span * bw as f64,
+                    dim,
+                );
+                buf.set_stringn(
+                    x_val,
+                    y + 1,
+                    text::fit(&cmps[i], vw as usize, true),
+                    vw as usize,
+                    dim,
+                );
             }
         }
     }
@@ -736,20 +1149,38 @@ fn text_block(body: &str, src: Option<&Source>, cx: &Cx, out: Option<(&mut Buffe
     let lines = if w == 0 { vec![] } else { text::wrap(body, w) };
     let extra = u16::from(cx.audit);
     let n = (lines.len() as u16).max(1) + extra;
-    let geom = Geom { height: n, items: vec![(0, n)] };
+    let geom = Geom {
+        height: n,
+        items: vec![(0, n)],
+    };
     let Some((buf, area)) = out else { return geom };
     let sel = cx.sel == Some(0);
-    let style = if cx.audit && src.is_some_and(Source::is_derived) { th.derived() } else { th.base() };
+    let style = if cx.audit && src.is_some_and(Source::is_derived) {
+        th.derived()
+    } else {
+        th.base()
+    };
     let mut out_lines: Vec<Line> = lines
         .into_iter()
         .map(|l| {
-            let g = if sel { Span::styled("▌ ", th.accent()) } else { Span::raw("  ") };
+            let g = if sel {
+                Span::styled("▌ ", th.accent())
+            } else {
+                Span::raw("  ")
+            };
             Line::from(vec![g, Span::styled(l, style)])
         })
         .collect();
     if cx.audit {
         let mut l = src_label(src, w, th);
-        l.spans.insert(0, gutter(false, src, cx).spans.into_iter().nth(1).unwrap_or_default());
+        l.spans.insert(
+            0,
+            gutter(false, src, cx)
+                .spans
+                .into_iter()
+                .nth(1)
+                .unwrap_or_default(),
+        );
         l.spans.insert(0, Span::raw(" "));
         out_lines.push(l);
     }
@@ -761,8 +1192,8 @@ fn text_block(body: &str, src: Option<&Source>, cx: &Cx, out: Option<(&mut Buffe
 mod tests {
     use super::*;
     use crate::model::Section;
-    use ratatui::backend::TestBackend;
     use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
 
     fn key(c: KeyCode) -> KeyEvent {
         KeyEvent::new(c, KeyModifiers::NONE)
@@ -820,14 +1251,24 @@ mod tests {
 
     fn draw(v: &mut BlockView, blocks: &[Block], w: u16, h: u16) -> (String, Buffer) {
         let mut t = Terminal::new(TestBackend::new(w, h)).unwrap();
-        t.draw(|f| v.render(f, f.area(), blocks, &Theme::default())).unwrap();
+        t.draw(|f| v.render(f, f.area(), blocks, &Theme::default()))
+            .unwrap();
         let b = t.backend().buffer().clone();
-        let s = (0..h).map(|y| (0..w).map(|x| b[(x, y)].symbol().to_string()).collect::<String>()).collect::<Vec<_>>().join("\n");
+        let s = (0..h)
+            .map(|y| {
+                (0..w)
+                    .map(|x| b[(x, y)].symbol().to_string())
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
         (s, b)
     }
 
     fn line_of(s: &str, needle: &str) -> usize {
-        s.lines().position(|l| l.contains(needle)).unwrap_or_else(|| panic!("{needle:?} not in\n{s}"))
+        s.lines()
+            .position(|l| l.contains(needle))
+            .unwrap_or_else(|| panic!("{needle:?} not in\n{s}"))
     }
 
     #[test]
@@ -835,20 +1276,39 @@ mod tests {
         let blocks = sample();
         let mut v = BlockView::new();
         let (s, b) = draw(&mut v, &blocks, 70, 40);
-        for needle in ["Revenue", "$2.74B", "Biggest adds", "manager", "BlackRock, Inc.", "Quarterly revenue  $M", "2,739.3", "Data Center", "6,100.3", "About", "Marvell provides"] {
+        for needle in [
+            "Revenue",
+            "$2.74B",
+            "Biggest adds",
+            "manager",
+            "BlackRock, Inc.",
+            "Quarterly revenue  $M",
+            "2,739.3",
+            "Data Center",
+            "6,100.3",
+            "About",
+            "Marvell provides",
+        ] {
             assert!(s.contains(needle), "{needle:?} missing in\n{s}");
         }
         // new marker, truncation ellipsis, None as a dash
         assert!(s.lines().any(|l| l.starts_with("●  Revenue")), "{s}");
         assert!(s.contains('…'), "{s}");
-        assert!(s.lines().any(|l| l.contains("Q2") && l.contains('–')), "{s}");
+        assert!(
+            s.lines().any(|l| l.contains("Q2") && l.contains('–')),
+            "{s}"
+        );
         // cursor row (first kv row) is highlighted
         let y = line_of(&s, "$2.74B") as u16;
-        assert!(b[(3, y)].modifier.contains(Modifier::REVERSED));
+        assert!((b[(3, y)].bg == Theme::default().sel_bg()));
         let y2 = line_of(&s, "  YoY") as u16;
-        assert!(!b[(3, y2)].modifier.contains(Modifier::REVERSED));
+        assert!(!(b[(3, y2)].bg == Theme::default().sel_bg()));
         // values right-aligned: "+36.5%" ends where "$2.74B" ends
-        let end = |n: &str| s.lines().nth(line_of(&s, n)).map(|l| text::width(&l[..l.find(n).unwrap()]) + n.len());
+        let end = |n: &str| {
+            s.lines()
+                .nth(line_of(&s, n))
+                .map(|l| text::width(&l[..l.find(n).unwrap()]) + n.len())
+        };
         assert_eq!(end("$2.74B"), end("+36.5%"));
         // negative bar grows left of the positive one's start
         assert!(s.contains('█'));
@@ -864,7 +1324,11 @@ mod tests {
         assert_eq!(v.cursor, Cursor { block: 1, item: 0 });
         v.on_key(key(KeyCode::Char('j')), &blocks);
         v.on_key(key(KeyCode::Char('j')), &blocks);
-        assert_eq!(v.cursor, Cursor { block: 3, item: 0 }, "empty table skipped");
+        assert_eq!(
+            v.cursor,
+            Cursor { block: 3, item: 0 },
+            "empty table skipped"
+        );
         v.on_key(key(KeyCode::Char('k')), &blocks);
         assert_eq!(v.cursor, Cursor { block: 1, item: 1 });
         v.on_key(key(KeyCode::Tab), &blocks);
@@ -887,9 +1351,15 @@ mod tests {
         assert_eq!(v.selected_cell(&blocks), Some("+21.80M"));
         // half page
         v.viewport = 6;
-        v.on_key(KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL), &blocks);
+        v.on_key(
+            KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL),
+            &blocks,
+        );
         assert_eq!(v.cursor, Cursor { block: 3, item: 1 });
-        v.on_key(KeyEvent::new(KeyCode::Char('u'), KeyModifiers::CONTROL), &blocks);
+        v.on_key(
+            KeyEvent::new(KeyCode::Char('u'), KeyModifiers::CONTROL),
+            &blocks,
+        );
         assert_eq!(v.cursor, Cursor { block: 1, item: 0 });
     }
 
@@ -911,7 +1381,10 @@ mod tests {
     #[test]
     fn cursor_row_wraps_long_cell() {
         let blocks = sample();
-        let mut v = BlockView { cursor: Cursor { block: 1, item: 1 }, ..Default::default() };
+        let mut v = BlockView {
+            cursor: Cursor { block: 1, item: 1 },
+            ..Default::default()
+        };
         let (s, _) = draw(&mut v, &blocks, 40, 30);
         assert!(s.contains("certainly"), "wrapped row shows full text\n{s}");
         assert!(s.contains("pane at all"), "{s}");
@@ -920,7 +1393,10 @@ mod tests {
     #[test]
     fn audit_marks_derived_and_missing() {
         let blocks = sample();
-        let mut v = BlockView { audit: true, ..Default::default() };
+        let mut v = BlockView {
+            audit: true,
+            ..Default::default()
+        };
         let (s, b) = draw(&mut v, &blocks, 90, 40);
         let yoy = line_of(&s, "YoY");
         assert!(s.lines().nth(yoy).unwrap().starts_with(" ƒ"), "{s}");
@@ -936,7 +1412,10 @@ mod tests {
     fn tiny_and_empty() {
         let blocks = sample();
         for (w, h) in [(10, 3), (1, 1), (0, 0), (3, 20), (200, 2)] {
-            let mut v = BlockView { audit: true, ..Default::default() };
+            let mut v = BlockView {
+                audit: true,
+                ..Default::default()
+            };
             draw(&mut v, &blocks, w, h);
             v.last(&blocks);
             draw(&mut v, &blocks, w, h);
@@ -948,7 +1427,10 @@ mod tests {
         v.on_key(key(KeyCode::Char('G')), &[]);
         assert!(v.selected_source(&[]).is_none());
         // cursor left over from a bigger section is clamped
-        let mut v = BlockView { cursor: Cursor { block: 9, item: 9 }, ..Default::default() };
+        let mut v = BlockView {
+            cursor: Cursor { block: 9, item: 9 },
+            ..Default::default()
+        };
         draw(&mut v, &blocks, 40, 10);
         assert_eq!(v.cursor, Cursor::default());
     }

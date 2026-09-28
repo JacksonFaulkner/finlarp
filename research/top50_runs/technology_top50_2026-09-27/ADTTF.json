@@ -1,0 +1,184 @@
+{
+  "ticker": "ADTTF",
+  "company": "ADTTF",
+  "market_cap_usd": 163818356736,
+  "as_of": "2016-04-01",
+  "filing": {
+    "form": "6-K",
+    "filed": "2016-04-01",
+    "accession": "0000947871-16-001078",
+    "url": "https://www.sec.gov/Archives/edgar/data/1158838/000094787116001078/ss1432566_6k.htm"
+  },
+  "generated_at": "2026-09-27T19:15:29+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 2,
+  "sources": [
+    {
+      "source_id": "adttf_business_2",
+      "label": "EarningsCall · ADTTF Q1 2024",
+      "url": "https://earningscall.biz/e/otc/s/adttf/y/2024/q/q1",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "adttf_business_3",
+      "label": "ADTTF Stock Price | Advantest Corp. Stock Quote (U.S.: OTC) | MarketWatch",
+      "url": "https://www.marketwatch.com/investing/stock/adttf",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business-model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Operations",
+          "text": "Advantest manufactures and sells semiconductor and component test systems and mechatronics-related products; its described activities also include customer solutions support and equipment leasing.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "adttf_business_3",
+            "quote": "manufacture and sale of semiconductor and component test system products and mechatronics-related products"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products-applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Product scope",
+          "text": "The source describes test systems for semiconductor and electronic-component industries, plus semiconductor-device handling products including testers, handlers, device interfaces, and nanotechnology products.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "adttf_business_3",
+            "quote": "test systems for semiconductors and electronic component industries"
+          }
+        }
+      ]
+    },
+    {
+      "id": "end-market-demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Later-period demand context (FY2024 Q1)",
+          "text": "In its FY2024 first-quarter briefing, management said semiconductor performance and rising complexity were driving demand growth, with tester demand—especially for SoC testers—rising faster than originally expected. This is later-period context, not a 2016-period claim.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "adttf_business_2",
+            "quote": "increasing complexity is raising tester demand more rapidly than originally expected, especially for SOC testers"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customers-channels",
+      "title": "Customers and channels",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented facts and inferred buyer archetypes",
+          "cols": [
+            "Type",
+            "Fact"
+          ],
+          "rows": [
+            {
+              "id": "documented-customers",
+              "cells": [
+                "Documented",
+                "The FY2024 Q1 briefing refers to product deliveries to customers but does not name customers in the supplied excerpt."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "adttf_business_2",
+                "quote": "our product deliveries to customers exceeded our original plan"
+              }
+            },
+            {
+              "id": "documented-channels",
+              "cells": [
+                "Documented",
+                "The company overview describes customer solutions support and equipment leasing services."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "adttf_business_3",
+                "quote": "customer solutions support, and equipment leasing services"
+              }
+            },
+            {
+              "id": "buyer-archetype",
+              "cells": [
+                "Inferred",
+                "Potential buyer archetypes include organizations in semiconductor and electronic-component industries; no specific buyer or customer is identified."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "adttf_business_3",
+                "quote": "test systems for semiconductors and electronic component industries"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest filed period: 2016-04-01 6-K",
+      "category": "financials",
+      "blocks": []
+    },
+    {
+      "id": "drivers-risks",
+      "title": "Drivers and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Demand driver (FY2024 Q1 context)",
+          "text": "Management identified semiconductor performance and rising complexity as demand drivers; this statement is from FY2024 Q1, not the 2016 filing period.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "adttf_business_2",
+            "quote": "continued demand growth driven by semiconductor performance and rising complexity"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Forward-looking uncertainty",
+          "text": "The FY2024 briefing cautioned that forward-looking statements are subject to risks and uncertainty that may cause actual results to differ. The supplied excerpt does not specify individual risk factors.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "adttf_business_2",
+            "quote": "all of which are subject to risks and uncertainty that may cause our actual results to be different"
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 1,
+    "sourced_items": 8
+  },
+  "usage": {
+    "input_tokens": 10536,
+    "cached_input_tokens": 6360,
+    "output_tokens": 5288,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0031252,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0431252
+  }
+}

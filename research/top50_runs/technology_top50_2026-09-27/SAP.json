@@ -1,0 +1,481 @@
+{
+  "ticker": "SAP",
+  "company": "SAP",
+  "market_cap_usd": 243167756288,
+  "as_of": "2026-07-28",
+  "filing": {
+    "form": "6-K",
+    "filed": "2026-07-28",
+    "accession": "0001104659-26-087251",
+    "url": "https://www.sec.gov/Archives/edgar/data/1000184/000110465926087251/tm2621275d1_6k.htm"
+  },
+  "generated_at": "2026-09-27T18:53:20+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 5,
+  "sources": [
+    {
+      "source_id": "sec_sap_6k",
+      "label": "SAP 6-K filed 2026-07-28",
+      "url": "https://www.sec.gov/Archives/edgar/data/1000184/000110465926087251/tm2621275d1_6k.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "sap_business_1",
+      "label": "SAP: Software products for best-run businesses",
+      "url": "https://www.sap.com/products.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "sap_business_3",
+      "label": "Company Information | About SAP SE",
+      "url": "https://www.sap.com/about/company.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "sap_results_1",
+      "label": "Tm2612672d1 ex99 1.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/1000184/000110465926049650/tm2612672d1_ex99-1.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "sap_results_2",
+      "label": "Tm264433d1 ex99 1.htm",
+      "url": "https://www.sec.gov/Archives/edgar/data/1000184/000110465926009465/tm264433d1_ex99-1.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Enterprise software portfolio",
+          "text": "SAP describes a portfolio of modular business applications and cloud solutions spanning core enterprise processes. Its Q1 2026 results report cloud, software-license, software-support, and services revenue categories.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sap_business_1",
+            "quote": "complete, modular solutions driven by built-in AI and analytics."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Revenue categories reported in Q1 2026",
+          "text": "Reported categories include cloud revenue, software licenses, software support, and services; this describes Q1 2026, not the half-year period ended June 30, 2026.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sap_results_1",
+            "quote": "Software licenses revenue | 116 | 183"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Portfolio areas described by SAP",
+          "cols": [
+            "Area",
+            "Application described"
+          ],
+          "rows": [
+            {
+              "id": "cloud_erp",
+              "cells": [
+                "Cloud ERP",
+                "ERP across finance, supply chain, procurement, and more"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "across finance, supply chain, procurement, and more."
+              }
+            },
+            {
+              "id": "crm",
+              "cells": [
+                "CRM and customer experience",
+                "Connecting commerce, marketing, sales, and service data"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "connecting your commerce, marketing, sales, and service data."
+              }
+            },
+            {
+              "id": "hcm",
+              "cells": [
+                "Human capital management",
+                "Employee experiences and mobile self-services"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "individualized experiences and strategic solutions with mobile self-services."
+              }
+            },
+            {
+              "id": "spend",
+              "cells": [
+                "Spend management",
+                "Spend, external workforce, travel, and expense processes"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "Manage direct and indirect spend"
+              }
+            },
+            {
+              "id": "data_cloud",
+              "cells": [
+                "Business Data Cloud",
+                "Unifies and governs SAP data and connects third-party data"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "unifies and governs all SAP data and seamlessly connects with third-party data."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported demand indicators",
+          "cols": [
+            "Period",
+            "Indicator",
+            "Value"
+          ],
+          "rows": [
+            {
+              "id": "q1_backlog",
+              "cells": [
+                "Q1 2026",
+                "Current cloud backlog",
+                "€21,932 million; up 20% year over year, 25% at constant currencies"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Current cloud backlog | | | | 21,932 | 18,202 | 20 | 25"
+              }
+            },
+            {
+              "id": "q1_cloud",
+              "cells": [
+                "Q1 2026",
+                "Cloud revenue",
+                "€5,962 million; up 19% year over year, 27% at constant currencies"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Cloud revenue | 5,962 | 4,993 | 19 | 5,962 | 4,993 | 19 | 27"
+              }
+            },
+            {
+              "id": "q1_cloud_erp",
+              "cells": [
+                "Q1 2026",
+                "Cloud ERP Suite revenue",
+                "€5,214 million; up 23% year over year, 30% at constant currencies"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Thereof Cloud ERP Suite 2 | 5,214 | 4,251 | 23 | 5,214 | 4,251 | 23 | 30"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Interpretation",
+          "text": "These company-reported backlog and revenue measures indicate demand for SAP cloud offerings; they do not establish demand trends for every end market.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sap_results_1",
+            "quote": "Current cloud backlog of €21.9 billion, up 20% and up 25% at constant currencies"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customers, channels, and buyer archetypes",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented facts and inferred buyer archetypes",
+          "cols": [
+            "Evidence type",
+            "Fact or archetype"
+          ],
+          "rows": [
+            {
+              "id": "documented_network",
+              "cells": [
+                "Reported",
+                "SAP describes a global network of customers and partners."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_3",
+                "quote": "With a global network of customers, partners, employees, and thought leaders"
+              }
+            },
+            {
+              "id": "documented_partner_collaboration",
+              "cells": [
+                "Reported",
+                "Its business-network offering is described as supporting real-time collaboration with trading partners."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "collaborating with your trading partners in real time"
+              }
+            },
+            {
+              "id": "archetype_finance",
+              "cells": [
+                "Inferred buyer archetype",
+                "Finance teams or finance leaders may be buyers of financial-management applications."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "Financial management"
+              }
+            },
+            {
+              "id": "archetype_hr",
+              "cells": [
+                "Inferred buyer archetype",
+                "HR teams may be buyers of human-capital-management applications."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sap_business_1",
+                "quote": "Human capital management (HCM)"
+              }
+            },
+            {
+              "id": "named_customers",
+              "cells": [
+                "Not disclosed in supplied excerpts",
+                "No named customer is identified in the supplied excerpts."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_business_3",
+                "quote": "With a global network of customers, partners, employees, and thought leaders"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Financials and liquidity",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Latest filed reporting period",
+          "text": "The 6-K says SAP filed a half-year report for the first half ended June 30, 2026. The supplied 6-K excerpt does not provide that report's income statement, cash-flow, or debt figures.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_sap_6k",
+            "quote": "for the first half ended June 30, 2026"
+          }
+        },
+        {
+          "type": "table",
+          "title": "Q1 2026 results (quarter, not YTD)",
+          "cols": [
+            "Measure",
+            "Period",
+            "Reported value"
+          ],
+          "rows": [
+            {
+              "id": "q1_total_revenue",
+              "cells": [
+                "Total revenue (IFRS)",
+                "Q1 2026",
+                "€9,555 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Total revenue | 9,555 | 9,013 | 6"
+              }
+            },
+            {
+              "id": "q1_operating_profit",
+              "cells": [
+                "Operating profit (IFRS)",
+                "Q1 2026",
+                "€2,741 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Operating profit (loss) | 2,741 | 2,333 | 17"
+              }
+            },
+            {
+              "id": "q1_profit_after_tax",
+              "cells": [
+                "Profit after tax (IFRS)",
+                "Q1 2026",
+                "€1,946 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Profit (loss) after tax | 1,946 | 1,796 | 8"
+              }
+            },
+            {
+              "id": "q1_operating_cash",
+              "cells": [
+                "Net cash flows from operating activities",
+                "Q1 2026",
+                "€3,513 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Net cash flows from operating activities | 3,513 | 3,780 | –7"
+              }
+            },
+            {
+              "id": "q1_free_cash",
+              "cells": [
+                "Free cash flow (non-IFRS)",
+                "Q1 2026",
+                "€3,248 million"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "Free cash flow | | | | 3,248 | 3,583 | –9"
+              }
+            },
+            {
+              "id": "debt_facts",
+              "cells": [
+                "Debt",
+                "First half ended June 30, 2026",
+                "Not disclosed in supplied 6-K excerpt"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sap_6k",
+                "quote": "The Half-Year Report is attached as Exhibit 99.2 hereto and incorporated by reference herein"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Non-IFRS measure caution",
+          "text": "SAP states that its non-IFRS measures are additional to, and not substitutes for or superior to, IFRS measures.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_sap_6k",
+            "quote": "should be considered in addition to, and not as substitutes for or superior to"
+          }
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported drivers and risk factors",
+          "cols": [
+            "Type",
+            "Claim"
+          ],
+          "rows": [
+            {
+              "id": "ai_driver",
+              "cells": [
+                "Reported driver",
+                "SAP's Q4 2025 CEO said Business AI was included in two thirds of Q4 cloud order entry."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_2",
+                "quote": "included in two thirds of our Q4 cloud order entry"
+              }
+            },
+            {
+              "id": "macro_risk",
+              "cells": [
+                "Reported risk context",
+                "SAP's Q1 2026 CFO referred to an increasingly complex and uncertain macroeconomic and geopolitical environment."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sap_results_1",
+                "quote": "increasingly complex and uncertain macroeconomic and geopolitical environment."
+              }
+            },
+            {
+              "id": "forward_risk",
+              "cells": [
+                "Reported caution",
+                "SAP warns that risks and uncertainties could cause actual results to differ materially from expectations."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_sap_6k",
+                "quote": "could cause actual results to differ materially from expectations."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 27
+  },
+  "usage": {
+    "input_tokens": 6393,
+    "cached_input_tokens": 1095,
+    "output_tokens": 3727,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00240425,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02240425
+  }
+}

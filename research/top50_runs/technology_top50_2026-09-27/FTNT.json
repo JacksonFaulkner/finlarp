@@ -1,0 +1,429 @@
+{
+  "ticker": "FTNT",
+  "company": "FTNT",
+  "market_cap_usd": 127269978112,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-07-30",
+    "accession": "0001262039-26-000021",
+    "url": "https://www.sec.gov/Archives/edgar/data/1262039/000126203926000021/ftnt-20260630.htm"
+  },
+  "generated_at": "2026-09-27T19:16:32+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 4,
+  "sources": [
+    {
+      "source_id": "sec_ftnt_10q",
+      "label": "FTNT 10-Q filed 2026-07-30",
+      "url": "https://www.sec.gov/Archives/edgar/data/1262039/000126203926000021/ftnt-20260630.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "ftnt_business_1",
+      "label": "Next Generation Firewall (NGFW) - See Top Products",
+      "url": "https://www.fortinet.com/products/next-generation-firewall",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "ftnt_business_2",
+      "label": "FortiGate-as-a-Service (FGaaS) | Fortinet",
+      "url": "https://www.fortinet.com/products/fortigate-as-a-service",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "ftnt_results_1",
+      "label": "Fortinet",
+      "url": "https://www.sec.gov/Archives/edgar/data/1262039/000126203926000018/ftntq2-2026ex991.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Revenue streams",
+          "cols": [
+            "Stream",
+            "Three months ended June 30, 2026 ($ millions)",
+            "Six months ended June 30, 2026 ($ millions)"
+          ],
+          "rows": [
+            {
+              "id": "product_revenue",
+              "cells": [
+                "Product",
+                "773.0",
+                "1,418.1"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Product | $773.0 | $508.9 | $1,418.1 | $968.0"
+              }
+            },
+            {
+              "id": "security_subscription",
+              "cells": [
+                "Security subscription",
+                "729.7",
+                "1,423.7"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Security subscription | 729.7 | 644.4 | 1,423.7 | 1,267.5"
+              }
+            },
+            {
+              "id": "technical_support",
+              "cells": [
+                "Technical support and other",
+                "545.2",
+                "1,055.7"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Technical support and other | 545.2 | 476.7 | 1,055.7 | 934.2"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Network security platform",
+          "text": "Fortinet describes FortiGate NGFWs as protecting data, assets, and users across hybrid environments; its product page says they are designed for physical, virtualized, and cloud deployments.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "ftnt_business_1",
+            "quote": "FortiGate Next-Generation Firewalls (NGFWs) protect data, assets, and users across today’s hybrid environments."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Cloud-delivered offering",
+          "text": "FortiGate-as-a-Service includes a FortiGate NGFW appliance, FortiManager, FortiAnalyzer, and FortiGuard AI-Powered Security Services as a service.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "ftnt_business_2",
+            "quote": "FGaaS delivers a FortiGate Next-Generation Firewall hardware appliance, FortiManager, and FortiAnalyzer as-a-Service."
+          }
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market contexts and demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed deployment contexts",
+          "cols": [
+            "Context",
+            "Disclosed application"
+          ],
+          "rows": [
+            {
+              "id": "data_centers",
+              "cells": [
+                "Data centers/AI data centers",
+                "Hyperscale security and protection"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "ftnt_business_1",
+                "quote": "Deploy hyperscale security with consistent, coordinated protection"
+              }
+            },
+            {
+              "id": "campus",
+              "cells": [
+                "Campus",
+                "Visibility and protection for enterprise sites"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "ftnt_business_1",
+                "quote": "Gain visibility and protection for enterprise sites"
+              }
+            },
+            {
+              "id": "branch",
+              "cells": [
+                "Branch",
+                "Protect and connect distributed edge; includes secure SD-WAN"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "ftnt_business_1",
+                "quote": "Protect and connect your distributed edge"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Demand exposure",
+          "text": "The company identifies reduced IT spending, including firewall spending, and adverse economic conditions as possible pressures on its business.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_ftnt_10q",
+            "quote": "reduced information technology (“IT”) spending, including firewall spending, may adversely impact our business."
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel_map",
+      "title": "Customer and channel map",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented customer and channel facts",
+          "cols": [
+            "Fact",
+            "Disclosure"
+          ],
+          "rows": [
+            {
+              "id": "channel_reliance",
+              "cells": [
+                "Channel",
+                "Third-party channel partners account for substantially all billings and revenue."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "We rely on third-party channel partners for substantially all of our billings, revenue"
+              }
+            },
+            {
+              "id": "distributor_concentration",
+              "cells": [
+                "Distributor concentration",
+                "A small number of distributors represent a large percentage of revenue and accounts receivable."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "a small number of distributors represent a large percentage of our revenue and accounts receivable."
+              }
+            },
+            {
+              "id": "government_customers",
+              "cells": [
+                "Government and adjacent customers",
+                "A portion of revenue comes from government organizations and adjacent customers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "A portion of our revenue is generated by sales to government organizations and other adjacent customers"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Inferred buyer archetypes (not named customers)",
+          "cols": [
+            "Archetype",
+            "Basis for inference"
+          ],
+          "rows": [
+            {
+              "id": "data_center_security_buyer",
+              "cells": [
+                "Organizations securing data centers or AI data centers",
+                "Inferred from the disclosed data-center deployment context."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "ftnt_business_1",
+                "quote": "Data Centers/AI Data Centers"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials_cash_debt",
+      "title": "Latest-quarter financials, cash flow, and debt",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Income statement items ($ millions, except per-share data)",
+          "cols": [
+            "Item",
+            "Three months ended June 30, 2026",
+            "Three months ended June 30, 2025",
+            "Six months ended June 30, 2026",
+            "Six months ended June 30, 2025"
+          ],
+          "rows": [
+            {
+              "id": "total_revenue",
+              "cells": [
+                "Total revenue",
+                "2,047.9",
+                "1,630.0",
+                "3,897.5",
+                "3,169.7"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Total revenue | 2,047.9 | 1,630.0 | 3,897.5 | 3,169.7"
+              }
+            },
+            {
+              "id": "total_cost_revenue",
+              "cells": [
+                "Total cost of revenue",
+                "404.7",
+                "314.9",
+                "769.2",
+                "608.0"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Total cost of revenue | 404.7 | 314.9 | 769.2 | 608.0"
+              }
+            },
+            {
+              "id": "total_gross_profit",
+              "cells": [
+                "Total gross profit",
+                "1,643.2",
+                "1,315.1",
+                "3,128.3",
+                "2,561.7"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Total gross profit | 1,643.2 | 1,315.1 | 3,128.3 | 2,561.7"
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Cash flow and debt",
+          "rows": [
+            {
+              "id": "quarter_operating_cash_flow",
+              "label": "Operating cash flow, second quarter 2026",
+              "value": "$1.04 billion",
+              "status": "reported",
+              "evidence": {
+                "source_id": "ftnt_results_1",
+                "quote": "Operating cash flow of $1.04 billion"
+              }
+            },
+            {
+              "id": "notes_debt",
+              "label": "Total debt, June 30, 2026",
+              "value": "$500.0 million",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Total debt | 500.0 | 1,000.0"
+              }
+            },
+            {
+              "id": "long_term_debt_net",
+              "label": "Total long-term debt, June 30, 2026",
+              "value": "$496.9 million",
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_ftnt_10q",
+                "quote": "Total long-term debt | $496.9 | $496.6"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Reported business developments",
+          "text": "The second-quarter release reported the launch of the FortiGate 1200G series with FortiSASE Outpost and the launch of FortiSOC.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "ftnt_results_1",
+            "quote": "Launched the FortiGate 1200G series with FortiSASE Outpost"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Supply-chain exposure",
+          "text": "The filing identifies limited sources for some key product components and the possibility of supply constraints, shortages, and disruptions.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_ftnt_10q",
+            "quote": "some of the key components in our products come from limited sources of supply."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Channel and competition risks",
+          "text": "The filing identifies reliance on third-party channel partners and intense competition as risks to results and competitive position.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_ftnt_10q",
+            "quote": "We face intense competition in our market"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Subscription and support exposure",
+          "text": "The company says it relies significantly on security subscription and technical support revenue, which may decline or fluctuate.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_ftnt_10q",
+            "quote": "We rely significantly on revenue from FortiGuard and other security subscriptions and FortiCare technical support services."
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 3,
+    "sourced_items": 23
+  },
+  "usage": {
+    "input_tokens": 35783,
+    "cached_input_tokens": 2190,
+    "output_tokens": 8786,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0077742,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0477742
+  }
+}
