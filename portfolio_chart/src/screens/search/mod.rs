@@ -285,10 +285,16 @@ impl Search {
             self.selection_changed();
         } else if self.context_req.is_some_and(|(rid, _)| rid == id)
             && let Some((_, chunk)) = self.context_req.take()
-            && r.error.is_none()
-            && !r.rows.is_empty()
         {
-            self.context.insert(chunk, r.rows);
+            if r.error.is_none() && !r.rows.is_empty() {
+                self.context.insert(chunk, r.rows);
+            } else {
+                // no context came back: fall back to the hit itself so the
+                // preview doesn't sit on "loading context…" forever
+                if let Some(hit) = self.results.iter().find(|h| h.id == chunk).cloned() {
+                    self.context.insert(chunk, vec![hit]);
+                }
+            }
         }
         // anything else is a stale reply: dropped
     }
@@ -539,9 +545,11 @@ impl Screen for Search {
         if self.palette.open
             && let Some(command) = self.palette.handle(key) {
                 return match command {
+                    // the query is only an argument for search itself; chart and
+                    // earnings take a range/ticker and reject free text
                     Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
                         screen: screen.into(),
-                        arg: Some(self.input.value().to_string()),
+                        arg: (screen == "search").then(|| self.input.value().to_string()),
                     }),
                     Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
                         screen: screen.into(),

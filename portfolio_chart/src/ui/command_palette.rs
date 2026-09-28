@@ -40,11 +40,14 @@ pub fn destinations(symbol: &str, picker: &'static str) -> Vec<Entry> {
         .into_iter()
         .map(|screen| Entry::new(format!("Open {screen}"), symbol, Command::Screen(screen)))
         .collect();
-    entries.push(Entry::new(
-        "Choose another ticker",
-        "open symbol picker",
-        Command::Picker(picker),
-    ));
+    // the chart is the portfolio, not a ticker: nvim has no chart picker
+    if picker != "chart" {
+        entries.push(Entry::new(
+            "Choose another ticker",
+            "open symbol picker",
+            Command::Picker(picker),
+        ));
+    }
     if symbol.is_empty() {
         entries.push(Entry::new(
             "Choose ticker for CANSLIM",
@@ -220,7 +223,7 @@ impl Widget for PaletteWidget<'_> {
             return;
         }
         let selected =
-            (!self.entries.is_empty()).then_some(self.selected.min(self.entries.len() - 1));
+            (!self.entries.is_empty()).then(|| self.selected.min(self.entries.len() - 1));
         let items: Vec<ListItem> = if self.entries.is_empty() {
             vec![ListItem::new(Line::styled(
                 "  no matching commands",

@@ -9,6 +9,7 @@ backtests, screener snapshots) instead of everything being fetch-and-discard.
 from __future__ import annotations
 
 import json
+import math
 import os
 import re
 import time
@@ -116,6 +117,22 @@ _SCHEMA = [
     """,
 ]
 _TABLES = {re.search(r"EXISTS (\w+)", s)[1] for s in _SCHEMA}
+
+
+def _finite(v):
+    if isinstance(v, float) and not math.isfinite(v):
+        return None
+    if isinstance(v, dict):
+        return {k: _finite(x) for k, x in v.items()}
+    if isinstance(v, (list, tuple)):
+        return [_finite(x) for x in v]
+    return v
+
+
+def _dumps(obj) -> str:
+    """JSON for the caches the Rust screens parse: NaN/Infinity (from parquet
+    or a 0/0 ratio) become null, since serde_json rejects the whole doc."""
+    return json.dumps(_finite(obj), default=str, allow_nan=False)
 
 
 def _open(read_only: bool) -> duckdb.DuckDBPyConnection:
@@ -314,7 +331,7 @@ def put_cached_dossier(symbol: str, dossier: dict) -> None:
             "INSERT INTO dossier_cache VALUES (?, ?, ?) "
             "ON CONFLICT (symbol) DO UPDATE SET "
             "dossier_json = excluded.dossier_json, fetched_at = excluded.fetched_at",
-            [symbol, json.dumps(dossier, default=str), time.time()],
+            [symbol, _dumps(dossier), time.time()],
         )
     finally:
         con.close()
@@ -352,7 +369,7 @@ def put_cached_canslim(symbol: str, scorecard: dict) -> None:
             "INSERT INTO canslim_cache VALUES (?, ?, ?) "
             "ON CONFLICT (symbol) DO UPDATE SET "
             "scorecard_json = excluded.scorecard_json, fetched_at = excluded.fetched_at",
-            [symbol, json.dumps(scorecard), time.time()],
+            [symbol, _dumps(scorecard), time.time()],
         )
     finally:
         con.close()

@@ -208,12 +208,17 @@ pub fn matches(text: &str, terms: &[String]) -> Vec<Range<usize>> {
     if stems.is_empty() {
         return Vec::new();
     }
-    let lower: String = text.chars().flat_map(char::to_lowercase).collect();
-    // to_lowercase can change byte lengths (rare, non-ASCII); fall back to no
-    // highlighting rather than slicing at a wrong offset.
-    if lower.len() != text.len() {
+    // to_lowercase can change a char's byte length (rare, non-ASCII). Offsets
+    // into `lower` are only valid for `text` if every char keeps its length;
+    // comparing total lengths isn't enough ("İẞ": +1 and -1 byte cancel out).
+    // Otherwise fall back to no highlighting rather than slice mid-char.
+    if text
+        .chars()
+        .any(|c| c.to_lowercase().map(char::len_utf8).sum::<usize>() != c.len_utf8())
+    {
         return Vec::new();
     }
+    let lower: String = text.chars().flat_map(char::to_lowercase).collect();
     let mut out = Vec::new();
     let mut i = 0;
     let mut prev: Option<char> = None;
@@ -356,5 +361,16 @@ mod tests {
         let src = crate::model::Source::url("x", format!("u#:~:text={}", encode_fragment("Q3 revenue, up 5%-ish")));
         assert_eq!(src.quote().as_deref(), Some("Q3 revenue, up 5%-ish"));
         assert_eq!(first_words("a  b\nc d", 3), "a b c");
+    }
+}
+
+#[cfg(test)]
+mod lowercase_len_tests {
+    use super::*;
+
+    #[test]
+    fn mixed_length_lowercase_does_not_panic() {
+        // İ lowercases to 3 bytes (+1), ẞ to 2 (-1): equal totals, shifted offsets
+        assert!(matches("İẞx", &["ßx".to_string()]).is_empty());
     }
 }

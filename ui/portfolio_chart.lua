@@ -169,10 +169,15 @@ local function finish(code, action_file, screen, opts)
         vim.notify("security_spread: on_exit failed: " .. tostring(err), vim.log.levels.ERROR)
       end
     end
-    if code == EXIT_BACK_TO_PICKER then
+    if action and action.error then
+      vim.notify("security_spread: " .. screen .. ": " .. action.error, vim.log.levels.ERROR)
+    elseif code == EXIT_BACK_TO_PICKER then
       call(root, "pick_" .. screen)
     elseif action then
       M.dispatch(action)
+    elseif code ~= 0 then
+      -- the popup closes with the process, taking any panic message with it
+      vim.notify(("security_spread: %s screen exited with code %d"):format(screen, code), vim.log.levels.ERROR)
     end
   end)
 end
