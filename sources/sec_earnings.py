@@ -449,6 +449,12 @@ def ingest_company(stock: dict, st: dict) -> dict:
     t = stock["ticker"]
     cs = st.setdefault(t, {"seen": {}, "reason": None})
     seen = cs["seen"]
+    # "ok" must mean "in the parquet": a run that died after marking rows ok
+    # but before writing them (state is saved on error too) would otherwise
+    # skip those releases forever.
+    stored = {r["accn"] for r in _read_rows(REL_DIR / f"{t}.parquet")}
+    for accn in [a for a, v in seen.items() if v == "ok" and a not in stored]:
+        del seen[accn]
     if not stock["ciks"]:
         cs["reason"] = "no_cik"
         return cs

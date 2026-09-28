@@ -300,7 +300,7 @@ def sec_holders_(t: str, con) -> dict | None:
         panel AS (SELECT cik FROM f WHERE period = $prev INTERSECT SELECT cik FROM f WHERE period = $cur),
         ranked AS (SELECT *, max(sh) FILTER (WHERE rn = 2) OVER (PARTITION BY cusip, period) runner_up
                    FROM (SELECT *, row_number() OVER (PARTITION BY cusip, period ORDER BY sh DESC) rn FROM h)),
-        clean AS (SELECT * FROM ranked WHERE NOT (rn = 1 AND sh > {sec_13f.SUSPECT_MULTIPLE} * runner_up)
+        clean AS (SELECT * FROM ranked WHERE NOT coalesce(rn = 1 AND sh > {sec_13f.SUSPECT_MULTIPLE} * runner_up, false)
                   AND period IN ($prev, $cur) AND cik IN (SELECT cik FROM panel))
         SELECT cik, any_value(mgr), sum(sh) FILTER (WHERE period = $prev), sum(sh) FILTER (WHERE period = $cur),
                min(acc) FILTER (WHERE period = $prev), min(acc) FILTER (WHERE period = $cur)

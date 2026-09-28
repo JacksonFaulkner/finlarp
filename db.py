@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import time
 from pathlib import Path
 
@@ -23,10 +24,8 @@ DB_PATH = Path(os.path.expanduser("~/.local/share/nvim/security_spread.duckdb"))
 DEFAULT_TTL_SECONDS = 15 * 60
 
 
-def _conn() -> duckdb.DuckDBPyConnection:
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    con = duckdb.connect(str(DB_PATH))
-    con.execute("""
+_SCHEMA = [
+    """
         CREATE TABLE IF NOT EXISTS history_cache (
             symbol VARCHAR,
             range VARCHAR,
@@ -35,63 +34,63 @@ def _conn() -> duckdb.DuckDBPyConnection:
             fetched_at DOUBLE,
             PRIMARY KEY (symbol, range, interval)
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS transactions_cache (
             account VARCHAR PRIMARY KEY,
             transactions_json VARCHAR,
             fetched_at DOUBLE
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS positions_cache (
             id INTEGER PRIMARY KEY,
             positions_json VARCHAR,
             fetched_at DOUBLE
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS portfolio_history (
             date DATE PRIMARY KEY,
             total_value DOUBLE,
             day_change_pct DOUBLE
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS canslim_cache (
             symbol VARCHAR PRIMARY KEY,
             scorecard_json VARCHAR,
             fetched_at DOUBLE
         )
-    """)
+    """,
     # Per-ticker research dossier (views/dossier.py) read straight out of
     # DuckDB by the portfolio_chart `dossier` screen, same as canslim_cache.
-    con.execute("""
+    """
         CREATE TABLE IF NOT EXISTS dossier_cache (
             symbol VARCHAR PRIMARY KEY,
             dossier_json VARCHAR,
             fetched_at DOUBLE
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS edgar_facts_cache (
             symbol VARCHAR PRIMARY KEY,
             facts_json VARCHAR,
             fetched_at DOUBLE
         )
-    """)
+    """,
     # SEC Financial Statement Data Sets — one bulk zip per calendar quarter
     # covering every filer. Only dimensional (segment) revenue rows are kept;
     # undimensioned totals already come from companyfacts. See
     # sources/edgar_fsds.py.
-    con.execute("""
+    """
         CREATE TABLE IF NOT EXISTS edgar_fsds_loaded (
             quarter VARCHAR PRIMARY KEY,   -- e.g. '2026q2'
             loaded_at DOUBLE,
             row_count INTEGER
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS edgar_segment_revenue (
             adsh VARCHAR,
             cik INTEGER,
@@ -107,14 +106,50 @@ def _conn() -> duckdb.DuckDBPyConnection:
             value DOUBLE,
             PRIMARY KEY (adsh, tag, ddate, qtrs, axis, member)
         )
-    """)
-    con.execute("""
+    """,
+    """
         CREATE TABLE IF NOT EXISTS edgar_cik_map_cache (
             id INTEGER PRIMARY KEY,
             map_json VARCHAR,
             fetched_at DOUBLE
         )
-    """)
+    """,
+]
+_TABLES = {re.search(r"EXISTS (\w+)", s)[1] for s in _SCHEMA}
+
+
+def _open(read_only: bool) -> duckdb.DuckDBPyConnection:
+    """DuckDB allows one read-write process *or* many readers per file, and
+    nvim fires several of these scripts at once (cached + live positions,
+    canslim, dossier) while the Rust screens read. Opens are short, so a
+    lock conflict just means waiting a moment: retry for ~5s."""
+    for attempt in range(25):
+        try:
+            return duckdb.connect(str(DB_PATH), read_only=read_only)
+        except duckdb.IOException as e:
+            if "lock" not in str(e).lower() or attempt == 24:
+                raise
+            time.sleep(0.05 * (attempt + 1))
+    raise AssertionError("unreachable")
+
+
+def _conn(read_only: bool = False) -> duckdb.DuckDBPyConnection:
+    """Connection with the schema in place. read_only=True for pure reads so
+    they can run alongside other readers; the schema is only (re)created,
+    read-write, when a table is missing (fresh DB or a new table)."""
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    if DB_PATH.exists():
+        con = _open(read_only)
+        have = {r[0] for r in con.execute("SELECT table_name FROM information_schema.tables").fetchall()}
+        if _TABLES <= have:
+            return con
+        con.close()
+    con = _open(False)
+    for stmt in _SCHEMA:
+        con.execute(stmt)
+    if read_only:
+        con.close()
+        con = _open(True)
     return con
 
 
@@ -123,7 +158,7 @@ def _conn() -> duckdb.DuckDBPyConnection:
 # immediately, and a background live pull that overwrites this cache once
 # E*TRADE responds. There's no expiry here on purpose.
 def get_cached_positions() -> list[dict] | None:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         row = con.execute("SELECT positions_json FROM positions_cache WHERE id = 0").fetchone()
     finally:
@@ -153,7 +188,7 @@ TRANSACTIONS_TTL_SECONDS = 60 * 60
 
 
 def get_cached_transactions(account: str, ttl_seconds: float = TRANSACTIONS_TTL_SECONDS) -> list[dict] | None:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         row = con.execute(
             "SELECT transactions_json, fetched_at FROM transactions_cache WHERE account = ?",
@@ -174,7 +209,7 @@ def get_all_cached_transactions() -> list[dict]:
     """Local-only read across every account's cache, ignoring TTL — any
     staleness is fine here since it's only used to paint the picker
     instantly while a live refresh runs in the background."""
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         rows = con.execute("SELECT transactions_json FROM transactions_cache").fetchall()
     finally:
@@ -225,7 +260,7 @@ def upsert_portfolio_snapshot(total_value: float, day_change_pct: float, date: s
 
 
 def get_portfolio_history() -> list[dict]:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         rows = con.execute(
             "SELECT date, total_value, day_change_pct FROM portfolio_history ORDER BY date"
@@ -241,7 +276,7 @@ def get_portfolio_history() -> list[dict]:
 def get_cached_history(
     symbol: str, range_: str, interval: str, ttl_seconds: float = DEFAULT_TTL_SECONDS
 ) -> list[dict] | None:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         row = con.execute(
             "SELECT points_json, fetched_at FROM history_cache "
@@ -293,7 +328,7 @@ CANSLIM_TTL_SECONDS = 4 * 60 * 60
 
 
 def get_cached_canslim(symbol: str, ttl_seconds: float = CANSLIM_TTL_SECONDS) -> dict | None:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         row = con.execute(
             "SELECT scorecard_json, fetched_at FROM canslim_cache WHERE symbol = ?",
@@ -333,7 +368,7 @@ EDGAR_CIK_MAP_TTL_SECONDS = 7 * 24 * 60 * 60
 
 
 def get_cached_edgar_facts(symbol: str, ttl_seconds: float = EDGAR_FACTS_TTL_SECONDS) -> dict | None:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         row = con.execute(
             "SELECT facts_json, fetched_at FROM edgar_facts_cache WHERE symbol = ?",
@@ -363,7 +398,7 @@ def put_cached_edgar_facts(symbol: str, facts: dict) -> None:
 
 
 def get_cached_edgar_cik_map(ttl_seconds: float = EDGAR_CIK_MAP_TTL_SECONDS) -> dict | None:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         row = con.execute("SELECT map_json, fetched_at FROM edgar_cik_map_cache WHERE id = 0").fetchone()
     finally:
@@ -578,7 +613,7 @@ def universe_members(level: str, category: str) -> list[dict]:
 # --- FSDS segment revenue -------------------------------------------------
 
 def fsds_loaded_quarters() -> set[str]:
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         return {r[0] for r in con.execute("SELECT quarter FROM edgar_fsds_loaded").fetchall()}
     finally:
@@ -588,7 +623,7 @@ def fsds_loaded_quarters() -> set[str]:
 def get_segment_revenue(cik: int) -> list[dict]:
     """All kept revenue rows for a filer, oldest -> newest. Includes the
     undimensioned total (axis='') so callers can sum-check members."""
-    con = _conn()
+    con = _conn(read_only=True)
     try:
         rows = con.execute(
             """

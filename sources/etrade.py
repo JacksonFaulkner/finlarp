@@ -125,14 +125,15 @@ def get_session(interactive: bool = True):
     # round-trip, and it is the only reliable check that the token is still
     # alive. A recently-renewed token still dies at ET midnight rollover, so
     # trusting a timestamp alone leads to a 401 on the first real call.
-    try:
-        resp = session.get(BASE_URL + "/oauth/renew_access_token", params={})
-    except Exception:
-        resp = None
-    if resp is None or resp.status_code != 200:
+    # Only a 401 means the token is dead. A network error or an E*TRADE 5xx
+    # says nothing about the token, and dropping it would force a browser
+    # login for a blip; let the real call surface that error instead.
+    resp = session.get(BASE_URL + "/oauth/renew_access_token", params={})
+    if resp.status_code == 401:
         _drop_token()
         return _interactive_login(etrade, interactive)
-    _touch_renewed_at()
+    if resp.status_code == 200:
+        _touch_renewed_at()
     return session
 
 
@@ -191,6 +192,7 @@ def cmd_positions(session) -> dict:
     # matching how backfill_history.py computes historical days (cash
     # tracked via transaction amounts), so the two methods agree.
     total_value = 0.0
+    balances_complete = True
     for account in accounts:
         account_id_key = account.get("accountIdKey")
         if not account_id_key:
@@ -200,6 +202,7 @@ def cmd_positions(session) -> dict:
             params={"instType": "BROKERAGE", "realTimeNAV": "true"},
         )
         if bal_resp.status_code != 200:
+            balances_complete = False
             continue
         total_value += (
             bal_resp.json()
@@ -209,7 +212,9 @@ def cmd_positions(session) -> dict:
             .get("totalAccountValue") or 0
         )
 
-    if total_value:
+    # A snapshot missing an account would record a fake loss (and a fake
+    # gain the next day), so only record one when every balance came back.
+    if total_value and balances_complete:
         today = time.strftime("%Y-%m-%d")
         # Exclude today's deposits/withdrawals from the return calc — an
         # Online Transfer changes account value without being a gain/loss.
@@ -330,12 +335,14 @@ def cmd_transactions(session) -> dict:
         today = time.strftime("%m%d%Y")
         params = {"startDate": two_years_ago, "endDate": today, "count": 50}
         raw_txns = []
+        complete = True
         while True:
             resp = session.get(
                 BASE_URL + f"/v1/accounts/{account_id_key}/transactions.json",
                 params=params,
             )
             if resp.status_code != 200:
+                complete = False
                 break
             payload = resp.json().get("TransactionListResponse", {})
             raw_txns.extend(payload.get("Transaction", []))
@@ -360,7 +367,9 @@ def cmd_transactions(session) -> dict:
                 "price": brokerage.get("price"),
                 "amount": t.get("amount"),
             })
-        db.put_cached_transactions(account_id, account_txns)
+        # a failed page means a truncated history: don't cache it as complete
+        if complete:
+            db.put_cached_transactions(account_id, account_txns)
         result.extend(account_txns)
     return {"transactions": result}
 

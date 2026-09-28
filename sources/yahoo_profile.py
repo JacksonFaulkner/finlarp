@@ -19,18 +19,23 @@ import duckdb
 
 from sources import yahoo
 from sources import universe
+from sources import pq
 
 OUT = universe.data_dir("profiles")
 URL = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/{}"
 MODULES = "assetProfile,quoteType,price"
 
 
-def fetch(session, crumb: str, sym: str) -> dict | None:
+def fetch(session, sym: str) -> dict | None:
+    crumb = yahoo.get_crumb(session)
     for attempt in range(3):
         r = session.get(URL.format(sym), params={"modules": MODULES, "crumb": crumb}, timeout=15)
         if r.status_code == 404:
             return None
-        if r.status_code in (401, 429) or r.status_code >= 500:
+        if r.status_code == 401:  # crumb went stale mid-run: new handshake, not the same dead crumb
+            crumb = yahoo.get_crumb(session, refresh=True)
+            continue
+        if r.status_code == 429 or r.status_code >= 500:
             time.sleep(2 ** attempt * 3)
             continue
         r.raise_for_status()
@@ -62,18 +67,22 @@ def row(ticker: str, res: dict) -> dict:
 
 def main() -> None:
     session = yahoo.new_session()
-    crumb = yahoo.get_crumb(session)
     rows, missing = [], []
     for s in universe.stocks():
-        res = fetch(session, crumb, s["ticker"])
+        res = fetch(session, s["ticker"])
         if res:
             rows.append(row(s["ticker"], res))
         else:
             missing.append(s["ticker"])
         time.sleep(0.4)
+    prev = OUT / "profiles.parquet"
+    had = duckdb.sql(f"SELECT count(*) FROM '{prev}'").fetchone()[0] if prev.exists() else 0
+    if len(rows) < 0.9 * had:
+        # a dead crumb or a Yahoo outage fails most tickers; keep the good file
+        raise SystemExit(f"only {len(rows)} profiles fetched vs {had} stored; not overwriting")
     con = duckdb.connect()
     con.execute("CREATE TABLE p AS SELECT * FROM (SELECT unnest($r, recursive := true))", {"r": rows})
-    con.execute(f"COPY p TO '{OUT}/profiles.parquet' (FORMAT parquet)")
+    pq.copy_atomic(con, "SELECT * FROM p", prev)
     print(f"{len(rows)} profiles, {len(missing)} missing: {' '.join(missing)}")
 
 

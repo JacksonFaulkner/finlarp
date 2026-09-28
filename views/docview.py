@@ -419,6 +419,11 @@ def open_doc(url: str, quote: str | None = None) -> dict:
 
     ext = Path(name).suffix.lower()
     raw = d / name
+    # an extensionless URL is saved under name + the Content-Type's extension,
+    # so look for that too or it's re-downloaded on every open
+    for alt, alt_ext in ((d / (name + ".pdf"), ".pdf"), (d / (name + ".html"), ".html")):
+        if not raw.exists() and alt.exists():
+            raw, ext = alt, alt_ext
     if not raw.exists():
         r = fetch(url)
         ctype = r.headers.get("Content-Type", "")
@@ -428,7 +433,9 @@ def open_doc(url: str, quote: str | None = None) -> dict:
         elif "html" in ctype and ext not in (".htm", ".html"):
             raw = d / (name + ".html")
             ext = ".html"
-        raw.write_bytes(r.content)
+        part = raw.with_name(raw.name + ".part")  # a killed download must not look cached
+        part.write_bytes(r.content)
+        part.replace(raw)
     elif ext not in (".pdf", ".txt", ".md", *IMG_EXT):
         ext = ext or ".html"
 

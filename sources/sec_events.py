@@ -47,6 +47,7 @@ import duckdb
 
 
 from sources import universe
+from sources import pq
 
 DIR = universe.data_dir("events")
 RAW = DIR / "raw"
@@ -150,8 +151,7 @@ def ingest(refresh: bool = False) -> None:
 def build() -> None:
     """Rebuild filings.parquet and events.parquet from raw/*.ndjson."""
     con = duckdb.connect()
-    con.execute(f"""
-        COPY (
+    pq.copy_atomic(con, f"""
           SELECT ticker, cik::BIGINT AS cik, is_predecessor, form,
                  filed::DATE AS filed, TRY_CAST(report_date AS DATE) AS report_date,
                  TRY_CAST(accepted_at AS TIMESTAMP) AS accepted_at, accn, primary_doc,
@@ -162,11 +162,10 @@ def build() -> None:
             primary_doc:'VARCHAR', description:'VARCHAR', items:'VARCHAR', size:'BIGINT',
             is_xbrl:'BOOLEAN'}})
           ORDER BY ticker, filed, accn
-        ) TO '{FILINGS}' (FORMAT parquet, COMPRESSION zstd)""")
+    """, FILINGS, "FORMAT parquet, COMPRESSION zstd")
     labels = ", ".join(f"('{k}', '{v[0].replace(chr(39), chr(39) * 2)}', '{v[1]}')"
                        for k, v in ITEMS.items())
-    con.execute(f"""
-        COPY (
+    pq.copy_atomic(con, f"""
           WITH f AS (
             SELECT * FROM '{FILINGS}' WHERE form IN ('8-K', '8-K/A', '6-K', '6-K/A')),
           x AS (
@@ -183,7 +182,7 @@ def build() -> None:
                       ELSE coalesce(lab.signal, 'low') END AS signal
           FROM x LEFT JOIN lab USING (item)
           ORDER BY x.ticker, x.filed, x.accn, x.item
-        ) TO '{EVENTS}' (FORMAT parquet, COMPRESSION zstd)""")
+    """, EVENTS, "FORMAT parquet, COMPRESSION zstd")
 
 
 def _q(sql: str, params: list | None = None) -> list[tuple]:
