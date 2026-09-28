@@ -29,9 +29,8 @@ from pathlib import Path
 import duckdb
 import requests
 
-
 import db
-from sources.edgar import UA
+from sources import sec_http
 
 INDEX_URL = "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
 OPENFIGI_URL = "https://api.openfigi.com/v3/mapping"
@@ -55,7 +54,7 @@ def _dir(name: str) -> Path:
 def available_windows(n: int = 6) -> list[tuple[str, str]]:
     """(stem, url) for the newest n zips listed on SEC's index page,
     oldest first. Stems look like 01jun2026-31aug2026_form13f."""
-    resp = requests.get(INDEX_URL, headers={"User-Agent": UA}, timeout=30)
+    resp = sec_http.get(INDEX_URL, timeout=30)
     resp.raise_for_status()
     hrefs = re.findall(r'href="([^"]*form13f\.zip)"', resp.text)
     seen: dict[str, str] = {}
@@ -73,7 +72,7 @@ def _download(stem: str, url: str) -> Path:
     dest = _dir("tmp") / f"{stem}.zip"
     if dest.exists():
         return dest
-    resp = requests.get(url, headers={"User-Agent": UA}, timeout=600, stream=True)
+    resp = sec_http.stream(url)
     resp.raise_for_status()
     part = dest.with_suffix(".part")
     with open(part, "wb") as f:

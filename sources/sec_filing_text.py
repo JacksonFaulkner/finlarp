@@ -49,8 +49,7 @@ from pathlib import Path
 
 import duckdb
 
-
-from sources import universe
+from sources import sec_http, universe
 
 ANNUAL_FORMS = ("10-K", "10-KT", "20-F", "40-F")
 ARCHIVES = "https://www.sec.gov/Archives/edgar/data"
@@ -570,7 +569,7 @@ def parse_subsidiaries(html: str) -> list[tuple[str, str | None]]:
 # --------------------------------------------------------------------------
 
 def _get_text(url: str) -> str | None:
-    r = universe.sec_get(url)
+    r = sec_http.get(url)
     if r.status_code != 200:
         return None
     r.encoding = r.encoding if r.encoding and r.encoding.lower() != "iso-8859-1" else (r.apparent_encoding or "utf-8")

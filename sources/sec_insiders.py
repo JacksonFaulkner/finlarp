@@ -24,15 +24,13 @@ from __future__ import annotations
 import json
 import re
 import sys
-import time
 import zipfile
 from datetime import date, timedelta
 from pathlib import Path
 
 import duckdb
 
-
-from sources import universe
+from sources import sec_http, universe
 
 INDEX_URL = "https://www.sec.gov/data-research/sec-markets-data/insider-transactions-data-sets"
 DATA_DIR = universe.data_dir("insiders")
@@ -58,7 +56,7 @@ def _dir(p: Path) -> Path:
 def available_quarters(n: int = 6) -> list[tuple[str, str]]:
     """(stem, url) for the newest n zips on SEC's index page, oldest first.
     Stems look like 2026q2_form345."""
-    resp = universe.sec_get(INDEX_URL)
+    resp = sec_http.get(INDEX_URL)
     resp.raise_for_status()
     seen: dict[str, str] = {}
     for h in re.findall(r'href="([^"]*form345\.zip)"', resp.text):
@@ -75,12 +73,9 @@ def _download(stem: str, url: str) -> Path:
     dest = _dir(TMP_DIR) / f"{stem}.zip"
     if dest.exists():
         return dest
-    # Stream the zip with the shared session; one request, so a plain
-    # throttle sleep is enough to stay inside the shared SEC budget.
-    time.sleep(1.0 / universe.RPS)
     part = dest.with_suffix(".part")
     try:
-        with universe._session.get(url, timeout=600, stream=True) as resp:
+        with sec_http.stream(url) as resp:
             resp.raise_for_status()
             with open(part, "wb") as f:
                 for chunk in resp.iter_content(1 << 20):

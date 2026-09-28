@@ -1,28 +1,20 @@
 """POC: pull every USPTO application where Marvell (or an acquired co) is applicant or assignee.
 
-Needs USPTO_API_KEY (plugin .env). Writes raw/patents.jsonl, one slim row per application.
+Needs USPTO_API_KEY (env or plugin .env). Writes raw/patents.jsonl, one slim row per application.
 Pre-AIA (<2014) filings list inventors as applicants, hence the assignee clause.
 """
-import json, os, time, requests
+import json, time, requests
 from pathlib import Path
 
+from sources import keys
+
 RAW = Path(__file__).parent / "raw"
-ENV = Path(__file__).resolve().parents[2] / ".env"
 NAMES = ["Marvell*", "Cavium*", "Inphi*", "Aquantia*", "Innovium*", "\"Celestial AI\"", "XConn*", "Polariton*"]
 URL = "https://api.uspto.gov/api/v1/patent/applications/search"
 PAGE = 100
 
 
-def api_key() -> str:
-    if k := os.environ.get("USPTO_API_KEY"):
-        return k
-    for line in ENV.read_text().splitlines():
-        if line.startswith("USPTO_API_KEY="):
-            return line.split("=", 1)[1].strip().strip("\"'")
-    raise SystemExit("USPTO_API_KEY missing")
-
-
-S = requests.Session(); S.headers["X-API-Key"] = api_key()
+S = requests.Session(); S.headers["X-API-Key"] = keys.require("USPTO_API_KEY")
 
 
 def get(offset: int) -> dict:

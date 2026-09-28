@@ -42,9 +42,9 @@ from pathlib import Path
 
 import duckdb
 
-
 from sources import universe
 from sources.edgar import REVENUE_CONCEPTS
+from sources import sec_http
 
 ANNUAL_FORMS = {"10-K", "10-KT", "20-F", "40-F"}
 QUARTERLY_FORMS = {"10-Q"}
@@ -124,7 +124,7 @@ def _instance_url(cik: int, f: dict) -> str | None:
 
 
 def _instance_from_index(base: str) -> str | None:
-    resp = universe.sec_get(f"{base}/index.json")
+    resp = sec_http.get(f"{base}/index.json")
     if resp.status_code != 200:
         return None
     items = resp.json()["directory"]["item"]
@@ -245,11 +245,11 @@ def ingest_filing(ticker: str, cik: int, f: dict) -> dict:
     if not f.get("isXBRL"):
         return entry | {"status": "no_xbrl", "reason": "filing has no XBRL"}
     url = _instance_url(cik, f)
-    resp = universe.sec_get(url) if url else None
+    resp = sec_http.get(url) if url else None
     if resp is not None and resp.status_code == 404 and url.endswith("_htm.xml"):
         base = url.rsplit("/", 1)[0]
         url = _instance_from_index(base)
-        resp = universe.sec_get(url) if url else None
+        resp = sec_http.get(url) if url else None
     if resp is None or resp.status_code != 200:
         code = None if resp is None else resp.status_code
         return entry | {"status": "failed", "reason": f"instance not found ({code})", "url": url}

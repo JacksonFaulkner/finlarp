@@ -43,8 +43,7 @@ from pathlib import Path
 
 import duckdb
 
-
-from sources import universe
+from sources import sec_http, universe
 
 FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"
 TAXONOMIES = ("us-gaap", "ifrs-full", "dei", "srt")
@@ -160,7 +159,7 @@ def _save_status(st: dict) -> None:
 
 
 def _fetch(cik: int) -> dict | None:
-    resp = universe.sec_get(FACTS_URL.format(cik=cik), timeout=120)
+    resp = sec_http.get(FACTS_URL.format(cik=cik), timeout=120)
     if resp.status_code == 404:
         return None
     resp.raise_for_status()

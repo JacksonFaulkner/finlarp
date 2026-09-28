@@ -12,7 +12,6 @@ matches what the source reports; reruns skip finished files.
 """
 from __future__ import annotations
 
-import os
 import re
 import sys
 import time
@@ -21,12 +20,11 @@ from pathlib import Path
 
 import requests
 
-
-from sources.edgar import UA
+from sources import keys
+from sources.sec_http import UA
 from sources.universe import data_dir
 
 ODP = "https://api.uspto.gov/api/v1/datasets/products"
-ENV = Path(__file__).resolve().parents[1] / ".env"
 CHUNK = 1 << 20
 
 # group -> (ODP product, filename regex). Only the tables loaders use.
@@ -43,15 +41,6 @@ SEC_FILES = {
     "submissions.zip": "https://www.sec.gov/Archives/edgar/daily-index/bulkdata/submissions.zip",
 }
 LCA_PAGE = "https://www.dol.gov/agencies/eta/foreign-labor/performance"
-
-
-def api_key() -> str:
-    if k := os.environ.get("USPTO_API_KEY"):
-        return k
-    for line in ENV.read_text().splitlines():
-        if line.startswith("USPTO_API_KEY="):
-            return line.split("=", 1)[1].strip().strip("\"'")
-    raise SystemExit("USPTO_API_KEY missing (env or .env)")
 
 
 def odp_files(product: str, pattern: str, key: str) -> list[tuple[str, str, int]]:
@@ -118,7 +107,7 @@ def plan(groups: list[str]) -> list[tuple[Path, str, int, dict]]:
     jobs = []
     odp = [g for g in groups if g in ODP_GROUPS]
     if odp:
-        key = api_key()
+        key = keys.require("USPTO_API_KEY")
         for g in odp:
             product, pattern = ODP_GROUPS[g]
             for rel, url, size in odp_files(product, pattern, key):
