@@ -157,7 +157,9 @@ end
 --- Best ticker to act on when a dashboard key is pressed outside a tile.
 local function focused_symbol(name)
   local s = sessions[name]
-  if not s then return nil end
+  if not s then
+    return nil
+  end
   local cur = vim.api.nvim_get_current_win()
   for _, t in ipairs(s.tiles) do
     if t.win == cur then
@@ -165,8 +167,12 @@ local function focused_symbol(name)
       return t.symbol
     end
   end
-  if s.focus_symbol then return s.focus_symbol end
-  if s.selected and s.selected[1] then return s.selected[1].symbol end
+  if s.focus_symbol then
+    return s.focus_symbol
+  end
+  if s.selected and s.selected[1] then
+    return s.selected[1].symbol
+  end
   return s.tiles[1] and s.tiles[1].symbol or nil
 end
 
@@ -378,13 +384,27 @@ local function open_tile(tile, region, name)
 
   local win = vim.api.nvim_open_win(buf, false, win_opts)
 
-  vim.keymap.set("n", "q", function() M.close(name) end, { buffer = buf, silent = true })
-  vim.keymap.set("n", "<Esc>", function() M.close(name) end, { buffer = buf, silent = true })
-  vim.keymap.set("n", "h", function() navigate("h") end, { buffer = buf, silent = true })
-  vim.keymap.set("n", "j", function() navigate("j") end, { buffer = buf, silent = true })
-  vim.keymap.set("n", "k", function() navigate("k") end, { buffer = buf, silent = true })
-  vim.keymap.set("n", "l", function() navigate("l") end, { buffer = buf, silent = true })
-  vim.keymap.set("n", "<Space>", function() toggle_select(win) end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "q", function()
+    M.close(name)
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "<Esc>", function()
+    M.close(name)
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "h", function()
+    navigate("h")
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "j", function()
+    navigate("j")
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "k", function()
+    navigate("k")
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "l", function()
+    navigate("l")
+  end, { buffer = buf, silent = true })
+  vim.keymap.set("n", "<Space>", function()
+    toggle_select(win)
+  end, { buffer = buf, silent = true })
   vim.keymap.set("n", "?", toggle_help, { buffer = buf, silent = true })
   -- Lazily required (not at module load) — init.lua requires window.lua,
   -- so requiring init.lua back at the top level here would be circular.
@@ -405,7 +425,9 @@ local function open_tile(tile, region, name)
   end, { buffer = buf, silent = true })
   vim.keymap.set("n", "p", function()
     local s = sessions[name]
-    if s then s.focus_symbol = tile.item.symbol end
+    if s then
+      s.focus_symbol = tile.item.symbol
+    end
     require("custom_plugins.security_spread").show_dossier(tile.item.symbol)
   end, { buffer = buf, silent = true })
 
@@ -413,7 +435,9 @@ local function open_tile(tile, region, name)
     buffer = buf,
     callback = function()
       local s = sessions[name]
-      if s then s.focus_symbol = tile.item.symbol end
+      if s then
+        s.focus_symbol = tile.item.symbol
+      end
     end,
   })
 
@@ -589,7 +613,10 @@ local function draw(name)
     if target and vim.api.nvim_win_is_valid(target) then
       vim.api.nvim_set_current_win(target)
       for _, t in ipairs(s.tiles) do
-        if t.win == target then s.focus_symbol = t.symbol; break end
+        if t.win == target then
+          s.focus_symbol = t.symbol
+          break
+        end
       end
     end
   elseif is_initial_open or not vim.api.nvim_win_is_valid(cur_win) then
@@ -602,7 +629,10 @@ local function draw(name)
     if s.wins[1] and vim.api.nvim_win_is_valid(s.wins[1]) then
       vim.api.nvim_set_current_win(s.wins[1])
       for _, t in ipairs(s.tiles) do
-        if t.win == s.wins[1] then s.focus_symbol = t.symbol; break end
+        if t.win == s.wins[1] then
+          s.focus_symbol = t.symbol
+          break
+        end
       end
     end
   end
@@ -656,13 +686,19 @@ function M.open(name, quotes, opts)
   -- refresh) instead of recomputing from whatever buffer happens to be
   -- current at that moment — for a fullscreen dashboard that could be a
   -- tile's own scratch buffer if the user is focused inside it.
-  local background_buf = existing and existing.background_buf and vim.api.nvim_buf_is_valid(existing.background_buf)
+  local background_buf = existing
       and existing.background_buf
-      or (opts.win and vim.api.nvim_win_is_valid(opts.win) and vim.api.nvim_win_get_buf(opts.win))
-      or prev_buf
+      and vim.api.nvim_buf_is_valid(existing.background_buf)
+      and existing.background_buf
+    or (opts.win and vim.api.nvim_win_is_valid(opts.win) and vim.api.nvim_win_get_buf(opts.win))
+    or prev_buf
   sessions[name].background_buf = background_buf
-  vim.keymap.set("n", "q", function() M.close(name) end, { buffer = background_buf, silent = true })
-  vim.keymap.set("n", "<Esc>", function() M.close(name) end, { buffer = background_buf, silent = true })
+  vim.keymap.set("n", "q", function()
+    M.close(name)
+  end, { buffer = background_buf, silent = true })
+  vim.keymap.set("n", "<Esc>", function()
+    M.close(name)
+  end, { buffer = background_buf, silent = true })
   vim.keymap.set("n", "?", toggle_help, { buffer = background_buf, silent = true })
   vim.keymap.set("n", "r", function()
     local s = sessions[name]

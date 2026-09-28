@@ -5,11 +5,11 @@
 //               flash message replaces the hints while it's set
 //   KeyOverlay  widget: centered popup table of every key (Clear behind)
 
+use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Rect};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Cell, Clear, Row, Table, Widget};
-use ratatui::Frame;
 
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -43,7 +43,13 @@ pub const BLOCK_KEYS: &[Key] = &[
 ];
 
 /// Footer with as many hints as fit; `flash` (if any) takes priority.
-pub fn render_footer(frame: &mut Frame, area: Rect, keys: &[Key], flash: Option<&str>, theme: &Theme) {
+pub fn render_footer(
+    frame: &mut Frame,
+    area: Rect,
+    keys: &[Key],
+    flash: Option<&str>,
+    theme: &Theme,
+) {
     frame.render_widget(Footer { keys, flash, theme }, area);
 }
 
@@ -108,8 +114,18 @@ impl Widget for KeyOverlay<'_> {
 impl Widget for &KeyOverlay<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let th = self.theme;
-        let kw = self.keys.iter().map(|k| text::width(k.keys)).max().unwrap_or(0) as u16;
-        let dw = self.keys.iter().map(|k| text::width(k.desc)).max().unwrap_or(0) as u16;
+        let kw = self
+            .keys
+            .iter()
+            .map(|k| text::width(k.keys))
+            .max()
+            .unwrap_or(0) as u16;
+        let dw = self
+            .keys
+            .iter()
+            .map(|k| text::width(k.desc))
+            .max()
+            .unwrap_or(0) as u16;
         let tw = text::width(self.title) as u16 + 4;
         let width = (kw + dw + 2 + 4).max(tw).max(24);
         let height = self.keys.len() as u16 + 2;
@@ -119,13 +135,22 @@ impl Widget for &KeyOverlay<'_> {
         }
         Clear.render(r, buf);
         let rows = self.keys.iter().map(|k| {
-            Row::new([Cell::from(Span::styled(k.keys, th.accent())), Cell::from(Span::styled(k.desc, th.base()))])
+            Row::new([
+                Cell::from(Span::styled(k.keys, th.accent())),
+                Cell::from(Span::styled(k.desc, th.base())),
+            ])
         });
         let block = Block::bordered()
             .border_style(th.accent())
             .style(th.base())
             .title_top(Line::styled(format!(" {} ", self.title), th.title()))
-            .title_bottom(Line::from(vec![Span::styled(" ? ", th.accent()), Span::styled("close ", th.dim())]).right_aligned());
+            .title_bottom(
+                Line::from(vec![
+                    Span::styled(" ? ", th.accent()),
+                    Span::styled("close ", th.dim()),
+                ])
+                .right_aligned(),
+            );
         Table::new(rows, [Constraint::Length(kw), Constraint::Fill(1)])
             .column_spacing(2)
             .block(block)
@@ -136,16 +161,28 @@ impl Widget for &KeyOverlay<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ratatui::backend::TestBackend;
     use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
 
-    const KEYS: &[Key] = &[key("j/k", "move"), key("↵", "open"), key("q", "quit"), key("?", "help")];
+    const KEYS: &[Key] = &[
+        key("j/k", "move"),
+        key("↵", "open"),
+        key("q", "quit"),
+        key("?", "help"),
+    ];
 
     fn draw(w: u16, h: u16, f: impl Fn(&mut Frame)) -> String {
         let mut t = Terminal::new(TestBackend::new(w, h)).unwrap();
         t.draw(|fr| f(fr)).unwrap();
         let b = t.backend().buffer();
-        (0..h).map(|y| (0..w).map(|x| b[(x, y)].symbol().to_string()).collect::<String>()).collect::<Vec<_>>().join("\n")
+        (0..h)
+            .map(|y| {
+                (0..w)
+                    .map(|x| b[(x, y)].symbol().to_string())
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     #[test]
@@ -156,7 +193,9 @@ mod tests {
         // only whole hints
         let out = draw(12, 1, |f| render_footer(f, f.area(), KEYS, None, &th));
         assert_eq!(out.trim_end(), "j/k move");
-        let out = draw(40, 1, |f| render_footer(f, f.area(), KEYS, Some("copied"), &th));
+        let out = draw(40, 1, |f| {
+            render_footer(f, f.area(), KEYS, Some("copied"), &th)
+        });
         assert!(out.starts_with("copied"));
         assert!(!out.contains("move"));
     }
@@ -164,7 +203,9 @@ mod tests {
     #[test]
     fn overlay_lists_keys() {
         let th = Theme::default();
-        let out = draw(60, 20, |f| render_overlay(f, f.area(), "dossier keys", SOURCE_KEYS, &th));
+        let out = draw(60, 20, |f| {
+            render_overlay(f, f.area(), "dossier keys", SOURCE_KEYS, &th)
+        });
         assert!(out.contains("dossier keys"), "{out}");
         assert!(out.contains("i  inspect formula inputs"), "{out}");
         for (w, h) in [(10, 3), (1, 1), (0, 0)] {

@@ -445,22 +445,23 @@ impl Screen for Dossier {
     fn on_key(&mut self, key: KeyEvent) -> Action {
         self.flash = None;
         if self.palette.open
-            && let Some(command) = self.palette.handle(key) {
-                return match command {
-                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
-                        screen: screen.into(),
-                        arg: Some(self.symbol.clone()),
-                    }),
-                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
-                        screen: screen.into(),
-                    }),
-                    Some(Command::Section(i)) => {
-                        self.select_section(i);
-                        Action::None
-                    }
-                    _ => Action::None,
-                };
-            }
+            && let Some(command) = self.palette.handle(key)
+        {
+            return match command {
+                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                    screen: screen.into(),
+                    arg: Some(self.symbol.clone()),
+                }),
+                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                    screen: screen.into(),
+                }),
+                Some(Command::Section(i)) => {
+                    self.select_section(i);
+                    Action::None
+                }
+                _ => Action::None,
+            };
+        }
         if self.doc.is_none() {
             return Action::Quit;
         }
@@ -979,7 +980,10 @@ mod tests {
             "first two blocks share a row: {detail}"
         );
         let all = rows_text(&term, Rect::new(0, 0, 140, 45));
-        assert!(all.contains("┬") && all.contains("┴"), "nav/source junctions kept: {all}");
+        assert!(
+            all.contains("┬") && all.contains("┴"),
+            "nav/source junctions kept: {all}"
+        );
 
         // l: next container right; h twice: back, then out to nav
         press(&mut s, KeyCode::Char('l'));

@@ -95,8 +95,10 @@ function M.squarify(sizes, x, y, dx, dy)
   end
 
   local i = 1
-  while i < #sizes and worst_ratio(slice(sizes, 1, i), x, y, dx, dy)
-      >= worst_ratio(slice(sizes, 1, i + 1), x, y, dx, dy) do
+  while
+    i < #sizes
+    and worst_ratio(slice(sizes, 1, i), x, y, dx, dy) >= worst_ratio(slice(sizes, 1, i + 1), x, y, dx, dy)
+  do
     i = i + 1
   end
 

@@ -40,18 +40,29 @@ pub fn wrap(s: &str, max: usize) -> Vec<String> {
             if l.trim().is_empty() {
                 vec![String::new()]
             } else {
-                textwrap::wrap(l, max.max(1)).into_iter().map(|c| c.into_owned()).collect()
+                textwrap::wrap(l, max.max(1))
+                    .into_iter()
+                    .map(|c| c.into_owned())
+                    .collect()
             }
         })
         .collect();
-    if lines.is_empty() { vec![String::new()] } else { lines }
+    if lines.is_empty() {
+        vec![String::new()]
+    } else {
+        lines
+    }
 }
 
 /// Pad (or truncate) `s` to exactly `w` columns; right-aligned when `right`.
 pub fn fit(s: &str, w: usize, right: bool) -> String {
     let t = truncate(s, w);
     let pad = " ".repeat(w.saturating_sub(width(&t)));
-    if right { format!("{pad}{t}") } else { format!("{t}{pad}") }
+    if right {
+        format!("{pad}{t}")
+    } else {
+        format!("{t}{pad}")
+    }
 }
 
 /// "https://www.sec.gov/Archives/edgar/data/1/2/mrvl-10q.htm#:~:text=x"
@@ -98,7 +109,11 @@ pub fn fmt_num(v: f64) -> String {
         _ => 3,
     };
     let s = format!("{x:.dec$}");
-    let s = if s.contains('.') { s.trim_end_matches('0').trim_end_matches('.').to_string() } else { s };
+    let s = if s.contains('.') {
+        s.trim_end_matches('0').trim_end_matches('.').to_string()
+    } else {
+        s
+    };
     let s = if s == "-0" { "0".to_string() } else { s };
     // thousands separators on the integer part
     let (sign, s) = s.strip_prefix('-').map_or(("", s.as_str()), |r| ("-", r));
@@ -124,7 +139,11 @@ pub fn fmt_nums(vals: &[f64]) -> Vec<String> {
     if vals.iter().any(|v| v.abs() >= 1e6) {
         return base;
     }
-    let dec = base.iter().filter_map(|s| s.split_once('.').map(|(_, f)| f.len())).max().unwrap_or(0);
+    let dec = base
+        .iter()
+        .filter_map(|s| s.split_once('.').map(|(_, f)| f.len()))
+        .max()
+        .unwrap_or(0);
     vals.iter()
         .zip(base)
         .map(|(&v, b)| {
@@ -135,7 +154,10 @@ pub fn fmt_nums(vals: &[f64]) -> Vec<String> {
             let frac = format!("{:.dec$}", v.abs().fract());
             // rounding can carry (0.999 -> "1.00"): fall back to the plain format
             match frac.strip_prefix("0.") {
-                Some(f) => format!("{}{int}.{f}", if v < 0.0 && v.trunc() == 0.0 { "-" } else { "" }),
+                Some(f) => format!(
+                    "{}{int}.{f}",
+                    if v < 0.0 && v.trunc() == 0.0 { "-" } else { "" }
+                ),
                 None => format!("{v:.dec$}"),
             }
         })
@@ -162,10 +184,15 @@ mod tests {
             "sec.gov/…/mrvl-10q.htm"
         );
         assert_eq!(
-            short_url("https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/0001/mrvl-20260801.htm"),
+            short_url(
+                "https://www.sec.gov/ix?doc=/Archives/edgar/data/1835632/0001/mrvl-20260801.htm"
+            ),
             "sec.gov/…/mrvl-20260801.htm"
         );
-        assert_eq!(short_url("https://patents.google.com/patent/US1"), "patents.google.com/…/US1");
+        assert_eq!(
+            short_url("https://patents.google.com/patent/US1"),
+            "patents.google.com/…/US1"
+        );
         assert_eq!(short_url("https://finance.yahoo.com"), "finance.yahoo.com");
         assert_eq!(short_url(""), "");
     }

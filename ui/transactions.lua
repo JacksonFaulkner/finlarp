@@ -11,10 +11,7 @@ local function format_row(t)
   local amount = t.amount and string.format("%+.2f", t.amount) or ""
   local desc = t.description or ""
 
-  return string.format(
-    "%-19s %-6s %-14s %-8s %-10s %-10s  %s",
-    date, symbol, ttype, qty, price, amount, desc
-  )
+  return string.format("%-19s %-6s %-14s %-8s %-10s %-10s  %s", date, symbol, ttype, qty, price, amount, desc)
 end
 
 local function open_picker(fzf, transactions)
@@ -32,7 +29,9 @@ local function open_picker(fzf, transactions)
 
   fzf.fzf_exec(rows, {
     prompt = "Transactions> ",
-    fzf_opts = { ["--header"] = "date                sym    type           qty      price      amount      description" },
+    fzf_opts = {
+      ["--header"] = "date                sym    type           qty      price      amount      description",
+    },
     actions = {
       ["default"] = function(selected)
         local t = by_row[selected[1]]

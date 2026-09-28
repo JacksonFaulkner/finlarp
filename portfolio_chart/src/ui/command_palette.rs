@@ -84,15 +84,21 @@ mod earnings_poc_tests {
 
     #[test]
     fn report_menu_entry_is_available_only_for_its_hard_coded_ticker() {
-        assert!(destinations("MRVL", "dossier")
-            .iter()
-            .any(|e| e.command == Command::Screen("earnings")));
-        assert!(!destinations("NVDA", "dossier")
-            .iter()
-            .any(|e| e.command == Command::Screen("earnings")));
-        assert!(destinations("", "dossier")
-            .iter()
-            .any(|e| e.label.contains("Marvell earnings report")));
+        assert!(
+            destinations("MRVL", "dossier")
+                .iter()
+                .any(|e| e.command == Command::Screen("earnings"))
+        );
+        assert!(
+            !destinations("NVDA", "dossier")
+                .iter()
+                .any(|e| e.command == Command::Screen("earnings"))
+        );
+        assert!(
+            destinations("", "dossier")
+                .iter()
+                .any(|e| e.label.contains("Marvell earnings report"))
+        );
     }
 }
 

@@ -49,7 +49,9 @@ local function ensure_built(on_ready)
   end
   vim.notify("security_spread: rebuilding portfolio_chart binary...", vim.log.levels.INFO)
   build_waiters = { on_ready }
-  vim.system({ "cargo", "build", "--release", "--manifest-path", crate_dir .. "/Cargo.toml" }, { text = true },
+  vim.system(
+    { "cargo", "build", "--release", "--manifest-path", crate_dir .. "/Cargo.toml" },
+    { text = true },
     vim.schedule_wrap(function(res)
       if res.code ~= 0 then
         vim.notify("security_spread: cargo build failed:\n" .. (res.stderr or ""), vim.log.levels.ERROR)
@@ -59,7 +61,8 @@ local function ensure_built(on_ready)
       for _, fn in ipairs(waiters) do
         fn()
       end
-    end))
+    end)
+  )
 end
 
 --- @return string "#rrggbb", or `fallback` (often "" for "no explicit
@@ -280,9 +283,15 @@ function M._open_built(screen, arg, opts)
   -- No detach: display-popup -E blocks until the popup closes and exits
   -- with the binary's code, so on_exit fires exactly then.
   vim.fn.jobstart({
-    "tmux", "display-popup", "-E",
-    "-w", "100%", "-h", "100%",
-    "-T", title,
+    "tmux",
+    "display-popup",
+    "-E",
+    "-w",
+    "100%",
+    "-h",
+    "100%",
+    "-T",
+    title,
     table.concat(parts, " "),
   }, {
     on_exit = function(_, code)

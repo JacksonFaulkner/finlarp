@@ -119,7 +119,7 @@ function M.pick(initial)
       ["--header-lines"] = "1",
       ["--preview"] = cmd("get", "{1}", "--context", "1", "--color", "--terms", "{q}"),
       ["--preview-window"] = "down,55%,wrap",
-      ["--header"] = "t:TICK s:sector r:region type:10k|risk|new|earn|guid|patent sec:mda since:2025 \"phrase\" -word",
+      ["--header"] = 't:TICK s:sector r:region type:10k|risk|new|earn|guid|patent sec:mda since:2025 "phrase" -word',
     },
     actions = {
       ["default"] = function(selected)

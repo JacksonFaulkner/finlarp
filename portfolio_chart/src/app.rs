@@ -102,7 +102,11 @@ struct CrosstermEvents;
 
 impl Events for CrosstermEvents {
     fn next(&mut self, timeout: Duration) -> io::Result<Option<Event>> {
-        if event::poll(timeout)? { event::read().map(Some) } else { Ok(None) }
+        if event::poll(timeout)? {
+            event::read().map(Some)
+        } else {
+            Ok(None)
+        }
     }
 }
 
@@ -127,7 +131,9 @@ pub(crate) fn event_loop<B: Backend>(
     let mut dirty = true;
     loop {
         if dirty || screen.needs_redraw() {
-            terminal.draw(|f| screen.draw(f)).map_err(|e| io::Error::other(e.to_string()))?;
+            terminal
+                .draw(|f| screen.draw(f))
+                .map_err(|e| io::Error::other(e.to_string()))?;
             dirty = false;
         }
         let mut action = screen.tick();
@@ -135,7 +141,9 @@ pub(crate) fn event_loop<B: Backend>(
             match events.next(POLL)? {
                 Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
                     dirty = true;
-                    action = if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
+                    action = if key.code == KeyCode::Char('c')
+                        && key.modifiers.contains(KeyModifiers::CONTROL)
+                    {
                         Action::Quit
                     } else {
                         screen.on_key(key)
@@ -193,15 +201,41 @@ mod tests {
     #[test]
     fn nvim_action_json_shape() {
         // ui/portfolio_chart.lua dispatches on exactly these keys.
-        let d = NvimAction::Docview { url: "https://x/y".into(), quote: Some("net revenue".into()) };
-        assert_eq!(to_json(&d), json!({"action": "docview", "url": "https://x/y", "quote": "net revenue"}));
-        let d = NvimAction::Docview { url: "u".into(), quote: None };
-        assert_eq!(to_json(&d), json!({"action": "docview", "url": "u", "quote": null}));
-        assert_eq!(to_json(&NvimAction::Chunk { id: "42".into() }), json!({"action": "chunk", "id": "42"}));
-        let s = NvimAction::Screen { screen: "dossier".into(), arg: Some("MRVL".into()) };
-        assert_eq!(to_json(&s), json!({"action": "screen", "screen": "dossier", "arg": "MRVL"}));
-        let p = NvimAction::Picker { screen: "canslim".into() };
-        assert_eq!(to_json(&p), json!({"action": "picker", "screen": "canslim"}));
+        let d = NvimAction::Docview {
+            url: "https://x/y".into(),
+            quote: Some("net revenue".into()),
+        };
+        assert_eq!(
+            to_json(&d),
+            json!({"action": "docview", "url": "https://x/y", "quote": "net revenue"})
+        );
+        let d = NvimAction::Docview {
+            url: "u".into(),
+            quote: None,
+        };
+        assert_eq!(
+            to_json(&d),
+            json!({"action": "docview", "url": "u", "quote": null})
+        );
+        assert_eq!(
+            to_json(&NvimAction::Chunk { id: "42".into() }),
+            json!({"action": "chunk", "id": "42"})
+        );
+        let s = NvimAction::Screen {
+            screen: "dossier".into(),
+            arg: Some("MRVL".into()),
+        };
+        assert_eq!(
+            to_json(&s),
+            json!({"action": "screen", "screen": "dossier", "arg": "MRVL"})
+        );
+        let p = NvimAction::Picker {
+            screen: "canslim".into(),
+        };
+        assert_eq!(
+            to_json(&p),
+            json!({"action": "picker", "screen": "canslim"})
+        );
         // One line, so the Lua side can read the file whole and decode it.
         assert!(!serde_json::to_string(&s).expect("serialize").contains('\n'));
     }
@@ -212,12 +246,17 @@ mod tests {
 
     impl Events for Script {
         fn next(&mut self, _timeout: Duration) -> io::Result<Option<Event>> {
-            self.0.pop_front().ok_or_else(|| io::Error::other("script exhausted"))
+            self.0
+                .pop_front()
+                .ok_or_else(|| io::Error::other("script exhausted"))
         }
     }
 
     fn key(c: char) -> Option<Event> {
-        Some(Event::Key(KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE)))
+        Some(Event::Key(KeyEvent::new(
+            KeyCode::Char(c),
+            KeyModifiers::NONE,
+        )))
     }
 
     #[derive(Default)]
@@ -251,7 +290,8 @@ mod tests {
     #[test]
     fn idle_polls_skip_redraw_when_screen_opts_out() {
         let mut p = Probe::default();
-        let code = run_script(&mut p, vec![None, None, None, key('j'), None, key('q')]).expect("run");
+        let code =
+            run_script(&mut p, vec![None, None, None, key('j'), None, key('q')]).expect("run");
         assert_eq!(code, 0);
         // initial draw + one after `j`; the four idle polls draw nothing.
         assert_eq!(p.draws, 2);
@@ -259,7 +299,10 @@ mod tests {
 
     #[test]
     fn default_redraws_every_poll_and_resize_forces_one() {
-        let mut p = Probe { idle_redraw: true, ..Default::default() };
+        let mut p = Probe {
+            idle_redraw: true,
+            ..Default::default()
+        };
         run_script(&mut p, vec![None, None, key('q')]).expect("run");
         assert_eq!(p.draws, 3);
 
@@ -271,10 +314,16 @@ mod tests {
     #[test]
     fn ctrl_c_quits_and_exit_codes_pass_through() {
         let mut p = Probe::default();
-        let ctrl_c = Some(Event::Key(KeyEvent::new(KeyCode::Char('c'), KeyModifiers::CONTROL)));
+        let ctrl_c = Some(Event::Key(KeyEvent::new(
+            KeyCode::Char('c'),
+            KeyModifiers::CONTROL,
+        )));
         assert_eq!(run_script(&mut p, vec![ctrl_c]).expect("run"), 0);
         let mut p = Probe::default();
-        assert_eq!(run_script(&mut p, vec![key('x')]).expect("run"), EXIT_BACK_TO_PICKER);
+        assert_eq!(
+            run_script(&mut p, vec![key('x')]).expect("run"),
+            EXIT_BACK_TO_PICKER
+        );
     }
 
     #[test]

@@ -95,7 +95,13 @@ fn values(q: &str, dim: Dim) -> Vec<String> {
         .iter()
         .filter_map(|t| filter(t))
         .filter(|(k, _)| dim.keys().contains(&k.as_str()))
-        .flat_map(|(_, v)| v.trim_matches('"').split(',').filter(|s| !s.is_empty()).map(str::to_string).collect::<Vec<_>>())
+        .flat_map(|(_, v)| {
+            v.trim_matches('"')
+                .split(',')
+                .filter(|s| !s.is_empty())
+                .map(str::to_string)
+                .collect::<Vec<_>>()
+        })
         .collect()
 }
 
@@ -128,7 +134,10 @@ fn since_until(q: &str) -> (Option<String>, Option<String>) {
 
 pub fn is_active(q: &str, dim: Dim, value: &str) -> bool {
     if dim == Dim::Year {
-        let next = value.parse::<i32>().map(|y| (y + 1).to_string()).unwrap_or_default();
+        let next = value
+            .parse::<i32>()
+            .map(|y| (y + 1).to_string())
+            .unwrap_or_default();
         let (s, u) = since_until(q);
         return s.is_some_and(|s| s.starts_with(value)) && u.is_some_and(|u| u.starts_with(&next));
     }
@@ -143,7 +152,10 @@ pub fn toggle(q: &str, dim: Dim, value: &str) -> String {
     let active = is_active(q, dim, value);
     let mut vals: Vec<String> = match dim {
         Dim::Year => Vec::new(),
-        _ => values(q, dim).into_iter().filter(|t| !selects(dim, t, value)).collect(),
+        _ => values(q, dim)
+            .into_iter()
+            .filter(|t| !selects(dim, t, value))
+            .collect(),
     };
     if !active {
         match dim {
@@ -203,7 +215,11 @@ fn is_word(c: char) -> bool {
 
 /// Byte ranges of `text` matching `terms`, non-overlapping, in order.
 pub fn matches(text: &str, terms: &[String]) -> Vec<Range<usize>> {
-    let mut stems: Vec<(String, bool)> = terms.iter().filter(|t| !t.is_empty()).map(|t| stem(t)).collect();
+    let mut stems: Vec<(String, bool)> = terms
+        .iter()
+        .filter(|t| !t.is_empty())
+        .map(|t| stem(t))
+        .collect();
     stems.sort_by_key(|(s, _)| std::cmp::Reverse(s.len()));
     if stems.is_empty() {
         return Vec::new();
@@ -223,13 +239,21 @@ pub fn matches(text: &str, terms: &[String]) -> Vec<Range<usize>> {
     let mut i = 0;
     let mut prev: Option<char> = None;
     while i < lower.len() {
-        let Some(c) = lower[i..].chars().next() else { break };
+        let Some(c) = lower[i..].chars().next() else {
+            break;
+        };
         if prev.is_none_or(|p| !is_word(p))
-            && let Some((s, ext)) = stems.iter().find(|(s, _)| lower[i..].starts_with(s.as_str()))
+            && let Some((s, ext)) = stems
+                .iter()
+                .find(|(s, _)| lower[i..].starts_with(s.as_str()))
         {
             let mut end = i + s.len();
             if *ext {
-                end += lower[end..].chars().take_while(|c| is_word(*c)).map(char::len_utf8).sum::<usize>();
+                end += lower[end..]
+                    .chars()
+                    .take_while(|c| is_word(*c))
+                    .map(char::len_utf8)
+                    .sum::<usize>();
             }
             out.push(i..end);
             prev = lower[..end].chars().next_back();
@@ -268,18 +292,30 @@ pub fn snippet(text: &str, terms: &[String], width: usize) -> String {
     let mut start = chars_before.saturating_sub(width / 4);
     // begin on a word: skip the partial word the window cut into (never past the match)
     if start > 0 {
-        let skip = flat.chars().skip(start).take(chars_before - start).take_while(|c| !c.is_whitespace()).count();
+        let skip = flat
+            .chars()
+            .skip(start)
+            .take(chars_before - start)
+            .take_while(|c| !c.is_whitespace())
+            .count();
         if start + skip < chars_before {
             start += skip + 1;
         }
     }
     let body: String = flat.chars().skip(start).take(width).collect();
-    if start > 0 { format!("…{body}") } else { body }
+    if start > 0 {
+        format!("…{body}")
+    } else {
+        body
+    }
 }
 
 /// First `n` words of `text`: the docview jump quote.
 pub fn first_words(text: &str, n: usize) -> String {
-    text.split_whitespace().take(n).collect::<Vec<_>>().join(" ")
+    text.split_whitespace()
+        .take(n)
+        .collect::<Vec<_>>()
+        .join(" ")
 }
 
 /// Percent-encode for a `#:~:text=` fragment (model::Source::quote decodes it).
@@ -306,8 +342,14 @@ mod tests {
     #[test]
     fn toggles_tickers() {
         assert_eq!(toggle("guidance", Dim::Ticker, "MRVL"), "t:MRVL guidance");
-        assert_eq!(toggle("t:MRVL guidance", Dim::Ticker, "NVDA"), "t:MRVL,NVDA guidance");
-        assert_eq!(toggle("t:MRVL,NVDA guidance", Dim::Ticker, "mrvl"), "t:NVDA guidance");
+        assert_eq!(
+            toggle("t:MRVL guidance", Dim::Ticker, "NVDA"),
+            "t:MRVL,NVDA guidance"
+        );
+        assert_eq!(
+            toggle("t:MRVL,NVDA guidance", Dim::Ticker, "mrvl"),
+            "t:NVDA guidance"
+        );
         assert_eq!(toggle("t:MRVL guidance", Dim::Ticker, "MRVL"), "guidance");
         assert_eq!(toggle("hbm t:MU ", Dim::Ticker, "SK"), "hbm t:MU,SK ");
     }
@@ -319,7 +361,10 @@ mod tests {
         assert_eq!(toggle("type:guid x", Dim::Type, "guidance"), "x");
         assert_eq!(toggle("x", Dim::Type, "new_risk"), "type:new_risk x");
         assert_eq!(toggle("sec:risk x", Dim::Section, "risk_factors"), "x");
-        assert_eq!(toggle("\"high bandwidth\" x", Dim::Section, "mda"), "sec:mda \"high bandwidth\" x");
+        assert_eq!(
+            toggle("\"high bandwidth\" x", Dim::Section, "mda"),
+            "sec:mda \"high bandwidth\" x"
+        );
     }
 
     #[test]
@@ -358,7 +403,10 @@ mod tests {
 
     #[test]
     fn encodes_quote_fragments() {
-        let src = crate::model::Source::url("x", format!("u#:~:text={}", encode_fragment("Q3 revenue, up 5%-ish")));
+        let src = crate::model::Source::url(
+            "x",
+            format!("u#:~:text={}", encode_fragment("Q3 revenue, up 5%-ish")),
+        );
         assert_eq!(src.quote().as_deref(), Some("Q3 revenue, up 5%-ish"));
         assert_eq!(first_words("a  b\nc d", 3), "a b c");
     }

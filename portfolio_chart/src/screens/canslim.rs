@@ -338,22 +338,23 @@ impl Screen for Canslim {
     fn on_key(&mut self, key: KeyEvent) -> Action {
         self.flash = None;
         if self.palette.open
-            && let Some(command) = self.palette.handle(key) {
-                return match command {
-                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
-                        screen: screen.into(),
-                        arg: Some(self.symbol.clone()),
-                    }),
-                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
-                        screen: screen.into(),
-                    }),
-                    Some(Command::Section(i)) => {
-                        self.select_letter(i);
-                        Action::None
-                    }
-                    _ => Action::None,
-                };
-            }
+            && let Some(command) = self.palette.handle(key)
+        {
+            return match command {
+                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                    screen: screen.into(),
+                    arg: Some(self.symbol.clone()),
+                }),
+                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                    screen: screen.into(),
+                }),
+                Some(Command::Section(i)) => {
+                    self.select_letter(i);
+                    Action::None
+                }
+                _ => Action::None,
+            };
+        }
         if self.help {
             self.help = false;
             return Action::None;

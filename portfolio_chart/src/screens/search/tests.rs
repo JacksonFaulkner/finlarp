@@ -5,16 +5,15 @@
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::time::{Duration, Instant};
 
+use ratatui::Terminal;
 use ratatui::backend::TestBackend;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::style::Modifier;
-use ratatui::Terminal;
 
 use super::*;
 
 const FIXTURE: &str = include_str!("fixture.json");
-const INDEX_URL: &str =
-    "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/0001835632-26-000011-index.htm";
+const INDEX_URL: &str = "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000011/0001835632-26-000011-index.htm";
 
 struct Harness {
     s: Search,
@@ -32,7 +31,12 @@ fn fixture(part: &str, id: u64) -> Reply {
 fn harness() -> Harness {
     let (tx, req) = mpsc::channel();
     let (reply, rx) = mpsc::channel();
-    let s = Search::new("t:MRVL guidance".into(), Theme::default(), Client { tx, rx }, History::in_memory(&[]));
+    let s = Search::new(
+        "t:MRVL guidance".into(),
+        Theme::default(),
+        Client { tx, rx },
+        History::in_memory(&[]),
+    );
     Harness { s, req, reply }
 }
 
@@ -64,7 +68,11 @@ fn draw(s: &mut Search, w: u16, h: u16) -> Terminal<TestBackend> {
 fn screen_text(t: &Terminal<TestBackend>) -> String {
     let b = t.backend().buffer();
     (0..b.area.height)
-        .map(|y| (0..b.area.width).map(|x| b[(x, y)].symbol()).collect::<String>())
+        .map(|y| {
+            (0..b.area.width)
+                .map(|x| b[(x, y)].symbol())
+                .collect::<String>()
+        })
         .collect::<Vec<_>>()
         .join("\n")
 }
@@ -84,7 +92,8 @@ fn renders_results_facets_preview_and_source() {
     // a query term in the results is highlighted
     let b = t.backend().buffer();
     let hl = (0..b.area.height).any(|y| {
-        (0..b.area.width).any(|x| b[(x, y)].symbol() == "g" && b[(x, y)].modifier.contains(Modifier::UNDERLINED))
+        (0..b.area.width)
+            .any(|x| b[(x, y)].symbol() == "g" && b[(x, y)].modifier.contains(Modifier::UNDERLINED))
     });
     assert!(hl, "no highlighted term");
 }
@@ -101,12 +110,25 @@ fn narrow_layout_stacks_preview_and_drops_facets() {
 fn keys_emit_nvim_and_in_process_actions() {
     let mut h = loaded();
     let a = press(&mut h.s, KeyCode::Enter, KeyModifiers::NONE);
-    assert_eq!(a, Action::Nvim(NvimAction::Chunk { id: "149731".into() }));
+    assert_eq!(
+        a,
+        Action::Nvim(NvimAction::Chunk {
+            id: "149731".into()
+        })
+    );
     let a = press(&mut h.s, KeyCode::Char('v'), KeyModifiers::ALT);
-    let Action::Nvim(NvimAction::Docview { url, quote }) = a else { panic!("{a:?}") };
+    let Action::Nvim(NvimAction::Docview { url, quote }) = a else {
+        panic!("{a:?}")
+    };
     assert_eq!(url, INDEX_URL);
-    assert_eq!(quote.as_deref(), Some("On January 5, 2026, the OECD released a comprehensive package"));
-    assert_eq!(press(&mut h.s, KeyCode::Char('o'), KeyModifiers::CONTROL), Action::OpenBrowser(INDEX_URL.into()));
+    assert_eq!(
+        quote.as_deref(),
+        Some("On January 5, 2026, the OECD released a comprehensive package")
+    );
+    assert_eq!(
+        press(&mut h.s, KeyCode::Char('o'), KeyModifiers::CONTROL),
+        Action::OpenBrowser(INDEX_URL.into())
+    );
     // y types into the input while it has focus, copies from the results
     press(&mut h.s, KeyCode::Char('y'), KeyModifiers::NONE);
     assert_eq!(h.s.input.value(), "t:MRVL guidancey");
@@ -114,11 +136,17 @@ fn keys_emit_nvim_and_in_process_actions() {
     press(&mut h.s, KeyCode::Tab, KeyModifiers::NONE);
     press(&mut h.s, KeyCode::Tab, KeyModifiers::NONE);
     assert_eq!(h.s.focus, Pane::Results);
-    assert_eq!(press(&mut h.s, KeyCode::Char('y'), KeyModifiers::NONE), Action::Copy(INDEX_URL.into()));
+    assert_eq!(
+        press(&mut h.s, KeyCode::Char('y'), KeyModifiers::NONE),
+        Action::Copy(INDEX_URL.into())
+    );
     press(&mut h.s, KeyCode::Char('j'), KeyModifiers::CONTROL);
     press(&mut h.s, KeyCode::Char('j'), KeyModifiers::NONE);
     assert_eq!(h.s.selected().map(|x| x.id), Some(181329));
-    assert_eq!(press(&mut h.s, KeyCode::Esc, KeyModifiers::NONE), Action::Quit);
+    assert_eq!(
+        press(&mut h.s, KeyCode::Esc, KeyModifiers::NONE),
+        Action::Quit
+    );
 }
 
 #[test]
@@ -127,10 +155,15 @@ fn debounces_and_drops_stale_replies() {
     h.s.debounce = Duration::from_secs(3600);
     press(&mut h.s, KeyCode::Char('s'), KeyModifiers::NONE);
     h.s.tick();
-    assert!(h.req.try_recv().is_err(), "sent before the debounce expired");
+    assert!(
+        h.req.try_recv().is_err(),
+        "sent before the debounce expired"
+    );
     h.s.debounce = Duration::ZERO;
     h.s.tick();
-    let Ok(Request::Query { id, q, .. }) = h.req.try_recv() else { panic!("no query sent") };
+    let Ok(Request::Query { id, q, .. }) = h.req.try_recv() else {
+        panic!("no query sent")
+    };
     assert_eq!(q, "t:MRVL guidances");
     // a late reply to the first query must not replace anything
     let mut stale = fixture("query", 1);
@@ -156,7 +189,10 @@ fn facet_toggle_rewrites_query_and_sends() {
     press(&mut h.s, KeyCode::Tab, KeyModifiers::NONE);
     assert_eq!(h.s.focus, Pane::Facets);
     // walk to the first "type" item (below the ticker items)
-    let target = h.s.facets.iter().position(|f| matches!(f, FacetRow::Item { dim: Dim::Type, .. }));
+    let target =
+        h.s.facets
+            .iter()
+            .position(|f| matches!(f, FacetRow::Item { dim: Dim::Type, .. }));
     while h.s.facet_state.selected() != target {
         press(&mut h.s, KeyCode::Char('j'), KeyModifiers::NONE);
     }
@@ -164,7 +200,9 @@ fn facet_toggle_rewrites_query_and_sends() {
     assert_eq!(h.s.input.value(), "type:filing t:MRVL guidance");
     h.s.debounce = Duration::from_millis(150);
     h.s.tick();
-    assert!(matches!(h.req.try_recv(), Ok(Request::Query { q, .. }) if q == "type:filing t:MRVL guidance"));
+    assert!(
+        matches!(h.req.try_recv(), Ok(Request::Query { q, .. }) if q == "type:filing t:MRVL guidance")
+    );
     // toggling the active ticker facet removes it
     h.s.facet_state.select(Some(1));
     press(&mut h.s, KeyCode::Enter, KeyModifiers::NONE);
@@ -177,14 +215,19 @@ fn preview_fetches_context_and_jumps_to_match() {
     h.s.move_result(2);
     h.s.selected_at = Instant::now().checked_sub(Duration::from_secs(1));
     h.s.tick();
-    let Ok(Request::Get { id, get, context }) = h.req.try_recv() else { panic!("no get sent") };
+    let Ok(Request::Get { id, get, context }) = h.req.try_recv() else {
+        panic!("no get sent")
+    };
     assert_eq!((get, context), (181329, 1));
     let _ = h.reply.send(fixture("get", id));
     h.s.tick();
     let text = screen_text(&draw(&mut h.s, 160, 30));
     assert!(text.contains("◀ match"), "{text}");
     assert!(text.contains("3 chunks"), "{text}");
-    assert!(h.s.preview_scroll > 0, "preview should scroll to the matched chunk");
+    assert!(
+        h.s.preview_scroll > 0,
+        "preview should scroll to the matched chunk"
+    );
     // cached: re-selecting does not re-fetch
     h.s.selection_changed();
     h.s.selected_at = Instant::now().checked_sub(Duration::from_secs(1));
@@ -196,7 +239,12 @@ fn preview_fetches_context_and_jumps_to_match() {
 fn history_on_up_down_in_input() {
     let (tx, _req) = mpsc::channel();
     let (_reply, rx) = mpsc::channel();
-    let mut s = Search::new("draft".into(), Theme::default(), Client { tx, rx }, History::in_memory(&["t:NVDA hbm"]));
+    let mut s = Search::new(
+        "draft".into(),
+        Theme::default(),
+        Client { tx, rx },
+        History::in_memory(&["t:NVDA hbm"]),
+    );
     press(&mut s, KeyCode::Up, KeyModifiers::NONE);
     assert_eq!(s.input.value(), "t:NVDA hbm");
     press(&mut s, KeyCode::Down, KeyModifiers::NONE);
@@ -209,7 +257,10 @@ fn history_on_up_down_in_input() {
 #[test]
 fn server_failure_shows_error() {
     let mut h = harness();
-    let _ = h.reply.send(Reply { error: Some("search.py exited".into()), ..Reply::default() });
+    let _ = h.reply.send(Reply {
+        error: Some("search.py exited".into()),
+        ..Reply::default()
+    });
     h.s.tick();
     let text = screen_text(&draw(&mut h.s, 120, 20));
     assert!(text.contains("search.py exited"), "{text}");

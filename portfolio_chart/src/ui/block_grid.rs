@@ -94,12 +94,7 @@ impl BlockGrid {
         if outer.is_empty() {
             return;
         }
-        let (l, r, t, b) = (
-            outer.x,
-            outer.right() - 1,
-            outer.y,
-            outer.bottom() - 1,
-        );
+        let (l, r, t, b) = (outer.x, outer.right() - 1, outer.y, outer.bottom() - 1);
         let edge: Vec<(u16, u16)> = (l..=r)
             .flat_map(|x| [(x, t), (x, b)])
             .chain((t..=b).flat_map(|y| [(l, y), (r, y)]))
@@ -113,7 +108,9 @@ impl BlockGrid {
         for (&p, old) in edge.iter().zip(&before) {
             let new = buf[p].symbol().to_string();
             if is_box(old) && is_box(&new) && *old != new {
-                buf[p].set_symbol(old).merge_symbol(&new, MergeStrategy::Exact);
+                buf[p]
+                    .set_symbol(old)
+                    .merge_symbol(&new, MergeStrategy::Exact);
             }
         }
     }

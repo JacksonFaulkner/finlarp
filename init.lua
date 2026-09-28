@@ -29,7 +29,9 @@ local function start_reauth(decoded, retry, fail)
       fail("re-auth cancelled")
       return
     end
-    run("sources/etrade.py", { "auth_finish", decoded.request_token, decoded.request_token_secret, code },
+    run(
+      "sources/etrade.py",
+      { "auth_finish", decoded.request_token, decoded.request_token_secret, code },
       function(fok, fdata)
         if not fok then
           vim.notify("security_spread: re-auth failed: " .. tostring(fdata), vim.log.levels.ERROR)
@@ -38,7 +40,8 @@ local function start_reauth(decoded, retry, fail)
         end
         vim.notify("security_spread: re-authorized", vim.log.levels.INFO)
         retry()
-      end)
+      end
+    )
   end)
 end
 
@@ -51,7 +54,11 @@ end
 --- @param callback fun(ok: boolean, data_or_err: any)
 run = function(script, args, callback)
   local cmd = vim.list_extend({
-    "uv", "run", "--env-file", env_file, script,
+    "uv",
+    "run",
+    "--env-file",
+    env_file,
+    script,
   }, args)
 
   vim.system(cmd, { cwd = plugin_dir, text = true }, function(result)
@@ -382,8 +389,12 @@ local function merge_positions(positions)
     if p.symbol then
       if not by_symbol[p.symbol] then
         by_symbol[p.symbol] = {
-          symbol = p.symbol, value = 0, quantity = 0,
-          last_price = p.last_price, change_close = 0, change_close_pct = p.change_close_pct,
+          symbol = p.symbol,
+          value = 0,
+          quantity = 0,
+          last_price = p.last_price,
+          change_close = 0,
+          change_close_pct = p.change_close_pct,
         }
         order[#order + 1] = p.symbol
       end
@@ -490,20 +501,26 @@ function M.toggle_auto_refresh(name, interval_ms)
   interval_ms = interval_ms or 2000
   local state = { in_flight = false }
   local timer = vim.uv.new_timer()
-  timer:start(interval_ms, interval_ms, vim.schedule_wrap(function()
-    if state.in_flight then
-      return -- previous pull still in flight — skip this tick, don't stack
-    end
-    local s = window.get_session(name)
-    if not s then
-      timer:stop()
-      timer:close()
-      auto_refresh[name] = nil
-      return
-    end
-    state.in_flight = true
-    s.opts.on_refresh(function() state.in_flight = false end)
-  end))
+  timer:start(
+    interval_ms,
+    interval_ms,
+    vim.schedule_wrap(function()
+      if state.in_flight then
+        return -- previous pull still in flight — skip this tick, don't stack
+      end
+      local s = window.get_session(name)
+      if not s then
+        timer:stop()
+        timer:close()
+        auto_refresh[name] = nil
+        return
+      end
+      state.in_flight = true
+      s.opts.on_refresh(function()
+        state.in_flight = false
+      end)
+    end)
+  )
   auto_refresh[name] = { timer = timer }
   vim.notify("security_spread: auto-refresh on every " .. interval_ms .. "ms", vim.log.levels.INFO)
 end
@@ -630,7 +647,10 @@ function M.show_dossier(symbol)
         -- still open: the screen explains a missing cache itself
         vim.notify("security_spread: dossier build failed: " .. tostring(data), vim.log.levels.ERROR)
       elseif type(data) == "table" and (data.unsourced or 0) > 0 then
-        vim.notify(("security_spread: %s dossier has %d unsourced values"):format(sym, data.unsourced), vim.log.levels.WARN)
+        vim.notify(
+          ("security_spread: %s dossier has %d unsourced values"):format(sym, data.unsourced),
+          vim.log.levels.WARN
+        )
       end
       chart.open_screen("dossier", sym, { title = " " .. sym .. " dossier " })
     end)
