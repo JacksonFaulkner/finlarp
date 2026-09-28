@@ -64,7 +64,7 @@ def _conn() -> duckdb.DuckDBPyConnection:
             fetched_at DOUBLE
         )
     """)
-    # Per-ticker research dossier (services/dossier.py) read straight out of
+    # Per-ticker research dossier (views/dossier.py) read straight out of
     # DuckDB by the portfolio_chart `dossier` screen, same as canslim_cache.
     con.execute("""
         CREATE TABLE IF NOT EXISTS dossier_cache (
@@ -83,7 +83,7 @@ def _conn() -> duckdb.DuckDBPyConnection:
     # SEC Financial Statement Data Sets — one bulk zip per calendar quarter
     # covering every filer. Only dimensional (segment) revenue rows are kept;
     # undimensioned totals already come from companyfacts. See
-    # services/edgar_fsds.py.
+    # sources/edgar_fsds.py.
     con.execute("""
         CREATE TABLE IF NOT EXISTS edgar_fsds_loaded (
             quarter VARCHAR PRIMARY KEY,   -- e.g. '2026q2'
@@ -398,7 +398,7 @@ def put_cached_edgar_cik_map(cik_map: dict) -> None:
 # Every per-security metric table added later (CANSLIM, EDGAR facts, ...)
 # joins on `ticker`.
 
-UNIVERSE_JSON = Path(__file__).resolve().parent / "ai_stocks_reviewed.json"
+UNIVERSE_JSON = Path(__file__).resolve().parent / "data" / "ai_stocks_reviewed.json"
 
 
 def _ensure_universe_tables(con: duckdb.DuckDBPyConnection) -> None:

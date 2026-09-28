@@ -1,0 +1,496 @@
+{
+  "ticker": "NVDA",
+  "company": "NVDA",
+  "market_cap_usd": 5434765213696,
+  "as_of": "2026-07-26",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-26",
+    "accession": "0001045810-26-000075",
+    "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm"
+  },
+  "generated_at": "2026-09-27T18:50:25+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 2,
+  "sources": [
+    {
+      "source_id": "sec_nvda_10q",
+      "label": "NVDA 10-Q filed 2026-08-26",
+      "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000075/nvda-20260726.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "nvda_results_1",
+      "label": "NVIDIA Announces Financial Results for Second Quarter ...",
+      "url": "https://www.sec.gov/Archives/edgar/data/1045810/000104581026000073/q2fy27pr.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_products",
+      "title": "Business model, products and applications",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Business model",
+          "text": "NVIDIA describes itself as a data center-scale AI infrastructure company, with Compute & Networking and Graphics as its two operating segments.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "NVIDIA is now a data center-scale AI infrastructure company reshaping all industries. Our two operating segments are “Compute & Networking” and “Graphics.”"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Products and applications",
+          "text": "The filing says Blackwell accounted for the majority of system shipments; it also describes accelerated computing and AI solutions, automotive platforms, and autonomous and electric vehicle solutions including software.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "Blackwell continued to account for the majority of our system shipments."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Applications",
+          "text": "The company says its GPU architecture supports scientific computing, AI, data science, autonomous vehicles, robotics, and digital twin applications.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "NVIDIA has leveraged its GPU architecture to create platforms for scientific computing, AI, data science, autonomous vehicles, robotics, and digital twin applications."
+          }
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Revenue by market platform (in millions)",
+          "cols": [
+            "Market platform",
+            "Three months ended Jul 26, 2026",
+            "Six months ended Jul 26, 2026"
+          ],
+          "rows": [
+            {
+              "id": "datacenter",
+              "cells": [
+                "Data Center",
+                "$89,023",
+                "$164,269"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Data Center | $89,023 | $41,096 | $164,269 | $80,208"
+              }
+            },
+            {
+              "id": "hyperscale",
+              "cells": [
+                "Hyperscale",
+                "$48,710",
+                "$91,761"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Hyperscale | 48,710 | 24,168 | 91,761 | 46,428"
+              }
+            },
+            {
+              "id": "acie",
+              "cells": [
+                "AI Clouds, Industrial, & Enterprise",
+                "$40,313",
+                "$72,508"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "AI Clouds, Industrial, & Enterprise | 40,313 | 16,928 | 72,508 | 33,780"
+              }
+            },
+            {
+              "id": "edge",
+              "cells": [
+                "Edge Computing",
+                "$7,198",
+                "$13,568"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Edge Computing | 7,198 | 5,647 | 13,568 | 10,597"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Reported demand drivers",
+          "text": "Management attributed revenue growth in the second quarter and first half of fiscal 2027 to data center products for accelerated computing and AI solutions.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "Revenue growth in the second quarter and the first half of fiscal year 2027 was driven by data center products for accelerated computing and AI solutions."
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customers, channels and buyer archetypes",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Documented direct and indirect customers",
+          "text": "Direct customers include AIBs, distributors, ODMs, OEMs, CSPs, AI model makers, and system integrators. Indirect customers include CSPs, AI clouds, AI model makers, enterprises, and public sector entities.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "We refer to indirect customers as those who purchase products through our direct customers; indirect customers include CSPs, AI clouds, AI model makers, enterprises, and public sector entities."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Customer concentration",
+          "text": "One direct customer represented 16% of total revenue in the three months ended Jul 26, 2026; three direct customers represented 16%, 15%, and 13% in the six months ended Jul 26, 2026. The filing does not name these customers in the supplied excerpt.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "For the second quarter of fiscal year 2027, one direct customer represented 16% of total revenue"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Inferred buyer archetypes",
+          "text": "Inferred archetypes from the disclosed customer categories: cloud infrastructure buyers, AI model builders, enterprise and public-sector purchasers, and channel/system integration partners. These are category-level archetypes, not identified customers.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "indirect customers include CSPs, AI clouds, AI model makers, enterprises, and public sector entities."
+          }
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest-quarter and first-half income statement",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Income statement (in millions, except per-share data)",
+          "cols": [
+            "Line item",
+            "Three months ended Jul 26, 2026",
+            "Six months ended Jul 26, 2026"
+          ],
+          "rows": [
+            {
+              "id": "revenue",
+              "cells": [
+                "Revenue",
+                "$96,221",
+                "$177,837"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Revenue | $96,221 | $46,743 | $177,837 | $90,805"
+              }
+            },
+            {
+              "id": "gross_profit",
+              "cells": [
+                "Gross profit",
+                "$72,142",
+                "$133,299"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Gross profit | 72,142 | 33,853 | 133,299 | 60,521"
+              }
+            },
+            {
+              "id": "operating_expenses",
+              "cells": [
+                "Total operating expenses",
+                "$8,408",
+                "$16,029"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Total operating expenses | 8,408 | 5,413 | 16,029 | 10,443"
+              }
+            },
+            {
+              "id": "operating_income",
+              "cells": [
+                "Operating income",
+                "$63,734",
+                "$117,270"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Operating income | 63,734 | 28,440 | 117,270 | 50,078"
+              }
+            },
+            {
+              "id": "pretax_income",
+              "cells": [
+                "Income before income tax",
+                "$71,507",
+                "$141,410"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Income before income tax | 71,507 | 31,206 | 141,410 | 53,117"
+              }
+            },
+            {
+              "id": "income_tax",
+              "cells": [
+                "Income tax expense",
+                "$11,819",
+                "$23,400"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Income tax expense | 11,819 | 4,784 | 23,400 | 7,920"
+              }
+            },
+            {
+              "id": "net_income",
+              "cells": [
+                "Net income",
+                "$59,688",
+                "$118,010"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Net income | $59,688 | $26,422 | $118,010 | $45,197"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cash_balance_sheet",
+      "title": "Cash, cash flow and debt",
+      "category": "balance_sheet",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Selected balance-sheet facts (in millions)",
+          "cols": [
+            "Item",
+            "Jul 26, 2026",
+            "Jan 25, 2026"
+          ],
+          "rows": [
+            {
+              "id": "cash",
+              "cells": [
+                "Cash and cash equivalents",
+                "$22,443",
+                "$10,605"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Cash and cash equivalents | $22,443 | $10,605"
+              }
+            },
+            {
+              "id": "marketable_debt",
+              "cells": [
+                "Marketable debt securities",
+                "$34,143",
+                "$39,065"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Marketable debt securities | 34,143 | 39,065"
+              }
+            },
+            {
+              "id": "short_debt",
+              "cells": [
+                "Short-term debt",
+                "$1,000",
+                "$999"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Short-term debt | 1,000 | 999"
+              }
+            },
+            {
+              "id": "long_debt",
+              "cells": [
+                "Long-term debt",
+                "$32,366",
+                "$7,469"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Total long-term portion | $32,366 | $7,469"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Cash flows for the six months ended Jul 26, 2026 (in millions)",
+          "cols": [
+            "Item",
+            "Amount"
+          ],
+          "rows": [
+            {
+              "id": "operating_cash_flow",
+              "cells": [
+                "Net cash provided by operating activities",
+                "$74,421"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Net cash provided by operating activities | 74,421 | 42,779"
+              }
+            },
+            {
+              "id": "investing_cash_flow",
+              "cells": [
+                "Net cash used in investing activities",
+                "$(35,124)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Net cash used in investing activities | (35,124) | (12,343)"
+              }
+            },
+            {
+              "id": "capital_spending",
+              "cells": [
+                "Purchases related to property and equipment and intangible assets",
+                "$(4,434)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Purchases related to property and equipment and intangible assets | (4,434) | (3,122)"
+              }
+            },
+            {
+              "id": "debt_issuance",
+              "cells": [
+                "Proceeds related to issuance of debt, net of costs",
+                "$24,896"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Proceeds related to issuance of debt, net of costs | 24,896 | —"
+              }
+            },
+            {
+              "id": "ending_cash",
+              "cells": [
+                "Cash and cash equivalents at end of period",
+                "$22,443"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_nvda_10q",
+                "quote": "Cash and cash equivalents at end of period | $22,443 | $11,639"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers, outlook and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Product transition and supply",
+          "text": "The filing says Vera Rubin began production shipments in the third quarter of fiscal 2027, while NVIDIA expected to ship both Blackwell and Rubin systems and was experiencing certain supply constraints.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "Our next-generation Data Center architecture, Vera Rubin, began production shipments in the third quarter of fiscal year 2027."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Supply commitments",
+          "text": "Supply and capacity commitments totaled $279 billion as of Jul 26, 2026, up from $119 billion last quarter; the filing says changes to supplier agreements may result in additional costs.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "increasing supply commitments from $119 billion last quarter to $279 billion as of July 26, 2026."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Company outlook",
+          "text": "For the third quarter of fiscal 2027, NVIDIA guided to revenue of $108.0 billion, plus or minus 2%, and said its outlook assumed no Data Center compute revenue from China.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "nvda_results_1",
+            "quote": "Revenue is expected to be $108.0 billion, plus or minus 2%. NVIDIA is not assuming any Data Center compute revenue from China in its outlook."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Concentration and estimation risk",
+          "text": "NVIDIA reports revenue concentration among a limited number of direct and indirect customers and cautions that demand estimates can be inaccurate, creating volatility in revenue or supply levels.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_nvda_10q",
+            "quote": "Demand estimates for our products can be inaccurate and create volatility in our revenue or supply levels."
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 31
+  },
+  "usage": {
+    "input_tokens": 16188,
+    "cached_input_tokens": 0,
+    "output_tokens": 4365,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.0038013,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.0238013
+  }
+}

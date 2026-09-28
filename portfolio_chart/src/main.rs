@@ -29,7 +29,7 @@ struct Cli {
     arg: Option<String>,
 }
 
-const SCREENS: &[&str] = &["chart", "canslim", "dossier", "search"];
+const SCREENS: &[&str] = &["chart", "canslim", "dossier", "earnings", "search"];
 
 /// Positional parse of everything after argv[0]. Empty strings are treated
 /// as absent (Lua passes "" for "no explicit colour").
@@ -70,6 +70,7 @@ fn main() {
     let res = match cli.screen.as_str() {
         "canslim" => screens::canslim::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
         "dossier" => screens::dossier::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
+        "earnings" => screens::earnings_report::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
         "search" => screens::search::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
         _ => screens::chart::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
     };

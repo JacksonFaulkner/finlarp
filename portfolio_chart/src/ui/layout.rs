@@ -9,17 +9,19 @@
 //                  returns the *inner* content areas to draw into.
 //   popup()        centered overlay rect
 
+use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::symbols::merge::MergeStrategy;
 use ratatui::text::Line;
 use ratatui::widgets::Block;
-use ratatui::Frame;
 
 use crate::ui::theme::Theme;
 
 /// Areas of the standard master/detail screen:
 ///
-///   ┌ header ───────────────────────────────┐
+///     header
+///     tabs (optional one-row SectionTabs strip)
+///   ┌ nav ─────┬ detail ────────────────────┐
 ///   │ nav      │ detail                     │
 ///   ├──────────┴────────────────────────────┤
 ///   │ source bar                            │
@@ -27,6 +29,8 @@ use crate::ui::theme::Theme;
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Panes {
     pub header: Rect,
+    /// Row for a SectionTabs strip between header and box (0 high when unused).
+    pub tabs: Rect,
     pub nav: Rect,
     pub detail: Rect,
     pub source: Rect,
@@ -41,11 +45,19 @@ pub struct PaneOpts {
     pub source_height: u16,
     pub header_height: u16,
     pub footer_height: u16,
+    /// Rows for a tab strip under the header; 0 = none.
+    pub tabs_height: u16,
 }
 
 impl Default for PaneOpts {
     fn default() -> Self {
-        Self { nav_width: 24, source_height: 3, header_height: 1, footer_height: 1 }
+        Self {
+            nav_width: 24,
+            source_height: 3,
+            header_height: 1,
+            footer_height: 1,
+            tabs_height: 0,
+        }
     }
 }
 
@@ -72,14 +84,22 @@ pub struct FrameTitles<'a> {
 /// Split `area` into `Panes` (outer rects, no borders drawn).
 /// Heights/widths are clamped by the layout solver, so tiny areas are safe.
 pub fn panes(area: Rect, opts: PaneOpts) -> Panes {
-    let [header, body, source, footer] = area.layout(&Layout::vertical([
+    let [header, tabs, body, source, footer] = area.layout(&Layout::vertical([
         Constraint::Length(opts.header_height),
+        Constraint::Length(opts.tabs_height),
         Constraint::Fill(1),
         Constraint::Length(opts.source_height),
         Constraint::Length(opts.footer_height),
     ]));
     let (nav, detail) = split_nav(body, opts.nav_width, 0);
-    Panes { header, nav, detail, source, footer }
+    Panes {
+        header,
+        tabs,
+        nav,
+        detail,
+        source,
+        footer,
+    }
 }
 
 /// nav | detail, with `overlap` shared columns; nav_width 0 = no nav column.
@@ -101,25 +121,48 @@ fn split_nav(body: Rect, nav_width: u16, overlap: i16) -> (Rect, Rect) {
 /// `source_height` counts the source block's own rows including its bottom
 /// border (its top border is the detail pane's bottom), so the default of 3
 /// gives two content lines.
-pub fn render_frame<'a>(frame: &mut Frame, area: Rect, opts: PaneOpts, titles: &FrameTitles<'a>, theme: &Theme) -> Panes {
-    let [header, body, footer] = area.layout(&Layout::vertical([
+pub fn render_frame<'a>(
+    frame: &mut Frame,
+    area: Rect,
+    opts: PaneOpts,
+    titles: &FrameTitles<'a>,
+    theme: &Theme,
+) -> Panes {
+    let [header, tabs, body, footer] = area.layout(&Layout::vertical([
         Constraint::Length(opts.header_height),
+        Constraint::Length(opts.tabs_height),
         Constraint::Fill(1),
         Constraint::Length(opts.footer_height),
     ]));
     // the source block's top border overlaps the main blocks' bottom border
     let (main, source) = if opts.source_height > 0 {
         let [m, s] = body.layout(
-            &Layout::vertical([Constraint::Fill(1), Constraint::Length(opts.source_height + 1)]).spacing(-1),
+            &Layout::vertical([
+                Constraint::Fill(1),
+                Constraint::Length(opts.source_height + 1),
+            ])
+            .spacing(-1),
         );
         (m, s)
     } else {
-        (body, Rect { height: 0, y: body.bottom(), ..body })
+        (
+            body,
+            Rect {
+                height: 0,
+                y: body.bottom(),
+                ..body
+            },
+        )
     };
     let (nav, detail) = split_nav(main, opts.nav_width, 1);
 
     let pane = |title: &Line<'a>, focused: bool| pane_block(title, focused, theme);
-    let mut out = Panes { header, footer, ..Panes::default() };
+    let mut out = Panes {
+        header,
+        tabs,
+        footer,
+        ..Panes::default()
+    };
     if nav.width > 0 {
         let b = pane(&titles.nav, titles.focus == Focus::Nav);
         out.nav = b.inner(nav);
@@ -127,8 +170,13 @@ pub fn render_frame<'a>(frame: &mut Frame, area: Rect, opts: PaneOpts, titles: &
     } else {
         out.nav = Rect { width: 0, ..nav };
     }
-    let b = pane(&titles.detail, titles.focus == Focus::Detail)
-        .title_top(titles.detail_right.clone().style(theme.dim()).right_aligned());
+    let b = pane(&titles.detail, titles.focus == Focus::Detail).title_top(
+        titles
+            .detail_right
+            .clone()
+            .style(theme.dim())
+            .right_aligned(),
+    );
     out.detail = b.inner(detail);
     frame.render_widget(b, detail);
     if source.height > 0 {
@@ -143,7 +191,9 @@ pub fn render_frame<'a>(frame: &mut Frame, area: Rect, opts: PaneOpts, titles: &
 
 /// One bordered pane of the standard frame; borders merge with neighbours.
 fn pane_block<'a>(title: &Line<'a>, focused: bool, theme: &Theme) -> Block<'a> {
-    let mut t = title.clone().style(if focused { theme.accent() } else { theme.dim() });
+    let mut t = title
+        .clone()
+        .style(if focused { theme.accent() } else { theme.dim() });
     // breathing room between the corner and the title text
     if t.width() > 0 {
         t.spans.insert(0, " ".into());
@@ -158,31 +208,49 @@ fn pane_block<'a>(title: &Line<'a>, focused: bool, theme: &Theme) -> Block<'a> {
 
 /// Centered popup rect of the given size, clamped to `area`.
 pub fn popup(area: Rect, width: u16, height: u16) -> Rect {
-    area.centered(Constraint::Length(width.min(area.width)), Constraint::Length(height.min(area.height)))
+    area.centered(
+        Constraint::Length(width.min(area.width)),
+        Constraint::Length(height.min(area.height)),
+    )
 }
 
 /// Centered popup sized as a percentage of `area`.
 pub fn popup_pct(area: Rect, width_pct: u16, height_pct: u16) -> Rect {
-    area.centered(Constraint::Percentage(width_pct.min(100)), Constraint::Percentage(height_pct.min(100)))
+    area.centered(
+        Constraint::Percentage(width_pct.min(100)),
+        Constraint::Percentage(height_pct.min(100)),
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ratatui::backend::TestBackend;
     use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
 
     fn draw(w: u16, h: u16, opts: PaneOpts) -> (Terminal<TestBackend>, Panes) {
         let mut t = Terminal::new(TestBackend::new(w, h)).unwrap();
         let mut panes = Panes::default();
-        let titles = FrameTitles { nav: "nav".into(), detail: "detail".into(), source: "src".into(), ..Default::default() };
-        t.draw(|f| panes = render_frame(f, f.area(), opts, &titles, &Theme::default())).unwrap();
+        let titles = FrameTitles {
+            nav: "nav".into(),
+            detail: "detail".into(),
+            source: "src".into(),
+            ..Default::default()
+        };
+        t.draw(|f| panes = render_frame(f, f.area(), opts, &titles, &Theme::default()))
+            .unwrap();
         (t, panes)
     }
 
     #[test]
     fn panes_without_nav() {
-        let p = panes(Rect::new(0, 0, 80, 20), PaneOpts { nav_width: 0, ..Default::default() });
+        let p = panes(
+            Rect::new(0, 0, 80, 20),
+            PaneOpts {
+                nav_width: 0,
+                ..Default::default()
+            },
+        );
         assert_eq!(p.nav.width, 0);
         assert_eq!(p.detail.width, 80);
         assert_eq!(p.header.height, 1);
@@ -192,9 +260,20 @@ mod tests {
 
     #[test]
     fn frame_merges_borders() {
-        let (t, p) = draw(40, 12, PaneOpts { nav_width: 10, ..Default::default() });
+        let (t, p) = draw(
+            40,
+            12,
+            PaneOpts {
+                nav_width: 10,
+                ..Default::default()
+            },
+        );
         let buf = t.backend().buffer();
-        let row = |y: u16| (0..40).map(|x| buf[(x, y)].symbol().to_string()).collect::<String>();
+        let row = |y: u16| {
+            (0..40)
+                .map(|x| buf[(x, y)].symbol().to_string())
+                .collect::<String>()
+        };
         // top border of the box (row 1): nav/detail junction
         assert!(row(1).starts_with("┌ nav ─"), "{}", row(1));
         assert_eq!(buf[(9, 1)].symbol(), "┬");
@@ -214,9 +293,25 @@ mod tests {
     fn frame_tiny_and_no_nav() {
         for (w, h) in [(10, 3), (1, 1), (0, 0), (3, 10)] {
             draw(w, h, PaneOpts::default());
-            draw(w, h, PaneOpts { nav_width: 0, source_height: 0, ..Default::default() });
+            draw(
+                w,
+                h,
+                PaneOpts {
+                    nav_width: 0,
+                    source_height: 0,
+                    ..Default::default()
+                },
+            );
         }
-        let (_, p) = draw(30, 10, PaneOpts { nav_width: 0, source_height: 0, ..Default::default() });
+        let (_, p) = draw(
+            30,
+            10,
+            PaneOpts {
+                nav_width: 0,
+                source_height: 0,
+                ..Default::default()
+            },
+        );
         assert_eq!(p.nav.width, 0);
         assert_eq!(p.detail, Rect::new(1, 2, 28, 6));
     }

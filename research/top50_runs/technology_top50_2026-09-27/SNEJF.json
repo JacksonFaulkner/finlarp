@@ -1,0 +1,240 @@
+{
+  "ticker": "SNEJF",
+  "company": "SNEJF",
+  "market_cap_usd": 138826661888,
+  "as_of": "2026-09-14",
+  "filing": {
+    "form": "6-K",
+    "filed": "2026-09-14",
+    "accession": "0001104659-26-107340",
+    "url": "https://www.sec.gov/Archives/edgar/data/313838/000110465926107340/tm2625084d1_6k.htm"
+  },
+  "generated_at": "2026-09-27T19:16:14+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 1,
+  "sources": [
+    {
+      "source_id": "snejf_business_2",
+      "label": "Sony Group Corporation (SNEJF)",
+      "url": "https://finance.yahoo.com/quote/SNEJF/",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Operating scope",
+          "text": "Sony develops, manufactures, supplies, and sells electronic equipment and devices, and also operates across gaming, music, pictures, entertainment technology, and imaging and sensing.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "snejf_business_2",
+            "quote": "develops, designs, produces, manufactures, supplies, and sells electronic equipment, instruments, and devices"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Content and services",
+          "text": "The described activities also include producing and distributing entertainment content, operating networks and direct-to-consumer distribution services, and providing financial services.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "snejf_business_2",
+            "quote": "operates television networks and direct-to-consumer distribution services"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Products and activities described",
+          "cols": [
+            "Area",
+            "Reported description"
+          ],
+          "rows": [
+            {
+              "id": "electronics",
+              "cells": [
+                "Electronics",
+                "Electronic equipment, instruments, and devices for consumer, professional, and industrial use"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "for consumer, professional, and industrial use"
+              }
+            },
+            {
+              "id": "imaging",
+              "cells": [
+                "Imaging",
+                "Smartphones and image sensors"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "sells smartphones and image sensors"
+              }
+            },
+            {
+              "id": "entertainment",
+              "cells": [
+                "Entertainment",
+                "Music software, performances and merchandise, animation, games, motion pictures, and television programs"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "music software, performances and merchandise"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End markets and demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Reported reach and applications",
+          "rows": [
+            {
+              "id": "geographic_reach",
+              "label": "Geographic reach",
+              "value": "Japan, the United States, Europe, China, the Asia-Pacific, and internationally",
+              "status": "reported",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "in Japan, the United States, Europe, China, the Asia-Pacific, and internationally"
+              }
+            },
+            {
+              "id": "application_types",
+              "label": "Electronics use cases",
+              "value": "Consumer, professional, and industrial use",
+              "status": "reported",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "for consumer, professional, and industrial use"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customer and channel facts",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented facts and inferred buyer archetypes",
+          "cols": [
+            "Evidence class",
+            "Fact or archetype"
+          ],
+          "rows": [
+            {
+              "id": "documented_channel",
+              "cells": [
+                "Documented channel",
+                "Television networks and direct-to-consumer distribution services are described."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "operates television networks and direct-to-consumer distribution services"
+              }
+            },
+            {
+              "id": "consumer_archetype",
+              "cells": [
+                "Inferred buyer archetype",
+                "Individual consumers are a plausible buyer group for products identified for consumer use."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "for consumer, professional, and industrial use"
+              }
+            },
+            {
+              "id": "professional_archetype",
+              "cells": [
+                "Inferred buyer archetype",
+                "Professional users are a plausible buyer group for products identified for professional use."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "snejf_business_2",
+                "quote": "for consumer, professional, and industrial use"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest filing: financial and cash/debt facts",
+      "category": "financials",
+      "blocks": []
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Potential drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Potential driver — inferred",
+          "text": "The combination of electronics, imaging, gaming, and content activities may provide multiple business drivers; the supplied excerpts do not quantify their relative contribution or outlook.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "snejf_business_2",
+            "quote": "operates through Game & Network Services, Music, Pictures, Entertainment Technology & Services, and Imaging & Sensing Solutions"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Potential risk — inferred",
+          "text": "Operating across multiple businesses and regions may create execution complexity; this is an inference, not a risk quantified in the supplied 6-K excerpt.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "snejf_business_2",
+            "quote": "in Japan, the United States, Europe, China, the Asia-Pacific, and internationally"
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 2,
+    "sourced_items": 12
+  },
+  "usage": {
+    "input_tokens": 12133,
+    "cached_input_tokens": 2190,
+    "output_tokens": 5326,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0036792,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0436792
+  }
+}

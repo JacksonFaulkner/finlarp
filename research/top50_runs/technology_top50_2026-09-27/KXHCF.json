@@ -1,0 +1,502 @@
+{
+  "ticker": "KXHCF",
+  "company": "KXHCF",
+  "market_cap_usd": 191059066880,
+  "as_of": null,
+  "filing": null,
+  "generated_at": "2026-09-27T19:18:40+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 5,
+  "sources": [
+    {
+      "source_id": "kxhcf_business_1",
+      "label": "Kioxia Holdings (KXHCF) Stock Price & Overview",
+      "url": "https://stockanalysis.com/quote/otc/KXHCF/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "kxhcf_business_2",
+      "label": "KXHCF - KIOXIA HLDGS CORP | Overview | OTC Markets",
+      "url": "https://www.otcmarkets.com/stock/KXHCF",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "kxhcf_business_3",
+      "label": "Kioxia Holdings Corporation (KXHCF)",
+      "url": "https://finance.yahoo.com/quote/KXHCF/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "kxhcf_results_1",
+      "label": "Investor Relations | KIOXIA Holdings Corporation",
+      "url": "https://www.kioxia-holdings.com/en-jp/ir.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "kxhcf_results_3",
+      "label": "KXHCF | Kioxia Holdings Corp. Quarterly Income Statement | MarketWatch",
+      "url": "https://www.marketwatch.com/investing/stock/kxhcf/financials/income/quarter",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Operations",
+          "rows": [
+            {
+              "id": "memory_business",
+              "label": "Operating business",
+              "value": "Research, develops, manufactures, and sells memory and SSD products.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "manufactures and sells memory and solid-state drives (SSDs)"
+              }
+            },
+            {
+              "id": "holding_role",
+              "label": "Holding-company role",
+              "value": "Supervises subsidiaries involved in memory storage and formulates group management strategies.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_2",
+                "quote": "supervision and management of its subsidiaries that deals with memory storage business"
+              }
+            },
+            {
+              "id": "geography",
+              "label": "Geographic reach",
+              "value": "Japan and international markets.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "in Japan and internationally"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Product categories and stated applications",
+          "cols": [
+            "Product/category",
+            "Applications or market described"
+          ],
+          "rows": [
+            {
+              "id": "flash",
+              "cells": [
+                "3D flash memory / BiCS FLASH",
+                "Flash-memory technology product"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "3d flash memory/ BiCS FLASH"
+              }
+            },
+            {
+              "id": "embedded",
+              "cells": [
+                "UFS and e-MMC",
+                "Consumer, industrial, and automotive applications"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "UFS & e-MMC for consumer, industrial, and automotive applications"
+              }
+            },
+            {
+              "id": "other_memory",
+              "cells": [
+                "SLD NAND flash memory and XL-FLASH storage-class memory",
+                "Applications not specified in the supplied excerpt"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "SLD (Single-Level Cell) NAND flash Memory; and XL-FLASH storage class memory"
+              }
+            },
+            {
+              "id": "ssds",
+              "cells": [
+                "Enterprise, cloud data center, and client SSDs",
+                "Enterprise, cloud data center, and client markets"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "enterprise, cloud data center, and client SSDs"
+              }
+            },
+            {
+              "id": "retail",
+              "cells": [
+                "SSDs, SD memory cards, and other retail products",
+                "Retail"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_1",
+                "quote": "SSDs, SD memory cards, and other retail products"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_markets",
+      "title": "End-market demand signals",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Disclosed signals",
+          "rows": [
+            {
+              "id": "ai_strategy",
+              "label": "Company strategic framing",
+              "value": "Investor Day materials frame memory as contributing to an AI-driven society.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_1",
+                "quote": "Creating New Value from “Memory” to Advance the AI-Driven Society"
+              }
+            },
+            {
+              "id": "on_device_ai",
+              "label": "On-device AI",
+              "value": "Kioxia described UFS 5.0 embedded flash samples as enabling on-device AI.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_1",
+                "quote": "UFS 5.0 embedded flash memory solutions are now available"
+              }
+            },
+            {
+              "id": "data_center",
+              "label": "AI and hyperscale environments",
+              "value": "A company announcement described next-generation E1.S SSDs for AI and hyperscale environments.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_1",
+                "quote": "Next-Generation E1.S SSDs for AI and Hyperscale Environments"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customer_map",
+      "title": "Customers and buyer map",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented facts versus inferred buyer archetypes",
+          "cols": [
+            "Classification",
+            "Fact or archetype"
+          ],
+          "rows": [
+            {
+              "id": "documented_sales",
+              "cells": [
+                "Documented company description",
+                "The company manufactures and sells memory and SSDs internationally."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "manufactures and sells memory and solid-state drives (SSDs) in Japan and internationally"
+              }
+            },
+            {
+              "id": "customer_disclosure",
+              "cells": [
+                "Named customers / channel partners",
+                "No named customer or channel relationship is identified in the supplied company-description excerpts."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "kxhcf_business_2",
+                "quote": "supervision and management of its subsidiaries that deals with memory storage business"
+              }
+            },
+            {
+              "id": "archetype_datacenter",
+              "cells": [
+                "Inferred buyer archetype",
+                "Enterprise and cloud-data-center SSD buyers"
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "enterprise, cloud data center, and client SSDs"
+              }
+            },
+            {
+              "id": "archetype_devices",
+              "cells": [
+                "Inferred buyer archetype",
+                "Consumer, industrial, and automotive device makers or integrators"
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "UFS & e-MMC for consumer, industrial, and automotive applications"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials",
+      "title": "Latest supplied financial and cash/debt facts",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Quarterly income statement — period labels as reported",
+          "cols": [
+            "Item",
+            "30-Jun-2026"
+          ],
+          "rows": [
+            {
+              "id": "revenue",
+              "cells": [
+                "Sales/Revenue",
+                "1.77T"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "Sales/Revenue Sales/Revenue | 342.8B | 448.35B | 543.63B | 1T | 1.77T"
+              }
+            },
+            {
+              "id": "cogs",
+              "cells": [
+                "COGS incl. D&A",
+                "387.05B"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "COGS) incl. D&A | 271.62B | 326.21B | 366.99B | 359.91B | 387.05B"
+              }
+            },
+            {
+              "id": "gross_income",
+              "cells": [
+                "Gross Income",
+                "1.38T"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "Gross Income Gross Income | 71.18B | 122.14B | 176.64B | 642.95B | 1.38T"
+              }
+            },
+            {
+              "id": "sga",
+              "cells": [
+                "SG&A Expense",
+                "71.73B"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "SG&A Expense SG&A Expense | 29.85B | 36.24B | 33.85B | 46.65B | 71.73B"
+              }
+            },
+            {
+              "id": "interest",
+              "cells": [
+                "Interest Expense",
+                "52.8B"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "Interest Expense Interest Expense | 19.86B | 32.25B | 24.25B | 24.98B | 52.8B"
+              }
+            },
+            {
+              "id": "pretax",
+              "cells": [
+                "Pretax Income",
+                "1.23T"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "Pretax Income Pretax Income | 27.44B | 56.42B | 121.59B | 577.71B | 1.23T"
+              }
+            },
+            {
+              "id": "tax",
+              "cells": [
+                "Income Tax",
+                "392.55B"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "Income Tax Income Tax | 9.02B | 16.05B | 33.93B | 170.61B | 392.55B"
+              }
+            },
+            {
+              "id": "net_income",
+              "cells": [
+                "Consolidated Net Income",
+                "842.17B"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_results_3",
+                "quote": "Consolidated Net Income Consolidated Net Income | 18.27B | 40.67B | 87.81B | 407.74B | 842.17B"
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Balance-sheet and cash-flow snapshot",
+          "rows": [
+            {
+              "id": "cash",
+              "label": "Total Cash (mrq)",
+              "value": "470.71B",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "Total Cash (mrq) 470.71B"
+              }
+            },
+            {
+              "id": "debt_equity",
+              "label": "Total Debt/Equity (mrq)",
+              "value": "89.57%",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "Total Debt/Equity (mrq) 89.57%"
+              }
+            },
+            {
+              "id": "levered_fcf",
+              "label": "Levered Free Cash Flow (ttm)",
+              "value": "186.85B",
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_3",
+                "quote": "Levered Free Cash Flow (ttm) 186.85B"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Source-grounded considerations",
+          "cols": [
+            "Type",
+            "Consideration"
+          ],
+          "rows": [
+            {
+              "id": "product_launches",
+              "cells": [
+                "Potential driver",
+                "Recent announcements include PCIe 6.0 enterprise SSDs utilizing a new BiCS FLASH generation."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "kxhcf_business_1",
+                "quote": "first PCIe 6.0 enterprise SSDs utilizing 10th Generation BiCS FLASH 3D Memory"
+              }
+            },
+            {
+              "id": "ai_alignment",
+              "cells": [
+                "Potential driver",
+                "AI-related product positioning is visible in announcements for on-device AI and hyperscale environments."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "kxhcf_business_1",
+                "quote": "Enable On-Device AI"
+              }
+            },
+            {
+              "id": "limited_disclosure",
+              "cells": [
+                "Risk / disclosure limitation",
+                "OTC Markets describes Pink Limited securities as having limited issuer involvement and limited availability of disclosure or financial information."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_2",
+                "quote": "limited to no issuer involvement"
+              }
+            },
+            {
+              "id": "caution",
+              "cells": [
+                "Risk / market caution",
+                "OTC Markets says these securities may not support their U.S. market and advises caution."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "kxhcf_business_2",
+                "quote": "may not support their U.S. market"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 0,
+    "sourced_items": 30
+  },
+  "usage": {
+    "input_tokens": 16586,
+    "cached_input_tokens": 9385,
+    "output_tokens": 8121,
+    "exa_search_calls": 6,
+    "exa_content_pages": 18,
+    "estimated_openai_usd": 0.00487445,
+    "estimated_exa_usd": 0.06,
+    "estimated_total_usd": 0.06487445
+  }
+}

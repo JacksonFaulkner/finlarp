@@ -1,7 +1,7 @@
 local M = {}
 
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h")
-local env_file = plugin_dir .. "/../../../EtradePythonClient/.env"
+local env_file = plugin_dir .. "/.env"
 
 local run -- forward-declared: start_reauth retries through `run` itself
 
@@ -571,7 +571,7 @@ end
 function M.show_canslim(symbol)
   local function open(sym)
     vim.notify("security_spread: fetching " .. sym .. " canslim...", vim.log.levels.INFO)
-    run("services/canslim.py", { sym, "--force" }, function(ok, data)
+    run("views/canslim.py", { sym, "--force" }, function(ok, data)
       if not ok then
         vim.notify("security_spread: canslim fetch failed: " .. tostring(data), vim.log.levels.ERROR)
         return
@@ -598,7 +598,7 @@ function M.pick_search(initial)
 end
 
 --- Opens the per-ticker research dossier TUI (portfolio_chart `dossier`
---- screen). Rebuilds services/dossier.py's cache first if it's missing,
+--- screen). Rebuilds views/dossier.py's cache first if it's missing,
 --- older than 12h, or older than the data it's built from; otherwise opens
 --- instantly. Prompts for a symbol if none given.
 --- @param symbol string|nil
@@ -606,7 +606,7 @@ function M.show_dossier(symbol)
   local function open(sym)
     sym = sym:upper()
     local chart = require("custom_plugins.security_spread.ui.portfolio_chart")
-    run("services/dossier.py", { sym, "--if-stale", "12" }, function(ok, data)
+    run("views/dossier.py", { sym, "--if-stale", "12" }, function(ok, data)
       if not ok then
         -- still open: the screen explains a missing cache itself
         vim.notify("security_spread: dossier build failed: " .. tostring(data), vim.log.levels.ERROR)

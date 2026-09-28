@@ -1,0 +1,578 @@
+{
+  "ticker": "MSFT",
+  "company": "MSFT",
+  "market_cap_usd": 3832843862016,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-K",
+    "filed": "2026-07-29",
+    "accession": "0001193125-26-323660",
+    "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm"
+  },
+  "generated_at": "2026-09-27T18:50:28+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 3,
+  "sources": [
+    {
+      "source_id": "sec_msft_10k",
+      "label": "MSFT 10-K filed 2026-07-29",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "msft_results_1",
+      "label": "EX-99.1",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323632/msft-ex99_1.htm",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "msft_results_2",
+      "label": "10-K",
+      "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526323660/msft-20260630.htm",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Overview",
+          "text": "Microsoft develops and supports software, services, devices, and solutions, including cloud services, support and consulting, and online advertising.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_msft_10k",
+            "quote": "We develop and support software, services, devices, and solutions"
+          }
+        },
+        {
+          "type": "table",
+          "title": "Operating segments",
+          "cols": [
+            "Segment",
+            "Reported scope"
+          ],
+          "rows": [
+            {
+              "id": "pbb",
+              "cells": [
+                "Productivity and Business Processes",
+                "Productivity, communication, and information services across devices and platforms"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "products and services in our portfolio of productivity, communication, and information services"
+              }
+            },
+            {
+              "id": "ic",
+              "cells": [
+                "Intelligent Cloud",
+                "Public, private, and hybrid server products and cloud services"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "public, private, and hybrid server products and cloud services"
+              }
+            },
+            {
+              "id": "mpc",
+              "cells": [
+                "More Personal Computing",
+                "Products and services that put customers at the center of their experience with Microsoft technology"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "products and services that put customers at the center of the experience with our technology"
+              }
+            },
+            {
+              "id": "scale",
+              "cells": [
+                "Cloud economics",
+                "Datacenter scale, aggregated demand, and multi-tenancy are described as lowering unit costs or improving utilization"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "three economies of scale: datacenters that deploy computational resources at significantly lower cost per unit"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Portfolio examples",
+          "cols": [
+            "Area",
+            "Reported products and applications"
+          ],
+          "rows": [
+            {
+              "id": "productivity",
+              "cells": [
+                "Productivity and business applications",
+                "Microsoft 365 Commercial and Consumer; LinkedIn; Dynamics 365"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Microsoft 365 Commercial products and cloud services"
+              }
+            },
+            {
+              "id": "cloud_dev",
+              "cells": [
+                "Cloud and development",
+                "Azure; GitHub; SQL Server; Windows Server; Visual Studio"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "including Azure and other cloud services"
+              }
+            },
+            {
+              "id": "personal",
+              "cells": [
+                "Personal computing and gaming",
+                "Windows, Surface, Xbox, game content and services"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Windows and Devices, including Windows OEM licensing"
+              }
+            },
+            {
+              "id": "azure_uses",
+              "cells": [
+                "Azure applications",
+                "Computing, networking, storage, mobile and web application services, AI, and Internet of Things"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "computing, networking, storage, mobile and web application services, AI, and Internet of Things"
+              }
+            },
+            {
+              "id": "dynamics_uses",
+              "cells": [
+                "Dynamics applications",
+                "Financial management, ERP, CRM, supply chain management, and low-code application development"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "financial management, enterprise resource planning (“ERP”), customer relationship management (“CRM”), and supply chain management"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand and revenue drivers",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed demand sensitivities",
+          "cols": [
+            "Area",
+            "Reported demand or revenue driver"
+          ],
+          "rows": [
+            {
+              "id": "azure_demand",
+              "cells": [
+                "Azure",
+                "Revenue mainly affected by consumption-based infrastructure-as-a-service and platform-as-a-service"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Azure revenue is mainly affected by infrastructure-as-a-service and platform-as-a-service consumption-based services."
+              }
+            },
+            {
+              "id": "m365_demand",
+              "cells": [
+                "Microsoft 365 Commercial",
+                "Installed-base growth, average revenue per user expansion, and shift from on-premises licenses to Microsoft 365"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "continued installed base growth and average revenue per user expansion"
+              }
+            },
+            {
+              "id": "windows_demand",
+              "cells": [
+                "Windows OEM",
+                "PC device-market volume, device mix, OEM customer mix, and channel inventory"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "In addition to computing device market volume"
+              }
+            },
+            {
+              "id": "gaming_demand",
+              "cells": [
+                "Xbox",
+                "Subscriptions, first- and third-party content sales, and advertising"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "XBOX revenue is mainly affected by subscriptions and sales of first- and third-party content, as well as advertising."
+              }
+            },
+            {
+              "id": "search_demand",
+              "cells": [
+                "Search advertising",
+                "User acquisition, understanding intent, and matching intent with relevant advertising content"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Growth depends on our ability to attract new users, understand intent, and match intent with relevant content"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customers, channels, and buyer archetypes",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented customer and channel facts",
+          "cols": [
+            "Type",
+            "Fact"
+          ],
+          "rows": [
+            {
+              "id": "direct_sales",
+              "cells": [
+                "Reported channel",
+                "Direct sales serve large multinational enterprises, public sector organizations, and small and medium-sized businesses."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Direct sales activities serve customers ranging from large multinational enterprises and public sector organizations to small and medium-sized businesses."
+              }
+            },
+            {
+              "id": "indirect_sales",
+              "cells": [
+                "Reported channel",
+                "Partners support the sale, deployment, and management of products and services worldwide."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "through a broad network of partners that support the sale, deployment, and management"
+              }
+            },
+            {
+              "id": "oem",
+              "cells": [
+                "Reported channel",
+                "OEMs license and preinstall certain Microsoft software on devices sold to end customers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "OEMs license and preinstall certain Microsoft software on devices that are sold to end customers."
+              }
+            },
+            {
+              "id": "licensing",
+              "cells": [
+                "Reported purchasing arrangements",
+                "Volume purchasing programs are tailored to large enterprises, mid-sized organizations, small businesses, educational institutions, and government entities."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "tailored to large enterprises, mid-sized organizations, small businesses, educational institutions, and government entities."
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Inferred buyer archetypes (not named customers)",
+          "cols": [
+            "Archetype",
+            "Basis for inference"
+          ],
+          "rows": [
+            {
+              "id": "cloud_it",
+              "cells": [
+                "Enterprise IT and development teams",
+                "Inferred potential Azure buyers from the disclosed intended users."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Azure is a comprehensive set of cloud services that offer developers, IT professionals, and enterprises"
+              }
+            },
+            {
+              "id": "business_ops",
+              "cells": [
+                "Organizations seeking business applications",
+                "Inferred potential Dynamics buyers from the disclosed organization types and application uses."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "for small and medium businesses, large organizations, and divisions of global enterprises"
+              }
+            },
+            {
+              "id": "end_users",
+              "cells": [
+                "Consumers and individual users",
+                "Inferred potential buyers/users of consumer productivity, devices, and gaming offerings."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Microsoft 365 Consumer is designed to increase personal productivity and creativity"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quarter_financials",
+      "title": "Latest quarter and disclosed debt instruments",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Three months ended June 30, 2026 (quarter; GAAP unless noted)",
+          "cols": [
+            "Measure",
+            "Reported value",
+            "Comparison"
+          ],
+          "rows": [
+            {
+              "id": "revenue",
+              "cells": [
+                "Revenue",
+                "$90.0 billion",
+                "Increased 18% year over year"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_1",
+                "quote": "Revenue was $90.0 billion and increased 18%"
+              }
+            },
+            {
+              "id": "operating_income",
+              "cells": [
+                "Operating income",
+                "$40.6 billion",
+                "Increased 18%"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_1",
+                "quote": "Operating income was $40.6 billion and increased 18%"
+              }
+            },
+            {
+              "id": "net_income",
+              "cells": [
+                "Net income",
+                "$35.8 billion",
+                "Increased 31% on a GAAP basis"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_1",
+                "quote": "Net income was $35.8 billion and increased 31% on a GAAP basis"
+              }
+            },
+            {
+              "id": "eps",
+              "cells": [
+                "Diluted earnings per share",
+                "$4.81",
+                "Increased 32% on a GAAP basis"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_1",
+                "quote": "Diluted earnings per share was $4.81 and increased 32% on a GAAP basis"
+              }
+            },
+            {
+              "id": "quarter_period",
+              "cells": [
+                "Period",
+                "Quarter ended June 30, 2026",
+                "Year-over-year comparisons are against the corresponding period of last fiscal year"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_1",
+                "quote": "for the quarter ended June 30, 2026"
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Registered debt securities (terms, not balance-sheet debt totals)",
+          "rows": [
+            {
+              "id": "notes_2028",
+              "label": "Registered notes",
+              "value": "3.125% Notes due 2028",
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_2",
+                "quote": "3.125% Notes due 2028"
+              }
+            },
+            {
+              "id": "notes_2033",
+              "label": "Registered notes",
+              "value": "2.625% Notes due 2033",
+              "status": "reported",
+              "evidence": {
+                "source_id": "msft_results_2",
+                "quote": "2.625% Notes due 2033"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed factors",
+          "cols": [
+            "Category",
+            "Factor"
+          ],
+          "rows": [
+            {
+              "id": "ai_cloud_driver",
+              "cells": [
+                "Driver",
+                "Microsoft identifies applying frontier AI capabilities and trusted platforms to improve decision-making, create value, and deliver business outcomes as an opportunity."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "improve decision-making, create new value, and deliver measurable business outcomes from AI."
+              }
+            },
+            {
+              "id": "datacenter_capacity",
+              "cells": [
+                "Execution risk",
+                "Datacenters depend on permitted land, predictable energy, networking supplies, and servers/components."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "depend on the availability of permitted and buildable land, predictable energy, networking supplies, and servers"
+              }
+            },
+            {
+              "id": "supplier_risk",
+              "cells": [
+                "Supply risk",
+                "The filing says there are few qualified suppliers for certain server and device components; disruption or limited availability could affect operations and manufacturing."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "There are few qualified suppliers for certain components of our servers and devices."
+              }
+            },
+            {
+              "id": "competition",
+              "cells": [
+                "Competitive risk",
+                "The filing cites intense competition, rapid technology change, and risk if products and services fail to appeal to businesses and consumers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "We face intense competition across all markets for our products and services"
+              }
+            },
+            {
+              "id": "ai_competition",
+              "cells": [
+                "AI risk",
+                "AI offerings compete with hyperscalers, open-source offerings, and frontier model providers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_msft_10k",
+                "quote": "Our AI offerings compete with AI products from hyperscalers, open-source offerings, and frontier model providers"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 34
+  },
+  "usage": {
+    "input_tokens": 14205,
+    "cached_input_tokens": 1095,
+    "output_tokens": 3944,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00329395,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02329395
+  }
+}

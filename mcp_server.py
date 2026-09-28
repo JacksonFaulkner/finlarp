@@ -28,16 +28,8 @@ from mcp.types import ToolAnnotations
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from services import (
-    sec_13f,
-    sec_earnings,
-    sec_events,
-    sec_financials,
-    sec_insiders,
-    sec_segments,
-    search as fts,
-    universe,
-)
+from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
+from views import search as fts
 
 D = universe.DATA_ROOT
 READ_ONLY = ToolAnnotations(readOnlyHint=True, openWorldHint=False)

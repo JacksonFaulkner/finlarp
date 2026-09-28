@@ -1,13 +1,13 @@
 """POC: pull every USPTO application where Marvell (or an acquired co) is applicant or assignee.
 
-Needs USPTO_API_KEY (repo-root .env). Writes raw/patents.jsonl, one slim row per application.
+Needs USPTO_API_KEY (plugin .env). Writes raw/patents.jsonl, one slim row per application.
 Pre-AIA (<2014) filings list inventors as applicants, hence the assignee clause.
 """
 import json, os, time, requests
 from pathlib import Path
 
 RAW = Path(__file__).parent / "raw"
-ENV = Path(__file__).resolve().parents[5] / ".env"
+ENV = Path(__file__).resolve().parents[2] / ".env"
 NAMES = ["Marvell*", "Cavium*", "Inphi*", "Aquantia*", "Innovium*", "\"Celestial AI\"", "XConn*", "Polariton*"]
 URL = "https://api.uspto.gov/api/v1/patent/applications/search"
 PAGE = 100

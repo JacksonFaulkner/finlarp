@@ -5,12 +5,12 @@
 //   SectionNav       the widget: `frame.render_stateful_widget(nav, area, &mut list)`
 //   SectionList::render  convenience wrapper around the two
 
+use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::layout::Rect;
 use ratatui::style::Stylize;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{HighlightSpacing, List, ListItem, ListState, StatefulWidget};
-use ratatui::Frame;
 
 use crate::model::Section;
 use crate::ui::text;
@@ -23,7 +23,9 @@ pub struct SectionList {
 
 impl SectionList {
     pub fn new() -> Self {
-        Self { state: ListState::default().with_selected(Some(0)) }
+        Self {
+            state: ListState::default().with_selected(Some(0)),
+        }
     }
     /// Selected index. May exceed the list length right after `next()`
     /// until the next render clamps it; use `selected_in(len)` when indexing.
@@ -57,8 +59,23 @@ impl SectionList {
         self.state.select(Some(i.min(len.saturating_sub(1))));
     }
 
-    pub fn render(&mut self, frame: &mut Frame, area: Rect, sections: &[Section], theme: &Theme, focused: bool) {
-        frame.render_stateful_widget(SectionNav { sections, theme, focused }, area, self);
+    pub fn render(
+        &mut self,
+        frame: &mut Frame,
+        area: Rect,
+        sections: &[Section],
+        theme: &Theme,
+        focused: bool,
+    ) {
+        frame.render_stateful_widget(
+            SectionNav {
+                sections,
+                theme,
+                focused,
+            },
+            area,
+            self,
+        );
     }
 }
 
@@ -86,7 +103,11 @@ impl StatefulWidget for SectionNav<'_> {
         state.clamp(self.sections.len());
         let inner = (area.width as usize).saturating_sub(SYMBOL_W);
         let items: Vec<ListItem> = self.sections.iter().map(|s| item(s, inner, th)).collect();
-        let hl = if self.focused { th.selected() } else { th.title() };
+        let hl = if self.focused {
+            th.selected()
+        } else {
+            th.title()
+        };
         let list = List::new(items)
             .style(th.base())
             .highlight_style(hl)
@@ -99,15 +120,27 @@ impl StatefulWidget for SectionNav<'_> {
 
 /// "● Title ......... badge", fitted to `width` columns.
 fn item<'a>(s: &Section, width: usize, th: &Theme) -> ListItem<'a> {
-    let marker = if s.new { Span::styled("● ", th.new_marker()) } else { Span::raw("  ") };
+    let marker = if s.new {
+        Span::styled("● ", th.new_marker())
+    } else {
+        Span::raw("  ")
+    };
     // the title yields to the badge (truncated with …), unless that would
     // leave the title under MIN_TITLE columns: then the badge is dropped
-    let badge_w = if s.badge.is_empty() { 0 } else { text::width(&s.badge) + 1 };
+    let badge_w = if s.badge.is_empty() {
+        0
+    } else {
+        text::width(&s.badge) + 1
+    };
     let room = width.saturating_sub(MARKER_W);
     let show_badge = badge_w > 0 && room >= badge_w + MIN_TITLE.min(text::width(&s.title));
     let title_w = if show_badge { room - badge_w } else { room };
     let title = text::fit(&s.title, title_w, false);
-    let badge = if show_badge { s.badge.clone() } else { String::new() };
+    let badge = if show_badge {
+        s.badge.clone()
+    } else {
+        String::new()
+    };
     let mut spans = vec![marker, Span::raw(title)];
     if !badge.is_empty() {
         spans.push(Span::raw(" "));
@@ -119,26 +152,44 @@ fn item<'a>(s: &Section, width: usize, th: &Theme) -> ListItem<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::style::Modifier;
-    use ratatui::Terminal;
 
     fn sections() -> Vec<Section> {
         vec![
-            Section { id: "a".into(), title: "Events".into(), new: true, badge: "3 new".into(), ..Default::default() },
-            Section { id: "b".into(), title: "Earnings & guidance".into(), ..Default::default() },
-            Section { id: "c".into(), title: "Holders".into(), badge: "A+".into(), ..Default::default() },
+            Section {
+                id: "a".into(),
+                title: "Events".into(),
+                new: true,
+                badge: "3 new".into(),
+                ..Default::default()
+            },
+            Section {
+                id: "b".into(),
+                title: "Earnings & guidance".into(),
+                ..Default::default()
+            },
+            Section {
+                id: "c".into(),
+                title: "Holders".into(),
+                badge: "A+".into(),
+                ..Default::default()
+            },
         ]
     }
 
     fn render(list: &mut SectionList, secs: &[Section], w: u16, h: u16, focused: bool) -> Buffer {
         let mut t = Terminal::new(TestBackend::new(w, h)).unwrap();
-        t.draw(|f| list.render(f, f.area(), secs, &Theme::default(), focused)).unwrap();
+        t.draw(|f| list.render(f, f.area(), secs, &Theme::default(), focused))
+            .unwrap();
         t.backend().buffer().clone()
     }
 
     fn row(b: &Buffer, y: u16) -> String {
-        (0..b.area.width).map(|x| b[(x, y)].symbol().to_string()).collect()
+        (0..b.area.width)
+            .map(|x| b[(x, y)].symbol().to_string())
+            .collect()
     }
 
     #[test]
@@ -147,19 +198,28 @@ mod tests {
         let b = render(&mut l, &sections(), 24, 5, true);
         assert_eq!(row(&b, 0), "▌ ● Events         3 new");
         assert!(row(&b, 2).trim_end().ends_with("A+"));
-        assert!(b[(4, 0)].modifier.contains(Modifier::REVERSED));
-        assert!(!b[(4, 1)].modifier.contains(Modifier::REVERSED));
+        assert!((b[(4, 0)].bg == Theme::default().sel_bg()));
+        assert!(!(b[(4, 1)].bg == Theme::default().sel_bg()));
         // unfocused: bold, not reversed
         let b = render(&mut l, &sections(), 24, 5, false);
         assert!(b[(4, 0)].modifier.contains(Modifier::BOLD));
-        assert!(!b[(4, 0)].modifier.contains(Modifier::REVERSED));
+        assert!(!(b[(4, 0)].bg == Theme::default().sel_bg()));
     }
 
     #[test]
     fn narrow_truncates_title_keeps_badge() {
         let secs = vec![
-            Section { id: "m".into(), title: "M Market direction".into(), badge: "A+".into(), ..Default::default() },
-            Section { id: "n".into(), title: "N New highs".into(), ..Default::default() },
+            Section {
+                id: "m".into(),
+                title: "M Market direction".into(),
+                badge: "A+".into(),
+                ..Default::default()
+            },
+            Section {
+                id: "n".into(),
+                title: "N New highs".into(),
+                ..Default::default()
+            },
         ];
         let mut l = SectionList::new();
         let b = render(&mut l, &secs, 16, 3, true);

@@ -1,0 +1,103 @@
+{
+  "ticker": "ATEYY",
+  "company": "ATEYY",
+  "market_cap_usd": 158353162240,
+  "as_of": "2016-04-01",
+  "filing": {
+    "form": "6-K",
+    "filed": "2016-04-01",
+    "accession": "0000947871-16-001078",
+    "url": "https://www.sec.gov/Archives/edgar/data/1158838/000094787116001078/ss1432566_6k.htm"
+  },
+  "generated_at": "2026-09-27T19:15:58+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 2,
+  "sources": [
+    {
+      "source_id": "ateyy_business_1",
+      "label": "ATEYY: ADVANTEST CORPORATION - Stock Price, Quote and News - CNBC",
+      "url": "https://www.cnbc.com/quotes/ATEYY",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "ateyy_business_3",
+      "label": "Advantest Corp ADR (ATEYY) Stock Price, Quote & News - Mboum",
+      "url": "https://mboum.com/quotes/ATEYY",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "filing_scope",
+      "title": "Filing scope",
+      "category": "other",
+      "blocks": []
+    },
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "kv",
+          "title": "Company activity",
+          "rows": [
+            {
+              "id": "manufacture_sale_service",
+              "label": "Activity described",
+              "value": "Manufacture and sale of test-system and mechatronics-related products, with related R&D, maintenance, and service activities.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "ateyy_business_1",
+                "quote": "mainly engaged in the manufacture and sale of test system products and mechatronics-related products, such as test handlers and device interfaces, as well as related research and development, maintenance, and service activities."
+              }
+            },
+            {
+              "id": "product_sales",
+              "label": "Business profile",
+              "value": "Manufactures and sells test-system products, including automated and component test systems.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "ateyy_business_3",
+                "quote": "manufactures and sells semiconductors, component test systems, and mechatronics-related products"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Listed offerings",
+          "text": "The profile lists automated test equipment for system-on-chip, power-device, and memory testing; burn-in and SSD test systems; metrology and SEM tools; and component-test handlers.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "ateyy_business_3",
+            "quote": "automated test equipment, including system on chip, power device, and memory test systems, as well as burn-in and SSD test systems; and metrology and SEM tools. It also provides component test systems, such as die level, SoC, and memory test handlers"
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 1,
+    "sourced_items": 3
+  },
+  "usage": {
+    "input_tokens": 12125,
+    "cached_input_tokens": 2190,
+    "output_tokens": 5306,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0036684,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0436684
+  }
+}

@@ -1,5 +1,5 @@
 // Shared data model for every screen: a value is only ever shown together
-// with where it came from. This mirrors the JSON services/dossier.py writes
+// with where it came from. This mirrors the JSON views/dossier.py writes
 // (see its module docstring); CANSLIM and search produce the same shapes so
 // one set of components (src/ui) renders and audits all of them.
 //
@@ -26,11 +26,24 @@ pub struct Source {
 
 impl Source {
     pub fn url(label: impl Into<String>, url: impl Into<String>) -> Self {
-        Self { label: label.into(), url: Some(url.into()), ..Default::default() }
+        Self {
+            label: label.into(),
+            url: Some(url.into()),
+            ..Default::default()
+        }
     }
 
-    pub fn derived(label: impl Into<String>, formula: impl Into<String>, inputs: Vec<Source>) -> Self {
-        Self { label: label.into(), formula: Some(formula.into()), inputs, ..Default::default() }
+    pub fn derived(
+        label: impl Into<String>,
+        formula: impl Into<String>,
+        inputs: Vec<Source>,
+    ) -> Self {
+        Self {
+            label: label.into(),
+            formula: Some(formula.into()),
+            inputs,
+            ..Default::default()
+        }
     }
 
     pub fn is_derived(&self) -> bool {
@@ -39,7 +52,9 @@ impl Source {
 
     /// URL without the `#:~:text=` quote fragment.
     pub fn doc_url(&self) -> Option<&str> {
-        self.url.as_deref().map(|u| u.split("#:~:text=").next().unwrap_or(u))
+        self.url
+            .as_deref()
+            .map(|u| u.split("#:~:text=").next().unwrap_or(u))
     }
 
     /// Decoded quote from the `#:~:text=` fragment, if any.
@@ -51,7 +66,9 @@ impl Source {
         let mut i = 0;
         while i < bytes.len() {
             // decode from bytes, not &str slices: a raw non-ASCII char after '%' would split a UTF-8 boundary
-            let hex = bytes.get(i + 1..i + 3).and_then(|h| std::str::from_utf8(h).ok());
+            let hex = bytes
+                .get(i + 1..i + 3)
+                .and_then(|h| std::str::from_utf8(h).ok());
             if bytes[i] == b'%'
                 && let Some(b) = hex.and_then(|h| u8::from_str_radix(h, 16).ok())
             {
@@ -186,6 +203,9 @@ impl Block {
 pub struct Section {
     pub id: String,
     pub title: String,
+    /// Compact label for tab strips when `title` doesn't fit ("C Earnings").
+    #[serde(default)]
+    pub short: String,
     #[serde(default)]
     pub blocks: Vec<Block>,
     /// Section contains something flagged new.
@@ -199,7 +219,9 @@ pub struct Section {
 impl Section {
     /// Every Source in the section in display order: the audit view groups these by document.
     pub fn sources(&self) -> impl Iterator<Item = &Source> {
-        self.blocks.iter().flat_map(|b| (0..b.len()).filter_map(move |i| b.source(i)))
+        self.blocks
+            .iter()
+            .flat_map(|b| (0..b.len()).filter_map(move |i| b.source(i)))
     }
 }
 
@@ -209,7 +231,10 @@ mod tests {
 
     #[test]
     fn quote_decodes_fragment() {
-        let s = Source::url("x", "https://a/b.htm#:~:text=Q2%20Net%20Revenue%3A%20%242.739");
+        let s = Source::url(
+            "x",
+            "https://a/b.htm#:~:text=Q2%20Net%20Revenue%3A%20%242.739",
+        );
         assert_eq!(s.quote().as_deref(), Some("Q2 Net Revenue: $2.739"));
         assert_eq!(s.doc_url(), Some("https://a/b.htm"));
     }

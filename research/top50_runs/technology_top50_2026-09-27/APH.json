@@ -1,0 +1,379 @@
+{
+  "ticker": "APH",
+  "company": "APH",
+  "market_cap_usd": 207363145728,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-07-31",
+    "accession": "0001104659-26-089194",
+    "url": "https://www.sec.gov/Archives/edgar/data/820313/000110465926089194/aph-20260630x10q.htm"
+  },
+  "generated_at": "2026-09-27T19:14:52+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 3,
+  "sources": [
+    {
+      "source_id": "sec_aph_10q",
+      "label": "APH 10-Q filed 2026-07-31",
+      "url": "https://www.sec.gov/Archives/edgar/data/820313/000110465926089194/aph-20260630x10q.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "aph_business_1",
+      "label": "Amphenol Corporation - Investor Relations",
+      "url": "https://investors.amphenol.com/home/default.aspx",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "aph_results_3",
+      "label": "2025 ANNUAL REPORT",
+      "url": "https://www.sec.gov/Archives/edgar/data/820313/000110465926040694/aph-20251231xars.pdf",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Overview",
+          "text": "Amphenol provides high-technology interconnect, sensor, antenna and cable solutions across a broad range of end markets.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "aph_results_3",
+            "quote": "Amphenol is one of the world’s largest providers of high-technology interconnect, sensor, antenna and cable solutions."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Business approach",
+          "text": "The company describes expanding its high-technology product offering organically and through acquisitions.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "aph_business_1",
+            "quote": "expanding our high-technology product offering both organically and through our successful acquisition program"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported segment offerings and applications",
+          "cols": [
+            "Segment",
+            "Products and applications"
+          ],
+          "rows": [
+            {
+              "id": "communications_solutions",
+              "cells": [
+                "Communications Solutions",
+                "Connector and interconnect systems, cable and antennas; used in IT and data communications, mobile devices, industrial, communications networks, automotive, commercial aerospace and defense."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "designs, manufactures and markets a broad range of connector and interconnect systems, including high speed, radio frequency, power, fiber optic and other interconnect products; coaxial, fiber optic and high-speed cable; antennas"
+              }
+            },
+            {
+              "id": "harsh_environment_solutions",
+              "cells": [
+                "Harsh Environment Solutions",
+                "Ruggedized interconnect products, specialty cable, printed circuits and printed circuit assemblies; used in industrial, defense, commercial aerospace, automotive, communications networks and IT and data communications."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "designs, manufactures and markets a broad range of ruggedized interconnect products, including connectors and interconnect systems, specialty cable, printed circuits and printed circuit assemblies"
+              }
+            },
+            {
+              "id": "interconnect_sensor_systems",
+              "cells": [
+                "Interconnect and Sensor Systems",
+                "Sensors, sensor-based systems, connectors and value-add interconnect systems; used in automotive, industrial, IT and data communications, communications networks, defense and commercial aerospace."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "designs, manufactures and markets a broad range of sensors, sensor-based systems, connectors and value-add interconnect systems"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market exposure",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "bars",
+          "title": "2025 end-market mix",
+          "unit": "Percent of mix as presented in the 2025 annual report",
+          "items": [
+            {
+              "id": "it_datacom",
+              "label": "IT Datacom",
+              "value": 36.0,
+              "compare": null,
+              "status": "reported",
+              "evidence": {
+                "source_id": "aph_results_3",
+                "quote": "IT Datacom 36%"
+              }
+            },
+            {
+              "id": "industrial",
+              "label": "Industrial",
+              "value": 19.0,
+              "compare": null,
+              "status": "reported",
+              "evidence": {
+                "source_id": "aph_results_3",
+                "quote": "Industrial 19%"
+              }
+            },
+            {
+              "id": "defense",
+              "label": "Defense",
+              "value": 9.0,
+              "compare": null,
+              "status": "reported",
+              "evidence": {
+                "source_id": "aph_results_3",
+                "quote": "Defense 9%"
+              }
+            },
+            {
+              "id": "mobile_devices",
+              "label": "Mobile Devices",
+              "value": 6.0,
+              "compare": null,
+              "status": "reported",
+              "evidence": {
+                "source_id": "aph_results_3",
+                "quote": "Mobile Devices 6%"
+              }
+            },
+            {
+              "id": "commercial_aerospace",
+              "label": "Commercial Aerospace",
+              "value": 5.0,
+              "compare": null,
+              "status": "reported",
+              "evidence": {
+                "source_id": "aph_results_3",
+                "quote": "Commercial Aerospace 5%"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Demand context",
+          "text": "The company characterizes electronics-related applications as a source of long-term growth opportunities; this is management commentary, not a quantified forecast.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "aph_business_1",
+            "quote": "The electronics revolution continues to create exciting, long-term growth opportunities for Amphenol."
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customer and channel map",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Documented sales channels",
+          "text": "The filing says revenue may come from sales to end customers or their appointed contract manufacturers, including OEMs. No named customers are identified in the supplied excerpt.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "Revenues consist of product sales to either end customers and their appointed contract manufacturers (including original equipment manufacturers)"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Inferred buyer archetypes",
+          "text": "Inferred archetypes include manufacturers and systems companies serving the disclosed end markets; the filing excerpt does not identify specific buyer names.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "for use in the information technology and data communications, mobile devices, industrial, communications networks, automotive, commercial aerospace and defense end markets"
+          }
+        }
+      ]
+    },
+    {
+      "id": "financials_liquidity",
+      "title": "Latest filed-period financial and debt facts",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Debt and cash-flow facts",
+          "cols": [
+            "Period",
+            "Item",
+            "Amount (USD millions)"
+          ],
+          "rows": [
+            {
+              "id": "total_debt",
+              "cells": [
+                "June 30, 2026",
+                "Total debt (carrying amount)",
+                "18,811.3"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "Total debt | 18,811.3 | 18,591.2"
+              }
+            },
+            {
+              "id": "long_term_debt",
+              "cells": [
+                "June 30, 2026",
+                "Total long-term debt, less current portion (carrying amount)",
+                "17,177.0"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "Total long-term debt | $17,177.0 | $16,954.5"
+              }
+            },
+            {
+              "id": "six_month_investing_cash",
+              "cells": [
+                "Six months ended June 30, 2026",
+                "Net cash used in investing activities",
+                "(11,703.6)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "Net cash used in investing activities | (11,703.6) | (2,964.2)"
+              }
+            },
+            {
+              "id": "six_month_financing_cash",
+              "cells": [
+                "Six months ended June 30, 2026",
+                "Net cash provided by financing activities",
+                "2,585.2"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "Net cash provided by financing activities | 2,585.2 | 612.3"
+              }
+            },
+            {
+              "id": "six_month_net_cash_change",
+              "cells": [
+                "Six months ended June 30, 2026",
+                "Net decrease in cash and cash equivalents",
+                "(6,401.2)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_aph_10q",
+                "quote": "Net decrease in cash and cash equivalents | (6,401.2) | (110.0)"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Income statement availability",
+          "text": "The supplied 10-Q excerpt identifies the income-statement periods but does not include the income-statement line-item values; no quarterly or YTD values are stated here.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "Condensed Consolidated Statements of Income for the Three and Six Months Ended June 30, 2026 and 2025"
+          }
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Acquisition-related capability driver",
+          "text": "CommScope added fiber-optic interconnect capabilities for IT datacom and communications networks, plus industrial interconnect products for building infrastructure connectivity.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "CommScope adds significant fiber optic interconnect capabilities for the IT datacom and communications networks markets"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Acquisition-related expense",
+          "text": "For the three months ended June 30, 2026, acquisition-related expenses were $23.5 million, primarily non-cash amortization related to acquired backlog from CommScope.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "During the three months ended June 30, 2026, the Company incurred a total of $23.5"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Tax uncertainty",
+          "text": "The company disclosed tax accruals related to determinations in China and reserves for potential settlements of foreign tax matters.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "primarily result from unfavorable determinations received from relevant tax authorities in China"
+          }
+        },
+        {
+          "type": "text",
+          "title": "Debt facility status",
+          "text": "No borrowings were outstanding under the revolving credit facility at June 30, 2026; the company reported compliance with its financial covenants on that date.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_aph_10q",
+            "quote": "As of June 30, 2026 and December 31, 2025, there were no outstanding borrowings under the Revolving Credit Facility."
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 2,
+    "sourced_items": 23
+  },
+  "usage": {
+    "input_tokens": 29836,
+    "cached_input_tokens": 2190,
+    "output_tokens": 8059,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.006816,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.046816
+  }
+}

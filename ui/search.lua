@@ -1,4 +1,4 @@
---- Live full-text search over pulled SEC text (services/search.py): 10-K/
+--- Live full-text search over pulled SEC text (views/search.py): 10-K/
 --- 20-F sections, new-this-year risk language, earnings releases and
 --- guidance, Yahoo profiles and (with type:patent) granted patents. BM25 in
 --- DuckDB; neither front end does fuzzy matching.
@@ -36,7 +36,7 @@ local M = {}
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h")
 -- Venv python directly: `uv run` adds ~100ms per keystroke.
 local python = plugin_dir .. "/.venv/bin/python"
-local script = plugin_dir .. "/services/search.py"
+local script = plugin_dir .. "/views/search.py"
 local DEBOUNCE_S = "0.2"
 
 local function cmd(...)

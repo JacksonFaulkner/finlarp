@@ -1,0 +1,339 @@
+{
+  "ticker": "ANET",
+  "company": "ANET",
+  "market_cap_usd": 260505960448,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-05",
+    "accession": "0001596532-26-000175",
+    "url": "https://www.sec.gov/Archives/edgar/data/1596532/000159653226000175/anet-20260630.htm"
+  },
+  "generated_at": "2026-09-27T19:14:15+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 1,
+  "sources": [
+    {
+      "source_id": "sec_anet_10q",
+      "label": "ANET 10-Q filed 2026-08-05",
+      "url": "https://www.sec.gov/Archives/edgar/data/1596532/000159653226000175/anet-20260630.htm",
+      "kind": "sec_filing"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Platform and revenue model",
+          "text": "Arista describes a client-to-cloud networking-as-a-service platform spanning AI, data center, campus and WAN domains, anchored by EOS and NetDL. Product revenue primarily comes from switching and routing products and related network applications; service revenue primarily comes from post-contract support (PCS) and renewals.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_anet_10q",
+            "quote": "Product revenue primarily consists of sales of our switching and routing products, and related network applications. Service revenue is primarily derived from sales of PCS"
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed offerings and uses",
+          "cols": [
+            "Area",
+            "Filing description"
+          ],
+          "rows": [
+            {
+              "id": "switching_routing",
+              "cells": [
+                "Switching and routing platforms",
+                "Core product revenue; used across cloud, AI and enterprise data center Ethernet switching/routing markets and campus workspace markets."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Product revenue primarily consists of sales of our switching and routing products"
+              }
+            },
+            {
+              "id": "software_platform",
+              "cells": [
+                "EOS and NetDL",
+                "The filing describes these as foundations of its network-as-a-service platform."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Anchored by Arista’s state-oriented Extensible Operating System (EOS) and Network Data Lake (NetDL)"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_market_demand",
+      "title": "End-market demand",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Demand commentary",
+          "text": "Management attributed product-revenue growth to healthy demand and higher shipments. It also said AI infrastructure investment has driven increased networking demand, while the longer-term demand trajectory is unknown and estimates for new products are difficult to forecast.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_anet_10q",
+            "quote": "This increase reflects healthy customer demand and higher shipments of our switching and routing platforms across our customer base."
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customer and channel facts",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented customer and channel disclosures",
+          "cols": [
+            "Disclosure",
+            "Fact"
+          ],
+          "rows": [
+            {
+              "id": "concentration",
+              "cells": [
+                "Historical customer concentration",
+                "Two customers each represented more than 10% of total revenue in each of the last three years discussed. The filing does not name them."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Two of our customers accounted for more than 10% of our total revenue in each of the last three years."
+              }
+            },
+            {
+              "id": "channel_types",
+              "cells": [
+                "Third-party relationships",
+                "The filing identifies distributors, systems integrators, channel partners and value-added resellers among its third-party relationships."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "our relationships with and expectations concerning third parties, including, but not limited to our large customers, suppliers, distributors, systems integrators, channel partners and value-added resellers"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Inferred buyer archetypes (not named customers)",
+          "cols": [
+            "Archetype",
+            "Basis"
+          ],
+          "rows": [
+            {
+              "id": "cloud_ai_buyers",
+              "cells": [
+                "Cloud and AI infrastructure buyers",
+                "Inferred from the markets and environments the company says it serves; the filing does not identify specific buyers here."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "increase sales in cloud, AI and enterprise data center Ethernet switching/routing markets"
+              }
+            },
+            {
+              "id": "campus_buyers",
+              "cells": [
+                "Enterprise campus buyers",
+                "Inferred from the stated campus workspace market; the filing does not identify specific buyers here."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "campus workspace markets"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "financials_cash",
+      "title": "Latest-quarter financials and cash",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Selected income statement lines ($ millions)",
+          "cols": [
+            "Line item",
+            "Three months ended June 30, 2026",
+            "Six months ended June 30, 2026"
+          ],
+          "rows": [
+            {
+              "id": "revenue",
+              "cells": [
+                "Total revenue",
+                "3,035.7",
+                "5,744.7"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Total revenue | 3,035.7 | 2,204.8 | 5,744.7 | 4,209.6"
+              }
+            },
+            {
+              "id": "product_revenue",
+              "cells": [
+                "Product revenue",
+                "2,605.2",
+                "4,916.5"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Product | $2,605.2 | $1,877.0 | $4,916.5 | $3,569.5"
+              }
+            },
+            {
+              "id": "service_revenue",
+              "cells": [
+                "Service revenue",
+                "430.5",
+                "828.2"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Service | 430.5 | 327.8 | 828.2 | 640.1"
+              }
+            },
+            {
+              "id": "gross_profit",
+              "cells": [
+                "Gross profit",
+                "1,910.3",
+                "3,587.1"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Gross profit | 1,910.3 | 1,438.6 | 3,587.1 | 2,714.7"
+              }
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "title": "Cash flow and balance-sheet facts ($ millions)",
+          "cols": [
+            "Measure",
+            "Period/date",
+            "Amount"
+          ],
+          "rows": [
+            {
+              "id": "operating_cash_flow",
+              "cells": [
+                "Net cash provided by operating activities",
+                "Six months ended June 30, 2026",
+                "2,776.5"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Net cash provided by operating activities | 2,776.5 | 1,841.8"
+              }
+            },
+            {
+              "id": "cash_end_period",
+              "cells": [
+                "Cash, cash equivalents and restricted cash",
+                "End of period, June 30, 2026",
+                "2,291.6"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "CASH, CASH EQUIVALENTS AND RESTRICTED CASH —End of period | $2,291.6 | $2,226.9"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers_risks",
+      "title": "Drivers and risks",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Reported drivers and risks",
+          "cols": [
+            "Type",
+            "Disclosure"
+          ],
+          "rows": [
+            {
+              "id": "supply_inventory",
+              "cells": [
+                "Risk",
+                "Management says supply constraints and trade measures could adversely affect supply-chain stability and increase product costs; elevated, volatile inventory and purchase commitments raise excess or obsolete inventory risk."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "Ongoing supply constraints and future trade measures have and could continue to adversely affect our supply chain stability and increase our product costs."
+              }
+            },
+            {
+              "id": "ai_forecast",
+              "cells": [
+                "Risk",
+                "The filing says the long-term trajectory of AI-related networking demand is unknown and new-product demand is difficult to forecast."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_anet_10q",
+                "quote": "the long-term trajectory is unknown. As such, demand estimates for our new products are difficult to forecast"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 5,
+    "sourced_items": 16
+  },
+  "usage": {
+    "input_tokens": 31806,
+    "cached_input_tokens": 2190,
+    "output_tokens": 7434,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.0067005,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.0467005
+  }
+}

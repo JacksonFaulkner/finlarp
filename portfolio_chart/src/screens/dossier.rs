@@ -1,8 +1,8 @@
-// Per-ticker dossier (dossier_cache.dossier_json, built by services/dossier.py).
+// Per-ticker dossier (dossier_cache.dossier_json, built by views/dossier.py).
 //
 //   ┌ MRVL Marvell Technology · Semiconductors · $235B ─── data ≥ 09-26 15:58 ┐
-//   │ Latest        │ blocks of the selected section (BlockView)             │
-//   │ Events      3 │                                                        │
+//   │ Latest        │ blocks of the selected section (BlockView, or a        │
+//   │ Events      3 │ 2-per-row BlockGrid for GRID_SECTIONS)                 │
 //   │ ...           │                                                        │
 //   ├───────────────┴────────────────────────────────────────────────────────┤
 //   │ source of the cursor item (↵ browser · v nvim · y copy · i inputs)     │
@@ -17,27 +17,33 @@ use std::io;
 use std::path::Path;
 
 use chrono::NaiveDate;
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use ratatui::Frame;
+use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Wrap};
-use ratatui::Frame;
 use serde::Deserialize;
 
 use crate::app::{Action, Ctx, NvimAction, Screen};
 use crate::model::{Block, Row, Section, Source};
+use crate::ui::block_grid::BlockGrid;
 use crate::ui::block_view::BlockView;
-use crate::ui::help::{self, Key, key, SOURCE_KEYS};
+use crate::ui::command_palette::{self, Command, Entry, Palette};
+use crate::ui::help::{self, Key, SOURCE_KEYS, key};
 use crate::ui::layout::{self, FrameTitles, PaneOpts, Panes};
 use crate::ui::section_list::SectionList;
-use crate::ui::source_bar::{render_source_bar, source_action, SourceInspector};
+use crate::ui::source_bar::{SourceInspector, render_source_bar, source_action};
 use crate::ui::theme::Theme;
 
 /// Items younger than this get the ● marker in "Latest".
 const NEW_DAYS: i64 = 30;
 const LATEST_MAX: usize = 40;
+/// Chart-heavy sections drawn as a grid (two blocks per row on a normal
+/// popup); list-like sections stay in the single-column BlockView.
+const GRID_SECTIONS: &[&str] = &["revenue", "patents"];
 
 const NAV_KEYS: &[Key] = &[
+    key("^p", "command palette"),
     key("j/k", "move"),
     key("J/K", "next / prev section"),
     key("tab h/l", "focus nav / detail / header"),
@@ -58,7 +64,7 @@ const FOOTER_KEYS: &[Key] = &[
     key("?", "help"),
 ];
 
-/// dossier_cache.dossier_json (see services/dossier.py docstring).
+/// dossier_cache.dossier_json (see views/dossier.py docstring).
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct DossierDoc {
     pub ticker: String,
@@ -110,11 +116,14 @@ pub struct Dossier {
     audit_notes: Vec<String>,
     nav: SectionList,
     view: BlockView,
+    /// Used instead of `view` for GRID_SECTIONS (audit mode always uses `view`).
+    grid: BlockGrid,
     inspector: SourceInspector,
     focus: Focus,
     /// Active `/` query plus the section to restore on esc.
     filter: Option<(String, usize)>,
     help: bool,
+    palette: Palette,
     flash: Option<String>,
     theme: Theme,
     /// Inner areas from the last draw (tests read the source bar from it).
@@ -128,7 +137,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
     } else {
         load_json(&ctx.db_path, &symbol).and_then(|j| match j {
             Some(j) => Ok(j),
-            None => Err(format!("{symbol} has no cached dossier. Build it with:\n\n  services/dossier.py {symbol}")),
+            None => Err(format!(
+                "{symbol} has no cached dossier. Build it with:\n\n  views/dossier.py {symbol}"
+            )),
         })
     };
     Ok(match res {
@@ -165,10 +176,12 @@ impl Dossier {
             audit_notes: Vec::new(),
             nav: SectionList::new(),
             view: BlockView::new(),
+            grid: BlockGrid::new(),
             inspector: SourceInspector::default(),
             focus: Focus::Nav,
             filter: None,
             help: false,
+            palette: Palette::default(),
             flash: None,
             theme,
             panes: Panes::default(),
@@ -179,7 +192,13 @@ impl Dossier {
         let doc: DossierDoc = match serde_json::from_str(json) {
             Ok(d) => d,
             Err(e) => {
-                return Self::empty(symbol, format!("{symbol}: cached dossier is unreadable ({e}).\nRebuild: services/dossier.py {symbol}"), theme);
+                return Self::empty(
+                    symbol,
+                    format!(
+                        "{symbol}: cached dossier is unreadable ({e}).\nRebuild: views/dossier.py {symbol}"
+                    ),
+                    theme,
+                );
             }
         };
         let today = chrono::Local::now().date_naive();
@@ -195,19 +214,47 @@ impl Dossier {
     }
 
     fn selected(&self) -> usize {
-        self.nav.selected().min(self.sections.len().saturating_sub(1))
+        self.nav
+            .selected()
+            .min(self.sections.len().saturating_sub(1))
     }
 
     /// Blocks of the selected section, in the current (normal / audit) view.
     fn blocks(&self) -> &[Block] {
-        let list = if self.view.audit { &self.audit_sections } else { &self.sections };
-        list.get(self.selected()).map(|s| s.blocks.as_slice()).unwrap_or(&[])
+        let list = if self.view.audit {
+            &self.audit_sections
+        } else {
+            &self.sections
+        };
+        list.get(self.selected())
+            .map(|s| s.blocks.as_slice())
+            .unwrap_or(&[])
+    }
+
+    /// Selected section is drawn by `grid` rather than `view`.
+    fn uses_grid(&self) -> bool {
+        !self.view.audit
+            && self
+                .sections
+                .get(self.selected())
+                .is_some_and(|s| GRID_SECTIONS.contains(&s.id.as_str()))
     }
 
     fn selected_source(&self) -> Option<&Source> {
         match self.focus {
             Focus::Header => self.doc.as_ref()?.header_src.as_ref(),
+            _ if self.uses_grid() => self.grid.selected_source(self.blocks()),
             _ => self.view.selected_source(self.blocks()),
+        }
+    }
+
+    /// Detail-pane keys to whichever of view / grid draws the section.
+    fn detail_key(&mut self, key: KeyEvent) -> bool {
+        let blocks = self.blocks().to_vec();
+        if self.uses_grid() {
+            self.grid.on_key(key, &blocks, &self.theme)
+        } else {
+            self.view.on_key(key, &blocks)
         }
     }
 
@@ -216,17 +263,21 @@ impl Dossier {
         if i != self.selected() {
             self.nav.state.select(Some(i));
             self.view.reset();
+            self.grid.reset();
         }
     }
 
     fn toggle_audit(&mut self) {
         self.view.audit = !self.view.audit;
         self.view.reset();
+        self.grid.reset();
     }
 
     /// `/` query: select the first section whose title contains it.
     fn on_filter_key(&mut self, key: KeyEvent) {
-        let Some((q, back)) = self.filter.as_mut() else { return };
+        let Some((q, back)) = self.filter.as_mut() else {
+            return;
+        };
         match key.code {
             KeyCode::Esc => {
                 let back = *back;
@@ -246,20 +297,34 @@ impl Dossier {
             _ => return,
         }
         let q = q.to_lowercase();
-        if let Some(i) = self.sections.iter().position(|s| s.title.to_lowercase().contains(&q)) {
+        if let Some(i) = self
+            .sections
+            .iter()
+            .position(|s| s.title.to_lowercase().contains(&q))
+        {
             self.select_section(i);
         }
     }
 
     fn pane_opts(area: Rect) -> PaneOpts {
-        PaneOpts { nav_width: (area.width / 5).clamp(12, 26), ..PaneOpts::default() }
+        PaneOpts {
+            nav_width: if area.width < 90 {
+                0
+            } else {
+                (area.width / 5).clamp(12, 26)
+            },
+            ..PaneOpts::default()
+        }
     }
 
     fn draw_header(&self, frame: &mut Frame, area: Rect, doc: &DossierDoc) {
         let t = &self.theme;
         let focused = self.focus == Focus::Header;
         let mut left = vec![
-            Span::styled(format!(" {} ", doc.ticker), if focused { t.selected() } else { t.accent() }),
+            Span::styled(
+                format!(" {} ", doc.ticker),
+                if focused { t.selected() } else { t.accent() },
+            ),
             Span::styled(format!(" {}", doc.name), t.title()),
         ];
         let facts = [
@@ -271,9 +336,15 @@ impl Dossier {
         for f in facts.into_iter().flatten() {
             left.push(Span::styled(format!(" · {f}"), t.dim()));
         }
-        let mut right = vec![Span::styled(format!("built {} ", short_ts(&doc.built_at)), t.dim())];
+        let mut right = vec![Span::styled(
+            format!("built {} ", short_ts(&doc.built_at)),
+            t.dim(),
+        )];
         if let Some(old) = doc.freshness.iter().min_by(|a, b| a.pulled.cmp(&b.pulled)) {
-            right.push(Span::styled(format!("· data ≥ {} ({}) ", short_ts(&old.pulled), old.source), t.dim()));
+            right.push(Span::styled(
+                format!("· data ≥ {} ({}) ", short_ts(&old.pulled), old.source),
+                t.dim(),
+            ));
         }
         let lw = left.iter().map(|s| s.width()).sum::<usize>() as u16;
         let rw = right.iter().map(|s| s.width()).sum::<usize>() as u16;
@@ -281,7 +352,10 @@ impl Dossier {
         let rw = if lw + rw < area.width { rw } else { 0 };
         let [l, r] = Layout::horizontal([Constraint::Fill(1), Constraint::Length(rw)]).areas(area);
         frame.render_widget(Paragraph::new(Line::from(left)).style(t.base()), l);
-        frame.render_widget(Paragraph::new(Line::from(right).right_aligned()).style(t.base()), r);
+        frame.render_widget(
+            Paragraph::new(Line::from(right).right_aligned()).style(t.base()),
+            r,
+        );
     }
 }
 
@@ -292,11 +366,21 @@ impl Screen for Dossier {
         let Some(doc) = self.doc.clone() else {
             let r = layout::popup(area, 64, 8);
             let msg = format!("{}\n\nq quit", self.message);
-            frame.render_widget(Paragraph::new(msg).style(theme.base()).wrap(Wrap { trim: false }), r);
+            frame.render_widget(
+                Paragraph::new(msg)
+                    .style(theme.base())
+                    .wrap(Wrap { trim: false }),
+                r,
+            );
             return;
         };
         let sel = self.selected();
-        let sections = if self.view.audit { &self.audit_sections } else { &self.sections };
+        let grid = self.uses_grid();
+        let sections = if self.view.audit {
+            &self.audit_sections
+        } else {
+            &self.sections
+        };
         let title = sections.get(sel).map(|s| s.title.as_str()).unwrap_or("");
         let titles = FrameTitles {
             nav: Line::from("sections"),
@@ -316,14 +400,31 @@ impl Screen for Dossier {
         self.panes = p;
         self.draw_header(frame, p.header, &doc);
         // Disjoint field borrows: sections are read while nav / view mutate their own state.
-        self.nav.render(frame, p.nav, sections, &theme, self.focus == Focus::Nav);
-        let blocks = sections.get(sel).map(|s| s.blocks.as_slice()).unwrap_or(&[]);
-        self.view.render(frame, p.detail, blocks, &theme);
+        if p.nav.width > 0 {
+            self.nav
+                .render(frame, p.nav, sections, &theme, self.focus == Focus::Nav);
+        }
+        let blocks = sections
+            .get(sel)
+            .map(|s| s.blocks.as_slice())
+            .unwrap_or(&[]);
+        if p.nav.width == 0 && self.focus == Focus::Nav {
+            self.nav.render(frame, p.detail, sections, &theme, true);
+        } else if grid {
+            self.grid.render_in_frame(frame, p.detail, blocks, &theme);
+        } else {
+            self.view.render(frame, p.detail, blocks, &theme);
+        }
         render_source_bar(frame, p.source, self.selected_source(), &theme);
         let status = match &self.filter {
             Some((q, _)) => Some(format!("/{q}▏  ↵ go  esc cancel")),
             None => self.flash.clone().or_else(|| {
-                (self.view.audit).then(|| format!("AUDIT · values grouped by source document · {} unsourced in dossier", doc.unsourced.len()))
+                (self.view.audit).then(|| {
+                    format!(
+                        "AUDIT · values grouped by source document · {} unsourced in dossier",
+                        doc.unsourced.len()
+                    )
+                })
             }),
         };
         help::render_footer(frame, p.footer, FOOTER_KEYS, status.as_deref(), &theme);
@@ -332,12 +433,39 @@ impl Screen for Dossier {
         }
         if self.help {
             let all: Vec<Key> = NAV_KEYS.iter().chain(SOURCE_KEYS).copied().collect();
-            help::render_overlay(frame, area, &format!("{} dossier keys", self.symbol), &all, &theme);
+            help::render_overlay(
+                frame,
+                area,
+                &format!("{} dossier keys", self.symbol),
+                &all,
+                &theme,
+            );
+        }
+        if self.palette.open {
+            self.palette.render(frame, area, &theme);
         }
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         self.flash = None;
+        if self.palette.open {
+            if let Some(command) = self.palette.handle(key) {
+                return match command {
+                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                        screen: screen.into(),
+                        arg: Some(self.symbol.clone()),
+                    }),
+                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                        screen: screen.into(),
+                    }),
+                    Some(Command::Section(i)) => {
+                        self.select_section(i);
+                        Action::None
+                    }
+                    _ => Action::None,
+                };
+            }
+        }
         if self.doc.is_none() {
             return Action::Quit;
         }
@@ -352,6 +480,14 @@ impl Screen for Dossier {
             self.on_filter_key(key);
             return Action::None;
         }
+        if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            let mut entries = command_palette::destinations(&self.symbol, "dossier");
+            entries.extend(self.sections.iter().enumerate().map(|(i, s)| {
+                Entry::new(format!("Go to {}", s.title), "section", Command::Section(i))
+            }));
+            self.palette.show(entries);
+            return Action::None;
+        }
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
             KeyCode::Char('?') => self.help = true,
@@ -359,6 +495,17 @@ impl Screen for Dossier {
             KeyCode::Char('J') => self.select_section(self.selected() + 1),
             KeyCode::Char('K') => self.select_section(self.selected().saturating_sub(1)),
             KeyCode::Char('/') => self.filter = Some((String::new(), self.selected())),
+            KeyCode::Char('h') | KeyCode::Left if self.focus == Focus::Detail => {
+                // grid: h moves to the container on the left; at the left edge it goes to nav
+                let block = self.grid.cursor.block;
+                let grid = self.uses_grid();
+                if !self.detail_key(key) || (grid && self.grid.cursor.block == block) {
+                    self.focus = Focus::Nav;
+                }
+            }
+            KeyCode::Char('l') | KeyCode::Right if self.focus == Focus::Detail => {
+                self.detail_key(key);
+            }
             KeyCode::Char('h') | KeyCode::Left => self.focus = Focus::Nav,
             KeyCode::Char('l') | KeyCode::Right => self.focus = Focus::Detail,
             KeyCode::Tab => {
@@ -376,7 +523,10 @@ impl Screen for Dossier {
                 }
             }
             KeyCode::Char('c') => {
-                return Action::Nvim(NvimAction::Screen { screen: "canslim".into(), arg: Some(self.symbol.clone()) });
+                return Action::Nvim(NvimAction::Screen {
+                    screen: "canslim".into(),
+                    arg: Some(self.symbol.clone()),
+                });
             }
             KeyCode::Char('i') => match self.selected_source().cloned() {
                 Some(s) => self.inspector.open(&s),
@@ -388,15 +538,18 @@ impl Screen for Dossier {
                 }
                 match self.focus {
                     Focus::Nav => match key.code {
-                        KeyCode::Char('j') | KeyCode::Down => self.select_section(self.selected() + 1),
-                        KeyCode::Char('k') | KeyCode::Up => self.select_section(self.selected().saturating_sub(1)),
+                        KeyCode::Char('j') | KeyCode::Down => {
+                            self.select_section(self.selected() + 1)
+                        }
+                        KeyCode::Char('k') | KeyCode::Up => {
+                            self.select_section(self.selected().saturating_sub(1))
+                        }
                         KeyCode::Char('g') | KeyCode::Home => self.select_section(0),
                         KeyCode::Char('G') | KeyCode::End => self.select_section(usize::MAX),
                         _ => {}
                     },
                     Focus::Detail => {
-                        let blocks = self.blocks().to_vec();
-                        self.view.on_key(key, &blocks);
+                        self.detail_key(key);
                     }
                     Focus::Header => {}
                 }
@@ -419,7 +572,8 @@ fn date_at(s: &str) -> Option<NaiveDate> {
 
 /// First YYYY-MM-DD anywhere in `s` (e.g. a source label "10-K 2026-03-11 · Item 1A").
 fn date_in(s: &str) -> Option<NaiveDate> {
-    s.char_indices().find_map(|(i, _)| s.get(i..).and_then(date_at))
+    s.char_indices()
+        .find_map(|(i, _)| s.get(i..).and_then(date_at))
 }
 
 /// "Latest": dated rows / points (first cell or x is a date), plus rows the
@@ -429,7 +583,14 @@ fn latest_section(sections: &[Section], today: NaiveDate) -> Section {
     let mut push = |date: NaiveDate, sec: &str, text: String, src: &Option<Source>| {
         let cells = vec![date.to_string(), sec.to_string(), text];
         let new = (today - date).num_days() < NEW_DAYS;
-        items.push((date, Row { cells, new, src: src.clone() }));
+        items.push((
+            date,
+            Row {
+                cells,
+                new,
+                src: src.clone(),
+            },
+        ));
     };
     let label_date = |src: &Option<Source>| src.as_ref().and_then(|s| date_in(&s.label));
     for sec in sections {
@@ -448,11 +609,20 @@ fn latest_section(sections: &[Section], today: NaiveDate) -> Section {
                 Block::Kv { rows, .. } => {
                     for r in rows.iter().filter(|r| r.new) {
                         if let Some(d) = label_date(&r.src) {
-                            push(d, &sec.title, format!("{}: {}", r.label.trim(), r.value), &r.src);
+                            push(
+                                d,
+                                &sec.title,
+                                format!("{}: {}", r.label.trim(), r.value),
+                                &r.src,
+                            );
                         }
                     }
                 }
-                Block::Series { title, unit, points } => {
+                Block::Series {
+                    title,
+                    unit,
+                    points,
+                } => {
                     for p in points {
                         if let (Some(d), Some(y)) = (date_at(&p.x), p.y) {
                             push(d, &sec.title, format!("{title} {} {unit}", num(y)), &p.src);
@@ -469,8 +639,13 @@ fn latest_section(sections: &[Section], today: NaiveDate) -> Section {
     Section {
         id: "latest".into(),
         title: "Latest".into(),
+        short: String::new(),
         new: n_new > 0,
-        badge: if n_new > 0 { n_new.to_string() } else { String::new() },
+        badge: if n_new > 0 {
+            n_new.to_string()
+        } else {
+            String::new()
+        },
         blocks: vec![Block::Table {
             title: format!("Newest dated items across sections (● = under {NEW_DAYS} days)"),
             cols: vec!["date".into(), "section".into(), "item".into()],
@@ -491,7 +666,11 @@ fn audit_section(sec: &Section) -> (Section, String) {
         for i in 0..b.len() {
             let (label, value) = describe(b, i);
             let src = b.source(i).cloned();
-            let row = Row { cells: vec![label, value], new: false, src: src.clone() };
+            let row = Row {
+                cells: vec![label, value],
+                new: false,
+                src: src.clone(),
+            };
             match src.as_ref().and_then(|s| s.doc_url().map(str::to_string)) {
                 Some(url) => match groups.iter_mut().find(|(u, _)| *u == url) {
                     Some((_, rows)) => rows.push(row),
@@ -502,7 +681,8 @@ fn audit_section(sec: &Section) -> (Section, String) {
             }
         }
     }
-    let n_vals: usize = groups.iter().map(|(_, r)| r.len()).sum::<usize>() + computed.len() + unsourced.len();
+    let n_vals: usize =
+        groups.iter().map(|(_, r)| r.len()).sum::<usize>() + computed.len() + unsourced.len();
     let summary = format!(
         "{n_vals} values · {} docs · {} computed · {} unsourced",
         groups.len(),
@@ -513,16 +693,35 @@ fn audit_section(sec: &Section) -> (Section, String) {
     let mut blocks = Vec::new();
     if !unsourced.is_empty() {
         let title = format!("UNSOURCED ({})", unsourced.len());
-        blocks.push(Block::Table { title, cols: cols(), rows: unsourced });
+        blocks.push(Block::Table {
+            title,
+            cols: cols(),
+            rows: unsourced,
+        });
     }
     if !computed.is_empty() {
         let title = format!("computed ({}) · formula + inputs, press i", computed.len());
-        blocks.push(Block::Table { title, cols: cols(), rows: computed });
+        blocks.push(Block::Table {
+            title,
+            cols: cols(),
+            rows: computed,
+        });
     }
     for (url, rows) in groups {
-        blocks.push(Block::Table { title: format!("{} × {url}", rows.len()), cols: cols(), rows });
+        blocks.push(Block::Table {
+            title: format!("{} × {url}", rows.len()),
+            cols: cols(),
+            rows,
+        });
     }
-    let sec = Section { id: sec.id.clone(), title: sec.title.clone(), blocks, new: sec.new, badge: sec.badge.clone() };
+    let sec = Section {
+        id: sec.id.clone(),
+        title: sec.title.clone(),
+        short: sec.short.clone(),
+        blocks,
+        new: sec.new,
+        badge: sec.badge.clone(),
+    };
     (sec, summary)
 }
 
@@ -531,32 +730,70 @@ fn describe(b: &Block, i: usize) -> (String, String) {
     match b {
         Block::Table { rows, .. } => rows
             .get(i)
-            .map(|r| (r.cells.first().cloned().unwrap_or_default(), join_cells(r.cells.get(1..).unwrap_or(&[]))))
+            .map(|r| {
+                (
+                    r.cells.first().cloned().unwrap_or_default(),
+                    join_cells(r.cells.get(1..).unwrap_or(&[])),
+                )
+            })
             .unwrap_or_default(),
-        Block::Kv { rows, .. } => rows.get(i).map(|r| (r.label.trim().to_string(), r.value.clone())).unwrap_or_default(),
-        Block::Series { title, unit, points } => points
+        Block::Kv { rows, .. } => rows
             .get(i)
-            .map(|p| (format!("{title} {}", p.x), p.y.map(|y| format!("{} {unit}", num(y))).unwrap_or("—".into())))
+            .map(|r| (r.label.trim().to_string(), r.value.clone()))
+            .unwrap_or_default(),
+        Block::Series {
+            title,
+            unit,
+            points,
+        } => points
+            .get(i)
+            .map(|p| {
+                (
+                    format!("{title} {}", p.x),
+                    p.y.map(|y| format!("{} {unit}", num(y)))
+                        .unwrap_or("—".into()),
+                )
+            })
             .unwrap_or_default(),
         Block::Bars { title, unit, items } => items
             .get(i)
-            .map(|it| (format!("{title}: {}", it.label), format!("{} {unit}", num(it.value))))
+            .map(|it| {
+                (
+                    format!("{title}: {}", it.label),
+                    format!("{} {unit}", num(it.value)),
+                )
+            })
             .unwrap_or_default(),
         Block::Text { title, text, .. } => {
-            let what = if title.is_empty() { "text".to_string() } else { title.clone() };
+            let what = if title.is_empty() {
+                "text".to_string()
+            } else {
+                title.clone()
+            };
             (what, text.chars().take(80).collect())
         }
     }
 }
 
 fn join_cells(cells: &[String]) -> String {
-    cells.iter().map(|c| c.trim()).filter(|c| !c.is_empty()).collect::<Vec<_>>().join(" · ")
+    cells
+        .iter()
+        .map(|c| c.trim())
+        .filter(|c| !c.is_empty())
+        .collect::<Vec<_>>()
+        .join(" · ")
 }
 
 /// 2739.3 -> "2,739.3"; whole numbers without decimals.
 fn num(v: f64) -> String {
-    let s = if v.fract() == 0.0 { format!("{:.0}", v.abs()) } else { format!("{:.1}", v.abs()) };
-    let (int, frac) = s.split_once('.').map_or((s.as_str(), None), |(i, f)| (i, Some(f)));
+    let s = if v.fract() == 0.0 {
+        format!("{:.0}", v.abs())
+    } else {
+        format!("{:.1}", v.abs())
+    };
+    let (int, frac) = s
+        .split_once('.')
+        .map_or((s.as_str(), None), |(i, f)| (i, Some(f)));
     let mut out = String::new();
     for (i, c) in int.chars().enumerate() {
         if i > 0 && (int.len() - i) % 3 == 0 {
@@ -586,14 +823,19 @@ fn short_ts(ts: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::crossterm::event::{KeyEventKind, KeyEventState, KeyModifiers};
-    use ratatui::Terminal;
 
     const MRVL: &str = include_str!("fixtures/dossier_MRVL.json");
 
     fn press(s: &mut Dossier, code: KeyCode) -> Action {
-        s.on_key(KeyEvent { code, modifiers: KeyModifiers::NONE, kind: KeyEventKind::Press, state: KeyEventState::NONE })
+        s.on_key(KeyEvent {
+            code,
+            modifiers: KeyModifiers::NONE,
+            kind: KeyEventKind::Press,
+            state: KeyEventState::NONE,
+        })
     }
 
     fn render(s: &mut Dossier, w: u16, h: u16) -> Terminal<TestBackend> {
@@ -605,7 +847,11 @@ mod tests {
     fn rows_text(term: &Terminal<TestBackend>, area: Rect) -> String {
         let buf = term.backend().buffer();
         (area.top()..area.bottom())
-            .map(|y| (area.left()..area.right()).map(|x| buf[(x, y)].symbol()).collect::<String>())
+            .map(|y| {
+                (area.left()..area.right())
+                    .map(|x| buf[(x, y)].symbol())
+                    .collect::<String>()
+            })
             .collect::<Vec<_>>()
             .join("\n")
     }
@@ -628,9 +874,14 @@ mod tests {
         assert_eq!(doc.ticker, "MRVL");
         assert_eq!(s.sections.len(), doc.sections.len() + 1);
         assert_eq!(s.sections[0].title, "Latest");
-        let Block::Table { rows, .. } = &s.sections[0].blocks[0] else { panic!("latest is a table") };
+        let Block::Table { rows, .. } = &s.sections[0].blocks[0] else {
+            panic!("latest is a table")
+        };
         assert!(!rows.is_empty());
-        assert!(rows.windows(2).all(|w| w[0].cells[0] >= w[1].cells[0]), "newest first");
+        assert!(
+            rows.windows(2).all(|w| w[0].cells[0] >= w[1].cells[0]),
+            "newest first"
+        );
         assert!(rows.iter().all(|r| r.src.is_some()));
     }
 
@@ -646,7 +897,11 @@ mod tests {
         let mut s = screen();
         press(&mut s, KeyCode::Char('a'));
         render(&mut s, 40, 12);
-        let mut e = Dossier::empty("ZZZZ", "ZZZZ has no cached dossier".into(), Theme::default());
+        let mut e = Dossier::empty(
+            "ZZZZ",
+            "ZZZZ has no cached dossier".into(),
+            Theme::default(),
+        );
         let term = render(&mut e, 40, 12);
         assert!(rows_text(&term, Rect::new(0, 0, 40, 12)).contains("no cached"));
     }
@@ -658,9 +913,19 @@ mod tests {
         assert_eq!(s.sections[s.selected()].id, "events");
         press(&mut s, KeyCode::Char('l'));
         press(&mut s, KeyCode::Char('j'));
-        let want = s.view.selected_source(s.blocks()).expect("row has a source").label.clone();
-        let Block::Table { rows, .. } = &s.sections[1].blocks[0] else { panic!() };
-        assert_eq!(rows[1].src.as_ref().map(|x| x.label.as_str()), Some(want.as_str()));
+        let want = s
+            .view
+            .selected_source(s.blocks())
+            .expect("row has a source")
+            .label
+            .clone();
+        let Block::Table { rows, .. } = &s.sections[1].blocks[0] else {
+            panic!()
+        };
+        assert_eq!(
+            rows[1].src.as_ref().map(|x| x.label.as_str()),
+            Some(want.as_str())
+        );
         let term = render(&mut s, 160, 45);
         let bar = rows_text(&term, s.panes.source);
         assert!(bar.contains(&want), "source bar {bar:?} lacks {want:?}");
@@ -668,7 +933,10 @@ mod tests {
         // header focus shows header_src
         press(&mut s, KeyCode::Tab);
         assert_eq!(s.focus, Focus::Header);
-        assert_eq!(s.selected_source().map(|x| x.label.as_str()), Some("Yahoo Finance profile"));
+        assert_eq!(
+            s.selected_source().map(|x| x.label.as_str()),
+            Some("Yahoo Finance profile")
+        );
     }
 
     #[test]
@@ -689,27 +957,82 @@ mod tests {
         assert_eq!(s.selected(), s.sections.len() - 1, "esc restores");
         assert_eq!(
             press(&mut s, KeyCode::Char('c')),
-            Action::Nvim(NvimAction::Screen { screen: "canslim".into(), arg: Some("MRVL".into()) })
+            Action::Nvim(NvimAction::Screen {
+                screen: "canslim".into(),
+                arg: Some("MRVL".into())
+            })
         );
         assert_eq!(press(&mut s, KeyCode::Char('q')), Action::Quit);
     }
 
     #[test]
+    fn revenue_is_a_two_column_grid() {
+        let mut s = screen();
+        let revenue = s
+            .sections
+            .iter()
+            .position(|x| x.id == "revenue")
+            .expect("revenue section");
+        s.select_section(revenue);
+        press(&mut s, KeyCode::Char('l'));
+        assert!(s.uses_grid());
+        let term = render(&mut s, 140, 45);
+        let detail = rows_text(&term, s.panes.detail);
+        let first = detail.lines().next().unwrap_or("");
+        assert!(
+            first.contains("│") && s.grid.cursor.block == 0,
+            "first two blocks share a row: {detail}"
+        );
+        let all = rows_text(&term, Rect::new(0, 0, 140, 45));
+        assert!(all.contains("┬") && all.contains("┴"), "nav/source junctions kept: {all}");
+
+        // l: next container right; h twice: back, then out to nav
+        press(&mut s, KeyCode::Char('l'));
+        assert_eq!(s.grid.cursor.block, 1);
+        assert_ne!(
+            s.selected_source().map(|x| x.label.clone()),
+            None,
+            "grid selection drives the source bar"
+        );
+        press(&mut s, KeyCode::Char('h'));
+        assert_eq!((s.grid.cursor.block, s.focus), (0, Focus::Detail));
+        press(&mut s, KeyCode::Char('h'));
+        assert_eq!(s.focus, Focus::Nav);
+
+        // audit mode is a list again
+        press(&mut s, KeyCode::Char('a'));
+        assert!(!s.uses_grid());
+    }
+
+    #[test]
     fn audit_groups_by_document() {
         let mut s = screen();
-        let revenue = s.sections.iter().position(|x| x.id == "revenue").expect("revenue section");
+        let revenue = s
+            .sections
+            .iter()
+            .position(|x| x.id == "revenue")
+            .expect("revenue section");
         s.select_section(revenue);
         press(&mut s, KeyCode::Char('a'));
         assert!(s.view.audit);
         let blocks = s.blocks();
-        assert!(s.audit_notes[revenue].ends_with("0 unsourced"), "{}", s.audit_notes[revenue]);
+        assert!(
+            s.audit_notes[revenue].ends_with("0 unsourced"),
+            "{}",
+            s.audit_notes[revenue]
+        );
         assert!(!blocks.iter().any(|b| b.title().starts_with("UNSOURCED")));
         let total: usize = s.sections[revenue].blocks.iter().map(Block::len).sum();
         let grouped: usize = blocks.iter().map(Block::len).sum();
         assert_eq!(total, grouped, "every value lands in exactly one group");
         for b in blocks.iter().filter(|b| !b.title().starts_with("computed")) {
-            let urls: Vec<_> = (0..b.len()).filter_map(|i| b.source(i)?.doc_url()).collect();
-            assert!(urls.windows(2).all(|w| w[0] == w[1]), "one document per group");
+            let urls: Vec<_> = (0..b.len())
+                .filter_map(|i| b.source(i)?.doc_url())
+                .collect();
+            assert!(
+                urls.windows(2).all(|w| w[0] == w[1]),
+                "one document per group"
+            );
         }
     }
 }

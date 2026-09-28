@@ -3,6 +3,9 @@
 // never hardcode colours: they ask the theme for a semantic style.
 
 use ratatui::style::{Color, Modifier, Style};
+use ratatui::layout::Rect;
+
+use crate::ui::spacing::Spacing;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Theme {
@@ -14,6 +17,8 @@ pub struct Theme {
     pub dim: Color,
     pub accent: Color,
     pub border: Color,
+    pub spacing: Spacing,
+    cursor_bg: Option<Color>,
 }
 
 impl Default for Theme {
@@ -26,6 +31,8 @@ impl Default for Theme {
             dim: Color::DarkGray,
             accent: Color::Rgb(0xd7, 0xa6, 0x5f),
             border: Color::DarkGray,
+            spacing: Spacing::default(),
+            cursor_bg: Some(Color::Rgb(0x3d, 0x3f, 0x50)),
         }
     }
 }
@@ -48,8 +55,14 @@ impl Theme {
             bg: bg.and_then(parse_hex),
             up: up.and_then(parse_hex).unwrap_or(d.up),
             down: down.and_then(parse_hex).unwrap_or(d.down),
+            cursor_bg: std::env::var("SECURITY_SPREAD_CURSOR_BG").ok().as_deref().and_then(parse_hex).or(d.cursor_bg),
             ..d
         }
+    }
+
+    /// Refresh shared spacing tokens at each draw so all panels adapt together.
+    pub fn fit(&mut self, area: Rect) {
+        self.spacing = Spacing::for_area(area);
     }
 
     pub fn base(&self) -> Style {
@@ -73,7 +86,15 @@ impl Theme {
     }
     /// Selected row / cell.
     pub fn selected(&self) -> Style {
-        self.base().add_modifier(Modifier::REVERSED)
+        match self.cursor_bg {
+            Some(bg) => self.base().bg(bg),
+            None => self.base().add_modifier(Modifier::REVERSED),
+        }
+    }
+    pub fn sel_bg(&self) -> Color { self.cursor_bg.unwrap_or(self.fg) }
+    /// Keep foreground contrast when applying the cursor background to a semantic style.
+    pub fn on_cursor(&self, style: Style) -> Style {
+        match self.cursor_bg { Some(bg) => style.bg(bg), None => style.add_modifier(Modifier::REVERSED) }
     }
     /// Green for >= 0, red for < 0.
     pub fn signed(&self, v: f64) -> Style {
@@ -92,5 +113,16 @@ impl Theme {
     /// Values that are computed (formula) rather than read from a document.
     pub fn derived(&self) -> Style {
         self.base().add_modifier(Modifier::ITALIC)
+    }
+    /// CANSLIM score color: low scores red, middling amber, high scores green.
+    pub fn score(&self, value: f64) -> Style {
+        let color = if value >= 70.0 { self.up } else if value >= 50.0 { self.accent } else { self.down };
+        self.base().fg(color).add_modifier(Modifier::BOLD)
+    }
+    pub fn score_badge(&self, badge: &str) -> Style {
+        match badge.rsplit(' ').next().and_then(|n| n.parse::<f64>().ok()) {
+            Some(value) => self.score(value),
+            None => self.dim(),
+        }
     }
 }

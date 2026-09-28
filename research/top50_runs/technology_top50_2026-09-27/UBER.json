@@ -1,0 +1,474 @@
+{
+  "ticker": "UBER",
+  "company": "UBER",
+  "market_cap_usd": 142203043840,
+  "as_of": "2026-06-30",
+  "filing": {
+    "form": "10-Q",
+    "filed": "2026-08-05",
+    "accession": "0001543151-26-000032",
+    "url": "https://www.sec.gov/Archives/edgar/data/1543151/000154315126000032/uber-20260630.htm"
+  },
+  "generated_at": "2026-09-27T19:16:04+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 3,
+  "sources": [
+    {
+      "source_id": "sec_uber_10q",
+      "label": "UBER 10-Q filed 2026-08-05",
+      "url": "https://www.sec.gov/Archives/edgar/data/1543151/000154315126000032/uber-20260630.htm",
+      "kind": "sec_filing"
+    },
+    {
+      "source_id": "uber_business_1",
+      "label": "Uber Apps, Products, and Offerings",
+      "url": "https://www.uber.com/us/en/about/uber-offerings/",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "uber_business_2",
+      "label": "Uber for Business",
+      "url": "https://www.uber.com/us/en/business/articles/what-is-uber-for-business/",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Platform model",
+          "text": "Uber describes itself as a technology platform connecting consumers with independent ride providers, merchants and delivery providers, public transportation networks, and freight shippers with carriers.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_uber_10q",
+            "quote": "Uber is a technology platform that uses a massive network, leading technology, operational excellence and product expertise to power movement from point A to point B."
+          }
+        },
+        {
+          "type": "text",
+          "title": "Operating footprint",
+          "text": "The filing says the technology is used principally in the U.S. and Canada, Latin America, Europe (excluding Russia), the Middle East, Africa, and APAC (excluding China and Southeast Asia).",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sec_uber_10q",
+            "quote": "principally in the United States (“U.S.”) and Canada, Latin America, Europe (excluding Russia), the Middle East, Africa, and Asia Pacific (“APAC”, excluding China and Southeast Asia)."
+          }
+        }
+      ]
+    },
+    {
+      "id": "offerings",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed offerings and channels",
+          "cols": [
+            "Offering",
+            "Disclosed function"
+          ],
+          "rows": [
+            {
+              "id": "mobility",
+              "cells": [
+                "Mobility",
+                "The platform connects riders with independent ride-service providers; the company also describes connections to public transportation networks."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "connects consumers (“Rider(s)”) with independent providers of ride services (“Mobility Driver(s)”)"
+              }
+            },
+            {
+              "id": "delivery",
+              "cells": [
+                "Delivery",
+                "Connects consumers and merchants for meal, grocery, and other delivery services using delivery providers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "connects Riders and other consumers (“Eaters”) with restaurants, grocers and other stores"
+              }
+            },
+            {
+              "id": "freight",
+              "cells": [
+                "Freight",
+                "Connects shippers with carriers in the freight industry."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "connect shippers (“Shippers”) with carriers (“Carriers”) in the freight industry."
+              }
+            },
+            {
+              "id": "business-apps",
+              "cells": [
+                "Business apps and services",
+                "Uber for Business supports managed rides and meals; Uber Freight is described as matching carriers with shippers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "uber_business_1",
+                "quote": "Uber for Business gives you an easy way to manage your ground transportation needs."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "markets",
+      "title": "End-market demand and customer/channel facts",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Markets served (qualitative; no demand volume asserted)",
+          "cols": [
+            "Market",
+            "Filing-described participants or use"
+          ],
+          "rows": [
+            {
+              "id": "rider-mobility",
+              "cells": [
+                "Passenger mobility",
+                "Riders and independent mobility drivers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "connects consumers (“Rider(s)”) with independent providers of ride services (“Mobility Driver(s)”)"
+              }
+            },
+            {
+              "id": "local-delivery",
+              "cells": [
+                "Meal, grocery, and other delivery",
+                "Consumers, restaurants, grocers, other stores, and couriers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "for meal preparation, grocery and other delivery services."
+              }
+            },
+            {
+              "id": "freight-market",
+              "cells": [
+                "Freight",
+                "Shippers and carriers."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "connect shippers (“Shippers”) with carriers (“Carriers”) in the freight industry."
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Documented business channel facts",
+          "rows": [
+            {
+              "id": "business-customer-count",
+              "label": "Uber for Business customer reach (company website statement)",
+              "value": "Trusted by over 200,000 companies worldwide, including more than half of the Fortune 500.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "uber_business_2",
+                "quote": "trusted by over 200,000 companies worldwide, including more than half of the Fortune 500."
+              }
+            },
+            {
+              "id": "business-use-cases",
+              "label": "Disclosed organizational use cases",
+              "value": "Business travel, employee commutes, courtesy rides, and employee meals are listed as use cases.",
+              "status": "reported",
+              "evidence": {
+                "source_id": "uber_business_2",
+                "quote": "Manage business travel; Subsidize employee commutes; Provide courtesy rides for customers; Arrange meals for employees"
+              }
+            }
+          ]
+        },
+        {
+          "type": "kv",
+          "title": "Inferred buyer archetypes (not identified customers)",
+          "rows": [
+            {
+              "id": "employer-buyer",
+              "label": "Potential organizational buyer",
+              "value": "Employers or organizations managing employee travel, commutes, or meals; inferred from the stated Uber for Business use cases.",
+              "status": "inferred",
+              "evidence": {
+                "source_id": "uber_business_2",
+                "quote": "Subsidized employee commutes: Provide individual or group rides to and from work"
+              }
+            },
+            {
+              "id": "customer-experience-buyer",
+              "label": "Potential organizational buyer",
+              "value": "Organizations arranging courtesy rides for clients or customers; inferred from the stated use case.",
+              "status": "inferred",
+              "evidence": {
+                "source_id": "uber_business_2",
+                "quote": "Courtesy rides: Organize rides for workers, clients, and customers"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "quarter-financials",
+      "title": "Latest-quarter income statement",
+      "category": "financials",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Three months ended June 30, 2026 (unaudited; $ millions)",
+          "cols": [
+            "Line item",
+            "Three months ended June 30, 2026"
+          ],
+          "rows": [
+            {
+              "id": "revenue-q2",
+              "cells": [
+                "Revenue",
+                "14,191"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Revenue | $12,651 | $14,191 | $24,184 | $27,394"
+              }
+            },
+            {
+              "id": "costs-q2",
+              "cells": [
+                "Total costs and expenses",
+                "12,301"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Total costs and expenses | 11,201 | 12,301 | 21,506 | 23,581"
+              }
+            },
+            {
+              "id": "operating-income-q2",
+              "cells": [
+                "Income from operations",
+                "1,890"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Income from operations | 1,450 | 1,890 | 2,678 | 3,813"
+              }
+            },
+            {
+              "id": "interest-expense-q2",
+              "cells": [
+                "Interest expense",
+                "(127)"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Interest expense | (108) | (127) | (213) | (235)"
+              }
+            },
+            {
+              "id": "interest-income-q2",
+              "cells": [
+                "Interest income",
+                "172"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Interest income | 181 | 172 | 350 | 347"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "liquidity-debt",
+      "title": "Cash flow and debt",
+      "category": "cash_flow",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Cash flow and debt facts",
+          "cols": [
+            "Measure",
+            "Period/date",
+            "Amount ($ millions)"
+          ],
+          "rows": [
+            {
+              "id": "operating-cash-ytd",
+              "cells": [
+                "Net cash provided by operating activities",
+                "Six months ended June 30, 2026",
+                "5,213"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Net cash provided by operating activities | 4,888 | 5,213"
+              }
+            },
+            {
+              "id": "total-debt",
+              "cells": [
+                "Total debt",
+                "As of June 30, 2026",
+                "12,723"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Total debt(1) | $10,521 | $12,723"
+              }
+            },
+            {
+              "id": "short-debt",
+              "cells": [
+                "Short-term debt",
+                "As of June 30, 2026",
+                "1,997"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Short-term debt | — | 1,997"
+              }
+            },
+            {
+              "id": "long-debt",
+              "cells": [
+                "Long-term debt",
+                "As of June 30, 2026",
+                "10,726"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "Long-term debt | 10,521 | 10,726"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers-risks",
+      "title": "Drivers, catalysts, and risks",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Disclosed items",
+          "cols": [
+            "Item",
+            "Assessment"
+          ],
+          "rows": [
+            {
+              "id": "delivery-hero-agreement",
+              "cells": [
+                "Potential catalyst: Delivery Hero takeover offer",
+                "On July 16, 2026, Uber agreed to launch a voluntary public takeover offer; the filing says closing is expected in the second half of 2027 and is subject to conditions."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "The transaction is expected to close in the second half of 2027."
+              }
+            },
+            {
+              "id": "blacklane-agreement",
+              "cells": [
+                "Potential catalyst: Blacklane acquisition",
+                "The March 28, 2026 agreement is for approximately $550 million in cash; closing is subject to regulatory approvals and other conditions and is expected by the end of 2026."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "The transaction is subject to regulatory approvals, including antitrust review, and other closing conditions"
+              }
+            },
+            {
+              "id": "competition-risk",
+              "cells": [
+                "Risk: competition",
+                "The filing identifies the ability to compete in highly competitive markets as a forward-looking uncertainty."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "our ability to successfully compete in highly competitive markets"
+              }
+            },
+            {
+              "id": "regulatory-risk",
+              "cells": [
+                "Risk: regulation and licensing",
+                "The filing identifies compliance with laws and regulations and renewal of operating licenses as uncertainties."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "our ability to comply with existing, modified, or new laws and regulations applying to our business"
+              }
+            },
+            {
+              "id": "period-caveat",
+              "cells": [
+                "Interim-period caveat",
+                "The filing cautions that interim results are not necessarily indicative of full-year results."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sec_uber_10q",
+                "quote": "The results for the interim periods are not necessarily indicative of results for the full year."
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "unverified_claims_dropped": 0,
+    "sourced_items": 27
+  },
+  "usage": {
+    "input_tokens": 31704,
+    "cached_input_tokens": 16944,
+    "output_tokens": 7288,
+    "exa_search_calls": 4,
+    "exa_content_pages": 12,
+    "estimated_openai_usd": 0.00528944,
+    "estimated_exa_usd": 0.04,
+    "estimated_total_usd": 0.04528944
+  }
+}

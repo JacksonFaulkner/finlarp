@@ -1,0 +1,278 @@
+{
+  "ticker": "SONY",
+  "company": "SONY",
+  "market_cap_usd": 137657581568,
+  "as_of": "2026-09-14",
+  "filing": {
+    "form": "6-K",
+    "filed": "2026-09-14",
+    "accession": "0001104659-26-107340",
+    "url": "https://www.sec.gov/Archives/edgar/data/313838/000110465926107340/tm2625084d1_6k.htm"
+  },
+  "generated_at": "2026-09-27T18:55:22+00:00",
+  "model": "gpt-6-luna",
+  "source_count": 2,
+  "sources": [
+    {
+      "source_id": "sony_business_1",
+      "label": "Applications | Sony Semiconductor Solutions Group",
+      "url": "https://www.sony-semicon.com/en/application/index.html",
+      "kind": "exa_search_result"
+    },
+    {
+      "source_id": "sony_business_2",
+      "label": "Products & Solutions | Sony Semiconductor Solutions Group",
+      "url": "https://www.sony-semicon.com/en/products/index.html",
+      "kind": "exa_search_result"
+    }
+  ],
+  "sections": [
+    {
+      "id": "business_model",
+      "title": "Business model",
+      "category": "business_model",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Semiconductor Solutions Group",
+          "text": "Sony Semiconductor Solutions Group describes its business as providing semiconductor products and solutions centered on imaging and sensing technology to address customer challenges. This is a description of that group, not a full account of Sony Group’s business model.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sony_business_1",
+            "quote": "solves customer challenges with various semiconductor products and solutions that make full use of industry-leading advanced technologies centered on imaging and sensing technology."
+          }
+        }
+      ]
+    },
+    {
+      "id": "products_applications",
+      "title": "Products and applications",
+      "category": "products",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented product areas",
+          "cols": [
+            "Product area",
+            "Documented examples"
+          ],
+          "rows": [
+            {
+              "id": "image_sensors",
+              "cells": [
+                "Image sensors",
+                "Industrial, security camera, consumer camera, automotive, mobile, medical and scientific-use sensors"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_2",
+                "quote": "from those for industrial use, to sensors used in consumer cameras, as well as those for automotive and mobile applications."
+              }
+            },
+            {
+              "id": "edge_ai",
+              "cells": [
+                "Edge AI sensing platform",
+                "AITRIOS™"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_2",
+                "quote": "AITRIOS™ is an Edge AI Sensing Platform created by Sony Semiconductor Solutions Corporation."
+              }
+            },
+            {
+              "id": "other_products",
+              "cells": [
+                "Other product areas",
+                "LSI/IC/modules, microdisplays, board computers, semiconductor lasers and MEMS foundry services"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_2",
+                "quote": "LSI/IC/Module"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "end_markets",
+      "title": "End-market applications",
+      "category": "end_markets",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Applications identified by Sony Semiconductor Solutions Group",
+          "cols": [
+            "Application area",
+            "Documented uses"
+          ],
+          "rows": [
+            {
+              "id": "mobility",
+              "cells": [
+                "Mobility",
+                "In-vehicle entertainment, safety, automotive cameras/LiDAR and motorcycle displays"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_1",
+                "quote": "SSS focuses on enhancing in-vehicle entertainment in addition to realizing high safety performance"
+              }
+            },
+            {
+              "id": "manufacturing_logistics",
+              "cells": [
+                "Manufacturing and logistics",
+                "Manufacturing productivity; imaging for distribution sites"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_1",
+                "quote": "solve the problem of productivity improvement in every industries."
+              }
+            },
+            {
+              "id": "medical_research",
+              "cells": [
+                "Medical and research",
+                "Medical care and scientific or medical imaging requirements"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_1",
+                "quote": "from science and technology to medical care."
+              }
+            },
+            {
+              "id": "mobile_security_environment",
+              "cells": [
+                "Mobile, security and environment",
+                "Smartphone imaging/sensing, monitoring and recycling-related applications"
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_1",
+                "quote": "SSS’s image sensors for mobile deliver high performance and high quality"
+              }
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "title": "Demand evidence",
+          "text": "The supplied application material identifies use cases but does not quantify end-market demand or growth.",
+          "status": "reported",
+          "evidence": {
+            "source_id": "sony_business_1",
+            "quote": "Applications"
+          }
+        }
+      ]
+    },
+    {
+      "id": "customer_channel",
+      "title": "Customers and channels",
+      "category": "customer_map",
+      "blocks": [
+        {
+          "type": "table",
+          "title": "Documented facts and inferred buyer archetypes",
+          "cols": [
+            "Classification",
+            "Fact or archetype"
+          ],
+          "rows": [
+            {
+              "id": "documented_customers",
+              "cells": [
+                "Reported",
+                "SSS refers to partners and customers for its Edge AI sensing platform; no customer names are given in the supplied excerpt."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_2",
+                "quote": "for partners and customers."
+              }
+            },
+            {
+              "id": "documented_channel",
+              "cells": [
+                "Reported",
+                "SSS invites inquiries about products, solutions, specifications, quotations and purchase requests through an inquiry form."
+              ],
+              "status": "reported",
+              "evidence": {
+                "source_id": "sony_business_1",
+                "quote": "specifications, quotation / purchase requests, etc., please contact us using the Inquiry form"
+              }
+            },
+            {
+              "id": "inferred_buyer_archetypes",
+              "cells": [
+                "Inferred",
+                "Potential buyer archetypes include automotive, manufacturing, logistics, medical and mobile-technology organizations; these are inferred from listed applications, not named customers."
+              ],
+              "status": "inferred",
+              "evidence": {
+                "source_id": "sony_business_1",
+                "quote": "Mobility"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "drivers",
+      "title": "Potential drivers",
+      "category": "catalysts",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Inferred opportunity",
+          "text": "AITRIOS may support solution development with partners and customers; treating platform uptake as a business driver is an inference, not a disclosed forecast or catalyst.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sony_business_2",
+            "quote": "functions for easily building sensing solutions using Edge AI for partners and customers."
+          }
+        }
+      ]
+    },
+    {
+      "id": "risks",
+      "title": "Risks and limitations",
+      "category": "risks",
+      "blocks": [
+        {
+          "type": "text",
+          "title": "Inferred execution exposure",
+          "text": "Serving varied application areas may require products tailored to different requirements; this is an inferred execution consideration, not a risk factor stated by Sony.",
+          "status": "inferred",
+          "evidence": {
+            "source_id": "sony_business_2",
+            "quote": "a diverse range of needs in a broad range of fields"
+          }
+        }
+      ]
+    }
+  ],
+  "validation": {
+    "all_source_ids_resolve": true,
+    "all_quotes_verified": true,
+    "sourced_items": 14
+  },
+  "usage": {
+    "input_tokens": 5822,
+    "cached_input_tokens": 1095,
+    "output_tokens": 3045,
+    "exa_search_calls": 2,
+    "exa_content_pages": 6,
+    "estimated_openai_usd": 0.00200615,
+    "estimated_exa_usd": 0.02,
+    "estimated_total_usd": 0.02200615
+  }
+}

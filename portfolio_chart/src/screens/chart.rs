@@ -13,22 +13,24 @@ use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use chrono::NaiveDate;
-use ratatui::crossterm::event::{KeyCode, KeyEvent};
+use ratatui::Frame;
+use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::symbols::Marker;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Tabs};
-use ratatui::Frame;
 
-use crate::app::{Action, Ctx, Screen};
+use crate::app::{Action, Ctx, NvimAction, Screen};
 use crate::model::{Point, Source};
 use crate::ui::charts::LineChart;
-use crate::ui::help::{self, key, Key};
+use crate::ui::command_palette::{self, Command, Entry, Palette};
+use crate::ui::help::{self, Key, key};
 use crate::ui::layout::{self, FrameTitles, PaneOpts};
 use crate::ui::source_bar::{self, SourceInspector};
 use crate::ui::theme::Theme;
 
 const KEYS: &[Key] = &[
+    key("^p", "command palette"),
     key("1-5", "range 1M/3M/6M/1Y/ALL"),
     key("h/l", "move cursor"),
     key("H/L", "first / last point"),
@@ -59,7 +61,13 @@ pub enum Range {
 }
 
 impl Range {
-    const ALL: [Range; 5] = [Range::OneM, Range::ThreeM, Range::SixM, Range::OneY, Range::All];
+    const ALL: [Range; 5] = [
+        Range::OneM,
+        Range::ThreeM,
+        Range::SixM,
+        Range::OneY,
+        Range::All,
+    ];
 
     /// Calendar days back from the latest data point, or None for "All".
     fn days(self) -> Option<i64> {
@@ -87,7 +95,9 @@ impl Range {
     }
 
     fn parse(s: &str) -> Option<Range> {
-        Self::ALL.into_iter().find(|r| r.label().eq_ignore_ascii_case(s))
+        Self::ALL
+            .into_iter()
+            .find(|r| r.label().eq_ignore_ascii_case(s))
     }
 }
 
@@ -113,10 +123,13 @@ fn window(history: &[Snapshot], range: Range) -> &[Snapshot] {
 /// a zoomed-in range reads as "% change since the start of this window".
 /// Each point carries the formula and both snapshot values as its Source.
 fn to_points(win: &[Snapshot]) -> Vec<Point> {
-    let Some(base) = win.first() else { return Vec::new() };
+    let Some(base) = win.first() else {
+        return Vec::new();
+    };
     win.iter()
         .map(|p| {
-            let pct = (base.total_value != 0.0).then(|| (p.total_value / base.total_value - 1.0) * 100.0);
+            let pct =
+                (base.total_value != 0.0).then(|| (p.total_value / base.total_value - 1.0) * 100.0);
             let formula = match pct {
                 Some(pct) => format!(
                     "({} / {} - 1) × 100 = {:+.2}%",
@@ -124,14 +137,21 @@ fn to_points(win: &[Snapshot]) -> Vec<Point> {
                     money(base.total_value),
                     pct
                 ),
-                None => format!("start value {} is zero: % change undefined", money(base.total_value)),
+                None => format!(
+                    "start value {} is zero: % change undefined",
+                    money(base.total_value)
+                ),
             };
             let src = Source::derived(
                 format!("E*TRADE account snapshot {}", p.date),
                 formula,
                 vec![snapshot_source(p), snapshot_source(base)],
             );
-            Point { x: p.date.clone(), y: pct, src: Some(src) }
+            Point {
+                x: p.date.clone(),
+                y: pct,
+                src: Some(src),
+            }
         })
         .collect()
 }
@@ -165,12 +185,15 @@ fn load_history(path: &Path) -> Result<Vec<Snapshot>, String> {
     let cfg = duckdb::Config::default()
         .access_mode(duckdb::AccessMode::ReadOnly)
         .map_err(|e| e.to_string())?;
-    let conn = duckdb::Connection::open_with_flags(path, cfg).map_err(|e| format!("{}: {e}", path.display()))?;
+    let conn = duckdb::Connection::open_with_flags(path, cfg)
+        .map_err(|e| format!("{}: {e}", path.display()))?;
     let mut stmt = conn
         .prepare("SELECT CAST(date AS VARCHAR), total_value FROM portfolio_history ORDER BY date")
         .map_err(|e| e.to_string())?;
     let rows = stmt
-        .query_map([], |row| Ok((row.get::<_, String>(0)?, row.get::<_, Option<f64>>(1)?)))
+        .query_map([], |row| {
+            Ok((row.get::<_, String>(0)?, row.get::<_, Option<f64>>(1)?))
+        })
         .map_err(|e| e.to_string())?;
     let mut out = Vec::new();
     for r in rows {
@@ -192,13 +215,17 @@ pub struct ChartScreen {
     cursor: Option<usize>,
     marker: Marker,
     help: bool,
+    palette: Palette,
     inspector: SourceInspector,
     flash: Option<(String, Instant)>,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<ChartScreen> {
     let mut s = ChartScreen::new(ctx.theme, ctx.db_path.clone(), Vec::new());
-    s.range = arg.as_deref().and_then(Range::parse).unwrap_or(Range::ThreeM);
+    s.range = arg
+        .as_deref()
+        .and_then(Range::parse)
+        .unwrap_or(Range::ThreeM);
     s.reload();
     Ok(s)
 }
@@ -214,6 +241,7 @@ impl ChartScreen {
             cursor: None,
             marker: Marker::Braille,
             help: false,
+            palette: Palette::default(),
             inspector: SourceInspector::default(),
             flash: None,
         }
@@ -242,7 +270,9 @@ impl ChartScreen {
 
     fn move_cursor(&mut self, delta: isize) {
         let len = window(&self.history, self.range).len();
-        let Some(cur) = self.selected(len) else { return };
+        let Some(cur) = self.selected(len) else {
+            return;
+        };
         let next = cur.saturating_add_signed(delta).min(len - 1);
         self.cursor = if next == len - 1 { None } else { Some(next) };
     }
@@ -262,7 +292,10 @@ impl ChartScreen {
             Span::styled(" Portfolio  ", t.title()),
             Span::styled(money(snap.total_value), t.base()),
             Span::styled("  ", t.base()),
-            Span::styled(p.y.map_or("n/a".into(), |v| format!("{v:+.2}%")), t.signed(pct)),
+            Span::styled(
+                p.y.map_or("n/a".into(), |v| format!("{v:+.2}%")),
+                t.signed(pct),
+            ),
             Span::styled(format!("  {}", p.x), t.dim()),
         ]);
         let [l, r] = Layout::horizontal([Constraint::Min(0), Constraint::Length(26)]).areas(area);
@@ -290,7 +323,9 @@ impl ChartScreen {
         let t = &self.theme;
         let msg = match &self.load_err {
             Some(e) => format!("could not read portfolio_history: {e}"),
-            None => "no history yet — open the $ dashboard at least once today to start tracking".into(),
+            None => {
+                "no history yet — open the $ dashboard at least once today to start tracking".into()
+            }
         };
         let r = area.centered_vertically(Constraint::Length(1));
         frame.render_widget(Paragraph::new(msg).style(t.dim()).centered(), r);
@@ -302,7 +337,11 @@ impl Screen for ChartScreen {
         let area = frame.area();
         let t = self.theme;
         frame.render_widget(Block::new().style(t.base()), area);
-        if self.flash.as_ref().is_some_and(|(_, at)| at.elapsed() > FLASH_FOR) {
+        if self
+            .flash
+            .as_ref()
+            .is_some_and(|(_, at)| at.elapsed() > FLASH_FOR)
+        {
             self.flash = None;
         }
         let points = self.points();
@@ -311,11 +350,27 @@ impl Screen for ChartScreen {
                 Some(p) => format!(" % change since {} ", p.x),
                 None => " portfolio history ".into(),
             }),
-            detail_right: Line::from(format!(" {} ", if self.marker == Marker::Braille { "braille" } else { "octant" })),
+            detail_right: Line::from(format!(
+                " {} ",
+                if self.marker == Marker::Braille {
+                    "braille"
+                } else {
+                    "octant"
+                }
+            )),
             source: Line::from(" source "),
             ..Default::default()
         };
-        let p = layout::render_frame(frame, area, PaneOpts { nav_width: 0, ..Default::default() }, &titles, &t);
+        let p = layout::render_frame(
+            frame,
+            area,
+            PaneOpts {
+                nav_width: 0,
+                ..Default::default()
+            },
+            &titles,
+            &t,
+        );
         let flash = self.flash.as_ref().map(|(m, _)| m.as_str());
         help::render_footer(frame, p.footer, KEYS, flash, &t);
 
@@ -333,9 +388,43 @@ impl Screen for ChartScreen {
         if self.help {
             help::render_overlay(frame, area, "portfolio history", KEYS, &t);
         }
+        if self.palette.open {
+            self.palette.render(frame, area, &t);
+        }
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
+        if self.palette.open {
+            if let Some(command) = self.palette.handle(key) {
+                return match command {
+                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                        screen: screen.into(),
+                        arg: None,
+                    }),
+                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                        screen: screen.into(),
+                    }),
+                    Some(Command::Range(i)) => {
+                        self.range = Range::ALL[(i as usize).min(Range::ALL.len() - 1)];
+                        self.cursor = None;
+                        Action::None
+                    }
+                    _ => Action::None,
+                };
+            }
+        }
+        if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
+            let mut entries = command_palette::destinations("", "chart");
+            entries.extend(Range::ALL.iter().enumerate().map(|(i, r)| {
+                Entry::new(
+                    format!("Show {} history", r.label()),
+                    "chart range",
+                    Command::Range(i as u8),
+                )
+            }));
+            self.palette.show(entries);
+            return Action::None;
+        }
         if self.help {
             self.help = false;
             return Action::None;
@@ -355,7 +444,11 @@ impl Screen for ChartScreen {
             KeyCode::Char('H') | KeyCode::Home => self.cursor = Some(0),
             KeyCode::Char('L') | KeyCode::End => self.cursor = None,
             KeyCode::Char('m') => {
-                self.marker = if self.marker == Marker::Braille { Marker::Octant } else { Marker::Braille };
+                self.marker = if self.marker == Marker::Braille {
+                    Marker::Octant
+                } else {
+                    Marker::Braille
+                };
             }
             KeyCode::Char('r') => {
                 // Cheap local read: picks up whatever the latest `$` refresh
@@ -372,7 +465,10 @@ impl Screen for ChartScreen {
                     self.inspector.open(&src);
                 }
             }
-            _ => return source_bar::source_action(key, self.selected_source().as_ref()).unwrap_or(Action::None),
+            _ => {
+                return source_bar::source_action(key, self.selected_source().as_ref())
+                    .unwrap_or(Action::None);
+            }
         }
         Action::None
     }
@@ -389,9 +485,9 @@ impl Screen for ChartScreen {
 
 #[cfg(test)]
 mod tests {
+    use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::crossterm::event::KeyModifiers;
-    use ratatui::Terminal;
 
     use super::*;
 
@@ -401,8 +497,12 @@ mod tests {
         let start = NaiveDate::from_ymd_opt(2026, 1, 1).expect("date");
         (0..120)
             .map(|i| {
-                let v = 10_000.0 + (i as f64 - 40.0) * (i as f64 - 40.0) - 1_600.0 + i as f64 * 10.0;
-                Snapshot { date: (start + chrono::Duration::days(i)).to_string(), total_value: v }
+                let v =
+                    10_000.0 + (i as f64 - 40.0) * (i as f64 - 40.0) - 1_600.0 + i as f64 * 10.0;
+                Snapshot {
+                    date: (start + chrono::Duration::days(i)).to_string(),
+                    total_value: v,
+                }
             })
             .collect()
     }
@@ -416,7 +516,11 @@ mod tests {
         term.draw(|f| s.draw(f)).expect("draw");
         let buf = term.backend().buffer();
         (0..buf.area.height)
-            .map(|y| (0..buf.area.width).map(|x| buf[(x, y)].symbol()).collect::<String>())
+            .map(|y| {
+                (0..buf.area.width)
+                    .map(|x| buf[(x, y)].symbol())
+                    .collect::<String>()
+            })
             .collect::<Vec<_>>()
             .join("\n")
     }
@@ -428,7 +532,10 @@ mod tests {
     #[test]
     fn window_anchors_on_latest_point() {
         let h = history();
-        assert_eq!(window(&h, Range::OneM).first().map(|s| s.date.as_str()), Some("2026-03-31"));
+        assert_eq!(
+            window(&h, Range::OneM).first().map(|s| s.date.as_str()),
+            Some("2026-03-31")
+        );
         assert_eq!(window(&h, Range::All).len(), 120);
         assert!(window(&[], Range::OneM).is_empty());
     }
@@ -436,23 +543,46 @@ mod tests {
     #[test]
     fn points_carry_formula_and_both_snapshots() {
         let pts = to_points(&[
-            Snapshot { date: "2026-01-01".into(), total_value: 2_000.0 },
-            Snapshot { date: "2026-01-02".into(), total_value: 2_500.0 },
+            Snapshot {
+                date: "2026-01-01".into(),
+                total_value: 2_000.0,
+            },
+            Snapshot {
+                date: "2026-01-02".into(),
+                total_value: 2_500.0,
+            },
         ]);
         assert_eq!(pts[1].y, Some(25.0));
         let src = pts[1].src.as_ref().expect("src");
         assert_eq!(src.label, "E*TRADE account snapshot 2026-01-02");
-        assert_eq!(src.formula.as_deref(), Some("($2,500.00 / $2,000.00 - 1) × 100 = +25.00%"));
+        assert_eq!(
+            src.formula.as_deref(),
+            Some("($2,500.00 / $2,000.00 - 1) × 100 = +25.00%")
+        );
         assert_eq!(src.inputs.len(), 2);
-        assert!(src.inputs[0].label.contains("2026-01-02: total_value $2,500.00"));
-        assert!(src.inputs[1].label.contains("2026-01-01: total_value $2,000.00"));
+        assert!(
+            src.inputs[0]
+                .label
+                .contains("2026-01-02: total_value $2,500.00")
+        );
+        assert!(
+            src.inputs[1]
+                .label
+                .contains("2026-01-01: total_value $2,000.00")
+        );
     }
 
     #[test]
     fn zero_start_value_is_a_gap_not_zero() {
         let pts = to_points(&[
-            Snapshot { date: "d0".into(), total_value: 0.0 },
-            Snapshot { date: "d1".into(), total_value: 5.0 },
+            Snapshot {
+                date: "d0".into(),
+                total_value: 0.0,
+            },
+            Snapshot {
+                date: "d1".into(),
+                total_value: 5.0,
+            },
         ]);
         assert_eq!(pts[1].y, None);
     }
@@ -472,7 +602,10 @@ mod tests {
         assert!(out.contains("Portfolio"), "{out}");
         assert!(out.contains(&money(last.total_value)), "{out}");
         assert!(out.contains("1M 3M 6M 1Y ALL"), "{out}");
-        assert!(out.contains(&format!("E*TRADE account snapshot {}", last.date)), "{out}");
+        assert!(
+            out.contains(&format!("E*TRADE account snapshot {}", last.date)),
+            "{out}"
+        );
 
         press(&mut s, KeyCode::Char('h'));
         let out = render(&mut s);
@@ -511,7 +644,11 @@ mod tests {
 
     #[test]
     fn empty_and_unreadable_db_render_a_message() {
-        let mut s = ChartScreen::new(Theme::default(), PathBuf::from("/nonexistent/x.duckdb"), Vec::new());
+        let mut s = ChartScreen::new(
+            Theme::default(),
+            PathBuf::from("/nonexistent/x.duckdb"),
+            Vec::new(),
+        );
         assert!(render(&mut s).contains("no history yet"));
         s.reload();
         assert!(render(&mut s).contains("could not read portfolio_history"));
