@@ -23,8 +23,15 @@ local EXIT_BACK_TO_PICKER = 90
 --- Rebuilds the release binary if any Rust source is newer than it, so
 --- editing a screen and reopening the popup picks up the change without
 --- a manual `cargo build --release` — the stale-binary trap this plugin
---- kept hitting since nvim just execs whatever's on disk.
-local function ensure_built()
+--- kept hitting since nvim just execs whatever's on disk. The build runs
+--- async (a release build takes minutes and used to freeze nvim); `on_ready`
+--- fires once the binary is current, and calls made mid-build wait for it.
+local build_waiters = nil -- non-nil while a build is running
+local function ensure_built(on_ready)
+  if build_waiters then
+    table.insert(build_waiters, on_ready)
+    return
+  end
   local bin_mtime = vim.fn.getftime(binary_path) -- -1 if missing
   local srcs = vim.fn.glob(crate_dir .. "/src/**/*.rs", false, true)
   table.insert(srcs, crate_dir .. "/Cargo.toml")
@@ -37,13 +44,22 @@ local function ensure_built()
     end
   end
   if not stale then
+    on_ready()
     return
   end
   vim.notify("security_spread: rebuilding portfolio_chart binary...", vim.log.levels.INFO)
-  local result = vim.fn.system({ "cargo", "build", "--release", "--manifest-path", crate_dir .. "/Cargo.toml" })
-  if vim.v.shell_error ~= 0 then
-    vim.notify("security_spread: cargo build failed:\n" .. result, vim.log.levels.ERROR)
-  end
+  build_waiters = { on_ready }
+  vim.system({ "cargo", "build", "--release", "--manifest-path", crate_dir .. "/Cargo.toml" }, { text = true },
+    vim.schedule_wrap(function(res)
+      if res.code ~= 0 then
+        vim.notify("security_spread: cargo build failed:\n" .. (res.stderr or ""), vim.log.levels.ERROR)
+      end
+      local waiters = build_waiters
+      build_waiters = nil
+      for _, fn in ipairs(waiters) do
+        fn()
+      end
+    end))
 end
 
 --- @return string "#rrggbb", or `fallback` (often "" for "no explicit
@@ -198,9 +214,14 @@ end
 --- @param arg string|nil screen argument (symbol, query, range)
 --- @param opts table|nil { title = string, on_exit = fun(code: integer, action: table|nil) }
 function M.open_screen(screen, arg, opts)
+  ensure_built(function()
+    M._open_built(screen, arg, opts)
+  end)
+end
+
+function M._open_built(screen, arg, opts)
   opts = opts or {}
   screen = screen or "chart"
-  ensure_built()
   if vim.fn.executable(binary_path) ~= 1 then
     vim.notify(
       "security_spread: portfolio_chart binary not built — run `cargo build --release` in " .. crate_dir,

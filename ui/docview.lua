@@ -111,7 +111,7 @@ function M.open(url, quote)
         vim.notify("security_spread: docview failed: " .. (r.stderr or ""):sub(-300), vim.log.levels.ERROR)
         return
       end
-      local ok, res = pcall(vim.json.decode, r.stdout)
+      local ok, res = pcall(vim.json.decode, r.stdout, { luanil = { object = true, array = true } })
       if not ok then
         vim.notify("security_spread: bad docview output", vim.log.levels.ERROR)
         return

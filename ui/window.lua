@@ -642,6 +642,9 @@ function M.open(name, quotes, opts)
     region = region,
     opts = opts,
   }
+  -- Captured before draw(), which focuses the first tile: after it the
+  -- current buffer is a tile's scratch buffer, not what shows in the gaps.
+  local prev_buf = vim.api.nvim_get_current_buf()
   draw(name)
 
   -- Tile floats have q/<Esc> bound, but whatever's showing in the gaps
@@ -656,7 +659,7 @@ function M.open(name, quotes, opts)
   local background_buf = existing and existing.background_buf and vim.api.nvim_buf_is_valid(existing.background_buf)
       and existing.background_buf
       or (opts.win and vim.api.nvim_win_is_valid(opts.win) and vim.api.nvim_win_get_buf(opts.win))
-      or vim.api.nvim_get_current_buf()
+      or prev_buf
   sessions[name].background_buf = background_buf
   vim.keymap.set("n", "q", function() M.close(name) end, { buffer = background_buf, silent = true })
   vim.keymap.set("n", "<Esc>", function() M.close(name) end, { buffer = background_buf, silent = true })
@@ -741,9 +744,16 @@ function M.close(name)
     pcall(vim.keymap.del, "n", "?", { buffer = s.background_buf })
     pcall(vim.keymap.del, "n", "r", { buffer = s.background_buf })
     pcall(vim.keymap.del, "n", "R", { buffer = s.background_buf })
+    pcall(vim.keymap.del, "n", "p", { buffer = s.background_buf })
   end
   sessions[name] = nil
   close_help_win()
+  -- A docked dashboard's host split (picker.host_win_for_slot) exists only
+  -- for it; close it too. After sessions[name] = nil so the WinClosed
+  -- autocmd this fires doesn't re-enter M.close. pcall: it may be the last window.
+  if s and s.region.win and vim.api.nvim_win_is_valid(s.region.win) then
+    pcall(vim.api.nvim_win_close, s.region.win, true)
+  end
 end
 
 --- @return string[] names of currently open sessions

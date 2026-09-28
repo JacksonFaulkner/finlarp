@@ -57,7 +57,7 @@ function M.open_chunk(id)
   id = tostring(id)
   vim.system({ python, script, "get", id, "--context", "2", "--json" }, { text = true }, function(res)
     vim.schedule(function()
-      local ok, rows = pcall(vim.json.decode, res.stdout or "")
+      local ok, rows = pcall(vim.json.decode, res.stdout or "", { luanil = { object = true, array = true } })
       if res.code ~= 0 or not ok or not rows[1] then
         vim.notify("security_spread: " .. (res.stderr or "search get failed"), vim.log.levels.ERROR)
         return
@@ -135,7 +135,7 @@ function M.pick(initial)
           return
         end
         local res = vim.system({ python, script, "get", id, "--json" }, { text = true }):wait()
-        local rok, rows = pcall(vim.json.decode, res.stdout or "")
+        local rok, rows = pcall(vim.json.decode, res.stdout or "", { luanil = { object = true, array = true } })
         if rok and rows[1] and rows[1].url then
           local words = {}
           for w in rows[1].text:gmatch("%S+") do
@@ -153,7 +153,7 @@ function M.pick(initial)
           return
         end
         local res = vim.system({ python, script, "get", id, "--json" }, { text = true }):wait()
-        local rok, rows = pcall(vim.json.decode, res.stdout or "")
+        local rok, rows = pcall(vim.json.decode, res.stdout or "", { luanil = { object = true, array = true } })
         if rok and rows[1] and rows[1].url then
           vim.ui.open(rows[1].url)
         end
