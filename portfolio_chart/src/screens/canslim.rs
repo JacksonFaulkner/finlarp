@@ -341,8 +341,8 @@ impl Screen for Canslim {
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         self.flash = None;
-        if self.palette.open {
-            if let Some(command) = self.palette.handle(key) {
+        if self.palette.open
+            && let Some(command) = self.palette.handle(key) {
                 return match command {
                     Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
                         screen: screen.into(),
@@ -358,7 +358,6 @@ impl Screen for Canslim {
                     _ => Action::None,
                 };
             }
-        }
         if self.help {
             self.help = false;
             return Action::None;

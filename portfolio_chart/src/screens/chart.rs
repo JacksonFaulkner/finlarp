@@ -394,8 +394,8 @@ impl Screen for ChartScreen {
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.palette.open {
-            if let Some(command) = self.palette.handle(key) {
+        if self.palette.open
+            && let Some(command) = self.palette.handle(key) {
                 return match command {
                     Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
                         screen: screen.into(),
@@ -412,7 +412,6 @@ impl Screen for ChartScreen {
                     _ => Action::None,
                 };
             }
-        }
         if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
             let mut entries = command_palette::destinations("", "chart");
             entries.extend(Range::ALL.iter().enumerate().map(|(i, r)| {

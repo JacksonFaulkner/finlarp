@@ -163,7 +163,7 @@ impl Palette {
     pub fn render(&mut self, frame: &mut Frame, area: Rect, theme: &Theme) {
         let q = self.query.clone();
         let visible = self.visible();
-        let width = area.width.min(72).max(1);
+        let width = area.width.clamp(1, 72);
         let height = area.height.min((visible.len() as u16 + 4).clamp(6, 18));
         let rect = area.centered(Constraint::Length(width), Constraint::Length(height));
         let selected = self.state.selected().unwrap_or(0);

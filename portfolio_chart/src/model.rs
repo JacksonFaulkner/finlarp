@@ -216,15 +216,6 @@ pub struct Section {
     pub badge: String,
 }
 
-impl Section {
-    /// Every Source in the section in display order: the audit view groups these by document.
-    pub fn sources(&self) -> impl Iterator<Item = &Source> {
-        self.blocks
-            .iter()
-            .flat_map(|b| (0..b.len()).filter_map(move |i| b.source(i)))
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
