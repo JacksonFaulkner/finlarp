@@ -43,7 +43,13 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
             SCREENS.join("|")
         ));
     }
-    Ok(Cli { bg: get(0), fg_up: get(1), fg_down: get(2), screen, arg: get(4) })
+    Ok(Cli {
+        bg: get(0),
+        fg_up: get(1),
+        fg_down: get(2),
+        screen,
+        arg: get(4),
+    })
 }
 
 fn db_path() -> PathBuf {
@@ -65,7 +71,11 @@ fn main() {
     };
     let ctx = app::Ctx {
         db_path: db_path(),
-        theme: Theme::from_args(cli.bg.as_deref(), cli.fg_up.as_deref(), cli.fg_down.as_deref()),
+        theme: Theme::from_args(
+            cli.bg.as_deref(),
+            cli.fg_up.as_deref(),
+            cli.fg_down.as_deref(),
+        ),
     };
     let arg = cli.arg;
     let res = match cli.screen.as_str() {
@@ -81,7 +91,10 @@ fn main() {
             eprintln!("portfolio_chart: {e}");
             // stderr dies with the popup/float; hand the message to nvim too
             if let Ok(path) = env::var(app::ACTION_FILE_ENV) {
-                let _ = std::fs::write(path, serde_json::json!({ "error": e.to_string() }).to_string());
+                let _ = std::fs::write(
+                    path,
+                    serde_json::json!({ "error": e.to_string() }).to_string(),
+                );
             }
             std::process::exit(1);
         }
@@ -99,14 +112,24 @@ mod tests {
     #[test]
     fn defaults_to_chart_with_no_colours() {
         let c = parse_args(&args(&[])).expect("parse");
-        assert_eq!(c, Cli { bg: None, fg_up: None, fg_down: None, screen: "chart".into(), arg: None });
+        assert_eq!(
+            c,
+            Cli {
+                bg: None,
+                fg_up: None,
+                fg_down: None,
+                screen: "chart".into(),
+                arg: None
+            }
+        );
         let c = parse_args(&args(&["", "", "", ""])).expect("parse");
         assert_eq!(c.screen, "chart");
     }
 
     #[test]
     fn full_positional() {
-        let c = parse_args(&args(&["#101010", "#00ff00", "#ff0000", "canslim", "MU"])).expect("parse");
+        let c =
+            parse_args(&args(&["#101010", "#00ff00", "#ff0000", "canslim", "MU"])).expect("parse");
         assert_eq!(c.bg.as_deref(), Some("#101010"));
         assert_eq!(c.screen, "canslim");
         assert_eq!(c.arg.as_deref(), Some("MU"));

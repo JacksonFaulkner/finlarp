@@ -156,7 +156,9 @@ function M.show(symbols)
 
     local close = function()
       if placement then
-        pcall(function() placement:close() end)
+        pcall(function()
+          placement:close()
+        end)
       end
       if tmp_path then
         vim.fn.delete(tmp_path)

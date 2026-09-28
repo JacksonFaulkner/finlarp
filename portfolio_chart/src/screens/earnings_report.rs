@@ -220,8 +220,7 @@ fn encode_fragment(s: &str) -> String {
 impl EarningsReport {
     fn selected_source(&self) -> Option<&Source> {
         self.view.selected_source(
-            self
-                .sections
+            self.sections
                 .get(self.nav.selected())
                 .map(|s| s.blocks.as_slice())
                 .unwrap_or(&[]),

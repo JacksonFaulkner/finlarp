@@ -543,25 +543,26 @@ impl Screen for Search {
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         if self.palette.open
-            && let Some(command) = self.palette.handle(key) {
-                return match command {
-                    // the query is only an argument for search itself; chart and
-                    // earnings take a range/ticker and reject free text
-                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
-                        screen: screen.into(),
-                        arg: (screen == "search").then(|| self.input.value().to_string()),
-                    }),
-                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
-                        screen: screen.into(),
-                    }),
-                    Some(Command::Pane(pane)) => {
-                        self.focus = [Pane::Input, Pane::Facets, Pane::Results, Pane::Preview]
-                            [(pane as usize).min(3)];
-                        Action::None
-                    }
-                    _ => Action::None,
-                };
-            }
+            && let Some(command) = self.palette.handle(key)
+        {
+            return match command {
+                // the query is only an argument for search itself; chart and
+                // earnings take a range/ticker and reject free text
+                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                    screen: screen.into(),
+                    arg: (screen == "search").then(|| self.input.value().to_string()),
+                }),
+                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                    screen: screen.into(),
+                }),
+                Some(Command::Pane(pane)) => {
+                    self.focus = [Pane::Input, Pane::Facets, Pane::Results, Pane::Preview]
+                        [(pane as usize).min(3)];
+                    Action::None
+                }
+                _ => Action::None,
+            };
+        }
         if self.show_help {
             self.show_help = false;
             return Action::None;

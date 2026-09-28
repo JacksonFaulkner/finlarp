@@ -11,12 +11,15 @@
 //                segments; optional colour-by-sign split at zero crossings;
 //                the cursor point (and optional guide line) are own datasets
 
+use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::symbols::Marker;
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Axis, Bar, BarChart, BarGroup, Block, Chart, Dataset, GraphType, Sparkline, SparklineBar, Widget};
-use ratatui::Frame;
+use ratatui::widgets::{
+    Axis, Bar, BarChart, BarGroup, Block, Chart, Dataset, GraphType, Sparkline, SparklineBar,
+    Widget,
+};
 
 use crate::model::{BarItem, Point};
 use crate::ui::text;
@@ -24,18 +27,50 @@ use crate::ui::theme::Theme;
 
 /// Grouped bars: `value` (signed colour) beside `compare` (dim) per item,
 /// with the selected index highlighted. Handles negative values.
-pub fn grouped_bars(frame: &mut Frame, area: Rect, items: &[BarItem], selected: Option<usize>, theme: &Theme) {
-    frame.render_widget(GroupedBars { items, selected, theme }, area);
+pub fn grouped_bars(
+    frame: &mut Frame,
+    area: Rect,
+    items: &[BarItem],
+    selected: Option<usize>,
+    theme: &Theme,
+) {
+    frame.render_widget(
+        GroupedBars {
+            items,
+            selected,
+            theme,
+        },
+        area,
+    );
 }
 
 /// One-line sparkline; None points render as absent (gap symbol).
 pub fn sparkline(frame: &mut Frame, area: Rect, points: &[Point], theme: &Theme) {
-    frame.render_widget(SparkBars { points, selected: None, theme }, area);
+    frame.render_widget(
+        SparkBars {
+            points,
+            selected: None,
+            theme,
+        },
+        area,
+    );
 }
 
 /// Line chart over points with a cursor at `selected`; x labels from Point.x.
-pub fn line_chart(frame: &mut Frame, area: Rect, title: &str, points: &[Point], selected: Option<usize>, theme: &Theme) {
-    frame.render_widget(LineChart::new(points, theme).title(title).selected(selected), area);
+pub fn line_chart(
+    frame: &mut Frame,
+    area: Rect,
+    title: &str,
+    points: &[Point],
+    selected: Option<usize>,
+    theme: &Theme,
+) {
+    frame.render_widget(
+        LineChart::new(points, theme)
+            .title(title)
+            .selected(selected),
+        area,
+    );
 }
 
 // ---------------------------------------------------------------- bars
@@ -55,7 +90,11 @@ impl Widget for GroupedBars<'_> {
         if self.items.is_empty() || area.is_empty() {
             return;
         }
-        if self.items.iter().any(|i| i.value < 0.0 || i.compare.is_some_and(|c| c < 0.0)) {
+        if self
+            .items
+            .iter()
+            .any(|i| i.value < 0.0 || i.compare.is_some_and(|c| c < 0.0))
+        {
             two_sided(&self, area, buf);
         } else {
             grouped(&self, area, buf);
@@ -64,7 +103,11 @@ impl Widget for GroupedBars<'_> {
 }
 
 fn per_group(items: &[BarItem]) -> u16 {
-    if items.iter().any(|i| i.compare.is_some()) { 2 } else { 1 }
+    if items.iter().any(|i| i.compare.is_some()) {
+        2
+    } else {
+        1
+    }
 }
 
 /// Bar width that fits n groups of g bars with 1-cell group gaps.
@@ -76,8 +119,19 @@ fn bar_width(area: Rect, n: usize, g: u16) -> u16 {
 
 fn grouped(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
     let th = w.theme;
-    let max = w.items.iter().flat_map(|i| [Some(i.value), i.compare]).flatten().fold(0.0_f64, f64::max);
-    let scale = |v: f64| if max > 0.0 { (v / max * SCALE).round() as u64 } else { 0 };
+    let max = w
+        .items
+        .iter()
+        .flat_map(|i| [Some(i.value), i.compare])
+        .flatten()
+        .fold(0.0_f64, f64::max);
+    let scale = |v: f64| {
+        if max > 0.0 {
+            (v / max * SCALE).round() as u64
+        } else {
+            0
+        }
+    };
     let g = per_group(w.items);
     let bw = bar_width(area, w.items.len(), g);
     let groups: Vec<BarGroup> = w
@@ -86,16 +140,29 @@ fn grouped(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
         .enumerate()
         .map(|(i, it)| {
             let sel = w.selected == Some(i);
-            let style = if sel { th.accent() } else { th.signed(it.value) };
-            let mut bars = vec![Bar::new(scale(it.value)).style(style).value_style(th.selected()).text_value(text::fmt_num(it.value))];
+            let style = if sel {
+                th.accent()
+            } else {
+                th.signed(it.value)
+            };
+            let mut bars = vec![
+                Bar::new(scale(it.value))
+                    .style(style)
+                    .value_style(th.selected())
+                    .text_value(text::fmt_num(it.value)),
+            ];
             if g == 2 {
                 bars.push(match it.compare {
-                    Some(c) => Bar::new(scale(c)).style(th.dim()).value_style(th.selected()).text_value(text::fmt_num(c)),
+                    Some(c) => Bar::new(scale(c))
+                        .style(th.dim())
+                        .value_style(th.selected())
+                        .text_value(text::fmt_num(c)),
                     None => Bar::new(0).text_value(""),
                 });
             }
             let label = text::truncate(&it.label, (bw * g) as usize);
-            BarGroup::new(bars).label(Line::styled(label, if sel { th.accent() } else { th.dim() }).centered())
+            BarGroup::new(bars)
+                .label(Line::styled(label, if sel { th.accent() } else { th.dim() }).centered())
         })
         .collect();
     BarChart::grouped(groups)
@@ -111,11 +178,18 @@ fn grouped(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
 /// resolution), negative bars grow down (1/2 cell). Labels on the last row.
 fn two_sided(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
     let th = w.theme;
-    let [plot, labels] = area.layout(&Layout::vertical([Constraint::Fill(1), Constraint::Length(1)]));
+    let [plot, labels] = area.layout(&Layout::vertical([
+        Constraint::Fill(1),
+        Constraint::Length(1),
+    ]));
     if plot.height < 2 {
         return;
     }
-    let vals = w.items.iter().flat_map(|i| [Some(i.value), i.compare]).flatten();
+    let vals = w
+        .items
+        .iter()
+        .flat_map(|i| [Some(i.value), i.compare])
+        .flatten();
     let (lo, hi) = vals.fold((0.0_f64, 0.0_f64), |(l, h), v| (l.min(v), h.max(v)));
     let span = (hi - lo).max(f64::EPSILON);
     // rows above the axis for positives, below for negatives (axis row itself separate)
@@ -123,7 +197,11 @@ fn two_sided(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
     let up_rows = ((hi / span) * rows).round() as u16;
     let axis_y = plot.y + up_rows;
     let down_rows = plot.bottom().saturating_sub(axis_y + 1);
-    let unit = if up_rows > 0 { hi / up_rows as f64 } else { -lo / down_rows.max(1) as f64 };
+    let unit = if up_rows > 0 {
+        hi / up_rows as f64
+    } else {
+        -lo / down_rows.max(1) as f64
+    };
     for x in plot.left()..plot.right() {
         buf[(x, axis_y)].set_symbol("─").set_style(th.border());
     }
@@ -140,14 +218,26 @@ fn two_sided(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
                 _ => th.dim(),
             };
             if let Some(v) = *v {
-                let r = Rect { x, width: bw, ..plot }.intersection(plot);
+                let r = Rect {
+                    x,
+                    width: bw,
+                    ..plot
+                }
+                .intersection(plot);
                 draw_signed_bar(buf, r, axis_y, v, unit, style);
             }
             x = x.saturating_add(bw);
         }
-        let group = Rect { x: x.saturating_sub(bw * g), width: bw * g, ..labels }.intersection(labels);
+        let group = Rect {
+            x: x.saturating_sub(bw * g),
+            width: bw * g,
+            ..labels
+        }
+        .intersection(labels);
         let label = text::truncate(&it.label, group.width as usize);
-        Line::styled(label, if sel { th.accent() } else { th.dim() }).centered().render(group, buf);
+        Line::styled(label, if sel { th.accent() } else { th.dim() })
+            .centered()
+            .render(group, buf);
         x = x.saturating_add(1);
         if x >= plot.right() {
             break;
@@ -155,7 +245,14 @@ fn two_sided(w: &GroupedBars, area: Rect, buf: &mut Buffer) {
     }
 }
 
-fn draw_signed_bar(buf: &mut Buffer, r: Rect, axis_y: u16, v: f64, unit: f64, style: ratatui::style::Style) {
+fn draw_signed_bar(
+    buf: &mut Buffer,
+    r: Rect,
+    axis_y: u16,
+    v: f64,
+    unit: f64,
+    style: ratatui::style::Style,
+) {
     if r.is_empty() || unit <= 0.0 {
         return;
     }
@@ -217,14 +314,24 @@ impl Widget for SparkBars<'_> {
             return;
         }
         // min..max scaling: a sparkline shows shape (the values sit beside it)
-        let ys = self.points.iter().filter_map(|p| p.y).filter(|y| y.is_finite());
+        let ys = self
+            .points
+            .iter()
+            .filter_map(|p| p.y)
+            .filter(|y| y.is_finite());
         let (lo, hi) = ys.fold((f64::MAX, f64::MIN), |(l, h), y| (l.min(y), h.max(y)));
         let span = hi - lo;
         let (per, first) = self.geometry(area.width);
         let mut data: Vec<SparklineBar> = Vec::new();
         for (i, p) in self.points.iter().enumerate().skip(first) {
             // the floor of 100 keeps the minimum visible (▁), distinct from absent (·)
-            let v = p.y.map(|y| if span > 0.0 { ((y - lo) / span * 900.0) as u64 + 100 } else { 500 });
+            let v = p.y.map(|y| {
+                if span > 0.0 {
+                    ((y - lo) / span * 900.0) as u64 + 100
+                } else {
+                    500
+                }
+            });
             let style = if self.selected == Some(i) {
                 th.accent()
             } else {
@@ -270,7 +377,16 @@ pub struct LineChart<'a> {
 
 impl<'a> LineChart<'a> {
     pub fn new(points: &'a [Point], theme: &'a Theme) -> Self {
-        Self { title: "", points, selected: None, theme, signed: false, marker: Marker::Braille, unit: "", cursor_line: false }
+        Self {
+            title: "",
+            points,
+            selected: None,
+            theme,
+            signed: false,
+            marker: Marker::Braille,
+            unit: "",
+            cursor_line: false,
+        }
     }
     pub fn title(mut self, title: &'a str) -> Self {
         self.title = title;
@@ -321,7 +437,11 @@ fn split_by_sign(run: &[(f64, f64)]) -> Vec<(bool, Vec<(f64, f64)>)> {
             Some((seg_up, seg)) if *seg_up == up => seg.push((x, y)),
             Some((_, seg)) => {
                 let (x0, y0) = seg.last().copied().unwrap_or((x, y));
-                let xc = if y != y0 { x0 + (0.0 - y0) * (x - x0) / (y - y0) } else { x };
+                let xc = if y != y0 {
+                    x0 + (0.0 - y0) * (x - x0) / (y - y0)
+                } else {
+                    x
+                };
                 seg.push((xc, 0.0));
                 out.push((up, vec![(xc, 0.0), (x, y)]));
             }
@@ -340,9 +460,19 @@ impl Widget for LineChart<'_> {
         }
         let runs = runs(self.points);
         let ys = runs.iter().flatten().map(|&(_, y)| y);
-        let init = if self.signed { (0.0, 0.0) } else { (f64::MAX, f64::MIN) };
+        let init = if self.signed {
+            (0.0, 0.0)
+        } else {
+            (f64::MAX, f64::MIN)
+        };
         let (lo, hi) = ys.fold(init, |(l, h): (f64, f64), y| (l.min(y), h.max(y)));
-        let (lo, hi) = if lo > hi { (0.0, 1.0) } else if lo == hi { (lo - 1.0, hi + 1.0) } else { (lo, hi) };
+        let (lo, hi) = if lo > hi {
+            (0.0, 1.0)
+        } else if lo == hi {
+            (lo - 1.0, hi + 1.0)
+        } else {
+            (lo, hi)
+        };
         let pad = (hi - lo) * 0.05;
         let bounds = [lo - pad, hi + pad];
         let n = self.points.len();
@@ -354,7 +484,9 @@ impl Widget for LineChart<'_> {
             .into_iter()
             .collect();
         let guide: Vec<(f64, f64)> = match self.selected {
-            Some(i) if self.cursor_line && i < n => vec![(i as f64, bounds[0]), (i as f64, bounds[1])],
+            Some(i) if self.cursor_line && i < n => {
+                vec![(i as f64, bounds[0]), (i as f64, bounds[1])]
+            }
             _ => vec![],
         };
         let segments: Vec<(bool, Vec<(f64, f64)>)> = if self.signed {
@@ -364,14 +496,36 @@ impl Widget for LineChart<'_> {
         };
 
         // guide first so the data draws over it
-        let mut datasets = vec![Dataset::default().marker(Marker::Braille).graph_type(GraphType::Line).style(th.border()).data(&guide)];
+        let mut datasets = vec![
+            Dataset::default()
+                .marker(Marker::Braille)
+                .graph_type(GraphType::Line)
+                .style(th.border())
+                .data(&guide),
+        ];
         for (up, seg) in &segments {
             let style = if *up { th.up() } else { th.down() };
             // a lone point between gaps would be invisible as a line: scatter it
-            let kind = if seg.len() == 1 { GraphType::Scatter } else { GraphType::Line };
-            datasets.push(Dataset::default().marker(self.marker).graph_type(kind).style(style).data(seg));
+            let kind = if seg.len() == 1 {
+                GraphType::Scatter
+            } else {
+                GraphType::Line
+            };
+            datasets.push(
+                Dataset::default()
+                    .marker(self.marker)
+                    .graph_type(kind)
+                    .style(style)
+                    .data(seg),
+            );
         }
-        datasets.push(Dataset::default().marker(Marker::Dot).graph_type(GraphType::Scatter).style(th.accent()).data(&cursor));
+        datasets.push(
+            Dataset::default()
+                .marker(Marker::Dot)
+                .graph_type(GraphType::Scatter)
+                .style(th.accent())
+                .data(&cursor),
+        );
 
         let x_labels: Vec<Line> = match n {
             0 => vec![],
@@ -383,11 +537,25 @@ impl Widget for LineChart<'_> {
             ],
         };
         let lbl = |v: f64| Line::from(format!("{}{}", text::fmt_num(v), self.unit));
-        let y_labels = if self.signed && lo < 0.0 && hi > 0.0 { vec![lbl(lo), lbl(0.0), lbl(hi)] } else { vec![lbl(lo), lbl(hi)] };
+        let y_labels = if self.signed && lo < 0.0 && hi > 0.0 {
+            vec![lbl(lo), lbl(0.0), lbl(hi)]
+        } else {
+            vec![lbl(lo), lbl(hi)]
+        };
         let sel_note = self.selected.and_then(|i| self.points.get(i)).map(|p| {
-            let v = p.y.map(|y| format!("{}{}", text::fmt_num(y), self.unit)).unwrap_or_else(|| "–".into());
-            let style = if self.signed { p.y.map_or(th.dim(), |y| th.signed(y)) } else { th.accent() };
-            Line::from(vec![Span::styled(format!("{} ", p.x), th.dim()), Span::styled(v, style)]).right_aligned()
+            let v =
+                p.y.map(|y| format!("{}{}", text::fmt_num(y), self.unit))
+                    .unwrap_or_else(|| "–".into());
+            let style = if self.signed {
+                p.y.map_or(th.dim(), |y| th.signed(y))
+            } else {
+                th.accent()
+            };
+            Line::from(vec![
+                Span::styled(format!("{} ", p.x), th.dim()),
+                Span::styled(v, style),
+            ])
+            .right_aligned()
         });
         let mut block = Block::new();
         if !self.title.is_empty() {
@@ -399,8 +567,18 @@ impl Widget for LineChart<'_> {
         Chart::new(datasets)
             .block(block)
             .style(th.base())
-            .x_axis(Axis::default().bounds([0.0, xmax]).labels(x_labels).style(th.dim()))
-            .y_axis(Axis::default().bounds(bounds).labels(y_labels).style(th.dim()))
+            .x_axis(
+                Axis::default()
+                    .bounds([0.0, xmax])
+                    .labels(x_labels)
+                    .style(th.dim()),
+            )
+            .y_axis(
+                Axis::default()
+                    .bounds(bounds)
+                    .labels(y_labels)
+                    .style(th.dim()),
+            )
             .render(area, buf);
     }
 }
@@ -408,20 +586,42 @@ impl Widget for LineChart<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ratatui::backend::TestBackend;
     use ratatui::Terminal;
+    use ratatui::backend::TestBackend;
 
     fn pts(ys: &[Option<f64>]) -> Vec<Point> {
-        ys.iter().enumerate().map(|(i, y)| Point { x: format!("Q{i}"), y: *y, src: None }).collect()
+        ys.iter()
+            .enumerate()
+            .map(|(i, y)| Point {
+                x: format!("Q{i}"),
+                y: *y,
+                src: None,
+            })
+            .collect()
     }
     fn bars(vs: &[(f64, Option<f64>)]) -> Vec<BarItem> {
-        vs.iter().enumerate().map(|(i, (v, c))| BarItem { label: format!("L{i}"), value: *v, compare: *c, src: None }).collect()
+        vs.iter()
+            .enumerate()
+            .map(|(i, (v, c))| BarItem {
+                label: format!("L{i}"),
+                value: *v,
+                compare: *c,
+                src: None,
+            })
+            .collect()
     }
     fn draw(w: u16, h: u16, f: impl Fn(&mut Frame)) -> String {
         let mut t = Terminal::new(TestBackend::new(w, h)).unwrap();
         t.draw(|fr| f(fr)).unwrap();
         let b = t.backend().buffer();
-        (0..h).map(|y| (0..w).map(|x| b[(x, y)].symbol().to_string()).collect::<String>()).collect::<Vec<_>>().join("\n")
+        (0..h)
+            .map(|y| {
+                (0..w)
+                    .map(|x| b[(x, y)].symbol().to_string())
+                    .collect::<String>()
+            })
+            .collect::<Vec<_>>()
+            .join("\n")
     }
 
     #[test]
@@ -447,15 +647,27 @@ mod tests {
         let out = draw(12, 7, |f| grouped_bars(f, f.area(), &b, None, &th));
         let rows: Vec<&str> = out.lines().collect();
         let axis = rows.iter().position(|r| r.contains('─')).expect("axis row");
-        assert!(rows[..axis].iter().any(|r| r.chars().any(|c| "▁▂▃▄▅▆▇█".contains(c))), "{out}");
-        assert!(rows[axis + 1..].iter().any(|r| r.contains('█') || r.contains('▀')), "{out}");
+        assert!(
+            rows[..axis]
+                .iter()
+                .any(|r| r.chars().any(|c| "▁▂▃▄▅▆▇█".contains(c))),
+            "{out}"
+        );
+        assert!(
+            rows[axis + 1..]
+                .iter()
+                .any(|r| r.contains('█') || r.contains('▀')),
+            "{out}"
+        );
     }
 
     #[test]
     fn line_chart_draws_and_labels_cursor() {
         let th = Theme::default();
         let p = pts(&[Some(1.0), Some(2.0), None, Some(4.0), Some(3.0)]);
-        let out = draw(40, 10, |f| line_chart(f, f.area(), "Revenue", &p, Some(3), &th));
+        let out = draw(40, 10, |f| {
+            line_chart(f, f.area(), "Revenue", &p, Some(3), &th)
+        });
         assert!(out.contains("Revenue"), "{out}");
         assert!(out.contains("Q3 4"), "{out}");
         assert!(out.contains('•'), "{out}");
@@ -472,7 +684,15 @@ mod tests {
         let th = Theme::default();
         let p = pts(&[Some(1.0), Some(-2.0), Some(3.0)]);
         let out = draw(40, 10, |f| {
-            f.render_widget(LineChart::new(&p, &th).signed(true).marker(Marker::Octant).unit("%").selected(Some(1)).cursor_line(true), f.area())
+            f.render_widget(
+                LineChart::new(&p, &th)
+                    .signed(true)
+                    .marker(Marker::Octant)
+                    .unit("%")
+                    .selected(Some(1))
+                    .cursor_line(true),
+                f.area(),
+            )
         });
         assert!(out.contains("0%"), "{out}");
         assert!(out.contains("Q1 -2%"), "{out}");
@@ -492,7 +712,13 @@ mod tests {
                 line_chart(f, f.area(), "t", &p, Some(9), &th);
                 line_chart(f, f.area(), "", &[], None, &th);
                 line_chart(f, f.area(), "", &pts(&[None, None]), Some(0), &th);
-                f.render_widget(LineChart::new(&p, &th).signed(true).cursor_line(true).selected(Some(2)), f.area());
+                f.render_widget(
+                    LineChart::new(&p, &th)
+                        .signed(true)
+                        .cursor_line(true)
+                        .selected(Some(2)),
+                    f.area(),
+                );
             });
         }
     }

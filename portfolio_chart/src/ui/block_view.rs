@@ -886,7 +886,18 @@ fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
         let Some((buf, area)) = out else {
             return grid(&spec, &grows, &tcx, None);
         };
-        let g = grid(&spec, &grows, &tcx, Some((buf, Rect { width: table_w.min(area.width), ..area })));
+        let g = grid(
+            &spec,
+            &grows,
+            &tcx,
+            Some((
+                buf,
+                Rect {
+                    width: table_w.min(area.width),
+                    ..area
+                },
+            )),
+        );
         let bars = SparkBars {
             points,
             selected: cx.sel,

@@ -98,7 +98,11 @@ fn python(plugin: &std::path::Path) -> PathBuf {
         return PathBuf::from(p);
     }
     let venv = plugin.join(".venv/bin/python");
-    if venv.exists() { venv } else { PathBuf::from("python3") }
+    if venv.exists() {
+        venv
+    } else {
+        PathBuf::from("python3")
+    }
 }
 
 impl Client {
@@ -120,7 +124,10 @@ impl Client {
                 thread::spawn(move || worker(child, req_rx, reply_tx));
             }
             Err(e) => {
-                let _ = reply_tx.send(Reply { error: Some(format!("search.py --serve: {e}")), ..Reply::default() });
+                let _ = reply_tx.send(Reply {
+                    error: Some(format!("search.py --serve: {e}")),
+                    ..Reply::default()
+                });
             }
         }
         Self { tx, rx }
@@ -129,7 +136,10 @@ impl Client {
 
 fn worker(mut child: Child, req_rx: Receiver<Request>, reply_tx: Sender<Reply>) {
     let (Some(mut stdin), Some(stdout)) = (child.stdin.take(), child.stdout.take()) else {
-        let _ = reply_tx.send(Reply { error: Some("search.py: no pipes".into()), ..Reply::default() });
+        let _ = reply_tx.send(Reply {
+            error: Some("search.py: no pipes".into()),
+            ..Reply::default()
+        });
         let _ = child.kill();
         return;
     };
@@ -150,13 +160,22 @@ fn worker(mut child: Child, req_rx: Receiver<Request>, reply_tx: Sender<Reply>) 
                 Err(TryRecvError::Disconnected) => break 'outer,
             }
         }
-        let q = pending.iter().rposition(Request::is_query).map(|i| pending[i].clone());
-        let g = pending.iter().rposition(|r| !r.is_query()).map(|i| pending[i].clone());
+        let q = pending
+            .iter()
+            .rposition(Request::is_query)
+            .map(|i| pending[i].clone());
+        let g = pending
+            .iter()
+            .rposition(|r| !r.is_query())
+            .map(|i| pending[i].clone());
         pending.clear();
         for req in q.into_iter().chain(g) {
             let reply = turn(&mut stdin, &mut stdout, &req);
             let dead = reply.is_err();
-            let reply = reply.unwrap_or_else(|e| Reply { error: Some(e), ..Reply::default() });
+            let reply = reply.unwrap_or_else(|e| Reply {
+                error: Some(e),
+                ..Reply::default()
+            });
             if reply_tx.send(reply).is_err() || dead {
                 break 'outer;
             }
@@ -169,7 +188,9 @@ fn worker(mut child: Child, req_rx: Receiver<Request>, reply_tx: Sender<Reply>) 
 /// One request/reply exchange. Err = the server is unusable.
 fn turn(stdin: &mut impl Write, stdout: &mut impl BufRead, req: &Request) -> Result<Reply, String> {
     let line = serde_json::to_string(req).map_err(|e| e.to_string())?;
-    writeln!(stdin, "{line}").and_then(|_| stdin.flush()).map_err(|e| format!("search.py exited: {e}"))?;
+    writeln!(stdin, "{line}")
+        .and_then(|_| stdin.flush())
+        .map_err(|e| format!("search.py exited: {e}"))?;
     let mut buf = String::new();
     match stdout.read_line(&mut buf) {
         Ok(0) => Err("search.py exited (index missing? run `search.py build`)".into()),
@@ -187,21 +208,52 @@ mod tests {
 
     #[test]
     fn request_wire_format() {
-        let q = serde_json::to_string(&Request::Query { id: 3, q: "t:MRVL".into(), k: 50 }).unwrap_or_default();
+        let q = serde_json::to_string(&Request::Query {
+            id: 3,
+            q: "t:MRVL".into(),
+            k: 50,
+        })
+        .unwrap_or_default();
         assert_eq!(q, r#"{"id":3,"q":"t:MRVL","k":50}"#);
-        let g = serde_json::to_string(&Request::Get { id: 4, get: 12, context: 1 }).unwrap_or_default();
+        let g = serde_json::to_string(&Request::Get {
+            id: 4,
+            get: 12,
+            context: 1,
+        })
+        .unwrap_or_default();
         assert_eq!(g, r#"{"id":4,"get":12,"context":1}"#);
     }
 
     #[test]
     fn turn_reads_one_reply() {
         let mut out = Vec::new();
-        let mut inp = std::io::Cursor::new(b"{\"id\":1,\"results\":[],\"facets\":{\"ticker\":[[\"MRVL\",3]]}}\n".to_vec());
-        let r = turn(&mut out, &mut inp, &Request::Query { id: 1, q: "x".into(), k: 5 });
+        let mut inp = std::io::Cursor::new(
+            b"{\"id\":1,\"results\":[],\"facets\":{\"ticker\":[[\"MRVL\",3]]}}\n".to_vec(),
+        );
+        let r = turn(
+            &mut out,
+            &mut inp,
+            &Request::Query {
+                id: 1,
+                q: "x".into(),
+                k: 5,
+            },
+        );
         let r = r.unwrap_or_default();
         assert_eq!(r.id, Some(1));
         assert_eq!(r.facets["ticker"], vec![(Some("MRVL".to_string()), 3)]);
         // EOF = dead server
-        assert!(turn(&mut out, &mut inp, &Request::Query { id: 2, q: "x".into(), k: 5 }).is_err());
+        assert!(
+            turn(
+                &mut out,
+                &mut inp,
+                &Request::Query {
+                    id: 2,
+                    q: "x".into(),
+                    k: 5
+                }
+            )
+            .is_err()
+        );
     }
 }

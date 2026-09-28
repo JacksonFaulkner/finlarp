@@ -24,14 +24,26 @@ impl History {
         let items = path
             .as_ref()
             .and_then(|p| std::fs::read_to_string(p).ok())
-            .map(|s| s.lines().filter(|l| !l.trim().is_empty()).map(str::to_string).collect())
+            .map(|s| {
+                s.lines()
+                    .filter(|l| !l.trim().is_empty())
+                    .map(str::to_string)
+                    .collect()
+            })
             .unwrap_or_default();
-        Self { path, items, ..Self::default() }
+        Self {
+            path,
+            items,
+            ..Self::default()
+        }
     }
 
     #[cfg(test)]
     pub fn in_memory(items: &[&str]) -> Self {
-        Self { items: items.iter().map(|s| s.to_string()).collect(), ..Self::default() }
+        Self {
+            items: items.iter().map(|s| s.to_string()).collect(),
+            ..Self::default()
+        }
     }
 
     /// Older entry; `current` is kept as the draft when browsing starts.

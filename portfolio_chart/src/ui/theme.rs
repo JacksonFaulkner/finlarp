@@ -2,8 +2,8 @@
 // ui/portfolio_chart.lua) so every screen blends with the editor. Screens
 // never hardcode colours: they ask the theme for a semantic style.
 
-use ratatui::style::{Color, Modifier, Style};
 use ratatui::layout::Rect;
+use ratatui::style::{Color, Modifier, Style};
 
 use crate::ui::spacing::Spacing;
 
@@ -55,7 +55,11 @@ impl Theme {
             bg: bg.and_then(parse_hex),
             up: up.and_then(parse_hex).unwrap_or(d.up),
             down: down.and_then(parse_hex).unwrap_or(d.down),
-            cursor_bg: std::env::var("SECURITY_SPREAD_CURSOR_BG").ok().as_deref().and_then(parse_hex).or(d.cursor_bg),
+            cursor_bg: std::env::var("SECURITY_SPREAD_CURSOR_BG")
+                .ok()
+                .as_deref()
+                .and_then(parse_hex)
+                .or(d.cursor_bg),
             ..d
         }
     }
@@ -91,10 +95,15 @@ impl Theme {
             None => self.base().add_modifier(Modifier::REVERSED),
         }
     }
-    pub fn sel_bg(&self) -> Color { self.cursor_bg.unwrap_or(self.fg) }
+    pub fn sel_bg(&self) -> Color {
+        self.cursor_bg.unwrap_or(self.fg)
+    }
     /// Keep foreground contrast when applying the cursor background to a semantic style.
     pub fn on_cursor(&self, style: Style) -> Style {
-        match self.cursor_bg { Some(bg) => style.bg(bg), None => style.add_modifier(Modifier::REVERSED) }
+        match self.cursor_bg {
+            Some(bg) => style.bg(bg),
+            None => style.add_modifier(Modifier::REVERSED),
+        }
     }
     /// Green for >= 0, red for < 0.
     pub fn signed(&self, v: f64) -> Style {
@@ -116,7 +125,13 @@ impl Theme {
     }
     /// CANSLIM score color: low scores red, middling amber, high scores green.
     pub fn score(&self, value: f64) -> Style {
-        let color = if value >= 70.0 { self.up } else if value >= 50.0 { self.accent } else { self.down };
+        let color = if value >= 70.0 {
+            self.up
+        } else if value >= 50.0 {
+            self.accent
+        } else {
+            self.down
+        };
         self.base().fg(color).add_modifier(Modifier::BOLD)
     }
     pub fn score_badge(&self, badge: &str) -> Style {

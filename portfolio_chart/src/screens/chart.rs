@@ -391,23 +391,24 @@ impl Screen for ChartScreen {
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         if self.palette.open
-            && let Some(command) = self.palette.handle(key) {
-                return match command {
-                    Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
-                        screen: screen.into(),
-                        arg: None,
-                    }),
-                    Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
-                        screen: screen.into(),
-                    }),
-                    Some(Command::Range(i)) => {
-                        self.range = Range::ALL[(i as usize).min(Range::ALL.len() - 1)];
-                        self.cursor = None;
-                        Action::None
-                    }
-                    _ => Action::None,
-                };
-            }
+            && let Some(command) = self.palette.handle(key)
+        {
+            return match command {
+                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                    screen: screen.into(),
+                    arg: None,
+                }),
+                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                    screen: screen.into(),
+                }),
+                Some(Command::Range(i)) => {
+                    self.range = Range::ALL[(i as usize).min(Range::ALL.len() - 1)];
+                    self.cursor = None;
+                    Action::None
+                }
+                _ => Action::None,
+            };
+        }
         if key.code == KeyCode::Char('p') && key.modifiers.contains(KeyModifiers::CONTROL) {
             let mut entries = command_palette::destinations("", "chart");
             entries.extend(Range::ALL.iter().enumerate().map(|(i, r)| {
