@@ -599,6 +599,137 @@ function M.show_portfolio_history()
   require("custom_plugins.security_spread.ui.portfolio_chart").show()
 end
 
+-- Portfolio suite freshness: what is worth re-pulling on open.
+local POSITIONS_FRESH_S = 5 * 60
+local TRANSACTIONS_FRESH_S = 60 * 60
+local CLOSES_FRESH_H = 6
+local CLOSES_RANGE = "2y"
+local CLOSES_WORKERS = 4
+-- Keep in step with Bench::ALL in portfolio_chart/src/screens/portfolio/data.rs.
+local BENCH_SYMBOLS = { "SPY", "QQQ", "SOXX" }
+
+local suite_refresh = { running = false, report = nil }
+
+--- Brings everything the portfolio suite reads up to date, in the background:
+--- positions + equity snapshot (E*TRADE, if older than 5 min), transactions
+--- (if older than 1h), then daily closes for the benchmarks and held symbols
+--- (Yahoo, if older than 6h). Each step is skipped while its cache is fresh,
+--- so opening the suite repeatedly costs nothing. The TUI only reads DuckDB,
+--- so `report` is how it hears about progress.
+--- @param report fun(state: "refreshing"|"done"|"error", msg: string, pulled: boolean)
+--- @param force boolean|nil ignore the freshness windows
+function M.refresh_portfolio(report, force)
+  if suite_refresh.running then
+    suite_refresh.report = report -- a newly opened suite takes over reporting
+    report("refreshing", "refresh in progress", true)
+    return
+  end
+  suite_refresh.running = true
+  suite_refresh.report = report
+  local function say(state, msg, pulled)
+    suite_refresh.report(state, msg, pulled)
+  end
+
+  run("sources/etrade.py", { "status" }, function(ok, age)
+    age = ok and age or {}
+    local need_pos = force or not age.positions_age or age.positions_age > POSITIONS_FRESH_S
+    local need_txn = force or not age.transactions_age or age.transactions_age > TRANSACTIONS_FRESH_S
+    local pulled = need_pos or need_txn
+    local errors = {}
+
+    local function finish()
+      suite_refresh.running = false
+      if #errors > 0 then
+        say("error", "refresh failed: " .. errors[1], pulled)
+      else
+        say("done", "portfolio updated", pulled)
+      end
+    end
+
+    local function pull_closes()
+      M.positions_cached(function(_, cached)
+        local symbols, seen = {}, {}
+        for _, s in ipairs(BENCH_SYMBOLS) do
+          seen[s] = true
+          symbols[#symbols + 1] = s
+        end
+        for _, p in ipairs(cached or {}) do
+          if p.symbol and not seen[p.symbol] and not p.symbol:find("[%s,]") then
+            seen[p.symbol] = true
+            symbols[#symbols + 1] = p.symbol
+          end
+        end
+        -- A few at a time: every call is a `uv run` that takes the DuckDB
+        -- write lock, so a full fan-out just queues on the lock.
+        local next_i, active = 1, 0
+        local function spawn()
+          while active < CLOSES_WORKERS and next_i <= #symbols do
+            local sym = symbols[next_i]
+            next_i = next_i + 1
+            active = active + 1
+            run("sources/yahoo.py", {
+              "history", sym, "--range", CLOSES_RANGE, "--interval", "1d",
+              "--max-age", tostring(CLOSES_FRESH_H),
+            }, function(hok, herr)
+              active = active - 1
+              if not hok then
+                errors[#errors + 1] = ("%s closes: %s"):format(sym, vim.trim(tostring(herr)):sub(1, 80))
+              end
+              if next_i > #symbols and active == 0 then
+                finish()
+              else
+                spawn()
+              end
+            end)
+          end
+        end
+        if #symbols == 0 then
+          finish()
+        else
+          spawn()
+        end
+      end)
+    end
+
+    local function pull_txns()
+      if not need_txn then
+        pull_closes()
+        return
+      end
+      say("refreshing", "refreshing transactions…", true)
+      M.transactions(function(tok, terr)
+        if not tok then
+          errors[#errors + 1] = "transactions: " .. vim.trim(tostring(terr)):sub(1, 80)
+        end
+        pull_closes()
+      end)
+    end
+
+    if not need_pos then
+      pull_txns()
+      return
+    end
+    say("refreshing", "refreshing positions…", true)
+    M.positions(function(pok, perr)
+      if not pok then
+        errors[#errors + 1] = "positions: " .. vim.trim(tostring(perr)):sub(1, 80)
+        pull_closes() -- E*TRADE is down or unauthorised: still refresh what we can
+        return
+      end
+      pull_txns()
+    end)
+  end)
+end
+
+--- Opens the portfolio suite TUI (portfolio_chart `portfolio` screen). It
+--- paints from DuckDB at once while M.refresh_portfolio updates the cache
+--- behind it; progress and completion reach the TUI through a status file
+--- (see ui/portfolio_chart.lua show_suite), so it reloads in place.
+--- @param range string|nil starting range for the overview
+function M.show_portfolio_suite(range)
+  require("custom_plugins.security_spread.ui.portfolio_chart").show_suite(range)
+end
+
 --- Opens the CANSLIM scorecard TUI for a symbol. Fetches (--force, so a
 --- manual open always gets current data and picks up schema changes)
 --- and only then opens the TUI, so the screen is populated on first paint

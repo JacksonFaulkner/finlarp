@@ -4,7 +4,7 @@
 //
 // CLI: `portfolio_chart <bg> <fg_up> <fg_down> [screen] [arg]`
 //   bg/fg_up/fg_down  #rrggbb from nvim's colorscheme; "" = terminal default
-//   screen            chart (default) | canslim | dossier | search
+//   screen            chart (default) | portfolio | canslim | dossier | earnings | search
 //   arg               screen argument (symbol, query, ...)
 // Env: SECURITY_SPREAD_DB overrides the DuckDB path;
 //      SECURITY_SPREAD_ACTION_FILE receives an NvimAction on handoff (app.rs).
@@ -30,7 +30,14 @@ struct Cli {
     arg: Option<String>,
 }
 
-const SCREENS: &[&str] = &["chart", "canslim", "dossier", "earnings", "search"];
+const SCREENS: &[&str] = &[
+    "chart",
+    "portfolio",
+    "canslim",
+    "dossier",
+    "earnings",
+    "search",
+];
 
 /// Positional parse of everything after argv[0]. Empty strings are treated
 /// as absent (Lua passes "" for "no explicit colour").
@@ -79,6 +86,7 @@ fn main() {
     };
     let arg = cli.arg;
     let res = match cli.screen.as_str() {
+        "portfolio" => screens::portfolio::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
         "canslim" => screens::canslim::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
         "dossier" => screens::dossier::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),
         "earnings" => screens::earnings_report::open(&ctx, arg).and_then(|mut s| app::run(&mut s)),

@@ -89,6 +89,11 @@ pub trait Screen {
     fn needs_redraw(&self) -> bool {
         true
     }
+    /// How long the loop waits for input before the next `tick`; screens
+    /// running an animation return a frame-sized interval while it plays.
+    fn poll_interval(&self) -> Duration {
+        POLL
+    }
 }
 
 /// Where the loop gets terminal events from; crossterm in production, a
@@ -138,7 +143,7 @@ pub(crate) fn event_loop<B: Backend>(
         }
         let mut action = screen.tick();
         if action == Action::None {
-            match events.next(POLL)? {
+            match events.next(screen.poll_interval())? {
                 Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
                     dirty = true;
                     action = if key.code == KeyCode::Char('c')

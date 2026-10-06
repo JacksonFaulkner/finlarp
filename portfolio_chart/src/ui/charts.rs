@@ -606,6 +606,7 @@ mod tests {
                 label: format!("L{i}"),
                 value: *v,
                 compare: *c,
+                note: String::new(),
                 src: None,
             })
             .collect()

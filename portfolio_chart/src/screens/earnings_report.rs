@@ -150,6 +150,7 @@ fn convert_block(v: &Value, sources: &[SourceDef]) -> Block {
                         .map(|x| x.as_str().unwrap_or("").to_string())
                         .collect(),
                     new: false,
+                    bar: r["bar"].as_f64(),
                     src: source(r, sources),
                 })
                 .collect(),
@@ -193,6 +194,7 @@ fn convert_block(v: &Value, sources: &[SourceDef]) -> Block {
                     label: string(i, "label"),
                     value: i["value"].as_f64().unwrap_or_default(),
                     compare: i["compare"].as_f64(),
+                    note: string(i, "note"),
                     src: source(i, sources),
                 })
                 .collect(),

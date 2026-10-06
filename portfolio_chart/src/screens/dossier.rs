@@ -584,6 +584,7 @@ fn latest_section(sections: &[Section], today: NaiveDate) -> Section {
             Row {
                 cells,
                 new,
+                bar: None,
                 src: src.clone(),
             },
         ));
@@ -665,6 +666,7 @@ fn audit_section(sec: &Section) -> (Section, String) {
             let row = Row {
                 cells: vec![label, value],
                 new: false,
+                bar: None,
                 src: src.clone(),
             };
             match src.as_ref().and_then(|s| s.doc_url().map(str::to_string)) {
