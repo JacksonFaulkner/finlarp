@@ -1,5 +1,5 @@
 -- Launcher for the ratatui binary (portfolio_chart/): one binary, several
--- screens (chart | canslim | dossier | search), all opened through
+-- screens (chart | portfolio | canslim | dossier | search), all opened through
 -- M.open_screen. Inside tmux the binary runs in a full-size
 -- `tmux display-popup` (a real terminal pane, no nested libvterm redraw
 -- lag); outside tmux it falls back to a floating :terminal.
@@ -100,6 +100,9 @@ end
 local screens = {
   chart = function()
     M.show()
+  end,
+  portfolio = function(arg)
+    M.show_suite(arg)
   end,
   canslim = function(arg)
     call(root, "show_canslim", arg)
@@ -220,7 +223,7 @@ end
 --- Opens a screen of the binary.
 --- @param screen string "chart" | "canslim" | "dossier" | "search"
 --- @param arg string|nil screen argument (symbol, query, range)
---- @param opts table|nil { title = string, on_exit = fun(code: integer, action: table|nil) }
+--- @param opts table|nil { title = string, env = table<string,string>, on_exit = fun(code: integer, action: table|nil) }
 function M.open_screen(screen, arg, opts)
   ensure_built(function()
     M._open_built(screen, arg, opts)
@@ -261,6 +264,9 @@ function M._open_built(screen, arg, opts)
   end
   if vim.env.SECURITY_SPREAD_DB then
     env.SECURITY_SPREAD_DB = vim.env.SECURITY_SPREAD_DB
+  end
+  for k, v in pairs(opts.env or {}) do
+    env[k] = v
   end
   local function on_exit(code)
     finish(code, action_file, screen, opts)
@@ -304,6 +310,30 @@ end
 --- @param range string|nil "1M" | "3M" | "6M" | "1Y" | "ALL"
 function M.show(range)
   M.open_screen("chart", range, { title = " portfolio history " })
+end
+
+--- Portfolio suite: six tabs (overview, positions, exposure, risk, activity,
+--- signals). Reads DuckDB directly, like the history chart.
+--- @param range string|nil starting range for the overview: "1M" | "3M" | "6M" | "1Y" | "ALL"
+function M.show_suite(range)
+  -- The binary only reads DuckDB, so the background refresh (init.lua
+  -- refresh_portfolio) reports through a small JSON status file it polls:
+  -- {seq, state = refreshing|done|error, msg, pulled}.
+  local status_file = vim.fn.tempname()
+  local seq = 0
+  local function report(state, msg, pulled)
+    seq = seq + 1
+    pcall(
+      vim.fn.writefile,
+      { vim.json.encode({ seq = seq, state = state, msg = msg, pulled = pulled }) },
+      status_file
+    )
+  end
+  M.open_screen("portfolio", range, {
+    title = " portfolio ",
+    env = { SECURITY_SPREAD_STATUS_FILE = status_file },
+  })
+  call(root, "refresh_portfolio", report)
 end
 
 --- CANSLIM scorecard for one symbol. Assumes `uv run views/canslim.py

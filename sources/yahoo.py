@@ -98,8 +98,9 @@ def cmd_quote(symbols: str) -> dict:
     return {"quotes": result}
 
 
-def cmd_history(symbol: str, range_: str, interval: str) -> dict:
-    cached = db.get_cached_history(symbol, range_, interval)
+def cmd_history(symbol: str, range_: str, interval: str, max_age_hours: float | None = None) -> dict:
+    ttl = db.DEFAULT_TTL_SECONDS if max_age_hours is None else max_age_hours * 3600
+    cached = db.get_cached_history(symbol, range_, interval, ttl)
     if cached is not None:
         return {"symbol": symbol, "points": cached}
 
@@ -191,6 +192,7 @@ def main() -> None:
     history_p.add_argument("symbol")
     history_p.add_argument("--range", dest="range_", default="6mo")
     history_p.add_argument("--interval", default="1d")
+    history_p.add_argument("--max-age", type=float, default=None, help="reuse the cache if younger than this many hours")
 
     universe_p = sub.add_parser("universe")
     universe_sub = universe_p.add_subparsers(dest="universe_cmd", required=True)
@@ -207,7 +209,7 @@ def main() -> None:
     elif args.cmd == "screen":
         output = cmd_screen(args.sector, args.industry, args.top)
     elif args.cmd == "history":
-        output = cmd_history(args.symbol, args.range_, args.interval)
+        output = cmd_history(args.symbol, args.range_, args.interval, args.max_age)
     elif args.cmd == "universe":
         import db
 

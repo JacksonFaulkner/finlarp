@@ -108,6 +108,9 @@ pub struct Row {
     /// Flagged as recent (< 30 days) by the producer; drawn with a ● marker.
     #[serde(default)]
     pub new: bool,
+    /// Optional magnitude drawn as an inline bar in a trailing column.
+    #[serde(default)]
+    pub bar: Option<f64>,
     #[serde(default)]
     pub src: Option<Source>,
 }
@@ -142,6 +145,9 @@ pub struct BarItem {
     /// Optional comparison value drawn beside `value` (e.g. EPS estimate vs actual).
     #[serde(default)]
     pub compare: Option<f64>,
+    /// Optional annotation drawn after the value (e.g. "+28.6% beat").
+    #[serde(default, deserialize_with = "null_str")]
+    pub note: String,
     #[serde(default)]
     pub src: Option<Source>,
 }

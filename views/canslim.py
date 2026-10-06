@@ -248,12 +248,10 @@ SHORT = {"C": "Earnings", "A": "Annual", "N": "New high", "S": "Supply", "L": "L
 
 def _section(key: str, title: str, score: int | None, score_src: dict, blocks: list[dict], rule: str) -> dict:
     blocks = [b for b in blocks if b.get("rows") or b.get("points") or b.get("items") or b.get("text")]
-    blocks.append({"type": "kv", "title": "Score", "rows": [
-        _kv("score", "—" if score is None else f"{score}/100  grade {_grade(score)}", score_src)]})
     blocks.append({"type": "text", "title": "Rule", "text": rule,
                    "src": src("IBD University · CAN SLIM (William O'Neil)", IBD_URL)})
     return {"id": key.lower(), "title": f"{key} {title}", "short": f"{key} {SHORT.get(key, title)}", "new": False,
-            "badge": f"{_grade(score)} {score}" if score is not None else "—", "blocks": blocks, "score": score}
+            "badge": f"{_grade(score)} {score}" if score is not None else "—", "blocks": blocks, "score": score, "score_src": score_src}
 
 
 # ---- build --------------------------------------------------------------------
@@ -520,16 +518,16 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
 
     rev_trend = [("90d ago", c.eps_estimate_90d_ago, s_eps_90), ("30d ago", c.eps_estimate_30d_ago, s_eps_30),
                  ("7d ago", c.eps_estimate_7d_ago, s_eps_7), ("now", c.eps_estimate_current, s_eps_now)]
-    rev_rows_kv, prev = [], None
+    rev_rows, prev = [], None
     for label, v, sv in rev_trend:
         delta, sd_ = "", sv
         if prev is not None and prev[0] is not None and v is not None:
             d = v - prev[0]
             arrow = "▲" if d > 1e-9 else "▼" if d < -1e-9 else " "
-            delta = f"  {d:+.2f} {arrow}"
+            delta = f"{d:+.2f} {arrow}"
             sd_ = src(sv["label"], sv["url"], formula=f"{v:.2f} − {prev[0]:.2f} = {d:+.2f} vs {prev[1]}",
                       inputs=[sv, prev[2]])
-        rev_rows_kv.append(_kv(f"EPS est {label}", _f(v) + delta, sd_))
+        rev_rows.append({"cells": [label, _f(v), delta], "bar": v, "src": sd_})
         prev = (v, label, sv)
 
     eh_src = lambda q: _yf(S, AN, f"earningsHistory {q.quarter_end}: actual {_f(q.eps_actual)}, "
@@ -545,24 +543,20 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
             _kv("analysts", _f(na, "{}"), s_analysts),
             _kv("filed revenue YoY (SEC)", _sp(latest_rev_yoy), s_latest_yoy),
         ]},
-        {"type": "kv", "title": "EPS estimate revision — next-quarter consensus (▲ raised / ▼ cut vs prior checkpoint)",
-         "rows": rev_rows_kv},
-        {"type": "series", "title": "EPS estimate revision trend (90d → now)", "unit": "$/sh",
-         "points": [{"x": lbl, "y": v, "src": sv} for lbl, v, sv in rev_trend]},
+        {"type": "table", "title": "EPS estimate revision (▲ raised / ▼ cut vs prior)",
+         "cols": ["next-qtr est", "EPS", "Δ"], "rows": rev_rows},
         {"type": "bars", "title": f"EPS actual vs estimate by quarter (compare = estimate) · latest {latest_q}",
          "unit": "$/sh", "items": [
-             {"label": q.quarter_end or "?", "value": q.eps_actual, "compare": q.eps_estimate, "src": eh_src(q)}
+             {"label": q.quarter_end or "?", "value": q.eps_actual, "compare": q.eps_estimate,
+              "note": " ".join(x for x in (
+                  _f(q.surprise_pct, "{:+.1%}") if q.surprise_pct is not None else "",
+                  "" if q.eps_estimate is None else ("beat" if q.eps_actual >= q.eps_estimate else "missed")) if x),
+              "src": eh_src(q)}
              for q in earnings_history if q.eps_actual is not None]},
-        {"type": "table", "title": "EPS surprise by quarter", "cols": ["quarter", "estimate", "actual", "surprise", "beat?"],
-         "rows": [{"cells": [q.quarter_end or "?", _f(q.eps_estimate), _f(q.eps_actual), _f(q.surprise_pct, "{:+.1%}"),
-                             "—" if q.eps_actual is None or q.eps_estimate is None else ("beat" if q.eps_actual >= q.eps_estimate else "missed")],
-                   "src": eh_src(q)} for q in earnings_history]},
-        {"type": "series", "title": f"Revenue (SEC filed, {rev_concept or 'n/a'}) · latest filed quarter {latest_rev_q}",
-         "unit": "$M", "points": [{"x": r.quarter_end, "y": round(r.revenue / 1e6, 1), "src": meta[0]}
-                                  for r, meta in zip(revenue_history, rev_meta)]},
-        {"type": "table", "title": "Revenue by quarter (SEC filed; YoY ≥ 0 growing / < 0 shrinking)",
+        {"type": "table", "title": f"Revenue by quarter (SEC filed) · latest {latest_rev_q}",
          "cols": ["quarter", "revenue", "QoQ", "YoY", "net margin"],
          "rows": [{"cells": [r.quarter_end, _big(r.revenue), _sp(r.qoq_growth_pct), _sp(r.yoy_growth_pct), _f(r.net_margin_pct, "{:.1f}%")],
+                   "bar": r.revenue,
                    # Row links to the revenue filing; formula/inputs cover the computed cells.
                    "src": src(meta[0]["label"], meta[0]["url"],
                               formula="QoQ = rev / prior qtr − 1; YoY = rev / year-ago qtr − 1; margin = net income / rev",
@@ -698,9 +692,10 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
         o = sum(v for _, v in scored) // len(scored)
         overall = {"score": o, "grade": _grade(o), "src": derived(
             "overall (mean of letter gauges)", " + ".join(f"{k} {v}" for k, v in scored) + f" / {len(scored)} = {o}",
-            [next(b for b in sec_["blocks"] if b.get("title") == "Score")["rows"][0]["src"] for sec_ in sections if sec_["score"] is not None])}
+            [sec_["score_src"] for sec_ in sections if sec_["score"] is not None])}
     for sec_ in sections:
         sec_.pop("score")
+        sec_.pop("score_src")
 
     return CanslimScorecard(symbol=symbol, as_of=date.today(), c=c, a=a, n=n, s=s, l=lead, i=i, m=m,
                             overall=overall, sections=sections)

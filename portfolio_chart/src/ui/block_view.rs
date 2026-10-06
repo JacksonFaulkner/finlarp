@@ -425,7 +425,7 @@ fn body(b: &Block, cx: &Cx, out: Option<(&mut Buffer, Rect)>, hdr: u16) -> Geom 
         Block::Kv { rows, .. } => kv(rows, cx, out),
         Block::Series { points, .. } => series(points, cx, out),
         Block::Bars { items, .. } => bars(items, cx, out),
-        Block::Text { text, src, .. } => text_block(text, src.as_ref(), cx, out),
+        Block::Text { title, text, src } => text_block(title, text, src.as_ref(), cx, out),
     };
     for it in &mut g.items {
         it.0 += hdr;
@@ -753,13 +753,38 @@ fn is_numeric(s: &str) -> bool {
             .all(|c| c.is_ascii_digit() || ",.$%+-−()KMBkx× ".contains(c))
 }
 
+/// Width of the inline bar column a table grows when rows carry `bar`.
+const BAR_COL_W: usize = 14;
+
+/// Horizontal bar of `frac` (0..=1) of `w` cells.
+fn inline_bar(frac: f64, w: usize) -> String {
+    // lower-half blocks: adjacent rows keep a gap instead of fusing
+    "▄".repeat((frac.clamp(0.0, 1.0) * w as f64).round() as usize)
+}
+
 fn table(cols: &[String], rows: &[Row], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
+    let bar_max = rows
+        .iter()
+        .filter_map(|r| r.bar)
+        .fold(0.0_f64, |m, v| m.max(v.abs()));
+    let has_bar = bar_max > 0.0;
+    // the bar sits right after the first value column
+    let bar_col = 2.min(cols.len());
+    let mut cols_ext = cols.to_vec();
+    if has_bar {
+        cols_ext.insert(bar_col, String::new());
+    }
+    let cols = &cols_ext[..];
+    let src_col = |c: usize| if has_bar && c > bar_col { c - 1 } else { c };
     let right: Vec<bool> = (0..cols.len())
         .map(|c| {
             // mostly numeric ("new", "n/a" placeholders don't flip the column)
+            if has_bar && c == bar_col {
+                return false;
+            }
             let vals: Vec<&String> = rows
                 .iter()
-                .filter_map(|r| r.cells.get(c))
+                .filter_map(|r| r.cells.get(src_col(c)))
                 .filter(|s| !s.trim().is_empty())
                 .collect();
             let num = vals.iter().filter(|s| is_numeric(s)).count();
@@ -769,7 +794,17 @@ fn table(cols: &[String], rows: &[Row], cx: &Cx, out: Option<(&mut Buffer, Rect)
     let grows: Vec<GridRow> = rows
         .iter()
         .map(|r| GridRow {
-            cells: r.cells.iter().map(|s| Cow::Borrowed(s.as_str())).collect(),
+            cells: {
+                let mut cells: Vec<Cow<str>> =
+                    r.cells.iter().map(|s| Cow::Borrowed(s.as_str())).collect();
+                if has_bar {
+                    let bar = r
+                        .bar
+                        .map_or_else(String::new, |v| inline_bar(v.abs() / bar_max, BAR_COL_W));
+                    cells.insert(bar_col.min(cells.len()), Cow::Owned(bar));
+                }
+                cells
+            },
             new: r.new,
             src: r.src.as_ref(),
         })
@@ -779,9 +814,12 @@ fn table(cols: &[String], rows: &[Row], cx: &Cx, out: Option<(&mut Buffer, Rect)
     let style = |i: usize, c: usize| {
         let s = rows
             .get(i)
-            .and_then(|r| r.cells.get(c))
+            .and_then(|r| r.cells.get(src_col(c)))
             .map_or("", String::as_str)
             .trim();
+        if has_bar && c == bar_col {
+            return th.up();
+        }
         match s.chars().next() {
             Some('+') if right[c] => th.up(),
             Some('-' | '−') if right[c] => th.down(),
@@ -987,7 +1025,18 @@ fn bars(items: &[BarItem], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
         .unwrap_or(0) as u16)
         .min(28)
         .min(cx.width / 3);
-    let fixed = GUTTER + lw + 1 + 1 + vw + if srcw > 0 { srcw + 1 } else { 0 };
+    let nw = items
+        .iter()
+        .map(|i| text::width(&i.note))
+        .max()
+        .unwrap_or(0) as u16;
+    let fixed = GUTTER
+        + lw
+        + 1
+        + 1
+        + vw
+        + if nw > 0 { nw + 1 } else { 0 }
+        + if srcw > 0 { srcw + 1 } else { 0 };
     let bw = area.width.saturating_sub(fixed);
     // shared scale with a zero column so mixed signs line up
     let all = items
@@ -1065,10 +1114,25 @@ fn bars(items: &[BarItem], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
                 th.signed(it.value)
             },
         );
+        let x_note = x_val + vw + 1;
+        if nw > 0 {
+            let style = if sel {
+                th.on_cursor(th.dim())
+            } else {
+                th.dim()
+            };
+            buf.set_stringn(
+                x_note,
+                y,
+                text::fit(&it.note, nw as usize, false),
+                nw as usize,
+                style,
+            );
+        }
         if srcw > 0 {
             src_label(it.src.as_ref(), srcw as usize, th).render(
                 Rect {
-                    x: x_val + vw + 1,
+                    x: x_note + if nw > 0 { nw + 1 } else { 0 },
                     y,
                     width: srcw,
                     height: 1,
@@ -1154,10 +1218,23 @@ fn hbar(buf: &mut Buffer, r: Rect, zero: u16, cells: f64, style: Style) {
     }
 }
 
-fn text_block(body: &str, src: Option<&Source>, cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
+fn text_block(
+    title: &str,
+    body: &str,
+    src: Option<&Source>,
+    cx: &Cx,
+    out: Option<(&mut Buffer, Rect)>,
+) -> Geom {
     let th = cx.th;
     let w = cx.width.saturating_sub(GUTTER) as usize;
-    let lines = if w == 0 { vec![] } else { text::wrap(body, w) };
+    let mut lines = if w == 0 { vec![] } else { text::wrap(body, w) };
+    // "Rule" is boilerplate: one line until the cursor is on it
+    if title == "Rule" && cx.sel != Some(0) && lines.len() > 1 {
+        lines.truncate(1);
+        if let Some(l) = lines.last_mut() {
+            *l = text::fit(&format!("{}…", l.trim_end()), w, false).to_string();
+        }
+    }
     let extra = u16::from(cx.audit);
     let n = (lines.len() as u16).max(1) + extra;
     let geom = Geom {
@@ -1230,10 +1307,11 @@ mod tests {
                 title: "Biggest adds".into(),
                 cols: vec!["manager".into(), "Δ shares".into()],
                 rows: vec![
-                    Row { cells: vec!["BlackRock, Inc.".into(), "+21.80M".into()], new: false, src: doc("13F BlackRock") },
+                    Row { cells: vec!["BlackRock, Inc.".into(), "+21.80M".into()], new: false, bar: None, src: doc("13F BlackRock") },
                     Row {
                         cells: vec!["A very long manager name that will certainly not fit in a narrow pane at all".into(), "-3.1M".into()],
                         new: true,
+                        bar: None,
                         src: doc("13F long"),
                     },
                 ],
@@ -1252,8 +1330,8 @@ mod tests {
                 title: "Segments".into(),
                 unit: "$M".into(),
                 items: vec![
-                    BarItem { label: "Data Center".into(), value: 6100.3, compare: Some(4000.0), src: doc("10-K DC") },
-                    BarItem { label: "Other".into(), value: -500.0, compare: None, src: doc("10-K other") },
+                    BarItem { label: "Data Center".into(), value: 6100.3, compare: Some(4000.0), note: String::new(), src: doc("10-K DC") },
+                    BarItem { label: "Other".into(), value: -500.0, compare: None, note: String::new(), src: doc("10-K other") },
                 ],
             },
             Block::Text { title: "About".into(), text: "Marvell provides data infrastructure semiconductor solutions.".into(), src: doc("Yahoo") },

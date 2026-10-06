@@ -397,6 +397,10 @@ def main() -> None:
         print(json.dumps(cmd_transactions_cached()))
         return
 
+    if cmd == "status":
+        print(json.dumps(db.cache_ages()))
+        return
+
     if cmd == "portfolio_history":
         print(json.dumps(cmd_portfolio_history()))
         return

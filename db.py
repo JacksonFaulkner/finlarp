@@ -185,6 +185,22 @@ def get_cached_positions() -> list[dict] | None:
     return json.loads(row[0])
 
 
+def cache_ages() -> dict:
+    """Seconds since each portfolio cache was last written (None if never).
+    Local-only; lets the nvim side decide what is worth re-pulling."""
+    con = _conn(read_only=True)
+    try:
+        pos = con.execute("SELECT max(fetched_at) FROM positions_cache").fetchone()[0]
+        txn = con.execute("SELECT min(fetched_at) FROM transactions_cache").fetchone()[0]
+    finally:
+        con.close()
+    now = time.time()
+    return {
+        "positions_age": None if pos is None else now - pos,
+        "transactions_age": None if txn is None else now - txn,
+    }
+
+
 def put_cached_positions(positions: list[dict]) -> None:
     con = _conn()
     try:
