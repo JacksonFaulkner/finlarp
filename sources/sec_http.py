@@ -13,7 +13,7 @@ import time
 
 import requests
 
-UA = "security_spread (personal nvim tool) contact: jackson.faulkner1@gmail.com"
+UA = "finlarp (personal nvim tool) contact: jackson.faulkner1@gmail.com"
 RPS = float(os.environ.get("SEC_RPS", "1.5"))
 
 _lock = threading.Lock()

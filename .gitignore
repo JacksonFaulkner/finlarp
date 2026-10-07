@@ -1,0 +1,16 @@
+# any env file (.env, .env.local, foo.env); commit only the template
+.env*
+*.env
+!.env.example
+.envrc
+.venv/
+__pycache__/
+*.pyc
+.ruff_cache/
+.DS_Store
+*.log
+
+# personal research notes; only the dataset docs are published
+research/*
+!research/FINDINGS.md
+!research/BULK_SOURCES.md

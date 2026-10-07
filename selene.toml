@@ -1,0 +1,8 @@
+std = "vim"
+exclude = ["**/.venv/**", "**/target/**"]
+
+[rules]
+mixed_table = "allow"
+multiple_statements = "allow"
+# lua51 std marks optional args (assert msg, io.read fmt) as required
+incorrect_standard_library_use = "allow"

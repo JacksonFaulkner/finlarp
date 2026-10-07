@@ -380,7 +380,7 @@ def main() -> None:
     openai_usd = sum(r.get("openai_usd", 0) for r in summary) + sum(r.get("estimated_openai_usd", 0) for r in failures)
     exa_usd = sum(r.get("exa_usd", 0) for r in summary) + sum(r.get("estimated_exa_usd", 0) for r in failures)
     manifest = {
-        "universe": "Technology top 50 by market cap (security_spread named watchlist)",
+        "universe": "Technology top 50 by market cap (finlarp named watchlist)",
         "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"),
         "market_cap_source": "Yahoo Finance screener; intradaymarketcap descending",
         "model": MODEL,

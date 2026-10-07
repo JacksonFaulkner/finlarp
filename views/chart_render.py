@@ -53,7 +53,7 @@ def render(series: list[dict], width_px: int, height_px: int) -> str:
 
     fig.tight_layout()
     out_path = tempfile.NamedTemporaryFile(
-        prefix="security_spread_chart_", suffix=".png", delete=False
+        prefix="finlarp_chart_", suffix=".png", delete=False
     ).name
     fig.savefig(out_path, facecolor=BG)
     plt.close(fig)

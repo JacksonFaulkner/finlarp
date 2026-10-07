@@ -13,7 +13,7 @@ every call is local and fast. Tools are all read-only:
     schema      the views `sql` can see, with columns
 
 Register with Claude Code:
-    claude mcp add security-spread -- <plugin_dir>/.venv/bin/python <plugin_dir>/mcp_server.py
+    claude mcp add finlarp -- <plugin_dir>/.venv/bin/python <plugin_dir>/mcp_server.py
 """
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ XBRL history belongs to a predecessor business (MTCH=IAC, JCI=Tyco, NBIS=Yandex)
 Patents: grants only (18mo+ lag vs filing); ticker = current owner incl. acquired
 subsidiaries' pre-deal patents. Group by patent_cpc/patent_wipo for tech mix."""
 
-mcp = MCPServer("security-spread", instructions=INSTRUCTIONS)
+mcp = MCPServer("finlarp", instructions=INSTRUCTIONS)
 
 
 def _dump(obj) -> str:

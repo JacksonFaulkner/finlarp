@@ -1,7 +1,7 @@
 [project]
-name = "security-spread"
+name = "finlarp"
 version = "0.1.0"
-description = "SEC/market data pipeline behind the security_spread nvim plugin"
+description = "finlarp: Financial Learning & Research Platform. SEC data pipeline, terminal UI and Neovim plugin."
 requires-python = ">=3.12"
 dependencies = [
     "duckdb>=1.5.5",
