@@ -41,7 +41,7 @@ Facets: counts of every match of the query (not just the top k) per ticker,
 type, section and year, top FACET_N each: {"ticker": [["MRVL", 41], ...], ...}.
 Computed in the same statement as the hits, so they cost ~one GROUP BY.
 
---serve protocol (portfolio_chart/src/screens/search): one JSON object per
+--serve protocol (tui/src/screens/search): one JSON object per
 line on stdin, one reply per line on stdout, in order, echoing "id". The
 connection and fts extension stay loaded, so a query is ~100ms instead of
 ~350ms for a fresh process; the query string is parsed here (single parser).

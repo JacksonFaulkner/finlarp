@@ -131,6 +131,6 @@ class CanslimScorecard(BaseModel):
     m: MarketDirection
     # Sourced view of the letters above (views/canslim.py): model-shaped
     # Sections, one per letter, every value with a Source. Rendered by the
-    # portfolio_chart `canslim` screen.
+    # finlarp `canslim` screen.
     overall: dict | None = None
     sections: list[dict] = []

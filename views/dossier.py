@@ -1,7 +1,7 @@
 """Per-ticker research dossier for the heatmap `p` screen: everything we've
 pulled for one security, where every number carries a link to the document
 it came from. Stored as JSON in DuckDB dossier_cache (db.py) and rendered by
-the portfolio_chart `dossier` screen, same flow as canslim.
+the finlarp `dossier` screen, same flow as canslim.
 
 Rule: no value without a source. Every kv row, table row, series point and
 bar item has `src`:
@@ -15,7 +15,7 @@ per patent, and a text fragment (#:~:text=) that scrolls to and highlights
 the quoted sentence for guidance lines and new risk factors.
 `validate()` lists anything unsourced in dossier["unsourced"].
 
-JSON shape (what portfolio_chart/src/screens/dossier.rs reads):
+JSON shape (what tui/src/screens/dossier.rs reads):
     {ticker, name, industry, country, market_cap, employees, built_at,
      freshness: [{source, pulled}], unsourced: [...],
      sections: [{id, title, new, badge, blocks: [block]}]}

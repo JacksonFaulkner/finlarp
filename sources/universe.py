@@ -18,13 +18,13 @@ ROOT = Path(__file__).resolve().parent.parent
 UNIVERSE_PATH = ROOT / "data" / "ai_stocks.json"
 ALIASES_PATH = ROOT / "data" / "cik_aliases.json"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
-DATA_ROOT = db.DB_PATH.parent / "security_spread"
+DATA_ROOT = db.DB_PATH.parent / "finlarp"
 
 _cik_map: dict[str, int] | None = None
 
 
 def data_dir(source: str) -> Path:
-    """~/.local/share/nvim/security_spread/<source>/ — one dir per puller."""
+    """~/.local/share/nvim/finlarp/<source>/ — one dir per puller."""
     d = DATA_ROOT / source
     d.mkdir(parents=True, exist_ok=True)
     return d

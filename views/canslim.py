@@ -2,14 +2,14 @@
 
 The flat letter fields (c/a/n/s/l/i/m) are kept for existing readers. Next
 to them the scorecard carries `sections`: one model-shaped Section per
-letter (see portfolio_chart/src/model.rs and views/dossier.py), where
+letter (see tui/src/model.rs and views/dossier.py), where
 every displayed value has a Source:
     fetched  -> {"label", "url"}  Yahoo Finance page the field is shown on,
                                   or the SEC filing (inline-XBRL viewer)
     computed -> {"label", "formula", "inputs": [...]}  growth %, surprise,
                                   volume surge, RS, % off high, margins,
                                   moving averages, letter scores
-plus `overall` {score, grade, src}. The portfolio_chart `canslim` screen
+plus `overall` {score, grade, src}. The finlarp `canslim` screen
 renders only `sections`.
 
     python views/canslim.py MRVL [--force]

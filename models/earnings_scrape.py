@@ -91,7 +91,7 @@ class EarningsStatementExtraction(BaseModel):
 
 
 # General per-security report panels. These discriminators mirror the
-# portfolio_chart Block enum; every factual leaf carries EvidencePointer.
+# finlarp Block enum; every factual leaf carries EvidencePointer.
 PanelCategory = Literal[
     "business_model", "products", "end_markets", "customer_map",
     "financials", "cash_flow", "balance_sheet", "catalysts", "risks",

@@ -1,6 +1,6 @@
 """Local DuckDB cache for historical price data.
 
-Keeps a small on-disk store at ~/.local/share/nvim/security_spread.duckdb so
+Keeps a small on-disk store at ~/.local/share/nvim/finlarp.duckdb so
 repeat chart opens (same symbol/range/interval within TTL) skip the network
 round-trip entirely, and gives the plugin a real place to grow into (joins,
 backtests, screener snapshots) instead of everything being fetch-and-discard.
@@ -17,7 +17,7 @@ from pathlib import Path
 
 import duckdb
 
-DB_PATH = Path(os.path.expanduser("~/.local/share/nvim/security_spread.duckdb"))
+DB_PATH = Path(os.path.expanduser("~/.local/share/nvim/finlarp.duckdb"))
 
 # History doesn't change intraday for the bar we already have except the
 # still-forming last bar, so a modest TTL is safe and saves a network round
@@ -65,7 +65,7 @@ _SCHEMA = [
         )
     """,
     # Per-ticker research dossier (views/dossier.py) read straight out of
-    # DuckDB by the portfolio_chart `dossier` screen, same as canslim_cache.
+    # DuckDB by the finlarp `dossier` screen, same as canslim_cache.
     """
         CREATE TABLE IF NOT EXISTS dossier_cache (
             symbol VARCHAR PRIMARY KEY,
