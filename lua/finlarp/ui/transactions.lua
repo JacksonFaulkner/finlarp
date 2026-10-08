@@ -1,6 +1,6 @@
 local M = {}
 
---- @param t table one transaction from sources/etrade.py's cmd_transactions
+--- @param t table one transaction from py/sources/etrade.py's cmd_transactions
 --- @return string fzf-lua row: fixed-width columns so alignment stays fuzzy-searchable
 local function format_row(t)
   local date = t.date and os.date("%Y-%m-%d %H:%M:%S", math.floor(t.date / 1000)) or "?"
@@ -50,7 +50,7 @@ local function open_picker(fzf, transactions)
 end
 
 --- Opens an fzf-lua picker over transaction history. Paints instantly from
---- whatever's cached in DuckDB (see db.py) — same instant-then-refresh
+--- whatever's cached in DuckDB (see py/core/db.py) — same instant-then-refresh
 --- pattern as `$`. If nothing's cached yet (first run), falls back to
 --- blocking on the live E*TRADE pull once. Either way, a live pull always
 --- runs in the background afterward to keep the cache warm for next time;

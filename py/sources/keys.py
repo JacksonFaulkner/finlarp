@@ -7,7 +7,7 @@ import os
 from functools import cache
 from pathlib import Path
 
-ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 @cache

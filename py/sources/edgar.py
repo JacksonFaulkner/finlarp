@@ -11,7 +11,7 @@ from __future__ import annotations
 import sys
 from datetime import date
 
-import db
+from core import db
 from sources import sec_http
 
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"

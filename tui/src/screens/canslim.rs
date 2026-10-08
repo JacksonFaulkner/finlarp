@@ -1,4 +1,4 @@
-// CANSLIM scorecard (canslim_cache.scorecard_json, built by views/canslim.py).
+// CANSLIM scorecard (canslim_cache.scorecard_json, built by py/derive/canslim.py).
 //
 //   MRVL  CANSLIM scorecard  261.94  as of 2026-09-27         overall B 60
 //   C Earnings  C 59 │ A Annual  A 100 │ N New high  D 31 │ …   (SectionTabs, H/L)
@@ -157,7 +157,7 @@ impl Canslim {
 
     fn set_json(&mut self, json: Option<&str>) {
         let sym = &self.symbol;
-        let refresh = format!("views/canslim.py {sym} --force");
+        let refresh = format!("py/derive/canslim.py {sym} --force");
         self.card = None;
         match json.map(serde_json::from_str::<Scorecard>) {
             None => {

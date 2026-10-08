@@ -1,4 +1,4 @@
-// Running the Python side (views/*.py, sources/*.py) from the binary, so
+// Running the Python side (py/derive/*.py, py/sources/*.py) from the binary, so
 // `fl` can build a CANSLIM scorecard or dossier itself instead of leaning on
 // nvim to do it first.
 
@@ -26,7 +26,7 @@ pub fn python(plugin: &Path) -> PathBuf {
     }
 }
 
-/// Runs `script` (repo-relative, e.g. "views/dossier.py") to completion and
+/// Runs `script` (repo-relative, e.g. "py/derive/dossier.py") to completion and
 /// returns its stdout. Err carries stderr (or the spawn error).
 pub fn run_script(script: &str, args: &[&str]) -> Result<String, String> {
     let plugin = plugin_dir();
@@ -47,7 +47,7 @@ pub fn run_script(script: &str, args: &[&str]) -> Result<String, String> {
 }
 
 /// Runs a snippet with the repo as cwd (`python -c`), for one-off calls
-/// into db.py such as loading the universe JSON.
+/// into py/core/db.py such as loading the universe JSON.
 pub fn run_code(code: &str) -> Result<(), String> {
     let plugin = plugin_dir();
     let out = Command::new(python(&plugin))

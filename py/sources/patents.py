@@ -42,7 +42,7 @@ import duckdb
 from sources import universe
 from sources import pq
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 MANUAL = ROOT / "data" / "patent_aliases.json"
 PV = universe.data_dir("bulk/pv")
 OUT = universe.data_dir("patents")

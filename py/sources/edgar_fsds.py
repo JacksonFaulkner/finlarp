@@ -23,7 +23,7 @@ import zipfile
 from datetime import date
 from pathlib import Path
 
-import db
+from core import db
 from sources import sec_http
 from sources.edgar import REVENUE_CONCEPTS, ticker_to_cik
 

@@ -1,4 +1,4 @@
-// Talks to `views/search.py --serve`: one long-lived Python process
+// Talks to `py/derive/search.py --serve`: one long-lived Python process
 // holding the DuckDB index + fts extension open (~100ms/query warm versus
 // ~350ms for a process per keystroke, and the query parser stays in one
 // place). JSON lines both ways, see the search.py module docstring.
@@ -91,7 +91,7 @@ impl Client {
         let (reply_tx, rx) = mpsc::channel::<Reply>();
         let plugin = crate::pyrun::plugin_dir();
         let child = Command::new(crate::pyrun::python(&plugin))
-            .arg(plugin.join("views/search.py"))
+            .arg(plugin.join("py/derive/search.py"))
             .arg("--serve")
             .current_dir(&plugin)
             .stdin(Stdio::piped())

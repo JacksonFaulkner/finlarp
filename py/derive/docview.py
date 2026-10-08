@@ -16,7 +16,7 @@ Cache: docs/<key>/ keyed by accession (SEC) or URL hash, so a second open
 is instant and works offline. The `#:~:text=` fragment that dossier links
 carry doubles as the quote to jump to.
 
-    python views/docview.py URL [--quote TEXT] [--json]
+    python py/derive/docview.py URL [--quote TEXT] [--json]
     -> {"path", "kind": md|pdf|image|text, "text_path", "line", "title", "url"}
 """
 from __future__ import annotations

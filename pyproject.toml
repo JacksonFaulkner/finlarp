@@ -12,15 +12,16 @@ dependencies = [
     "requests>=2.34.2",
 ]
 
-# Editable install puts the plugin root on sys.path (hatch dev-mode-dirs
-# default), so any script can `import db` / `from sources import ...`
-# without a sys.path hack, whatever its own directory or cwd.
+# Editable install puts py/ on sys.path (dev-mode-dirs), so any script can
+# `from core import db` / `from sources import ...` without a sys.path hack,
+# whatever its own directory or cwd.
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["sources", "views", "jobs", "models"]
+packages = ["py/core", "py/sources", "py/derive", "py/jobs", "py/agent"]
+dev-mode-dirs = ["py"]
 
 [dependency-groups]
 dev = ["ruff>=0.12"]

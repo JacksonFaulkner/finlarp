@@ -125,14 +125,14 @@ fn run_screen(ctx: &app::Ctx, screen: &str, arg: Option<String>) -> std::io::Res
         ("dossier", None) => app::run(&mut pick::open_symbols(ctx, "dossier")?),
         ("canslim", Some(sym)) => {
             eprintln!("fetching {sym} canslim...");
-            if let Err(e) = pyrun::run_script("views/canslim.py", &[&sym, "--force"]) {
+            if let Err(e) = pyrun::run_script("py/derive/canslim.py", &[&sym, "--force"]) {
                 eprintln!("finlarp: {e}"); // open anyway: the screen shows what is cached
             }
             app::run(&mut canslim::open(ctx, Some(sym))?)
         }
         ("dossier", Some(sym)) => {
             eprintln!("building {sym} dossier...");
-            if let Err(e) = pyrun::run_script("views/dossier.py", &[&sym, "--if-stale", "12"]) {
+            if let Err(e) = pyrun::run_script("py/derive/dossier.py", &[&sym, "--if-stale", "12"]) {
                 eprintln!("finlarp: {e}");
             }
             app::run(&mut dossier::open(ctx, Some(sym))?)

@@ -2,7 +2,7 @@
 
 The flat letter fields (c/a/n/s/l/i/m) are kept for existing readers. Next
 to them the scorecard carries `sections`: one model-shaped Section per
-letter (see tui/src/model.rs and views/dossier.py), where
+letter (see tui/src/model.rs and py/derive/dossier.py), where
 every displayed value has a Source:
     fetched  -> {"label", "url"}  Yahoo Finance page the field is shown on,
                                   or the SEC filing (inline-XBRL viewer)
@@ -12,8 +12,8 @@ every displayed value has a Source:
 plus `overall` {score, grade, src}. The finlarp `canslim` screen
 renders only `sections`.
 
-    python views/canslim.py MRVL [--force]
-    python views/canslim.py --all [--force]
+    python py/derive/canslim.py MRVL [--force]
+    python py/derive/canslim.py --all [--force]
 """
 from __future__ import annotations
 
@@ -22,10 +22,10 @@ import sys
 from datetime import date, datetime, timezone
 
 from sources import yahoo
-import db
+from core import db
 import sources.edgar as edgar
 from sources import sec_http
-from models.canslim import (
+from core.schemas.canslim import (
     AnnualEarnings,
     AnnualPeriod,
     CanslimScorecard,
@@ -39,7 +39,7 @@ from models.canslim import (
     SupplyDemand,
     TopHolder,
 )
-from views.dossier import archive, derived, ixbrl, src
+from derive.dossier import archive, derived, ixbrl, src
 
 MODULES = ",".join([
     "assetProfile", "summaryDetail", "defaultKeyStatistics", "financialData",

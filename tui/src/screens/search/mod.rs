@@ -1,5 +1,5 @@
 // Full-text search over SEC filing chunks, patents and profiles
-// (views/search.py BM25 index), as a live ratatui screen. The fzf picker
+// (py/derive/search.py BM25 index), as a live ratatui screen. The fzf picker
 // in ui/search.lua is the other front end over the same engine.
 //
 //   ┌ search › t:MRVL guidance▏                              searching… ┐

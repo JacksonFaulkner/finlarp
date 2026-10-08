@@ -26,7 +26,7 @@ from mcp.types import ToolAnnotations
 
 
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
-from views import search as fts
+from derive import search as fts
 
 D = universe.DATA_ROOT
 READ_ONLY = ToolAnnotations(readOnlyHint=True, openWorldHint=False)

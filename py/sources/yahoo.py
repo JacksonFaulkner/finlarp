@@ -20,7 +20,7 @@ from pathlib import Path
 
 import requests
 
-import db
+from core import db
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
@@ -211,7 +211,7 @@ def main() -> None:
     elif args.cmd == "history":
         output = cmd_history(args.symbol, args.range_, args.interval, args.max_age)
     elif args.cmd == "universe":
-        import db
+        from core import db
 
         if args.universe_cmd == "groups":
             output = {"groups": db.universe_groups()}

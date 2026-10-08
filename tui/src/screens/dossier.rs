@@ -1,4 +1,4 @@
-// Per-ticker dossier (dossier_cache.dossier_json, built by views/dossier.py).
+// Per-ticker dossier (dossier_cache.dossier_json, built by py/derive/dossier.py).
 //
 //   ┌ MRVL Marvell Technology · Semiconductors · $235B ─── data ≥ 09-26 15:58 ┐
 //   │ Latest        │ blocks of the selected section (BlockView, or a        │
@@ -64,7 +64,7 @@ const FOOTER_KEYS: &[Key] = &[
     key("?", "help"),
 ];
 
-/// dossier_cache.dossier_json (see views/dossier.py docstring).
+/// dossier_cache.dossier_json (see py/derive/dossier.py docstring).
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct DossierDoc {
     pub ticker: String,
@@ -138,7 +138,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
         load_json(&ctx.db_path, &symbol).and_then(|j| match j {
             Some(j) => Ok(j),
             None => Err(format!(
-                "{symbol} has no cached dossier. Build it with:\n\n  views/dossier.py {symbol}"
+                "{symbol} has no cached dossier. Build it with:\n\n  py/derive/dossier.py {symbol}"
             )),
         })
     };
@@ -191,7 +191,7 @@ impl Dossier {
                 return Self::empty(
                     symbol,
                     format!(
-                        "{symbol}: cached dossier is unreadable ({e}).\nRebuild: views/dossier.py {symbol}"
+                        "{symbol}: cached dossier is unreadable ({e}).\nRebuild: py/derive/dossier.py {symbol}"
                     ),
                     theme,
                 );
