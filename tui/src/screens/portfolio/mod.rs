@@ -8,7 +8,7 @@
 //   6 Signals    mock skeleton
 //
 // Reads DuckDB only (see data.rs); the E*TRADE pull that fills it is the
-// `$` refresh in sources/etrade.py, so a stale cache is shown, not fetched.
+// `$` refresh in py/sources/etrade.py, so a stale cache is shown, not fetched.
 
 mod data;
 mod holding;

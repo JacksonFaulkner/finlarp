@@ -25,10 +25,10 @@ JSON shape (what tui/src/screens/dossier.rs reads):
           | {type: bars,   title, unit, items: [{label, value, src}]}
           | {type: text,   text, src}
 
-    python views/dossier.py MRVL          # build + cache, print summary
-    python views/dossier.py MRVL --json   # print the JSON
-    python views/dossier.py --all         # every ticker in the universe
-    python views/dossier.py MRVL --if-stale 12   # rebuild only if stale; JSON status (nvim)
+    python py/derive/dossier.py MRVL          # build + cache, print summary
+    python py/derive/dossier.py MRVL --json   # print the JSON
+    python py/derive/dossier.py --all         # every ticker in the universe
+    python py/derive/dossier.py MRVL --if-stale 12   # rebuild only if stale; JSON status (nvim)
 """
 from __future__ import annotations
 
@@ -42,7 +42,7 @@ from urllib.parse import quote
 import duckdb
 
 
-import db
+from core import db
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
 
 D = universe.DATA_ROOT

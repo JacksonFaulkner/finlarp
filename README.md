@@ -50,13 +50,15 @@ universe is about 430 AI-exposed stocks (`data/ai_stocks.json`).
 ## Layout
 
 ```
-tui/                 terminal UI (Rust, ratatui); reads the DuckDB file
-lua/finlarp/         Neovim plugin: launches the TUI, treemap dashboards, pickers, document viewer
-sources/             data pullers, one module per dataset
-views/               derived data: search index, CANSLIM scores, dossiers
-models/              scoring and extraction logic
-jobs/                batch scripts
-mcp_server.py        read-only MCP server over the same data
+tui/                 Rust: terminal UI (ratatui); reads the DuckDB file
+lua/finlarp/         Lua: Neovim plugin (launches the TUI, treemap dashboards, pickers, document viewer)
+py/                  Python: everything that fetches or computes data
+  core/                DuckDB cache (db.py) and pydantic schemas
+  sources/             data pullers, one module per dataset
+  derive/              derived data: search index, CANSLIM scores, dossiers
+  jobs/                batch scripts
+  agent/               read-only MCP server over the same data
+data/                universe lists (local, gitignored)
 ```
 
 ## Requirements
@@ -100,24 +102,24 @@ Press `?` on any screen for its keys.
 
 ## Pulling data
 
-Each puller in `sources/` runs on its own; its module docstring describes
+Each puller in `py/sources/` runs on its own; its module docstring describes
 what it fetches. SEC allows 10 requests per second per client; each process
 defaults to 1.5 (`SEC_RPS` overrides it).
 
 ```sh
-uv run python sources/bulk_pull.py              # large bulk files (patents, SEC data sets)
-uv run python sources/sec_filing_text.py ingest
-uv run python sources/sec_filing_text.py build
-uv run python views/dossier.py --all
+uv run python py/sources/bulk_pull.py              # large bulk files (patents, SEC data sets)
+uv run python py/sources/sec_filing_text.py ingest
+uv run python py/sources/sec_filing_text.py build
+uv run python py/derive/dossier.py --all
 ```
 
 ## MCP server
 
-`mcp_server.py` gives an agent read access to the same data over stdio:
+`py/agent/server.py` gives an agent read access to the same data over stdio:
 full-text search, company briefings, financial time series and read-only SQL.
 
 ```sh
-claude mcp add finlarp -- "$PWD/.venv/bin/python" "$PWD/mcp_server.py"
+claude mcp add finlarp -- "$PWD/.venv/bin/python" -m agent.server
 ```
 
 ## Development

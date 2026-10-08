@@ -23,7 +23,7 @@ import time
 from collections import defaultdict
 
 
-import db
+from core import db
 from sources import yahoo
 
 SHARE_AFFECTING_TYPES = {"Bought", "Sold", "Stock Split"}

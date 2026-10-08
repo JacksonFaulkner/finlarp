@@ -1,6 +1,6 @@
 // Portfolio history: total account value over time as a % change line
 // chart. Reads `portfolio_history` (one E*TRADE account snapshot per day,
-// upserted by sources/etrade.py on every live `$` refresh) straight out of
+// upserted by py/sources/etrade.py on every live `$` refresh) straight out of
 // DuckDB, read-only.
 //
 // Every number on screen is a point's value or its % change since the

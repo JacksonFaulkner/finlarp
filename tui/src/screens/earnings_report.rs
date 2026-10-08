@@ -20,7 +20,7 @@ use crate::ui::section_list::SectionList;
 use crate::ui::source_bar::{SourceInspector, render_source_bar, source_action};
 use crate::ui::theme::Theme;
 
-const REPORT: &str = include_str!("../../../research/mrvl_poc/marvell_report.json");
+const REPORT: &str = include_str!("fixtures/marvell_report.json");
 const KEYS: &[Key] = &[
     key("j/k", "move"),
     key("J/K", "section"),

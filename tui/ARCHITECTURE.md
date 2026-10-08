@@ -128,7 +128,7 @@ enum and the Lua dispatcher together.
    gets a `src: Option<Source>`.
 2. Extend `Block::title` / `len` / `source`: all the cursor and audit need.
 3. Render it in `ui/block_view.rs` (reuse `ui::charts`) and emit the same
-   JSON shape from the Python producer (`views/dossier.py`, `canslim.py`).
+   JSON shape from the Python producer (`py/derive/dossier.py`, `canslim.py`).
 
 ## Testing
 

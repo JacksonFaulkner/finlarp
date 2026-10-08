@@ -1,5 +1,5 @@
 // Shared data model for every screen: a value is only ever shown together
-// with where it came from. This mirrors the JSON views/dossier.py writes
+// with where it came from. This mirrors the JSON py/derive/dossier.py writes
 // (see its module docstring); CANSLIM and search produce the same shapes so
 // one set of components (src/ui) renders and audits all of them.
 //

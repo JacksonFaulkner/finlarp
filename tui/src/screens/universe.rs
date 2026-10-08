@@ -29,7 +29,7 @@ const GROUPS_SQL: &str = "
     ORDER BY 1, 3 NULLS FIRST, 4 DESC";
 
 const NOT_LOADED: &str = "The AI universe isn't loaded into DuckDB yet.\n\n  \
-    python -c 'import db; db.load_universe()'   (from the repo root)";
+    python -c 'from core import db; db.load_universe()'   (from the repo root)";
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Pick> {
     let res = match arg.as_deref().and_then(|a| a.split_once('|')) {
@@ -54,7 +54,7 @@ fn with_load<T>(
     {
         return Ok(rows);
     }
-    crate::pyrun::run_code("import db; db.load_universe()")?;
+    crate::pyrun::run_code("from core import db; db.load_universe()")?;
     let rows = read(ctx)?;
     if rows.is_empty() {
         Err(NOT_LOADED.to_string())

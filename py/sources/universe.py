@@ -11,10 +11,10 @@ import os
 import time
 from pathlib import Path
 
-import db
+from core import db
 from sources import sec_http
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 UNIVERSE_PATH = ROOT / "data" / "ai_stocks.json"
 ALIASES_PATH = ROOT / "data" / "cik_aliases.json"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"

@@ -4,7 +4,7 @@
 // those rows so they can be unit-tested without a database.
 //
 // Returns are time-weighted: the equity index chains each day's
-// `day_change_pct` (which sources/etrade.py computes net of same-day
+// `day_change_pct` (which py/sources/etrade.py computes net of same-day
 // transfers), so deposits and withdrawals never show up as performance.
 
 use std::collections::HashMap;

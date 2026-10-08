@@ -1,4 +1,4 @@
---- Open the document a number came from, inside nvim (views/docview.py
+--- Open the document a number came from, inside nvim (py/derive/docview.py
 --- fetches + caches + converts it). SEC HTML becomes markdown with clean
 --- tables and its images drawn inline by snacks.image; PDFs and images are
 --- drawn by snacks.image directly. The quote (from a dossier/search link's
@@ -12,7 +12,7 @@ local M = {}
 
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h:h:h")
 local python = plugin_dir .. "/.venv/bin/python"
-local script = plugin_dir .. "/views/docview.py"
+local script = plugin_dir .. "/py/derive/docview.py"
 
 local HL = "SecuritySpreadQuote"
 vim.api.nvim_set_hl(0, HL, { default = true, link = "Search" })

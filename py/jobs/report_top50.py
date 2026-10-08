@@ -16,8 +16,8 @@ from pathlib import Path
 
 import requests
 
-PLUGIN = Path(__file__).resolve().parents[1]
-from models.earnings_scrape import SecurityReportPanels
+PLUGIN = Path(__file__).resolve().parents[2]
+from core.schemas.earnings_scrape import SecurityReportPanels
 from sources import keys, sec_http, universe, yahoo
 from sources.sec_earnings import html_to_text
 

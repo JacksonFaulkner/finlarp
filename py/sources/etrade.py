@@ -25,7 +25,7 @@ from urllib.parse import quote
 import requests
 from rauth import OAuth1Service
 
-import db
+from core import db
 
 BASE_URL = "https://api.etrade.com"
 TOKEN_PATH = Path(os.path.expanduser("~/.local/share/nvim/etrade_token.json"))

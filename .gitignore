@@ -15,8 +15,6 @@ __pycache__/
 *.duckdb.wal
 *.sqlite
 *.db
-
-# personal research notes; only the dataset docs are published
-research/*
-!research/FINDINGS.md
-!research/BULK_SOURCES.md
+# local datasets and scratch notes; not published
+data/
+research/
