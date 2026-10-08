@@ -677,3 +677,24 @@ mod tests {
         assert_eq!(s.on_key(k('q')), Action::Quit);
     }
 }
+
+/// Symbols that ever changed share count in the cached E*TRADE
+/// transactions (buys, sells, splits), sorted. Empty when nothing is cached.
+pub fn traded_symbols(db_path: &std::path::Path) -> Result<Vec<String>, String> {
+    let conn = crate::db::open_read_only(db_path)?;
+    let Ok(mut stmt) = conn.prepare("SELECT transactions_json FROM transactions_cache") else {
+        return Ok(Vec::new()); // table not created yet = nothing cached
+    };
+    let rows = stmt
+        .query_map([], |r| r.get::<_, String>(0))
+        .map_err(|e| e.to_string())?;
+    let mut out = std::collections::BTreeSet::new();
+    for json in rows.flatten() {
+        for t in data::parse_txns(&json) {
+            if matches!(t.kind.as_str(), "Bought" | "Sold" | "Stock Split") {
+                out.insert(t.symbol);
+            }
+        }
+    }
+    Ok(out.into_iter().collect())
+}

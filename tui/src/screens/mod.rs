@@ -5,5 +5,8 @@ pub mod canslim;
 pub mod chart;
 pub mod dossier;
 pub mod earnings_report;
+pub mod home;
+pub mod pick;
 pub mod portfolio;
 pub mod search;
+pub mod universe;

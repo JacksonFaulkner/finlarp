@@ -9,6 +9,12 @@ __pycache__/
 .ruff_cache/
 .DS_Store
 *.log
+.pytest_cache/
+.mypy_cache/
+*.duckdb
+*.duckdb.wal
+*.sqlite
+*.db
 
 # personal research notes; only the dataset docs are published
 research/*

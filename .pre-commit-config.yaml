@@ -14,6 +14,11 @@ repos:
       - id: stylua-github
   - repo: local
     hooks:
+      - id: selene
+        name: selene
+        entry: selene
+        language: system
+        types: [lua]
       - id: cargo-fmt
         name: cargo fmt
         entry: cargo fmt --manifest-path tui/Cargo.toml --check

@@ -11,9 +11,15 @@ default: check
 setup:
     uv sync
     cargo build --release --manifest-path {{crate}}
+    uvx prek install
 
 build:
     cargo build --release --manifest-path {{crate}}
+
+# put `fl` on PATH: symlink into ~/.local/bin so a rebuild updates it in place
+install: build
+    mkdir -p {{env("HOME")}}/.local/bin
+    ln -sf {{justfile_directory()}}/tui/target/release/fl {{env("HOME")}}/.local/bin/fl
 
 test:
     cargo test --release --manifest-path {{crate}}

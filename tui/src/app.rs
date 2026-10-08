@@ -10,6 +10,9 @@
 // reads the file after the popup closes and dispatches it. Browser opens and
 // clipboard copies happen in-process and the screen stays up.
 //
+// Outside nvim (`fl`) there is no action file: documents open in the browser
+// and screen/picker requests come back to main's router as `Exit::handoff`.
+//
 // Drawing is two-phase: the loop only calls `Screen::draw` when something
 // could have changed (a key, a resize, a non-None action, a flash) or when
 // the screen asks via `needs_redraw` (default: always, so tick-driven
@@ -27,10 +30,6 @@ use serde::Serialize;
 
 use crate::ui::theme::Theme;
 
-/// Exit code the Lua wrapper treats as "reopen the symbol picker" (legacy
-/// CANSLIM `s` key); prefer `NvimAction::Picker` in new code.
-pub const EXIT_BACK_TO_PICKER: i32 = 90;
-
 /// Env var naming the file an `NvimAction` is written to.
 pub const ACTION_FILE_ENV: &str = "FINLARP_ACTION_FILE";
 
@@ -43,7 +42,8 @@ pub struct Ctx {
     pub theme: Theme,
 }
 
-/// Work to hand back to nvim. Serialized as {"action": "...", ...}.
+/// Work to hand back to nvim (or, outside nvim, to main's screen router).
+/// Serialized as {"action": "...", ...}.
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(tag = "action", rename_all = "lowercase")]
 pub enum NvimAction {
@@ -53,7 +53,7 @@ pub enum NvimAction {
     Chunk { id: String },
     /// Open another screen: "canslim" | "dossier" | "search", with its argument.
     Screen { screen: String, arg: Option<String> },
-    /// Reopen the fzf symbol picker for `screen`.
+    /// Reopen the symbol picker for `screen`.
     Picker { screen: String },
 }
 
@@ -67,8 +67,6 @@ pub enum Action {
     Copy(String),
     /// Hand work to nvim and exit.
     Nvim(NvimAction),
-    /// Exit with a specific process code.
-    Exit(i32),
 }
 
 pub trait Screen {
@@ -123,8 +121,25 @@ fn write_nvim_action(a: &NvimAction) -> io::Result<()> {
     std::fs::write(path, line + "\n")
 }
 
-/// Runs a screen to completion. Returns the process exit code.
-pub fn run(screen: &mut dyn Screen) -> io::Result<i32> {
+/// How a screen ended: the process exit code, plus a screen/picker request
+/// the caller (main's router) should open next when running outside nvim.
+#[derive(Debug, PartialEq)]
+pub struct Exit {
+    pub code: i32,
+    pub handoff: Option<NvimAction>,
+}
+
+impl Exit {
+    fn code(code: i32) -> Self {
+        Self {
+            code,
+            handoff: None,
+        }
+    }
+}
+
+/// Runs a screen to completion.
+pub fn run(screen: &mut dyn Screen) -> io::Result<Exit> {
     ratatui::run(|terminal| event_loop(terminal, screen, &mut CrosstermEvents))
 }
 
@@ -132,7 +147,7 @@ pub(crate) fn event_loop<B: Backend>(
     terminal: &mut Terminal<B>,
     screen: &mut dyn Screen,
     events: &mut dyn Events,
-) -> io::Result<i32> {
+) -> io::Result<Exit> {
     let mut dirty = true;
     loop {
         if dirty || screen.needs_redraw() {
@@ -165,8 +180,7 @@ pub(crate) fn event_loop<B: Backend>(
         }
         match action {
             Action::None => {}
-            Action::Quit => return Ok(0),
-            Action::Exit(code) => return Ok(code),
+            Action::Quit => return Ok(Exit::code(0)),
             Action::OpenBrowser(url) => {
                 let msg = match open::that_detached(&url) {
                     Ok(()) => "opened in browser".to_string(),
@@ -182,8 +196,30 @@ pub(crate) fn event_loop<B: Backend>(
                 screen.set_flash(msg);
             }
             Action::Nvim(a) => {
-                write_nvim_action(&a)?;
-                return Ok(0);
+                if std::env::var_os(ACTION_FILE_ENV).is_some() {
+                    write_nvim_action(&a)?;
+                    return Ok(Exit::code(0));
+                }
+                // Standalone (`fl`): nothing to hand back to. Documents open in
+                // the browser; screen/picker requests go to main's router.
+                match a {
+                    NvimAction::Docview { url, .. } => {
+                        let msg = match open::that_detached(&url) {
+                            Ok(()) => "opened in browser".to_string(),
+                            Err(e) => format!("open failed: {e}"),
+                        };
+                        screen.set_flash(msg);
+                    }
+                    NvimAction::Chunk { .. } => {
+                        screen.set_flash("opening a chunk needs the nvim plugin".into());
+                    }
+                    a @ (NvimAction::Screen { .. } | NvimAction::Picker { .. }) => {
+                        return Ok(Exit {
+                            code: 0,
+                            handoff: Some(a),
+                        });
+                    }
+                }
             }
         }
     }
@@ -278,7 +314,6 @@ mod tests {
         fn on_key(&mut self, key: KeyEvent) -> Action {
             match key.code {
                 KeyCode::Char('q') => Action::Quit,
-                KeyCode::Char('x') => Action::Exit(EXIT_BACK_TO_PICKER),
                 _ => Action::None,
             }
         }
@@ -289,7 +324,7 @@ mod tests {
 
     fn run_script(screen: &mut Probe, evs: Vec<Option<Event>>) -> io::Result<i32> {
         let mut term = Terminal::new(TestBackend::new(20, 3)).expect("terminal");
-        event_loop(&mut term, screen, &mut Script(evs.into()))
+        event_loop(&mut term, screen, &mut Script(evs.into())).map(|e| e.code)
     }
 
     #[test]
@@ -317,18 +352,13 @@ mod tests {
     }
 
     #[test]
-    fn ctrl_c_quits_and_exit_codes_pass_through() {
+    fn ctrl_c_quits() {
         let mut p = Probe::default();
         let ctrl_c = Some(Event::Key(KeyEvent::new(
             KeyCode::Char('c'),
             KeyModifiers::CONTROL,
         )));
         assert_eq!(run_script(&mut p, vec![ctrl_c]).expect("run"), 0);
-        let mut p = Probe::default();
-        assert_eq!(
-            run_script(&mut p, vec![key('x')]).expect("run"),
-            EXIT_BACK_TO_PICKER
-        );
     }
 
     #[test]
