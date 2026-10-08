@@ -11,7 +11,6 @@
 
 use std::collections::BTreeMap;
 use std::io::{BufRead, BufReader, Write};
-use std::path::PathBuf;
 use std::process::{Child, Command, Stdio};
 use std::sync::mpsc::{self, Receiver, Sender, TryRecvError};
 use std::thread;
@@ -85,33 +84,13 @@ pub struct Client {
     pub rx: Receiver<Reply>,
 }
 
-/// PLUGIN dir: $FINLARP_PLUGIN_DIR, else the crate's parent (the
-/// binary is always built in-tree by ui/tui.lua).
-fn plugin_dir() -> PathBuf {
-    std::env::var_os("FINLARP_PLUGIN_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|| PathBuf::from(env!("CARGO_MANIFEST_DIR")).join(".."))
-}
-
-fn python(plugin: &std::path::Path) -> PathBuf {
-    if let Some(p) = std::env::var_os("FINLARP_PYTHON") {
-        return PathBuf::from(p);
-    }
-    let venv = plugin.join(".venv/bin/python");
-    if venv.exists() {
-        venv
-    } else {
-        PathBuf::from("python3")
-    }
-}
-
 impl Client {
     /// Spawn the server. Never fails: spawn errors arrive as an error Reply.
     pub fn spawn() -> Self {
         let (tx, req_rx) = mpsc::channel::<Request>();
         let (reply_tx, rx) = mpsc::channel::<Reply>();
-        let plugin = plugin_dir();
-        let child = Command::new(python(&plugin))
+        let plugin = crate::pyrun::plugin_dir();
+        let child = Command::new(crate::pyrun::python(&plugin))
             .arg(plugin.join("views/search.py"))
             .arg("--serve")
             .current_dir(&plugin)

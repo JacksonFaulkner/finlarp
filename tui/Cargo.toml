@@ -3,6 +3,10 @@ name = "finlarp"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "fl"
+path = "src/main.rs"
+
 [dependencies]
 ratatui = "0.30"
 duckdb = { version = "1.1", features = ["bundled"] }

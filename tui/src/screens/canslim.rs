@@ -24,7 +24,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Wrap};
 use serde::Deserialize;
 
-use crate::app::{Action, Ctx, EXIT_BACK_TO_PICKER, NvimAction, Screen};
+use crate::app::{Action, Ctx, NvimAction, Screen};
 use crate::model::{Block, Section, Source};
 use crate::ui::block_grid::BlockGrid;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
@@ -429,17 +429,11 @@ impl Screen for Canslim {
     }
 }
 
-/// `s`: reopen the fzf symbol picker in nvim. Through the action file when
-/// ui/tui.lua provided one, else the legacy exit-90 sentinel
-/// its shell wrapper watches for.
+/// `s`: back to the symbol picker.
 fn back_to_picker() -> Action {
-    if std::env::var_os("FINLARP_ACTION_FILE").is_some() {
-        Action::Nvim(NvimAction::Picker {
-            screen: "canslim".into(),
-        })
-    } else {
-        Action::Exit(EXIT_BACK_TO_PICKER)
-    }
+    Action::Nvim(NvimAction::Picker {
+        screen: "canslim".into(),
+    })
 }
 
 #[cfg(test)]

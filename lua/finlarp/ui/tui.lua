@@ -1,6 +1,7 @@
--- Launcher for the ratatui binary (tui/): one binary, several
--- screens (chart | portfolio | canslim | dossier | search), all opened through
--- M.open_screen. Inside tmux the binary runs in a full-size
+-- Launcher for the ratatui binary `fl` (tui/): one binary, several
+-- screens (home | chart | portfolio | canslim | dossier | earnings | search |
+-- universe), all opened through M.open_screen. All navigation lives in the
+-- binary; this file only hosts it in a popup and carries colours in. Inside tmux the binary runs in a full-size
 -- `tmux display-popup` (a real terminal pane, no nested libvterm redraw
 -- lag); outside tmux it falls back to a floating :terminal.
 --
@@ -9,16 +10,14 @@
 -- screen, a picker) it writes one JSON line to $FINLARP_ACTION_FILE
 -- and exits. `display-popup -E` blocks until the popup closes and passes the
 -- binary's exit code through, so the jobstart on_exit here fires then and
--- M.dispatch runs the action. Exit code 90 is the legacy "back to picker".
+-- M.dispatch runs the action.
 
 local M = {}
 
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h:h:h")
 local crate_dir = plugin_dir .. "/tui"
-local binary_path = crate_dir .. "/target/release/finlarp"
+local binary_path = crate_dir .. "/target/release/fl"
 local root = "finlarp"
-
-local EXIT_BACK_TO_PICKER = 90
 
 --- Rebuilds the release binary if any Rust source is newer than it, so
 --- editing a screen and reopening the popup picks up the change without
@@ -95,26 +94,14 @@ local function call(mod, fn, ...)
   end
 end
 
---- Screen name -> how to open it from nvim. Screens that need a fetch
---- first (canslim) go through init.lua, not straight to open_screen.
+--- Screens that need more than open_screen(screen, arg). The binary builds
+--- the canslim/dossier caches itself, so everything else opens directly.
 local screens = {
   chart = function()
     M.show()
   end,
   portfolio = function(arg)
     M.show_suite(arg)
-  end,
-  canslim = function(arg)
-    call(root, "show_canslim", arg)
-  end,
-  dossier = function(arg)
-    call(root, "show_dossier", arg)
-  end,
-  earnings = function(arg)
-    M.open_screen("earnings", arg or "MRVL", { title = " " .. (arg or "MRVL") .. " research report " })
-  end,
-  search = function(arg)
-    call(root .. ".ui.search", "pick_tui", arg)
   end,
 }
 
@@ -135,10 +122,10 @@ function M.dispatch(a)
     if open then
       open(a.arg)
     else
-      vim.notify("finlarp: unknown screen " .. tostring(a.screen), vim.log.levels.WARN)
+      M.open_screen(a.screen, a.arg)
     end
   elseif a.action == "picker" then
-    call(root, "pick_" .. tostring(a.screen))
+    M.open_screen(a.screen) -- no argument = the screen's ticker picker
   else
     vim.notify("finlarp: unknown action " .. vim.inspect(a), vim.log.levels.WARN)
   end
@@ -165,7 +152,7 @@ local function take_action(path)
 end
 
 --- After the binary exits: opts.on_exit(code, action) first, then the
---- default handling (picker on 90, else dispatch the action).
+--- default handling (dispatch the action).
 local function finish(code, action_file, screen, opts)
   vim.schedule(function()
     local action = take_action(action_file)
@@ -177,8 +164,6 @@ local function finish(code, action_file, screen, opts)
     end
     if action and action.error then
       vim.notify("finlarp: " .. screen .. ": " .. action.error, vim.log.levels.ERROR)
-    elseif code == EXIT_BACK_TO_PICKER then
-      call(root, "pick_" .. screen)
     elseif action then
       M.dispatch(action)
     elseif code ~= 0 then
@@ -221,7 +206,7 @@ local function open_in_float(cmd, env, title, on_exit)
 end
 
 --- Opens a screen of the binary.
---- @param screen string "chart" | "canslim" | "dossier" | "search"
+--- @param screen string "home" | "chart" | "portfolio" | "canslim" | "dossier" | "earnings" | "search" | "universe"
 --- @param arg string|nil screen argument (symbol, query, range)
 --- @param opts table|nil { title = string, env = table<string,string>, on_exit = fun(code: integer, action: table|nil) }
 function M.open_screen(screen, arg, opts)
@@ -240,8 +225,11 @@ function M._open_built(screen, arg, opts)
 
   local cmd = {
     binary_path,
+    "--bg",
     hl_hex("Normal", "bg", ""),
+    "--up",
     hl_hex("SecuritySpreadUp", "fg", "#4d9375"),
+    "--down",
     hl_hex("SecuritySpreadDown", "fg", "#c25c5c"),
     screen,
   }
@@ -329,11 +317,9 @@ function M.show_suite(range)
   call(root, "refresh_portfolio", report)
 end
 
---- CANSLIM scorecard for one symbol. Assumes `uv run views/canslim.py
---- <symbol>` has already cached it (init.lua show_canslim does the fetch).
---- @param symbol string
-function M.show_canslim(symbol)
-  M.open_screen("canslim", symbol, { title = " " .. symbol .. " canslim " })
+--- The home menu (`fl` / `fl .`).
+function M.show_home()
+  M.open_screen("home", nil, { title = " finlarp " })
 end
 
 return M

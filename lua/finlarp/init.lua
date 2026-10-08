@@ -552,9 +552,9 @@ function M.pick(slot)
   require("finlarp.ui.picker").pick(slot)
 end
 
---- Opens the fzf-lua AI-universe group picker (primary/sub buckets, regions).
-function M.pick_universe(slot)
-  require("finlarp.ui.universe").pick(slot)
+--- AI-universe browser (picker lives in the binary).
+function M.pick_universe()
+  require("finlarp.ui.tui").open_screen("universe", nil, { title = " AI universe " })
 end
 
 --- Lists currently open dashboard session names.
@@ -736,32 +736,12 @@ function M.show_portfolio_suite(range)
   require("finlarp.ui.tui").show_suite(range)
 end
 
---- Opens the CANSLIM scorecard TUI for a symbol. Fetches (--force, so a
---- manual open always gets current data and picks up schema changes)
---- and only then opens the TUI, so the screen is populated on first paint
---- — no "press r to reload" round trip. Prompts for a symbol if none given.
+--- CANSLIM scorecard TUI for a symbol. The binary fetches the data itself
+--- and shows its ticker picker when no symbol is given.
 --- @param symbol string|nil
 function M.show_canslim(symbol)
-  local function open(sym)
-    vim.notify("finlarp: fetching " .. sym .. " canslim...", vim.log.levels.INFO)
-    run("views/canslim.py", { sym, "--force" }, function(ok, data)
-      if not ok then
-        vim.notify("finlarp: canslim fetch failed: " .. tostring(data), vim.log.levels.ERROR)
-        return
-      end
-      require("finlarp.ui.tui").show_canslim(sym)
-    end)
-  end
-
-  if symbol and symbol ~= "" then
-    open(symbol)
-  else
-    vim.ui.input({ prompt = "CANSLIM symbol: " }, function(input)
-      if input and input ~= "" then
-        open(input:upper())
-      end
-    end)
-  end
+  local sym = symbol and symbol ~= "" and symbol:upper() or nil
+  require("finlarp.ui.tui").open_screen("canslim", sym, { title = " " .. (sym or "") .. " canslim " })
 end
 
 --- Live full-text search over pulled SEC filings / earnings text.
@@ -770,90 +750,27 @@ function M.pick_search(initial)
   require("finlarp.ui.search").pick(initial)
 end
 
---- Opens the per-ticker research dossier TUI (finlarp `dossier`
---- screen). Rebuilds views/dossier.py's cache first if it's missing,
---- older than 12h, or older than the data it's built from; otherwise opens
---- instantly. Prompts for a symbol if none given.
+--- Per-ticker research dossier TUI. The binary rebuilds a stale cache
+--- itself and shows its ticker picker when no symbol is given.
 --- @param symbol string|nil
 function M.show_dossier(symbol)
-  local function open(sym)
-    sym = sym:upper()
-    local chart = require("finlarp.ui.tui")
-    run("views/dossier.py", { sym, "--if-stale", "12" }, function(ok, data)
-      if not ok then
-        -- still open: the screen explains a missing cache itself
-        vim.notify("finlarp: dossier build failed: " .. tostring(data), vim.log.levels.ERROR)
-      elseif type(data) == "table" and (data.unsourced or 0) > 0 then
-        vim.notify(("finlarp: %s dossier has %d unsourced values"):format(sym, data.unsourced), vim.log.levels.WARN)
-      end
-      chart.open_screen("dossier", sym, { title = " " .. sym .. " dossier " })
-    end)
-  end
-
-  if symbol and symbol ~= "" then
-    open(symbol)
-  else
-    vim.ui.input({ prompt = "Dossier symbol: " }, function(input)
-      if input and input ~= "" then
-        open(input)
-      end
-    end)
-  end
+  local sym = symbol and symbol ~= "" and symbol:upper() or nil
+  require("finlarp.ui.tui").open_screen("dossier", sym, { title = " " .. (sym or "") .. " dossier " })
 end
 
---- fzf-lua picker over held symbols (from cached transaction history).
---- Same instant-paint pattern as pick_transactions: uses whatever's
---- cached, no live E*TRADE pull.
---- @param prompt string
---- @param on_pick fun(symbol: string)
-local function pick_held(prompt, on_pick)
-  local ok, fzf = pcall(require, "fzf-lua")
-  if not ok then
-    vim.notify("finlarp: fzf-lua not installed", vim.log.levels.ERROR)
-    return
-  end
-
-  local share_affecting = { Bought = true, Sold = true, ["Stock Split"] = true }
-
-  M.transactions_cached(function(cok, transactions)
-    if not cok or not transactions then
-      vim.notify("finlarp: no cached transactions — run <leader>st first", vim.log.levels.WARN)
-      return
-    end
-    local seen, symbols = {}, {}
-    for _, t in ipairs(transactions) do
-      if t.symbol and share_affecting[t.type] and not seen[t.symbol] then
-        seen[t.symbol] = true
-        symbols[#symbols + 1] = t.symbol
-      end
-    end
-    table.sort(symbols)
-    if #symbols == 0 then
-      vim.notify("finlarp: no symbols found in cached transactions", vim.log.levels.WARN)
-      return
-    end
-
-    fzf.fzf_exec(symbols, {
-      prompt = prompt,
-      actions = {
-        ["default"] = function(selected)
-          if selected[1] then
-            on_pick(selected[1])
-          end
-        end,
-      },
-    })
-  end)
-end
-
---- Held-symbol picker -> CANSLIM scorecard.
+--- Ticker picker -> CANSLIM scorecard (picker lives in the binary).
 function M.pick_canslim()
-  pick_held("CANSLIM> ", M.show_canslim)
+  M.show_canslim()
 end
 
---- Held-symbol picker -> research dossier.
+--- Ticker picker -> research dossier.
 function M.pick_dossier()
-  pick_held("Dossier> ", M.show_dossier)
+  M.show_dossier()
+end
+
+--- The finlarp home menu.
+function M.home()
+  require("finlarp.ui.tui").show_home()
 end
 
 return M

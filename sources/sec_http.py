@@ -13,7 +13,10 @@ import time
 
 import requests
 
-UA = "finlarp (personal nvim tool) contact: jackson.faulkner1@gmail.com"
+from sources import keys
+
+# SEC 403s without contact info; set SEC_CONTACT (an email) in env or .env
+UA = f"finlarp (personal nvim tool) contact: {keys.require('SEC_CONTACT')}"
 RPS = float(os.environ.get("SEC_RPS", "1.5"))
 
 _lock = threading.Lock()
