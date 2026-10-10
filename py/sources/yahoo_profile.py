@@ -26,10 +26,10 @@ URL = "https://query1.finance.yahoo.com/v10/finance/quoteSummary/{}"
 MODULES = "assetProfile,quoteType,price"
 
 
-def fetch(session, sym: str) -> dict | None:
+def fetch(session, sym: str, modules: str = MODULES) -> dict | None:
     crumb = yahoo.get_crumb(session)
     for attempt in range(3):
-        r = session.get(URL.format(sym), params={"modules": MODULES, "crumb": crumb}, timeout=15)
+        r = session.get(URL.format(sym), params={"modules": modules, "crumb": crumb}, timeout=15)
         if r.status_code == 404:
             return None
         if r.status_code == 401:  # crumb went stale mid-run: new handshake, not the same dead crumb
@@ -68,7 +68,7 @@ def row(ticker: str, res: dict) -> dict:
 def main() -> None:
     session = yahoo.new_session()
     rows, missing = [], []
-    for s in universe.stocks():
+    for s in universe.rows():
         res = fetch(session, s["ticker"])
         if res:
             rows.append(row(s["ticker"], res))
