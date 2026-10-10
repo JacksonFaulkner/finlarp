@@ -18,12 +18,14 @@ Needs DATABENTO_API_KEY in the environment (see .env.example).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import re
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
+from pathlib import Path
 
 import databento as db
 import duckdb
@@ -56,15 +58,9 @@ def symbols() -> list[str]:
 def holdings() -> list[str]:
     """Plain US tickers ever held or traded, from the append-only traded_symbols table.
 
-    Holdings churn, so this is a superset on purpose: a sold name keeps its bars. Pulled history is
-    never dropped, and each extra symbol has its own file, so growth here never re-pulls anything.
+    Holdings churn, so this is a superset on purpose: a sold name keeps its bars.
     """
     return [s for s in cache_db.get_traded_symbols() if PLAIN_TICKER.fullmatch(s)]
-
-
-def extra_symbols() -> list[str]:
-    """Held or traded tickers outside the universe."""
-    return sorted(set(holdings()) - set(symbols()))
 
 
 def _retry(fn):
@@ -95,17 +91,44 @@ def windows(start: date, end: date, step: int) -> list[tuple[date, date]]:
     return out
 
 
+def _manifest(path: Path) -> Path:
+    return path.with_suffix(".symbols.json")
+
+
+def covered(table: str, a: date, b: date) -> set[str]:
+    """Symbols already requested for this window, whatever the batch layout was when they were pulled.
+
+    Each pulled file has a manifest of the symbols asked for, so a symbol with no bars in the window
+    (pre-IPO) still counts as covered. Files from before manifests existed fall back to the symbols
+    inside the parquet.
+    """
+    out: set[str] = set()
+    for f in sorted((OUT_ROOT / table).glob(f"{a}_{b}_*.parquet")):
+        m = _manifest(f)
+        if m.exists():
+            out |= set(json.loads(m.read_text()))
+        else:
+            con = duckdb.connect()
+            out |= {r[0] for r in con.execute("SELECT DISTINCT symbol FROM read_parquet(?)", [str(f)]).fetchall()}
+            con.close()
+    return out
+
+
 def chunks(table: str, client: db.Historical) -> list[dict]:
+    """Only what is missing: per window, every wanted symbol that no file on disk covers yet.
+
+    Batches are named by content, so growing the universe or the traded set never shifts or
+    invalidates an existing file; it just adds chunks for the new symbols.
+    """
     spec = TABLES[table]
     start, end = span(client, spec)
-    syms = symbols()
-    # (batch, file tag): universe batches are positional; each extra gets its own file keyed by symbol,
-    # so the set of extras can change freely without invalidating or duplicating anything on disk.
-    batches = [(syms[i : i + BATCH], f"b{i // BATCH:02d}") for i in range(0, len(syms), BATCH)]
-    batches += [([s], f"s{s}") for s in extra_symbols()]
+    wanted = sorted(set(symbols()) | set(holdings()))
     out = []
     for a, b in windows(start, end, spec["window_days"]):
-        for batch, tag in batches:
+        missing = [s for s in wanted if s not in covered(table, a, b)]
+        for i in range(0, len(missing), BATCH):
+            batch = missing[i : i + BATCH]
+            tag = hashlib.sha1(",".join(batch).encode()).hexdigest()[:8]
             out.append(
                 {
                     "table": table,
@@ -114,7 +137,7 @@ def chunks(table: str, client: db.Historical) -> list[dict]:
                     "symbols": batch,
                     "start": a.isoformat(),
                     "end": b.isoformat(),
-                    "path": OUT_ROOT / table / f"{a}_{b}_{tag}.parquet",
+                    "path": OUT_ROOT / table / f"{a}_{b}_c{tag}.parquet",
                 }
             )
     return out
@@ -142,6 +165,7 @@ def fetch(client: db.Historical, ch: dict) -> int:
     tmp = ch["path"].with_suffix(".tmp")
     df.drop(columns=[c for c in ("rtype", "publisher_id", "instrument_id") if c in df.columns]).to_parquet(tmp)
     tmp.rename(ch["path"])  # a file on disk is always complete, so reruns can trust it
+    _manifest(ch["path"]).write_text(json.dumps(ch["symbols"]))
     return len(df)
 
 
