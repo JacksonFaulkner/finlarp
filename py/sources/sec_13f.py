@@ -12,7 +12,7 @@ time: latest original-or-RESTATEMENT, plus any NEW HOLDINGS amendments
 filed after it.
 
 13F has no ticker column (FIGI is on ~12% of rows), so `build_cusip_map()`
-maps the ai_stocks.json universe via OpenFIGI tickers -> FIGIs matched
+maps the universe via OpenFIGI tickers -> FIGIs matched
 against filer-reported (cusip, figi) pairs, falling back to issuer name.
 
 https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets
@@ -30,13 +30,12 @@ import duckdb
 import requests
 
 from core import db
-from sources import sec_http
+from sources import sec_http, universe
 from sources import pq
 
 INDEX_URL = "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
 OPENFIGI_URL = "https://api.openfigi.com/v3/mapping"
 DATA_DIR = db.DB_PATH.parent / "sec_13f"
-UNIVERSE_PATH = Path(__file__).resolve().parents[2] / "data" / "ai_stocks.json"
 
 # A single filer reporting more than this multiple of the next-largest
 # holder's position is almost always a units typo (CalSTRS reported 386M
@@ -234,7 +233,7 @@ def build_cusip_map() -> dict[str, int]:
     only if the issuer name shares a word with OpenFIGI's name.
     name: exact normalized issuer-name match (OpenFIGI name, then the
     universe's own name); catches foreign listings via their US ADRs."""
-    stocks = json.loads(UNIVERSE_PATH.read_text())["stocks"]
+    stocks = universe.rows()
     con = duckdb.connect()
     # Window start date from the file stem (01jun2026-31aug2026_form13f)
     # so a FIGI whose cusip changed (spin-off, redomicile) follows the new one.
@@ -260,7 +259,7 @@ def build_cusip_map() -> dict[str, int]:
             by_name[k] = (cusip, n)
     names = {c: nm for c, nm, _ in issuers}
 
-    figi = _openfigi([s["ticker"] for s in stocks if "." not in s["ticker"]])
+    figi = _openfigi([s["ticker"] for s in stocks if s["kind"] != "foreign"])
     rows, counts = [], {"figi": 0, "figi_unverified": 0, "name": 0, "unmapped": 0}
     for s in stocks:
         t = s["ticker"]

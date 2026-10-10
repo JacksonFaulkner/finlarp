@@ -17,6 +17,8 @@ from pathlib import Path
 
 import duckdb
 
+from core.schemas.universe import Stock, infer_kind
+
 DB_PATH = Path(os.path.expanduser("~/.local/share/nvim/finlarp.duckdb"))
 
 # History doesn't change intraday for the bar we already have except the
@@ -530,6 +532,7 @@ def _ensure_universe_tables(con: duckdb.DuckDBPyConnection) -> None:
             reviewed_on VARCHAR
         )
     """)
+    con.execute("ALTER TABLE ai_universe ADD COLUMN IF NOT EXISTS kind VARCHAR")
     con.execute("""
         CREATE TABLE IF NOT EXISTS ai_universe_category (
             ticker VARCHAR,
@@ -563,50 +566,47 @@ def _dominant(weights: dict) -> str | None:
 
 
 def load_universe(path: Path = UNIVERSE_JSON, force: bool = False) -> dict:
-    """(Re)load the reviewed JSON into DuckDB. Skips when the file hasn't
-    changed since the last load unless `force`."""
-    mtime = path.stat().st_mtime
+    """One-time import of the reviewed JSON into DuckDB. The tables are the source of truth after
+    that: an existing universe is never overwritten unless `force`. New stocks go through
+    `upsert_stock`, not the file."""
     con = _conn()
     try:
         _ensure_universe_tables(con)
-        row = con.execute("SELECT source_mtime, record_count FROM ai_universe_meta WHERE id = 0").fetchone()
-        if row is not None and not force and row[0] == mtime:
-            return {"loaded": False, "record_count": row[1]}
+        n = con.execute("SELECT count(*) FROM ai_universe").fetchone()[0]
+        if n and not force:
+            return {"loaded": False, "record_count": n}
 
         data = json.loads(path.read_text())
         meta = data.get("_meta", {})
-        stocks = data["stocks"]
-
-        universe_rows = []
-        category_rows = []
-        for s in stocks:
+        taxonomy = meta.get("taxonomy", {})
+        stocks, invalid = [], []
+        for s in data["stocks"]:
             sec = s.get("security", {})
             west = s.get("weight_estimation", {})
-            rev = s.get("review", {})
-            rationale = " ".join(west.get("rationale") or [])
             sources = s.get("sources") or []
-            source_url = sources[0].get("url") if sources else None
-            universe_rows.append([
-                s["ticker"],
-                s.get("name"),
-                s.get("region"),
-                _dominant(s.get("primary", {})),
-                sec.get("status"),
-                sec.get("eligible_as_current_security"),
-                west.get("category_assignment_confidence"),
-                rationale,
-                source_url,
-                rev.get("reviewed_on") or meta.get("reviewed_on"),
-            ])
-            for cat, w in (s.get("primary") or {}).items():
-                category_rows.append([s["ticker"], "primary", cat, float(w)])
-            for cat, w in (s.get("subs") or {}).items():
-                category_rows.append([s["ticker"], "sub", cat, float(w)])
+            try:
+                stock = Stock(
+                    ticker=s["ticker"],
+                    name=s.get("name") or s["ticker"],
+                    region=s.get("region") or "US",
+                    kind=infer_kind(s["ticker"]),
+                    subs=s.get("subs") or {},
+                    eligible=sec.get("eligible_as_current_security"),
+                    status=sec.get("status"),
+                    category_confidence=west.get("category_assignment_confidence"),
+                    rationale=" ".join(west.get("rationale") or []) or None,
+                    source_url=sources[0].get("url") if sources else None,
+                    reviewed_on=(s.get("review") or {}).get("reviewed_on") or meta.get("reviewed_on"),
+                )
+                stock.check_taxonomy(taxonomy)
+                stocks.append(stock.with_primary(taxonomy))
+            except ValueError as e:
+                invalid.append(str(e))
 
         taxonomy_rows = []
         ext_desc = meta.get("taxonomy_extensions", {})
         clar = meta.get("taxonomy_scope_clarifications", {})
-        for primary, subs in meta.get("taxonomy", {}).items():
+        for primary, subs in taxonomy.items():
             for sub in subs:
                 desc = ext_desc.get(primary, {}).get(sub) or clar.get(sub)
                 taxonomy_rows.append([sub, primary, desc])
@@ -615,19 +615,84 @@ def load_universe(path: Path = UNIVERSE_JSON, force: bool = False) -> dict:
         con.execute("DELETE FROM ai_universe")
         con.execute("DELETE FROM ai_universe_category")
         con.execute("DELETE FROM ai_taxonomy")
-        con.executemany("INSERT INTO ai_universe VALUES (?,?,?,?,?,?,?,?,?,?)", universe_rows)
-        con.executemany("INSERT INTO ai_universe_category VALUES (?,?,?,?)", category_rows)
         con.executemany("INSERT INTO ai_taxonomy VALUES (?,?,?)", taxonomy_rows)
-        con.execute(
-            "INSERT INTO ai_universe_meta VALUES (0, ?, ?, ?) "
-            "ON CONFLICT (id) DO UPDATE SET source_mtime = excluded.source_mtime, "
-            "loaded_at = excluded.loaded_at, record_count = excluded.record_count",
-            [mtime, time.time(), len(universe_rows)],
-        )
+        for stock in stocks:
+            _write_stock(con, stock)
         con.execute("COMMIT")
-        return {"loaded": True, "record_count": len(universe_rows)}
+        return {"loaded": True, "record_count": len(stocks), "invalid": invalid}
     finally:
         con.close()
+
+
+def _write_stock(con: duckdb.DuckDBPyConnection, s: Stock) -> None:
+    con.execute("DELETE FROM ai_universe WHERE ticker = ?", [s.ticker])
+    con.execute("DELETE FROM ai_universe_category WHERE ticker = ?", [s.ticker])
+    con.execute(
+        "INSERT INTO ai_universe (ticker, name, region, primary_category, security_status, eligible, "
+        "category_confidence, rationale, source_url, reviewed_on, kind) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        [s.ticker, s.name, s.region, _dominant(s.primary), s.status, s.eligible, s.category_confidence,
+         s.rationale, s.source_url, s.reviewed_on, s.kind],
+    )
+    rows = [[s.ticker, "primary", c, w] for c, w in s.primary.items()]
+    rows += [[s.ticker, "sub", c, w] for c, w in s.subs.items()]
+    con.executemany("INSERT INTO ai_universe_category VALUES (?,?,?,?)", rows)
+
+
+def taxonomy() -> dict[str, list[str]]:
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        out: dict[str, list[str]] = {}
+        for sub, primary in con.execute("SELECT sub_category, primary_category FROM ai_taxonomy").fetchall():
+            out.setdefault(primary, []).append(sub)
+        return out
+    finally:
+        con.close()
+
+
+def upsert_stock(stock: Stock) -> Stock:
+    """Add or replace one stock. Buckets are checked against the taxonomy and primary is recomputed."""
+    tax = taxonomy()
+    stock.check_taxonomy(tax)
+    stock = stock.with_primary(tax)
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        con.execute("BEGIN")
+        _write_stock(con, stock)
+        con.execute("COMMIT")
+    finally:
+        con.close()
+    return stock
+
+
+def get_stocks(include_ineligible: bool = False) -> list[Stock]:
+    """The universe. Ineligible names (acquired, delisted) are kept in the table but hidden by default."""
+    load_universe()
+    con = _conn()
+    try:
+        where = "" if include_ineligible else "WHERE u.eligible IS DISTINCT FROM false"
+        heads = con.execute(
+            f"SELECT ticker, name, region, kind, eligible, security_status, category_confidence, rationale, "
+            f"source_url, reviewed_on FROM ai_universe u {where} ORDER BY ticker"
+        ).fetchall()
+        weights: dict[str, dict[str, dict[str, float]]] = {}
+        for t, level, cat, w in con.execute("SELECT ticker, level, category, weight FROM ai_universe_category").fetchall():
+            weights.setdefault(t, {"primary": {}, "sub": {}})[level][cat] = w
+    finally:
+        con.close()
+    out = []
+    for t, name, region, kind, elig, status, conf, why, url, rev in heads:
+        w = weights.get(t, {"primary": {}, "sub": {}})
+        subs = dict(sorted(w["sub"].items(), key=lambda kv: -kv[1]))
+        out.append(
+            Stock.model_construct(
+                ticker=t, name=name, region=region, kind=kind or "stock", subs=subs,
+                primary=dict(sorted(w["primary"].items(), key=lambda kv: -kv[1])), eligible=elig, status=status,
+                category_confidence=conf, rationale=why, source_url=url, reviewed_on=rev,
+            )
+        )
+    return out
 
 
 def universe_groups() -> list[dict]:

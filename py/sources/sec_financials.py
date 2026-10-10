@@ -1,5 +1,5 @@
 """XBRL companyfacts — every financial-statement fact each company has
-filed with the SEC, for the whole ai_stocks.json universe.
+filed with the SEC, for the whole universe.
 
 companyfacts (data.sec.gov/api/xbrl/companyfacts/CIK##########.json) is
 one JSON per registrant holding every us-gaap / ifrs-full / dei / srt
