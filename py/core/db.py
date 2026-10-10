@@ -50,6 +50,15 @@ _SCHEMA = [
             fetched_at DOUBLE
         )
     """,
+    # Append-only: every ticker ever seen in positions or trades. The caches above are
+    # overwritten (and transactions only span 2y); this is what outlives them.
+    """
+        CREATE TABLE IF NOT EXISTS traded_symbols (
+            symbol VARCHAR PRIMARY KEY,
+            first_seen DOUBLE,
+            last_seen DOUBLE
+        )
+    """,
     """
         CREATE TABLE IF NOT EXISTS portfolio_history (
             date DATE PRIMARY KEY,
@@ -201,6 +210,41 @@ def cache_ages() -> dict:
     }
 
 
+def _remember_symbols(con, symbols) -> None:
+    now = time.time()
+    for s in {s for s in symbols if s}:
+        con.execute(
+            "INSERT INTO traded_symbols VALUES (?, ?, ?) ON CONFLICT (symbol) DO UPDATE SET last_seen = excluded.last_seen",
+            [s, now, now],
+        )
+
+
+def get_traded_symbols() -> list[str]:
+    """Every ticker ever held or traded. Seeds itself from the current caches, so it is
+    complete the first time it is read, then only grows."""
+    con = _conn()
+    try:
+        _remember_symbols(con, (p.get("symbol") for p in _loads("SELECT positions_json FROM positions_cache", con)))
+        _remember_symbols(
+            con,
+            (
+                t.get("symbol")
+                for t in _loads("SELECT transactions_json FROM transactions_cache", con)
+                if t.get("type") in TRADE_TYPES
+            ),
+        )
+        return [r[0] for r in con.execute("SELECT symbol FROM traded_symbols ORDER BY symbol").fetchall()]
+    finally:
+        con.close()
+
+
+TRADE_TYPES = ("Bought", "Sold", "Stock Split")
+
+
+def _loads(sql: str, con) -> list[dict]:
+    return [row for (blob,) in con.execute(sql).fetchall() for row in json.loads(blob)]
+
+
 def put_cached_positions(positions: list[dict]) -> None:
     con = _conn()
     try:
@@ -210,6 +254,7 @@ def put_cached_positions(positions: list[dict]) -> None:
             "positions_json = excluded.positions_json, fetched_at = excluded.fetched_at",
             [json.dumps(positions), time.time()],
         )
+        _remember_symbols(con, (p.get("symbol") for p in positions))
     finally:
         con.close()
 
@@ -262,6 +307,7 @@ def put_cached_transactions(account: str, transactions: list[dict]) -> None:
             "transactions_json = excluded.transactions_json, fetched_at = excluded.fetched_at",
             [account, json.dumps(transactions), time.time()],
         )
+        _remember_symbols(con, (t.get("symbol") for t in transactions if t.get("type") in TRADE_TYPES))
     finally:
         con.close()
 
