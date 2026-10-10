@@ -260,7 +260,7 @@ impl PortfolioScreen {
             Sync::Failed(m) => spans.push(Span::styled(format!(" · ✗ {m}"), t.down())),
         }
         if self.tab > 1 {
-            spans.push(Span::styled(" · tabs 3-6 are mock data", t.accent()));
+            spans.push(Span::styled(" · tabs 4-6 are mock data", t.accent()));
         }
         Line::from(spans)
     }
@@ -354,7 +354,16 @@ impl Screen for PortfolioScreen {
                     };
                     pie::draw(frame, p.detail, &view);
                 }
-                2 => mock::exposure(frame, p.detail, &t),
+                2 => {
+                    let tot = data::totals(&self.data.history, &self.data.positions);
+                    let view = mock::ExposureView {
+                        theme: &t,
+                        positions: &self.data.positions,
+                        tot: &tot,
+                        exp: &self.data.exposure,
+                    };
+                    mock::exposure(frame, p.detail, &view);
+                }
                 3 => mock::risk(frame, p.detail, &t, self.row),
                 4 => mock::activity(frame, p.detail, &t, self.row),
                 _ => mock::signals(frame, p.detail, &t, self.row),
@@ -541,8 +550,56 @@ mod tests {
     #[test]
     fn mock_tabs_are_labelled_mock() {
         let mut s = screen(sample());
-        s.tab = 2;
+        s.tab = 3;
         assert!(render(&mut s, 120, 30).contains("mock"));
+    }
+
+    #[test]
+    fn exposure_drift_renders_industry_rows() {
+        let mut d = sample();
+        let start = NaiveDate::from_ymd_opt(2026, 1, 1).unwrap();
+        d.txns = vec![data::Txn {
+            id: "1".into(),
+            date: start,
+            kind: "trade".into(),
+            symbol: "NVDA".into(),
+            qty: 10.0,
+            price: 100.0,
+            amount: -1000.0,
+        }];
+        d.closes.insert(
+            "NVDA".into(),
+            (0..120)
+                .map(|i| (start + chrono::Duration::days(i), 100.0 + i as f64))
+                .collect(),
+        );
+        let industries =
+            std::collections::HashMap::from([("NVDA".to_string(), "gpu accelerators".to_string())]);
+        d.exposure =
+            data::build_exposure(&d.history, &d.positions, &d.txns, &d.closes, &industries);
+        let mut s = screen(d);
+        s.tab = 2;
+        let out = render(&mut s, 160, 50);
+        assert!(out.contains("gpu accel"), "{out}");
+        assert!(
+            out.contains("100.0%"),
+            "latest drift weight missing:\n{out}"
+        );
+    }
+
+    #[test]
+    fn exposure_tab_shows_real_panels() {
+        let mut s = screen(sample());
+        s.tab = 2;
+        let out = render(&mut s, 160, 50);
+        assert!(out.contains("By industry"), "{out}");
+        assert!(out.contains("Industry drift"));
+        assert!(out.contains("Concentration"));
+        assert!(out.contains("Top 1"));
+        assert!(
+            !out.contains("· mock"),
+            "exposure panels are live, not mock:\n{out}"
+        );
     }
 
     #[test]

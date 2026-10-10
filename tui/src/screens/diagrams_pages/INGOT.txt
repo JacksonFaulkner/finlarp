@@ -1,0 +1,127 @@
+# 1. What happens: from as-pulled crystal to wafer-ready cylinder
+
+ ┌───────────┐  ┌───────────┐  ┌─────────────┐  ┌───────────┐  ┌─────────────┐  ┌──────────┐
+ │ AS-PULLED │  │ CROP      │  │ TEST        │  │ GRIND OD  │  │ NOTCH       │  │ WIRE SAW │
+ │ rough rod │─▶│ cut cones │─▶│ orientation │─▶│ to 300 mm │─▶│ orient mark │─▶│ slices   │
+ └───────────┘  └───────────┘  └─────────────┘  └───────────┘  └─────────────┘  └──────────┘
+
+  (the node ends at a ground, notched cylinder; the saw output goes on to lap, etch and polish)
+
+# 2. The rod, side view, and where it gets cut
+
+  ┌────────────────────────────────────────────────────────────────────────────────────────┐
+  │       CROP LINE                                                       CROP LINE        │
+  │           ┊                                                                 ┊          │
+  │         ╱─┊──────────────────────────────────────────────────────────┊─╲               │
+  │       ╱   ┊                                                          ┊   ╲             │
+  │      ╱SEED┊          SINGLE-CRYSTAL BODY, ground to 300 mm           ┊TAIL╲            │
+  │       ╲   ┊                                                          ┊   ╱             │
+  │         ╲─┊──────────────────────────────────────────────────────────┊─╱               │
+  │           ┊                                                          ┊                 │
+  │    seed cone + neck off     notch ground along full length       tail cone off         │
+  │    (start of the pull)      (V groove marks <110>)               (defects, impurities) │
+  └────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Cutting the ingot into wafers:
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ WIRE SAW (side view)                                                                             │
+  │                                                                                                  │
+  │   ┌─────┐                                              ┌─────┐                                   │
+  │   │  ◀  │══════════════════════════════════════════════│  ▶  │   guide rollers, wire loops round │
+  │   └─────┘          wire web: one wire, many grooves    └─────┘                                   │
+  │                    │  │  │  │  │  │  │  │  │  │  │  │                                            │
+  │                    │  │  │  │  │  │  │  │  │  │  │  │   diamond-abrasive wire runs, ingot is     │
+  │           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   fed down through the web              │
+  │           ▓▓▓▓▓▓▓▓▓▓▓▓▓ INGOT ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                                         │
+  │           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                                         │
+  │           ══════════ mounting beam (ingot is bonded to it) ══════════                            │
+  │                                                                                                  │
+  │   Wire pitch sets wafer thickness plus kerf. Pitch and kerf numbers: no source found.            │
+  └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Notch detail on the wafer rim (not to scale):
+     ──────────────────────╲   ╱──────────────────────      V shape, 90 deg included angle
+                            ╲ ╱                            depth 1.0 mm (+0.25 / -0.00), on <110>
+                             V
+
+# 3. The crystal physics behind the cuts
+
+  Orientation   Miller index sets which atomic plane faces up. {100} for standard logic / CMOS,
+                {111} for bipolar, power and MEMS (Wikipedia infobox). Set by the seed in MELT + PULL.
+  Notch         wafers of 200 mm and up carry one small notch instead of flats, so no area is wasted;
+                it marks <110> and does not show doping type. 450 mm was to be notchless (laser mark).
+  Doping        boron, phosphorus, arsenic or antimony added to the melt: 1e13 to 1e16 atoms/cm3
+                (Wikipedia). Purity still above 99.9999%, transition metals below ppb.
+  Cropping      seed cone and tail cone are removed (cropping / lapping / grinding), also removing zones
+                with voids or contamination (patent text). Resistivity check step: no source found.
+  Grinding      a grind wheel brings the ingot to target outer diameter and length (patent text).
+  Slicing       wire saw, diamond wire; the wafers are then machined for flatness, edge-ground to avoid
+                cracking, chamfered, etched and polished.
+
+# 4. By the numbers (300 mm wafer, SEMI-style)
+
+  diameter          300 mm, tolerance +/- 0.2 mm (vendor datasheet)
+  thickness         775 um (introduced 1999); vendor sheets show +/- 25 um, a drawing shows +/- 20 um
+  mass              about 125 g per wafer (Wikipedia)
+  notch             depth 1.0 mm (+0.25 / -0.00), angle 90 deg, orientation <110> +/- 1 deg
+  die per wafer     640 dies of 100 mm2 (Wikipedia, ideal count)
+  ingot size        up to 2 m long, several hundred kg (Wikipedia); 450 mm would weigh ~1 tonne
+  governing spec    SEMI M1 for polished single-crystal wafers (tables not fetched)
+  not found         kerf loss, wafers per ingot, saw speeds: no source gave them, so none are shown
+
+# 5. Wafer size ladder: thickness in um (Wikipedia standards table)
+
+  100 mm (1976)   ███████████████████████ 525
+  150 mm (1983)   █████████████████████████████ 675
+  200 mm (1992)   ███████████████████████████████ 725
+  300 mm (1999)   ██████████████████████████████████ 775
+  450 mm (never)  ████████████████████████████████████████ 925
+
+# 6. Mass per wafer in grams, and dies per wafer (same table)
+
+  100 mm          █ 10 g, 56 die
+  200 mm          ██████ 53 g, 269 die
+  300 mm          ███████████████ 125 g, 640 die
+  450 mm          ████████████████████████████████████████ 342 g, 1490 die
+  (450 mm was proposed for 2018 and stopped in 2016; tool makers declined the retooling cost)
+
+# 7. Who makes it: silicon wafer share 2024, all large wafers (Report Prime estimate)
+
+  Shin-Etsu     ████████████████████████████████████████ 19.9%
+  SUMCO         ███████████████████████████████████ 17.2%
+  GlobalWafers  ██████████████████████████ 12.9%
+  Siltronic     ████████████████████ 9.9%
+  SK Siltron    █████████████████ 8.6%
+  (low-reliability aggregator; Omdia 2020 had GlobalWafers 16.7%, Siltronic 12.3%, SK Siltron 10.6%,
+   five players 94% of $11.2B. Shin-Etsu + SUMCO >55%.) Ranking is stable: Shin-Etsu, SUMCO first.
+
+# 8. Market structure and risks
+
+  - Five firms make nearly all wafers (82-94% depending on source and year). Qualification takes
+    chipmakers years, so new entrants rarely win share.
+  - Industry swings: SEMI says 2023 wafer revenue fell 10.9% to $12.3B and area shipments fell
+    14.3% to 12,602 million sq in; polished 300 mm -13%, epi 300 mm -5%.
+  - Pricing: long-term agreements (LTAs). Shin-Etsu said LTA prices should rise on capex and raw
+    material costs; fixed-LTA customers see no 2024 increase, step-up LTAs may.
+  - Upstream chokepoints: crucible quartz (Spruce Pine, see SAND) and electronic-grade polysilicon.
+  - Geographic: Japan (Shin-Etsu, SUMCO), Taiwan (GlobalWafers), Germany (Siltronic), Korea (SK Siltron).
+
+# 9. Listed names
+
+  Shin-Etsu Chemical 4063.T   SUMCO 3436.T   GlobalWafers 6488.TWO   Siltronic SSG.DE
+  SK Siltron is owned by SK Inc 034730.KS   (tickers are general knowledge, not a fetched source)
+
+# Sources
+
+  [1] Wikipedia, Wafer (electronics) standards table: en.wikipedia.org/wiki/Wafer_(electronics)
+  [2] Wikipedia, Czochralski method (ingot length / mass): en.wikipedia.org/wiki/Czochralski_method
+  [3] University Wafer 300 mm sheet (diameter, notch): universitywafer.com/300mm-silicon-wafers.html
+  [4] Crop / grind / notch / saw steps, patent text: image-ppubs.uspto.gov/dirsearch-public/print/
+      downloadPdf/12617032 and .../12605863
+  [5] Wafer shares: reportprime.com/large-semiconductor-wafers-r3643/company
+  [6] Omdia 2020 via KED Global: kedglobal.com/newsView/ked202203160007
+  [7] SEMI 2023 data, Shin-Etsu LTA pricing:
+      marklapedus.substack.com/p/silicon-wafer-market-upturn-higher
+  [8] SEMI M1 listing: store-us.semi.org/products/
+      m00100-semi-m1-specification-for-polished-single-crystal-silicon-wafers

@@ -1,0 +1,172 @@
+== GAS / TARGET
+# Three kinds of source
+Deposition starts with a source: a precursor gas for CVD and ALD, or a solid metal target for PVD. The choice sets the chemistry, the by-products and which supplier chain the fab depends on.
+
+# Precursors as a chokepoint
+Precursors come from a few specialty chemical vendors (page, textbook). Solid precursors are harder: Counterpoint's white paper written with Lam notes molybdenum was slow to be adopted partly because the ALD molybdenum precursor is a solid, which complicates delivery. Lam's ALTUS Halo was built to handle this; customer work cited by a Japanese report showed more than 50% resistivity improvement versus tungsten (company-sourced, unverified). More layers and 3D structures (GAA, HBM, 3D NAND) raise deposition steps per wafer.
+
+# Sources
+https://www.counterpointresearch.com/insight/scaling-3d-chips-with-molybdenumbased-metallization/
+https://news.mynavi.jp/techplus/article/20250515-3320303/
+
+== CHAMBER
+# Process windows
+The chamber is a vacuum vessel with a heated wafer. Vacuum keeps gas-phase chemistry clean and lets precursors reach the wafer without reacting early. LPCVD of TEOS runs at 650 to 800 C below about 5 Torr, PECVD under 1 Torr typically, and tungsten fill at about 400 to 500 C (patents). Higher temperature raises rate but may violate thermal budgets of earlier layers, which is why PECVD and ALD at lower temperature matter for back-end metal layers (textbook).
+
+# Batch vs single wafer
+Kokusai's batch ALD processes many wafers per run (textbook), while ASM and others use single-wafer chambers. SemiAnalysis puts Kokusai near 70% of batch ALD with TEL most of the rest (undated), and Kokusai itself claims the No.1 global revenue share in batch-ALD-compatible equipment for 2025.
+
+# Sources
+https://envalith.com/en/companies/6525/overview
+https://newsletter.semianalysis.com/p/going-vertical-gate-all-around-3d
+
+== FILM
+# How films are judged
+Atoms bond on the wafer surface into a solid film. Film quality is judged on uniformity, conformality (coverage of trench sidewalls), density, stress and purity. Line-of-sight PVD covers flat areas well and narrow trenches poorly, while ALD coats every surface evenly.
+
+# Conformality is the AI-era requirement
+Gate-all-around transistors and 3D NAND wordlines require films to coat vertical and horizontal structures. The Counterpoint white paper notes NAND needs ALD that deposits conformally in vertical and horizontal wordline structures. ASM says its Mo ALD and area-selective deposition products entered high-volume manufacturing for 2nm, and it expects to gain share in GAA at 1.4nm, adding an estimated US$450 to 500 million to its served market (company estimate).
+
+# Sources
+https://www.counterpointresearch.com/insight/scaling-3d-chips-with-molybdenumbased-metallization/
+https://www.globenewswire.com/news-release/2026/03/03/3248697/0/en/asm-reports-q4-and-full-year-2025-results.html
+https://www.generation-nt.com/communiques-presse/asm-hosts-investor-day-provides-new-2030-targets-revises-h2-2025-2062822
+
+== PUMP
+# By-products out
+The pump and scrubber remove volatile by-products. In the tungsten recipe on the page those include HF and SiF4, which are corrosive and toxic, so abatement is a real part of tool cost and uptime (textbook).
+
+# Where service revenue comes from
+By-products that do not leave the chamber condense as particles or flakes on chamber walls and fall on wafers, so chambers are periodically cleaned with plasma. This is a major driver of spares and service revenue: ASM reported spares and services up 18% in 2025, and Kokusai's service revenue was reported up sharply in FY2026 (up 127.4% per one aggregator, verify).
+
+# Sources
+https://www.globenewswire.com/news-release/2026/03/03/3248697/0/en/asm-reports-q4-and-full-year-2025-results.html
+https://envalith.com/en/companies/6525/segments
+
+== CMP/ETCH
+# The repeat loop
+After a film is deposited, the wafer goes either to etch to pattern it or to CMP (chemical mechanical planarization) to flatten it, for example after tungsten or copper fill. Deposition, litho, etch and CMP repeat many times, so deposition tool demand scales with layer count (textbook).
+
+# Copper side
+Applied Materials introduced the Endura Copper Barrier Seed IMS with Volta ruthenium CVD to keep copper wiring viable at 2nm-class and beyond (date not confirmed in the search). The Endura CuBS RF XT deposits the Ta(N)/Ta barrier and then the copper seed under high vacuum. Barrier and seed layers take a growing share of ever narrower wires, so thinner, more conformal barriers directly set resistance and RC delay in AI chips.
+
+# Sources
+https://www.appliedmaterials.com/us/en/product-library/endura-cubs-rf-xt-pvd.html
+https://at-web1.www.anandtech.com/tag/applied-materials
+
+== SHOWERHEAD
+# Spreading the gas
+The showerhead is a perforated plate that spreads gas evenly across the wafer. In PECVD it is also the RF electrode that ignites the plasma. Hole pattern and spacing set film uniformity (textbook). Typical gases are WF6, SiH4 and H2; uneven distribution gives thickness variation across the wafer, a yield issue at the edge on 300 mm.
+
+# Who
+Single-wafer CVD from Applied and Lam uses showerhead designs; Lam's ALTUS family combines CVD and ALD for tungsten or molybdenum metallization in logic and memory per Lam's FY2025 10-K. The ALTUS Halo is a four-chamber configuration per a Japanese report.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+https://news.mynavi.jp/techplus/article/20250515-3320303/
+
+== HEATED PEDESTAL
+# Temperature sets rate
+The pedestal holds the wafer and heats it to hundreds of degrees C. Temperature sets reaction rate and film properties, so the heater must be uniform across 300 mm (textbook). Tungsten fill runs the wafer at about 400 to 500 C. HfO2 from TDMAH and water grows 1.2 to 1.6 A per cycle below 400 C, with better crystal quality and higher dielectric constant above 300 C (PMC). Ozone Al2O3 grows about 0.6 A/cycle at 100 C and 0.9 A/cycle at 250 C (UPenn).
+
+# Failure mode
+Temperature non-uniformity gives thickness and stress variation, and ceramic heaters are consumables (textbook; no sourced tolerances).
+
+# Sources
+https://pmc.ncbi.nlm.nih.gov/articles/PMC10254648/
+https://www.seas.upenn.edu/~nanosop/ALD_Recipes.htm
+
+== 1 PULSE A
+# The ALD cycle
+ALD builds a film by alternating self-limiting surface reactions. Pulse A dosed precursor saturates every available surface site and then stops reacting, which is why ALD is perfectly conformal. After a purge, pulse B reacts with layer A, and a second purge clears by-products.
+
+# Cycle numbers
+UPenn's recipe for Al2O3 at 200 C uses 0.015 s pulses, 8 s purges and precursor lines at 150 C. Growth is about 1 A per cycle for Al2O3 (Stanford ALD tutorial), so tens of nm requires hundreds of cycles. On the UPenn timings one cycle is about 16 s, so 100 cycles (about 10 nm) takes roughly 27 minutes (arithmetic here, lab recipe, not production). That slowness is why ALD tools need many chambers or batch operation.
+
+# Business
+ASM International reported record 2025 revenue of EUR 3.2 billion, up 12% constant currency, gross margin 51.8% and adjusted operating margin 30.2%, with ALD and epitaxy named as main growth drivers toward a 2030 goal above EUR 5.7 billion. An unverified aggregator says Q2 2026 revenue reached about EUR 1 billion with record ALD sales.
+
+# Sources
+https://www.seas.upenn.edu/~nanosop/ALD_Recipes.htm
+https://www.investegate.co.uk/announcement/gnw/asm-international-nv--0nx3/asm-reports-q4-and-full-year-2025-results/9456685
+https://startupmap.iamsterdam.com/news/feed/asm-international-hits-1-1b-q2-revenue-up-24-yoy-with-record-ald-sales-and-401m-free-cash-flow
+
+== TARGET (Ta, Ti, Cu)
+# Sputtering
+In PVD, argon ions strike a negatively biased target and knock metal atoms out, which fly across the vacuum gap and coat the wafer. It is line-of-sight, so it covers flat surfaces well and narrow trenches poorly. RF bias on the chuck helps trench bottom coverage.
+
+# Where it is used
+Barrier and seed layers for copper interconnect: Applied's Endura CuBS RF XT deposits a Ta(N)/Ta barrier then a copper seed in high vacuum, targeting logic and memory at the 3x/2x node and beyond. As trenches narrow, ruthenium CVD liners (Applied's Volta) and ALD take over, and Applied says copper can stay in use for 2nm-class and beyond.
+
+# Sources
+https://www.appliedmaterials.com/us/en/product-library/endura-cubs-rf-xt-pvd.html
+https://at-web1.www.anandtech.com/tag/applied-materials
+
+== TEOS SiO2
+# The reaction
+TEOS (tetraethyl orthosilicate) is the standard precursor for silicon dioxide insulating films between wires. The reaction gives SiO2 plus organic by-products. Plasma lowers the temperature so back-end layers are not damaged, at the cost of film quality.
+
+# Speed vs density
+LPCVD runs at 650 to 800 C with rate rising exponentially with temperature, below about 5 Torr. PECVD is typically under 1 Torr, with one claim of 200 to 400 C up to 50 Torr, and a reported rate of 41 A/s (about 2,460 A/min) at 4 Torr and 200 C. High rate means low film density; speed versus density is the central tension (page and patents).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/5354715
+https://ir.lib.ncu.edu.tw/handle/987654321/68270
+
+== Tungsten fill
+# Reaction and sequence
+Tungsten fills contact holes and vias. WF6 reacts with H2 (WF6 + 3H2 gives W + 6HF) or with silane. A silane nucleation layer under 100 nm protects Ti and Si from WF6, then H2 bulk fill gives a conformal low-resistance film (patents). A pulsed nucleation process gave about 100 uohm-cm versus about 25 for conventional at 400 C (study cited by the page).
+
+# What replaces it
+Lam's ALTUS Halo targets molybdenum in place of tungsten. Counterpoint credits Mo with lower resistivity and barrierless deposition, which matters in 3D NAND wordlines. Lam's CEO said on the Q4 2024 call that the transition from tungsten to Mo in NAND would begin in 2025; no independent confirmation of 2025 volume adoption was found.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6358844
+https://www.counterpointresearch.com/insight/scaling-3d-chips-with-molybdenumbased-metallization/
+https://financialfilings.com/filings/lam-research-corp/call-transcript/2025/48347014/
+
+== ASM International
+# FY2025
+ASM (ASM.AS) is the single-wafer ALD and epitaxy specialist. FY2025 revenue was a record EUR 3.2 billion (up 12% constant currency), driven mostly by advanced logic and foundry as customers added 2nm GAA capacity. The 2030 goal is revenue above EUR 5.7 billion. Mo ALD and area-selective deposition entered high-volume manufacturing for 2nm, and ASM sees an extra US$450 to 500 million of served market at 1.4nm (company estimates).
+
+# Mix and risks
+Memory was 16% of equipment sales and China more than 30% of revenue, which exposes ASM to export-control changes. Spares and services rose 18%. Analysts earlier in 2026 questioned the organic growth targets; a later unverified report says 2026 revenue now should surpass EUR 4 billion.
+
+# Sources
+https://www.globenewswire.com/news-release/2026/03/03/3248697/0/en/asm-reports-q4-and-full-year-2025-results.html
+https://global.morningstar.com/en-gb/stocks/asm-earnings-2025-secured-investors-look-into-2026
+
+== Mo ALD
+# Why swap metals
+Molybdenum ALD is the first major metal swap in contacts and wordlines since tungsten. Lam and ASM are both in it: ASM says Mo ALD and area-selective deposition entered high-volume manufacturing for 2nm, and Lam launched ALTUS Halo for Mo metallization in logic and memory. Counterpoint, in a white paper with Lam, says tungsten is no longer sufficient for 3D NAND and credits Mo with lower resistivity and barrierless deposition.
+
+# Hurdle
+The ALD Mo precursor is a solid, which makes delivery harder than for gases. NAND needs conformal deposition in vertical and horizontal wordline structures.
+
+# Sources
+https://www.counterpointresearch.com/insight/scaling-3d-chips-with-molybdenumbased-metallization/
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+https://news.mynavi.jp/techplus/article/20250515-3320303/
+
+== Applied Materials
+# FY2025 segment
+Applied Materials (AMAT) leads in CVD, PVD and epi. FY2025 Semiconductor Systems revenue was $20.80B, 73% of $28.37B total, up 4%. By end market the segment was foundry/logic 67% (68% prior year), DRAM 26% (28%) and NAND 7% (4%). The segment covers all of Applied's chip tools, not only deposition.
+
+# Products and share
+Products on the page: Endura CuBS RF XT for PVD barrier and seed, and Endura Volta ruthenium CVD for copper liners. The 2009 share chart (Applied 49%, TEL 17%, Novellus 16%) is old and shown for structure only. A Substack source says Applied and TEL each lost share within their served markets in 2025 while Lam, KLA and ASML gained (paywalled detail).
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm
+https://drrobertcastellano.substack.com/p/applied-materials-lost-share-across
+https://www.appliedmaterials.com/us/en/product-library/endura-cubs-rf-xt-pvd.html
+
+== Kokusai Electric
+# Position
+Kokusai Electric (6525.T) makes batch CVD and ALD furnaces. It claims the No.1 global revenue share in batch-ALD-compatible equipment for 2025; an undated SemiAnalysis piece put its batch ALD share near 70% with TEL most of the rest. A Kokusai executive said at SEMICON China 2024 that China is shifting from conventional CVD to ALD.
+
+# Recent numbers
+For the nine months of FY2026 (to March 2026) revenue was about JPY 173.1B, roughly flat, and operating profit fell to about JPY 32.5B from 39.7B. China sales fell from JPY 83.0B to 73.2B while Korea rose. Largest customers: CXMT 20.4%, Samsung 13.3%, TSMC 12.9%. Management expects recovery in FY2027 on generative-AI demand. Aggregator data, verify before use.
+
+# Sources
+https://envalith.com/en/companies/6525/segments
+https://newsletter.semianalysis.com/p/going-vertical-gate-all-around-3d

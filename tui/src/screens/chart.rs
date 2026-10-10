@@ -329,6 +329,14 @@ impl ChartScreen {
 }
 
 impl Screen for ChartScreen {
+    fn claude_context(&self) -> Option<String> {
+        self.selected_source().map(|s| s.to_context())
+    }
+
+    fn leader_ok(&self) -> bool {
+        !self.palette.open
+    }
+
     fn draw(&mut self, frame: &mut Frame) {
         let area = frame.area();
         let t = self.theme;

@@ -1,0 +1,201 @@
+== ORGANICS
+# SPM: the hot first step
+Sulfuric acid plus hydrogen peroxide (SPM, also called piranha) oxidises photoresist and other carbon residue into CO2 and water, which is why it leads the sequence. The patent example runs 99% H2SO4 to 1% H2O2 at 140 C for 10 minutes, then an SC1 step at 55 C. The peroxide is consumed quickly at that temperature, so tools either dose fresh peroxide inline just before the wafer or recirculate and replenish a bath (textbook).
+
+# Side effects
+SPM leaves a thin chemical oxide and sulfur residue on silicon, which is why the later DHF dip and rinses are in the recipe. Waste is concentrated hot acid, so the drain-line segregation shown in the spin-cleaner diagram matters. Fabs increasingly look to ozone or plasma ash to cut sulfuric acid use (textbook).
+
+# Step counts rise with layers
+Every resist strip after an implant or etch in a leading-edge logic flow is followed by a clean like this, so wet-clean step counts rise with layer count (textbook).
+
+# Sources
+https://patents.google.com/patent/US7449127
+https://patents.google.com/patent/US6153014
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6003527
+
+== RINSE
+# DI water between every chemistry
+The rinse is not a formality. Each chemical (acid, base, solvent) must be flushed before the next one touches the wafer, otherwise acid and base meet on the surface and form salts and particles. The page's recipe source says to rinse with DI water between each of the HF, SC1 and SC2 steps.
+
+# Water quality
+Textbook spec for the water is 18.2 megohm-cm resistivity (no source found). Ultra-pure water plants are therefore a chokepoint alongside chemicals: traces of dissolved ions, silica, bacteria or particles in the rinse re-contaminate the very surface just cleaned. Dissolved oxygen in rinse water can regrow native oxide on bare silicon after DHF, so some fabs degas or use N2-blanketed rinse (textbook).
+
+# Rinse time costs throughput
+In a single-wafer tool the same nozzle arm or a second nozzle delivers the DI stream while the wafer spins, so rinse time directly costs throughput. In a batch bench the wafers sit in an overflow rinse tank (textbook).
+
+# Sources
+https://patents.google.com/patent/US7449127
+https://noeltech.com/cleans/
+
+== OXIDE
+# DHF: strip native oxide
+Dilute HF (usually 1000:1 or 200:1 HF to water per the patent text on this page) etches silicon dioxide, removing native or thin oxide and any contaminants trapped in it. The overall chemistry is SiO2 + 6HF giving H2SiF6 + 2H2O (textbook).
+
+# A clean but reactive surface
+After the dip the silicon surface is hydrogen-terminated, hydrophobic and very clean but also reactive, so it should go to the next process step or a controlled ambient quickly (textbook).
+
+# Order and failure modes
+The page's source places DHF first in the classic RCA order: HF, then SC1, then SC2, with DI rinses between. The SPM step leaves a chemical oxide, so a recipe that starts with SPM follows it with a rinse and then DHF. Failure modes (textbook): over-etching of thin gate oxides or low-k and oxide spacers changes device dimensions, so concentration, time and temperature are held tight. HF is toxic and the waste stream needs its own treatment.
+
+# Sources
+https://patents.google.com/patent/US7449127
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6843857
+
+== PARTICLES
+# SC1 undercuts particles
+SC1 (ammonium hydroxide, hydrogen peroxide, water) removes particles by a mild etch-and-regrow cycle: peroxide grows a thin oxide, the base dissolves a little of it, and each cycle undercuts the particle (textbook).
+
+# Charge repulsion
+At a pH near 10 the particle and the wafer surface both carry a negative charge, so they repel and the particle stays in solution (textbook).
+
+# Roughness versus removal
+The weakness is roughness and loss of material. Because SC1 etches silicon slowly, hotter and longer recipes (the patent range is 30-80 C, 5-30 min) trade particle removal against surface roughness and pitting. At advanced nodes the particle size that kills a die keeps shrinking, so SC1 is combined with megasonic energy. A vendor article (ACM Research) claims its SAPS megasonic method reaches particle removal efficiency up to 99.2% with diluted SC1 (vendor claim).
+
+# Sources
+https://patents.google.com/patent/US7449127
+https://siliconsemiconductor.net/article/117031/How_advanced_cleaning_helps_achieve_optimal_wafer_yields_at_advanced_semiconductor_nodes
+
+== METALS
+# SC2 turns metals into chlorides
+SC2 is water, peroxide and hydrochloric acid (vendor bench: 160:4:1 at about 50 C for 20 min, per the page). It works by converting metal contamination into soluble chlorides that rinse away. SC1 can leave behind or even deposit metals such as iron and aluminium hydroxides, which is one reason SC2 follows it (textbook).
+
+# The quiet killer
+Transition metals and mobile ions diffuse into silicon and degrade gate oxide integrity and minority-carrier lifetime, raising leakage and failing devices without any visible defect (textbook). That makes metal control a yield matter, not a cosmetic one, and it is why chemical purity grades and the metal content of DI water and process tanks are specified so tightly.
+
+# Modern variants
+Modern flows often replace the full SC2 with dilute acid steps or use chelating additives, and batch benches with quartz or PFA tanks must avoid being their own metal source (textbook). The page notes real fabs run many variants after almost every etch, strip and CMP step.
+
+# Sources
+https://noeltech.com/cleans/
+https://aemd.sjtu.edu.cn/en/platform/882.html
+
+== DRY
+# Water must leave cleanly
+After the final DI rinse the wafer must be dried without watermarks (dissolved silica or residue left where a droplet evaporates) and without pulling fine features together. The simplest route is spin dry: spin the wafer to throw off water, often with N2 and an IPA vapour to lower surface tension.
+
+# Supercritical CO2
+Where capillary forces would still collapse the structure, supercritical CO2 avoids a liquid-gas interface entirely. Patent text says its drawbacks are slow supply and discharge of the fluid and possible redeposition of IPA residue during depressurisation, leaving drying marks.
+
+# Batch versus single-wafer drying
+In a batch bench the wafers lift out of the final tank through an IPA vapour zone; in a single-wafer tool the spin and N2 sweep is done in the same chamber, one wafer at a time (textbook). The Marangoni card covers the drying choice that matters most for tall, thin patterns.
+
+# Sources
+https://patents.google.com/patent/9437416
+https://patents.justia.com/patent/9437416
+
+== chem nozzle arm
+# Dispensing onto a spinning wafer
+In a single-wafer tool the wafer sits face up on a spinning chuck or edge pins and a swing arm brings the chemical nozzle across it. Spin speed creates the liquid film: centrifugal force spreads fresh chemistry outward and the spent liquid, with the particles it lifted, runs off the edge into the bowl (textbook). The arm sweeps from centre to edge so that the whole wafer sees the same dwell time.
+
+# Fresh chemistry each wafer
+Each wafer gets fresh chemistry, which is the main advantage over a batch bench where the same bath is reused by many wafers and can cross-contaminate. The tradeoff is fewer wafers per hour, so a fab buys many chambers per tool. Chemistries can be heated at the point of use so that short-lived mixtures such as SPM or SC1 are fresh when they land (textbook).
+
+# Vendors
+Single-wafer clean is the area where the page cites SCREEN, Tokyo Electron, Lam and SEMES as leading vendors, per aggregators.
+
+# Sources
+https://envalith.com/en/companies/7735/segments
+https://marketsandmarkets.com/ResearchInsight/
+
+== megasonic transducer
+# Sound that shears particles
+A megasonic transducer sends acoustic waves at about a megahertz through the liquid film. The oscillating pressure creates microscopic bubbles; their motion thins the boundary layer at the wafer surface and pushes particles loose that chemistry alone has undercut. Cavitation (bubble collapse) is the double-edged part.
+
+# A narrow window
+The numbers come from a patent test: damage-free operation is predicted at 1 MHz or below, and a 0.1 ms pulse cycle gave no damage while a 2 ms cycle gave 1,216 damage sites on 55 nm features. So the usable window between particle removal and feature damage is narrow, and it narrows further as features shrink.
+
+# Pressure points
+Gate-all-around and 3D NAND are the pressure points: fragile nanosheets and deep holes limit how much energy can be used (textbook). A university RCA tank on the page offers 80 kHz and 120 kHz ultrasonic, a lower frequency used for bulk bath cleaning. A vendor article states conventional megasonic cleaning is reaching its limit for the smallest killer defects.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10910244
+https://aemd.sjtu.edu.cn/en/platform/882.html
+https://siliconsemiconductor.net/article/117031/How_advanced_cleaning_helps_achieve_optimal_wafer_yields_at_advanced_semiconductor_nodes
+
+== splash guard
+# Bowl, rings and drains
+The splash guard or bowl catches everything the spinning wafer flings off, and in chemical tools it is often a stack of rings that rise and fall so each chemistry exits into its own channel. That is how acid, base and solvent waste stay on separate drain lines. Mixing them would be dangerous (acid plus base reaction, solvent plus oxidiser) and would ruin recycling (textbook).
+
+# Hazardous chemistry
+Cleaning chemicals on this page are hazardous: hot sulfuric/peroxide, hydrofluoric acid, ammonia and hydrochloric acid. The page lists HF and H2SO4 waste handling as a chokepoint for the process, so the waste side is a real part of the tool's cost and permitting.
+
+# Cross-contamination
+Cross-contamination shows up as watermarks, haze and particle adders on the next wafer when mist from one chemistry lands on another's path. Chamber design (airflow, back-rinse of the bowl, N2 curtains) is a large part of what separates tool vendors (textbook).
+
+# Sources
+https://patents.google.com/patent/US7449127
+https://envalith.com/en/companies/7735/segments
+
+== Marangoni
+# The meniscus pulls lines together
+When water sits between tall, thin lines, the curved meniscus pulls them together as it recedes; if the lines are stiff enough they spring back, if not they stick (stiction). Marangoni and IPA drying work by introducing isopropanol so that surface tension is lower and varies along the receding edge, driving a flow that pulls water away from the surface (textbook).
+
+# Methods compared
+One Applied Materials abstract compares methods: solvent-assisted Marangoni drying gave about 40% stiction, sublimation drying about 90%, and supercritical CO2 drying none. Another patent source says even a lower-surface-tension fluid such as HFE (hydrofluoroether) has not made IPA drying fully safe from collapse.
+
+# Why scCO2 is not everywhere
+Supercritical CO2 removes the liquid-gas interface so surface tension is effectively zero. Costs: slow supply and discharge of the fluid, IPA that can redeposit on depressurisation as drying marks, and metal electrodes that may be etched at some chamber temperatures. High aspect ratio fins, GAA stacks and DRAM capacitors are the typical risk structures (textbook).
+
+# Sources
+https://ecs.confex.com/ecs/228/webprogram/Paper55794.html
+https://patents.justia.com/patent/9437416
+https://patents.justia.com/patent/20130061492
+
+== BATCH WET BENCH
+# Batch versus single-wafer
+A batch bench lowers a cassette of 25-50 wafers (the page's figure) into heated recirculating tanks of SPM, SC1, SC2 and DHF, with rinse and IPA dry tanks between. It gives high throughput per square metre but uses big chemical volumes, and wafer-to-wafer or backside cross-contamination is a risk because all wafers share the bath. Single-wafer spin cleaning uses fresh chemistry on one wafer at a time, with tight control and lower damage on fragile patterns but fewer wafers per hour.
+
+# SCREEN's position
+SCREEN SPE says it holds top global share in single-wafer, batch and spin scrubbers, with no number given. Its semiconductor equipment segment sales for the fiscal year to March 2026 were 485,982 million yen (down 6.5%), operating profit 122,707 million yen. Third-party aggregators gave SCREEN single-wafer share of 45% (2024 est.) and 38% (end-2025 est.), but these are low quality.
+
+# Drift to single-wafer
+The industry drift at advanced nodes has been toward single-wafer for critical steps, with batch kept where throughput and cost dominate (textbook).
+
+# Sources
+https://envalith.com/en/companies/7735/segments
+https://marketsandmarkets.com/ResearchInsight/
+
+== Etch + clean
+# A slice of WFE
+Yole data cited on this page puts etch and clean at about 27% of wafer fab equipment spending in early 2022 and about 19% in H1 2024 (dry and wet combined). The drop is a mix effect: the 2024 WFE total was described as stable before a 2025 surge, and other segments grew faster, so the share is not a sign that cleaning is shrinking in absolute terms.
+
+# Who sells it
+For stock tickers, the listed names on the page are SCREEN Holdings (7735.T), Tokyo Electron (8035.T) and Lam Research (LRCX), with SEMES as a Samsung affiliate (textbook). One 2025 page lists wet etch shares (not cleaning): Applied 15.7%, TEL 13.8%, Lam 12.7%, Hitachi High-Tech 7.2%.
+
+# Why it grows with AI
+More layers and smaller features mean more wet steps per wafer, and gentle clean for GAA and 3D NAND is a design constraint (textbook). Cleaning is a smaller, slower-moving corner of WFE than lithography, etch or deposition, so it rarely drives a stock on its own.
+
+# Sources
+https://yolegroup.com/strategy-insights/
+https://reportprime.com/semiconductor-wet-etching-system-r3629/company
+
+== SC1 @39
+# Recipe spread
+SC1 is water, peroxide and ammonium hydroxide. The patent range on this page is 1000:1:1 to 1:1:1 by volume with a preferred 100:1:1 to 5:1:1, at 30-80 C for 5-30 min. A vendor bench uses 40:1:1 at about 50 C for 20 min. The gap shows there is no single standard: fabs tune ratio, temperature and time per layer to balance particle removal, silicon loss and roughness.
+
+# Self-limiting chemistry
+The reaction chemistry (textbook, unsourced): Si + 2H2O2 gives SiO2 + 2H2O, then the base dissolves the oxide, so the process is self-limiting in how far it eats into the silicon.
+
+# Failure modes
+Practical failure modes (textbook): too hot or too long gives roughness and thickness loss, ammonia and peroxide both decay with temperature so baths drift, and incomplete rinse leaves ammonium salts. For leading-edge nodes a diluted SC1 is paired with megasonic energy rather than being made stronger.
+
+# Sources
+https://patents.google.com/patent/US7449127
+https://patents.google.com/patent/US6153014
+https://noeltech.com/cleans/
+
+== Report C 2023
+# Why the market size is uncertain
+The page shows three reports for wafer cleaning equipment: 7.39 (2024), 9.28 (2024) and 10.92 (2023) billion USD. Report C is both the largest and the oldest year, which already tells you definitions differ. Aggregators vary in whether they count wet benches, single-wafer, scrubbers, dry clean, ash and strip, consumables or service (textbook inference). Nothing here links to company filings.
+
+# Cross-checks
+A way to cross-check: SCREEN's semiconductor equipment segment was 485,982 million yen in the fiscal year to March 2026 and the page cites Yole's combined etch-and-clean share of WFE (about 19% in H1 2024). Neither converts easily into a clean-only market size.
+
+# Better anchors
+Use the spread as a warning, not a data point. For investing, company segment results (SCREEN, Tokyo Electron, Lam) and SEMI equipment data are better anchors than aggregator headline figures. Sources cited for the market size are gii.tw, giikorea.co.kr and credenceresearch.com.
+
+# Sources
+https://gii.tw
+https://giikorea.co.kr
+https://credenceresearch.com
+https://envalith.com/en/companies/7735/segments

@@ -1,0 +1,254 @@
+== SLICE
+# Diamond wire
+
+Slicing turns the notched cylinder into hundreds of thin discs in one pass. A fixed-abrasive diamond wire runs through the ingot while it is fed through the wire web; the cutting is brittle micro-fracture by diamond grit. Diamond wire replaced loose-slurry sawing because it cuts about 2x faster (TaiyangNews, solar context).
+
+# Damage layer
+
+The saw leaves a cracked layer microns deep on every face, and every later step exists to remove it (page). Slicing also sets the wafer's initial bow, warp and thickness variation, which the lapping or grinding step must correct.
+
+# Kerf
+
+Kerf is about 150 um for slurry and about 125 um for diamond wire, with a path to about 85 um (ITRPV roadmap via TaiyangNews; solar-grade numbers). Under 35 um fine wire is the research direction (Ge et al.). Kerf is silicon grown at great cost and lost as swarf, so thinner wire raises wafers per ingot, with a trade-off in wire strength.
+
+# Sources
+
+(Sources: https://taiyangnews.info/technology/diamonds-are-a-wafers-friend ; https://patents.google.com/patent/US5964210 ; https://strathprints.strath.ac.uk/94630/)
+
+== GRIND/LAP
+# Lap or grind
+
+After the saw, each wafer is flattened. Lapping uses loose abrasive slurry between two plates and works both faces at once; it sets flatness and parallelism. Fixed-abrasive grinding is the alternative: a resin-bond wheel removes 10-20 um on one side (page, from patents).
+
+# How much comes off
+
+Total double-side lapping removes 80-200 um, with one 200-300 mm patent example of 80 um in 40 minutes; a double-side rough grind example removes about 45-75 um before lapping. This is the largest planned removal in the thickness budget after kerf, so the choice of lap versus grind is a cost lever.
+
+# Purpose and failure
+
+The purpose is to cut away saw waviness and sawing damage and bring the wafer to uniform thickness before the chemical steps. Grinding is faster and can be in-line; lapping is a proven batch process (textbook). Scratches and subsurface damage left behind by too aggressive a step become polish defects later.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US6114245 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6352927 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7829467)
+
+== ETCH
+# Etching the damage away
+
+Etching strips the damaged layer that lapping or grinding leaves behind. A wet alkali or acid bath removes about 15-25 um (patent examples on this page). Etching is chemical, so it removes damage without adding mechanical stress.
+
+# One patent sequence
+
+In one 300 mm patent example the sequence is an acid etch of 10 um, a gas-phase etch of 2 um, and then a final polish of 5 um on the front. The page notes that removal amounts are patent examples, not a standard.
+
+# Alkali vs acid
+
+Alkali etch tends to give a flatter but rougher surface and acid etch a smoother but less flat one (textbook, unsourced). Non-uniform etch from bath flow or temperature variation leaves thickness variation that the polish must then repair; metal contamination from the chemicals goes into the surface and bulk.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US6114245 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6352927)
+
+== EDGE
+# A rounded rim
+
+Edge profiling rounds the rim of the wafer. After slicing the edge is sharp and brittle, so it is ground, chamfered and polished into a rounded profile. The source text on INGOT notes that wafers are edge-ground to avoid cracking and chamfered.
+
+# Why it matters
+
+Sharp corners chip during handling, and chips make particles and can start cracks that run across the wafer under thermal stress in the fab (textbook). The profile also matters for film deposition and for photoresist coating, where edge beads and edge defects can contaminate tools (textbook).
+
+# Order of steps
+
+Edge treatment comes before final polish so the polishing step does not re-damage the face, and so debris does not scratch the polished surface. A broken wafer costs the customer a fabricated lot, so edge quality is an audited spec. No removal figure for this step was found in the sources.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Wafer_(electronics) ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12617032)
+
+== POLISH
+# DSP then final polish
+
+Polishing makes the mirror. Double-side polish (DSP) removes 10-20 um total, then a final chemical-mechanical polish on the front removes 10-15 um in 5-15 minutes (patent examples on this page). Mechanism: chemistry softens or oxidises the surface and abrasive wipes it off (textbook).
+
+# Nanotopography
+
+Some sources describe a free-floating planetary double-sided polish as the process that achieves the required nanotopography and flatness, since nanotopography is largely set by the polishing process (KLA-related patent). Nanotopography is surface deviation over spatial wavelengths of about 0.2 to 20 mm (SEMI 3089 definition per the patent).
+
+# Result and control
+
+End result per vendor datasheet: 775 um +/- 25 um thickness and TTV 5 um or less. Pad wear, slurry mix, pressure and speed are the control knobs; a 2013 study on 300 mm final polishing used a Taguchi design to pick the best pressure, speed and slurry ratio. The polished surface is the reference plane for lithography.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US12386340 ; https://www.scientific.net/AMR.797.438 ; https://www.universitywafer.com/300mm-silicon-wafers.html)
+
+== CLEAN
+# Clean and inspect
+
+The last box cleans, inspects and ships. After polishing the wafer carries slurry residue, abrasive particles and metal traces, which are removed with chemical cleans (textbook; the common RCA-type sequence). Inspection then measures thickness, flatness, nanotopography and particle counts against the customer's spec.
+
+# Metrology example
+
+The page gives no cleaning chemistry or numbers, so this card is partly a pointer. What the sources do give is a metrology example: a 2014 Fraunhofer automated nanotopography tool for 300 mm wafers stitches 16 single measurements to cover the entire surface of a wafer.
+
+# Qualification
+
+Cleanliness and inspection are what a customer qualifies. Qualification at a chipmaker takes years (INGOT page), so once a wafer line is approved the buyer rarely switches, which supports the oligopoly. Shipments in 2025 were 12,973 million square inches (SEMI), and the AI-driven strength is in polished HBM wafers and advanced epitaxial logic wafers.
+
+# Sources
+
+(Sources: https://publica.fraunhofer.de/handle/publica/384841 ; https://www.eetasia.com/?p=72562)
+
+== WIRE WEB
+# Web geometry
+
+The web is a single wire wound around grooved guide rollers so that many parallel segments cut together. The groove pitch is roughly the wafer thickness plus kerf, so the roller set defines the product. The wire spools forward and then back so that wire is used evenly and abrasive wear is spread.
+
+# Wear
+
+Key controls are wire tension and speed (page, textbook; no numbers sourced). Wear raises wire deflection, thickness variation and kerf (a 2026 paper in the International Journal of Advanced Manufacturing Technology, via Springer), so worn wire produces wafers with more TTV and a wavier surface.
+
+# Fine wire limits
+
+Fine wire below 35 um diameter is the research target (Ge et al. 2026), but thinner wire is weaker; the trade-off limits how fast kerf can shrink. This page found no saw-maker market share, so the saw vendors are not named here.
+
+# Sources
+
+(Sources: https://link.springer.com/10.1007/s00170-026-17634-4 ; https://strathprints.strath.ac.uk/94630/)
+
+== coolant spray
+# Cooling and flushing
+
+A water-based coolant is sprayed on the cut. It cools the wire and the cut zone and washes out silicon swarf (page). Coolant temperature controls thermal bow of the wafer (textbook, listed as a control point on the page), because heat expands the ingot and beam during the cut and changes the shape of the finished wafers.
+
+# Swarf
+
+The swarf is fine silicon powder suspended in coolant. It is the kerf loss made visible: silicon lost per wafer at about 125 um for diamond wire (solar roadmap number). Swarf recovery from solar sawing is an active recycling topic, though this page did not source a recovery figure.
+
+# Water not oil
+
+Diamond wire cuts with water-based coolant, in place of the oil-based slurry of older slurry saws, which simplifies the process (textbook) and is part of why diamond wire became the standard. Poor coolant flow causes thermal bow and thickness variation.
+
+# Sources
+
+(Sources: https://taiyangnews.info/technology/diamonds-are-a-wafers-friend ; https://link.springer.com/10.1007/s00170-026-17634-4)
+
+== kerf
+# Kerf numbers
+
+Kerf is the slot of silicon destroyed by each wire pass. It equals the effective wire diameter including the diamond layer, plus wobble (page). Sourced values: about 150 um for slurry saws, about 125 um for diamond wire today, with a path to about 85 um (ITRPV roadmap via TaiyangNews). These are solar-grade numbers and are the best sourced kerf data found.
+
+# What it costs
+
+Arithmetic on a 775 um wafer (my arithmetic, using solar kerf numbers): 125 um of kerf per 775 um wafer means 125 / (775 + 125) = 13.9% of the ingot length becomes swarf. At 85 um it is 9.9%, and wafers per ingot rise about 4.7%.
+
+# Thickness budget
+
+The budget shown on this page uses midpoint examples: kerf 125 um, lapping 80 um, etch 20 um, DSP 15 um, so silicon use per wafer is dominated by sawing and lapping. Kerf is the only part of the budget that is pure loss, and wire wear raises both deflection and kerf (Springer 2026).
+
+# Sources
+
+(Sources: https://taiyangnews.info/technology/diamonds-are-a-wafers-friend ; https://strathprints.strath.ac.uk/94630/ ; https://link.springer.com/10.1007/s00170-026-17634-4)
+
+== SILICON INGOT
+# Feed into the saw
+
+The ingot is the feedstock, ground to 300 mm and notched. It is bonded to the beam or glue plate, so its orientation relative to the wire matters, and the saw is fed downward through the web. The cylinder is several hundred kg of crystal (Wikipedia).
+
+# Wire drag
+
+Wire drag through the ingot grows with diameter; patents on diamond-wire slicing note that as diameters reach 300-400 mm wire drag makes breakage more likely unless a thicker wire is used, which raises kerf. One patent family has the wire meet the ingot tangentially with the ingot fixed, claiming fast cutting with minimal kerf and less follow-on lapping (inventor claims).
+
+# Highest-value failure
+
+Every ingot came out of a day-long furnace pull, so the saw is the stage where crystal value is converted into wafers. Failure modes are wire breakage and wear raising deflection and thickness variation (Springer 2026). Mistakes here destroy the most value per event.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US5964210 ; https://en.wikipedia.org/wiki/Czochralski_method ; https://link.springer.com/10.1007/s00170-026-17634-4)
+
+== Preston
+# Preston's law
+
+Preston's law models polishing removal rate: RR = K*P + C, where K is the Preston constant, P the pressure and C a zero-pressure term (page, from patent and paper). Higher pressure and speed raise removal; pad, slurry and temperature fold into K.
+
+# Slurry pH
+
+For oxide CMP the page reports that removal rises with pH for silica slurries, with pitting seen at pH 13, while ceria slurries peak near pH 8-9 (patent and journal citations). So slurry chemistry is a real tuning axis, not just abrasive size.
+
+# Used at both ends
+
+Planarity comes from pad asperities and slurry flow averaging out high spots (textbook picture). The same physics runs on the wafer maker's polish and on later fab CMP of deposited films (STI, copper, tungsten). Fujifilm launched a copper and oxide CMP slurry for hybrid bonding in September 2025, with one unnamed device maker disclosed as an adopter (PS Market Research summary).
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10418247 ; https://doi.org/10.1149/2.0311910jss ; https://www.psmarketresearch.com/market-analysis/semiconductor-cmp-slurry-market-report)
+
+== CMP tools
+# Two big suppliers
+
+CMP tools are the polishing machines. Applied Materials (AMAT) and Ebara (6361.T) are said to hold about 80% of tool sales (market-research claim with weak sourcing). The only quantified split found is old Dataquest data: Applied 62.1% and Ebara 23% in 2001, Applied 61.3% and Ebara 22% in 2002 (Silicon Semiconductor article).
+
+# Competition
+
+Applied's FY2025 10-K discusses CMP competition including Chinese domestic toolmakers pushing in (page, from the filing). A market-research listing names Lam Research, Hitachi High-Tech and Tokyo Seimitsu among other CMP equipment players but gives no shares.
+
+# Scope note
+
+Fab CMP tools polish deposited films, while the wafer makers' own polish tools are for bare silicon; the page does not source which vendors supply wafer-level polishers. A two-supplier tool market with a rising Chinese challenger is a geopolitics and export-control story as well as a share story. Treat the 80% figure as rough.
+
+# Sources
+
+(Sources: https://siliconsemiconductor.net/article/69559 ; https://www.sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm ; https://www.reanin.com/reports/chemical-mechanical-planarization-equipment-market)
+
+== CMP slurry
+# Slurry share
+
+Slurry is the abrasive-plus-chemistry liquid and the main CMP consumable. A TECHCET-cited article reports Fujifilm Electronic Materials (4901.T) as the largest supplier at about 31%, mainly on its copper slurry position, with Entegris (ENTG) second after acquiring Sinmat, Chemetall Precision Microchemicals and CMC Materials. The article forecasts 2024 growth, so the shares are probably from around 2023.
+
+# Market structure
+
+The global top six slurry players hold over 70% of revenue (market-research summary). A 2024-base report lists Entegris, Resonac, Fujimi, DuPont and Fujifilm among key players, though no figures were retrieved.
+
+# Qualified per line
+
+Slurries are bought forever and qualified per fab line (page), so switching is slow. Upstream, ceria and silica abrasive purity is a supply question. Consumables revenue scales with wafer starts and CMP steps per chip, and advanced nodes and hybrid bonding add steps.
+
+# Sources
+
+(Sources: https://semiconductor-digest.com/?p=26625 ; https://www.giikorea.co.kr/report/qyr1862414-cmp-polishing-materials-global-market-share.html ; https://www.psmarketresearch.com/market-analysis/semiconductor-cmp-slurry-market-report)
+
+== CMP pads
+# What pads do
+
+Pads are the polyurethane surfaces that carry slurry against the wafer; their asperities and flow channels set how high spots are averaged out (page, textbook for the material).
+
+# Share
+
+DuPont (DD) is said to hold over 50% of pads per the same TECHCET-cited article used for slurry shares; it is undated and probably about 2023, so treat it as rough. No pad market size was found in the searches.
+
+# Wear
+
+Pad wear is a named control point on the page: as the pad glazes and wears, removal rate and uniformity drift, so pads are conditioned and replaced on a schedule (textbook). Pads are consumed in volume, qualified per line, and cannot easily be swapped between processes. Scratches come from large particles or pad debris.
+
+# Sources
+
+(Sources: https://semiconductor-digest.com/?p=26625)
+
+== wire breakage and wear
+# Wear raises kerf
+
+Wire breakage and wear are the main saw risks named on the page. Wear raises wire deflection, thickness variation and kerf (International Journal of Advanced Manufacturing Technology, 2026). A broken wire mid-cut can scrap the ingot's wafers, and the fixed-abrasive wire is expensive and thin by design.
+
+# Thinner is weaker
+
+The trade-off: thinner wire cuts less kerf but is weaker, which limits how fast kerf can shrink. Research is heading under 35 um diameter (Ge et al. 2026). Older patents already note that as ingot diameter reaches 300-400 mm, wire drag raises breakage risk unless the gauge increases, and a thicker gauge raises kerf loss.
+
+# Other chokepoints
+
+Other chokepoints on the page: CMP slurries and pads as consumables with few vendors; a two-supplier CMP tool market with Chinese domestic toolmakers pushing in (AMAT FY2025 10-K); ceria and silica abrasive purity upstream. Process control points (textbook, no number sourced): wire tension and speed, ingot feed rate, coolant temperature. GlobalWafers said its 300 mm capacity ran at full utilisation in August 2026, so a lost ingot hurts.
+
+# Sources
+
+(Sources: https://link.springer.com/10.1007/s00170-026-17634-4 ; https://strathprints.strath.ac.uk/94630/ ; https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/ ; https://www.sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm)

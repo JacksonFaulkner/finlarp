@@ -1,0 +1,127 @@
+# 1. What happens: testing every die before it is cut
+
+ ┌────────────┐   ┌────────────────┐   ┌───────────────┐   ┌─────────────────┐   ┌─────────────────┐
+ │ WAFER      │──▶│ PROBER         │──▶│ PROBE CARD    │──▶│ ATE TESTER      │──▶│ WAFER MAP       │
+ │ finished,  │   │ loads, aligns, │   │ needles touch │   │ drives signals, │   │ bin per die     │
+ │ die intact │   │ steps per die  │   │ bond pads     │   │ reads responses │   │ ink / data file │
+ └────────────┘   └────────────────┘   └───────────────┘   └─────────────────┘   └─────────────────┘
+
+  (this is the first electrical test; bad die are marked so DICE and packaging never spend money on them)
+
+# 2. Inside the test cell: tester head, probe card, wafer chuck
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ATE TESTER MAINFRAME (Advantest / Teradyne): pin electronics, power, timing │
+└─────────────────────────────────────────────────────────────────────────────┘
+          ║  cabled to the test head
+┌────────────────────────────────────────────────┐
+│ TEST HEAD: pogo-pin / spring-contact interface │
+└────────────────────────────────────────────────┘
+          ║
+┌─────────────────────────────────────────────────────────┐
+│ PROBE CARD PCB (large, multilayer)                      │
+│ space transformer: re-routes the pad pitch to PCB pitch │
+└─────────────────────────────────────────────────────────┘
+     │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │    probe needles / MEMS springs
+     ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼    tips land on the die bond pads (scrub the oxide)
+┌─────────────────────────────────────────────────────────────────┐
+│ WAFER: ▓▓ ┌──┐┌──┐┌──┐┌──┐┌──┐┌──┐┌──┐┌──┐ ▓▓  (die under test) │
+└─────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────┐
+│ WAFER CHUCK: vacuum hold, X-Y-Z-theta stage, heated or cooled │
+└───────────────────────────────────────────────────────────────┘
+   PROBER indexes the chuck die to die, cameras align the pads, and the Z-lift drives the needles
+   'overdrive' a few mils past first touch so the skate breaks through the pad oxide (ohmic contact)
+
+  (schematic; a real card contacts many die at once, called parallelism)
+
+# 3. Procedure and physics
+
+  1  Load wafer from FOUP, find notch, optical pre-align, vacuum onto chuck
+  2  Contact: chuck rises until needle tips touch; overdrive adds Z travel so tips bend and scrub the
+      pad oxide
+     too little overdrive: bad contact; too much: pad damage or tip sliding off the pad
+  3  Tester applies power and patterns: DC (shorts/opens, leakage), functional, speed bins, analog trims
+  4  Result per die is written to the wafer map as a bin number; the chuck steps to the next site (or
+      next group)
+  5  Repair step for memory: failing rows/columns replaced from spares, then retest (textbook knowledge)
+  6  Temperature: hot or cold chuck used to screen temperature-sensitive fails (textbook knowledge)
+
+# 4. Wafer map: good and bad die as the tester saw them
+
+  G = good bin 1    2,3 = lower speed bins    X = hard fail    . = edge, partial die not tested
+
+        . . . . X . G G G G . . . .
+      . G G G G G G G G G G G G . .
+    . G G G G G 2 G G G G G G G G .
+    . G G X G G G G G G G G G G G G
+    G G G G G G G G G G G G G 3 G G
+    G G G G G G G G G G 2 G G G G G
+    G G G G X G G G G G G G G G G G
+    . G G G G G G G G G G G G G G .
+      . G G G G G G G G G G G G . .
+        . . G G G G G G G G . . . .
+
+  (illustrative drawing, not real fab data; clusters of X at the edge point at process problems, a ring
+      points at CMP)
+
+# 5. By the numbers
+
+  Probes per die, adv. packaging devices    1K to 5K probes per die (FormFactor SWTW deck)
+  Probes, advanced packaging SoC cards      15K to 60K in total on the card (FormFactor deck)
+  HBM parallelism                           128 to 256 sites at once (FormFactor deck)
+  HBM micro-bump probing pitch              below 60 um; fine pitch 45 um with probe force under 1.5 gf
+  1995 high-end card                        500 probes, 60 um tips, 100 um pads on 125 um pitch
+      (Keithley note)
+  Overdrive example in a patent             about 3 mils (~76 um)
+  Per-die test time                         no sourced number found; it varies from ms to seconds by
+      device
+
+# 6. Revenue of the main suppliers (latest sourced), million, native currency
+
+  Teradyne total 2025 (USD, ~80% is test) ██████████████████████████████ 3,200
+  Advantest FY ending Mar 2025 (JPY bn)   ███████ 779.7
+  FormFactor 2025 (USD)                   ███████ 785
+  Technoprobe 2025 (EUR)                  ██████ 628.4
+  Technoprobe 2024 (EUR)                  █████ 543.2
+  (units differ per line: Advantest in billions of yen, others in millions; read as each company's own
+      growth, not as a ranking)
+  Teradyne 2025: $3.2B, +13%; Semiconductor Test +19%, Q4 test revenue $883M (+45% YoY). FormFactor
+      2025 a record.
+
+# 7. ATE market share, 2023 (Substack estimate, rough)
+
+  Advantest ████████████████████████████████████████ 50%
+  Teradyne  ████████████████████████ 30%
+  Others    ████████████████ 20%
+  (blog-grade estimate; the duopoly holds near 80%. Another report cites Teradyne+Advantest+Keysight at
+      46% of a broader
+  test-equipment market. Definitions differ, so these do not reconcile.)
+
+# 8. Who makes it, chokepoints
+
+  Testers          Advantest (6857.T, ADR ATEYY), Teradyne (TER); smaller: Cohu (COHU), Keysight (KEYS)
+  Probe cards      FormFactor (FORM), Technoprobe (TPRO.MI), also MPI, CHPT, Micronics Japan (6871.T)
+  Probers          Tokyo Electron (8035.T), Accretech / Tokyo Seimitsu (7729.T) (textbook knowledge, no
+      sourced share)
+  Drivers          AI accelerators, networking and HBM/DRAM testing push both tester and probe card
+      demand
+  Risk             tester duopoly makes capacity of a few lines a gate for AI chip ramps; HBM
+      known-good-die need
+                   makes fine-pitch probe cards a single-digit-vendor bottleneck
+
+# Sources
+
+  [1] FormFactor SWTW HBM2 KGD deck:
+      formfactor.com/wp-content/uploads/SWTW_HBM2_KGD-June-2017-Final-3.pdf
+  [2] FormFactor probe card requirements: compass.formfactor.com (2021 Probe Card Solution ... Alan
+      Liao pdf)
+  [3] Keithley probe card note: xdevs.com/doc/Keithley/Appnotes/2871%20Probe%20Card%20WP.pdf
+  [4] Patent with overdrive example: patents.google.com/patent/US6078186
+  [5] Technoprobe presentation:
+      technoprobe.com/wp-content/uploads/2026/05/Technoprobe-Company-Presentation-May-2026.pdf
+  [6] Teradyne 2025 annual report: sec.gov/Archives/edgar/data/97210/000119312526127510/2025_ter-ars.pdf
+  [7] Advantest FY revenue: simplywall.st/stocks/jp/semiconductors/tse-6857/advantest-shares/news
+  [8] ATE share 2023: tspasemiconductor.substack.com/p/advantest-leading-the-ai-testing
+  [9] Teradyne Q4 test revenue:
+      nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead

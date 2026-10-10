@@ -1,0 +1,128 @@
+# 1. What happens: ingot to mirror-polished wafer
+
+ ┌────────┐  ┌──────────┐  ┌────────────┐  ┌─────────────┐  ┌─────────┐  ┌───────────┐  ┌─────────┐
+ │ INGOT  │  │ SLICE    │  │ GRIND/LAP  │  │ ETCH        │  │ EDGE    │  │ POLISH    │  │ CLEAN   │
+ │ ground │─▶│ diamond  │─▶│ remove saw │─▶│ wet chem    │─▶│ profile │─▶│ DSP then  │─▶│ inspect │
+ │ 300 mm │  │ wire saw │  │ damage     │  │ strip layer │  │ round   │  │ CMP final │  │ ship    │
+ └────────┘  └──────────┘  └────────────┘  └─────────────┘  └─────────┘  └───────────┘  └─────────┘
+
+  (these are textbook step names; removal amounts below come from patents, see 9 and Sources)
+
+# 2. Inside a multi-wire diamond saw
+
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │    wire spool ◀──────── wire runs back and forth at high speed ────────▶ wire spool                  │
+ │         │                                                                   │                        │
+ │    ─────┴──┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬──────┬────────┴─────  WIRE WEB         │
+ │            ║      ║      ║      ║      ║      ║      ║      ║      ║   (grooved guide rollers,       │
+ │            ║      ║      ║      ║      ║      ║      ║      ║      ║    ~equal pitch = wafer + kerf) │
+ │       ┌────╨──────╨──────╨──────╨──────╨──────╨──────╨──────╨──────╨────┐                            │
+ │       │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ SILICON INGOT (cylinder, 300 mm) ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                          │
+ │       └───────────────────────────────┬─────────────────────────────────┘                            │
+ │                  beam / glue plate ───┴─── ingot is fed DOWN through the web                         │
+ │    ≈≈≈≈≈≈≈≈ coolant spray (water-based) washes out Si swarf and cools the cut ≈≈≈≈≈≈≈≈               │
+ └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (every wire is a steel core with diamond grit fixed on it; each pass cuts one slot, all wafers at once)
+
+  detail of one cut, side view:
+
+ ┌───────────────────────────────────────────────────────────────────────────┐
+ │   wire (core + grit)   ○  ○  ○  grit tips scratch and chip the silicon    │
+ │        ●━━━━━━━━●      kerf = effective wire diameter incl. diamond layer │
+ │   wafer │        │ wafer   silicon removed as swarf, lost as kerf         │
+ └───────────────────────────────────────────────────────────────────────────┘
+
+# 3. The mechanics of each step
+
+  slicing     brittle micro-fracture by fixed diamond grit; kerf loss = effective wire diameter + wobble
+  lapping     loose abrasive slurry between two plates, both faces; sets flatness + parallelism
+  grinding    fixed-abrasive wheel alternative; resin-bond wheel removes 10-20 um on one side
+  etching     alkali or acid bath removes the damaged layer lapping leaves behind
+  polishing   chemical + mechanical: chemistry softens the surface, abrasive removes it
+  CMP law     Preston: removal rate RR = K*P + C   (K Preston constant, P pressure, C zero-pressure term)
+  oxide CMP   removal rises with pH for silica slurries; pitting seen at pH 13; ceria peaks near pH 8-9
+  surface     chemistry softens or oxidises the top layer, abrasive wipes it off (textbook picture)
+  planarity   pad asperities + slurry flow average out high spots; pressure P and speed set the rate
+  damage      sawing leaves a cracked layer microns deep; every later step exists to remove it
+
+# 4. By the numbers
+
+  kerf, slurry saw        about 150 um (ITRPV roadmap via TaiyangNews)
+  kerf, diamond wire      about 125 um today, path to about 85 um
+  fine wire               under 35 um diameter is where research is heading (Ge et al. 2026)
+  cut speed               diamond wire about 2x the speed of the older slurry technology
+  lapping stock removal   80 to 200 um total for double-side lapping; one 200-300 mm example 80 um, 40
+      min
+  double-side rough grind about 45-75 um removed before lapping (patent example)
+  chemical etch           about 15-25 um removed after lapping
+  double-side polish      10 to 20 um total; front-side polish 10-15 um, 5-15 min
+  300 mm patent example   acid etch 10 um, gas-phase etch 2 um, final polish 5 um on the front
+  end result              775 um +/- 25 um thick, TTV 5 um or less (vendor datasheet, see WAFER)
+
+  (kerf matters: at 125 um kerf and a ~775 um wafer, about one sixth of the ingot length turns to swarf,
+   my arithmetic from the numbers above; note PV roadmap kerf numbers are for solar-grade wafers)
+
+# 5. Thickness budget: where the silicon goes (um, sourced mid-point examples)
+
+  saw kerf lost per wafer      ████████████████████████████████████ 125 um
+  double-side lapping (80-200) ███████████████████████ 80 um
+  etch (15-25)                 ██████ 20 um
+  polish DSP (10-20)           ████ 15 um
+  (lapping shown at the 80 um single patent example; ranges in parentheses; kerf is per wafer cut)
+
+# 6. Who makes it: CMP equipment and consumables
+
+  CMP tools     Applied Materials (AMAT) and Ebara (6361.T) are said to hold about 80% of CMP tools
+                (market-research claim, weak sourcing). Older Dataquest: Applied 62.1% / Ebara 23% in
+                    2001.
+  CMP slurry    Fujifilm (4901.T) about 31% per TECHCET, Entegris (ENTG) second after buying CMC
+      Materials
+  CMP pads      DuPont (DD) over 50% per the same TECHCET piece (undated, treat as rough)
+  top six       global top six slurry players hold over 70% of revenue (market-research summary)
+  wafer-level   polishing is done in-house by the wafer makers (see WAFER); saw makers not sourced here
+
+  CMP equipment share, Dataquest 2001 and 2002 (old, but the only quantified split found), percent
+
+  Applied 2001 ████████████████████████████████████████ 62.1%
+  Applied 2002 ███████████████████████████████████████ 61.3%
+  Ebara 2001   ███████████████ 23%
+  Ebara 2002   ██████████████ 22%
+
+# 7. Chokepoints and risks
+
+  - wire breakage and wear: wear raises wire deflection, thickness variation and kerf (Springer 2026)
+  - thinner wire means less kerf but weaker wire; the trade-off limits how fast kerf can shrink
+  - CMP slurries and pads are consumables bought forever: a few vendors, qualified per fab line
+  - two-supplier CMP tool market; Chinese domestic toolmakers are pushing in (AMAT FY2025 10-K)
+  - ceria and silica abrasives: raw-material and purity supply sits upstream of this step
+
+  Process control points (textbook, no number sourced):
+    wire tension and speed, ingot feed rate, coolant temperature (thermal bow of the wafer)
+    plate pressure and slurry mix in lapping; etch bath temperature and time; pad wear in CMP
+
+# 8. Why it matters downstream
+
+  A polished wafer is the flat reference for lithography: later CMP in the fab reuses the same physics
+  on deposited films (STI, copper, tungsten). So the Preston law above runs on both ends of the chip.
+
+# 9. Caveats
+
+  Removal amounts are patent examples, not a standard; each wafer maker tunes its own sequence.
+  Market-share items are from market-research summaries and old analyst data; verify before use.
+  Diamond-wire kerf numbers are solar-industry roadmap values, shown as the best sourced kerf data.
+
+# Sources
+
+  [1] TaiyangNews, Diamonds Are A Wafer's Friend:
+      taiyangnews.info/technology/diamonds-are-a-wafers-friend
+  [2] Ge et al., slicing with ultra-fine diamond wire: strathprints.strath.ac.uk/94630/
+  [3] Wear and kerf, Int J Adv Manuf Tech 2026: link.springer.com/10.1007/s00170-026-17634-4
+  [4] Lapping/etch/polish removal: patents.google.com/patent/US6114245 ; image-ppubs.uspto.gov 6352927,
+      7829467
+  [5] Preston law and pH: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10418247 ;
+      doi.org/10.1149/2.0311910jss
+  [6] Slurry and tool shares: semiconductor-digest.com/?p=26625 ; sst.semiconductor-digest.com/?p=28666
+  [7] CMP competition + Applied FY2025 10-K:
+      sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm
+  [8] CMP equipment share (Dataquest): siliconsemiconductor.net/article/69559

@@ -1,0 +1,195 @@
+== WAFER SORT
+# Test before cut
+Wafer sort (probe) electrically tests every die before anything is cut. Each die is binned good or bad and the result is saved as a wafer map. For ordinary chips a bad die just means lost revenue; for HBM one bad die can kill a whole stack (see the Why only known-good die card).
+
+# The map and repair
+The map travels as data with the wafer lot, and at dicing and pick the picker reads it so bad die never reach the bonder. Mismatched maps (wrong lot, rotated wafer) are a classic factory error, so the map is validated against the notch and alignment marks (textbook).
+
+Sort comes first and stacking second, because a stack tested after assembly cannot be repaired. Memory makers also repair at sort by blowing fuses to swap failed rows for spares (textbook).
+
+# Sources
+trendforce.com/news/?p=56780
+semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
+
+== WAFER MAP
+# The good and bad die list
+The wafer map is a coordinate file: for each die position, a bin code. Good die are picked; failures stay on the tape and are scrapped. Some flows add finer bins such as speed grades (textbook), but HBM stacks need fully good DRAM.
+
+# Why it is a bottleneck
+The pick tool must locate each die by vision, match it to a map position and act. A single mapping error is silent and expensive. Fabs cross-check the map with an inline vision inspection of the sawn wafer, since cracked or chipped die that passed electrical test should also be skipped (textbook).
+
+Bad-die patterns, like an edge ring or cluster, point to front-end process tools, so the map links yield to back-end cost. No audited HBM yield data was found; HBM yield reports are press estimates.
+
+# Sources
+trendforce.com/news/2026/04/29/news-sk-hynix-reportedly-completes-12-high-hybrid-bonding-hbm-validation-works-to-raise-yields-for-mass-production/
+
+== DICE + TAPE
+# Sawn wafer on tape
+After dicing, the die sit on dicing tape in their original grid, held on the frame. The tape adhesive is UV-releasable in many products so grip drops before pick, making thin die easier to lift (textbook). Tape expansion widens the gaps, helps vision find edges and keeps neighbours from touching.
+
+Cut quality matters: chips, burrs and stringy DAF residue on a die edge become particles and bonding defects at the picker. See the DICE page.
+
+# HBM die thickness
+HBM3E 12-high stacks hold 12 DRAM dies and a base die; JEDEC lifted the HBM4 stack height limit from 720 to 775 um so HBM4 can keep microbumps. Any warp in a thin die on the tape shows up as pick failures.
+
+DISCO's DDS series heat-shrinks the tape so die go straight to bonding on the same frame, with no re-lamination.
+
+# Sources
+disco.co.jp/eg/products/separator/dds2300.html
+tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+trendforce.com/news/2025/04/28/news-following-jedecs-hbm4-standard-whats-next-for-sk-hynix-samsung-and-micron/
+
+== COLLET
+# Pick-up collet
+The collet is a vacuum tip that grips the die face, lifts it clear of the tape and swings it to the bonder. Its material and tip shape match die size: a soft rubber or polymer tip spreads load across a thin die, a hard tip is less forgiving. A worn or contaminated collet scratches or drops the die. Newer flows add a flip step so the bump side faces down.
+
+# Placement and cleanliness
+A 12-high stack needs 12 picks and 12 bond cycles, so picker cycle time is not the bottleneck against the bonder; placement accuracy is. Vision aligns die and target, in microns for microbumps and sub-micron for hybrid bonding (textbook).
+
+Cleanliness is strict for hybrid bonding: particles on the oxide surface cause voids in the bond. Handling and placement tools come from Disco and Kulicke and Soffa (KLIC) per the page (textbook, no share sourced).
+
+# Sources
+trendforce.com/news/2026/04/29/news-sk-hynix-reportedly-completes-12-high-hybrid-bonding-hbm-validation-works-to-raise-yields-for-mass-production/
+
+== EJECTOR NEEDLE
+# Needle that pushes the die up
+Beneath the tape, a needle or set of needles (or a stepped ejector tower) rises while the chuck holds the tape down by vacuum. The needle lifts the centre of the die and the tape peels from the edges inward. On thin die force, speed and stroke height are tuned precisely, because the die flexes as the tape peels and cracks if the stroke is too fast or too high.
+
+# Failure modes
+Under about 100 um, single needles can punch through; multi-needle or ultrasonic-assisted ejectors spread force (textbook). UV-cured tape needs less force; DAF-backed die add adhesion that fights the peel and raises the force.
+
+Failure modes: microcracks that pass visual inspection but fail in reliability tests later, die tilt and tape residue. That is why stacks are retested after assembly. The page notes a wrong ejector stroke cracks HBM DRAM dies.
+
+# Sources
+disco.co.jp/eg/products/separator/dds2300.html
+semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
+
+== PLACE
+# Align and place
+Placement puts each die onto its target (the base die, the die below, or the substrate) with correct alignment. For microbump flows the tolerance is a fraction of the bump pitch. Tools combine pick, flip, align and bond in one machine in the TCB flow.
+
+Alignment is checked with vision marks on die and substrate and, for TSV stacks, through-silicon infrared (textbook). Die tilt or warp from thin silicon causes open joints on one side and shorts on the other.
+
+# The pitch ladder
+The page's ladder runs from 40 um historically to 25 um in volume and 10 um in the newest memory, then 6 um hybrid today with 4.5 and 3 um in development. Each step tightens alignment budgets and makes particles and thermal drift more costly.
+
+TSMC has asked partners for roughly 5 um class bumps, with mass production estimated for 2H 2028 (TrendForce).
+
+# Sources
+semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
+tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+trendforce.com/news/?p=56780
+
+== BOND HEAD
+# Thermocompression head
+In TCB the head picks up the die, heats it and presses it onto the stack with controlled force and temperature while the stage below is also heated. The solder caps on the microbumps melt and wet the pads, and the non-conductive film between die softens, flows out of the joint and cures. Each die is bonded one at a time, so a 12-high stack means 12 cycles; throughput per tool is the economic variable.
+
+# Who sells bonders
+Hanmi Semiconductor (042700.KS) led supply to SK hynix, but share claims conflict (about 65% in one report, 90% in a low-quality one). ASMPT (0522.HK) guides to 35-40%. Hanwha Semitech, SEMES (Samsung affiliate), Toray and Shinkawa are also named.
+
+In June 2026 SK hynix reportedly placed a 44.2 billion won order with Hanmi for TC BONDER 4.5 GRIFFIN units for HBM4, delivery through Sept 2, about 7.7% of Hanmi's 2025 revenue (TrendForce/Hankyung). SEMES delivered nearly 100 TC bonders in a year (Chosun, via TrendForce). Share claims are press estimates.
+
+# Sources
+trendforce.com/news/2026/06/09/news-sk-hynix-reportedly-places-44-2bn-won-tc-bonder-order-with-hanmi-accelerating-hbm4-ramp-up/
+techovedas.com/14b-investment-90-market-share-hanmi-semiconductor-leads-the-hbm-bonder-market/
+view.asiae.co.kr/en/article/2025071513415370851
+
+== NCF resin
+# Non-conductive film
+NCF is a pre-applied epoxy film between DRAM die. During thermocompression it melts, flows out of the microbump joint so solder can touch the pad, then cures to give mechanical support and fill the gap. It replaces a separate capillary underfill step for each layer. The resin has a tight window: flow enough to clear the bump, but not trap voids or squeeze out and contaminate neighbours.
+
+# NCF versus MR-MUF
+With MR-MUF, dies are tack-bonded with mass reflow and a molded underfill is injected around the whole stack at once. NCF stacks bond die one at a time with full heat and force each cycle, while MR-MUF batches the reflow, so throughput and heat behaviour differ (textbook).
+
+TrendForce's comparison says MR-MUF allows higher stack counts than TC-NCF. Film thickness also adds to stack height, which JEDEC capped at 775 um for HBM4. Voids, filler trapping at the joint and resin flow are failure modes (textbook). Compound makers are mostly Japanese per the PACKAGE page (no share sourced).
+
+# Sources
+trendforce.com/news/?p=56780
+tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+trendforce.com/presscenter/news/20241114-12362.html
+
+== microbumps
+# Microbumps and TSVs
+Microbumps are small solder-capped copper pillars on the die face, one per signal path. Through-silicon vias (TSVs) run down through each thinned DRAM die so signals pass layer to layer. The page's pitch ladder runs from 40 um historically to 25 um as the cited volume standard and 10 um for the latest memory. Smaller pitch means more connections per mm2.
+
+# Pitch limits
+Below about 10 um solder wicks sideways and shorts neighbours, and bump heights vary. Semiconductor Engineering reports HBM is leading the way on defect-free bumps.
+
+JEDEC raised the HBM4 height limit from 720 to 775 um, which lets HBM4 keep microbumps rather than being forced onto hybrid bonding. Hybrid bonding removes the bump, which also thins the interconnect layer and improves heat flow (textbook). TSMC reportedly asked for roughly 5 um class bumps, mass production estimated 2H 2028 (TrendForce).
+
+# Sources
+semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
+trendforce.com/news/?p=56780
+tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+
+== MR-MUF
+# SK hynix mass reflow molded underfill
+Dies are stacked with a light tack bond, then the whole stack goes through a mass reflow oven where all solder joints melt together. A liquid epoxy molding compound is then injected into the gaps in one shot and cured. It fills the space between die, protects the joints and conducts heat better than film (textbook).
+
+SK hynix unveiled a 16-high HBM3E at its SK AI Summit 2024 and said it would use Advanced MR-MUF, with hybrid bonding as a backup (iconnect007 / TrendForce, 2024 reports).
+
+# Share and tooling
+By shipments in Q2 2025 (Counterpoint): SK hynix 62%, Micron 21%, Samsung 17%. By revenue: SK hynix 50% (58% in Q1), Samsung 33%, Micron 18%. One Counterpoint Korean table shows a slightly different split (64/15/21), so treat the exact numbers as estimates.
+
+Because the batch reflow is not thermocompression, SK hynix leans less on TC bonders per layer than TC-NCF rivals (textbook); Hanmi has still been a main supplier for tack bonding.
+
+# Sources
+counterpointresearch.com/jp/insights/samsungs-q2-2025-memory-performance-disappoints-but-signals-h2-recovery
+trendforce.com/news/?p=56780
+mail.iconnect007.com/article/143022/sk-hynix-leads-the-market-with-hbm3e-16hi-products-boosting-capacity-limits/143019/ein
+
+== Hybrid bonding
+# Copper-to-copper without bumps
+Hybrid bonding polishes oxide and copper pad surfaces perfectly flat by CMP, presses the two die together at room temperature so the oxide bonds, then anneals so the copper expands more than the oxide and pads meet and fuse (textbook). No solder, no film, no underfill. Pitch today is about 6 um at the leading edge, with 4.5 and 3 um in development.
+
+# Status and risks
+SK hynix finished validation of 12-high hybrid-bonded HBM in April 2026 and is working on yield. Roadmaps place hybrid for HBM5 and stacks above 20 dies (SK hynix); Hanmi plans a hybrid tool for HBM6. A hybrid bonder market near $2B by 2028 was reported by TrendForce in Oct 2025.
+
+Besi (BESI.AS) leads tools; ASMPT is delivering to HBM customers; Hanwha and LG are developing, LG by 2028. Hybrid is delayed by yield and particle control, and a single particle leaves a void across many pads. Watch Besi, ASMPT and Hanmi.
+
+# Sources
+trendforce.com/news/2026/04/29/news-sk-hynix-reportedly-completes-12-high-hybrid-bonding-hbm-validation-works-to-raise-yields-for-mass-production/
+trendforce.com/news/2025/10/07/news-hybrid-bonder-equipment-market-reportedly-near-2b-by-2028-as-korean-makers-race-to-next-gen-hbm-tools/
+
+== Why only known-good die
+# Compound yield
+If each die in a 12-high stack is 99% good, 0.99^12 gives 88.6% working stacks; at 95% per die it falls to 54.0% (arithmetic, not sourced). A bad die wastes the 11 good ones and the base die, which is why sort comes first, stacking second, and stacks are retested.
+
+With 16 or 20 layers, even 99.5% per die (illustrative) gives under 91% stack yield at 20 layers.
+
+# Cost of a lost stack
+HBM is the highest-value memory die, so a lost stack destroys much more value than a bad ordinary DRAM chip. HBM yield is the hidden constraint on accelerator supply: GPU makers can buy all the logic die they like, but without enough good stacks the package cannot ship.
+
+KGI, cited by one search result, expects Nvidia Rubin CoWoS shipments to fall below 50% of allocation in 2026, citing HBM4 constraints from SK hynix and a possible three-month delay from base-die redesign (secondary report, treat with caution).
+
+# Sources
+kgi.com.hk/en/-/media/files/kgishk/research-reports/tw-reports/tsmc_2330-tt_09032026e.pdf
+
+== HBM share
+# Who buys the process
+By shipments in Q2 2025 (Counterpoint): SK hynix 62%, Micron 21%, Samsung 17% (41% a year earlier). By revenue: SK hynix 50% (58% in Q1), Samsung 33% (21% in Q1), Micron 18% (21% in Q1). Counterpoint's Korean table lists 64/15/21 for shipments, so the split is approximate.
+
+# Reading the shares
+Samsung's shipment share was below its revenue share, so it sold at a higher average price per unit that quarter, likely from a different mix (textbook inference).
+
+Each memory maker picks a process (SK hynix MR-MUF, others TC-NCF), so one customer's orders can swing a bonder vendor's year. Hanmi leans on SK hynix; SEMES is a Samsung affiliate. Tickers: SK hynix 000660.KS, Samsung 005930.KS, Micron MU. Shares are press and analyst estimates, not audited.
+
+# Sources
+counterpointresearch.com/jp/insights/samsungs-q2-2025-memory-performance-disappoints-but-signals-h2-recovery
+koreajoongangdaily.com/business/samsung-narrows-gap-with-no-1-sk-hynix-in-hbm-market-revenue-in-q2/12859060
+
+== Hanmi
+# TC bonder leader and its challengers
+Hanmi Semiconductor (042700.KS) led thermocompression bonder supply to SK hynix, but share claims conflict: about 65% in one report and 90% in a low-quality one, so treat both as estimates. ASMPT (0522.HK) guides to 35-40%.
+
+Competition: Hanwha Semitech, SEMES (Samsung affiliate, nearly 100 TC bonders delivered in one year), Toray, Shinkawa.
+
+# Orders and risks
+In June 2026 SK hynix reportedly placed a 44.2 billion won order for TC BONDER 4.5 GRIFFIN units for the HBM4 ramp, delivery through Sept 2, said to equal about 7.7% of Hanmi's 2025 revenue and possibly around 15 units at roughly 3 billion won each (TrendForce, citing Hankyung). They are headed to SK hynix's new M15X fab in Cheongju (Korea Herald). Another report mentions a 9.65 billion won order split between Hanmi and Hanwha Semitech.
+
+Hanmi says HBM4 and HBM5 can still use TC bonders and plans a hybrid tool for HBM6 by end 2027 (TrendForce). Risks: customer concentration, share loss to Hanwha, and a hybrid shift that favours Besi.
+
+# Sources
+trendforce.com/news/2026/06/09/news-sk-hynix-reportedly-places-44-2bn-won-tc-bonder-order-with-hanmi-accelerating-hbm4-ramp-up/
+en.bizhankook.com/articles/31197.html
+trendforce.com/news/2025/10/07/news-hybrid-bonder-equipment-market-reportedly-near-2b-by-2028-as-korean-makers-race-to-next-gen-hbm-tools/

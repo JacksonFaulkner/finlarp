@@ -8,7 +8,7 @@ name = "fl"
 path = "src/main.rs"
 
 [dependencies]
-ratatui = "0.30"
+ratatui = { version = "0.30", features = ["unstable-rendered-line-info"] }
 duckdb = { version = "1.1", features = ["bundled"] }
 chrono = { version = "0.4", default-features = false, features = ["clock"] }
 serde_json = "1"

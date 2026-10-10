@@ -31,6 +31,8 @@ pub const SOURCE_KEYS: &[Key] = &[
     key("y", "copy source URL"),
     key("i", "inspect formula inputs"),
     key("a", "audit overlay"),
+    key("spc a s", "add selection to Claude"),
+    key("spc a c", "toggle Claude window"),
 ];
 
 /// Movement keys understood by `block_view::BlockView::on_key`.
@@ -207,7 +209,8 @@ mod tests {
             render_overlay(f, f.area(), "dossier keys", SOURCE_KEYS, &th)
         });
         assert!(out.contains("dossier keys"), "{out}");
-        assert!(out.contains("i  inspect formula inputs"), "{out}");
+        assert!(out.contains("inspect formula inputs"), "{out}");
+        assert!(out.contains("add selection to Claude"), "{out}");
         for (w, h) in [(10, 3), (1, 1), (0, 0)] {
             draw(w, h, |f| render_overlay(f, f.area(), "k", KEYS, &th));
             draw(w, h, |f| render_footer(f, f.area(), KEYS, Some("x"), &th));

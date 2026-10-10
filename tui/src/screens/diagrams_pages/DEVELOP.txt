@@ -1,0 +1,120 @@
+# 1. What happens: invisible image to physical resist pattern
+
+ ┌──────────────┐  ┌───────────────┐  ┌───────────┐  ┌────────────────┐  ┌───────────┐  ┌─────────────┐
+ │ EXPOSED      │  │ PEB           │  │ COOL      │  │ DEVELOP        │  │ RINSE     │  │ TO ETCH     │
+ │ wafer back   │  │ hot plate;    │  │ stops the │  │ TMAH dissolves │  │ DI water, │  │ resist is   │
+ │ from scanner │─▶│ acid cuts the │─▶│ reaction  │─▶│ the soluble    │─▶│ spin dry  │─▶│ the stencil │
+ └──────────────┘  │ polymer       │  └───────────┘  │ part           │  └───────────┘  └─────────────┘
+                   └───────────────┘                 └────────────────┘
+
+  (PEB = post-exposure bake. Until PEB and develop the wafer holds only a latent chemical image.)
+
+# 2. The chemistry in a chemically amplified resist (CAR)
+
+  EXPOSE   PAG + 92 eV photon ──▶ H+ (photoacid); EUV secondary electrons make extra acid
+
+  PEB      polymer-COO-tBu + H+ ──▶ polymer-COOH + isobutene + H+      acid is regenerated: CATALYTIC
+           (t-butyl ester shown as the textbook example; real resists mix several protecting groups)
+
+  DEVELOP  polymer-COOH + OH- ──▶ polymer-COO- + H2O       carboxylate dissolves in aqueous TMAH
+           developer: (CH3)4N+ OH-, 2.38 wt% (about 0.26 mol/L by arithmetic: 23.8 g/L / 91.15 g/mol)
+
+  QUENCHER a weak base in the resist that neutralises stray acid, limiting how far it spreads
+  (equations are textbook; the search confirmed t-butyl deprotection by photoacid and TMAH at 2.38 wt%)
+
+# 3. Inside the PEB hot plate and the develop module
+
+  ┌────────────────────────────────────────────────────────────────────────────────────┐
+  │   PEB MODULE                           DEVELOP MODULE                              │
+  │   ┌───────────────────────────┐        nozzle ──▶ TMAH puddle or spray             │
+  │   │   wafer, resist side up   │                       │                            │
+  │   │   ═══════════════════     │                       ▼                            │
+  │   │   ▓▓▓▓ HOT PLATE ▓▓▓▓     │        ═══ wafer spins slowly ═══                  │
+  │   │   90-150 C, 30-120 s      │              ┌───────┐                             │
+  │   │   (proximity gap)         │              │ CHUCK │  cup + drain below          │
+  │   └───────────────────────────┘              └───────┘                             │
+  │   then a COOL PLATE                    then DI-water RINSE, spin to dry            │
+  │                                                                                    │
+  │   Inside the resist during PEB:   acid ≈≈▶ diffuses, cuts protecting groups        │
+  │   Bake too short: weak deprotection. Too long or hot: acid blurs, lines get rough. │
+  └────────────────────────────────────────────────────────────────────────────────────┘
+
+# 4. The physics: acid diffusion sets the blur
+
+  Gaussian blur of the acid:     sigma = sqrt(2 * D * t)      D = acid diffusivity, t = bake time
+  One EUV study fitted D = ~25 nm2/s for a commercial polymer CAR (Gaussian kernel); it also found
+  linewidth versus bake time was non-linear, so treat the numbers below as rough illustration only.
+
+  Too little blur: more dose needed (low sensitivity). Too much: lost resolution, rough line edges.
+  This is the CAR trade-off. EUV and e-beam exposure occur in vacuum, which can dry the film and weaken
+  the acid-catalysed reaction in the later bake (reported). Fast lasers can bake in milliseconds:
+  one laser PEB study reported acid diffusivity 100-1000x lower than hot-plate extrapolations and
+  needed under half the EUV dose.
+
+# 5. Resist profile: before and after develop (positive-tone CAR, schematic)
+
+  ┌───────────────────────────────────────────────────────────────────────────────┐
+  │   after exposure + PEB                      after develop                     │
+  │   ▓▓▓▓▓▓░░░░░░▓▓▓▓▓▓░░░░░░▓▓▓▓▓▓            ▓▓▓▓▓▓      ▓▓▓▓▓▓      ▓▓▓▓▓▓    │
+  │   ▓▓▓▓▓▓░░░░░░▓▓▓▓▓▓░░░░░░▓▓▓▓▓▓            ▓▓▓▓▓▓      ▓▓▓▓▓▓      ▓▓▓▓▓▓    │
+  │   ══════════════════════════════            ══════════════════════════════    │
+  │   ▓ = protected polymer (stays)   ░ = deprotected, acidic (dissolves in TMAH) │
+  │   the ░ regions become trenches; etch then copies the resist pattern downward │
+  └───────────────────────────────────────────────────────────────────────────────┘
+
+# 5b. By the numbers
+
+  PEB               90-150 C for 30-120 s (CAR range, SPIE paper); 130 C used for a t-butyl ester resist
+  developer         2.38 wt% TMAH, the standard aqueous developer (works for a negative-tone EUV resist)
+  acid diffusivity  ~25 nm2/s in the fitted commercial CAR
+  dose              30 mJ/cm2 reference, ~20 photons per nm2 (see EXPOSE, arithmetic)
+  resist film       ~20 nm absorbs only ~10% of EUV light, so few photons make the image
+  dry resist        Lam says Aether uses 5-10x less chemicals than wet resist processes (company claim)
+  TMAH market       USD 1.16B in 2025 to 1.98B by 2032 (one report; others give USD 1.8B, estimates vary)
+
+# 6. Acid blur, sigma = sqrt(2*D*t) with D = 25 nm2/s (computed, nm)
+
+  10 s          ████████████ 22 nm
+  30 s          ████████████████████ 39 nm
+  60 s          ████████████████████████████ 55 nm
+  120 s         ████████████████████████████████████████ 77 nm
+  (computed from one fitted D at one temperature, not a measurement of any production resist)
+
+  Semiconductor TMAH developer market, USD billions (one market report, low reliability)
+  2025          ███████████████████████ 1.16
+  2032 proj.    ████████████████████████████████████████ 1.98
+
+# 7. Where it goes wrong: stochastics and collapse
+
+  Few photons mean some pixels get too few or too many: random bridges, broken lines, missing contacts.
+  Chemically amplified resists: noise from polymer molecular-weight spread and uneven PAG / quencher mix.
+  Metal-oxide resists (MOR) absorb about 3x more but have no acid-blur smoothing, so edges stay rough;
+  strong top absorption can leave an undercut profile (simulation study). Raising CAR dose also thins the
+  film after develop, so dose is no free fix. Tall thin lines can collapse in rinse + dry (textbook).
+  Lam DRY RESIST (Aether): deposited and developed with no wet chemistry; an unnamed leading memory
+  maker chose it for advanced DRAM (Jan 2025). Lam + JSR/Inpria signed a cross-licence in Sept 2025.
+
+# 8. Who makes it, risks
+
+  Tokyo Electron (8035.T)   CLEAN TRACK coater/developers; reportedly ~100% of EUV tracks (TrendForce)
+  SCREEN (7735.T)           number two; TEL+SCREEN about 88-91% of coater/developer sales (aggregators)
+  Developer chemical        Merck KGaA (MRK.DE), BASF (BAS.DE), Tokuyama, Mitsubishi Gas Chemical (lists)
+  Resists                   JSR/Inpria, TOK, Shin-Etsu, Sumitomo Chemical (textbook, not sourced here)
+  Dry resist                Lam Research (LRCX)
+
+  Chokepoints: track duopoly; Japanese resist and chemical supply; developer purity (metal ions).
+  Risks: stochastic defects limit yield at High-NA, resist cost, PFAS and TMAH waste rules (textbook).
+
+# Sources
+
+  [1] PEB range, acid diffusion: SPIE 10809, 108090B, 'Measurement and modeling of diffusion
+      characteristics in EUV resist', doi 10.1117/12.2502226
+  [2] Millisecond PEB: impact.ornl.gov/en/publications/addressing-challenges-in-lithography-using-
+      sub-millisecond-post-e
+  [3] t-butyl deprotection, 130 C PEB: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/5071730
+  [4] CAR vs MOR stochastics: frederickchen.substack.com/p/edge-roughness-differences-among
+  [5] Lam dry resist: storagenewsletter.com/2025/02/04/lam-research-euv-dry-photoresist-technology-
+      adopted-by-leading-memory-manufacturer ; jsr.co.jp/jsr_e/news/2025/20250916.html
+  [6] TMAH market (low reliability):
+      researchandmarkets.com/reports/6100444/tetramethylammonium-hydroxide-tmah-global
+  [7] Track share: trendforce.com/news/?p=46933 ; reportprime.com/coaters-and-developers-r3845

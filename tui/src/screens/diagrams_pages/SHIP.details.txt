@@ -1,0 +1,194 @@
+== BOARD
+# Bianca board
+The first step puts the tested GB200 superchip onto a compute board. In the NVL72 each board carries 2 B200 GPUs and 1 Grace CPU (the Bianca board), and a tray holds 2 boards, so 4 GPUs and 2 CPUs per tray (SemiAnalysis). The link between Grace and Blackwell is NVLink-C2C at 900 GB/s per superchip.
+
+# Where it can fail
+The board is where the GPU package meets power delivery and the CPU's memory. Board-level yield matters because a failed package or solder joint at this stage wastes an entire expensive GPU, so the final-test screening on the previous page pays for itself here. The first sign of trouble is usually warpage or solder problems on the large package (textbook).
+
+# Upstream limits
+ODMs such as Foxconn, Quanta and Wistron mount these boards; NVIDIA supplies the GPU and the board design. The chokepoints upstream are CoWoS packaging and HBM supply.
+
+# Sources
+https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component ; https://spheron.network/blog/nvidia-gb200-nvl72-guide/ ; https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+
+
+== TRAY
+# Compute tray
+A tray is the 1U sled that slides into the rack: two boards, NICs, cold plates on the chips, and power connections. In NVL72 there are 18 compute trays (72 GPUs, 36 CPUs). Trays are liquid cooled, so each includes quick-disconnect fittings and cold plates; HPE describes the NVL72 as needing liquid cooling.
+
+# Who builds trays
+The tray is where ODMs add value: thermal design, cable routing, and testing. The ODM list on this page is Foxconn, Quanta, Wistron, Wiwynn and Inventec. TrendForce says Foxconn mostly assembles NVL72 while Quanta is the main assembler for NVL36, and KGI says Wistron's GB200 shipments in 2Q25 mainly served Dell.
+
+# Failure points
+Tray-level failures include leaks at fittings and bad NIC or cable seating, which are found at the liquid test and burn stages (textbook).
+
+# Sources
+https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component ; https://trendforce.com/news/2025/05/05/news-microsoft-meta-ramp-up-ai-spend-lifting-nvidias-taiwanese-odm-partners-foxonn-quanta-and-wiwynn/ ; https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+
+
+== RACK
+# Rack integration
+The rack stage places 18 compute trays, 9 NVLink switch trays, power shelves, coolant manifolds and a rear cable spine into one cabinet. Result: 72 Blackwell GPUs and 36 Grace CPUs acting as one. The unit of sale is the whole rack, so the integrator is the party who makes 72 GPUs behave as one; Foxconn mostly assembles NVL72 per TrendForce.
+
+# Rack totals
+130 TB/s NVLink bandwidth, 13.4 TB HBM3e at 576 TB/s, and 1.44 exaflops FP4 with sparsity (720 PFLOPS dense). Rack-level yield is the risk: any bad GPU or spine fault takes the system down.
+
+# Power and weight
+Power is about 120 kW nominal, 130-132 kW deployed (Spheron); HPE specs 132 kW TDP with peak at 1.5x, about 192 kW, and advises provisioning 192 kW. Weight is about 1.36 t (3,000 lb); HPE lists about 3,245 lb loaded.
+
+# Sources
+https://spheron.network/blog/nvidia-gb200-nvl72-guide/ ; https://hpe.com/us/en/collaterals/collateral.a50009224enw.html ; https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component
+
+
+== NVLINK SWITCH TRAY 1
+# All-to-all fabric
+Nine switch trays sit between the compute trays and make an all-to-all fabric: any GPU can talk to any of the other 71 at full speed, giving 130 TB/s of aggregate NVLink bandwidth. Each switch tray uses two NVSwitch5 ASICs (SemiAnalysis).
+
+# Why one rack
+Each GPU link terminates in the switch trays through a copper cable spine at the back of the rack. Copper limits reach, which is why NVIDIA keeps all 72 GPUs in a single rack; the page states NVLink needs 72 GPUs wired at copper reach, so the rack, not the server, is the unit of sale.
+
+# Cables and revenue
+The design has a large number of cables and connectors, each a possible fault point, so cable-spine assembly and test is a labour-heavy step. NVIDIA sells the NVLink switches, which is part of why the rack bundle brings it more revenue per GPU than a bare chip. Per-part content and cable-vendor shares are not sourced here.
+
+# Sources
+https://spheron.network/blog/nvidia-gb200-nvl72-guide/ ; https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component
+
+
+== power shelves
+# AC to DC
+Power shelves convert facility AC to DC and feed trays through a rear busbar. SemiAnalysis puts total draw at 123.6 kW per NVL72 including AC-to-DC conversion losses; the page also lists ~120 kW nominal and deployments of 130-132 kW.
+
+# Against other racks
+HPE gives 132 kW TDP and a peak of 1.5x, about 192 kW, and tells buyers to provision 192 kW. The rack is roughly 10x a typical 12 kW CPU rack and 3x a 40 kW air-cooled H100 rack, per the chart on this page.
+
+# Vertiv design
+Vertiv and NVIDIA released a 7 MW reference architecture for GB200 NVL72 supporting up to 132 kW per rack. Power equipment, feeders and transformers can gate a deployment more than the chips, and short peaks above TDP require headroom that older halls lack.
+
+# Sources
+https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component ; https://hpe.com/us/en/collaterals/collateral.a50009224enw.html ; https://nasdaq.com/press-release/vertiv-codevelops-with-nvidia-complete-power-and-cooling-blueprint-nvidia-gb200-nvl72
+
+
+== coolant manifolds
+# Coolant loop
+Liquid cooling is mandatory for NVL72: coolant flows through rack manifolds to cold plates mounted on the GPUs and CPUs, then returns to a coolant distribution unit (CDU) that exchanges heat with the facility loop.
+
+# CDU sizing
+HPE describes an in-row CDU rated 1.3 MW, supporting up to 8 racks. Vertiv's reference design pairs liquid and air cooling, and Vertiv says its factory-integrated MegaMod CoolChip approach delivers turnkey infrastructure up to 50% faster than building onsite (vendor claim).
+
+# Leaks and testing
+The main failure mode is a leak at a quick-disconnect or cold plate, which can destroy a rack worth millions, so the loop is leak-checked before shipping (textbook). Boyd, with NVIDIA, built a Rack Emulator that automates thermal testing and validation of liquid cooling systems before connection to data-centre equipment. Companies named: Vertiv (VRT) and Boyd; no market shares are sourced.
+
+# Sources
+https://hpe.com/us/en/collaterals/collateral.a50009244enw.html ; https://nasdaq.com/press-release/vertiv-codevelops-with-nvidia-complete-power-and-cooling-blueprint-nvidia-gb200-nvl72 ; https://businesswire.com/news/home/20251016593787/en/Boyd-Extends-End-to-End-AI-Liquid-Cooling-Technologies-Portfolio-with-New-Rack-Emulator-Developed-in-Collaboration-with-NVIDIA
+
+
+== BURN + TEST
+# Rack-level checks
+Before shipping, the integrated rack is powered, filled with coolant, leak-checked and run at load, with firmware loaded and checked (textbook on this page; no sourced procedure or duration). This is a third round of screening after wafer sort and final test.
+
+# What it catches
+It is where integration faults show up: loose cables in the NVLink spine, a GPU that fails only under full rack power, a coolant leak or a firmware mismatch. Tools like Boyd's Rack Emulator, built with NVIDIA to automate thermal test and validation of liquid cooling, point to the need for this step.
+
+# Cost
+The cost is time and power: a 120+ kW rack under load needs a test bay with facility power and cooling, so test capacity at the ODM is itself a constraint. A failure caught here costs a tray swap in the factory; at the customer it costs downtime on a rack that is the whole unit of capacity.
+
+# Sources
+https://businesswire.com/news/home/20251016593787/en/Boyd-Extends-End-to-End-AI-Liquid-Cooling-Technologies-Portfolio-with-New-Rack-Emulator-Developed-in-Collaboration-with-NVIDIA ; textbook otherwise
+
+
+== crate by
+# Route
+A tested rack goes into a crate and travels by air and truck to the customer. The page notes final assembly is mostly done by Taiwan-based ODMs with plants in Taiwan, Mexico and the US (location is textbook). Nikkei, via a blog summary, said Taiwan-to-US AI server shipments were set to double in 2025 versus 2024.
+
+# Weight and floors
+The rack weighs about 1.36 t (HPE lists about 3,245 lb loaded). Weight and height matter for floor loading, lift access and door sizes at the site, and many halls need reinforced floors (textbook).
+
+# Volumes
+KGI estimates 4.5 thousand GB200/GB300 racks shipped in 2Q25 by three ODMs combined, a 27-28 thousand forecast for 2025 and 50-60 thousand for 2026; the last two are forecasts, not deliveries. Transport damage, tariffs and customs affect timing, and revenue is typically recognised on delivery, so a delay moves quarters (textbook).
+
+# Sources
+https://hpe.com/us/en/collaterals/collateral.a50009224enw.html ; https://kgi.com.hk/en/-/media/files/kgishk/research-reports/tw-reports/it-hardware_18082025e.pdf ; https://tech-now.io/en/blogs/taiwans-ai-server-revolution-how-foxconn-and-odms-redefined-global-tech-leadership-in-2025/
+
+
+== DATA CENTER
+# Site readiness
+The last step is the one the chip maker does not control: the site needs 120-192 kW per rack, CDUs, facility water, network and a floor that can bear the weight. HPE says to provision 192 kW per rack. Most existing halls cannot take NVL72 without upgrades.
+
+# Reference design
+Vertiv and NVIDIA published a 7 MW reference design for GB200 NVL72 at up to 132 kW per rack, with each in-row CDU (HPE: 1.3 MW) serving up to 8 racks. A typical air-cooled H100 rack is about 40 kW and a general-purpose CPU rack up to 12 kW (chart on this page).
+
+# Who buys
+The page concludes that power and cooling can gate deployment more than chips, and that buyers are a handful of hyperscalers (Microsoft, Meta, AWS, Google). For stocks this links Nvidia to power and cooling suppliers such as Vertiv (VRT). Rental prices on the page (indicative, 22 Mar 2026, Spheron) range from $10.50 to $27 per GPU-hour.
+
+# Sources
+https://hpe.com/us/en/collaterals/collateral.a50009224enw.html ; https://nasdaq.com/press-release/vertiv-codevelops-with-nvidia-complete-power-and-cooling-blueprint-nvidia-gb200-nvl72 ; https://spheron.network/blog/nvidia-gb200-nvl72-guide/
+
+
+== ODM
+# Who builds
+Original design manufacturers build to order, often to a cloud customer's design. The page lists Foxconn, Quanta, Wistron, Wiwynn and Inventec. TrendForce says Foxconn mostly assembles NVL72 and Quanta is main assembler for NVL36.
+
+# Shipments
+KGI says Hon Hai was the most aggressive ODM on GB200 shipment growth in 3Q25 guidance, and that Wistron's 2Q25 GB200 shipments mainly served Dell. Quanta's CFO said AI servers are on track for 70% of its server revenue (over 60% mid-2025). Wiwynn is a key supplier for AWS Trainium systems and reported 2025 revenue NT$950.663bn per the page.
+
+# Share claims
+A blog puts Foxconn near 40% of general plus AI server market (unverified), and an aggregator citing the Taipei Times says the top four (Foxconn, Quanta, Wistron, Inventec) held 53.2% of the server market in Q4 2025 (not confirmed). Margins are thin, so ODMs rely on volume and rack content.
+
+# Sources
+https://trendforce.com/news/2025/05/05/news-microsoft-meta-ramp-up-ai-spend-lifting-nvidias-taiwanese-odm-partners-foxonn-quanta-and-wiwynn/ ; https://kgi.com.hk/en/-/media/files/kgishk/research-reports/tw-reports/it-hardware_18082025e.pdf
+
+
+== OEM
+# OEMs
+OEMs sell branded systems with support contracts to enterprises, neoclouds and sovereign buyers: Dell (DELL), HPE (HPE) and Supermicro (SMCI). They differ from ODMs, who build to a hyperscaler's design for direct sale.
+
+# HPE spec sheet
+HPE publishes an NVL72 spec sheet that gives 132 kW TDP, peak 1.5x TDP and about 192 kW, and about 3,245 lb loaded, which shows how an OEM turns a reference design into a documented product with customer guidance.
+
+# Margin and mix
+KGI notes Wistron's 2Q25 GB200 shipments mainly served Dell, so an ODM often builds for an OEM too. The OEM's value is financing, support and integration with a customer's data centre; the risk is thin margin on a product whose major content (GPU, switch, HBM) is Nvidia's, and exposure to GPU allocation. No OEM AI server revenue or share figure is sourced here.
+
+# Sources
+https://hpe.com/us/en/collaterals/collateral.a50009224enw.html ; https://kgi.com.hk/en/-/media/files/kgishk/research-reports/tw-reports/it-hardware_18082025e.pdf
+
+
+== NVL72 peak
+# Rack power density
+The chart compares rack power: a general-purpose CPU rack at up to 12 kW, an air-cooled H100 rack at about 40 kW, NVL72 at about 120 kW nominal, and a peak or provisioning figure of 192 kW from HPE (peak is 1.5x the 132 kW TDP). Spheron reports 130-132 kW deployed, and SemiAnalysis 123.6 kW total draw including AC-to-DC losses.
+
+# Retrofit limits
+Air cannot remove this heat from packed trays, so liquid cooling is needed, and a hall built for 10-15 kW racks needs new power feeds, cooling and floor loading. Vertiv and NVIDIA's reference design supports up to 132 kW per rack across a 7 MW block.
+
+# Siting math
+Power and cooling can gate deployment more than chips, which gives vendors like Vertiv (VRT) a demand link to each GB200/GB300 rack shipped. Provisioning at 192 kW versus using 120 kW is the gap that decides how many racks fit in a given site.
+
+# Sources
+https://hpe.com/us/en/collaterals/collateral.a50009224enw.html ; https://spheron.network/blog/nvidia-gb200-nvl72-guide/ ; https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component
+
+
+== 2026 forecast
+# KGI rack forecasts
+KGI estimates (Aug 2025) put GB200/GB300 rack shipments at 4.5 thousand in 2Q25 across three ODMs, a raised 2025 forecast of 27-28 thousand, and 50-60 thousand for 2026. The bars use midpoints and these are forecasts, not deliveries.
+
+# Implied GPUs
+At 72 GPUs per rack, 50-60 thousand racks implies roughly 3.6-4.3 million GPUs (simple arithmetic, not a sourced figure). TrendForce says Blackwell is above 80% of Nvidia high-end GPU shipments in 2025.
+
+# Dependencies
+The forecast depends on CoWoS output, HBM supply, rack integration and data-centre power, which the page names as the chokepoints in that order. KGI also flagged Hon Hai as the most aggressive ODM on shipment growth. Risk is two-sided: a liquid-cooling or yield problem delays ramp, while a cut in hyperscaler capex would reduce demand.
+
+# Sources
+https://kgi.com.hk/en/-/media/files/kgishk/research-reports/tw-reports/it-hardware_18082025e.pdf ; https://trendforce.com/news/2025/05/05/news-microsoft-meta-ramp-up-ai-spend-lifting-nvidias-taiwanese-odm-partners-foxonn-quanta-and-wiwynn/
+
+
+== Azure ND GB200 v6
+# Renting a GPU-hour
+This chart shows what the end customer pays per GPU-hour on indicative prices checked 22 Mar 2026 (Spheron): CoreWeave $10.50, Oracle Cloud $16, Azure ND GB200 v6 $27. The spread is large for the same Blackwell hardware because hyperscalers bundle networking, storage, SLAs and enterprise contracts, while neoclouds sell leaner capacity. Prices are indicative list rates and change often.
+
+# Rack revenue
+An NVL72 has 72 GPUs, so at $10.50 per GPU-hour a rack earns about $756 per hour if fully rented (72 x 10.5; simple arithmetic from the page's numbers, not a sourced figure), before power, cooling and financing.
+
+# Why it matters
+Utilisation, contract length and price declines drive returns. A failure that takes down a rack stops this revenue stream, which is why burn and test before shipping matter.
+
+# Sources
+https://spheron.network/blog/nvidia-gb200-nvl72-guide/

@@ -1,0 +1,95 @@
+# 1. What happens: rock to metallurgical-grade silicon
+
+ ┌───────────┐   ┌───────┐   ┌───────────────┐   ┌────────────────┐   ┌───────────┐   ┌──────────────┐
+ │ QUARTZITE │   │ CRUSH │   │ BLEND         │   │ ARC FURNACE    │   │ TAP       │   │ CAST + CRUSH │
+ │ SiO2 rock │──▶│ lumps │──▶│ + coal, coke, │──▶│ electric, 24/7 │──▶│ molten Si │──▶│ MG-Si 98-99% │
+ └───────────┘   └───────┘   └───────────────┘   └────────────────┘   └───────────┘   └──────────────┘
+                                  wood chips
+
+  (feed is plain quartzite, not the rare high-purity quartz; that goes to crucibles, see 8)
+
+# 2. Inside a submerged arc furnace
+
+                 ELECTRODE 1        ELECTRODE 2        ELECTRODE 3
+                      ║                  ║                  ║
+                      ║                  ║                  ║      ◀── CO + SiO fume leaves the top
+      ┌────────────────╨──────────────────╨──────────────────╨─────────┐   SiO re-oxidises to silica fume
+      │  CHARGE: quartzite lumps + carbon, sinking slowly              │
+      │                                                                │
+      │    SiO2 + 3C ──▶ SiC + 2CO         (upper, cooler charge)      │
+      │  ≈≈≈≈≈≈≈≈≈≈≈ ARC CAVITIES, above 1800 C ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈│
+      │    SiO2 + C ──▶ SiO(gas) + CO     SiC + SiO ──▶ 2Si + CO       │
+      │                                                                │
+      │  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ MOLTEN SILICON POOL ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓          │
+      └────────────────────────────────────────────────────────┬───────┘
+                                                               ▼  tap hole ──▶ ladle ──▶ casting bed
+
+  (3 electrodes on 3-phase AC; arcs burn in cavities under the burden, which is the resistor)
+
+# 3. The chemistry (overall vs what really happens)
+
+  overall      SiO2 + 2C ──▶ Si + 2CO
+  step 1       SiO2 + 3C ──▶ SiC + 2CO         makes silicon carbide in the cooler zone
+  step 2       SiO2 +  C ──▶ SiO + CO          makes SiO gas in the hot zone
+  step 3       SiC + SiO ──▶ 2Si + CO          textbook closing step, gives liquid Si
+
+# 4. By the numbers
+
+  temperature     > 1800 C in the arc zone
+  electricity     11 to 13 MWh per tonne of silicon (one patent example: 11.2 MWh/t)
+  trend           bigger furnaces + better control keep pushing MWh/t down
+  output          98-99% pure Si, about 2N; roughly 10,000 ppm impurities
+
+# 5. Who makes it: silicon metal output 2025e, thousand tonnes Si (USGS)
+
+  China        ██████████████████████████████████████████████████ 4,000
+  Brazil       ██ 180
+  Norway       ██ 130
+  France       █ 68
+  Australia    █ 47
+  Russia       █ 35
+  Canada       █ 34
+  Iceland      █ 16
+  Germany      █ 13
+  South Africa █ 10
+  Other        █ 46
+  World total  4,600   (China about 87%; incl. ferrosilicon, almost 80% of all silicon materials)
+
+# 6. Price: US silicon metal, cents per pound (USGS / S&P Platts)
+
+  2021   ████████████████████████████ 220
+  2022   █████████████████████████████████████████████ 362
+  2023   ██████████████████████ 180
+  2024   █████████████████████ 170
+  2025e  ████████████████ 130
+  (2025: oversupply, weak demand; China prices lowest since Nov 2016 in April)
+
+# 7. Purity ladder: how far from sand to chip
+
+  grade                purity        impurities    log scale of impurities
+  metallurgical (this) 98-99%  (2N)      ~10,000 ppm   ████████████████████████████████████████
+  solar                99.9999% (6N)     ~1 ppm        ████████████████████
+  electronic           99.9999999% (9N)  ~1 ppb        █████
+  (POLYSILICON, the next node, does the 7 orders of magnitude of cleaning)
+
+# 8. Chokepoint: high-purity quartz for crucibles
+
+  Spruce Pine, North Carolina: est. 70-90% of commercial high-purity quartz (HPQ).
+  Mines: Sibelco and The Quartz Corp (Imerys / Norsk Mineral JV). Crucibles used in MELT + PULL;
+  last hundreds of hours, so an outage (Hurricane Helene, 2024) shakes wafer supply.
+
+# 9. Market context
+
+  US silicon metal imports  117 kt (2024) ──▶ 180 kt (2025e), tariff + export-curb worries
+  China #553 grade          about 10,500-10,700 yuan per tonne in Feb-Mar 2025 (SMM)
+  Policy                    silicon added to the US critical minerals list, Nov 2025
+  Listed names              Ferroglobe (GSM), Elkem (ELK.OL); Sibelco + Quartz Corp are private
+
+# Sources
+
+  [1] USGS Mineral Commodity Summaries 2026, Silicon: pubs.usgs.gov/periodicals/mcs2026/mcs2026-silicon.pdf
+      (production, price, imports, critical-minerals note, China share)
+  [2] Energy + reaction steps: US patent 12157671, hrcak.srce.hr/347941 (step 3 = textbook)
+  [3] Spruce Pine HPQ: konvoy.beehiiv.com/p/semiconductor-s-reliance-on-north-carolina
+  [4] China #553 price: news.metal.com/newscontent/103207609 (SMM Silicon Daily Review)
+  [5] Grades and purity: en.wikichip.org/wiki/metallurgical-grade-silicon

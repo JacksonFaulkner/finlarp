@@ -1,0 +1,190 @@
+== PEB
+# Acid does the cutting
+After exposure the wafer holds only a latent image of photoacid. The PEB hot plate (90-150 C for 30-120 s, SPIE range; 130 C in a t-butyl ester resist patent) lets each acid cut many protecting groups and come back out. That is chemical amplification: a patent reports catalytic chain lengths up to several hundred reaction events per acid. It is what makes resists sensitive enough for EUV photons.
+
+# Too short, too long
+Too short or too cool and deprotection is weak. Too long or too hot and the acid diffuses, blurring and roughening lines. One measured study (SPIE 10809) fitted D = about 25 nm2/s for a commercial polymer CAR and found linewidth versus bake time non-linear. Other work reports acid diffusion lengths from about 5-8 nm up to tens of nm depending on resist and method, so no single number is safe. Bake plate temperature uniformity directly sets line width uniformity (module spec, textbook).
+
+# Faster baking
+An ORNL-linked study of laser PEB in milliseconds reports acid diffusivity 100-1000x lower than hot-plate extrapolations and under half the EUV dose. It is a research result, not production. EUV exposure happens in vacuum, which can dry the resist and weaken the later bake reaction (reported), so bake control is tighter than on ArF.
+
+# Sources
+SPIE 10809, 108090B doi 10.1117/12.2502226
+https://impact.ornl.gov/en/publications/addressing-challenges-in-lithography-using-sub-millisecond-post-e
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/5071730
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6689529
+
+== DEVELOP
+# Dissolving the exposed part
+In a positive-tone CAR the deprotected polymer carries carboxylic acid groups that turn to carboxylate in aqueous base and dissolve; the protected parts stay. The standard developer is 2.38 wt% TMAH, tetramethylammonium hydroxide (about 0.26 mol/L, computed from 23.8 g/L over 91.15 g/mol). The same 2.38 wt% TMAH is also used for a negative-tone EUV resist, per the page.
+
+# Swelling and collapse
+The developer also swells the resist. One study reports swelling by TMA ions and water is a very important factor for pattern collapse. Large AI dies (near reticle limit, 800 mm2+) have more places to fail, so any develop defect density hits yield hard.
+
+# On the track
+Develop runs on the coater/developer track tied to the scanner. Tokyo Electron (8035.T) leads and Screen (7735.T) is the only other major supplier; together about 88% of the market (aggregator estimate). Track throughput must match ASML scanner output. EUV needs tight defect control because stochastic defects (missing contacts, bridges) set yield. Metal-oxide and dry-develop resists are under work for High-NA.
+
+# Sources
+https://www.giiresearch.com/report/mell2117153-euv-photoresist-supplier-shares-high-na-transition.html
+https://techinsights.com/ja/node/61870
+https://www.fujifilm.com/ie/en/business/semiconductor-materials/photoresist-ancillaries/other-developer
+
+== RINSE
+# Why thin lines fall over
+After develop, a deionised water rinse and spin dry remove dissolved resist and developer. Tall thin lines can collapse here: as the meniscus recedes, the capillary force of the rinse liquid pulls adjacent lines together. Sources give the pressure as P = 2 x gamma x cos(theta) / S, with gamma the surface tension, theta the contact angle and S the space width. Taller lines and narrower spaces raise the risk.
+
+# Rinse chemistry fixes
+Fluorosurfactants at 0.1% and 0.01% in water raised the critical aspect ratio of collapse by about 20-30% (from 2.5 to 3.2) in one study. An SPIE study found a rinse with low surface tension and low affinity to resist showed significant collapse mitigation at 28 nm pitch. A solvent with low surface tension also tends to have a small contact angle, which raises cos(theta), so simple solvent swaps have limits. A patent describes point-of-use blending of rinse solutions for EUV processing.
+
+# Aspect ratio at High-NA
+Thinner resists at High-NA lower the aspect ratio, which helps collapse but hurts photon capture. Lam claims a process without wet develop avoids capillary collapse altogether (company claim, not independently verified here), which is one reason dry resist is being tried.
+
+# Sources
+https://spiedigitallibrary.org/conference-proceedings-of-spie/12292/122921O/Study-on-rinse-material-for-pattern-collapse-mitigation-in-EUV/10.1117/12.2643712.full
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12393121
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12638773
+https://euvlsymposium.lbl.gov/pdf/2011/pres/Dario%20Goldfarb.pdf
+
+== TO ETCH
+# The resist is a stencil
+The developed resist is a temporary stencil: etch transfers it into the layer below, then the resist is stripped. Every nanometre of line-edge roughness or resist height lost in develop carries into the final transistor or metal line. Raising CAR dose also thins the film after develop, so there is less resist left for etch to use as a mask (page, simulation and textbook). Most EUV layers use a thin hard mask beneath the resist to survive etch (textbook).
+
+# Defects feed back
+Defects found here come from every upstream step: stochastic bridges and missing contacts, mask defects, collapse and contamination. Defect inspection happens after develop and after etch, so yield learning loops between lithography, metrology and etch teams (textbook).
+
+# Pull-through
+Litho cluster demand (ASML plus TEL tracks) is paired with etch and inspection demand: each EUV layer pulls through coat, develop, etch and metrology spending (textbook).
+
+# Sources
+https://frederickchen.substack.com/p/edge-roughness-differences-among
+SPIE 10809, 108090B
+
+== COOL
+# Stopping the reaction
+The cool plate takes the wafer from bake temperature back to room temperature quickly and uniformly, before develop. Acid diffusion continues while hot, so the cool step is part of the bake time budget. Modules therefore control the time between bake and cool precisely (textbook).
+
+# Time adds blur
+Using the page's blur formula sigma = sqrt(2 x D x t) with D = 25 nm2/s (one fitted value), 10 s gives 22 nm, 30 s gives 39 nm, 60 s gives 55 nm and 120 s gives 77 nm (computed). The cooling profile therefore contributes to blur. These blur lengths exceed EUV critical dimensions, so real resists must be tuned: this is a rough illustration, not a production number.
+
+# Uniformity and speed
+Temperature uniformity also sets the develop rate, since TMAH dissolution rate is temperature-dependent (textbook). Track vendors compete on bake and cool uniformity and throughput: a few tenths of a degree or a few seconds shifts critical dimension. If the bake could be made nearly instantaneous, as in the laser PEB study, the cool step would matter less.
+
+# Sources
+https://impact.ornl.gov/en/publications/addressing-challenges-in-lithography-using-sub-millisecond-post-e
+SPIE 10809, 108090B
+
+== QUENCHER
+# The brake on acid
+A quencher is a weak base in the resist that neutralises stray acid. It shortens the acid's effective reach, sharpens the boundary between exposed and unexposed areas, and stops acid migrating into the unexposed region (textbook). It costs sensitivity: neutralised acid does not cut protecting groups, so more dose is needed.
+
+# The CAR trade-off
+This is the core CAR trade-off: too little blur and dose goes up; too much and resolution and edge roughness suffer. Chemical stochastics research identifies unevenly distributed resist components (including PAG and quencher) and uneven acid diffusion during PEB as separate causes of printing defects, in addition to photon shot noise.
+
+# Metal-oxide contrast
+Metal-oxide resists absorb about 3x more EUV but have no acid-blur smoothing, so edges stay rough, per a simulation study cited on the page. That makes quencher and PAG distribution one of the main targets of resist chemistry at JSR/Inpria, TOK, Shin-Etsu and Sumitomo Chemical (textbook, not sourced here).
+
+# Sources
+https://www.doi.org/10.1117/12.2515926
+https://m.researching.cn/articles/OJ986eccd204c4a168
+https://frederickchen.substack.com/p/edge-roughness-differences-among
+
+== TMAH dissolves
+# What TMAH is
+TMAH, (CH3)4N+ OH-, is a strong organic base used because it contains no metal ions that could contaminate transistors (textbook). Standard use is 2.38 wt% aqueous. Vendors offer metal-ion-containing and metal-ion-free grades; FUJIFILM lists an ultra-high-purity grade for advanced chips.
+
+# A small, conflicting market
+Market numbers conflict, which the page flags. One report quotes USD 1.16B in 2025 rising to 1.98B by 2032; another summary of the same listing gives roughly USD 350-700 million for 2025, and others give USD 1.8B. Treat as low reliability.
+
+# Who supplies it
+Named producers: Merck KGaA (MRK.DE), BASF (BAS.DE), Tokuyama and Mitsubishi Gas Chemical (per the page lists), plus SACHEM. Tokuyama's Chinese subsidiary has about 13,000 tons per year capacity. Purity is the chokepoint; TMAH waste is an environmental rule risk (textbook). Developer is a tiny cost per wafer but a single bad lot can scrap many wafers.
+
+# Sources
+https://www.researchandmarkets.com/reports/6100444/tetramethylammonium-hydroxide-tmah-global
+https://www.fujifilm.com/ie/en/business/semiconductor-materials/photoresist-ancillaries/other-developer
+
+== Gaussian blur
+# The blur formula
+sigma = sqrt(2 x D x t) with D = 25 nm2/s from one EUV study of a commercial polymer CAR (SPIE 10809). The study itself found linewidth versus bake time non-linear, so the Gaussian model is rough. The page warns it is one D at one temperature, not any production resist.
+
+# Worked values
+Worked values on the page: 22 nm at 10 s, 39 nm at 30 s, 55 nm at 60 s, 77 nm at 120 s. Those blur lengths exceed the 8-13 nm critical dimensions in EUV, which shows real resists must be tuned (quencher, lower temperature, lower diffusivity polymers) rather than read from this formula.
+
+# If baking were instant
+The laser PEB study reports acid diffusivity 100-1000x lower than hot-plate extrapolations. At D = 0.025-0.25 nm2/s, sigma over 1 s would be only 0.2-0.7 nm (computed here by extending the page's number). Fast bakes could decouple sensitivity from blur. Any process that cuts blur without raising dose relaxes the stochastic constraint.
+
+# Sources
+SPIE 10809, 108090B doi 10.1117/12.2502226
+https://impact.ornl.gov/en/publications/addressing-challenges-in-lithography-using-sub-millisecond-post-e
+
+== HOT PLATE
+# The bake module
+The PEB module is a precisely temperature-controlled plate with a small proximity gap, so the wafer sits just above the plate instead of touching it (page). Typical settings are 90-150 C for 30-120 s. Uniformity across a 300 mm wafer is a key spec because bake temperature shifts critical dimension through acid diffusion (textbook).
+
+# Who builds it
+These modules live inside the track from Tokyo Electron (CLEAN TRACK) or SCREEN. The page cites TrendForce for TEL at reportedly about 100% of EUV tracks, and aggregators for TEL+SCREEN at about 88-91% of coater/developer sales. The TEL LITHIUS Pro Z is marketed as a 300 mm coater/developer for 10 nm and beyond with EUV process flexibility; no independent share figure was found.
+
+# Pace of the scanner
+TEL's tracks must keep pace with 220 wafers per hour scanners. An alternative is the millisecond laser bake: an ORNL-linked study reports it could cut EUV dose by more than half, but production use is unproven.
+
+# Sources
+https://www.trendforce.com/news/?p=46933
+https://www.reportprime.com/coaters-and-developers-r3845
+https://moov.co/marketplace/coaters-developers/tel-tokyo-electron/tel-tokyo-electronlithius-pro-z
+
+== CHUCK
+# Develop module hardware
+In the develop module the wafer sits on a vacuum chuck and spins slowly while a nozzle dispenses TMAH as a puddle or spray; a cup and drain collect effluent (page). The challenge is uniform dissolution: concentration, temperature and contact time must be identical across the wafer, or critical dimension varies from centre to edge (textbook).
+
+# Uniform dissolution
+Concentration, temperature and contact time must be identical across the wafer, or critical dimension varies from centre to edge (textbook). Defects arise here from bubbles, particles, residue (scum) and watermarks from drying (textbook).
+
+# Pull-through for TEL
+All EUV volume flows through these modules, so TEL (8035.T) earns a pull-through on every scanner ASML ships. TEL and SCREEN supply almost all coater/developer tools (aggregators: 88-91%), and TEL is reportedly near 100% of EUV tracks (TrendForce). After develop, rinse chemistry matters for collapse: fluorosurfactants raised the critical aspect ratio of collapse by about 20-30% in one study.
+
+# Sources
+https://www.trendforce.com/news/?p=46933
+https://spiedigitallibrary.org/conference-proceedings-of-spie/12292/122921O/Study-on-rinse-material-for-pattern-collapse-mitigation-in-EUV/10.1117/12.2643712.full
+
+== Metal-oxide resists
+# More photons, rougher edges
+Metal-oxide resists (MOR) absorb about 3x more EUV than chemically amplified resists, so they capture more photons per nm of film (page). But they have no acid-blur smoothing, so edges stay rough, and strong top absorption can leave an undercut profile (simulation study cited on the page).
+
+# Stochastics at High-NA
+Raising CAR dose is no free fix: it thins the film after develop. Stochastic review: reports show a strong trade-off between resist sensitivity and defectivity, and a Monte Carlo study finds defect probability rises exponentially with decreasing feature size. For High-NA, thinner resists capture fewer photons, potentially worsening roughness.
+
+# Suppliers and the licence deal
+Lam Research and JSR/Inpria signed a cross-licence in September 2025 (page, JSR press release), and JSR/Inpria is the leading MOR supplier (textbook). Other resist makers: TOK, Shin-Etsu, Sumitomo Chemical (textbook, not sourced here). Resist choice is the new battleground at High-NA, where stochastics limit yield.
+
+# Sources
+https://frederickchen.substack.com/p/edge-roughness-differences-among
+https://www.jsr.co.jp/jsr_e/news/2025/20250916.html
+https://semiengineering.com/new-challenges-emerge-with-high-na-euv
+
+== Lam DRY RESIST
+# What dry resist is
+Lam Research's Aether deposits and develops resist without wet chemistry. Lam claims 5-10x less chemicals than wet resist processes (company claim, per the page). In January 2025 an unnamed leading memory maker adopted it for advanced DRAM, per Storage Newsletter.
+
+# Claimed benefits
+Benefits claimed: no wet develop means no capillary pattern collapse (reasoned from the rinse mechanism, not verified here), less TMAH waste, and a thin well-controlled film for High-NA depth of focus. Open questions: how the metal-containing resist performs on stochastics at scale.
+
+# Who gains, who loses
+LRCX gains a new EUV-adjacent revenue line, while TEL and the chemical makers (TMAH suppliers) face share risk over time if adoption widens beyond one memory customer. If develop moves into a Lam dry tool, the track loses that module (reasoning, not sourced). Lam and JSR/Inpria signed a cross-licence in September 2025 (JSR news, 16 Sept 2025).
+
+# Sources
+https://www.storagenewsletter.com/2025/02/04/lam-research-euv-dry-photoresist-technology-adopted-by-leading-memory-manufacturer
+https://www.jsr.co.jp/jsr_e/news/2025/20250916.html
+
+== Chokepoints
+# Tracks and chemicals
+Tokyo Electron (8035.T) CLEAN TRACK reportedly makes about 100% of EUV tracks (TrendForce); with SCREEN (7735.T) the two hold about 88-91% of coater/developer sales (aggregator estimates). Developer chemicals come from Merck KGaA, BASF, Tokuyama, Mitsubishi Gas Chemical and SACHEM; FUJIFILM sells 2.38 wt% grades including ultra-high-purity.
+
+# Risks
+Risks from the page: stochastic defects limiting High-NA yield, resist cost, and PFAS and TMAH waste rules (textbook). Pattern-collapse chemistry such as fluorosurfactants intersects with PFAS regulation (reasoning, not sourced). TMAH capacity expansion is in China as well, e.g. Tokuyama's Zhejiang subsidiary at about 13,000 tons per year.
+
+# One cluster
+Japan-heavy supply of resists, tracks and chemicals means a geopolitical or disaster shock hits the same cluster that ASML's scanners depend on.
+
+# Sources
+https://www.trendforce.com/news/?p=46933
+https://www.reportprime.com/coaters-and-developers-r3845
+https://www.fujifilm.com/ie/en/business/semiconductor-materials/photoresist-ancillaries/other-developer

@@ -1,0 +1,206 @@
+== SOURCE
+# Making ions
+The ion source is an arc chamber where a hot filament (or RF) strikes a plasma in a low-pressure gas or vapour. Collisions in the plasma strip electrons from the dopant-bearing molecules and make a mix of ions (textbook).
+
+# Which gas for which dopant
+Typical feeds are BF3 for boron, AsH3 for arsenic and PH3 for phosphorus. AsH3 and PH3 are toxic and handled under tight safety rules (textbook, unsourced).
+
+# Source sets throughput
+The source sets how much usable current the tool can produce, and therefore throughput. High-current implants need up to roughly 25-30 mA of beam, so source life, cleaning and plasma stability are central. Sources erode and coat with deposits, so they are a consumable and a maintenance interval (textbook). For SiC power devices, the heavy dopants and hot wafers add further source challenges, the niche Axcelis emphasises.
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+Axcelis, Ion Implantation in Silicon Technology: https://www.axcelis.com/wp-content/uploads/2019/02/
+textbook
+
+== EXTRACT
+# Pulling ions out
+Extraction electrodes pull the ions out of the arc chamber through a slit. A voltage of roughly kilovolts between the source and the extraction electrode gives the ions their first energy and forms the beam (page figure; textbook for the mechanism). The beam then travels into the analyser.
+
+# Space charge limit
+Extracting more current needs higher voltage and a wider slit, but space charge makes a dense low-energy beam blow itself apart (textbook). That is why high-current implanters at low energy (0.1 - 100 keV, doses 1e14 to 1e17 per cm2) use deceleration after extraction: extract at high energy for a tight beam, then slow it to the energy you want at the wafer.
+
+# Failure modes
+Arcing and glitches at the electrodes interrupt the beam and cause dose errors; deposits on the electrodes need cleaning. Each of these cuts tool uptime, which fabs weigh heavily when choosing between Applied Materials and Axcelis.
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+https://www.axcelis.com/wp-content/uploads/2019/02/
+textbook
+
+== MASS
+# Bending by mass
+The mass filter is the analyser magnet. The page gives the physics as r = m v / (q B): ions of the wrong mass-to-charge ratio bend with the wrong radius and hit a slit, so only the chosen species passes. A 90 degree magnet is shown.
+
+# Many species leave the source
+The source emits many species (BF2+, B+, BF3 fragments, and impurities such as ions from the chamber walls). Without mass selection you would implant the wrong element, or the wrong charge state, at the wrong energy, changing depth and device behaviour. Energy contamination, where neutralised ions skip the filter and arrive at a different energy, is a known issue handled by magnet design (textbook).
+
+# Why implant has no substitute
+The magnet is what makes implant a clean process: it can place essentially any element in silicon, including species with no good diffusion or deposition route. No film is left on the wafer, as the page notes. This flexibility, together with controlled dose, is why implant has no true technological substitute for many doping steps (textbook).
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+textbook
+
+== ACCEL
+# Energy sets depth
+The acceleration or deceleration column sets final ion energy. The page gives E = q V: each unit charge gains q times the accelerating voltage (textbook). Energy sets the projected range Rp, the depth of the dopant peak: higher energy puts the peak deeper. Multiply-charged ions can also reach higher effective energies from the same voltage (textbook).
+
+# Energy ranges by class
+Medium-current tools run roughly 3 - 500 keV (some to about 600), and high-energy tools 100 keV to 5 MeV (up to 10 MeV), per patents, Wikipedia and Axcelis. High-current tools sit at the low end, about 0.1 - 100 keV. The ranges are approximate; the sources say they are not strict.
+
+# Why Axcelis cares
+High-energy implant is where Axcelis emphasises its position, especially in silicon carbide and power devices, where heavy, deep dopants are needed because dopants barely diffuse in SiC at any temperature (textbook). Applied Materials' Varian lineage dominates overall unit sales (62.65% in a 2024 third-party estimate).
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9336992
+https://www.williamblair.com/News/ACLS-Initiation
+
+== SCAN +
+# Spreading the beam evenly
+Scan and tilt spread a narrow beam evenly over the whole wafer so the dose is uniform to a very tight tolerance. Either the beam is scanned electrically or magnetically, or the wafer is mechanically moved, and a parallelising lens makes every ion arrive at the same angle (page figure; textbook). The wafer is tilted and rotated.
+
+# Dose is current times time
+The page gives the dose as Q = (1/qA) x integral of I(t) dt: ions per cm2 as the time integral of beam current over the wafer area. A Faraday cup measures the current used in that integral. Uniformity errors become threshold-voltage and leakage spreads across the wafer, so uniformity and dose accuracy are core specs. The highest dose with economical throughput is about 1e16 per cm2, per Axcelis.
+
+# Tilt and shadowing
+Ions travelling down crystal planes channel unusually deep, producing a long tail in the profile. A small tilt (typically around 7 degrees, textbook) avoids channelling, but tilt creates shadowing next to tall features on modern 3D transistors, so angle control matters more at FinFET and GAA nodes (textbook).
+
+# Sources
+https://www.axcelis.com/wp-content/uploads/2019/02/
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9336992
+textbook
+
+== ANNEAL
+# Repair and activate
+Anneal is the repair-and-activate step that follows implant. The beam leaves vacancies and interstitials and amorphises the crystal near the surface; the dopant atoms sit in random places and are electrically inactive. Heating regrows the crystal and moves dopants onto lattice sites so they become electrically active.
+
+# Heat versus diffusion
+More heat activates more dopant but also diffuses it: transient enhanced diffusion pushes dopant deeper if the anneal is slow. So anneals keep getting shorter and hotter. Spike anneal ramps at least 75 C/s with about a 1 s soak for high activation and little diffusion. Millisecond anneals remove implant damage poorly and risk leakage.
+
+# Thermal budget
+Shrinking junctions on GAA and FinFET nodes leave no thermal budget. Suppliers of anneal tools differ from implant suppliers (textbook), so anneal is a separate investment angle from Applied and Axcelis.
+
+# Sources
+https://patents.google.com/patent/US6897131
+https://siliconsemiconductor.net/article/66798/
+
+== ANALYZER
+# A single-species beam
+The analyser is the 90 degree magnet that sorts ions by mass-to-charge ratio. Wrong masses strike the slit and stop, so the beam leaving it is a single species (page figure). A radius r = m v / (q B) means the field B can be tuned to pick boron versus arsenic versus phosphorus (textbook).
+
+# Resolution and vacuum
+The magnet and slit set the mass resolution; the beam line must be under vacuum throughout so ions do not collide with gas molecules and change charge state or energy (textbook). The page notes vacuum throughout so the beam hits nothing but the wafer.
+
+# Transmission and tool lineup
+The analyser, plus the acceleration column and scan lens, determines how much of the extracted current actually reaches the wafer, called transmission. Higher transmission means shorter implant time per wafer, the main throughput lever. Axcelis markets a three-tool Purion lineup against Applied's, and analysts argue Axcelis gives customers more process flexibility with separate high-current, medium-current and high-energy tools. Fabs typically run a mix tuned to their process (secondary sources).
+
+# Sources
+https://www.williamblair.com/News/ACLS-Initiation
+https://www.findmymoat.com/stocks/XNAS%3AACLS
+textbook
+
+== Faraday cup
+# Counting charge
+A Faraday cup is a metal cup that catches the beam and measures its current directly, since each ion carries known charge. Integrating the current over time and dividing by charge and wafer area gives the dose Q, the number of ions per cm2 that the page equation defines. This is the feedback loop that ends an implant when the target dose is reached.
+
+# Dose is the spec
+Dose is the controlling specification. Roughly, dose ranges from 1e10 to 1e13 per cm2 for high energy, 1e11 to 1e14 for medium current and 1e14 to 1e17 for high current. An error of a few percent shifts sheet resistance and threshold voltage (textbook), so accurate current measurement is a core engineering problem.
+
+# Failure modes
+Beam glitches interrupt current. Secondary electrons knocked out of the cup would falsify the reading, so they must be suppressed (textbook). Charge build-up on the wafer can damage thin gate oxides (textbook) and is handled by electron flood systems. The cup itself can be contaminated.
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9336992
+textbook
+
+== channeling
+# Open corridors in silicon
+Silicon is a crystal with open corridors between atomic planes. Ions that enter along those corridors scatter little and travel much deeper than the Gaussian-like profile predicts, producing a long tail of dopant that ruins shallow junctions.
+
+# Two fixes
+The page lists two fixes: tilt and rotate the wafer so the beam does not align with a crystal axis, or pre-amorphise the surface (for example with a heavy ion beam) so there is no crystal to channel along. Pre-amorphisation adds damage that must be repaired at anneal, and leftover end-of-range defects can cause leakage.
+
+# The normal profile
+The depth profile otherwise follows ion slowing by nuclear and electronic stopping: the peak sits at the projected range Rp; more energy moves Rp deeper, more dose makes the peak taller (page figure, textbook). A tail of boron beyond the intended junction depth adds leakage and short-channel effects in tiny transistors.
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+https://patents.google.com/patent/US6897131
+textbook
+
+== high current
+# Heavy dose, low energy
+High-current implanters deliver the heaviest doses at low energy: 0.1 - 100 keV, 1e14 - 1e17 ions per cm2, with beam currents up to about 25-30 mA. The highest dose with economical throughput is about 1e16 per cm2 (Axcelis). Per the page's usage table (textbook), they make source/drain and extension doping with B, As and P, which needs shallow, heavily doped regions.
+
+# The scaling pain
+This is the class most tied to transistor scaling. Shallow junctions need low energy, high dose and tight anneals, which is why decel and beam transport design matters. Space charge limits low-energy beam current, so productivity falls as junctions shrink (textbook).
+
+# Three classes
+Medium-current tools (3 - 500 keV, 1e11 - 1e14, around 1 uA - 5 mA) handle wells, channels, threshold adjust and halos. High-energy tools (100 keV - 5 MeV, 1e10 - 1e13) make deep wells for image sensors and power devices. Ranges are approximate from patents, Wikipedia and Axcelis and are not strict.
+
+# Sources
+https://en.wikipedia.org/wiki/Ion_implantation
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9336992
+https://www.axcelis.com/wp-content/uploads/2019/02/
+
+== Applied Mat.
+# Market share
+Applied Materials (AMAT) sold about 62.65% of ion implanters in 2024 in a third-party estimate (about 686 units per the same estimate; not a filing). Axcelis had 21.19%. The remaining 16.16% is arithmetic: 100 minus the two named shares.
+
+# Share over time
+Applied owns Varian Semiconductor, bought in 2011 when Varian held about 75% of the market, so share has slipped from that peak. One analyst piece had Applied at 62% in 2022, so share has been roughly stable recently. Treat unit and share figures as estimates.
+
+# Why it is not the stock driver
+Implant is a small slice of Applied's business, which is much bigger in deposition and selective removal, so implant is not the stock driver. But Applied is the incumbent for logic and memory implant, and its position is hard to dislodge because fabs qualify tools layer by layer (textbook). Applied's offering is described as a single tool against Axcelis's three-tool Purion suite. No current Applied SiC-specific implanter model was found.
+
+# Sources
+https://seekingalpha.com/article/4585639-applied-materials-worried-about-axcelis-core-implant-business
+https://www.williamblair.com/News/ACLS-Initiation
+https://www.findmymoat.com/stocks/XNAS%3AACLS
+
+== Axcelis
+# Almost pure implant
+Axcelis (ACLS) is the number two implanter maker with a 21.19% share of 2024 unit sales in a third-party estimate. Its Purion line is a three-tool suite covering high-current, medium-current and high-energy. Implant was 98.2% of FY2025 revenue (aggregator figure), so ACLS is an almost pure-play on implant.
+
+# The Veeco merger
+Axcelis agreed to merge with Veeco (VECO) in October 2025. Axcelis stockholders approved the deal on February 6, 2026. The latest filing found (10-Q for the quarter ended June 30, 2026) says the deal still needed final approval from China's SAMR, with completion expected in the second half of 2026. A UK review ended with a no-action letter and the Swedish condition was waived. Treat the status as pending unless a later filing says closed.
+
+# SiC position
+One analyst view puts Axcelis at roughly 70-80% of SiC implant; the Purion XE and EXE handle the high-energy needs of 150 and 200 mm SiC wafers. These figures come from analyst commentary and secondary sites and are not verified.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/0001113232/000110465926091999/acls-20260630x10q.htm
+https://www.streetinsider.com/PRNewswire/Axcelis+Stockholders+Approve+Merger+with+Veeco/25961598.html
+https://www.williamblair.com/News/ACLS-Initiation
+https://www.findmymoat.com/stocks/XNAS%3AACLS
+
+== SEN (Sumitomo Heavy 6302.T)
+# A 50/50 joint venture
+SEN is a 50/50 joint venture between Axcelis and Sumitomo Heavy Industries (6302.T). Per Axcelis's 2004 10-K it was the leader in Japan. It lets Axcelis sell and service implanters in the Japanese market through a local partner (textbook interpretation of the JV structure).
+
+# What is not confirmed
+The source is a 2004 filing, so the current ownership, scope and market share of SEN are not confirmed here. Search results did not return anything newer on SEN. Anyone using this for investment decisions should check the most recent Axcelis 10-K for the status of the SEN relationship.
+
+# Why Japan matters
+Japan, together with Korea and Taiwan, is a core market for chipmakers who buy implanters, and a local-partner structure can matter for qualification at Japanese fabs and for export-control compliance (textbook). The merger with Veeco may affect how the JV is presented, but no source was found stating that.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/1113232/000111323204000002/form10k.htm
+(weakly sourced)
+
+== laser anneal
+# Surface-only heating
+Laser anneal heats only the top thin layer of the wafer for a few microseconds, giving high dopant activation with almost no diffusion. The page's source describes pulses of 10-200 microseconds reaching up to about 1350 C (a vendor claim) and notes that adding laser after a spike anneal raised activation.
+
+# Shorter and hotter
+This is the end of the trend in the page's trade-off line: anneals get shorter and hotter (spike, then millisecond, then microsecond laser) to keep junctions shallow while activating more dopant. Spike anneal alone ramps at least 75 C/s with about 1 s soak. Millisecond anneals remove implant damage poorly and risk leakage.
+
+# Failure modes
+In GAA and FinFET structures, heat must not damage metal gates and contacts already built (textbook), which pushes toward surface-only heating. Failure modes: pattern-dependent heating (different films absorb light differently, textbook), and melt-related defects and leakage if damage is not fully healed. Anneal tool suppliers differ from implanter suppliers (textbook).
+
+# Sources
+https://patents.google.com/patent/US6897131
+https://siliconsemiconductor.net/article/66798/

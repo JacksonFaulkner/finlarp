@@ -31,7 +31,7 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 ## Data
 
 Pulled once into `~/.local/share/nvim/finlarp/`, then read locally. The
-universe is about 430 AI-exposed stocks (`data/ai_stocks.json`).
+universe is about 430 AI-exposed stocks (DuckDB `ai_universe`, seeded once from `data/ai_stocks_reviewed.json`).
 
 | Data | Source |
 |---|---|
@@ -84,10 +84,20 @@ Neovim, with lazy.nvim:
 {
   "JacksonFaulkner/finlarp",
   keys = {
-    { "<leader>sf", function() require("finlarp").pick_search() end, desc = "finlarp: search filings" },
-    { "<leader>sc", function() require("finlarp").pick_canslim() end, desc = "finlarp: CANSLIM" },
-    { "<leader>sd", function() require("finlarp").pick_dossier() end, desc = "finlarp: dossier" },
-    { "<leader>sw", function() require("finlarp").pick_universe() end, desc = "finlarp: universe" },
+    { "$", function() require("finlarp").show() end, desc = "finlarp: portfolio treemap" },
+    { "<leader>vww", function() require("finlarp").pick() end, desc = "finlarp: pick watchlist (fullscreen)" },
+    { "<leader>vwl", function() require("finlarp").pick("left") end, desc = "finlarp: pick watchlist (left half)" },
+    { "<leader>vwr", function() require("finlarp").pick("right") end, desc = "finlarp: pick watchlist (right half)" },
+    { "<leader>vu", function() require("finlarp").pick_universe() end, desc = "finlarp: AI universe bucket/sub/region picker" },
+    { "<leader>vf", function() require("finlarp").pick_search() end, desc = "finlarp: search SEC filings / earnings text" },
+    { "<leader>vo", function() require("finlarp").switch() end, desc = "finlarp: switch open dashboards" },
+    { "<leader>vc", function() require("finlarp").show_chart_current() end, desc = "finlarp: chart selected/focused symbol" },
+    { "<leader>vt", function() require("finlarp").pick_transactions() end, desc = "finlarp: search transaction history" },
+    { "<leader>vh", function() require("finlarp").show_portfolio_history() end, desc = "finlarp: daily % change history chart" },
+    { "<leader>vp", function() require("finlarp").show_portfolio_suite() end, desc = "finlarp: portfolio suite" },
+    { "<leader>vD", function() require("finlarp").show_diagrams() end, desc = "finlarp: diagrams" },
+    { "<leader>ve", function() require("finlarp").show_events() end, desc = "finlarp: catalyst calendar" },
+    { "<leader>vC", function() require("finlarp").pick_canslim() end, desc = "finlarp: CANSLIM scorecard picker" },
   },
 }
 ```

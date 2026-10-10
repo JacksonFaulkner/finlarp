@@ -1,0 +1,135 @@
+# 1. What happens: from tested wafer to bonded die
+
+ ┌────────────┐  ┌────────────┐  ┌─────────────┐  ┌───────────────┐  ┌───────┐  ┌──────────────┐
+ │ WAFER SORT │─▶│ WAFER MAP  │─▶│ DICE + TAPE │─▶│ PICK          │─▶│ PLACE │─▶│ BOND         │
+ │ probe dies │  │ good / bad │  │ saw / laser │  │ needle+collet │  │ align │  │ TCB / hybrid │
+ └────────────┘  └────────────┘  └─────────────┘  └───────────────┘  └───────┘  └──────────────┘
+
+  (only dies marked known-good are picked; bad ones stay on the tape and are scrapped)
+
+# 2. Mechanism: lifting one die off the dicing tape
+
+  ┌──────────────────────────────────────────────────────────────────────────────────┐
+  │               PICK-UP COLLET, holds die by vacuum                                │
+  │                       ┌─────────────┐ ▲ vacuum line                              │
+  │                       │   COLLET    │ arm swings die to the bonder               │
+  │                       └─────────────┘                                            │
+  │                              ▲          die lifted off tape, peeled from edge in │
+  │                         ┌─────────┐                                              │
+  │     ▓▓ neighbour dies ▓▓│DIE (KGD)│     ▓▓ neighbour dies ▓▓                     │
+  │                         └─────────┘                                              │
+  │   ──────────────────────────────────────────────────────────────dicing tape────  │
+  │                              │                                                   │
+  │                         EJECTOR NEEDLE pushes up                                 │
+  │   ════════════════════════════ chuck + vacuum ═════════════════════════════════  │
+  └──────────────────────────────────────────────────────────────────────────────────┘
+
+  Peel-off matters because dies are thinned: HBM DRAM dies are tens of um thick (textbook); a wrong
+  ejector stroke cracks them. Newer flows use a flip step so the bump side ends up facing down.
+
+# 3. Mechanism: three ways to join the die
+
+  (a) Thermocompression bonding (TCB) with non-conductive film, as in HBM stacks today
+
+  ┌─────────────────────────────────────────────────────────────────────────────────┐
+  │         ┌───────────────────────────────────────────┐                           │
+  │         │▓▓▓▓ BOND HEAD: heated, pressing down ▓▓▓▓▓│ ◀ heat + force            │
+  │         └───────────────────────────────────────────┘                           │
+  │               ┌───────────────────────────────┐                                 │
+  │               │        upper DRAM die         │                                 │
+  │               │     o   o   o   o   o   o     │ ◀ microbumps, solder caps       │
+  │               ├───────────────────────────────┤                                 │
+  │               │      ≈≈≈≈ NCF resin ≈≈≈≈      │ ◀ film melts, flows out         │
+  │               ├───────────────────────────────┤                                 │
+  │               │        lower DRAM die         │                                 │
+  │               │      TSV  ║   ║   ║   ║       │                                 │
+  │               └───────────────────────────────┘                                 │
+  │   ════════════════════════════ stage, also heated ═════════════════════════════ │
+  │                                                                                 │
+  └─────────────────────────────────────────────────────────────────────────────────┘
+
+  Solder bumps melt and wet the pads while the film squeezes out of the joint; then it cures. Each die
+  is bonded one at a time (a 12-high stack means 12 cycles), so throughput is the whole game.
+  (b) MR-MUF (SK hynix): dies tack-bonded with mass reflow, then a molded underfill is injected at once.
+  (c) Hybrid bonding: no bumps at all. Copper pads sit flush in oxide and bond directly:
+
+  ┌─────────────────────────────────────────────────────────────────────────────────┐
+  │   upper die   │ oxide ▓▓ Cu ▓▓ oxide ▓▓ Cu ▓▓ oxide │                           │
+  │   ──────────  ═══════ bonded interface ═══════════                              │
+  │   lower die   │ oxide ▓▓ Cu ▓▓ oxide ▓▓ Cu ▓▓ oxide │                           │
+  │   step 1      polish oxide flat (CMP), touch, bond at room temp (textbook)      │
+  │   step 2      anneal: Cu expands more than oxide, pads meet and fuse (textbook) │
+  └─────────────────────────────────────────────────────────────────────────────────┘
+
+# 4. Why only known-good die
+
+  Stack yield is a product. Illustration (arithmetic, not sourced): if each die in a 12-high stack is
+  99% good, 0.99^12 = 88.6% of stacks work; at 95% per die it falls to 0.95^12 = 54.0%. One bad die
+  also wastes the 11 good ones and the base die. Hence sort first, stack second, then re-test stacks.
+
+# 5. By the numbers
+
+  HBM stack height limit   JEDEC raised from 720 um to 775 um, so HBM4 keeps microbumps (Tom's)
+  bonding head             TCB for HBM today; SK hynix MR-MUF can reach 16-high on HBM3E (SK hynix)
+  hybrid status            SK hynix finished validating 12-high hybrid-bonded HBM (Apr 2026), then yield
+                           work
+  roadmap                  hybrid for HBM5 and stacks above 20 dies (SK hynix); Hanmi: hybrid tool for
+                           HBM6
+  hybrid bonder market     reported near $2B by 2028 (TrendForce headline, Oct 2025)
+  TC bonder deliveries     SEMES: nearly 100 TC bonders in a year (Chosun, via TrendForce)
+
+# 6. Bond pitch ladder, micrometres (smaller means more connections per mm2)
+
+  microbump (old) ████████████████████████████████████████ 40  historical
+  microbump (vol) █████████████████████████ 25  volume standard cited
+  microbump (new) ██████████ 10  latest memory
+  hybrid today    ██████ 6   leading edge
+  hybrid next     ████ 4.5 in development
+  hybrid after    ███ 3   in development
+  TSMC has asked partners for ~5 um class bumps; mass production est. 2H 2028 (TrendForce).
+
+# 7. Who needs it: HBM share, Q2 2025 (Counterpoint)
+
+  by shipments:
+  SK hynix  ████████████████████████████████████████ 62%
+  Micron    ██████████████ 21%
+  Samsung   ███████████ 17%  (was 41% a year earlier)
+  by revenue:
+  SK hynix  ████████████████████████████████ 50%  (58% in Q1)
+  Samsung   █████████████████████ 33%  (21% in Q1)
+  Micron    ████████████ 18%  (21% in Q1)
+
+# 8. Who makes the tools, market structure, risks
+
+  TC bonders    Hanmi Semiconductor (042700.KS) led SK hynix supply. Share claims conflict: ~65% in one
+                report, 90% in another (low quality). ASMPT (0522.HK) guides 35-40%. Also Hanwha
+                    Semitech,
+                SEMES (Samsung affiliate), Toray, Shinkawa.
+  Buyers        SK hynix (000660.KS), Samsung (005930.KS), Micron (MU).
+  Hybrid        Besi (BESI.AS) leads; ASMPT delivering to HBM customers; Hanwha, LG developing (LG by
+                2028).
+  Die handling  dicing and placement: Disco (6146.T), Kulicke and Soffa (KLIC) (textbook, no share
+                sourced)
+  Risks         hybrid delayed by yield and particle control; few bonder suppliers qualified;
+                the share numbers above are press estimates, no audited data found.
+
+# Sources
+
+  [1] HBM shipment + revenue share:
+      koreajoongangdaily.com/business/samsung-narrows-gap-with-no-1-sk-hynix-in-hbm-market-revenue-in-q2/
+      12859060
+      counterpointresearch.com/jp/insights/samsungs-q2-2025-memory-performance-disappoints-but-signals-
+          h2-recovery
+  [2] Hybrid vs microbump, HBM roadmap: trendforce.com/news/?p=56780
+  [3] SK hynix 12-high hybrid validation:
+      trendforce.com/news/2026/04/29/news-sk-hynix-reportedly-completes-12-high-hybrid-bonding-hbm-
+      validation-works-to-raise-yields-for-mass-production/
+  [4] Hybrid bonder market near $2B by 2028:
+      trendforce.com/news/2025/10/07/news-hybrid-bonder-equipment-market-reportedly-near-2b-by-2028-as-
+      korean-makers-race-to-next-gen-hbm-tools/
+  [5] TC bonder vendors:
+      techovedas.com/14b-investment-90-market-share-hanmi-semiconductor-leads-the-hbm-bonder-market/
+      view.asiae.co.kr/en/article/2025071513415370851
+      techinvestments.io/p/hbmdie-bonding-semicap-outlook
+  [6] Bump pitches: semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
+      tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined

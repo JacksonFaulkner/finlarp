@@ -30,7 +30,7 @@ local function start_reauth(decoded, retry, fail)
       return
     end
     run(
-      "py/py/sources/etrade.py",
+      "py/sources/etrade.py",
       { "auth_finish", decoded.request_token, decoded.request_token_secret, code },
       function(fok, fdata)
         if not fok then
@@ -49,7 +49,7 @@ end
 --- script is py/sources/etrade.py and the cached token expired, transparently
 --- drives the re-auth flow and retries the original call once it succeeds
 --- — callers never see an auth failure, just a slower first response.
---- @param script string e.g. "py/py/sources/etrade.py" or "py/py/sources/yahoo.py"
+--- @param script string e.g. "py/sources/etrade.py" or "py/sources/yahoo.py"
 --- @param args string[] extra CLI args, e.g. { "quote", "AAPL,MSFT" }
 --- @param callback fun(ok: boolean, data_or_err: any)
 run = function(script, args, callback)
@@ -87,7 +87,7 @@ end
 
 --- @param callback fun(ok: boolean, positions_or_err: any)
 function M.positions(callback)
-  run("py/py/sources/etrade.py", { "positions" }, function(ok, data)
+  run("py/sources/etrade.py", { "positions" }, function(ok, data)
     if ok then
       callback(true, data.positions)
     else
@@ -100,7 +100,7 @@ end
 --- last live `positions` pull. `callback` gets nil if nothing's cached yet.
 --- @param callback fun(ok: boolean, positions_or_err: any)
 function M.positions_cached(callback)
-  run("py/py/sources/etrade.py", { "positions_cached" }, function(ok, data)
+  run("py/sources/etrade.py", { "positions_cached" }, function(ok, data)
     if ok then
       callback(true, data.positions)
     else
@@ -111,7 +111,7 @@ end
 
 --- @param callback fun(ok: boolean, orders_or_err: any)
 function M.orders(callback)
-  run("py/py/sources/etrade.py", { "orders" }, function(ok, data)
+  run("py/sources/etrade.py", { "orders" }, function(ok, data)
     if ok then
       callback(true, data.orders)
     else
@@ -122,7 +122,7 @@ end
 
 --- @param callback fun(ok: boolean, transactions_or_err: any)
 function M.transactions(callback)
-  run("py/py/sources/etrade.py", { "transactions" }, function(ok, data)
+  run("py/sources/etrade.py", { "transactions" }, function(ok, data)
     if ok then
       callback(true, data.transactions)
     else
@@ -134,7 +134,7 @@ end
 --- Local-only read (no network/OAuth) from the DuckDB cache — instant.
 --- @param callback fun(ok: boolean, transactions_or_err: any)
 function M.transactions_cached(callback)
-  run("py/py/sources/etrade.py", { "transactions_cached" }, function(ok, data)
+  run("py/sources/etrade.py", { "transactions_cached" }, function(ok, data)
     if ok then
       callback(true, data.transactions)
     else
@@ -146,7 +146,7 @@ end
 --- @param symbols string[] e.g. { "AAPL", "MSFT" }
 --- @param callback fun(ok: boolean, quotes_or_err: any)
 function M.quote(symbols, callback)
-  run("py/py/sources/etrade.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
+  run("py/sources/etrade.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
     if ok then
       callback(true, data.quotes)
     else
@@ -158,7 +158,7 @@ end
 --- @param symbols string[] e.g. { "NVDA", "AMD" }
 --- @param callback fun(ok: boolean, quotes_or_err: any)
 function M.quote_yahoo(symbols, callback)
-  run("py/py/sources/yahoo.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
+  run("py/sources/yahoo.py", { "quote", table.concat(symbols, ",") }, function(ok, data)
     if ok then
       callback(true, data.quotes)
     else
@@ -182,7 +182,7 @@ function M.screen_yahoo(filters, callback)
   if filters.top then
     vim.list_extend(args, { "--top", tostring(filters.top) })
   end
-  run("py/py/sources/yahoo.py", args, function(ok, data)
+  run("py/sources/yahoo.py", args, function(ok, data)
     if ok then
       callback(true, data.quotes)
     else
@@ -193,7 +193,7 @@ end
 
 --- @param callback fun(ok: boolean, groups_or_err: any) groups: { { level, category, parent, count } }
 function M.universe_groups(callback)
-  run("py/py/sources/yahoo.py", { "universe", "groups" }, function(ok, data)
+  run("py/sources/yahoo.py", { "universe", "groups" }, function(ok, data)
     if ok then
       callback(true, data.groups)
     else
@@ -206,7 +206,7 @@ end
 --- @param category string
 --- @param callback fun(ok: boolean, members_or_err: any) members: { { ticker, name, weight } }
 function M.universe_members(level, category, callback)
-  run("py/py/sources/yahoo.py", { "universe", "members", level, category }, function(ok, data)
+  run("py/sources/yahoo.py", { "universe", "members", level, category }, function(ok, data)
     if ok then
       callback(true, data.members)
     else
@@ -218,7 +218,7 @@ end
 --- @param symbol string e.g. "NVDA"
 --- @param callback fun(ok: boolean, points_or_err: any) points: { { t, close }, ... }
 function M.history_yahoo(symbol, callback)
-  run("py/py/sources/yahoo.py", { "history", symbol }, function(ok, data)
+  run("py/sources/yahoo.py", { "history", symbol }, function(ok, data)
     if ok then
       callback(true, data.points)
     else
@@ -630,7 +630,7 @@ function M.refresh_portfolio(report, force)
     suite_refresh.report(state, msg, pulled)
   end
 
-  run("py/py/sources/etrade.py", { "status" }, function(ok, age)
+  run("py/sources/etrade.py", { "status" }, function(ok, age)
     age = ok and age or {}
     local need_pos = force or not age.positions_age or age.positions_age > POSITIONS_FRESH_S
     local need_txn = force or not age.transactions_age or age.transactions_age > TRANSACTIONS_FRESH_S
@@ -667,7 +667,7 @@ function M.refresh_portfolio(report, force)
             local sym = symbols[next_i]
             next_i = next_i + 1
             active = active + 1
-            run("py/py/sources/yahoo.py", {
+            run("py/sources/yahoo.py", {
               "history",
               sym,
               "--range",
@@ -763,9 +763,32 @@ function M.pick_canslim()
   M.show_canslim()
 end
 
+--- Diagrams viewer TUI.
+function M.show_diagrams(name)
+  require("finlarp.ui.tui").open_screen("diagrams", name, { title = " diagrams " })
+end
+
+--- Catalyst calendar TUI (month / week / day).
+--- @param arg string|nil "month" | "week" | "day" and/or a YYYY-MM-DD start date
+function M.show_events(arg)
+  require("finlarp.ui.tui").open_screen("events", arg, { title = " events " })
+end
+
 --- Ticker picker -> research dossier.
 function M.pick_dossier()
   M.show_dossier()
+end
+
+--- Note capture + background answer (see ui/note.lua). Map to <leader>vn in your config:
+---   vim.keymap.set("n", "<leader>vn", "<cmd>FinlarpNote<cr>")
+---   vim.keymap.set("x", "<leader>vn", ":FinlarpNote<cr>")
+function M.setup_notes()
+  require("finlarp.ui.note").setup()
+end
+
+--- fzf viewer over every note asked; <CR> reopens the answering Claude chat.
+function M.notes()
+  require("finlarp.ui.notes").open()
 end
 
 --- The finlarp home menu.

@@ -1,0 +1,121 @@
+# 1. What happens: the last gate before shipping
+
+ ┌───────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+ │ LOAD          │─▶│ ATE TEST     │─▶│ BURN-IN      │─▶│ SYSTEM TEST │─▶│ SPEED BIN   │─▶│ MARK + SHIP │
+ │ handler picks │  │ functional,  │  │ heat + volts │  │ run real    │  │ sort by     │  │ tray / tape │
+ │ packaged part │  │ speed, power │  │ kill infants │  │ workload    │  │ fmax, power │  │ to server   │
+ └───────────────┘  └──────────────┘  └──────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
+
+  (order varies by product; burn-in and system-level test are used where a field failure is very costly)
+
+# 2. Mechanism: automatic test equipment (ATE) for one package
+
+  ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+  │     ┌─────────────────────────────────────────┐                                         │
+  │     │  HANDLER: picks part, sorts by result   │   also presses part and sets hot / cold │
+  │     └─────────────────────────────────────────┘                                         │
+  │                          ▼ press + temperature                                          │
+  │               ┌─────────────────────┐                                                   │
+  │               │DEVICE (packaged GPU)│                                                   │
+  │               └─────────────────────┘                                                   │
+  │             ┌─────────────────────────┐                                                 │
+  │             │ SOCKET: pins touch BGA  │           thousands of contacts, wears out      │
+  │             └─────────────────────────┘                                                 │
+  │       ┌─────────────────────────────────────┐                                           │
+  │       │ LOAD BOARD (custom PCB per product) │     routes tester channels to socket      │
+  │       └─────────────────────────────────────┘                                           │
+  │           ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║                       │
+  │     ┌─────────────────────────────────────────┐                                         │
+  │     │     TEST HEAD: pattern generators,      │   many channels, big current rails      │
+  │     │       power supplies, instruments       │                                         │
+  │     └─────────────────────────────────────────┘                                         │
+  │                                                                                         │
+  └─────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Test types: continuity/leakage first, scan patterns for logic defects, memory BIST for HBM links,
+  serial loopback (NVLink, PCIe), power and thermal behaviour. All textbook; no counts sourced
+
+# 3. Burn-in and system-level test (SLT)
+
+  Burn-in    hold parts hot at raised voltage for hours so weak parts fail now, not in a data centre.
+             (temperature, hours: product specific, none sourced). Failures follow a bathtub curve:
+
+   failure    infant mortality              useful life                      wear-out
+   rate       █                                                                    █
+     high     ██                                                                  ██
+              ███                                                                ███
+     low      ████▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄████
+              ──────────────────────────────────────────────────────────────▶ time
+   (burn-in uses heat and voltage to age the part past the infant zone; textbook, shape only)
+
+  SLT       plug the part into a board like the real one and boot software or run a stress app. Catches
+            what ATE patterns miss: interactions between blocks, power droop, firmware. It is slow, so it
+            needs many parallel slots. Teradyne launched Titan HP for SLT in AI and cloud (Oct 2025).
+  Why bother: a part that dies after install costs a rack swap, not just a chip, so AI buyers pay for
+      screening.
+  Acceleration is by the Arrhenius model: failure rate rises exponentially with temperature (textbook).
+  Wafer-level burn-in exists (Aehr Test Systems, AEHR); no figures sourced for burn-in here.
+
+# 4. Speed binning: one design, many products
+
+  Every die is a little different. Test measures the highest stable clock and the power at that clock:
+
+   count of parts
+        ▲            ┌── bell curve of fmax across a wafer lot
+        │          ▄▄▄▄▄▄
+        │       ▄▄██████████▄▄
+        │    ▄▄████████████████▄▄
+        │ ▄▄████████████████████████▄▄
+        └─┴──────┴──────┴──────┴──────┴────▶ fmax / efficiency
+          SCRAP  LOW BIN  MID BIN  TOP BIN   (bins become different SKUs; salvage: fuse off bad blocks)
+
+  A lower bin is not scrap: the same wafer feeds a top-bin SKU and cheaper cut-down SKUs (textbook).
+  Large AI dies disable failed SMs or HBM channels and sell as a cut-down part (textbook practice).
+
+# 5. By the numbers
+
+  Teradyne Q4 2025           semiconductor test revenue $883M, about 81.5% of sales
+  Teradyne 2025              Semiconductor Test Group +19% YoY, SoC test +23% (networking + compute)
+  AI share of Teradyne rev   above 60% in Q4 2025; expected up to 70% in Q1 2026
+  Teradyne VIP compute       company believes ~50% share in 2025
+  test intensity             3-5x test time per die for leading AI silicon vs conventional (one source,
+                             unverified); another: reticle-limit die needs 2-3x patterns of a 7nm SoC
+  burn-in / SLT time         no sourced figure found; do not trust blog numbers
+
+# 6. SoC tester share (analyst estimates, definitions differ)
+
+  Advantest 2023  █████████████████████████████ ~50%  (older report)
+  Teradyne 2023   █████████████████ ~30%  (older report)
+  Advantest CY25  ██████████████████████████████████████ 66%  (up from 56%, one analysis)
+  Teradyne VIP    █████████████████████████████ ~50%  (VIP compute, own claim 2025)
+  Another source claims Teradyne holds 50-55% of SoC test; these do not reconcile. Treat as ranges.
+  Teradyne also says it gained share in HBM and DRAM final test in 2025 (memory test otherwise flat).
+
+# 7. Teradyne growth, 2025 (YoY %)
+
+  SoC test        ████████████████████████████████████████ 23%
+  Semi test group █████████████████████████████████ 19%
+
+# 8. Who makes it, market structure, risks
+
+  Testers      Advantest (6857.T) leads SoC test per analysts; Teradyne (TER) the other major vendor.
+  Handlers     Cohu (COHU); others not sourced here.
+  Burn-in      Aehr Test Systems (AEHR) in wafer-level burn-in.
+  Test houses  OSATs do much of the volume: KYEC (2449.TW) 2.2% and ChipMOS 1.7% of top-10 OSAT revenue,
+               Hana Micron 2.2% (TrendForce 2024). ASE (ASX), Amkor (AMKR) also test.
+  Risks        tester duopoly; test time grows with die size and chiplets, so tester, socket and SLT
+               capacity can gate output; share numbers conflict between sources.
+               Sockets and load boards are consumables (textbook), another quiet bottleneck.
+
+# Sources
+
+  [1] Teradyne Q4 2025 results:
+      nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead
+      allmind.ai/earnings/event/bt_TER_2025_Q4
+  [2] Advantest vs Teradyne share:
+      inpractise.com/articles/advantest-vs-teradyne-gpu-test-market-share-and-power-supply-advantage
+  [3] Test intensity: wing.vc/content/the-chip-testing-bottleneck
+  [4] Advantest share trend:
+      kr-asia.com/this-rising-japanese-chip-stock-has-a-close-correlation-with-nvidia
+  [5] OSAT shares: trendforce.com/presscenter/news/20250513-12577.html
+      evertiq.com/news/2025-05-23-chinese-firms-gain-ground-in-2024-top-10-osat-ranking

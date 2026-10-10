@@ -1,0 +1,236 @@
+== MG-Si
+# Why go through chlorides
+
+Metallurgical silicon is 98-99% pure, so the reactor stage must cut impurities by orders of magnitude. Only silicon reacts with HCl to make volatile chlorosilanes, while many metal impurities form chlorides with different boiling points, which distillation then separates (textbook chemistry). Boron and phosphorus are the stubborn ones because their chlorides boil near TCS.
+
+# Where the feed comes from
+
+Siemens-type production is described in patents as a chemical vapor deposition process in which trichlorosilane is heated in the presence of silicon rods. It makes large quantities of silicon tetrachloride (STC) as a by-product. The metal feed comes from the SAND page's arc furnaces; polysilicon makers either run their own silicon-metal supply or buy from smelters, with price set by power cost (textbook).
+
+# Sources
+
+(Sources: https://www.sglcarbon.com/en/markets-solutions/applications/polysilicon-production/ ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10632438)
+
+== Si + HCl
+# Trichlorosilane synthesis
+
+Ground metallurgical silicon is fluidised by HCl gas at about 300 C, forming trichlorosilane (TCS, SiHCl3) and hydrogen. The page cites Fraunhofer's practical mix, Si + 3.1HCl giving 0.9 SiHCl3 + 0.1 SiCl4 + 1.1 H2, so about 10% of the product is silicon tetrachloride. The reaction is exothermic, so the bed needs cooling (textbook).
+
+# TCS properties
+
+TCS is liquid at ordinary conditions and boils at about 31.8 C, which is why distillation works at the 30-60 C range quoted on the page. TCS is hazardous: it hydrolyses to HCl and is flammable. Fraunhofer's electricity breakdown gives TCS synthesis about 9 kWh per kg of the 60-70 kWh/kg total for solar grade in 2023.
+
+# Alternative: granules
+
+An alternative route in patents is fluidised-bed deposition of silicon granules, a continuous process with potential for large electrical energy savings. Hemlock holds patents on integrating it with Siemens reactors.
+
+# Sources
+
+(Sources: https://www.ise.fraunhofer.de/content/dam/ise/en/documents/publications/studies/25_en_ISE_Report_Analysis-of-the-Electricity-Consumption-for-the-Production-of-Electronic-Grade-Polysilicon.pdf ; https://patents.google.com/patent/US8609058 ; https://en.wikipedia.org/wiki/Trichlorosilane)
+
+== DISTILL
+# Boiling points
+
+Multi-stage columns separate TCS (boils at about 31.8 C) from STC (boils at about 57.7 C) and from chlorides of metals, boron and phosphorus, at the 30-60 C quoted on the page. Repeated stages push donor impurities down to the specs on the page.
+
+# Spec ladder
+
+Repeated stages push donors to the specs on the page: Special EG at or below 1.5e12 atoms per cm3 and base metals at or below 0.1 ppbw, versus 2.5e14 donors for solar grade, more than 100 times looser. Electronic grade needs more columns and slower throughput. It is only about 5% of volume yet needs purity near 11N.
+
+# Capacity
+
+Distillation columns, hyperpure piping and sampling are the quiet differentiator. Wacker says it is lifting hyperpure cleaning capacity by more than 50% at Burghausen with a new etching line that cost over 300 million euros, commissioned in July 2025. Bernreuter says 12N claims are not achieved for EG polysilicon.
+
+# Sources
+
+(Sources: https://www.wacker.com/cms/media/en/documents/pressrelease-pdf/pm2025/opening_etching_line_next.pdf ; https://evertiq.com/news/2025-07-22-wacker-commissions-300m-production-line-for-chip-grade-polysilicon ; https://en.wikipedia.org/wiki/Trichlorosilane ; https://en.wikipedia.org/wiki/Silicon_tetrachloride ; https://www.ise.fraunhofer.de/content/dam/ise/en/documents/publications/studies/25_en_ISE_Report_Analysis-of-the-Electricity-Consumption-for-the-Production-of-Electronic-Grade-Polysilicon.pdf ; https://bernreuter.com/files/data/newsroom/press-releases/2025-11-25-Bernreuter-Research-Top-Ten-Polysilicon-Makers-Nearly-All-Chinese.pdf)
+
+== BELL JAR
+# Deposition batch
+
+In the Siemens reactor, filament rods are usually joined into inverted U-shaped pairs with a bridge on top. The rods are held by electrodes in the base plate, and a bell jar mates with the base plate to form a batch reactor that can run under vacuum or positive pressure (patent descriptions). Filament rods are most often made from mono- or polycrystalline silicon.
+
+# Growth and power
+
+Batches are long because the diameter grows only by about 1.9 mm/h at most (page figure), from 20 mm to 150-180 mm. A batch time is not given in the sources used. Electricity is the largest line: the page cites 35-45 kWh/kg in the CVD step alone, with 70-85% of the heat recoverable.
+
+# After the batch
+
+After the batch, the reactor is cooled, the jar lifted, and the rods removed with the graphite stubs cut off (textbook).
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9845247 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10774443)
+
+== CRUSH
+# Crushing and etching
+
+Rods are broken into chunks, and the crushed pieces are acid-etched with HNO3 plus HF at room temperature, or alkaline-etched at 70-80 C, as the page states, to strip surface contamination from tools and handling. Packing is in clean bags in cleanroom conditions (textbook).
+
+# Popcorn grading
+
+Chunk quality is part of the spec. Popcorn, a porous fissured surface layer on large-diameter rods above about 150 mm, is tracked as a fraction of the product, and rod pieces with excessively deep popcorn must be downgraded (patent descriptions).
+
+# Etch capacity
+
+A recent patent covers methods for producing silicon fragments to tight size classes, the form a crystal-puller operator buys. Wacker's Etching Line Next at Burghausen is the 2025 capacity addition for exactly this step, and the company says first deliveries to chip customers had started by July 2025.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12172170 ; https://www.wacker.com/cms/media/en/documents/pressrelease-pdf/pm2025/opening_etching_line_next.pdf)
+
+== POLY
+# What the customer buys
+
+The product is chunk polysilicon of 9N or better for electronics (page), qualified lot by lot by wafer makers, often over years, so switching suppliers is slow. In the next step, MELT + PULL, it is melted in a quartz crucible and pulled as a single crystal.
+
+# Chunks vs granules
+
+Granular silicon from fluidised-bed reactors is the other form: approximately spherical, free-flowing particles that are easier to handle mechanically than Siemens rods (patent description).
+
+# Demand
+
+Wacker attributes rising semiconductor polysilicon demand to AI chips, data centers and digitalisation, and aims to double semiconductor sales by 2030 relative to 2024. These are the company's own statements.
+
+# Sources
+
+(Sources: https://www.chemeurope.com/en/news/1186732/wacker-commissions-new-production-line-for-semiconductor-grade-polysilicon-at-burghausen-site.html ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10632438)
+
+== WATER-COOLED STEEL BELL JAR
+# Why a cold wall
+
+The jar wall is cooled so that silicon deposits only on the hot rods. The rod surface is about 1100 C (page), so a low-temperature wall keeps decomposition off the steel and keeps metal from the jar out of the product (textbook). The tradeoff is heat loss: the rods radiate to the cold wall.
+
+# Heat recovery
+
+A large share of the 35-45 kWh/kg of CVD power is lost as heat. The page cites 70-85% of CVD heat as recoverable.
+
+# Popcorn causes
+
+Reactor pressure, gas flow and any dust inside matter: patent text says gas backup, extra vortices and overheated reaction gas cause popcorn growth and dust deposition, and blocked or asymmetric feed and offgas paths worsen it. Suppressing popcorn usually lengthens the process and reduces output.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9845247 ; https://www.ise.fraunhofer.de/content/dam/ise/en/documents/publications/studies/25_en_ISE_Report_Analysis-of-the-Electricity-Consumption-for-the-Production-of-Electronic-Grade-Polysilicon.pdf)
+
+== U-bridge
+# Rod pairs
+
+Two vertical rods are joined at the top by a horizontal bridge so current flows up one, across, and down the other. Filament rods are typically silicon (patent description). At the start a slim silicon rod has high resistance, so the system is first brought to conduction by high voltage or preheating (textbook), then runs at lower voltage and higher current as the rods thicken.
+
+# Failure risks
+
+Thick rods can fall, particularly at the bridge, which is a known yield loss in Siemens reactors, since a collapsed rod contaminates the batch with the jar floor (textbook). Rod spacing and symmetry affect gas flow and radiation exchange, so the layout is a core part of reactor design.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10774443 ; https://patents.justia.com/patent/9845247)
+
+== graphite chucks
+# Contacts
+
+Graphite chucks hold the rod base and carry current from the base-plate electrodes. SGL Carbon lists graphite components for polysilicon production as its application, and the page notes high-current power feeds pass through the base plate.
+
+# Contamination
+
+Carbon has to be hyperpure because the rod bottoms are cut off and any carbon or metal diffusion at the foot is a contamination path (textbook). Carbon in polysilicon is itself a spec item, though the limits were not found in the sources used.
+
+# Sources
+
+(Sources: https://www.sglcarbon.com/en/markets-solutions/applications/polysilicon-production/ ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10774443)
+
+== slim rod 20 mm
+# Growth to 150-180 mm
+
+Deposition starts on a 20 mm slim rod and grows up to 1.9 mm/h on the diameter to 150-180 mm (page). Electronic grade uses slower, uniform growth: steady H2:TCS ratio, low HCl, even temperature, so the rod stays smooth and dense. Solar grade pushes speed and tolerates rough surfaces.
+
+# Popcorn
+
+Popcorn is the failure mode: a porous, fissured surface layer, common above 150 mm rods, hurts crystallisation behaviour of the polysilicon downstream and deep popcorn pieces must be downgraded. Slower growth reduces popcorn but cuts output, so EG plants accept lower throughput per jar.
+
+# EG is not solar
+
+This is the physical reason EG capacity cannot simply be swapped from Chinese solar plants: the process regime differs.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9845247 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10562779)
+
+== SiHCl3 + H2
+# Deposition and recycle
+
+Hydrogen reduces TCS on the 1000-1150 C rod surface (patents, page) to give silicon and 3 HCl. The page also gives the textbook side reaction 4SiHCl3 giving Si + 3SiCl4 + 2H2, which makes STC. Off-gas, HCl, H2, STC and unreacted TCS, is condensed and separated; H2 and HCl are recycled, and STC is sold for silicones and silica or hydrogenated back to TCS in modified Siemens routes (page).
+
+Conversion per pass is modest in practice, so recycle loops and heat integration carry the economics. The Fraunhofer ISE figure on the page is 60-70 kWh/kg for solar grade in 2023, versus company averages for electronic grade between 91.9 and 126 kWh/kg (Wacker 2020, REC 2020 at 123, Hemlock 2019 at 126).
+
+For modified-Siemens reactor design, patents also couple Siemens vent gas to fluidised-bed reactors.
+
+(Sources: https://www.ise.fraunhofer.de/content/dam/ise/en/documents/publications/studies/25_en_ISE_Report_Analysis-of-the-Electricity-Consumption-for-the-Production-of-Electronic-Grade-Polysilicon.pdf ; https://brevets-patents.ic.gc.ca/opic-cipo/cpd/eng/patent/2759449/summary.html)
+
+== Special EG
+# Purity spec
+
+The page uses GB/T 12963-2022 and Fraunhofer ISE: Special EG donors at or below 1.5e12 atoms per cm3, EG3 at 5e12, solar grade at 2.5e14. Base metals are at or below 0.1 ppbw for Special EG.
+
+# Why chips need it
+
+A single phosphorus or boron atom per 1e12 silicon atoms shifts resistivity in the crystal, and device wafers must have controlled dopant levels (textbook). Advanced wafers for AI chips (logic and HBM base dies) draw on this tier.
+
+# A moving ladder
+
+The page notes electronics grade is only about 5% of volume, with purity near 11N. Bernreuter says claims of 12N for EG polysilicon are not achieved. Semiconductor standards are a moving ladder, with qualification at each customer.
+
+# Sources
+
+(Sources: https://www.ise.fraunhofer.de/content/dam/ise/en/documents/publications/studies/25_en_ISE_Report_Analysis-of-the-Electricity-Consumption-for-the-Production-of-Electronic-Grade-Polysilicon.pdf ; https://bernreuter.com/files/data/newsroom/press-releases/2025-11-25-Bernreuter-Research-Top-Ten-Polysilicon-Makers-Nearly-All-Chinese.pdf)
+
+== Tongwei
+# Capacity ranks
+
+Bernreuter ranks Tongwei first at 910 thousand tonnes (2024), then GCL at 480, Daqo 350 and Xinte 300, with the top four at 65% of global output (page). Their commodity is solar grade, priced in a glut.
+
+# Price glut
+
+A March 2026 OPIS note says a consolidation plan to acquire and idle about one-third of Chinese capacity, with about CNY 50 billion raised by leaders, has been effectively stalled since mid-January after regulators barred coordinated production and pricing controls over monopoly concerns. OPIS assessed China Mono Premium at 44.583 yuan/kg on March 17, down 16.4% since January, near the mid-2025 low of just above 30 yuan/kg.
+
+# Relevance to chips
+
+Tongwei was expected to lose 7 to 7.5 billion yuan in 2024. I did not find 2025 or 2026 results. For chip supply the relevance is indirect: cheap Chinese solar poly pressures Western makers, but it is not electronic grade.
+
+# Sources
+
+(Sources: https://www.opis.com/resources/energy-market-news-from-opis/chinas-polysilicon-prices-slide-in-q1-on-inventory-stockpiles-and-policy-ambiguity/ ; https://yicaiglobal.com/star50news/2025_01_226785197679526805505 ; https://bernreuter.com/files/data/newsroom/press-releases/2025-11-25-Bernreuter-Research-Top-Ten-Polysilicon-Makers-Nearly-All-Chinese.pdf)
+
+== Wacker
+# The leading EG supplier
+
+Wacker (WCH.DE) calls itself the world's leading producer of semiconductor polysilicon and the only European producer of ultra-pure polysilicon (company claims). Its goal is to double semiconductor sales by 2030 versus 2024, and it ties demand to AI chips and data centers.
+
+# 2025 expansion
+
+In July 2025 it commissioned a Burghausen production line at a cost above 300 million euros, its largest single investment in ten years, lifting ultra-pure capacity by more than 50% over the long term.
+
+# Energy intensity
+
+The page notes Wacker ranks 8th by capacity at about 80 thousand tonnes, with Fraunhofer ISE reporting Wacker EG-only electricity of 150 kWh/kg in 2002 and a multi-product average of 91.9 in 2020. I found no 2026 Wacker results in search.
+
+# Sources
+
+(Sources: https://www.wacker.com/cms/en-at/press-and-media/press/press-releases/2025/press-releases-detail-2025-257922.html ; https://evertiq.com/news/2025-07-22-wacker-commissions-300m-production-line-for-chip-grade-polysilicon ; https://www.chemeurope.com/en/news/1186732/wacker-commissions-new-production-line-for-semiconductor-grade-polysilicon-at-burghausen-site.html)
+
+== Hemlock
+# US chip-grade supply
+
+Hemlock Semiconductor (Michigan) is a US electronic-grade producer; the page ranks it 14th overall. Its patents cover fluidised-bed processes using tetrachlorosilane to reduce wall deposition and Siemens-integrated fluidised beds (US7927984, US8609058).
+
+# Section 232 prices
+
+Proclamation 11052 (6 August 2026, effective 4 December 2026) follows a Commerce Section 232 investigation on polysilicon. Minimum import prices apply: $21 per kg for polysilicon, $100 per kg for ingots and wafers, $0.22 per W for cells, $0.38 per W for modules.
+
+# Effect on makers
+
+Raw polysilicon is exempt from the 15% tariff on derivatives but subject to the minimum price. The action is framed around semiconductor supply-chain security, and onshoring plans may earn waivers. Specific effects on Hemlock or Wacker were not found.
+
+# Sources
+
+(Sources: https://www.whitecase.com/insight-alert/president-trump-orders-tariffs-and-price-floors-polysilicon-section-232-action ; https://www.bdo.com/insights/tax/new-tariffs-and-minimum-import-prices-on-polysilicon-derivatives-and-solar-products ; https://patents.google.com/patent/US7927984)

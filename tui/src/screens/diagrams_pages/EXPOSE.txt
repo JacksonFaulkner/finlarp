@@ -1,0 +1,134 @@
+# 1. What happens: from tin droplet to printed pattern
+
+ ┌───────────────┐  ┌─────────────────────┐  ┌───────────────┐  ┌────────────────────┐
+ │ TIN DROPLET   │  │ 2 LASER SHOTS       │  │ PLASMA        │  │ COLLECTOR          │
+ │ ~25 um molten │─▶│ pre-pulse flattens, │─▶│ emits 13.5 nm │─▶│ focuses to the     │
+ │ tin, ~50 kHz  │  │ CO2 main pulse      │  │ light         │  │ intermediate focus │
+ └───────────────┘  └─────────────────────┘  └───────────────┘  └────────────────────┘
+   (row 1 ends at the intermediate focus; row 2 is inside the scanner, same direction of travel)
+ ┌──────────────────┐  ┌──────────────────────┐  ┌────────────────┐
+ │ ILLUMINATOR      │  │ RETICLE + MIRRORS    │  │ WAFER          │
+ │ shapes the beam  │─▶│ reflective mask,     │─▶│ resist absorbs │
+ │ onto the reticle │  │ 6 mirrors, 4x shrink │  │ 92 eV photons  │
+ └──────────────────┘  └──────────────────────┘  └────────────────┘
+
+  (all of it in vacuum or low-pressure hydrogen: EUV is absorbed by air and by every lens material)
+
+# 2a. The light source (laser-produced plasma, LPP)
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │   DROPLET GENERATOR ──▶  ●  ●  ●  ●   tin droplets, ~25 um, ~70 m/s, ~50 kHz                     │
+  │                               │                                                                  │
+  │        PRE-PULSE laser ══▶    ▼   droplet swells from ~30 um to >100 um (pancake / mist)         │
+  │                            ◌◌◌◌◌                                                                 │
+  │        CO2 MAIN PULSE ══▶  ≈≈≈≈≈≈≈   10.6 um, 15-25 ns, ~1e11 W/cm2   ──▶ PLASMA ~100 um         │
+  │                            ≈≈≈≈≈≈≈   electron temp 20-50 eV, emits 13.5 nm EUV                   │
+  │                                  ╲                                                               │
+  │    COLLECTOR: ellipsoidal Mo/Si multilayer mirror, ringed around the plasma, aims light          │
+  │    at the INTERMEDIATE FOCUS (IF) ──▶ into the scanner. H2 gas (1-10 Pa) sweeps tin off the mirror │
+  │    tin debris still builds up: collector loses 0.1-0.3% per billion pulses, swapped ~yearly      │
+  └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (CO2 laser reflecting off the droplet can damage the laser, so the beam train is isolated; per patents)
+
+# 2b. The scanner: reticle to wafer (all mirrors, no lenses)
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │       from IF ──▶ ILLUMINATOR (2+ mirrors: shape, homogenise)                                    │
+  │                          │                                                                       │
+  │                          ▼ ╲ small angle off the normal                                          │
+  │         ┌────────────────────────────┐                                                           │
+  │         │ RETICLE (reflective mask)  │  Mo/Si multilayer, Ta-based absorber draws the pattern    │
+  │         └────────────────────────────┘  scans one way                                            │
+  │                          │ reflected pattern                                                     │
+  │                          ▼                                                                       │
+  │        PROJECTION OPTICS: 6 mirrors (0.33 NA), 4x reduction, Mo/Si ~67-70% reflective each       │
+  │                          │                                                                       │
+  │                          ▼                                                                       │
+  │         ┌────────────────────────────┐                                                           │
+  │         │ WAFER on stage, resist     │  scans opposite way, synchronised to the reticle          │
+  │         └────────────────────────────┘                                                           │
+  └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  Light budget: each mirror reflects ~0.67-0.70, so ~10 mirrors keep <2%; 100 W in, ~1 W at wafer.
+  (0.7^10 = 2.8% and 0.67^10 = 1.8%: computed here, matches the <2% patent figure)
+
+# 3. The physics
+
+  Rayleigh resolution    CD = k1 * lambda / NA          DOF = k2 * lambda / NA^2   (textbook)
+
+  0.33 NA  with k1 = 0.33   CD = 0.33 * 13.5 / 0.33 = 13.5 nm   (ASML quotes 13 nm)
+  0.55 NA  with k1 = 0.33   CD = 0.33 * 13.5 / 0.55 =  8.1 nm   (ASML quotes 8 nm)
+  depth of focus shrinks by (0.55/0.33)^2 = 2.8x, so the resist must be thin and the wafer very flat.
+
+  Photon energy      E = 1239.8 eV*nm / 13.5 nm = 91.8 eV    vs 6.4 eV for 193 nm ArF (14x higher)
+  Photons at 30 mJ/cm2   30e-3 J / (91.8 eV * 1.602e-19 J/eV) = 2.0e15 per cm2 = ~20 per nm2
+  Same dose in ArF would be ~14x more photons, so EUV has 14x more shot noise: STOCHASTICS.
+  Pellicle (membrane over the reticle to stop dust) must pass EUV: NXE:3400B membrane 85-90% (Wikipedia).
+  High-NA: 4x/8x anamorphic mirrors, field 26x16.5 mm instead of 26x33 mm, so a wafer takes 2x the shots.
+
+# 4. By the numbers
+
+  wavelength        13.5 nm (92 eV)         conversion efficiency  ~5-6% laser light to in-band EUV
+  source power      ~250 W at IF today (Wikipedia); NXE:3800E 500 W source (ASML Nov 2024)
+  throughput        NXE:3800E 220 wafers/h (was 160, +38%); EXE:5000 110 w/h, target >200 by 2030
+  tool price        High-NA EUR 350M+ (reported), about $380-400M; low-NA ~$180M (Wikipedia, AnandTech)
+  size, power       ~200 tons; NXE:3400C 1.31 MW, 9.64 kWh per wafer pass vs 0.45 kWh for ArF immersion
+  dose              30 mJ/cm2 reference (NXE:3400C); 20 mJ/cm2 gives 180 w/h on the 3600D (ASML deck)
+  overlay           NXE:3800E improves overlay by 13% (ASML)
+  ASML 2025         sales EUR 32.7B; EUV EUR 11.6B (+39%), 48 EUV systems; backlog EUR 38.8B, EUV 25.5B
+
+# 5. Throughput by tool, wafers per hour (ASML decks / press)
+
+  NXE:3600D     ██████████████████████ 160  customer sites, 30 mJ/cm2
+  NXE:3600D lab ██████████████████████████ 185  demonstrated, 30 mJ/cm2
+  NXE:3800E     ██████████████████████████████ 220  roadmap spec
+  NXE:3800F     ████████████████████████████████████ 260  reported (Tom's Hardware)
+  EXE:5000      ███████████████ 110  High-NA, first gen
+
+  Tool price, EUR millions (reported estimates; bar = upper end of range)
+  early NXE        ████████████ 100-120
+  NXE 3400C/3600D  █████████████████ 140-170
+  High-NA EXE      ████████████████████████████████████ 350+ (reported)
+
+  Energy per wafer pass, kWh (Wikipedia)
+  EUV NXE:3400C    ████████████████████████████████████ 9.64
+  ArF immersion    ██ 0.45
+
+  EUV share of ASML net system sales: 38% in 2024, 48% in 2025 (ASML Q4 2025 release)
+  2024             ████████████████████████████ 38%
+  2025             ████████████████████████████████████ 48%
+
+# 6. Who makes it, risks
+
+  ASML (ASML, ASML.AS)      sole maker of EUV scanners; owns Cymer, the San Diego source maker (textbook)
+  Carl Zeiss SMT            makes the mirrors; private (Zeiss Group), no ticker (textbook)
+  TRUMPF                    CO2 drive laser; private (textbook)
+  Lasertec (6920.T)         actinic EUV mask inspection (textbook)
+  Hoya (7741.T)             EUV mask blanks (textbook)
+  TEL (8035.T)              tracks that join the scanner, see COAT / DEVELOP
+  Customers                 TSMC (TSM), Samsung, SK Hynix, Intel (INTC; first High-NA), Micron (MU)
+
+  Chokepoints: one scanner vendor, one mirror maker, one laser maker; ~200 ton tool.
+  Price: ASML is pushing value-based pricing beyond productivity gains, TSMC reportedly objects.
+  Risks: tin debris, collector life, stochastic defects, High-NA yield and cost, export controls.
+  (company roles marked textbook are not backed by a page I fetched)
+
+# Sources
+
+  [1] ASML FY2025 results (6-K), SEC:
+      sec.gov/Archives/edgar/data/937966/000162828026003701/a2026_01x28xpresentation.htm
+  [2] 2025 recap: eenewseurope.com/en/asml-reports-e32-7bn-sales-e9-6bn-net-income-for-2025/
+  [3] NXE:3800E 500 W, 220 w/h (ASML 6-K):
+      sec.gov/Archives/edgar/data/937966/000093796624000026/exhibit994.htm
+  [4] EXE:5000 110 w/h: eetimes.itmedia.co.jp/ee/articles/2501/15/news015_5.html
+  [5] Source and optics numbers: en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+  [6] Pre-pulse: laserfocusworld.com/lasers-sources/article/16557052/
+      lithography-pre-pulse-technology-scales-euv-source-power
+  [7] Mirror loss: laserfocusworld.com/optics/article/16566714/
+      optics-for-scanning-multilayer-mirrors-enable-next-generation-euv-lithography
+  [8] Throughput by model: euvlitho.com/2022/P3.pdf ; euvlitho.com/2023/P62.pdf
+  [9] High-NA price, 8 nm: heise.de/-9690285 ; tomshardware.com/news/asml-to-ship-first-high-na-euv-tool-
+      this-year-dollar300-million-per-scanner
+  [10] NXE price history: at-web1.www.anandtech.com/show/21297/asml-delivers-first-2nm-generation-low-na-
+      euv-tool-twinscan-3800e

@@ -3,8 +3,19 @@
 
 pub mod canslim;
 pub mod chart;
+pub mod diagrams;
+mod diagrams_art;
+mod diagrams_desc;
+mod diagrams_mol;
+mod diagrams_vis;
+mod diagrams_vis_a;
+mod diagrams_vis_b;
+mod diagrams_vis_c;
+mod diagrams_vis_d;
+mod diagrams_vis_e;
 pub mod dossier;
 pub mod earnings_report;
+pub mod events;
 pub mod home;
 pub mod pick;
 pub mod portfolio;

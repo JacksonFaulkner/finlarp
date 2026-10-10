@@ -1,0 +1,208 @@
+== LOAD
+# Handler loads the part
+A handler (pick-and-place robot) takes packaged parts from JEDEC trays or tape, carries them to the test site and presses each into a socket. It starts the test, the tester runs it, and the handler sorts the part into a bin on the result (patent descriptions).
+
+# Index time
+Throughput is set by index time (how fast one part is swapped for the next) and by how many sites test in parallel. A slow swap leaves an expensive tester idle, so handler speed protects tester utilisation.
+
+# Contact
+Big AI packages need high press force, because thousands of BGA balls must each make contact. Heavy GPU and HBM packages warp when hot, a common cause of bad contact and false failures (textbook). A false failure is a good part thrown in the reject bin, so contact quality hits yield and cost directly.
+
+# Sources
+cohu.com ; researchandmarkets.com/reports/6235308/semiconductor-test-contactor-market-analysis ; patents.google.com/patent/US6960908
+
+
+== ATE TEST
+# Test order
+ATE applies power, then runs continuity and leakage checks first. Scan patterns follow, exercising the logic for manufacturing defects, then memory built-in self-test on the HBM interfaces and loopback on the high-speed serial links (all textbook, no counts sourced). Good results decide which parts go on to burn-in and binning.
+
+# Test time is cost
+Test time per die is the cost lever: a tester costs far more per hour than most fab tools in the back end. One source claims leading AI silicon needs 3-5x the test time of conventional chips, and another says a reticle-limit die needs 2-3x the patterns of a 7nm SoC; both are unverified.
+
+# Who sells it
+Teradyne reported Q4 2025 semiconductor test revenue of $883M, about 81.5% of sales, with AI above 60% of revenue and guided up to 70% in Q1 2026. Advantest and Teradyne are the two big SoC tester vendors, so a longer test per die turns into more tester purchases.
+
+# Sources
+nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead ; wing.vc/content/the-chip-testing-bottleneck
+
+
+== BURN-IN
+# Why heat works
+Burn-in holds parts at high temperature and raised voltage for hours so latent defects (thin oxide, weak vias, marginal solder) fail in the factory instead of in a data centre. Failure mechanisms accelerate exponentially with temperature (Arrhenius). With an assumed 0.7 eV activation energy, 1000 hours at 100C against 50C use is about 29x, roughly 3.3 years of use (textbook arithmetic).
+
+# Where it is used
+It costs time, power and special boards, so it is applied where a field failure is very costly, which is why AI accelerators get it. A dead GPU inside an NVL72 rack means pulling a tray from a liquid-cooled system. JEDEC's JESD22-A108 life test is commonly run for 1000 hours at 125C junction temperature with 77 units and zero allowed failures (vendor reports); production burn-in is the short form of that.
+
+# Wafer-level burn-in
+Aehr Test Systems (AEHR) sells wafer-level burn-in. It shipped its first FOX-XP system for AI processors in Feb 2025, running 9 wafers in parallel in that configuration (up to 18 per its claim) at wafer temperatures up to 150C, and argues this replaces costlier package-level burn-in. In Feb 2026 it announced a $14M order from its lead AI processor customer. Aehr's claims are its own.
+
+# Sources
+aehr.com/2025/02/aehr-announces-shipment-of-initial-fox-xp-wafer-level-burn-in-system-for-advanced-ai-processors/ ; aehr.com/2026/02/aehr-receives-14-million-order-from-lead-ai-processor-customer-for-multiple-new-fully-automated-fox-xp-wafer-level-burn-in-systems/ ; halbleiter.org/en/reliability/burn-in-htol-testing/ ; thierry-lequeu.fr/data/JEDECSTD/22A108B.PDF
+
+
+== SYSTEM TEST
+# What SLT catches
+System-level test (SLT) puts the packaged part on a board close to the real product and boots software or runs a stress workload. It catches faults ATE patterns miss: block-to-block interactions, supply droop under real load, firmware and thermal behaviour.
+
+# Slots and power
+Each run is slow, so SLT needs a very large number of parallel slots, and socket count and floor space become the limit. A modern AI package dissipates far more heat than older SLT cells were designed to remove. For investors, SLT capacity is an under-watched bottleneck between a packaged GPU and a shippable GPU.
+
+# Titan HP
+Teradyne launched Titan HP on 2 Oct 2025 for high-power AI and cloud devices. It supports up to 2 kW today with a roadmap to 4 kW, uses a multi-branch cold plate that cools the device under test and surrounding parts, and has PID-tuned per-site thermal control. Teradyne says it is in production at several large customers, unnamed.
+
+# Sources
+investors.teradyne.com/news-events/press-releases/detail/424/teradyne-unveils-titan-hp ; businesswire.com/news/home/20251002549708/en/Teradyne-Unveils-Titan-HP
+
+
+== SPEED BIN
+# Bell curve
+After functional test, each die is characterised for the highest stable clock (fmax) and the power at that clock. Process variation spreads dies into a bell curve, and the factory sorts them into bins that become different SKUs, so one design supports a top product and cheaper cut-down versions.
+
+# Salvage
+A die that fails a block can often be salvaged by fusing off the bad unit and selling it as a lower SKU. Large AI dies disable failed SMs or HBM channels this way (textbook practice). Binning turns what would be scrap into revenue and is part of why yield on huge dies is economic at all.
+
+# Mix risk
+Better-than-average dies reach higher clocks at lower voltage, which matters when a data centre is limited by watts per rack. The mix is not under the vendor's control: if the curve shifts low, fewer top-bin parts exist and average selling price falls. No bin split is sourced here.
+
+# Sources
+(No sourced figures; textbook mechanism.)
+
+
+== MARK + SHIP
+# Mark
+Passing parts are laser-marked with part number, lot and date code. That gives traceability back to wafer, test lot and handler, so a vendor can trace a field failure to a test insertion, a socket or a wafer lot and decide whether a whole lot must be recalled (textbook).
+
+# Pack
+Parts then go into trays or tape-and-reel for the next owner. For a GPU the next stop is a board and tray assembler, not the end customer (see the SHIP page). Packing must protect the BGA balls and prevent static damage.
+
+# Escape cost
+A shipped part is revenue recognised and the last point where a bad die is cheap to stop, so test escape rate is a key quality measure. A part that escapes and dies in a data centre costs a rack tray swap rather than one chip, which is why AI buyers accept extra steps such as burn-in and SLT (textbook).
+
+# Sources
+(Textbook; see page for sourced test-equipment figures.)
+
+
+== HANDLER: picks part
+# Handler jobs
+The handler is more than a robot. Per the diagram it picks the part, presses it into the socket and sets the temperature, hot or cold, so the part can be tested across its operating range. Handlers are mechanical and wear, so uptime and jam rate drive effective capacity.
+
+# Thermal control
+Thermal control is a differentiator for high-power AI parts, which self-heat during test and can overshoot the target temperature. Cohu (COHU) lists its MT9510 XP handler at -55C to +175C with a T CORE thermal control feature, and its cDragon contactor pin as supporting fast temperature response.
+
+# Vendor view
+A market report says the vendor edge is bundling handler and contactor as one thermal and mechanical interface. On its Q1 2026 call Cohu said five more customers engaged on its Eclipse platform, about $200M of incremental revenue opportunity, and put the high-performance computing market at $750M (management commentary, not independent). Other handler vendors are not sourced here.
+
+# Sources
+cohu.com/?p=36054 ; insidermonkey.com/blog/cohu-inc-nasdaqcohu-q1-2026-earnings-call-transcript-1752184/
+
+
+== SOCKET: pins touch BGA
+# What it is
+The socket (contactor) is a precision array of spring pins that presses against each BGA ball on the package. It sits on the load board and holds the device in a cavity. Pin types include pogo pins, elastomer-embedded contacts and particle interconnects (patent descriptions).
+
+# Wear
+A modern AI GPU package has thousands of contacts and passes large current, so contact resistance, pin wear and contamination matter. Pins wear out and collect solder residue after a limited number of insertions, so sockets are consumables that are cleaned and replaced regularly (textbook); the page calls this a quiet bottleneck.
+
+# Who and risk
+Contactors are increasingly designed together with the tester and the package, per a market report, which names WinWay as a major AI-socket supplier next to Cohu (cHybrid, cCompact, Gemini, ICON, MiCon). A bad contact looks like a failing chip, so the yield risk is a good die binned bad, or a marginal contact that passes and fails later.
+
+# Sources
+researchandmarkets.com/reports/6235308/semiconductor-test-contactor-market-analysis ; cohu.com/?p=36054 ; patents.google.com/patent/US6960908
+
+
+== LOAD BOARD (custom
+# Signal path
+The load board is a custom PCB. It extends the tester's measurement resources out to the device's pins, provides power, and carries support parts such as decoupling capacitors, relays and sometimes loopback circuits for serial links (patents; textbook). The socket sits on top of it.
+
+# One per product
+A custom board is usually needed for each unique device or family, because each new GPU or HBM package has a different pinout and power budget. Board design is therefore on the critical path to a product launch.
+
+# Demands and wear
+For AI devices the board must deliver very high current with low droop and run high-speed lanes such as PCIe and NVLink, so layer counts and materials are demanding and boards are expensive (textbook, no price sourced). Boards wear and need repair like sockets, and signal-integrity problems on the board can mimic device failures. No supplier or volume figures are sourced here.
+
+# Sources
+(Textbook; patents.google.com/patent/US6960908; no sources found for load board market sizes.)
+
+
+== TEST HEAD
+# What is inside
+The test head holds the tester electronics next to the load board: pattern generators that drive and compare digital signals, power supplies, and analog and RF instruments, in many channels. The label notes big current rails, the key for AI parts that draw hundreds of amps at low voltage.
+
+# Duopoly
+Advantest and Teradyne are the two main SoC tester vendors. Teradyne claims about 50% share in VIP compute and says its power-supply capability is an advantage. Its 2025 Semiconductor Test Group grew 19% and SoC test 23%, on networking and compute.
+
+# Conflicting share
+Analysts put Advantest at 66% in CY25 (up from 56%, one analysis), while a different source says Teradyne holds 50-55%, so the figures do not reconcile. A tester duopoly means few alternatives for chipmakers, and test capacity can gate output when die size and chiplet count raise test time.
+
+# Sources
+inpractise.com/articles/advantest-vs-teradyne-gpu-test-market-share-and-power-supply-advantage ; kr-asia.com/this-rising-japanese-chip-stock-has-a-close-correlation-with-nvidia ; nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead
+
+
+== infant mortality
+# Bathtub curve, left side
+Reliability engineers split a part's life into three zones: infant mortality, where weak parts with latent defects fail early at a falling rate; useful life, a low and flat random-failure rate; and wear-out, where rising failures come from ageing such as electromigration and oxide breakdown (textbook, shape only).
+
+# What burn-in does
+Burn-in aims to push every part past the left zone before shipment, so the customer sees only the flat middle. Burn-in reduces early failures but does not remove them entirely. The trade is cost against field failure: longer or hotter burn-in finds more weak parts but uses up some life of the good ones and adds time.
+
+# Demand link
+No burn-in temperature or hours are sourced for AI GPUs, and this page says not to trust blog numbers. The point for stock readers is demand: every extra screen on a reticle-size die needs more burn-in capacity, which supports Aehr's wafer-level approach and the SLT and burn-in cells from Teradyne and others.
+
+# Sources
+(Textbook; halbleiter.org/en/reliability/burn-in-htol-testing/ for the burn-in and bathtub definitions.)
+
+
+== Titan HP
+# Platform
+Titan HP is Teradyne's system-level test platform for AI and cloud devices, announced on 2 Oct 2025. It supports up to 2 kW per site today with a roadmap to 4 kW, the scale needed for next-generation accelerator packages.
+
+# Cooling
+Cooling uses a multi-branch cold plate that serves the device under test and the surrounding components, with asynchronous PID-tuned per-site thermal control and an optional DUT heater. Teradyne states it is in production at several large customers, which it did not name.
+
+# Revenue shift
+The launch fits Teradyne's AI shift: above 60% of revenue from AI in Q4 2025 and guided up to 70% in Q1 2026, per one earnings summary. Risks: SLT is a crowded field with many specialist vendors, and customers can do less SLT if ATE and burn-in coverage improve. No SLT market share is sourced.
+
+# Sources
+investors.teradyne.com/news-events/press-releases/detail/424/teradyne-unveils-titan-hp ; allmind.ai/earnings/event/bt_TER_2025_Q4
+
+
+== TOP BIN
+# Top bin
+The top bin holds the fastest, lowest-power dies and sells as the flagship SKU at the highest price. The mid and low bins become cut-down products, and SCRAP at the far left holds dies that fail even the lowest spec.
+
+# What moves the bins
+The bell curve's shape depends on process maturity: a mature node tightens the distribution and lifts the top-bin share, while a new node or a large die widens it. For AI, efficiency matters as much as raw clock because rack power is the limit, so bins are set on both fmax and power.
+
+# Mix effect
+Large AI dies can also disable failed SMs or HBM channels and sell as a cut-down part, so scrap is lower than the raw defect rate suggests (textbook). Bin yields are closely held and no figures are sourced. Lower top-bin share means less flagship supply and more mix pressure on average price.
+
+# Sources
+(Textbook; no bin yields sourced.)
+
+
+== Advantest CY25
+# Advantest share
+This bar shows Advantest at 66% of SoC test in calendar 2025, up from 56%, in one analysis, versus about 50% in an older 2023 report. Advantest (6857.T) is described by analysts as the leader in SoC test, and a KR-Asia article links the stock closely to Nvidia because Nvidia GPU volume drives test demand.
+
+# Why numbers differ
+Definitions differ between sources: some count only compute SoC testers, others all ATE, so shares do not reconcile with Teradyne's claim of about 50% in VIP compute or another source's 50-55% of SoC test. Treat all of them as ranges.
+
+# What holds
+Teradyne says it gained share in HBM and DRAM final test in 2025 while memory test was otherwise flat. The stable conclusion is that two vendors dominate and that AI test intensity (more patterns, longer test, higher power) is the growth driver for both; the exact split is unknown.
+
+# Sources
+kr-asia.com/this-rising-japanese-chip-stock-has-a-close-correlation-with-nvidia ; inpractise.com/articles/advantest-vs-teradyne-gpu-test-market-share-and-power-supply-advantage
+
+
+== Test houses
+# OSAT test houses
+Much of the volume test is done not by the chip designer but by outsourced assembly and test houses (OSATs). TrendForce's 2024 top-10 OSAT ranking, as cited on this page, gives KYEC (2449.TW) 2.2%, Hana Micron 2.2% and ChipMOS 1.7% of top-10 revenue; these are test-focused names, while ASE (ASX) and Amkor (AMKR) do assembly and test together.
+
+# Who owns the tools
+The OSAT owns the testers, handlers and sockets, so it carries the capital cost and is a customer for Teradyne, Advantest and Cohu. Capacity at the test house can therefore gate shipment of AI GPUs, especially when die size and chiplet count raise test time.
+
+# Risks
+Customer concentration (a few chip designers fill most capacity), consumable cost and tester delivery lead times. TrendForce also reports Chinese firms gaining ground in the 2024 OSAT ranking.
+
+# Sources
+trendforce.com/presscenter/news/20250513-12577.html ; evertiq.com/news/2025-05-23-chinese-firms-gain-ground-in-2024-top-10-osat-ranking

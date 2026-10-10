@@ -1,0 +1,2120 @@
+@@ KLAC ## INSPECT ## Light versus electrons
+# Speed versus sensitivity (schematic, not measured)
+
+                   optical             e-beam
+                   (broadband plasma)  (scanning electrons)
+  wafer covered    ██████████████████  ███
+  smallest defect  ████████            ██████████████████
+  time per wafer   ██                  ██████████████████
+
+  fabs run both: optical finds candidates fast,
+  e-beam looks closer at the ones that matter
+-- spots
+optical ## 0 ## 0 ## Broadband plasma light scans the whole wafer in minutes and compares dies. Fast, but small defects get lost in pattern noise (textbook, per the page).
+e-beam ## 0 ## 0 ## A scanning electron beam resolves tiny voids and opens that light cannot, but samples only a few dies (textbook, per the page).
+wafer covered ## 0 ## eol ## Optical covers 100% of the wafer area; e-beam samples a few dies. This is the core speed trade.
+smallest defect ## 0 ## eol ## E-beam resolves smaller defects than optical. The bars are qualitative, not measured data.
+time per wafer ## 0 ## eol ## Optical takes minutes per wafer; e-beam is much slower (textbook, per the page).
+fabs run both ## 0 ## eol ## Fabs combine them: optical for coverage, e-beam to look closer at what matters.
+
+@@ KLAC ## INSPECT ## A real e-beam tool
+# KLA eSL10 (announced 20 July 2020)
+
+  ┌──────────────────────────────────────┐
+  │ electron beam                        │
+  │ highest landing energy + high res    │
+  └───────────────────┬──────────────────┘
+                      ▼
+  small physical defects and high-aspect-ratio defects
+  (logic + memory, including EUV-printed layers)
+
+  Yellowstone scan mode: 10 billion pixels per scan
+-- spots
+electron beam ## 0 ## 0 ## KLA's eSL10 was pitched at defects that optical and other e-beam platforms often miss on logic and memory chips.
+highest landing energy + high res ## 0 ## 0 ## KLA's product page says it uses the industry's highest landing energy with high resolution (vendor claim).
+small physical defects and high-aspect-ratio defects ## 0 ## eol ## Targets small physical defects and high aspect ratio defects, such as deep holes where light cannot see the bottom.
+(logic + memory, including EUV-printed layers) ## 0 ## 0 ## KLA's release says it covers logic and memory chips including EUV-printed layers.
+Yellowstone scan mode ## 0 ## eol ## The release describes a Yellowstone scanning mode that uses 10 billion pixels of information per scan.
+
+@@ KLAC ## MEASURE ## Three measurements
+# What gets measured, and by what
+
+  overlay    layer N+1 against layer N     Archer
+  CD         line width                    SpectraShape
+  film       thickness                     SpectraShape
+
+  CD-SEM is Hitachi and Applied turf; Nova sells optical CD + film
+
+  why it matters (textbook):
+    CD drift       changes transistor speed and leakage
+    film thickness shifts later etch depth
+    overlay        a few nm can open or short a via
+-- spots
+overlay    layer N+1 ## 0 ## eol ## Overlay asks how well layer N+1 sits on layer N. KLA's Archer family measures it.
+CD         line width ## 0 ## eol ## Critical dimension: the width of printed lines. KLA's SpectraShape measures it optically.
+film       thickness ## 0 ## eol ## Film thickness is measured by the same optical family (SpectraShape).
+CD-SEM is Hitachi and Applied turf ## 0 ## eol ## CD-SEM is an electron-microscope measurement led by Hitachi High-Tech and Applied Materials; Nova (NVMI) sells optical CD and film metrology (per the page).
+CD drift ## 0 ## eol ## A CD that drifts changes transistor speed and leakage (textbook).
+film thickness shifts ## 0 ## eol ## A film that is too thick or thin shifts later etch depth (textbook).
+overlay        a few nm ## 0 ## eol ## An overlay error of a few nm can open or short a via (textbook).
+
+@@ KLAC ## MEASURE ## Archer 750 and SpectraShape 11k
+# Announced together, 24 Feb 2020
+
+  ┌─────────────────┐      ┌───────────────────┐
+  │ ARCHER 750      │      │ SPECTRASHAPE 11k  │
+  │ imaging overlay │      │ optical CD        │
+  └────────┬────────┘      └─────────┬─────────┘
+           ▼                         ▼
+  layer-to-layer alignment    3D shapes: transistors,
+  rAIM overlay targets        memory cells
+  scatterometry-class         logic, DRAM, 3D NAND
+  productivity
+-- spots
+ARCHER 750 ## 0 ## 0 ## Imaging-based overlay metrology system. KLA says it delivers accurate, robust overlay under process variation (vendor claim).
+SPECTRASHAPE 11k ## 0 ## 0 ## Optical CD metrology that tracks the shape of 3D structures to keep them within spec (KLA release).
+rAIM overlay targets ## 0 ## eol ## rAIM target design and algorithms improve the match between target error and device overlay error (KLA release).
+scatterometry-class ## 0 ## eol ## KLA says Archer 750 delivers productivity previously seen only in scatterometry-based overlay systems, so fabs can sample more points (vendor claim).
+3D shapes: transistors, ## 0 ## eol ## SpectraShape 11k tracks the shapes of 3D structures such as transistors and memory cells.
+logic, DRAM, 3D NAND ## 0 ## eol ## KLA says the two tools support leading-edge logic, DRAM and 3D NAND devices.
+
+@@ KLAC ## ANALYSE ## The review ladder
+# From detection to decision
+
+  optical inspector ──▶ candidate defects
+          │
+          ▼
+  review SEM images each candidate
+          │
+          ▼
+  classifier: killer or nuisance?
+       │                    │
+       ▼                    ▼
+   in spec              out of spec
+   next lot goes on     hold the lot, fix etch / CMP / litho
+-- spots
+optical inspector ## 0 ## eol ## Optical inspection finds candidate defects fast across the whole wafer.
+review SEM images each candidate ## 0 ## eol ## A review SEM goes to the flagged coordinates and images each candidate.
+classifier: killer or nuisance? ## 0 ## eol ## A classifier sorts killer defects from nuisance ones, using tuned recipes and image libraries (textbook).
+in spec ## 0 ## eol ## Counts within spec: production continues.
+out of spec ## 0 ## eol ## If counts exceed spec the lot is held and the offending step is fixed before the next lot (page text).
+
+@@ KLAC ## ANALYSE ## Why the software sticks
+# The data path (lot by lot)
+
+  tool measurements
+        │
+        ▼
+  fab host ──▶ run-to-run control ──▶ recipe offsets
+
+  switching vendor means retuning all of this
+  and rebuilding the image libraries
+
+  KLA services revenue, March 2025 quarter
+  $775M   +16% year on year
+-- spots
+tool measurements ## 0 ## eol ## Inspection and metrology tools produce the raw data.
+fab host ## 0 ## eol ## Measurements go to the fab host, the factory's control system.
+run-to-run control ## 0 ## eol ## Run-to-run control turns measurements into recipe offsets for the next lot (textbook).
+switching vendor ## 0 ## eol ## The page calls this next-layer feedback lock-in that makes switching vendors costly.
+$775M   +16% year on year ## 0 ## eol ## KLA services revenue was $775M in the March 2025 quarter, up 16% year on year (quarterly-call summary on the page).
+
+@@ KLAC ## FEED BACK ## Closing the loop
+# One lot's measurements correct the next lot
+
+  ┌──────────┐     ┌────────────┐     ┌───────────────┐
+  │ SCANNER  │ ──▶ │ ARCHER     │ ──▶ │ APC analytics │
+  │ (ASML)   │     │ overlay    │     │ fits 5 terms  │
+  └──────────┘     └────────────┘     └───────┬───────┘
+        ▲                                     │
+        └──── corrections for the next lot ◀──┘
+              shift  scale  rotation  dose  focus
+-- spots
+SCANNER ## 0 ## 0 ## The ASML scanner exposes the next layer using corrections fed back from the last lot.
+ARCHER ## 0 ## 0 ## Archer reads overlay marks on the wafer and reports the error.
+APC analytics ## 0 ## 0 ## Advanced process control fits the corrections from the overlay data (page diagram).
+corrections for the next lot ## 0 ## eol ## The loop sends corrections back upstream so the process learns from its own errors (run-to-run control, textbook).
+shift  scale  rotation  dose  focus ## 0 ## eol ## The five correction terms on the page's APC box. Higher-order corrections need dense sampling.
+
+@@ KLAC ## FEED BACK ## Why process control outgrows WFE
+# KLA quarterly revenue ($B)
+
+  June 2025   ████████████████████████ 3.175
+  Mar 2026    ██████████████████████████ 3.415
+  June 2026   ████████████████████████████ 3.66
+
+  FY2026 revenue: $13.58B
+
+  KLA expects process control to outgrow WFE through 2030
+  WFE about $140B in calendar 2026
+-- spots
+June 2025 ## 0 ## eol ## June-quarter 2025 revenue was $3.175B (a year earlier, per the page).
+Mar 2026 ## 0 ## eol ## Prior-quarter revenue was $3.415B (page).
+June 2026 ## 0 ## eol ## June-quarter 2026 revenue was $3.66B, above the guidance midpoint (page).
+FY2026 revenue: $13.58B ## 0 ## eol ## KLA reported fiscal 2026 revenue of $13.58B (page).
+KLA expects process control to outgrow WFE ## 0 ## eol ## Each new layer and structure (GAA, backside power, HBM stacks) adds measurement steps (page).
+WFE about $140B ## 0 ## eol ## KLA's WFE estimate for calendar 2026, per the page.
+
+@@ KLAC ## ARCHER ## Two gratings, one number
+# Overlay mark: two gratings (schematic)
+
+  layer N+1      ▌  ▌  ▌  ▌  ▌  ▌
+  layer N       ▌  ▌  ▌  ▌  ▌  ▌
+                └┘
+                offset between the centres = overlay error
+
+  tool images both gratings, compares centres
+  result: nm per field, then per wafer
+-- spots
+layer N+1 ## 0 ## eol ## The upper grating is printed with the newest layer.
+layer N  ## 0 ## eol ## The lower grating was printed with the previous layer.
+offset between the centres = overlay error ## 0 ## eol ## The offset between the grating centres is the overlay error, in nm.
+tool images both gratings ## 0 ## eol ## Archer images both gratings and compares their centres.
+result: nm per field ## 0 ## eol ## Overlay is reported per field and per wafer, then modelled into corrections (page diagram).
+
+@@ KLAC ## ARCHER ## Imaging versus scatterometry
+# Two ways to read overlay
+
+  IMAGING (Archer 750)           SCATTEROMETRY
+  ┌──────────────────────┐       ┌──────────────────────┐
+  │ look at the marks    │       │ shine light on a     │
+  │ directly, measure    │       │ grating, read the    │
+  │ the offset           │       │ diffraction          │
+  └──────────────────────┘       └──────────────────────┘
+  rAIM targets match             throughput was the
+  device overlay better          strength
+
+  Archer 600 claim: sub-3nm overlay error
+-- spots
+IMAGING (Archer 750) ## 0 ## 0 ## Imaging-based overlay reads marks directly (textbook).
+SCATTEROMETRY ## 0 ## 0 ## Scatterometry-based overlay infers error from diffraction (textbook).
+rAIM targets match ## 0 ## eol ## KLA says rAIM targets and algorithms improve the correlation between target and device overlay.
+throughput was the ## 0 ## eol ## Scatterometry-class productivity is what Archer 750 claims to match (vendor claim).
+Archer 600 claim: sub-3nm overlay error ## 0 ## eol ## The page's Archer 600 claim is sub-3nm overlay error (vendor claim).
+
+@@ KLAC ## OVERLAY ERROR ## A via off its line
+# Via landing on a metal line (schematic)
+
+  aligned          half off           off
+    ▓▓▓▓             ▓▓▓▓                ▓▓▓▓
+  ██████████       ██████████       ██████████
+  full contact     high resistance  open, or shorts
+                   or weak contact  into a neighbour
+-- spots
+aligned ## 0 ## 0 ## Overlay near zero: the via lands fully on its metal line.
+half off ## 0 ## 0 ## A partly misplaced via raises resistance or gives a weak contact (textbook, as stated on the page).
+off ## 1 ## 0 ## A big miss opens the contact or slides it into a neighbour and shorts (textbook, as stated on the page).
+full contact ## 0 ## eol ## Full overlap means low resistance.
+open, or shorts ## 0 ## eol ## Either no connection at all, or a connection to the wrong wire.
+
+@@ KLAC ## OVERLAY ERROR ## The edge placement budget
+# Edge placement error (EPE)
+
+   overlay        CD            stochastic
+   error     +    error    +    variation
+   (layer to      (line width)   (random, at EUV)
+   layer)
+        └────────────┬─────────────┘
+                     ▼
+        edge placement error budget
+
+  this is why KLA sells overlay, CD and defect tools together
+-- spots
+overlay         ## 0 ## 0 ## Overlay is one of three terms in the edge placement budget.
+CD             ## 0 ## 0 ## CD error: line width off target.
+stochastic ## 0 ## 0 ## Random photon and resist variation, which matters at EUV (textbook).
+edge placement error budget ## 0 ## eol ## The sum of overlay, CD and stochastic variation is the budget fabs care about at EUV (textbook).
+this is why KLA sells ## 0 ## eol ## Each term is measured by a different tool, so the budget favours a vendor that sells all of them (textbook inference).
+
+@@ KLAC ## APC analytics ## Measure, compute, adjust
+# Run-to-run control
+
+    ┌─────────┐   ┌───────────┐   ┌──────────┐
+    │ MEASURE │──▶│ COMPUTE   │──▶│ ADJUST   │
+    │ overlay │   │ 5 offsets │   │ scanner  │
+    └─────────┘   └───────────┘   └────┬─────┘
+         ▲                             │
+         └───────── next lot ◀─────────┘
+
+  five terms: shift  scale  rotation  dose  focus
+-- spots
+MEASURE ## 0 ## 0 ## Overlay metrology measures the lot.
+COMPUTE ## 0 ## 0 ## APC software fits shift, scale, rotation, dose and focus offsets (page diagram).
+ADJUST ## 0 ## 0 ## The offsets go to the scanner for the next lot.
+next lot ## 0 ## eol ## Measure, compute offsets, adjust, repeat: the textbook run-to-run pattern.
+five terms: ## 0 ## eol ## The five correction terms on the page's APC box.
+
+@@ KLAC ## APC analytics ## Why software is sticky
+# What APC absorbs without a human
+
+  lens drift ─────┐
+  wafer heating ──┼──▶ measured ──▶ corrected ──▶ stable output
+  chuck wear ─────┘
+
+  KLA services, March 2025 quarter: $775M (+16% YoY)
+
+  no sourced figure for analytics revenue alone
+-- spots
+lens drift ## 0 ## eol ## Lens drift is one slow change APC can absorb (textbook).
+wafer heating ## 0 ## eol ## Wafer heating changes overlay during a lot (textbook).
+chuck wear ## 0 ## eol ## Chuck wear shifts the wafer slightly over time (textbook).
+KLA services, March 2025 quarter ## 0 ## eol ## Services revenue was $775M, up 16% YoY (page). Software and data analytics are sticky and sell with tools.
+no sourced figure ## 0 ## eol ## No sourced figure was found for analytics revenue alone.
+
+@@ KLAC ## DEFECT INSPECTOR ## Compare each die with its neighbours
+# Die-to-die comparison (schematic)
+
+   die 1          die 2          die 3
+  ┌──────┐       ┌──────┐       ┌──────┐
+  │ ▓▓▓▓ │       │ ▓▓▓▓ │       │ ▓▓▓▓ │
+  │ ▓▓▓▓ │       │ ▓▓✕▓ │       │ ▓▓▓▓ │
+  └──────┘       └──────┘       └──────┘
+                      ▲
+    differs from both neighbours: flagged
+
+  KLA: over 85% of optical patterned inspection, 2024
+-- spots
+die 2 ## 0 ## 0 ## The middle die is compared to its neighbours.
+✕ ## 0 ## 0 ## A pixel that differs from both neighbours is flagged as a defect (textbook).
+differs from both neighbours: flagged ## 0 ## eol ## Optical patterned-wafer tools compare each die image to neighbours and flag differences (textbook).
+KLA: over 85% ## 0 ## eol ## KLA claimed over 85% of optical patterned-wafer inspection in 2024 (company presentation, vendor claim).
+
+@@ KLAC ## DEFECT INSPECTOR ## Who leads which niche
+# Inspection niches and leaders
+
+  patterned wafer      optical (broadband plasma)   KLA
+  bare wafer           Surfscan family              KLA, Hitachi High-Tech
+  EUV mask blank       actinic inspection           Lasertec
+  review + CD-SEM      e-beam                       Applied, Hitachi
+
+  Surfscan (third-party listing): DUV laser,
+  darkfield and optional brightfield together
+-- spots
+patterned wafer ## 0 ## eol ## KLA claimed over 85% of optical patterned-wafer inspection in 2024 (vendor claim).
+bare wafer ## 0 ## eol ## Unpatterned wafers use Surfscan-class tools, checking bare wafers coming in and after CMP. KLA and Hitachi High-Tech lead (page).
+EUV mask blank ## 0 ## eol ## Lasertec leads actinic EUV mask-blank inspection (page).
+review + CD-SEM ## 0 ## eol ## Applied Materials and Hitachi High-Tech lead e-beam review and CD-SEM (page).
+Surfscan (third-party listing) ## 0 ## eol ## A third-party listing describes Surfscan SP A2 as DUV-laser based, with darkfield and optional brightfield modes at the same time.
+
+@@ KLAC ## REVIEW SEM ## Image the candidates
+# From a coordinate to a class code
+
+  inspector map          review SEM            class
+  ┌────────────┐        ┌────────────┐
+  │  ·    ·    │ coords │ goes to    │──▶  particle
+  │     ·   ·  │ ─────▶ │ each spot, │──▶  bridge
+  │  ·      ·  │        │ images it  │──▶  void
+  └────────────┘        └────────────┘──▶  scratch / nuisance
+
+  counts by class point at the chamber or step at fault
+-- spots
+inspector map ## 0 ## 0 ## The optical inspector produces a map of candidate defect coordinates.
+review SEM ## 0 ## 0 ## The review SEM drives to each coordinate and takes a high-resolution image (page's review ladder).
+particle ## 0 ## 0 ## A particle defect: debris on the wafer. A class code from the review step.
+bridge ## 0 ## 0 ## A bridge: material connecting lines that should be separate.
+void ## 0 ## 0 ## A void: a gap in a filled structure.
+scratch / nuisance ## 0 ## 0 ## Scratches and nuisance defects that do not hurt the chip.
+counts by class ## 0 ## eol ## Counts by class tell the fab which chamber or step is at fault (textbook).
+
+@@ KLAC ## REVIEW SEM ## The sensitivity trade-off
+# Where to set the inspector threshold
+
+  too sensitive                      too lax
+  ┌──────────────────────┐          ┌──────────────────────┐
+  │ many nuisance hits   │          │ few hits             │
+  │ review SEM busy,     │          │ a killer defect type │
+  │ tool is slow         │          │ escapes              │
+  └──────────────────────┘          └──────────────────────┘
+
+  hold a lot: costs a delay
+  pass a bad layer: scraps every layer built on it
+-- spots
+too sensitive ## 0 ## 0 ## Too sensitive and review time is wasted on nuisance defects (textbook trade-off).
+too lax ## 0 ## 0 ## Too low and a killer defect type escapes (textbook trade-off).
+hold a lot: costs a delay ## 0 ## eol ## A hold costs delay on lots.
+pass a bad layer ## 0 ## eol ## Passing a bad layer costs every later layer built on it (textbook).
+
+@@ KLAC ## e-beam inspection ## Voids and opens light cannot see
+# Deep 3D NAND hole, side view (schematic)
+
+        light ↓     electrons ↓
+     ┌──┐   ┌──┐
+     │  │   │  │  top of the hole: visible to both
+     │  │   │  │
+     │  │   │  │
+     │▒▒│   │  │  void or open at the bottom
+     └──┘   └──┘
+
+  optical: whole wafer in minutes
+  e-beam: a few dies, but sees the bottom
+-- spots
+light ↓ ## 0 ## 0 ## Optical light struggles to see the bottom of deep, narrow holes (textbook).
+electrons ↓ ## 0 ## 0 ## Electrons resolve voids and opens that light cannot (page).
+void or open at the bottom ## 0 ## eol ## Deep 3D NAND holes, buried contacts and EUV stochastic defects are hard to see optically (textbook).
+optical: whole wafer ## 0 ## eol ## Optical covers the whole wafer area in minutes.
+e-beam: a few dies ## 0 ## eol ## E-beam samples a few dies where optical covers the whole wafer.
+
+@@ KLAC ## e-beam inspection ## Voltage contrast
+# Voltage contrast (schematic)
+
+  connected plug     open (floating) plug
+      ┌───┐              ┌───┐
+      │ ░ │              │ █ │
+      └─┬─┘              └───┘
+        │ to ground       no path
+        ▼                 ▼
+    dark under beam    bright under beam
+                       (charges up)
+
+  a buried open shows as a brightness difference
+-- spots
+connected plug ## 0 ## 0 ## A plug connected to ground drains the beam charge (textbook).
+open (floating) plug ## 0 ## 0 ## A buried open cannot drain charge, so it charges up (textbook).
+dark under beam ## 0 ## eol ## The grounded plug looks one brightness.
+bright under beam ## 0 ## eol ## The floating plug looks different, which is how a buried open is seen (textbook).
+a buried open shows ## 0 ## eol ## E-beam can see voltage-contrast defects: a buried open shows up as a brightness difference (textbook).
+
+@@ KLAC ## Semiconductor Process Control ## KLA's 10-K segment table
+# KLA segment revenue, fiscal year ended June 2026 ($M)
+
+  Semi Process Control  ██████████████████████████████████████ 12,240
+  PCB + Component Insp  ██ 750
+  Specialty Semi        ██ 584
+
+  total segment revenue about $13.58B, up 12%
+  SPC is about 90% of the total (arithmetic from the figures)
+-- spots
+Semi Process Control ## 0 ## eol ## Semiconductor Process Control: $12,240M (page, from the 10-K).
+PCB + Component Insp ## 0 ## eol ## PCB and Component Inspection: $750M.
+Specialty Semi ## 0 ## eol ## Specialty Semiconductor Process: $584M.
+total segment revenue ## 0 ## eol ## Total segment revenue near $13.58B, up 12% (page).
+SPC is about 90% ## 0 ## eol ## 12,240 / 13,574 is about 90%, so the stock is essentially a leading-edge process control bet (arithmetic).
+
+@@ KLAC ## Semiconductor Process Control ## What moved
+# Segment growth, fiscal 2026
+
+  PCB + Component    ████████████████████ +21%  advanced packaging
+  Semi Proc Control  ████████████ +12%  foundry/logic + memory
+  Specialty Semi     ▒ -1%  lower China investment
+
+  GAAP net income for the year: $4.83B
+-- spots
+PCB + Component  ## 0 ## eol ## PCB rose 21% on advanced packaging (page).
+Semi Proc Control ## 0 ## eol ## SPC rose 12% on foundry/logic and memory demand tied to AI and HPC (page).
+Specialty Semi ## 0 ## eol ## Specialty Semi fell 1% on lower China investment (page).
+GAAP net income ## 0 ## eol ## GAAP net income for the year was $4.83B (page).
+
+@@ KLAC ## Advanced-packaging process control rev ## Packaging is the new growth leg
+# Advanced-packaging process control revenue
+
+  2025        ███████████████ ~$635M
+  2026 guide  ████████████████████████ ~$1B
+              (an earlier call said over $800M: sources conflict)
+
+  what gets measured in packaging (textbook):
+    bumps   RDL   bonding   warpage
+-- spots
+2025  ## 0 ## eol ## About $635M of advanced-packaging process control revenue in 2025 (page).
+2026 guide ## 0 ## eol ## About $1B in the 2026 guide (page).
+an earlier call said over $800M ## 0 ## eol ## An earlier call said over $800M, so sources conflict (page).
+bumps   RDL   bonding   warpage ## 0 ## eol ## CoWoS-style interposers, HBM stacks and chiplets add inspection of bumps, RDL, bonding and warpage (textbook).
+
+@@ KLAC ## Advanced-packaging process control rev ## A focused rival
+# Packaging is not a KLA monopoly
+
+  ┌───────────────┐        ┌───────────────┐
+  │ KLA           │  vs    │ ONTO (ONTO)   │
+  │ broad process │        │ packaging +   │
+  │ control       │        │ 3D metrology  │
+  └───────────────┘        └───────────────┘
+
+  PCB and Component Inspection, fiscal 2026
+  $750M, +21% (advanced packaging)
+
+  tool orders follow TSMC CoWoS and HBM supply
+-- spots
+│ KLA  ## 0 ## 0 ## KLA is the broad process control leader, but not in packaging specifically.
+ONTO (ONTO) ## 0 ## 0 ## Onto Innovation leads in packaging and 3D metrology and inspection per the page.
+$750M, +21% ## 0 ## eol ## KLA's PCB and Component Inspection segment rose 21% to $750M in fiscal 2026 (10-K data on the page).
+tool orders follow ## 0 ## eol ## Packaging tool orders follow TSMC CoWoS and HBM supply; Advantest's commentary cited wafer starts, CoWoS capacity and memory supply risks (secondary summary).
+
+@@ KLAC ## Top 5 combined ## Share depends on the definition
+# Process control share, 2025 (different definitions)
+
+  KLA, GMI Insights     ████████████████████ 49%
+  KLA, investor day     ███████████████████████ 58%
+  top 5, GMI Insights   ███████████████████████████████ 78.8%
+  top 8, DRI / LP Info  ████████████████████████████████████ ~90%
+
+  top five: KLA, Applied, Lasertec, Onto, ASML
+  ranking is robust; the exact percentage is not
+-- spots
+KLA, GMI Insights ## 0 ## eol ## GMI Insights puts KLA at 49% of process control in 2025.
+KLA, investor day ## 0 ## eol ## KLA's own number is 58% in 2025, up 360 bp since 2021, about 7x the nearest rival, on a narrower definition.
+top 5, GMI Insights ## 0 ## eol ## GMI's top five (KLA, Applied Materials, Lasertec, Onto Innovation, ASML) hold 78.8%.
+top 8, DRI / LP Info ## 0 ## eol ## DRI / LP Information says the top eight vendors hold nearly 90%.
+ranking is robust ## 0 ## eol ## For modelling, use KLA's own segment revenue rather than an aggregator share.
+
+@@ KLAC ## Top 5 combined ## Risks and the moat
+# Why the lead holds, and what could hurt
+
+  moat                          risk
+  ┌───────────────────────┐    ┌───────────────────────┐
+  │ installed-base recipes│    │ China export controls │
+  │ data pipelines        │    │ hit sales (Q2 2025)   │
+  │ broadband plasma lead │    │ foundry + memory      │
+  │ (textbook inference)  │    │ capex cycles          │
+  └───────────────────────┘    └───────────────────────┘
+-- spots
+installed-base recipes ## 0 ## 0 ## Years of tuned recipes and image libraries make switching costly (textbook inference).
+data pipelines ## 0 ## 0 ## Fab-host data paths and APC loops are built around the vendor (textbook inference).
+broadband plasma lead ## 0 ## 0 ## The hardware lead in broadband plasma optics (textbook inference).
+China export controls ## 0 ## 0 ## The Q2 2025 call cited export challenges, and Specialty Semi fell 1% on lower China investment (page).
+foundry + memory ## 0 ## 0 ## Orders follow foundry and memory capex cycles (textbook).
+
+@@ KLAC ## Lasertec (6920.T) ## One bad mask, every wafer
+# A mask defect multiplies
+
+            ┌───────────────┐
+            │ MASK / RETICLE│  one defect here
+            └───────┬───────┘
+          ┌─────────┼─────────┐
+          ▼         ▼         ▼
+       wafer 1   wafer 2   wafer 3 ...  every die printed wrong
+
+  so the mask is inspected before it prints
+-- spots
+MASK / RETICLE ## 0 ## 0 ## A reticle error is multiplied: the mask prints onto every wafer (page).
+wafer 1 ## 0 ## 0 ## Each wafer exposed with the mask carries the same defect.
+every die printed wrong ## 0 ## eol ## Because the same defect repeats on every die, reticle inspection happens first (page).
+so the mask is inspected ## 0 ## eol ## Reticle inspection checks the mask before it prints errors everywhere (page).
+
+@@ KLAC ## Lasertec (6920.T) ## Actinic means at the EUV wavelength
+# Actinic inspection
+
+  EUV light (13.5 nm) ──▶ mask blank ──▶ detector
+                         defects behave as
+                         they will in the scanner
+
+  Lasertec (6920.T): EUV mask-blank + actinic leader
+  KLA: near-monopoly in optical wafer inspection
+  top-five process control vendor (GMI Insights)
+-- spots
+EUV light (13.5 nm) ## 0 ## 0 ## Actinic inspection uses the same EUV wavelength the scanner uses (textbook).
+defects behave as ## 0 ## eol ## At the actinic wavelength, defects show up the way they will print (textbook).
+Lasertec (6920.T) ## 0 ## eol ## Lasertec leads actinic EUV mask-blank inspection (page). No sourced revenue figure was found.
+KLA: near-monopoly ## 0 ## eol ## The page calls KLA a near-monopoly in optical wafer and mask-adjacent inspection, yet Lasertec holds the EUV blank niche.
+top-five process control vendor ## 0 ## eol ## GMI Insights counts Lasertec among the top five process control vendors.
+
+@@ WAFER SORT ## PROBER ## The robot that steps the wafer
+# One wafer through the prober
+
+  FOUP ──▶ notch find + pre-align ──▶ vacuum onto chuck
+                                            │
+                                            ▼
+  cameras align the pads ◀── chuck indexes die to die
+                                            │
+                                            ▼
+                         Z up: needles touch the pads
+
+  makers: Tokyo Electron (8035.T), Accretech / Tokyo Seimitsu (7729.T)
+-- spots
+FOUP ## 0 ## 0 ## The wafer carrier the prober loads from (page).
+notch find + pre-align ## 0 ## eol ## The prober finds the notch and pre-aligns the wafer optically (page).
+vacuum onto chuck ## 0 ## eol ## Vacuum holds the wafer on the chuck for the whole sort.
+cameras align the pads ## 0 ## eol ## Cameras align to the die pads before each touchdown (page).
+chuck indexes die to die ## 0 ## eol ## The chuck steps the wafer from die to die (page).
+Z up: needles touch ## 0 ## eol ## The chuck lifts in Z to bring the needles into contact (page).
+makers: Tokyo Electron ## 0 ## eol ## Listed prober makers on the page; no sourced share.
+
+@@ WAFER SORT ## PROBER ## Why stepping accuracy matters
+# Pad pitch versus alignment error
+
+  60 um HBM micro-bump pitch (FormFactor deck)
+
+   pad     pad     pad     pad
+  ┌──┐    ┌──┐    ┌──┐    ┌──┐
+  └▲─┘    └▲─┘    └▲─┘    └▲─┘
+   │needle tips must land on each pad
+   a few microns of misalignment matters
+
+  128 to 256 sites touch at once: chuck must stay planar
+-- spots
+60 um HBM micro-bump pitch ## 0 ## eol ## HBM micro-bump probing needs pitch below 60 um (FormFactor deck).
+pad  ## 0 ## 0 ## Fine-pitch pads are small targets for the probe tips.
+needle tips must land ## 0 ## eol ## Stepping accuracy sets how well tips hit small pads.
+a few microns of misalignment ## 0 ## eol ## At this pitch, an alignment error of a few microns matters (page).
+128 to 256 sites ## 0 ## eol ## With many sites at once, the chuck must stay planar and the prober needs high Z force (textbook inference).
+
+@@ WAFER SORT ## PROBE CARD ## The consumable that touches the die
+# Probe card, side view (schematic)
+
+  ┌──────────────────────────────┐
+  │ PCB (coarse pitch)           │
+  └──────────────┬───────────────┘
+  ┌──────────────┴───────────────┐
+  │ SPACE TRANSFORMER            │
+  └─┬──┬──┬──┬──┬──┬──┬──┬──┬──┬─┘
+    │  │  │  │  │  │  │  │  │  │    probes: needles or MEMS springs
+  ──┴──┴──┴──┴──┴──┴──┴──┴──┴──┴──  die pads
+
+  one card per product: custom to the pad layout
+-- spots
+PCB (coarse pitch) ## 0 ## 0 ## The probe card PCB connects to the tester through the test head.
+SPACE TRANSFORMER ## 0 ## 0 ## Fans out from the tight probe pitch to the coarse PCB pitch (page).
+probes: needles or MEMS springs ## 0 ## eol ## Needles or MEMS springs matched to one chip's bond pad layout (page).
+die pads ## 0 ## 0 ## The chip's bond pads that the probes touch.
+one card per product ## 0 ## eol ## Each product needs its own card, so cost and lead time are part of every chip launch (textbook).
+
+@@ WAFER SORT ## PROBE CARD ## Probe counts and suppliers
+# Probes per card
+
+  1995 high-end card        ▌ 500
+  per advanced-packaging die ██ 1K to 5K
+  advanced-packaging SoC    ████████████████████ 15K to 60K
+
+  HBM: 128 to 256 sites in parallel
+
+  Technoprobe revenue (EUR M)
+  2024  ███████████████████████████ 543.2
+  2025  ███████████████████████████████ 628.4
+-- spots
+1995 high-end card ## 0 ## eol ## A 1995 card had 500 probes, 60 um tips and 100 um pads on 125 um pitch (Keithley note).
+per advanced-packaging die ## 0 ## eol ## FormFactor: 1K to 5K probes per die for advanced packaging devices (page).
+advanced-packaging SoC ## 0 ## eol ## 15K to 60K probes on an advanced packaging SoC card (FormFactor, page).
+HBM: 128 to 256 sites ## 0 ## eol ## HBM probing runs 128 to 256 sites in parallel (FormFactor deck).
+2024   ## 0 ## eol ## Technoprobe 2024 revenue: EUR 543.2M (page).
+2025   ## 0 ## eol ## Technoprobe 2025 revenue: EUR 628.4M (page).
+
+@@ WAFER SORT ## ATE TESTER ## The tester mainframe
+# Tester, test head, probe card
+
+  ┌─────────────────────────┐
+  │ MAINFRAME               │
+  │ pin electronics         │
+  │ power supplies + timing │
+  └────────────┬────────────┘
+               ▼
+  TEST HEAD ──▶ PROBE CARD ──▶ die on the wafer
+
+  tests: DC (shorts, opens, leakage)  functional
+         speed binning  analog trims
+-- spots
+MAINFRAME ## 0 ## 0 ## The mainframe drives test patterns into the die through the test head and probe card (page).
+pin electronics ## 0 ## eol ## The circuits that drive and sense each pin.
+power supplies + timing ## 0 ## eol ## Power delivery and timing generation live in the mainframe (page).
+TEST HEAD ## 0 ## 0 ## Carries pin electronics close to the wafer (page).
+PROBE CARD ## 0 ## 0 ## The custom board that touches the die.
+tests: DC ## 0 ## eol ## DC tests check shorts, opens and leakage; functional tests run patterns (page).
+
+@@ WAFER SORT ## ATE TESTER ## The duopoly
+# ATE share estimate, 2023 (blog-grade)
+
+  Advantest   ██████████████████████████ 50%
+  Teradyne    ███████████████ 30%
+  others      ██████████ 20%
+
+  Teradyne 2025: $3.2B revenue, +13%, test about 80%
+  Q4 test revenue: $883M (+45% YoY)
+  Advantest: record FY2025, gained share (company note)
+-- spots
+Advantest  ## 0 ## eol ## Advantest (6857.T): estimated 50% of ATE in 2023 (Substack estimate, blog-grade).
+Teradyne  ## 0 ## eol ## Teradyne (TER): estimated 30% (same blog-grade estimate).
+others  ## 0 ## eol ## Cohu, Keysight and others: about 20% (same estimate).
+Teradyne 2025 ## 0 ## eol ## Teradyne 2025 revenue $3.2B, +13%, test about 80% (page).
+Q4 test revenue ## 0 ## eol ## Q4 test revenue $883M, up 45% year on year (page).
+Advantest: record FY2025 ## 0 ## eol ## Advantest says FY2025 set records and the tester market grew a second year, with the company gaining share (company note).
+
+@@ WAFER SORT ## WAFER MAP ## Binning and the map
+# Sample map (illustrative, not fab data)
+
+          · · 1 1 1 1 · ·
+        · 1 1 1 1 1 1 1 1 ·
+        1 1 1 2 1 1 1 1 1 1
+        1 1 1 1 1 1 X 1 1 1
+        1 1 1 1 1 1 1 1 1 1
+        · 1 1 1 1 3 1 1 1 ·
+          · · 1 1 1 1 · ·
+
+  bin 1 full-speed good   2, 3 slower grades   X hard fail
+  picker skips every X
+-- spots
+1 1 1 2 1 1 ## 0 ## 0 ## Bin 1 is full-speed good die (page).
+2  ## 0 ## 0 ## Higher bins are slower sellable grades (page).
+X 1 1 1 ## 0 ## 0 ## A hard fail. Packaging and dicing skip bad die, so no assembly cost is spent on them (page).
+bin 1 full-speed good ## 0 ## eol ## Bin 1 full speed, higher bins slower or hard fails; the map is a data file or ink marks (page).
+picker skips every X ## 0 ## eol ## The picker reads the map and never lifts failed die.
+
+@@ WAFER SORT ## WAFER MAP ## A map is a diagnostic
+# What map patterns point to (illustrative)
+
+  edge cluster         ring               same reticle spot
+  · X X X ·           · 1 1 1 ·           X 1 1 X 1 1
+  X 1 1 1 X           1 X X X 1           1 1 1 1 1 1
+  X 1 1 1 X           1 X 1 X 1           X 1 1 X 1 1
+  · X X X ·           · 1 1 1 ·           1 1 1 1 1 1
+  process problem     CMP                 mask or litho
+
+  HBM: wafer-level test is the KGD gate: 44.13% of the KGD
+  test market in 2025 (research sales page, indicative)
+-- spots
+edge cluster ## 0 ## 0 ## Clusters of failing die at the edge point to process problems (page's drawing notes).
+ring  ## 0 ## 0 ## A ring of failures points to CMP (page's drawing notes).
+same reticle spot ## 0 ## 0 ## Systematic failures at the same reticle position point to a mask or litho issue (textbook).
+process problem ## 0 ## eol ## Edge clusters: a process problem.
+mask or litho ## 0 ## eol ## Same position on every field: mask or litho.
+HBM: wafer-level test ## 0 ## eol ## One market report puts wafer-level testing at 44.13% of the HBM KGD test market in 2025 (research sales page, treat as indicative).
+
+@@ WAFER SORT ## space transformer ## Re-routing pad pitch to board pitch
+# Fan-out from probe pitch to board pitch
+
+   probe tips (tight pitch)      ▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌▌
+                                  ╲╲╲╲╲╲╱╱╱╱╱╱╱╱╱
+   inside the transformer         multilayer ceramic or organic
+                                    ╲    ╲    ╱    ╱
+   to the PCB (coarse pitch)       ▌     ▌    ▌     ▌
+
+  sets probe layout accuracy
+  at large probe counts it limits how many probes fit
+-- spots
+probe tips (tight pitch) ## 0 ## eol ## Chip pads are tight, so the probes at the bottom are closely spaced (page).
+multilayer ceramic or organic ## 0 ## eol ## The space transformer is a multilayer ceramic or organic substrate (page).
+to the PCB (coarse pitch) ## 0 ## eol ## The probe card PCB is coarse, so the substrate fans the signals out to it (page).
+sets probe layout accuracy ## 0 ## eol ## It sets probe layout accuracy and, at large probe counts, limits how many probes fit (page).
+
+@@ WAFER SORT ## space transformer ## Why MEMS probes
+# Pitch ladder for probing
+
+  1995 card        125 um pad pitch    hand-made needles
+  HBM micro-bump   below 60 um
+  fine pitch       45 um               probe force under 1.5 gf
+                                       MEMS spring probes
+
+  each new HBM generation: more stacked die, more heat,
+  alignment must hold across temperature
+-- spots
+1995 card ## 0 ## eol ## A 1995 high-end card used 125 um pad pitch (Keithley note).
+HBM micro-bump ## 0 ## eol ## HBM micro-bump probing pitch is below 60 um (FormFactor deck).
+fine pitch       45 um ## 0 ## eol ## 45 um fine pitch at probe force under 1.5 gf (FormFactor deck).
+MEMS spring probes ## 0 ## eol ## At 45 um pitch each probe must be tiny, which is why MEMS spring probes replaced hand-made needles (textbook).
+each new HBM generation ## 0 ## eol ## Heat from more stacked die affects probe-to-pad alignment, so the transformer must keep its geometry across temperature (FormFactor presentation).
+
+@@ WAFER SORT ## TEST HEAD ## Pogo pins between tester and card
+# The electrical path
+
+  tester pin electronics
+         │
+         ▼
+  ┌─────────────┐
+  │ TEST HEAD   │
+  └──────┬──────┘
+         ▼ pogo pins (spring contacts)
+  ┌─────────────┐
+  │ PROBE CARD  │
+  └─────────────┘
+
+  short path = clean timing for fast interfaces
+-- spots
+tester pin electronics ## 0 ## eol ## The head carries the tester's pin electronics close to the wafer (page).
+TEST HEAD ## 0 ## 0 ## Teradyne and Advantest design heads with their mainframes, so interfaces are vendor-specific (textbook).
+pogo pins (spring contacts) ## 0 ## eol ## A pogo-pin or spring-contact interface connects the head to the probe card PCB (page).
+PROBE CARD ## 0 ## 0 ## The card that fans out to the die pads.
+short path = clean timing ## 0 ## eol ## A short electrical path protects signal timing for fast interfaces (textbook).
+
+@@ WAFER SORT ## TEST HEAD ## Why the path matters
+# What the path must carry
+
+  high-speed I/O      impedance must hold (HBM, AI chips)
+  high current        power delivery even at wafer test
+  contact quality     worn pogo pins add resistance
+                      and false fails (routine maintenance)
+
+  Teradyne semiconductor test, 2025
+  revenue +19%     Q4 test revenue $883M (+45% YoY)
+-- spots
+high-speed I/O ## 0 ## eol ## Modern AI chips and HBM run high-speed I/O, so the head, pogo interface and card must hold impedance (textbook).
+high current ## 0 ## eol ## Accelerators draw high currents even during wafer test (textbook inference).
+contact quality ## 0 ## eol ## Worn pogo pins add contact resistance and false fails, a routine maintenance item (textbook).
+revenue +19% ## 0 ## eol ## Teradyne semiconductor test revenue rose 19% in 2025; Q4 test revenue was $883M, up 45% (page).
+
+@@ WAFER SORT ## WAFER CHUCK ## Vacuum, motion and temperature
+# The chuck
+
+             wafer on top
+  ═══════════════════════════════   probes press down here
+  ┌─────────────────────────────┐
+  │ vacuum holds the wafer      │ ◀── heat or cool: hot/cold test
+  └──────────────┬──────────────┘
+                 │
+        X  Y  Z  theta stage
+                 (moves the wafer, lifts it onto the needles)
+-- spots
+wafer on top ## 0 ## 0 ## The wafer sits on the chuck.
+probes press down here ## 0 ## 0 ## Hundreds of probes push on the wafer, so the force sums over all of them (textbook).
+vacuum holds the wafer ## 0 ## eol ## Vacuum holds the wafer on the chuck (page).
+heat or cool: hot/cold test ## 0 ## eol ## The chuck may be heated or cooled; hot or cold test screens temperature-sensitive fails (textbook).
+X  Y  Z  theta stage ## 0 ## eol ## The chuck sits on an X-Y-Z-theta stage (page).
+
+@@ WAFER SORT ## WAFER CHUCK ## The HBM stress case
+# Load versus pad
+
+  256 sites x many probes ──▶ large total force on the wafer
+  each probe: under 1.5 gf on a fine-pitch pad
+
+  so the chuck needs:
+    flatness      probes all touch together
+    Z control     overdrive stays even
+    cooling       AI chips dissipate heat during test
+    support       thin stacked-memory wafers are fragile
+-- spots
+256 sites x many probes ## 0 ## eol ## With 128 to 256 sites at once, the total load is large (FormFactor deck).
+each probe: under 1.5 gf ## 0 ## eol ## Each pad sees little force, under 1.5 gf (FormFactor deck).
+flatness ## 0 ## 0 ## Planarity matters because hundreds of probes push at once (page, textbook).
+Z control ## 0 ## 0 ## Overdrive must stay even across all probes (textbook inference).
+cooling ## 0 ## 0 ## Chuck cooling capacity limits how hard a device can be exercised (textbook inference).
+support ## 0 ## 0 ## Thin wafers used for stacked memory are fragile on the chuck (textbook).
+
+@@ WAFER SORT ## overdrive ## Overdrive: the contact trade-off
+# Probe tip across a pad (side view, schematic)
+
+  first touch          with overdrive        too much
+      │                    │                   │
+      ▼                    ▼                   ▼
+  ──────────           ───╲──────           ────────╲
+  ▒▒▒▒▒▒▒▒▒▒           ▒▒▒▒╲▒▒▒▒▒           ▒▒▒▒▒▒▒▒▒▒╲  off the pad
+  oxide skin           oxide scrubbed        pad damaged
+                       (about 3 mils / 76 um in a page patent)
+-- spots
+first touch ## 0 ## 0 ## The tip just touches the oxide skin on the pad.
+with overdrive ## 0 ## 0 ## Extra Z travel bends the needle so the tip scrubs, breaking the oxide (page).
+too much ## 0 ## 0 ## Too much overdrive damages the pad or slides the tip off (page).
+oxide skin ## 0 ## eol ## Aluminium pads grow a nonconductive oxide the probe must get through (page).
+about 3 mils / 76 um ## 0 ## eol ## A patent on the page uses about 3 mils (about 76 um) of overdrive.
+
+@@ WAFER SORT ## overdrive ## Why the scrub works
+# Contact resistance and overdrive
+
+  aluminium pad oxide      about 5 to 10 nm (one patent)
+                           insulating: dominates contact resistance
+  tungsten needle card     0.002 to 0.004 inch overdrive (patent)
+
+  cantilever tips     scrub more, shear load under the pad
+  vertical probes     mostly compression
+  too much overdrive  tips wear and break; deep marks
+                      make wire bonding harder
+-- spots
+aluminium pad oxide ## 0 ## eol ## One patent puts the oxide at about five to ten nanometers; its film resistance dominates contact resistance.
+tungsten needle card ## 0 ## eol ## A patent says a tungsten needle card typically needs about 0.002 to 0.004 inch of overdrive.
+cantilever tips ## 0 ## eol ## Cantilever tips scrub more and put shear load on structures under the pad (probe-test papers).
+vertical probes ## 0 ## eol ## Vertical probes mostly apply compression and tolerate higher pressure (probe-test papers).
+too much overdrive ## 0 ## eol ## High overdrive makes tips bend, break and wear faster, and deep scrub marks make wire bonding harder (patents).
+
+@@ WAFER SORT ## HBM parallelism ## 128 to 256 sites at once
+# One touchdown, many die
+
+   one probe card spans many die at once
+
+  ┌────┬────┬────┬────┬────┬────┬────┬────┐
+  │ d  │ d  │ d  │ d  │ d  │ d  │ d  │ d  │ ... 128 to 256 sites
+  ├────┼────┼────┼────┼────┼────┼────┼────┤
+  │ d  │ d  │ d  │ d  │ d  │ d  │ d  │ d  │
+  └────┴────┴────┴────┴────┴────┴────┴────┘
+
+  fewer steps per wafer: test cost per die falls (textbook)
+  pitch below 60 um, fine pitch 45 um, under 1.5 gf
+-- spots
+one probe card spans many die ## 0 ## eol ## Parallelism means one card contacts many die per touchdown (textbook).
+128 to 256 sites ## 0 ## eol ## HBM parallelism of 128 to 256 sites at once, from a FormFactor deck (page).
+fewer steps per wafer ## 0 ## eol ## Fewer touchdowns per wafer cut test cost per die (textbook).
+pitch below 60 um ## 0 ## eol ## HBM micro-bump probing pitch is below 60 um, fine pitch 45 um, probe force under 1.5 gf (FormFactor deck).
+
+@@ WAFER SORT ## HBM parallelism ## Why HBM needs known-good die
+# A bad die kills the stack
+
+  stack of 12 DRAM die + base die
+   ┌──────┐
+   │ good │
+   │ good │
+   │ BAD  │  ◀── whole stack scrapped
+   │ good │
+   └──────┘
+
+  so every die is tested at wafer level first
+  Micronics Japan memory probe cards: Q1 2026 record,
+  sales +51.0% YoY (secondary summary)
+-- spots
+stack of 12 DRAM die ## 0 ## 0 ## HBM stacks multiple DRAM dies, each tested as known-good die (market summary).
+BAD ## 0 ## 0 ## A bad die ruins the whole stack (textbook).
+whole stack scrapped ## 0 ## eol ## That is why wafer-level known-good-die testing gates yield (textbook).
+so every die is tested ## 0 ## eol ## Every die in a stack must be good before stacking (textbook).
+Micronics Japan memory probe cards ## 0 ## eol ## Micronics Japan memory probe cards hit a quarterly record in Q1 2026, sales up 51.0% (secondary summary).
+
+@@ WAFER SORT ## Teradyne total 2025 ## Teradyne
+# Teradyne 2025
+
+  total revenue    $3.2B   +13%
+  of which test    about 80%
+  semiconductor test  +19%
+  Q4 test revenue  $883M   +45% YoY
+
+  Q4 jump = the AI signal: custom accelerators and
+  networking silicon need more test capacity
+-- spots
+total revenue ## 0 ## eol ## Teradyne 2025 revenue was $3.2B, up 13% (page).
+of which test ## 0 ## eol ## About 80% of revenue is test (page).
+semiconductor test  +19% ## 0 ## eol ## Semiconductor Test rose 19% in 2025 (page).
+Q4 test revenue ## 0 ## eol ## Q4 test revenue was $883M, up 45% year on year (page).
+Q4 jump = the AI signal ## 0 ## eol ## Custom accelerators and networking silicon need more test capacity (page).
+
+@@ WAFER SORT ## Teradyne total 2025 ## Reading the numbers
+# Revenue mix and caveats
+
+  test       ████████████████████████████████ about 80%
+  other      ████████ about 20%  (robotics, industrial automation)
+
+  rough 2023 ATE share: Teradyne 30%, Advantest 50%
+
+  units differ by line (Teradyne in USD)
+  compare each company's own growth, not bar lengths
+  a duopoly can gate AI chip ramps (textbook inference)
+-- spots
+test        ## 0 ## eol ## About 80% of Teradyne revenue is test (page).
+other       ## 0 ## eol ## Robotics and industrial automation make up roughly 20% (page).
+rough 2023 ATE share ## 0 ## eol ## Blog-grade 2023 estimate from the page: Advantest 50%, Teradyne 30%.
+units differ by line ## 0 ## eol ## Teradyne reports USD, Advantest yen, Technoprobe EUR, so compare growth rates, not sizes (page).
+a duopoly can gate ## 0 ## eol ## A few test lines could gate AI chip ramps; demand follows a few hyperscaler and GPU programs (textbook inference).
+
+@@ WAFER SORT ## Advantest FY ending Mar 2025 ## Advantest
+# Advantest
+
+  page figure       779.7 billion yen  (FY ended March 2025)
+  company notes     FY2025: record sales, operating profit,
+                    net income
+                    tester market grew a 2nd year (calendar 2025)
+                    Advantest gained share
+  ticker            6857.T   ADR ATEYY
+-- spots
+page figure ## 0 ## eol ## The page shows 779.7 billion yen for the fiscal year ended March 2025.
+company notes ## 0 ## eol ## Advantest's notes say FY2025 set records in sales, operating profit and net income, on AI demand in Q4.
+tester market grew a 2nd year ## 0 ## eol ## The tester market grew for a second consecutive year in calendar 2025 and Advantest says it gained share.
+ticker ## 0 ## eol ## Tokyo: 6857.T. US ADR: ATEYY.
+
+@@ WAFER SORT ## Advantest FY ending Mar 2025 ## Fiscal-year label warning
+# Two figures that conflict
+
+  page             779.7 B yen    FY ended March 2025
+  German summary   1,128.6 B yen  FY2025  (+44.7%)
+                   operating margin 44.2%
+                   SoC testers +44%   memory testers -36%
+
+  not verified against the annual report
+  the fiscal-year labels differ: do not mix them
+-- spots
+page             779.7 ## 0 ## eol ## This looks like the year ended March 2025.
+German summary ## 0 ## eol ## A German-language summary gives FY2025 sales of 1,128.6 billion yen (+44.7%), operating profit 499.1 billion yen. Unverified against the annual report.
+SoC testers +44% ## 0 ## eol ## SoC tester sales up 44%, memory tester sales down 36% (secondary summary).
+not verified ## 0 ## eol ## The two figures conflict. Check the annual report.
+
+@@ WAFER SORT ## FormFactor 2025 ## FormFactor
+# FormFactor (FORM)
+
+  2025 revenue   $785M   record
+
+  HBM driver:
+    fiscal 2024  HBM revenue grew fourfold
+    Q2 2025      volume shipments to all three HBM makers
+    (secondary source)
+
+  also sells probe stations and cryogenic systems
+-- spots
+2025 revenue ## 0 ## eol ## Record 2025 revenue of $785M (page).
+fiscal 2024  HBM revenue ## 0 ## eol ## A market summary says HBM revenue grew fourfold in fiscal 2024 (secondary source).
+Q2 2025      volume ## 0 ## eol ## By Q2 2025 it was shipping in volume to all three major HBM makers (secondary source).
+also sells probe stations ## 0 ## eol ## FormFactor also sells probe stations and cryogenic systems (textbook).
+
+@@ WAFER SORT ## FormFactor 2025 ## Competitors and risk
+# Field and exposure
+
+  competitors     Technoprobe (TPRO.MI)   MPI   CHPT
+                  Micronics Japan (6871.T)
+
+  demand follows  new chip tape-outs
+                  memory capex
+                  HBM yields at SK hynix, Samsung, Micron
+
+  decks supply:  1K-5K probes/die   15K-60K per SoC card
+                 128-256 HBM sites  45 um at under 1.5 gf
+-- spots
+competitors ## 0 ## eol ## Competitors listed on the page: Technoprobe, MPI, CHPT and Micronics Japan.
+demand follows ## 0 ## eol ## Probe cards are custom consumables whose demand follows tape-outs and memory capex (textbook inference).
+HBM yields at ## 0 ## eol ## Demand is tied to HBM yields at the three memory makers (textbook).
+decks supply ## 0 ## eol ## FormFactor decks supply many of the page's figures.
+
+@@ WAFER SORT ## Technoprobe 2025 ## Technoprobe
+# Technoprobe (TPRO.MI), revenue in EUR M
+
+  2024  ███████████████████████████ 543.2
+  2025  ███████████████████████████████ 628.4
+
+  growth about 16% (arithmetic from the page figures)
+  Italian probe card maker, MEMS probes in house
+-- spots
+2024   ## 0 ## eol ## EUR 543.2M in 2024 (page).
+2025   ## 0 ## eol ## EUR 628.4M in 2025 (page; source is the company's May 2026 presentation).
+growth about 16% ## 0 ## eol ## 628.4 / 543.2 is about 1.16 (arithmetic).
+Italian probe card maker ## 0 ## eol ## MEMS probes are made in house (textbook).
+
+@@ WAFER SORT ## Technoprobe 2025 ## Market context
+# Probe card market forecast (research firm, unconfirmed)
+
+  size    USD 3.5 to 5.5 billion
+  growth  6.5% to 9.5% a year through 2031
+
+  fine-pitch cards: a bottleneck
+  single-digit number of vendors
+
+  makers compete on: pitch  current capacity
+                     lifetime in touchdowns
+-- spots
+size    USD 3.5 to 5.5 billion ## 0 ## eol ## A 2026 research forecast puts the probe card market at USD 3.5 to 5.5 billion (research-firm estimate, not confirmed).
+growth  6.5% to 9.5% ## 0 ## eol ## Forecast growth 6.5% to 9.5% a year through 2031 (same estimate).
+fine-pitch cards: a bottleneck ## 0 ## eol ## The page calls fine-pitch cards a bottleneck with a single-digit number of vendors.
+makers compete on ## 0 ## eol ## Competition is on pitch, current capacity and lifetime in touchdowns (textbook).
+
+@@ WAFER SORT ## ATE market share, 2023 ## How concentrated is test
+# Two share estimates that do not reconcile
+
+  SoC ATE (Substack, blog-grade)
+    Advantest 50%   Teradyne 30%   others 20%
+
+  broader test equipment (other report)
+    Teradyne + Advantest + Keysight together: 46%
+
+  different definitions: all test versus SoC ATE
+-- spots
+SoC ATE (Substack ## 0 ## eol ## A Substack estimate on the page puts 2023 ATE share at Advantest 50%, Teradyne 30%, others 20% (blog-grade).
+Advantest 50% ## 0 ## eol ## Advantest: 50% in this estimate.
+broader test equipment ## 0 ## eol ## Another report cites Teradyne, Advantest and Keysight together at 46% of a broader market.
+different definitions ## 0 ## eol ## All test versus SoC ATE: the numbers do not reconcile.
+
+@@ WAFER SORT ## ATE market share, 2023 ## Reading shares
+# How to use the numbers
+
+  company notes    Advantest says it gained share in
+                   calendar 2025
+  explainer        ATE a duopoly, probe cards a
+                   tightening three-vendor oligopoly
+                   (unconfirmed, vendors not named)
+  AI link          more test time per chip: ramps can
+                   be gated by test capacity (inference)
+  best source      each company's own filings
+-- spots
+company notes ## 0 ## eol ## Advantest says it gained share in a tester market that grew in calendar 2025 (company note).
+explainer ## 0 ## eol ## A wafer-sort explainer describes it that way but could not be confirmed from other sources.
+AI link ## 0 ## eol ## Test time per chip rises with complexity; a duopoly with finite output could limit ramps (textbook inference).
+best source ## 0 ## eol ## Use filings for share trends; treat one blog-grade percentage as a rough guide.
+
+@@ WAFER SORT ## Repair step ## Memory repair after test
+# Redundancy repair
+
+  DRAM array             spare rows / columns
+  ┌──────────────┐       ┌────────┐
+  │ row 1  ok    │       │ spare  │
+  │ row 2  FAIL  │ ─────▶│ spare  │  fuse or laser links
+  │ row 3  ok    │       └────────┘  reroute row 2 to a spare
+  └──────────────┘
+
+  retest ──▶ die sells as fully good
+-- spots
+DRAM array ## 0 ## 0 ## For memory, failing rows or columns are replaced with spare ones (page procedure, textbook).
+row 2  FAIL ## 0 ## 0 ## The tester logs failing addresses (textbook).
+spare rows / columns ## 0 ## 0 ## Spare capacity lets a die with a few defective cells be sold as fully good (textbook).
+fuse or laser links ## 0 ## eol ## Repair is done by fusing or laser trimming links, or programming on-die fuses (textbook).
+retest ## 0 ## eol ## The die is retested after repair (page procedure).
+
+@@ WAFER SORT ## Repair step ## Why repair matters for HBM
+# Repair feeds known-good die
+
+  wafer sort ──▶ repair ──▶ retest ──▶ known-good DRAM die
+                                            │
+                                            ▼
+                                       stack 8 to 12 die
+
+  tester needs fast redundancy analysis
+  memory testers (Advantest FY2025, summary): sales -36%
+  SoC testers: +44%
+-- spots
+wafer sort ## 0 ## 0 ## Wafer sort finds failing cells (page).
+repair ## 0 ## 0 ## Repair raises effective yield rather than just rejecting die (textbook).
+known-good DRAM die ## 0 ## 0 ## DRAM die in HBM must be fully good after repair before stacking, because a bad die ruins the stack.
+tester needs fast redundancy analysis ## 0 ## eol ## The tester logs failing addresses and needs built-in redundancy analysis speed (textbook).
+memory testers (Advantest ## 0 ## eol ## The Advantest summary reports memory tester sales down 36% in FY2025 while SoC tester sales rose 44% (secondary summary).
+
+@@ DICE ## TAPE ## Front-side protection tape
+# Wafer flipped for grinding (side view, schematic)
+
+       wheel ▼ ▼ ▼
+  ════════════════════════   back of the wafer (being ground)
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   silicon
+  ░░░░░░░░░░░░░░░░░░░░░░░░   UV backgrind tape
+  ═════ vacuum chuck ═════
+
+  tape: cushions bumps   seals out coolant and swarf
+        holds the wafer flat
+-- spots
+wheel ## 0 ## eol ## The grinding wheel works on the back side while the device side faces the chuck.
+silicon ## 0 ## eol ## The wafer being thinned.
+UV backgrind tape ## 0 ## eol ## A UV-curable tape laminated on the device side before grinding (page).
+vacuum chuck ## 0 ## eol ## Vacuum holds the taped wafer flat.
+tape: cushions bumps ## 0 ## eol ## Three jobs: cushion bumps and passivation, seal out coolant and swarf, hold the wafer flat.
+
+@@ DICE ## TAPE ## Peeling and bump height
+# Tape has to match the topography
+
+  plain wire-bond part       tall bumps / copper pillars
+  ░░░░░░░░░░░░░░░░           ░░░░░░░░░░░░░░░░
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓           ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  thin tape is enough        needs thicker, softer tape
+                             or bumps print through
+
+  UV exposure ──▶ adhesive loses grip ──▶ low-force peel
+  too sticky: tears thin wafers   too weak: slurry creeps in
+-- spots
+plain wire-bond part ## 0 ## 0 ## Flat device surface: a thinner tape layer is enough (textbook).
+tall bumps / copper pillars ## 0 ## 0 ## Common on advanced packaging parts; tape must absorb their height or the pattern prints through as thickness variation (textbook).
+needs thicker, softer tape ## 0 ## eol ## Otherwise the bump pattern shows up as thickness variation in the ground wafer (textbook).
+UV exposure ## 0 ## eol ## UV light drops the adhesive's grip so the tape peels with little force (page).
+too sticky ## 0 ## eol ## A tape that stays too sticky tears thin wafers; one too weak lets slurry creep under the edge and scratch circuits (page).
+
+@@ DICE ## BACKGRIND ## Thinning the wafer
+# Thickness by package type (um, approximate)
+
+  300 mm wafer      ████████████████████████████████████████ 750
+  wire-bond / FC    ████████████████████████ 150-200
+  mobile            ████████████████ 75-100
+  3D stack (HBM)    ███ 50 or less
+
+  coarse wheel (fast) ──▶ fine wheel (finish) ──▶ stress relief
+-- spots
+300 mm wafer ## 0 ## eol ## A 300 mm wafer is about 750 um thick so it survives front-end processing.
+wire-bond / FC ## 0 ## eol ## Roughly 150-200 um for wire-bond and flip-chip packages.
+mobile ## 0 ## eol ## Roughly 75-100 um for mobile.
+3D stack (HBM) ## 0 ## eol ## 50 um or less for 3D stacks such as HBM.
+coarse wheel (fast) ## 0 ## eol ## Two grinding passes, then polish or etch to strip the damaged layer (page).
+
+@@ DICE ## BACKGRIND ## Why thin: HBM
+# HBM4 height budget
+
+  package height limit
+  HBM3E   720 um
+  HBM4    775 um  (JEDEC, 12-high and 16-high)
+
+    ┌────────┐
+    │ DRAM   │ ┐
+    │ DRAM   │ │ 12 to 16 die
+    │ ...    │ │ must all fit
+    │ DRAM   │ ┘
+    │ base   │
+    └────────┘
+-- spots
+HBM3E   720 um ## 0 ## eol ## Thickness stayed at 720 um through HBM3E (TrendForce).
+HBM4    775 um ## 0 ## eol ## JEDEC relaxed the nominal HBM4 package height to 775 um for 12-high and 16-high stacks (TrendForce).
+12 to 16 die ## 0 ## 0 ## Each of 12 or 16 DRAM dies must be a few tens of um or the stack will not fit.
+base ## 0 ## 0 ## The base die sits at the bottom of the stack.
+
+@@ DICE ## GRINDING WHEEL ## Diamond cup wheel
+# In-feed grind (top view)
+
+         wheel (spins fast)
+        ┌───────────┐
+        │  ◜  ◝     │   only the rim touches
+        │  ◟  ◞     │   the wafer
+        └─────┬─────┘
+              ▼ feeds down in um steps
+  ┌───────────────────┐
+  │   wafer (spins    │
+  │   slowly)         │
+  └───────────────────┘
+  contact arc sweeps the whole face: crescent scratches
+-- spots
+wheel (spins fast) ## 0 ## 0 ## A ring of diamond abrasive segments on a metal or resin matrix (page).
+only the rim touches ## 0 ## eol ## Only the wheel rim touches the wafer.
+feeds down in um steps ## 0 ## eol ## The spindle feeds down in micrometre steps (page).
+wafer (spins ## 0 ## 0 ## The wafer on the chuck spins slowly on its own axis.
+crescent scratches ## 0 ## eol ## The in-feed grind leaves a characteristic crescent scratch pattern (page).
+
+@@ DICE ## GRINDING WHEEL ## Coarse, fine and wear
+# Two wheels, two jobs
+
+  coarse wheel  large diamond grit    fast, deep damage
+  fine wheel    small grit            last tens of um
+                                      must remove ALL coarse damage
+                                      residual damage: a few um deep
+
+  wheel life + dressing ──▶ cost per wafer
+
+  DISCO FY Mar-2026: consumables record high,
+  IC grinder sales flat
+-- spots
+coarse wheel ## 0 ## eol ## Large diamond grit removes material fast but leaves deeper damage (page).
+fine wheel ## 0 ## eol ## Small grit takes the last tens of um off (page).
+must remove ALL coarse damage ## 0 ## eol ## Otherwise the cracks survive into the final die (page).
+wheel life + dressing ## 0 ## eol ## Wheels wear and load with swarf, so wheel life shows up directly in cost per wafer.
+DISCO FY Mar-2026 ## 0 ## eol ## DISCO's FY Mar-2026 report notes consumables hit a record high while IC grinder sales were flat.
+
+@@ DICE ## porous vacuum chuck ## Holding a wafer that is thinning
+# Porous ceramic chuck (side view)
+
+  ░░░░░░░░░░░░░░░░░░░░░░░░   taped wafer (last 50-100 um)
+  ┌──────────────────────┐
+  │ ·  ·  ·  ·  ·  ·  ·  │   porous ceramic: vacuum
+  │ ·  ·  ·  ·  ·  ·  ·  │   through the pores holds
+  └──────────┬───────────┘   the whole face flat
+             ▼ vacuum
+  chuck rotates under the wheel, ground flat in the machine
+-- spots
+taped wafer ## 0 ## 0 ## The last 50-100 um of silicon has almost no stiffness of its own (page).
+porous ceramic ## 0 ## eol ## A disc of porous ceramic; vacuum through the pores holds the wafer flat across its whole face (page).
+vacuum ## 1 ## eol ## Vacuum pulled through the pores.
+chuck rotates under the wheel ## 0 ## eol ## The chuck's top surface is ground flat in the machine so the wafer inherits an accurate plane (page).
+
+@@ DICE ## porous vacuum chuck ## Flatness and handling
+# What sets thickness uniformity
+
+  chuck flatness    ┐
+  spindle tilt      ├──▶ thickness variation (a few um target)
+  tape thickness    ┘
+
+  particle between tape and chuck ──▶ dimple in the wafer
+
+  after grinding:
+    Bernoulli or porous end effector (no edge grab)
+    tens-of-um wafers may go on a glass carrier first
+-- spots
+chuck flatness ## 0 ## eol ## Thickness uniformity depends on chuck flatness, spindle tilt and tape variation (page).
+thickness variation ## 0 ## eol ## A few um is a typical target (textbook, no source).
+particle between tape and chuck ## 0 ## eol ## A trapped particle prints into the wafer as a dimple, a classic yield killer on thin wafers (page).
+Bernoulli or porous end effector ## 0 ## eol ## Thin wafers curl, so an air cushion or porous end effector is used instead of grabbing the edge (page).
+tens-of-um wafers ## 0 ## eol ## Wafers thinned to tens of um sometimes go onto a rigid glass carrier first (textbook).
+
+@@ DICE ## MOUNT ## Wafer on dicing tape and frame
+# Ring frame mount (top view)
+
+  ╭───────────────────────────╮
+  │  ring frame (rigid)       │
+  │   ┌───────────────────┐   │
+  │   │ dicing tape       │   │
+  │   │   ( wafer )       │   │
+  │   └───────────────────┘   │
+  ╰───────────────────────────╯
+  back side down, front-side tape removed (UV)
+
+  every later tool grips the frame
+-- spots
+ring frame (rigid) ## 0 ## 0 ## A metal or plastic ring frame makes the thin wafer a rigid object.
+dicing tape ## 0 ## 0 ## Dicing tape stretched across the frame holds the wafer, back side down (page).
+( wafer ) ## 0 ## 0 ## The thinned wafer, floppy on its own.
+back side down ## 0 ## eol ## After grinding, the front-side tape is removed and the wafer is laminated to dicing tape (page).
+every later tool grips the frame ## 0 ## eol ## Saw, laser, expander, inspection and die picker all grip the frame (page).
+
+@@ DICE ## MOUNT ## DAF and failure modes
+# DAF sandwich (side view)
+
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓   wafer
+  ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   die attach film (DAF)
+  ░░░░░░░░░░░░░░░░░░   dicing tape
+
+  laminated as one sandwich: die bonders skip a dispense step
+
+  failure modes: air bubbles (chipping, die shift)
+                 wrinkles
+                 misalignment to the frame
+-- spots
+wafer ## 0 ## 0 ## The thinned wafer.
+die attach film (DAF) ## 0 ## 0 ## The glue that will later hold each die to its substrate or to the die below (page).
+dicing tape ## 0 ## 0 ## The tape that holds everything on the frame.
+laminated as one sandwich ## 0 ## eol ## With DAF on the back, the DAF and dicing tape are laminated together (page).
+air bubbles ## 0 ## eol ## Bubbles under the tape cause chipping and die shift (page).
+wrinkles ## 0 ## eol ## Wrinkles and misalignment to the frame also hurt dicing yield, which is well above 99% in mature lines (page).
+
+@@ DICE ## DICE ## Separating the die
+# Three ways to cut a street
+
+  BLADE            STEALTH LASER        LASER GROOVE + BLADE
+  diamond in water  crack plane inside   laser cuts low-k film,
+  street 50-80 um   street ~15 um        blade cuts silicon
+  chips edges       dry, no kerf         for brittle low-k
+  cheap, proven     (patent figure)
+
+  DFL7363: claimed ~50% more productivity than the
+  conventional model (DISCO, vendor claim)
+-- spots
+BLADE ## 0 ## 0 ## A diamond blade spinning in water; chips the edge and needs streets of 50-80 um (page).
+STEALTH LASER ## 0 ## 0 ## A laser focused inside the silicon forms a crack plane without removing material (page).
+LASER GROOVE + BLADE ## 0 ## 0 ## A laser first grooves the brittle low-k film and a blade finishes the cut (page).
+street ~15 um ## 0 ## eol ## A wafer-dicing patent puts stealth saw lanes at about 15 um versus 50-80 um for blades.
+DFL7363 ## 0 ## eol ## DISCO's DFL7363 stealth saw is claimed to give about 50% more productivity than its conventional model (vendor claim).
+
+@@ DICE ## DICE ## Why it matters for AI chips
+# From 775 um to singulated die
+
+  wafer 775 um ──grind──▶ ~50 um
+  tape  ═══════════════════════════════
+  dice      │   │   │   │   │   (saw / laser)
+          [d] [d] [d] [d] [d] [d]   singulated die
+
+  HBM stack: 12-16 die x ~30-50 um each
+
+  Disco (6146.T) dominant in saws and grinders
+  others: Tokyo Seimitsu (7729.T), ASMPT (0522.HK), Kulicke
+-- spots
+wafer 775 um ## 0 ## eol ## Wafer thickness shown as 775 um in the page art; incoming 300 mm wafers are 725-775 um (SemiconductorX).
+[d] [d] [d] [d] [d] [d] ## 0 ## 0 ## After dicing, the individual die sit on the tape.
+HBM stack: 12-16 die ## 0 ## eol ## HBM stacks of 12-16 dies need ultra-thin, warp-free dies (page).
+Disco (6146.T) ## 0 ## eol ## Disco is the dominant supplier of dicing saws and grinders; no current third-party figure was found.
+others: Tokyo Seimitsu ## 0 ## eol ## Other suppliers: Tokyo Seimitsu, ASMPT, Kulicke (KLIC) for later steps (page).
+
+@@ DICE ## BLADE ## Diamond blade dicing
+# Blade in a street (side view)
+
+        ╭─╮   ← blade, tens of thousands of rpm
+        │ │
+  ▓▓▓▓▓▓│ │▓▓▓▓▓▓   wafer, cut through full thickness
+  ░░░░░░│ │░░░░░░   tape, cut shallowly
+         ↑
+         kerf: tens of um
+
+  water cools the blade and washes debris out
+  street 50-80 um = kerf + alignment tolerance
+-- spots
+blade, tens of thousands of rpm ## 0 ## eol ## An ultra-thin blade embedded with diamond grit spins at tens of thousands of rpm (textbook).
+wafer, cut through full thickness ## 0 ## eol ## The wafer on tape is cut through its full thickness (page).
+tape, cut shallowly ## 0 ## eol ## The cut goes shallowly into the tape.
+kerf: tens of um ## 0 ## eol ## The cut width is tens of um (page).
+street 50-80 um ## 0 ## eol ## The street must be wider than the kerf plus alignment tolerance, hence 50-80 um (page).
+
+@@ DICE ## BLADE ## Where blades fall short
+# Failure modes and suppliers
+
+  chipping       mechanical stress, top and bottom edges
+  low-k cracks   brittle dielectric peels at the cut
+  residue        water can leave residue on exposed pads
+  wear           blades are consumables
+
+  suppliers: DISCO (dominant)
+             Accretech / Tokyo Seimitsu (second source)
+             ASMPT, ADT, Okamoto
+  mature lines: dicing yield above 99%
+-- spots
+chipping ## 0 ## eol ## Mechanical stress causes chipping along top and bottom edges (page).
+low-k cracks ## 0 ## eol ## Brittle low-k dielectrics in advanced nodes can crack or peel at the cut (page).
+residue ## 0 ## eol ## Water can leave residue on exposed pads (page).
+wear ## 0 ## eol ## Blades wear and must be replaced; cost per cut includes the consumable.
+suppliers: DISCO ## 0 ## eol ## The page lists DISCO as dominant in blades with Accretech second.
+mature lines ## 0 ## eol ## Mature blade lines still reach dicing yield above 99% (SemiconductorX).
+
+@@ DICE ## STEALTH ## Stealth dicing
+# Modified layer inside the silicon (side view)
+
+        laser ▼ (wavelength silicon passes)
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  ▓▓▓▓▓▓▓▓▓·╳·▓▓▓▓▓▓▓▓▓▓   ← focus: microcrack plane
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  ░░░░░░░░░░░░░░░░░░░░░░   tape
+        stretch the tape ──▶ cracks run up and down
+
+  no kerf, no water, no slurry
+-- spots
+laser ▼ ## 0 ## eol ## A laser with a wavelength silicon passes is focused inside the wafer (page).
+focus: microcrack plane ## 0 ## eol ## At the focus, energy density creates a modified layer of microcracks without ablating the surface (page).
+tape ## 0 ## 0 ## The wafer is then split by stretching the tape.
+stretch the tape ## 0 ## eol ## Stretching makes the cracks propagate up and down through the thickness (page).
+no kerf, no water, no slurry ## 0 ## eol ## Dry process: hence the narrow street.
+
+@@ DICE ## STEALTH ## Limits
+# Street width and where stealth fits
+
+  blade street     ████████████████████ 50-80 um
+  stealth street   ██ about 15 um
+                   (from a wafer-dicing patent, not a DISCO figure)
+
+  good for: MEMS, image sensors, thin memory
+  DISCO: 2,000+ laser saws shipped by April 2020
+         three new laser saws announced December 2025
+  limit: metal in the street can block the beam
+-- spots
+blade street ## 0 ## eol ## Blade streets are 50-80 um (page).
+stealth street ## 0 ## eol ## A wafer-dicing patent says stealth dicing can cut saw lanes to about 15 um.
+good for: ## 0 ## eol ## A dry process suits MEMS, image sensors and thin memory where water and debris damage (page).
+DISCO: 2,000+ laser saws ## 0 ## eol ## DISCO reported more than 2,000 laser saws shipped by April 2020 and announced three new laser saws in December 2025 (press releases).
+limit: metal in the street ## 0 ## eol ## Test structures in the street must be cleared or the laser comes from the back (page).
+
+@@ DICE ## GROOVING ## Laser grooving before the blade
+# Two-step cut (side view)
+
+  step 1  laser burns two grooves     step 2  blade cuts silicon
+            ╲╱      ╲╱                          between the grooves
+  ▒▒▒▒▒▒▒▒   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒    ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒
+  ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓    ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓
+   low-k + metal removed cleanly       blade only sees silicon
+-- spots
+step 1  laser burns two grooves ## 0 ## eol ## A laser burns a pair of narrow grooves through the low-k and metal stack on each edge of the street (page).
+step 2  blade cuts silicon ## 0 ## eol ## A blade then cuts the remaining silicon between the grooves (page).
+▒▒▒▒▒▒▒▒  ## 0 ## 0 ## The low-k dielectric and metal film stack: weak and brittle.
+low-k + metal removed cleanly ## 0 ## eol ## The laser takes the brittle film out cleanly.
+blade only sees silicon ## 0 ## eol ## So the blade never chips the low-k (page).
+
+@@ DICE ## GROOVING ## Plasma and why it grows
+# Alternatives and trade-offs
+
+  laser grooving   debris must be controlled
+                   protective coating, then removed
+                   extra time per street
+  plasma dicing    etches the street chemically
+                   (Plasma-Therm, Oxford Instruments)
+
+  low-k films are standard on leading-edge AI logic
+  ──▶ laser tools grow as nodes shrink
+-- spots
+laser grooving ## 0 ## eol ## Trade-offs: debris control, a protective coating, and more time per street (page).
+plasma dicing ## 0 ## eol ## Plasma dicing etches the street chemically instead of cutting; listed vendors are Plasma-Therm and Oxford Instruments (page).
+low-k films are standard ## 0 ## eol ## Low-k films are standard on leading-edge AI logic die (textbook).
+laser tools grow ## 0 ## eol ## One more reason laser tools grow as nodes shrink (page).
+
+@@ DICE ## SDBG ## Stealth dicing before grinding
+# SDBG: cut first, grind after
+
+  1 laser-mark inside     ▓▓▓·╳·▓▓▓▓▓·╳·▓▓▓   (wafer still thick)
+  2 grind from the back   ▓▓▓·╳·▓▓▓▓▓·╳·▓▓▓
+                           grinder reaches the layer
+  3 die separate          ▓▓▓  ▓▓▓▓▓  ▓▓▓     (cracks already there)
+
+  ultra-thin die come out strong
+  many memory makers already use SDBG (DISCO)
+-- spots
+1 laser-mark inside ## 0 ## eol ## The wafer is laser-marked first, while thick and strong (page).
+2 grind from the back ## 0 ## eol ## The grinder thins the wafer until it reaches the modified layer (page).
+3 die separate ## 0 ## eol ## Because the cracks are already there, the wafer separates into die as it thins (page).
+ultra-thin die come out strong ## 0 ## eol ## DISCO states this yields very strong ultra-thin chips.
+many memory makers ## 0 ## eol ## DISCO says many memory makers worldwide already use the process, with thin die for stacked flash a main driver.
+
+@@ DICE ## SDBG ## Cold expansion and DAF
+# Why order matters, and how DAF splits
+
+  dicing after grinding: micro-cracks a few um deep
+  die thinned to the same depth ──▶ strength collapses
+  SDBG: cut first ──▶ no chipping on front or back
+
+  cold expander ──▶ DAF turns brittle ──▶ splits cleanly
+  heat shrink   ──▶ tape sag removed ──▶ die go to bonding
+                    (DISCO DDS series)
+-- spots
+dicing after grinding ## 0 ## eol ## Conventional dicing after grinding leaves micro-cracks a few um deep (page).
+SDBG: cut first ## 0 ## eol ## Cutting before grinding avoids the chipping damage on front and back of ultra-thin die (page).
+cold expander ## 0 ## eol ## DISCO says DAF turns brittle when cold, so the expander runs at low temperature (page).
+heat shrink ## 0 ## eol ## Heat shrinking removes tape sag so die go straight to bonding on the same frame (DISCO DDS series).
+
+@@ DICE ## DAF ## Die attach film
+# Epoxy dispense versus DAF
+
+  liquid epoxy               pre-applied DAF
+  ┌────────────┐             ┌────────────┐
+  │ die        │             │ die        │
+  ╰─╮▒▒▒▒▒▒▒╭─╯             └────────────┘
+    ▒▒▒▒▒▒▒▒▒   uneven       ▒▒▒▒▒▒▒▒▒▒▒▒▒▒   uniform
+    ▒ bleed ▒   fillet       no bleed, no fillet
+  hard for thin or stacked die   good for thin or stacked die
+-- spots
+liquid epoxy ## 0 ## 0 ## Liquid epoxy dispensing gives uneven bondline thickness, a problem for thin or stacked die (textbook).
+pre-applied DAF ## 0 ## 0 ## Pre-applied film is uniform, with no epoxy bleed or fillet creeping up the die side (textbook).
+hard for thin or stacked die ## 0 ## eol ## The unevenness matters most on thin and stacked die.
+good for thin or stacked die ## 0 ## eol ## Film bondline stays uniform.
+
+@@ DICE ## DAF ## Cool expansion
+# Splitting DAF
+
+  room temperature      cold expansion
+  film stretches        film is brittle
+  ░░░ stringy ░░░       ░░░ snaps ░░░
+  die edges stay        tears along the
+  connected             die edges
+
+  Lintec DDAF: built for stealth dicing + cool expansion
+  suppliers: Resonac, Nitto Denko, Lintec, Furukawa
+-- spots
+room temperature ## 0 ## eol ## DAF stretches rather than snaps at room temperature, leaving stringy film between die (page).
+cold expansion ## 0 ## eol ## Stretching the frame in a cold chamber makes the film brittle so it tears neatly along die edges (page).
+Lintec DDAF ## 0 ## eol ## Lintec published a dicing die attach film structure built for stealth dicing and cool expansion.
+suppliers: Resonac ## 0 ## eol ## The page names Resonac, Nitto Denko, Lintec and Furukawa Electric.
+
+@@ DICE ## EXPAND + PICK ## Expand, then pick good die
+# Tape expansion
+
+  before                 after (ring pushes frame down)
+  [d][d][d][d][d]        [d]  [d]  [d]  [d]  [d]
+  ══════════════         ═══════════════════════
+  die touching           gaps widen: neighbours apart,
+                         cracks / DAF fully separate
+
+  heat shrink removes slack: spacing holds on the frame
+-- spots
+before ## 0 ## 0 ## After dicing the die sit in their original grid on the tape.
+after (ring pushes frame down) ## 0 ## eol ## A ring pushes the tape frame down while the centre stays held, creating the expansion (page).
+gaps widen ## 0 ## eol ## Widening the gaps keeps neighbours from touching during pick-up and fully separates stealth cracks or DAF (page).
+heat shrink removes slack ## 0 ## eol ## Heat shrink removes slack so die spacing holds on the frame (page).
+
+@@ DICE ## EXPAND + PICK ## Handoff to bonding
+# Wafer map meets the picker
+
+  wafer sort ──▶ map (data file) ──▶ picker
+                                       │
+                          good die lifted      bad die stay on tape
+                                       ▼
+                                die bonding
+
+  12-high HBM stack: every die must be known good
+  DISCO DDS: die move to bonding without re-lamination
+-- spots
+map (data file) ## 0 ## 0 ## The map follows the wafer through the line as a data file, a quiet but critical piece of information flow (page).
+good die lifted ## 0 ## 0 ## Only die marked good are lifted (page).
+bad die stay on tape ## 0 ## 0 ## Bad die stay on the tape and are scrapped (page).
+12-high HBM stack ## 0 ## eol ## In a 12-high stack every die must be known good, so a sorting miss multiplies.
+DISCO DDS ## 0 ## eol ## DISCO's DDS series is designed so die go on to bonding without re-laminating tape (page).
+
+@@ DICE ## 750 um in ## Starting thickness
+# Starting point
+
+  300 mm wafer  725 to 775 um (SemiconductorX)
+                about 750 um (Wikipedia)
+
+  thick enough for        thin enough not to waste
+  hundreds of hot,        silicon
+  stressful steps and
+  robot handling          SEMI standard compromise
+-- spots
+300 mm wafer ## 0 ## eol ## Incoming 300 mm wafers are 725-775 um thick (SemiconductorX), roughly 750 um per Wikipedia.
+thick enough for ## 0 ## 0 ## Thick enough to survive hundreds of hot, mechanically stressful front-end steps and robot handling (textbook).
+thin enough not to waste ## 0 ## 0 ## Thin enough not to waste silicon or make slices too costly (textbook).
+SEMI standard compromise ## 0 ## eol ## The thickness is the same for logic, memory and power chips (textbook).
+
+@@ DICE ## 750 um in ## The thickness budget
+# What thinning removes
+
+  750 um  ██████████████████████████████████████████████████
+  after   █████ 75 um
+          ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ 675 um swarf
+          about 90% of the silicon is ground away
+
+  HBM4 height budget 775 um: thinner die = more die fit
+-- spots
+750 um   ## 0 ## eol ## The starting thickness.
+after    ## 0 ## eol ## Thinned to 75 um, as for mobile packages.
+▒▒▒▒ ## 0 ## eol ## 675 of 750 um removed (arithmetic), lost as swarf; the ground surface needs polish or plasma etch.
+about 90% of the silicon ## 0 ## eol ## Thinning to 75 um removes about 90% of the silicon (arithmetic).
+HBM4 height budget 775 um ## 0 ## eol ## The thinner each die, the more dies can be stacked in the JEDEC height limit (page, TrendForce).
+
+@@ DICE ## DISCO net sales ## DISCO as the bellwether
+# DISCO net sales (billion yen)
+
+  FY Mar-2025  ███████████████████████████████████████ 393.3
+  FY Mar-2026  ███████████████████████████████████████████ 436.889
+
+  shipments FY Mar-2026: 442.824
+  nine months to Dec 2025: sales +11.5%, net income +8.7%
+  ticker 6146.T   ADR DSCSY
+-- spots
+FY Mar-2025 ## 0 ## eol ## 393.3 billion yen the year before (page, using Roic's figure).
+FY Mar-2026 ## 0 ## eol ## 436.889 billion yen for the fiscal year ended March 2026 (page).
+shipments FY Mar-2026 ## 0 ## eol ## Shipments were 442.824 billion yen.
+nine months to Dec 2025 ## 0 ## eol ## For the nine months to December 2025, sales rose 11.5% and net income 8.7%.
+
+@@ DICE ## DISCO net sales ## How to read it
+# Consumables versus machines
+
+  consumables (blades, wheels)   record high
+                                 recurring, tied to wafer volume
+  IC grinders                    flat
+  power + other grinders         down
+
+  = installed base running hard,
+    new tool orders lumpy
+
+  risks: yen, smartphone + auto cycles, China
+-- spots
+consumables (blades, wheels) ## 0 ## eol ## Consumables hit a record high in FY Mar-2026 (DISCO report).
+IC grinders ## 0 ## eol ## Grinders were flat for IC.
+power + other grinders ## 0 ## eol ## Down for power and other uses.
+= installed base running hard ## 0 ## eol ## Consumables are recurring and higher margin than machines (textbook).
+risks: yen ## 0 ## eol ## Yen moves, cyclical smartphone and auto demand, and Chinese demand all feed in.
+
+@@ DICE ## Lintec ## Tapes and films concentration
+# Who makes tape and film (all Japanese)
+
+  dicing tape   Lintec (7966.T)           Mitsui Chemicals (4183.T)
+                Nitto Denko (6988.T)      Furukawa Electric (5801.T)
+  DAF           Resonac (4004.T)          Nitto Denko
+                Lintec                    Furukawa
+
+  no sourced market shares found
+-- spots
+dicing tape ## 0 ## eol ## Tape suppliers listed on the page.
+Lintec (7966.T) ## 0 ## 0 ## Lintec published a paper on a new dicing die attach film structure for stealth dicing and cool expansion.
+DAF           Resonac ## 0 ## eol ## Die attach film suppliers: Resonac, Nitto Denko, Lintec and Furukawa Electric.
+no sourced market shares ## 0 ## eol ## No sourced market shares for these films were found.
+
+@@ DICE ## Lintec ## Why it sticks
+# One-time use, tight qualification
+
+  wafer starts ──▶ tape + film used once ──▶ volume scales
+  film qualified with a specific saw + expander recipe
+  switching supplier ──▶ requalification time
+  ──▶ pricing power in a niche too small for new entrants
+
+  watch: contamination excursions
+         tape chemistry for 16-high HBM
+         Japanese chemical export policy
+-- spots
+wafer starts ## 0 ## eol ## Each wafer uses tape and film once, so volumes scale with wafer starts and die per stack.
+film qualified with ## 0 ## eol ## The film is qualified together with a specific saw and expander recipe (textbook).
+switching supplier ## 0 ## eol ## Switching suppliers takes qualification time (textbook).
+watch: contamination ## 0 ## eol ## Contamination excursions, new chemistries for 16-high HBM, and Japanese chemical export policy shifts.
+
+@@ DICE ## Risk ## One vendor, many chokepoints
+# One country, one dominant vendor
+
+  DISCO (Japan):  saws ─ wheels ─ blades
+        │
+        ▼
+  grinders + laser saws thin the wafers
+        │
+        ▼
+  HBM stacks need die thinned to tens of um
+        │
+        ▼
+  AI memory output can be gated here
+  (inference from the numbers, not a sourced shortage claim)
+-- spots
+DISCO (Japan) ## 0 ## 0 ## One Japanese vendor dominates saws, wheels and blades (page).
+grinders + laser saws thin the wafers ## 0 ## eol ## Grinder and laser-saw supply thins every HBM wafer.
+HBM stacks need die thinned ## 0 ## eol ## HBM stacks need wafers thinned to tens of um (page).
+AI memory output can be gated here ## 0 ## eol ## The page's risk line, an inference rather than a sourced shortage claim.
+
+@@ DICE ## Risk ## Second sources and scenarios
+# Alternatives
+
+  dicers + grinders   Accretech / Tokyo Seimitsu (7729.T)
+                      ASMPT (0522.HK)  ADT (Israel)  Okamoto
+  laser + plasma      Synova (Switzerland)  Plasma-Therm (US)
+                      Oxford Instruments (OXIG.L)
+
+  scenario: earthquake or export limit in Japan
+            hits blades, wheels, tapes and film together
+  tools qualified per recipe: no quick swap
+-- spots
+dicers + grinders ## 0 ## eol ## Second sources listed on the page; no sourced share numbers.
+laser + plasma ## 0 ## eol ## Laser and plasma vendors listed on the page.
+scenario: earthquake ## 0 ## eol ## A single-country event would hit blades, wheels, tapes and film simultaneously.
+tools qualified per recipe ## 0 ## eol ## An HBM maker cannot swap saws quickly because tools are qualified per process recipe (textbook).
+
+@@ PICK ## WAFER SORT ## Test before cut
+# Sort, then cut, then stack
+
+  wafer sort ──▶ wafer map ──▶ dice ──▶ pick good die
+  (probe every     (bin per die)          │
+   die)                                   ▼
+                                     bond / stack
+
+  ordinary chip: bad die = lost revenue
+  HBM: one bad die can kill the whole stack
+-- spots
+wafer sort ## 0 ## 0 ## Wafer sort electrically tests every die with a probe card before anything is cut (page).
+wafer map ## 0 ## 0 ## Each die is binned good or bad and the result is saved as a wafer map (page).
+dice ## 0 ## 0 ## Dicing singulates the die; see the DICE page.
+pick good die ## 0 ## 0 ## The picker reads the map so bad die are never lifted (page).
+ordinary chip ## 0 ## eol ## For ordinary chips a bad die just means lost revenue (page).
+HBM: one bad die ## 0 ## eol ## For HBM it is worse, because one bad die can kill a whole stack (page).
+
+@@ PICK ## WAFER SORT ## The map and repair
+# Map travels with the lot
+
+  map file ──▶ validated against notch + alignment marks
+               wrong lot / rotated wafer = scrapped good silicon
+
+  stack tested after assembly cannot be repaired
+  so: sort first, stack second
+
+  memory repair at sort:
+    blow fuses to swap failed rows for spares
+-- spots
+map file ## 0 ## 0 ## The map travels as data with the wafer lot (page).
+wrong lot / rotated wafer ## 0 ## eol ## Mismatched maps are a classic factory error that scraps good silicon (textbook).
+stack tested after assembly ## 0 ## eol ## A stack that is tested after assembly cannot be repaired (page).
+blow fuses ## 0 ## eol ## Memory makers use redundancy repair at sort, replacing failed rows with spares (textbook).
+
+@@ PICK ## WAFER MAP ## The good and bad die list
+# Coordinate file (illustrative)
+
+  die (3,4)   bin 1   ──▶ pick
+  die (3,5)   bin 1   ──▶ pick
+  die (3,6)   FAIL    ──▶ stays on tape, scrapped
+  die (4,1)   bin 2   ──▶ slower grade (some flows)
+
+  HBM stacks need fully good DRAM: bin 1 only
+-- spots
+die (3,4) ## 0 ## 0 ## For each die position the map holds a bin code (page).
+FAIL ## 0 ## eol ## Failures stay on the tape and are scrapped (page).
+bin 2 ## 0 ## eol ## Some flows add finer bins such as speed grades or partially good die sold as lower-spec parts (textbook).
+HBM stacks need fully good DRAM ## 0 ## eol ## HBM stacks need fully good DRAM die (page).
+
+@@ PICK ## WAFER MAP ## Why it is a bottleneck
+# From map to action
+
+  sawn wafer ──▶ vision finds each die ──▶ match to map position
+                                                │
+                              mapping error = silent and expensive
+                              cross-check: inline vision of the
+                              sawn wafer (cracked / chipped die
+                              that passed electrical test)
+
+  bad-die patterns (edge ring, cluster) point to front-end tools
+-- spots
+vision finds each die ## 0 ## 0 ## The pick tool must locate each die by vision, match it to a map position and act (page).
+mapping error = silent and expensive ## 0 ## eol ## A single mapping error is silent and expensive (page).
+cross-check: inline vision ## 0 ## eol ## Fabs cross-check the map with inline vision because cracked or chipped die can pass electrical test (textbook).
+bad-die patterns ## 0 ## eol ## Patterns like an edge ring or cluster point to front-end process tools, linking yield to back-end cost (page).
+
+@@ PICK ## DICE + TAPE ## Sawn wafer on tape
+# After dicing
+
+  ┌──┬──┬──┬──┬──┐
+  │d │d │d │d │d │   die still in the original grid
+  └──┴──┴──┴──┴──┘
+  ═══════════════════  dicing tape on the frame
+
+  UV-release tape: grip drops before pick
+  expansion: gaps widen, vision finds edges,
+  neighbours do not touch
+  cut quality: chips, burrs, DAF strings become particles
+-- spots
+die still in the original grid ## 0 ## eol ## After dicing the die sit on tape in their original grid, held on the frame (page).
+dicing tape on the frame ## 0 ## 0 ## Tape on a ring frame holds the sawn wafer.
+UV-release tape ## 0 ## eol ## The adhesive is UV-releasable in many products so thin die are easier to lift (textbook).
+expansion: gaps widen ## 0 ## eol ## Tape expansion widens the gaps and keeps neighbours from touching (page).
+cut quality ## 0 ## eol ## Chips, burrs and stringy DAF residue on the die edge become particles and bonding defects at the picker (page).
+
+@@ PICK ## DICE + TAPE ## HBM die thickness
+# HBM3E 12-high stack
+
+  ┌─────────┐
+  │ DRAM 12 │
+  │  ...    │  each die tens of um
+  │ DRAM 1  │
+  │ base die│
+  └─────────┘
+  height limit: 720 um (HBM3E) ──▶ 775 um (HBM4)
+  JEDEC raised it so HBM4 can keep microbumps
+
+  warp in a thin die on tape ──▶ pick failures
+-- spots
+DRAM 12 ## 0 ## 0 ## HBM3E 12-high stacks hold 12 DRAM dies and a base die (page).
+each die tens of um ## 0 ## eol ## HBM dies are thinned to a few tens of microns before stacking.
+height limit: 720 um ## 0 ## eol ## JEDEC relaxed the nominal package height to 775 um for HBM4 (TrendForce).
+JEDEC raised it ## 0 ## eol ## The higher limit lets HBM4 keep microbumps rather than being forced onto hybrid bonding (page).
+warp in a thin die ## 0 ## eol ## Warp in a thin die on the tape shows up as pick failures (page).
+
+@@ PICK ## COLLET ## Pick-up collet
+# Vacuum collet (side view)
+
+       ┌──────┐
+       │collet│ ◀── vacuum
+       └──┬───┘
+       ┌──┴───┐
+       │ die  │
+  ═════╧══════╧═══ tape
+
+  soft rubber / polymer tip: spreads load on thin die
+  hard tip: less forgiving
+  worn or dirty collet: scratches or drops the die
+-- spots
+│collet│ ## 0 ## 0 ## A vacuum tip that grips the die face, lifts it from the tape and swings it to the bonder (page).
+vacuum ## 0 ## 0 ## Vacuum holds the die to the collet.
+soft rubber / polymer tip ## 0 ## eol ## Material and tip shape are matched to die size (page).
+worn or dirty collet ## 0 ## eol ## A worn or contaminated collet scratches the die or drops it (page).
+
+@@ PICK ## COLLET ## Placement and cleanliness
+# Why the collet is not the bottleneck
+
+  12-high stack = 12 picks + 12 bond cycles
+  picker cycle time: not the limit
+  placement accuracy: the limit
+
+  vision aligns die and target:
+    microbumps        microns
+    hybrid bonding    sub-micron
+
+  hybrid needs clean oxide: a particle = a void
+-- spots
+12-high stack = 12 picks ## 0 ## eol ## A 12-high stack needs 12 picks and 12 bond cycles (page).
+placement accuracy: the limit ## 0 ## eol ## Picker cycle time is not the bottleneck against the bonder; placement accuracy is (page).
+microbumps        microns ## 0 ## eol ## Alignment is in microns for microbumps (textbook).
+hybrid bonding    sub-micron ## 0 ## eol ## And sub-micron for hybrid bonding (textbook).
+hybrid needs clean oxide ## 0 ## eol ## Particles on the oxide surface cause voids in the bond (page).
+
+@@ PICK ## EJECTOR NEEDLE ## Needle that pushes the die up
+# Peel from the edges inward (side view)
+
+          ┌────────────┐
+          │    die     │  ◀── collet lifts
+  ════════╧╤══╤══╤══╤═╧════════ tape (vacuum holds it down)
+           │  │  │  │
+          needle(s) rise: centre lifts,
+          tape peels from the die edges inward
+
+  force, speed, stroke height tuned for thin die
+-- spots
+die ## 0 ## 0 ## The die being picked.
+tape (vacuum holds it down) ## 0 ## eol ## The chuck holds the tape down by vacuum while the needle rises (page).
+needle(s) rise ## 0 ## eol ## A needle or set of needles (or stepped ejector tower) lifts the centre of the die (page).
+force, speed, stroke height ## 0 ## eol ## Tuned precisely, because the die flexes as the tape peels and cracks if the stroke is too fast or too high (page).
+
+@@ PICK ## EJECTOR NEEDLE ## Failure modes
+# What goes wrong
+
+  die under ~100 um: single needle can punch through
+                     multi-needle or ultrasonic ejector
+                     spreads the force (textbook)
+  DAF-backed die:    film adds adhesion, more force needed
+
+  latent damage:     microcracks pass visual inspection
+                     fail later in reliability tests
+                     ──▶ why stacks are retested
+-- spots
+die under ~100 um ## 0 ## eol ## Single needles can punch through thin die; multi-needle or ultrasonic-assisted ejectors spread force (textbook).
+DAF-backed die ## 0 ## eol ## The film comes with the die, adding adhesion that fights the peel and raises the force needed (page).
+latent damage ## 0 ## eol ## Microcracks pass visual inspection but fail in reliability tests later (page).
+why stacks are retested ## 0 ## eol ## The page notes a wrong ejector stroke cracks HBM DRAM dies.
+
+@@ PICK ## PLACE ## Align and place
+# Die onto target
+
+   ┌────────┐   die from the collet
+   └────────┘
+       ▼  vision aligns marks (IR through silicon for TSV stacks)
+   ┌────────┐
+   │ target │   base die, die below, or substrate
+   └────────┘
+
+  tolerance: a fraction of the bump pitch
+  tilt or warp: open joint one side, short on the other
+-- spots
+die from the collet ## 0 ## 0 ## Placement puts each die onto its target with correct alignment (page).
+vision aligns marks ## 0 ## eol ## Alignment uses vision marks on die and substrate and, for TSV stacks, through-silicon infrared (textbook).
+│ target │ ## 0 ## 0 ## The base die, the die below, or the substrate.
+tolerance: a fraction ## 0 ## eol ## For microbump flows the tolerance is a fraction of the bump pitch (page).
+tilt or warp ## 0 ## eol ## Thin silicon warps; the result is an open on one side and a short on the other (page).
+
+@@ PICK ## PLACE ## The pitch ladder
+# Interconnect pitch (um)
+
+  historical      ████████████████████ 40
+  volume memory   ████████████ 25
+  newest memory   █████ 10
+  hybrid today    ███ 6
+  in development  ██ 4.5   █ 3
+
+  TSMC reportedly asked for ~5 um class bumps
+  mass production est. 2H 2028 (TrendForce)
+-- spots
+historical ## 0 ## eol ## 40 um historically (page).
+volume memory ## 0 ## eol ## 25 um as the cited volume standard (page).
+newest memory ## 0 ## eol ## 10 um in the latest memory (page).
+hybrid today ## 0 ## eol ## 6 um hybrid at the leading edge (page).
+in development ## 0 ## eol ## 4.5 and 3 um in development (page).
+TSMC reportedly asked ## 0 ## eol ## TSMC reportedly asked partners for roughly 5 um class bumps, with mass production estimated for 2H 2028 (TrendForce).
+
+@@ PICK ## BOND HEAD ## Thermocompression head
+# TCB cycle (side view)
+
+       ┌──────────┐ heat + force
+       │ bond head│
+       └────┬─────┘
+       ┌────┴─────┐
+       │ new die  │  solder caps melt, wet the pads
+       ╞══NCF═════╡  film softens, flows out, cures
+       │ stack    │
+       └──────────┘  heated stage below
+
+  one die per cycle: 12-high = 12 cycles
+-- spots
+bond head ## 0 ## 0 ## The head picks up the die, heats it and presses it down with controlled force and temperature (page).
+new die ## 0 ## eol ## The solder caps on the microbumps melt and wet the pads (page).
+NCF ## 0 ## 0 ## The non-conductive film softens, flows out of the joint and cures (page).
+heated stage below ## 0 ## eol ## The stage below is also heated (page).
+one die per cycle ## 0 ## eol ## Each die is bonded one by one; throughput per tool is the economic variable (page).
+
+@@ PICK ## BOND HEAD ## Who sells bonders
+# TC bonder suppliers (press claims)
+
+  Hanmi (042700.KS)     ~65% (one report); 90% (low-quality)
+  ASMPT (0522.HK)       guides 35-40%
+  Hanwha Semitech  SEMES (Samsung)  Toray  Shinkawa
+
+  Jun 2026: SK hynix order to Hanmi, 44.2B won
+            TC BONDER 4.5 GRIFFIN, HBM4, ~7.7% of Hanmi's
+            2025 revenue (TrendForce/Hankyung)
+  SEMES: nearly 100 TC bonders delivered in a year
+-- spots
+Hanmi (042700.KS) ## 0 ## eol ## Hanmi led supply to SK hynix, but share claims conflict: about 65% in one report, 90% in a low-quality one.
+ASMPT (0522.HK) ## 0 ## eol ## ASMPT guides to 35-40% (page).
+Hanwha Semitech ## 0 ## eol ## Other named suppliers (page).
+Jun 2026 ## 0 ## eol ## SK hynix reportedly placed a 44.2 billion won order with Hanmi for HBM4, delivery through Sept 2 (TrendForce/Hankyung).
+SEMES: nearly 100 ## 0 ## eol ## SEMES delivered nearly 100 TC bonders in a year (Chosun, via TrendForce).
+
+@@ PICK ## NCF resin ## Non-conductive film
+# NCF in the joint (side view)
+
+  die    ┌──────────────┐
+  bump   ▲▲            ▲▲
+  film   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒   pre-applied epoxy
+  pad    ▼▼            ▼▼
+  die    └──────────────┘
+
+  heat: film melts, flows out of the joint
+        solder touches the pad
+  then:  cures ──▶ supports the stack, fills the gap
+  window: flow enough to clear the bump, trap no voids
+-- spots
+film   ▒▒▒ ## 0 ## 0 ## A pre-applied epoxy film between DRAM die (page).
+bump ## 0 ## 0 ## Microbumps are solder-capped copper pillars.
+heat: film melts ## 0 ## eol ## During thermocompression NCF melts and flows out so the solder can touch the pad (page).
+then:  cures ## 0 ## eol ## It then cures to give mechanical support and fill the gap; it replaces a separate underfill step per layer (page).
+window: flow enough ## 0 ## eol ## A tight window: voids, filler trapping and squeeze-out are failure modes (page, textbook).
+
+@@ PICK ## NCF resin ## NCF versus MR-MUF
+# Two stacking processes
+
+  TC-NCF                      MR-MUF (SK hynix)
+  bond each die with          tack-bond the stack lightly
+  heat + force, one by one    mass reflow melts all joints
+  film between die            inject molding compound once
+  slower per layer            batch reflow
+
+  TrendForce: MR-MUF allows higher stack counts
+  film thickness adds to height (HBM4 cap: 775 um)
+-- spots
+TC-NCF ## 0 ## 0 ## Bond die one at a time with full heat and force each cycle (page, textbook).
+MR-MUF (SK hynix) ## 0 ## 0 ## Dies are tack-bonded, then mass reflow and a molded underfill are done for the whole stack at once (page).
+slower per layer ## 0 ## eol ## Throughput and heat behaviour differ (textbook).
+batch reflow ## 0 ## eol ## MR-MUF batches the reflow (textbook).
+TrendForce: MR-MUF ## 0 ## eol ## TrendForce's comparison says MR-MUF allows higher stack counts than TC-NCF.
+film thickness adds ## 0 ## eol ## Film thickness also adds to stack height, which JEDEC capped at 775 um for HBM4.
+
+@@ PICK ## microbumps ## Microbumps and TSVs
+# Between two DRAM die (side view)
+
+   die 2 ┌────────────────┐
+         │  TSV │    │ TSV│  ◀ through-silicon vias
+         ▲▲     ▲▲    ▲▲      microbumps (solder-capped Cu)
+         ▼▼     ▼▼    ▼▼
+   die 1 │  TSV │    │ TSV│
+         └────────────────┘
+
+  smaller pitch = more connections per mm2
+-- spots
+through-silicon vias ## 0 ## eol ## TSVs run down through each thinned DRAM die so signals pass layer to layer (page).
+microbumps ## 0 ## eol ## Small solder-capped copper pillars on the die face, one per signal path (page).
+TSV ## 0 ## 0 ## A TSV: a vertical copper conductor through the silicon.
+smaller pitch ## 0 ## eol ## Smaller pitch means more connections per mm2 (page).
+
+@@ PICK ## microbumps ## Pitch limits
+# Why microbumps run out
+
+  below ~10 um   solder wicks sideways, shorts neighbours
+                 bump heights vary
+
+  HBM4 height 775 um ──▶ microbumps still fit
+  hybrid bonding removes the bump:
+    thinner interconnect layer, better heat flow
+
+  TSMC: ~5 um class bumps, mass production est. 2H 2028
+-- spots
+below ~10 um ## 0 ## eol ## Below about 10 um solder wicks sideways and shorts neighbours, and bump heights vary (page).
+HBM4 height 775 um ## 0 ## eol ## JEDEC raised the limit from 720 to 775 um, letting HBM4 keep microbumps (page).
+hybrid bonding removes the bump ## 0 ## eol ## No bump also thins the interconnect layer and improves heat flow (textbook).
+TSMC: ~5 um class ## 0 ## eol ## TSMC reportedly asked partners for roughly 5 um class bumps (TrendForce).
+
+@@ PICK ## MR-MUF ## SK hynix mass reflow molded underfill
+# MR-MUF steps
+
+  1 stack die, light tack bond
+  2 mass reflow oven: all solder joints melt together
+  3 inject liquid epoxy molding compound into every gap
+  4 cure
+
+  compound: fills gaps, protects joints,
+            conducts heat better than film (textbook)
+  SK hynix: 16-high HBM3E planned on Advanced MR-MUF
+            (unveiled 2024, hybrid bonding as backup)
+-- spots
+1 stack die ## 0 ## 0 ## Dies are stacked with a light tack bond (page).
+2 mass reflow oven ## 0 ## eol ## The whole stack goes through a mass reflow oven (page).
+3 inject liquid epoxy ## 0 ## eol ## A liquid epoxy molding compound is injected into the gaps in one shot (page).
+compound: fills gaps ## 0 ## eol ## Fills the space between die, protects the joints and conducts heat better than film (textbook).
+SK hynix: 16-high HBM3E ## 0 ## eol ## SK hynix unveiled a 16-high HBM3E at SK AI Summit 2024 and said it would use Advanced MR-MUF (iconnect007 / TrendForce).
+
+@@ PICK ## MR-MUF ## Share and tooling
+# HBM share, Q2 2025 (Counterpoint)
+
+  shipments       SK hynix ██████████████████████████ 62%
+                  Micron   █████████ 21%
+                  Samsung  ███████ 17%
+  revenue         SK hynix ████████████████████ 50%
+                  Samsung  █████████████ 33%
+                  Micron   ███████ 18%
+
+  Korean table: 64 / 15 / 21: treat as estimates
+-- spots
+SK hynix ██████████████████████████ ## 0 ## eol ## SK hynix: 62% of HBM shipments in Q2 2025 (Counterpoint).
+Micron   █████████  ## 0 ## eol ## Micron: 21% of shipments.
+Samsung  ███████ 17% ## 0 ## eol ## Samsung: 17% of shipments, down from 41% a year earlier.
+SK hynix ████████████████████ ## 1 ## eol ## SK hynix: 50% of HBM revenue (58% in Q1).
+Samsung  █████████████ 33% ## 0 ## eol ## Samsung: 33% of revenue (21% in Q1).
+Korean table ## 0 ## eol ## Counterpoint's Korean site lists 64/15/21 for shipments, so the exact split is approximate.
+
+@@ PICK ## Hybrid bonding ## Copper-to-copper without bumps
+# Hybrid bond steps (side view)
+
+  1 CMP: oxide + Cu pads polished flat
+  2 press together at room temperature
+     ▓▓▓▓ ▓▓▓▓ ▓▓▓▓      oxide bonds to oxide
+     ░░░░ ░░░░ ░░░░      Cu pads touch
+  3 anneal: Cu expands more than the oxide
+            pads meet and fuse
+
+  no solder, no film, no underfill
+  pitch today about 6 um; 4.5 and 3 um in development
+-- spots
+1 CMP ## 0 ## eol ## Oxide and copper pad surfaces are polished perfectly flat by CMP (textbook).
+2 press together ## 0 ## eol ## The two die are pressed together at room temperature so the oxide bonds (textbook).
+3 anneal ## 0 ## eol ## The copper expands more than the oxide, so pads meet and fuse (textbook).
+no solder, no film ## 0 ## eol ## No solder, no film, no underfill (textbook).
+pitch today ## 0 ## eol ## About 6 um at the leading edge, with 4.5 and 3 um in development (page).
+
+@@ PICK ## Hybrid bonding ## Status and risks
+# Where hybrid stands
+
+  Apr 2026   SK hynix finished 12-high validation, working on yield
+  roadmaps   HBM5 and stacks above 20 dies (SK hynix)
+  HBM6       Hanmi plans a hybrid tool
+  market     near $2B by 2028 (TrendForce, Oct 2025)
+
+  tools: Besi (BESI.AS) leads, ASMPT delivering
+         Hanwha, LG developing (LG by 2028)
+  risk:  one particle = a void across many pads
+-- spots
+Apr 2026 ## 0 ## eol ## SK hynix reportedly finished validation of 12-high hybrid-bonded HBM and is working on yield (TrendForce).
+roadmaps ## 0 ## eol ## Roadmaps place hybrid for HBM5 and stacks above 20 dies (SK hynix, per the page).
+HBM6 ## 0 ## eol ## Hanmi plans a hybrid tool for HBM6 (page).
+market     near $2B ## 0 ## eol ## A hybrid bonder market near $2B by 2028 was reported by TrendForce in Oct 2025.
+tools: Besi ## 0 ## eol ## Besi leads tools; ASMPT is delivering to HBM customers (page).
+risk:  one particle ## 0 ## eol ## Hybrid is delayed by yield and particle control; a single particle leaves a void across many pads (page).
+
+@@ PICK ## Why only known-good die ## Compound yield
+# Working stacks at 12 high (arithmetic)
+
+  99% per die   █████████████████████████████████████ 88.6%
+  95% per die   ████████████████████████████ 54.0%
+
+  0.99^12 = 0.886     0.95^12 = 0.540
+
+  20 layers at 99.5% per die: under 91% (illustrative)
+-- spots
+99% per die ## 0 ## eol ## 0.99^12 gives 88.6% working stacks (arithmetic, not sourced).
+95% per die ## 0 ## eol ## 0.95^12 gives 54.0% working stacks (arithmetic).
+0.99^12 = 0.886 ## 0 ## eol ## A bad die wastes the 11 good ones and the base die, so sort comes first, stacking second.
+20 layers at 99.5% ## 0 ## eol ## 0.995^20 is about 0.90, so under 91% (illustrative arithmetic).
+
+@@ PICK ## Why only known-good die ## Cost of a lost stack
+# The hidden constraint
+
+  logic die  ──┐
+               ├──▶ accelerator package
+  good HBM  ───┘     needs enough good stacks
+
+  HBM = highest-value memory die
+  lost stack = much more value gone than a bad DRAM chip
+
+  KGI (secondary): Rubin CoWoS shipments under 50% of
+  allocation in 2026 on HBM4 constraints (treat with caution)
+-- spots
+logic die ## 0 ## 0 ## GPU makers can buy all the logic die they like.
+good HBM ## 0 ## 0 ## But without enough good stacks the package cannot ship (page).
+HBM = highest-value memory die ## 0 ## eol ## A lost stack destroys much more value than a bad ordinary DRAM chip (page).
+KGI (secondary) ## 0 ## eol ## KGI, cited by one search result, expects Nvidia Rubin CoWoS shipments below 50% of allocation in 2026, citing HBM4 constraints (secondary report).
+
+@@ PICK ## HBM share ## Who buys the process
+# Shipments versus revenue, Q2 2025
+
+              shipments   revenue
+  SK hynix       62%        50%   (58% in Q1)
+  Samsung        17%        33%   (21% in Q1; 41% of shipments a year ago)
+  Micron         21%        18%   (21% in Q1)
+
+  source: Counterpoint; Korean table shows 64 / 15 / 21
+-- spots
+SK hynix       62% ## 0 ## eol ## SK hynix: 62% of shipments, 50% of revenue (58% in Q1).
+Samsung        17% ## 0 ## eol ## Samsung: 17% of shipments but 33% of revenue (21% in Q1).
+Micron         21% ## 0 ## eol ## Micron: 21% of shipments, 18% of revenue (21% in Q1).
+source: Counterpoint ## 0 ## eol ## Press and analyst estimates, not audited.
+
+@@ PICK ## HBM share ## Reading the shares
+# What the gap and the process mean
+
+  Samsung revenue share > shipment share
+  ──▶ higher average price per unit that quarter
+      (textbook inference)
+
+  process chosen by each maker:
+    SK hynix  MR-MUF        others  TC-NCF
+  ──▶ one customer's orders swing a bonder vendor's year
+      Hanmi leans on SK hynix   SEMES = Samsung affiliate
+
+  tickers: 000660.KS  005930.KS  MU
+-- spots
+Samsung revenue share ## 0 ## eol ## Samsung sold at a higher average price per unit that quarter, likely from a different mix (textbook inference).
+process chosen by each maker ## 0 ## eol ## Each memory maker picks a process, so tool orders from one customer can swing a vendor's year (page).
+Hanmi leans on SK hynix ## 0 ## eol ## Hanmi leans on SK hynix; SEMES is a Samsung affiliate (page).
+tickers: ## 0 ## eol ## SK hynix 000660.KS, Samsung 005930.KS, Micron MU.
+
+@@ PICK ## Hanmi ## TC bonder leader and its challengers
+# TC bonder field
+
+  Hanmi (042700.KS)   led supply to SK hynix
+                      share: ~65% (one report), 90% (low-quality)
+  ASMPT (0522.HK)     guides 35-40%
+  Hanwha Semitech
+  SEMES (Samsung)     nearly 100 TC bonders in one year
+  Toray   Shinkawa
+-- spots
+Hanmi (042700.KS) ## 0 ## eol ## Hanmi led thermocompression bonder supply to SK hynix, but share claims conflict, so treat both as estimates.
+ASMPT (0522.HK) ## 0 ## eol ## ASMPT guides to 35-40% (page).
+Hanwha Semitech ## 0 ## 0 ## Hanwha Semitech is a challenger (page).
+SEMES (Samsung) ## 0 ## eol ## SEMES, a Samsung affiliate, delivered nearly 100 TC bonders in one year (page).
+
+@@ PICK ## Hanmi ## Orders and risks
+# Orders and what could change
+
+  Jun 2026   SK hynix: 44.2B won for TC BONDER 4.5 GRIFFIN
+             (HBM4 ramp; ~7.7% of Hanmi's 2025 revenue;
+              maybe ~15 units at ~3B won each)
+             going to the new M15X fab, Cheongju (Korea Herald)
+  Hanmi view HBM4 + HBM5 still on TC bonders
+             hybrid tool for HBM6 by end 2027
+  risks      customer concentration, share loss to Hanwha,
+             hybrid shift favours Besi
+-- spots
+Jun 2026 ## 0 ## eol ## SK hynix reportedly placed a 44.2 billion won order, delivery through Sept 2 (TrendForce, citing Hankyung).
+(HBM4 ramp ## 0 ## eol ## Said to equal about 7.7% of Hanmi's 2025 revenue and possibly about 15 units at roughly 3 billion won each.
+going to the new M15X fab ## 0 ## eol ## Korea Herald says the units are headed to SK hynix's new M15X fab in Cheongju.
+Hanmi view ## 0 ## eol ## Hanmi says HBM4 and HBM5 can still use TC bonders and plans a hybrid tool for HBM6 by end 2027 (TrendForce).
+risks      customer ## 0 ## eol ## Customer concentration, share loss to Hanwha, and a hybrid transition that favours Besi (page).

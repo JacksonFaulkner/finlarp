@@ -1,0 +1,255 @@
+== HARD MASK
+# Resist is too soft
+Litho exposes resist, but resist is too soft to survive a long, deep etch. So the pattern is usually transferred first into a harder layer (carbon, nitride, oxide or metal, textbook) that erodes far more slowly than the film below it. Etch then carves the film through that hard mask.
+
+# Selectivity caps depth
+The ratio of film etch rate to mask etch rate is called selectivity, and it caps how deep you can go. A 10 um NAND channel hole needs a mask thick enough to survive the whole etch while its opening stays near 100 nm wide.
+
+# Layers drive etch demand
+Every EUV or DUV layer printed by a scanner is only worth something once etch copies it faithfully. Pattern fidelity errors (mask faceting, line-edge roughness, critical-dimension drift) are baked in at this step and cannot be fixed later. More mask layers per GAA logic node and more word-line tiers per NAND generation mean more etch steps per wafer, the structural driver behind Lam and TEL growth (textbook).
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+textbook
+
+== IGNITE
+# From neutral gas to plasma
+A strong RF field accelerates the few free electrons present. They collide with gas molecules, ionise some, and release more electrons until the discharge sustains itself (textbook). This happens at 5-100 mTorr: low enough that electrons gain energy between collisions, high enough to supply gas.
+
+# RIE versus ICP
+Capacitive RIE couples RF between two plates, so source and bias are tied together and plasma density stays lower. Inductive (ICP) reactors use a coil outside a dielectric window to induce the field, giving a high-density plasma of about 1e11 per cm3 and letting source and bias be set independently. The page quotes an ICP tool spec of up to 2500 W at 2.4 MHz, with bias at 13.56 MHz (textbook).
+
+# Drift and chamber matching
+Failure modes: unstable ignition, arcing and drifting plasma impedance cause wafer-to-wafer variation. Chamber-matching across hundreds of tools in a fab is a major service and software problem, part of why services are 38% of Lam revenue (FY2025).
+
+# Sources
+https://en.wikipedia.org/wiki/Reactive-ion_etching
+https://patents.google.com/patent/US6402974
+Lam FY2025 10-K https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+
+== RADICALS
+# The chemical half
+Radicals are neutral, highly reactive fragments made when electrons break gas molecules apart, for example CF4 + e- giving CF3 + F. Neutrals feel no electric field, so they arrive at the wafer from every angle. Fluorine reacts with silicon or oxide to form volatile SiF4 gas that the pumps remove. Radicals alone etch isotropically, undercutting the mask (textbook).
+
+# Gas choices by film
+Fluorocarbons such as CF4 and C4F8 etch oxide and nitride. Cl2 or HBr etch poly-silicon and fins. For 3D NAND the page cites HF gas at cold wafer temperature, with PF3 as a catalyst that raises the rate (textbook, cryo-etch article).
+
+# When radicals are the point
+Radical flux, together with ion flux, sets etch rate; the ratio sets profile. Too many radicals relative to ions gives bowed or tapered sidewalls. Radical-heavy, ion-free regimes are used deliberately where you want isotropic removal, such as releasing GAA nanosheets by selectively removing SiGe laterally.
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+https://ebooks.spiedigitallibrary.org/conference-proceedings-of-spie/12958/129580P/Study-of-precisely-controlled-selective-isotropic-quasi-ALE-of-SiGe/10.1117/12.3010886.full
+https://research.ibm.com/publications/a-novel-dry-selective-etch-of-sige-for-the-enablement-of-high-performance-logic-stacked-gate-all-around-nanosheet-devices
+
+== ION-ASSISTED
+# Ions make it vertical
+Radicals sit on the surface but SiO2 etches slowly with fluorine alone, because Si-O bonds are strong. Positive ions (CF3+, Ar+) accelerated across the sheath hit the wafer at near-normal incidence, break those bonds and sputter byproducts. So reaction happens mainly on horizontal surfaces, not sidewalls. Ions plus radicals together etch far faster than the sum of either alone (textbook).
+
+# Source power and bias
+Source power sets ion flux and bias power sets ion energy, roughly 1 V per watt, geometry dependent. Higher energy gives straighter holes and faster floor etch but worse selectivity to the mask and more lattice damage.
+
+# Deep holes starve for ions
+At the extreme, high-aspect-ratio holes (about 10 um deep through a 100 nm opening in NAND, aspect ratio approaching 70:1) lose ion energy and angle on the way down, which slows the floor etch. Bias power, pulsing and cryogenic cooling are central to the roadmaps of Lam, TEL and AMAT. Lam's Akara platform is described as using direct-drive solid-state RF delivery with plasma pulsing. Recent literature also reports a shift to very low frequency bias (below a few MHz) to raise ion energy and narrow angular spread.
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+https://www.barchart.com/story/news/34425597/lrcx-s-akara-etch-wins-gain-momentum-can-it-expand-dram-share
+https://cpseg.eecs.umich.edu/pub/articles/JVSTA_43_033001_2025.pdf
+
+== SIDEWALL
+# The protective film
+Sidewall passivation keeps trench walls from being eaten sideways. Carbon-containing byproducts and polymer from fluorocarbon gases (or oxide from O2 in silicon etch, textbook) deposit thinly on all surfaces. Ions sputter it off the floor, where they strike directly, but the sidewalls see few ions, so the film survives and blocks radical attack. Net result: vertical walls.
+
+# A balancing act
+Too little passivation gives bowing and undercut. Too much gives tapering, or polymer that closes the mouth of the hole and stops the etch entirely (an etch-stop failure). In deep holes polymer at the top can block ions. A 3D NAND patent also notes that insufficient sidewall passivation results in bowing and poor critical dimension control.
+
+# Cryo changes the balance
+At 0 to -30 C wafer temperature, the cold surface suppresses sidewall attack and adsorbs more neutrals, so less polymer is needed and the floor etches faster. Tokyo Electron reports its cryo etcher uses 84% lower carbon than its first cryo run, relevant to the PFAS and greenhouse-gas pressure on fluorocarbon gases.
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+
+== STRIP
+# Remove the helpers
+Strip and clean removes everything that was only there to enable the etch: leftover hard mask or resist (typically oxygen plasma ashing, textbook), the sidewall polymer, and residues containing halogens that would corrode metal if left. Wet clean chemistries follow (textbook), and the wafer then moves to the next deposition or implant step.
+
+# Why etch and clean are bundled
+Every litho layer is followed by etch and then clean, so clean is bundled with etch in market data. Yole Group puts etch plus clean at 27% of wafer-fab equipment in 2022 and 19% in H1 2024, with etch-plus-clean revenue falling 16.7% in 2023 on the NAND capex downturn.
+
+# Yield risks in strip
+Residual polymer or particles leave defects (opens, shorts) in later layers. Over-aggressive strip can attack the sidewalls just carved or damage low-k dielectrics (textbook). In high-aspect-ratio holes, getting byproducts and clean chemistry out of a 10 um-deep hole is itself a hard transport problem.
+
+# Sources
+https://yolegroup.com/strategy-insights/
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+
+== SHOWERHEAD
+# Even gas delivery
+The showerhead is a perforated top electrode (capacitive reactors) or a dielectric window beneath the coil (ICP) that distributes process gas evenly across the wafer. Gas enters a plenum above and exits through thousands of small holes as jets at 5-100 mTorr. Uniformity of gas delivery sets uniformity of etch rate across a 300 mm wafer (textbook).
+
+# A consumable part
+Failure modes (textbook): hole erosion changes flow; polymer or particle flaking from the showerhead onto the wafer causes defects; edge-to-centre non-uniformity. Showerheads are consumable parts made from silicon, silicon carbide, yttria-coated or anodised aluminium, which is why Lam's services business (38% of FY2025 revenue on $18.44B) includes spares and upgrades.
+
+# Chamber design differentiates
+Chamber design is a differentiator. Lam's Akara conductor etch platform is described as combining direct-drive solid-state RF power delivery with plasma pulsing, targeted at gate-all-around logic and advanced DRAM and NAND. Management said Akara's installed base doubled over the past year (secondary summary of the Q2 2026 call; treat with caution).
+
+# Sources
+https://www.barchart.com/story/news/34425597/lrcx-s-akara-etch-wins-gain-momentum-can-it-expand-dram-share
+https://www.sec.gov/Archives/edgar/data/0000707549/000070754926000037/lrcx-20260628.htm
+
+== PLASMA:
+# Three species
+The plasma region holds three species. Electrons are light and fast and do the dissociating and ionising. Radicals (F, Cl) are neutral chemical reactants. Ions (CF3+, Ar+) are charged and carry energy to the wafer. Density on the page is about 1e11 per cm3 for a high-density plasma, orders of magnitude fewer than neutrals at these pressures, so the plasma is only weakly ionised (textbook).
+
+# The sheath
+Between plasma and wafer sits the sheath, a thin region with a strong field where ions are accelerated. The RF bias sets the voltage across it, giving ions their energy. Because ions drop through the sheath nearly perpendicular, they hit the floor at normal incidence, producing vertical walls. Positive ions have narrow angular spreads, while electrons arrive nearly isotropic, which can charge the feature interior in deep holes (HAR etch literature).
+
+# Why ICP replaced RIE
+Independent control of density (flux) and sheath voltage (energy) is the main reason ICP replaced simple RIE for demanding layers. Process engineers tune 30+ recipe knobs, and a source cited on the page describes AI tuning 33 of them once for a NAND recipe.
+
+# Sources
+https://en.wikipedia.org/wiki/Reactive-ion_etching
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+
+== ESC
+# Holding and cooling the wafer
+The electrostatic chuck holds the wafer flat with an electrostatic force and lets helium flow behind it to carry heat between wafer and chuck. Ion bombardment dumps substantial power into the wafer, so without back-side helium cooling the wafer would drift hot and etch rate and profile would change (textbook).
+
+# Cryo etch demands more
+For cryogenic NAND etch the chuck and chiller hold the wafer at 0 to -30 C. The chuck must hold temperature uniform across 300 mm while RF bias passes through it, and keep the wafer from icing or the gas condensing. Lam's Cryo 3.0 is claimed to deliver more than twice the etch rate of conventional dielectric etch with 40% lower energy per wafer, and the vendor says nearly 1,000 Lam cryo chambers are installed in NAND fabs, covering 5 million wafers (vendor claims).
+
+# Failure modes
+Failure modes: wafer sticking or de-chucking errors, helium leaks at the edge, and temperature non-uniformity that shows up as a ring pattern in critical dimension (textbook).
+
+# Sources
+https://www.emsnow.com/?p=42504
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+
+== cathode
+# The bottom electrode
+The cathode is the bottom electrode beneath the chuck. It carries the RF bias (13.56 MHz, textbook) that creates the sheath voltage and so controls ion energy, and it houses the chiller channels that hold wafer temperature. In cryo etch it must remove a lot of heat: the page quotes 0 to -30 C.
+
+# Bias is the deep-hole lever
+Higher ion energy keeps ions straight and energetic through a 10 um hole, but too much sputters the mask. Recent tools add pulsed and multi-frequency bias to decouple ion energy from angle distribution, since ions lose energy and angle on the way down a deep hole. The wafer-edge region is shaped by a focus ring; ring erosion shifts edge profiles and is a regular consumable (textbook).
+
+# Pull from NAND and HBM
+HBM and NAND both depend on deep etch, and the rated number of tiers (about 30% more word lines per generation on the page) pushes cathode power and cooling specs upward each generation.
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+textbook
+
+== Lam Cryo 3.0
+# What it is
+Lam Cryo 3.0 is Lam Research's third-generation cryogenic dielectric etch, aimed at the deepest 3D NAND channel holes. The vendor claims more than twice the etch rate of conventional dielectric etch and 40% lower energy per wafer. It works by holding the wafer cold (0 to -30 C per the cryo-etch article), where sidewall attack falls, adsorbed neutrals rise and floor etch speeds up. Lam says nearly 1,000 of its cryo chambers are installed, covering 5 million wafers (all vendor claims).
+
+# Why NAND needs it
+As NAND goes toward 100:1 aspect ratios (the page says that is much harder than today's roughly 70:1), conventional RIE slows as holes deepen. Cryo is Lam's wedge in memory, which is 42% of its end market. Competitor Tokyo Electron launched its first cryo etcher in 2023.
+
+# Risk
+Cryo is memory-capex dependent. NAND capex dropped sharply in 2023 and etch plus clean revenue fell 16.7% that year (Yole). I could not confirm any Cryo 3.0 detail beyond the vendor claims.
+
+# Sources
+https://www.emsnow.com/?p=42504
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+https://www.sec.gov/Archives/edgar/data/0000707549/000070754926000037/lrcx-20260628.htm
+
+== NAND channel hole
+# A very deep, very thin hole
+The NAND channel hole is a vertical hole punched through the whole stack of alternating oxide and nitride layers, later filled to form the string of memory cells. Per the cryo-etch article it is about 10 um deep through a roughly 100 nm opening, and allowed deviation is under 10 nm (less than 0.1% of depth). A tall two-tier stack is about 30 um, and word-line z-pitch is around 40 nm.
+
+# How holes fail
+The hole twists, bows, tapers or fails to reach the bottom, so cells in the string misalign. Tiny deviations at the top become large misses at the bottom. The same article lists polymer clogging at the mouth, ions losing energy and angle with depth, and conventional RIE rate dropping as holes deepen. Circularity distortion and slit twisting have been linked to etch regime; one Samsung-related study found a neutral-starved (ion-rich) regime essential to mitigate both.
+
+# Why AI cares
+HBM is DRAM, but AI datacentres also buy enormous enterprise SSD capacity, and each NAND generation adds roughly 30% more word lines (per the article), meaning more etch time per wafer and more etch tools per bit. That is why Lam, TEL and Hitachi High-Tech pitch cryo and high-aspect-ratio platforms to NAND makers.
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+
+== aspect ratio
+# Depth over width
+Aspect ratio is hole depth divided by hole width. The page says NAND is approaching 70:1 today, while 100:1 is described as much harder. At 10 um deep and 100 nm wide the ratio is 100:1 by simple arithmetic, which shows the article's figures are for roughly current to next-generation holes, not identical limits (my arithmetic).
+
+# Why depth is hard
+Ion flux reaching the floor falls with depth because ions collide with walls and lose angle. Neutral reactants must diffuse down and byproducts must diffuse up (Knudsen transport, textbook). The mask erodes while the etch runs, and charging of the hole can deflect ions. The article lists these as failure modes, plus 30+ recipe knobs that interact.
+
+# Industry responses
+Cryo etch, string stacking in two tiers (the 30 um stack), pulsed bias, and AI-assisted recipe tuning (33 knobs tuned by AI once). Lam says its Akara platform targets high-aspect-ratio etch for advanced DRAM and NAND as well as gate-all-around logic. Each aspect-ratio step is a reason for memory makers to buy new etch tools rather than reuse old ones.
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+https://www.barchart.com/story/news/34425597/lrcx-s-akara-etch-wins-gain-momentum-can-it-expand-dram-share
+https://cpseg.eecs.umich.edu/pub/articles/JVSTA_41_013006_2023.pdf
+
+== ALE
+# Two self-limiting steps
+Atomic layer etching splits etching into two self-limiting half-steps: first a surface modification step (for example chlorine adsorbs on silicon), then a low-energy ion step (Ar+) that removes only the modified layer. Because each cycle removes a fixed thin amount, control is at the atomic scale.
+
+# Numbers from simulation
+The page quotes a molecular-dynamics yield of 0.172 Si per ion for Cl2 plus 50 eV Ar+, 1.9 angstroms per cycle for C4F8/Ar+ on SiO2, and 1.63 angstroms per cycle for GaN/AlGaN (not silicon).
+
+# Where it is used
+Gate-all-around nanosheets, where lateral, isotropic, highly selective SiGe-over-Si removal builds the inner spacer cavity and releases channels. Research reports a cyclic oxidation-then-etch quasi-ALE for SiGe, and IBM work reports a dry SiGe lateral etch with roughly 150:1 selectivity over Si. A 2025 study found gas etching gave the highest SiGe selectivity and less nanosheet damage than ICP or remote plasma. ALE is slow, so it is used only on thin critical steps, which raises step count per wafer (textbook).
+
+# Sources
+https://plasma.oxinst.com/technology/atomic-layer-etching
+https://research.ibm.com/publications/a-novel-dry-selective-etch-of-sige-for-the-enablement-of-high-performance-logic-stacked-gate-all-around-nanosheet-devices
+https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12844779/
+
+== China
+# Lam's biggest region
+China was Lam's largest region in FY2025 at 34% of its $18.44B revenue, ahead of Korea at 22% and Taiwan at 19%. That concentration is the stock's main policy risk: US export controls restrict advanced etch tools to certain Chinese fabs, so a tightening can remove a third of revenue quickly, while a loosening can add it back (textbook inference, not a filing quote).
+
+# Who is buying
+The mix reflects who is buying: Chinese memory and foundry makers pursuing domestic capacity at mature nodes. Lam systems are 62% of revenue and services 38%; services (spares, upgrades) are stickier than new tool sales and partly cushion a China pullback. End-market split is memory 42, foundry 45, logic and other 13.
+
+# Open questions
+Competition: domestic Chinese etch makers are a rising threat as Chinese customers are pushed toward local tools (textbook, not verified here). Current FY2026 regional percentages were not obtained beyond the FY2025 figures; Lam's FY2026 10-K is filed and is the place to check whether the China share changed.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+https://www.sec.gov/Archives/edgar/data/0000707549/000070754926000037/lrcx-20260628.htm
+
+== Etch+clean 22
+# Share of wafer-fab equipment
+This row is Yole Group's estimate of etch plus clean as a share of wafer-fab equipment: 27% in 2022 and 19% in H1 2024, versus patterning (lithography) at 29% of WFE in 2024e and deposition at 25%. Etch plus clean revenue fell 16.7% in 2023 as the NAND capex downturn bit.
+
+# Why it swings
+The share swings with memory cycles because etch is heavily levered to NAND and DRAM layer count. The drop from 27% to 19% mostly reflects lower NAND spending plus faster growth elsewhere in WFE (lithography and deposition share rising in 2024). Definitions differ across analysts, and the page notes 2024 WFE revenue was stable before a 2025 surge.
+
+# Investor read
+When memory capex recovers, etch is typically among the first segments to rebound because deep-hole etch tools are the bottleneck per wafer. Lam's end-market exposure to memory (42%) is why LRCX trades as a memory-capex proxy as well as an AI proxy.
+
+# Sources
+https://yolegroup.com/strategy-insights/
+
+== Tokyo Electron
+# Number two in etch
+Tokyo Electron (8035.T) is the number two etch player and the strongest challenger to Lam in memory. The cryo-etch article says TEL launched its first cryogenic etcher in 2023, and reports 84% lower carbon than its first cryo run.
+
+# Estimated share
+Secondary reports put Lam plus Applied at about 60% of etch revenue and TEL about 20%; another puts the top three at about 90%. Definitions differ and no primary split is public.
+
+# Competitive map
+Competition between TEL and Lam in NAND channel-hole etch decides who captures the biggest cryo volumes. Applied (AMAT) leads in conductor etch and selective removal but is bigger in deposition, and Hitachi High-Tech is a further etch supplier. Risks: Japan export policy alignment with US controls, yen swings on reported results, and NAND capex cyclicality (textbook).
+
+# Sources
+https://semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+https://www.alliedmarketresearch.com/etch-process-market-A317527
+
+== Lam Research (LRCX)
+# The pure play
+Lam Research is the etch leader and the best pure-play on the segment. FY2025 revenue was $18.44B: systems 62%, services 38%; end markets memory 42, foundry 45, logic and other 13; regions led by China 34%, Korea 22%, Taiwan 19%.
+
+# Product pillars
+Cryo dielectric etch for NAND high-aspect-ratio holes (Cryo 3.0, claimed more than 2x etch rate and 40% lower energy per wafer), and Akara conductor etch for gate-all-around logic and advanced DRAM. Per a secondary summary of the Q2 2026 call, Akara's installed base doubled in a year with tool-of-record wins in EUV and high-aspect-ratio applications, and Lam expects Akara-related applications to grow about 2x in gate-all-around and about 3x in DRAM at the 1D node (treat with caution). Lam's launch material says Akara scales to 6F2 DRAM and 3D NAND and is extendible to 4F2 DRAM, CFET and 3D DRAM.
+
+# Risks
+NAND capex swings, China export controls, and TEL/AMAT competition. The FY2026 10-K (period ended June 2026) is on file for current figures.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+https://www.barchart.com/story/news/34425597/lrcx-s-akara-etch-wins-gain-momentum-can-it-expand-dram-share
+https://eurekamagazine.co.uk/content/news/lam-research-corp-unveils-akara

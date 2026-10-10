@@ -484,6 +484,10 @@ fn hit_source(h: &Hit) -> Source {
 }
 
 impl Screen for Search {
+    fn leader_ok(&self) -> bool {
+        false
+    }
+
     fn draw(&mut self, frame: &mut Frame) {
         self.render(frame);
     }
