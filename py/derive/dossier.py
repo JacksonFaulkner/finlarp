@@ -43,7 +43,7 @@ import duckdb
 
 
 from core import db
-from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
+from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe, yahoo, yahoo_profile
 
 D = universe.DATA_ROOT
 SEC = "https://www.sec.gov"
@@ -450,6 +450,113 @@ def profile_(t: str, prof: dict | None) -> dict | None:
     return {"id": "profile", "title": "Profile", "blocks": blocks}
 
 
+EST_MODULES = "earningsTrend,earningsHistory,recommendationTrend,upgradeDowngradeHistory,financialData"
+EST_PERIODS = {"0q": "Current quarter", "+1q": "Next quarter", "0y": "Current year", "+1y": "Next year"}
+
+
+def _raw(f):
+    return f.get("raw") if isinstance(f, dict) else f
+
+
+def _n(v, fmt: str = "{:,.2f}") -> str:
+    return "—" if v is None else fmt.format(v)
+
+
+def estimates_(t: str) -> dict | None:
+    """Analyst consensus from Yahoo Finance (the Analysis page): EPS and
+    revenue estimates by period, how they have been revised, price targets,
+    the rating mix, and recent upgrades / downgrades."""
+    session = yahoo.new_session()
+    res = yahoo_profile.fetch(session, t, EST_MODULES)
+    if not res:
+        return None
+    url = f"https://finance.yahoo.com/quote/{quote(t)}/analysis/"
+    y = lambda what: src(f"Yahoo Finance analysis · {what}", url)  # noqa: E731
+    blocks = []
+
+    fd = res.get("financialData") or {}
+    price, mean_t = _raw(fd.get("currentPrice")), _raw(fd.get("targetMeanPrice"))
+    kv = []
+    if fd.get("recommendationKey"):
+        kv.append({"label": "Consensus rating", "value": f"{fd['recommendationKey']} "
+                   f"(mean {_n(_raw(fd.get('recommendationMean')), '{:.2f}')} of 5, "
+                   f"{_n(_raw(fd.get('numberOfAnalystOpinions')), '{:.0f}')} analysts)", "src": y("financialData.recommendationKey")})
+    for key, label in (("targetLowPrice", "Target low"), ("targetMeanPrice", "Target mean"),
+                       ("targetMedianPrice", "Target median"), ("targetHighPrice", "Target high")):
+        if _raw(fd.get(key)) is not None:
+            kv.append({"label": label, "value": f"${_raw(fd[key]):,.2f}", "src": y(f"financialData.{key}")})
+    if price and mean_t:
+        up = (mean_t / price - 1) * 100
+        kv.append({"label": "Upside to mean target", "value": _pct(up), "src": derived(
+            "Upside to mean analyst target", f"({mean_t:,.2f} / {price:,.2f} − 1) × 100 = {up:+.1f}%",
+            [y("financialData.targetMeanPrice"), y("financialData.currentPrice")])})
+    if kv:
+        blocks.append({"type": "kv", "title": "Consensus", "rows": kv})
+
+    trend = {p["period"]: p for p in (res.get("earningsTrend") or {}).get("trend", []) if p.get("period") in EST_PERIODS}
+    eps_rows, rev_rows, rev_trend_rows = [], [], []
+    for per, label in EST_PERIODS.items():
+        p = trend.get(per)
+        if not p:
+            continue
+        e, r, tr = p.get("earningsEstimate") or {}, p.get("revenueEstimate") or {}, p.get("epsTrend") or {}
+        name = f"{label} (ends {p.get('endDate') or '?'})"
+        if _raw(e.get("avg")) is not None:
+            eps_rows.append({"cells": [name, _n(_raw(e.get("avg"))), _n(_raw(e.get("low"))), _n(_raw(e.get("high"))),
+                                       _n(_raw(e.get("yearAgoEps"))), _pct(_raw(e.get("growth")) * 100 if _raw(e.get("growth")) is not None else None),
+                                       _n(_raw(e.get("numberOfAnalysts")), "{:.0f}")],
+                             "src": y(f"earningsTrend[{per}].earningsEstimate")})
+        if _raw(r.get("avg")) is not None:
+            rev_rows.append({"cells": [name, _money(_raw(r.get("avg"))), _money(_raw(r.get("low"))), _money(_raw(r.get("high"))),
+                                       _money(_raw(r.get("yearAgoRevenue"))), _pct(_raw(r.get("growth")) * 100 if _raw(r.get("growth")) is not None else None),
+                                       _n(_raw(r.get("numberOfAnalysts")), "{:.0f}")],
+                             "src": y(f"earningsTrend[{per}].revenueEstimate")})
+        cur = _raw(tr.get("current"))
+        if cur is not None:
+            cells, ago_srcs = [name, _n(cur)], []
+            for k, days in (("7daysAgo", 7), ("30daysAgo", 30), ("90daysAgo", 90)):
+                ago = _raw(tr.get(k))
+                if ago:
+                    ch = (cur - ago) / abs(ago) * 100
+                    cells.append(f"{_n(ago)} ({ch:+.1f}%)")
+                    ago_srcs.append(derived(f"{label} EPS estimate revision, {days}d",
+                                            f"({cur:,.2f} − {ago:,.2f}) / |{ago:,.2f}| × 100 = {ch:+.1f}%",
+                                            [y(f"earningsTrend[{per}].epsTrend.current"), y(f"earningsTrend[{per}].epsTrend.{k}")]))
+                else:
+                    cells.append("—")
+            rev_trend_rows.append({"cells": cells, "src": ago_srcs[0] if ago_srcs else y(f"earningsTrend[{per}].epsTrend")})
+    if eps_rows:
+        blocks.append({"type": "table", "title": "EPS estimates", "cols": ["period", "avg", "low", "high", "year ago", "growth", "analysts"], "rows": eps_rows})
+    if rev_rows:
+        blocks.append({"type": "table", "title": "Revenue estimates", "cols": ["period", "avg", "low", "high", "year ago", "growth", "analysts"], "rows": rev_rows})
+    if rev_trend_rows:
+        blocks.append({"type": "table", "title": "EPS estimate revisions (change since)",
+                       "cols": ["period", "now", "7d ago", "30d ago", "90d ago"], "rows": rev_trend_rows})
+
+    hist = [h for h in (res.get("earningsHistory") or {}).get("history", []) if _raw(h.get("epsActual")) is not None]
+    if hist:
+        blocks.append({"type": "table", "title": "EPS vs estimate, last quarters", "cols": ["quarter", "actual", "estimate", "surprise"],
+                       "rows": [{"cells": [(h.get("quarter") or {}).get("fmt") or "?", _n(_raw(h.get("epsActual"))), _n(_raw(h.get("epsEstimate"))),
+                                           _pct(_raw(h.get("surprisePercent")) * 100 if _raw(h.get("surprisePercent")) is not None else None)],
+                                 "src": y("earningsHistory")} for h in hist]})
+
+    rt = (res.get("recommendationTrend") or {}).get("trend", [])
+    if rt:
+        blocks.append({"type": "table", "title": "Rating mix by month", "cols": ["month", "strong buy", "buy", "hold", "sell", "strong sell"],
+                       "rows": [{"cells": [{"0m": "This month", "-1m": "Last month", "-2m": "2 months ago", "-3m": "3 months ago"}.get(r.get("period"), r.get("period") or "?"),
+                                           *(str(r.get(k, 0)) for k in ("strongBuy", "buy", "hold", "sell", "strongSell"))],
+                                 "src": y(f"recommendationTrend[{r.get('period')}]")} for r in rt]})
+
+    ud = sorted((res.get("upgradeDowngradeHistory") or {}).get("history", []), key=lambda h: h.get("epochGradeDate") or 0, reverse=True)[:12]
+    if ud:
+        blocks.append({"type": "table", "title": "Recent rating changes", "cols": ["date", "firm", "action", "from", "to"],
+                       "rows": [{"cells": [datetime.fromtimestamp(h["epochGradeDate"]).date().isoformat() if h.get("epochGradeDate") else "?",
+                                           h.get("firm") or "?", h.get("action") or "?", h.get("fromGrade") or "—", h.get("toGrade") or "—"],
+                                 "new": _is_new(datetime.fromtimestamp(h["epochGradeDate"]).date()) if h.get("epochGradeDate") else False,
+                                 "src": y("upgradeDowngradeHistory")} for h in ud]})
+    return {"id": "estimates", "title": "Analyst estimates", "blocks": blocks} if blocks else None
+
+
 # ---- assembly --------------------------------------------------------------
 
 FRESH = {  # source -> glob whose newest mtime is "last pulled"
@@ -504,11 +611,11 @@ def build(ticker: str) -> dict:
     if pf.exists():
         r = con.execute(f"SELECT * FROM '{pf}' WHERE ticker = ?", [t]).fetchone()
         prof = dict(zip([c[0] for c in con.description], r)) if r else None
-    name = (prof or {}).get("long_name") or next((s["name"] for s in universe.stocks() if s["ticker"] == t), t)
+    name = (prof or {}).get("long_name") or next((s["name"] for s in universe.rows() if s["ticker"] == t), t)
     sections = [s for s in (
         _section(sec_events_, t, F), _section(sec_earnings_, t, F), _section(sec_revenue_, t, F, con),
         _section(sec_holders_, t, con), _section(sec_insiders_, t, F), _section(sec_risks_, t, F, con),
-        _section(sec_patents_, t, con), _section(profile_, t, prof)) if s]
+        _section(sec_patents_, t, con), _section(estimates_, t), _section(profile_, t, prof)) if s]
     for s in sections:
         rows = [it for b in s["blocks"] for it in b.get("rows", [])]
         s["new"] = any(it.get("new") for it in rows)
@@ -546,7 +653,7 @@ def main(argv: list[str]) -> None:
     # the data; prints one JSON status line per ticker (for init.lua `run`).
     stale_h = next((float(argv[i + 1]) for i, a in enumerate(argv[:-1]) if a == "--if-stale"), None)
     args = [a for i, a in enumerate(argv) if not a.startswith("--") and not (i and argv[i - 1] == "--if-stale")]
-    tickers = [s["ticker"] for s in universe.stocks()] if "--all" in argv else [a.upper() for a in args]
+    tickers = [s["ticker"] for s in universe.rows()] if "--all" in argv else [a.upper() for a in args]
     for t in tickers:
         if stale_h is not None and not _is_stale(t, stale_h):
             print(json.dumps({"ticker": t, "rebuilt": False}), flush=True)

@@ -21,7 +21,7 @@ import json
 import sys
 from datetime import date, datetime, timezone
 
-from sources import yahoo
+from sources import market, universe, yahoo
 from core import db
 import sources.edgar as edgar
 from sources import sec_http
@@ -240,6 +240,137 @@ def _score(letter: str, parts: list[tuple[float | None, float, float, dict | Non
     terms = " + ".join(f"clamp(({v:.2f} − {lo:g}) / ({hi:g} − {lo:g}))" for v, lo, hi, _ in have)
     formula = f"({terms}) / {len(have)} × 100 = {score}" if len(have) > 1 else f"{terms} × 100 = {score}"
     return score, derived(f"{letter} score (gauge; A≥80 B≥60 C≥40 D≥20)", formula, [s for *_, s in have if s])
+
+
+def _trend_label(price, ma50, ma200) -> str | None:
+    if not (price and ma50 and ma200):
+        return None
+    if price > ma50 > ma200:
+        return "uptrend"
+    if price < ma50 < ma200:
+        return "downtrend"
+    return "correction"
+
+
+def _stock_ma_rows(sym: str, pts: list[dict]):
+    """N-section moving-average rows for the stock: close, MA50/MA200 with % distance, trend label."""
+    if not pts:
+        s_empty = src(f"Yahoo {sym} history: empty", f"https://finance.yahoo.com/quote/{sym}/history/")
+        return [], None, s_empty, None, s_empty
+    price = pts[-1]["close"]
+    s_close = _close_src(sym, pts[-1])
+    ma50, ma200 = _sma(pts, 50), _sma(pts, 200)
+    rows, pct200, s_pct200 = [_kv(f"{sym} close", _f(price), s_close)], None, derived(f"{sym} vs MA200: < 200 closes", "n/a", [s_close])
+    for n, ma in ((50, ma50), (200, ma200)):
+        if ma is None:
+            s_ma = derived(f"{sym} {n}-day MA: < {n} closes", "n/a", [s_close])
+            rows += [_kv(f"{n}-day MA", "—", s_ma)]
+            continue
+        s_ma = derived(f"{sym} {n}-day simple moving average", f"sum of last {n} closes / {n} = {ma:.2f}", [_range_src(sym, pts[-n:])])
+        pct = (price - ma) / ma * 100
+        s_pct = derived(f"{sym} vs MA{n}", f"({price:.2f} − {ma:.2f}) / {ma:.2f} × 100 = {pct:+.1f}%", [s_close, s_ma])
+        rows += [_kv(f"{n}-day MA", _f(ma), s_ma), _kv(f"vs {n}-day", _f(pct, "{:+.1f}%"), s_pct)]
+        if n == 200:
+            pct200, s_pct200 = pct, s_pct
+    trend = _trend_label(price, ma50, ma200)
+    s_trend = derived(f"{sym} trend", f"price {_f(price)} vs MA50 {_f(ma50)} vs MA200 {_f(ma200)}: "
+                      "price > MA50 > MA200 = uptrend; price < MA50 < MA200 = downtrend; else correction", [s_close])
+    return rows, pct200, s_pct200, trend, s_trend
+
+
+def _index_row(sym: str, pts: list[dict]) -> tuple[dict, str | None]:
+    """One index-table row: close, 50/200-day MA, trend; each cell's source is
+    the same derived trend (price vs both MAs), citing the closes behind it."""
+    if not pts:
+        return {"cells": [sym, "—", "—", "—", "—"],
+                "src": src(f"Yahoo {sym} history: empty", f"https://finance.yahoo.com/quote/{sym}/history/")}, None
+    price, ma50, ma200 = pts[-1]["close"], _sma(pts, 50), _sma(pts, 200)
+    trend = _trend_label(price, ma50, ma200)
+    inputs = [_close_src(sym, pts[-1])]
+    for n in (50, 200):
+        if len(pts) >= n:
+            inputs.append(_range_src(sym, pts[-n:]))
+    s_row = derived(f"{sym} trend", f"price {_f(price)} vs MA50 {_f(ma50)} vs MA200 {_f(ma200)}: "
+                    "price > MA50 > MA200 = uptrend; price < MA50 < MA200 = downtrend; else correction", inputs)
+    return {"cells": [sym, _f(price), _f(ma50), _f(ma200), trend or "—"], "src": s_row}, trend
+
+
+def _market_internals(session, spy_hist: list[dict]) -> dict:
+    """Everything M adds beyond SPY's trend: the other indices, distribution
+    days on SPY and QQQ, and breadth across the finlarp universe. Any piece
+    that fails to fetch comes back empty rather than sinking the scorecard."""
+    hists = {"SPY": spy_hist}
+    for sym in ("QQQ", "IWM", "RSP"):
+        try:
+            hists[sym] = market.history(sym, session=session)
+        except Exception:
+            hists[sym] = []
+    index_rows, trends = [], {}
+    for sym, pts in hists.items():
+        row, trends[sym] = _index_row(sym, pts)
+        index_rows.append(row)
+
+    dist = {}
+    for sym in ("SPY", "QQQ"):
+        pts = hists[sym]
+        dist[sym] = (pts, market.distribution_days(pts) if pts and pts[-1].get("volume") else None)
+
+    breadth_data = None
+    try:
+        tickers = [x["ticker"] for x in universe.rows()]
+        breadth_data = market.breadth(tickers)
+    except Exception:
+        pass
+    return {"index_rows": index_rows, "trends": trends, "dist": dist, "breadth": breadth_data}
+
+
+def _dist_blocks(internals: dict) -> tuple[list[dict], int | None, dict]:
+    """(table rows, SPY count or None, SPY count's source)."""
+    rows, counts, s_spy_dist = [], {}, derived("SPY distribution days: no volume data", "n/a", [])
+    for sym, (pts, days) in internals["dist"].items():
+        if days is None:
+            continue
+        counts[sym] = len(days)
+        window = pts[-(market.DIST_WINDOW + 1):]
+        s_count = derived(
+            f"{sym} distribution days, last {market.DIST_WINDOW} sessions",
+            f"count of sessions down ≥{abs(market.DIST_DROP_PCT)}% on volume above the prior session = {len(days)}",
+            [_range_src(sym, window)])
+        if sym == "SPY":
+            s_spy_dist = s_count
+        rows.append({"cells": [sym, "count", str(len(days)), "", ""], "src": s_count})
+        for d in days:
+            a = {"t": d["prev_t"], "close": d["prev_close"]}
+            b = {"t": d["t"], "close": d["close"]}
+            rows.append({"cells": [sym, _day(d["t"]), f"{d['pct']:+.2f}%", f"{d['volume']:,.0f}", f"{d['prev_volume']:,.0f}"],
+                         "src": derived(f"{sym} {_day(d['t'])} distribution day",
+                                        f"({d['close']:.2f} − {d['prev_close']:.2f}) / {d['prev_close']:.2f} × 100 = {d['pct']:+.2f}%; "
+                                        f"volume {d['volume']:,.0f} > prior {d['prev_volume']:,.0f}",
+                                        [_close_src(sym, a), _close_src(sym, b)])})
+    return rows, counts.get("SPY"), s_spy_dist
+
+
+def _breadth_rows(b: dict | None) -> tuple[list[dict], float | None, dict | None]:
+    """(kv rows, % above 50-day MA, that percentage's source)."""
+    if not b or not b["rows"]:
+        return [], None, None
+    kv, pct50, s50 = [], None, None
+    for field, n in (("ma50", 50), ("ma200", 200)):
+        up, have = market.pct_above(b["rows"], field)
+        if not have:
+            continue
+        pct = up / have * 100
+        inputs = [src(f"{r['ticker']} close {r['close']:.2f} vs {n}-day MA {r[field]:.2f}",
+                      f"https://finance.yahoo.com/quote/{r['ticker']}/history/") for r in b["rows"] if r.get(field)]
+        s = derived(f"universe breadth: above {n}-day MA",
+                    f"{up} of {have} universe tickers close above their {n}-day average = {pct:.0f}%", inputs)
+        kv.append(_kv(f"universe above {n}-day MA", f"{pct:.0f}%  ({up}/{have})", s))
+        if n == 50:
+            pct50, s50 = pct, s
+    if b["failed"]:
+        kv.append(_kv("tickers without data", str(b["failed"]), src(
+            "market.breadth: chart request failed or too few closes", "https://finance.yahoo.com/")))
+    return kv, pct50, s50
 
 
 # Tab labels for narrow screens (the Rust tab strip falls back to these).
@@ -616,16 +747,24 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
                              "Gauge: Yahoo earnings growth YoY over 0..50%. The 10-K series shows the real multi-year trend."))
 
     # ---- N
-    n_score, n_ssrc = _score("N", [(None if pct_off_high is None else 30 - pct_off_high, 0, 30, s_off_high)])
+    ma_rows, pct_vs200, s_vs200_stock, stock_trend, s_stock_trend = _stock_ma_rows(S, hist)
+    n_score, n_ssrc = _score("N", [
+        (None if pct_off_high is None else 30 - pct_off_high, 0, 30, s_off_high),
+        (pct_vs200, -10, 20, s_vs200_stock),
+    ])
     sections.append(_section("N", "New high", n_score, n_ssrc, [
         {"type": "kv", "title": "Headline", "rows": [
             _kv("price", _f(current_price), s_price),
             _kv("52-week high", _f(fifty_high), s_high),
             _kv("52-week low", _f(fifty_low), s_low),
             _kv("off high", _f(pct_off_high and -pct_off_high, "{:.1f}%"), s_off_high),
-        ]}],
+        ]},
+        {"type": "kv", "title": "Moving averages", "rows": ma_rows + [_kv("trend", stock_trend or "—", s_stock_trend)]}],
         "New products, management or price highs: buy as the stock emerges from a sound base toward new highs, not near lows. "
-        "Gauge: 30 − % off the 52-week high over 0..30 (at the high = 100, ≥30% off = 0)."))
+        "Leaders hold above the 200-day average; a close below it is a warning. "
+        "Trend: price > MA50 > MA200 = uptrend, price < MA50 < MA200 = downtrend, otherwise correction. "
+        "Gauge: mean of 30 − % off the 52-week high over 0..30 (at the high = 100, ≥30% off = 0) "
+        "and % above the 200-day over -10..20."))
 
     # ---- S
     s_score, s_ssrc = _score("S", [(vol_surge, 0.5, 2.0, s_surge)])
@@ -671,9 +810,16 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
        "Gauge: % held by institutions over 0..100."))
 
     # ---- M
+    internals = _market_internals(session, spy_hist)
+    dist_rows, spy_dist, s_spy_dist = _dist_blocks(internals)
+    breadth_kv, pct50, s_pct50 = _breadth_rows(internals["breadth"])
     m_val = {"uptrend": 100, "correction": 50, "downtrend": 0}.get(trend or "")
-    m_score = m_val
-    m_ssrc = derived("M score (gauge)", f"trend {trend or 'n/a'}: uptrend = 100, correction = 50, downtrend = 0", [s_trend])
+    s_m_trend = derived("SPY trend gauge", f"trend {trend or 'n/a'}: uptrend = 100, correction = 50, downtrend = 0", [s_trend])
+    m_score, m_ssrc = _score("M", [
+        (m_val, 0, 100, s_m_trend),
+        (None if spy_dist is None else -spy_dist, -7, 0, s_spy_dist),
+        (pct50, 20, 80, s_pct50),
+    ])
     sections.append(_section("M", "Market direction", m_score, m_ssrc, [
         {"type": "kv", "title": "SPY", "rows": [
             _kv("SPY close", _f(spy_price), s_spy),
@@ -682,9 +828,18 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
             _kv("SPY vs MA50", _f(vs50, "{:+.2f}"), s_vs50),
             _kv("SPY vs MA200", _f(vs200, "{:+.2f}"), s_vs200),
             _kv("trend", trend or "—", s_trend),
-        ]}],
+        ]},
+        {"type": "table", "title": "Indices (RSP = equal-weight S&P: lagging SPY means narrow leadership)",
+         "cols": ["index", "close", "MA50", "MA200", "trend"], "rows": internals["index_rows"]},
+        {"type": "table", "title": f"Distribution days, last {market.DIST_WINDOW} sessions",
+         "cols": ["index", "date", "change", "volume", "prior volume"], "rows": dist_rows},
+        {"type": "kv", "title": "Breadth (finlarp universe)", "rows": breadth_kv}],
         "Three of four stocks follow the market: buy in a confirmed uptrend, raise cash in corrections. "
-        "Trend: SPY > MA50 > MA200 = uptrend, SPY < MA50 < MA200 = downtrend, otherwise correction."))
+        "Trend: SPY > MA50 > MA200 = uptrend, SPY < MA50 < MA200 = downtrend, otherwise correction. "
+        "Distribution days: a down day of 0.2%+ on volume above the prior session; 5+ in 25 sessions means "
+        "institutions are selling. Breadth: the share of the universe above its 50-day average; a rising "
+        "index on falling breadth is a warning. Gauge: mean of trend (0..100), SPY distribution days "
+        "(7 → 0), and breadth above 50-day (20%..80%)."))
 
     scored = [(sec_["id"].upper(), sec_["score"]) for sec_ in sections if sec_["score"] is not None]
     overall = None

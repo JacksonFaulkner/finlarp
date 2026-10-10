@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "finlarp: Financial Learning & Research Platform. SEC data pipeline, terminal UI and Neovim plugin."
 requires-python = ">=3.12"
 dependencies = [
+    "databento>=0.87.0",
     "duckdb>=1.5.5",
     "matplotlib>=3.11.2",
     "mcp>=1.2",

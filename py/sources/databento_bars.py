@@ -51,8 +51,7 @@ PLAIN_TICKER = re.compile(r"[A-Z]{1,5}")  # excludes options, free text and clas
 
 def symbols() -> list[str]:
     """US tickers on Databento's raw_symbol scheme (class shares like BRK.B need a different form)."""
-    stocks = json.loads(universe.UNIVERSE_PATH.read_text())["stocks"]  # not universe.stocks(): that hits sec.gov for CIKs
-    return sorted({s["ticker"] for s in stocks if s.get("region") == "US" and "." not in s["ticker"]})
+    return sorted({s["ticker"] for s in universe.rows() if s["region"] == "US" and s["kind"] != "foreign"})
 
 
 def holdings() -> list[str]:

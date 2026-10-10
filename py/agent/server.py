@@ -26,18 +26,27 @@ from mcp.types import ToolAnnotations
 
 
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
+from sources import yahoo_live
 from derive import search as fts
 
 D = universe.DATA_ROOT
 READ_ONLY = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
 MAX_CELL = 600
 
-INSTRUCTIONS = """Local SEC dataset for ~428 AI-exposed stocks (ai_stocks.json universe), pulled
+INSTRUCTIONS = """Local SEC dataset for ~428 AI-exposed stocks (universe table), pulled
 from EDGAR: XBRL financials (15+ yrs), segment/geography revenue, 13F institutional
 holdings (6 quarters, whole market), 8-K event stream, Form 4 insider trades,
 10-K/20-F text (business, risk factors, MD&A...), YoY-new risk sentences,
 earnings press releases with extracted guidance, Yahoo company profiles, and
 ~1.5M granted US patents (PatentsView, thru 2025) matched to tickers.
+
+The local snapshot ends at the last completed session. For anything about today, premarket,
+after-hours, a move that just happened, or news, use the live Yahoo tools instead of guessing:
+  live_quote(ticker)    price, day move, volume vs 20d avg, pre/post-market, 5d/1m trend
+  live_history(ticker)  OHLCV bars from Yahoo (any range/interval, incl. 1m and pre/post-market)
+  live_news(ticker)     latest headlines (explains moves the filings can't)
+Use SEC data for fundamentals and these for what the market is doing right now. Say which source
+each number came from.
 
 Suggested flow: `company` for a ticker overview -> `search` for qualitative
 questions (then `get_chunk` to read more of a hit) -> `financials` or `sql` for
@@ -53,6 +62,8 @@ specific terms (product names, line items) rather than longer sentences.
 Caveats: data is a local snapshot (check dates in results). Insider bulk data
 lags 0-3 months. 20-F filers have no quarterly XBRL. Some tickers' early
 XBRL history belongs to a predecessor business (MTCH=IAC, JCI=Tyco, NBIS=Yandex).
+Prices (bars_1d, bars_1m, quotes_1m) are Databento pulls; column is `symbol`, time is `ts_event`
+(UTC-aware: convert with AT TIME ZONE 'America/New_York'). Data ends at the last completed session.
 Patents: grants only (18mo+ lag vs filing); ticker = current owner incl. acquired
 subsidiaries' pre-deal patents. Group by patent_cpc/patent_wipo for tech mix."""
 
@@ -99,6 +110,16 @@ def _views(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
         "patent_ai": (f"'{D}/patents/ai.parquet'",
                       "USPTO AI Patent Dataset labels per granted patent (thru 2023-12-26): any_ai (predict50, generous), "
                       "any_ai93 (strict), ml/evo/nlp/speech/vision/planning/kr/hardware bools + <cat>_score"),
+        "bars_1d": (f"read_parquet('{D}/market/databento/bars_1d/*.parquet', union_by_name=true)",
+                    "Databento consolidated daily bars per symbol (open/high/low/close/volume), 2024-07-01+. Volume is the true "
+                    "consolidated total. ts_event is midnight UTC of the trade date: use (ts_event AT TIME ZONE 'UTC')::date"),
+        "bars_1m": (f"read_parquet('{D}/market/databento/bars_1m/*.parquet', union_by_name=true)",
+                    "Databento 1-minute bars, 2 years, Nasdaq venues only (volume is ~50-100% of consolidated, median ~79%: use "
+                    "bars_1d for volume rules). Includes pre/post-market (04:00-20:00 ET); filter 09:30-16:00 for the regular session. "
+                    "Only minutes with trades have a row"),
+        "quotes_1m": (f"read_parquet('{D}/market/databento/quotes_1m/*.parquet', union_by_name=true)",
+                      "Databento consolidated best bid/ask sampled per minute (bid_px_00/ask_px_00, sizes), last ~3 months; "
+                      "includes pre/post-market quotes, which can be wide"),
         "patent_ai_by_ticker_year": (f"'{D}/patents/ai_by_ticker_year.parquet'",
                                      "ticker x grant year (<=2023): n_patents, n_ai_any/pct_ai, n_ai93/pct_ai93, n_<cat>; prefer pct_ai93 or n_ml"),
     }
@@ -249,6 +270,42 @@ def company(ticker: str) -> str:
         "latest_earnings": _section(earnings),
         "annual_report": _section(annual_report),
     })
+
+
+LIVE = ToolAnnotations(readOnlyHint=True, openWorldHint=True)
+
+
+@mcp.tool(annotations=LIVE)
+def live_quote(ticker: str) -> str:
+    """Live Yahoo snapshot for one ticker: last price (incl. extended hours), day change vs prev
+    close, day volume vs 20-session average (relative_volume is understated while the session
+    is still open), pre/post-market move and volume, 5d/1m change, 52-week range. Use for any
+    question about today."""
+    try:
+        return _dump(yahoo_live.live(ticker.upper()))
+    except Exception as e:  # noqa: BLE001 - tell the model, don't crash the server
+        return _dump({"error": f"yahoo live_quote failed: {e}"})
+
+
+@mcp.tool(annotations=LIVE)
+def live_history(ticker: str, range: str = "1mo", interval: str = "1d", pre_post: bool = False) -> str:
+    """OHLCV bars from Yahoo, times in ET. range: 1d 5d 1mo 3mo 6mo 1y 2y 5y max. interval: 1m 5m 15m
+    30m 60m 1d 1wk 1mo (1m only reaches back ~7 days, intraday ~60 days). pre_post=True includes
+    04:00-20:00 ET extended hours. Returns at most 400 bars (the most recent)."""
+    try:
+        return _dump(yahoo_live.history(ticker.upper(), range, interval, pre_post))
+    except Exception as e:  # noqa: BLE001
+        return _dump({"error": f"yahoo live_history failed: {e}"})
+
+
+@mcp.tool(annotations=LIVE)
+def live_news(ticker: str, count: int = 8) -> str:
+    """Latest Yahoo Finance headlines for a ticker (title, publisher, time ET, link). Use to explain
+    a price move or check what the market is reacting to."""
+    try:
+        return _dump(yahoo_live.news(ticker.upper(), count))
+    except Exception as e:  # noqa: BLE001
+        return _dump({"error": f"yahoo live_news failed: {e}"})
 
 
 @mcp.tool(annotations=READ_ONLY)
