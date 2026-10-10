@@ -1,4 +1,4 @@
-"""The ai_stocks.json universe, resolved to SEC CIKs.
+"""The stock universe (DuckDB ai_universe, see core.db), resolved to SEC CIKs.
 
 cik_aliases.json maps a ticker to predecessor CIKs whose filings are the
 same business under an older registrant (MRVL's pre-2021 history lives
@@ -15,7 +15,6 @@ from core import db
 from sources import sec_http
 
 ROOT = Path(__file__).resolve().parents[2]
-UNIVERSE_PATH = ROOT / "data" / "ai_stocks.json"
 ALIASES_PATH = ROOT / "data" / "cik_aliases.json"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 DATA_ROOT = db.DB_PATH.parent / "finlarp"
@@ -75,10 +74,16 @@ def ciks(ticker: str) -> list[int]:
     return out + [c for c in aliases().get(ticker.upper(), []) if c not in out]
 
 
+def rows() -> list[dict]:
+    """Eligible universe entries as dicts, straight from the DB. No network, so use this
+    whenever the CIK is not needed."""
+    return [s.model_dump() for s in db.get_stocks()]
+
+
 def stocks() -> list[dict]:
     """Universe entries with `cik` (current or None) and `ciks` (all)."""
     out = []
-    for s in json.loads(UNIVERSE_PATH.read_text())["stocks"]:
+    for s in rows():
         cs = ciks(s["ticker"])
         out.append(s | {"cik": cs[0] if cs else None, "ciks": cs})
     return out

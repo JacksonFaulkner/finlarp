@@ -97,7 +97,7 @@ def build() -> dict:
     yahoo = dict(src.execute(f"""
         SELECT ticker, lower(concat_ws(' / ', sector, industry)) FROM '{prof}'""").fetchall()) if prof.exists() else {}
     meta = {}
-    for s in universe.stocks():
+    for s in universe.rows():
         meta[s["ticker"]] = {
             "sectors": sorted(set(s.get("primary", {})) | set(s.get("subs", {}))),
             "region": s.get("region"),
