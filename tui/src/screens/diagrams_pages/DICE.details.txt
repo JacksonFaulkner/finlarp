@@ -1,0 +1,216 @@
+== TAPE
+# Front-side protection tape
+Before the wafer is flipped for grinding, a UV-curable backgrind tape is laminated on the device side. It cushions the bumps and passivation against wheel pressure, seals out coolant and silicon swarf, and holds the wafer flat on the vacuum chuck.
+
+# Peeling and bump height
+After grinding, UV light drops the adhesive's grip so the tape peels with little force. Too sticky and it tears thin wafers; too weak and slurry creeps under the edge and scratches circuits.
+
+Tape has to absorb the height of the topography underneath, so wafers with tall solder bumps or copper pillars need thicker, softer tape layers (textbook). The tape is bought per wafer. The page lists Lintec, Mitsui Chemicals, Nitto Denko and Furukawa Electric as makers, all Japanese: a small, concentrated chokepoint.
+
+# Sources
+en.wikipedia.org/wiki/Wafer_backgrinding
+semiconductorx.com/mfg-back-end-dicing.html
+
+== BACKGRIND
+# Thinning the wafer
+A 300 mm wafer is about 750 um thick so it survives front-end processing. Packages need far less: roughly 150-200 um for wire-bond and flip-chip, 75-100 um for mobile, and 50 um or less for 3D stacks such as HBM. Grinding removes the rest from the back in two passes, coarse then fine, followed by stress relief (polish or etch).
+
+# Why thin: HBM
+Less silicon means lower thermal resistance and thinner stacks. JEDEC raised the HBM4 package height limit from 720 to 775 um, for both 12-high and 16-high stacks (TrendForce), so each DRAM die must be thin or the stack will not fit.
+
+Failure modes: edge chipping, warpage once the stiff 750 um is gone, and subsurface cracks a few um deep that later propagate. Thin wafers stay on tape or a carrier until dicing.
+
+# Sources
+en.wikipedia.org/wiki/Wafer_backgrinding
+semiconductorx.com/mfg-back-end-dicing.html
+disco.co.jp/eg/solution/library/dbg/sdbg.html
+trendforce.com/news/2025/04/28/news-following-jedecs-hbm4-standard-whats-next-for-sk-hynix-samsung-and-micron/
+
+== GRINDING WHEEL
+# Diamond cup wheel
+The wheel is a ring of diamond abrasive segments on a metal or resin matrix; only the rim touches the wafer. The spindle spins fast while the wafer on the chuck spins slowly, and the spindle feeds down in micrometre steps. This in-feed grind leaves a crescent scratch pattern.
+
+# Coarse, fine and wear
+Coarse wheels remove material fast but leave deeper damage; fine wheels take the last tens of um off. The fine wheel must remove all the coarse damage, or cracks survive into the die. The page puts residual damage at a few um.
+
+Wheels wear and load with swarf, so wheel life shows up in cost per wafer. DISCO dominates grinders, wheels and blades together (page). Its FY Mar-2026 report notes consumables hit a record high while IC grinder sales were flat.
+
+# Sources
+en.wikipedia.org/wiki/Wafer_backgrinding
+disco.co.jp/eg/ir/library/doc/fr/fr20260422.pdf
+
+== porous vacuum chuck
+# Holding a wafer that is thinning
+The chuck is a disc of porous ceramic. Vacuum pulled through the pores holds the taped wafer flat across its whole face, which matters because the last 50-100 um of silicon has almost no stiffness. The chuck rotates under the wheel and is ground flat in the machine so the wafer inherits an accurate plane.
+
+# Flatness and handling
+Thickness uniformity depends on chuck flatness, spindle tilt and tape thickness variation; a few um is a typical target (textbook, no source). A particle between tape and chuck prints into the wafer as a dimple, a classic yield killer.
+
+After grinding, thin wafers curl, so a Bernoulli or porous end effector moves them instead of grabbing the edge. Wafers thinned to tens of um sometimes go onto a rigid glass carrier first (textbook).
+
+# Sources
+en.wikipedia.org/wiki/Wafer_backgrinding
+disco.co.jp/eg/solution/library/dbg/sdbg.html
+
+== MOUNT
+# Wafer on dicing tape and frame
+After grinding, the front-side tape is removed (UV releases it) and the wafer is laminated back side down onto dicing tape stretched across a ring frame. The frame makes the floppy wafer a rigid object every downstream tool can grip: saw, laser, expander, inspection and die picker.
+
+# DAF and failure modes
+If the back side carries die attach film, the DAF-and-dicing-tape combination is laminated as one sandwich, so die bonders can skip a dispense step. Lintec has published work on a dicing die attach film built for stealth dicing and cool expansion, sized close to the wafer diameter to limit film ejection.
+
+Failure modes: air bubbles (chipping, die shift), wrinkles, and misalignment to the frame. Mature lines reach dicing yield well above 99% (page's source).
+
+# Sources
+imapsource.org/api/v1/articles/74636-development-of-all-new-structure-of-dicing-die-attach-film-ddaf-for-stealth-dicing-and-cool-expansion-processes.pdf
+semiconductorx.com/mfg-back-end-dicing.html
+
+== DICE
+# Separating the die
+Streets are the empty lanes between die, where test structures live and the cut goes. Three methods: a diamond blade spinning in water, a stealth laser that forms a crack plane inside the silicon, and a hybrid where a laser first grooves the brittle low-k film and a blade finishes. Choice depends on thickness, die size and film stack.
+
+Blades are cheap and proven but chip edges and need streets of 50-80 um. Stealth lasers work dry and can cut streets of about 15 um (per a wafer-dicing patent). DISCO's DFL7363 stealth saw is claimed to give about 50% more productivity than its conventional model (vendor claim).
+
+# Why it matters for AI chips
+HBM dies are thinned to a few tens of microns before stacking, so grinders and dicers are a bottleneck. Disco (6146.T) is the dominant supplier of saws and grinders (no current third-party figure found). Others: Tokyo Seimitsu (7729.T), ASMPT (0522.HK), Kulicke (KLIC) for later steps.
+
+Laser and plasma dicing gain share as die get thinner and brittle low-k layers chip under blades. Chipping into the seal ring lets moisture in later, so edge quality is a reliability issue (textbook).
+
+# Sources
+disco.co.jp/eg/news/press/20171206.html
+semiconductorx.com/mfg-back-end-dicing.html
+image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9349645
+futurumgroup.com/insights/teradyne-q2-fy-2026-doubles-semiconductor-test-revenue-on-ai-compute-and-memory-demand/
+
+== BLADE
+# Diamond blade dicing
+An ultra-thin diamond blade spins at tens of thousands of rpm (textbook) while water cools it and washes out debris. The kerf is tens of um, and the street must be wider than that plus alignment tolerance, hence 50-80 um streets. The wafer on tape is cut through its full thickness and shallowly into the tape.
+
+# Where blades fall short
+Mechanical stress chips the top and bottom edges, and brittle low-k dielectrics can crack or peel at the cut. Water can leave residue on exposed pads. Blades wear, so cost per cut includes consumables.
+
+The page lists DISCO as dominant in blades along with saws, Accretech (Tokyo Seimitsu) as second source, and ASMPT, ADT and Okamoto also named. Mature blade lines still reach dicing yield above 99% (SemiconductorX).
+
+# Sources
+semiconductorx.com/mfg-back-end-dicing.html
+disco.co.jp/eg/news/press/20171206.html
+
+== STEALTH
+# Stealth dicing
+A laser with a wavelength silicon passes is focused to a point inside the wafer. At the focus, energy density creates a modified layer of microcracks without ablating the surface. Scanning along the street writes a crack plane; stretching the tape then splits the wafer. There is no kerf, no water and no slurry.
+
+# Limits
+Because it is dry, it suits MEMS, image sensors and thin memory. DISCO reported more than 2,000 laser saws shipped by April 2020, and in December 2025 announced three new laser saws.
+
+Street width: about 15 um versus 50-80 um for blades (a wafer-dicing patent, not a DISCO figure). Limits: depth control of the modified layer, and metal in the street can block the beam, so test structures must be cleared or the laser comes from the back.
+
+# Sources
+disco.co.jp/eg/news/press/20171206.html
+disco.co.jp/eg/news/press/20200402.html
+disco.co.jp/eg/news/corp/20251215_2.html
+image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9349645
+
+== GROOVING
+# Laser grooving before the blade
+Advanced chips use low-k dielectrics, porous insulators that cut capacitance between copper wires but are weak and brittle. A blade chips and delaminates them. So a laser first burns a pair of narrow grooves through the low-k and metal stack on each edge of the street, then a blade cuts the silicon between them.
+
+# Plasma and why it grows
+The blade only sees silicon. Trade-offs: laser debris must be controlled, a protective coating is often applied and removed after, and the process adds time per street.
+
+Plasma dicing (Plasma-Therm, Oxford Instruments are listed on the page) etches the street chemically instead. Low-k films are standard on leading-edge AI logic (textbook), which is one reason laser tools grow as nodes shrink.
+
+# Sources
+semiconductorx.com/mfg-back-end-dicing.html
+disco.co.jp/eg/news/press/20171206.html
+
+== SDBG
+# Stealth dicing before grinding
+In SDBG the wafer is laser-marked first, while thick and strong, then ground. The grinder thins until it reaches the modified layer. The cracks are already there, so the wafer separates into die as it thins, and grinding removes the modified section itself. DISCO states this gives very strong ultra-thin chips and that many memory makers already use it.
+
+# Cold expansion and DAF
+Conventional dicing after grinding leaves micro-cracks a few um deep, and a die thinned to the same depth loses strength. Cutting first avoids chipping on front and back of ultra-thin die.
+
+The back of the wafer carries DAF, which must split too. DISCO says DAF turns brittle when cold, so the expander runs cold; heat shrinking then removes tape sag so die go straight to bonding on the same frame (DDS series). Relevant to HBM, where DRAM die are thin and stacked 12 or 16 high.
+
+# Sources
+disco.co.jp/eg/solution/library/dbg/sdbg.html
+disco.co.jp/eg/products/separator/dds2300.html
+
+== DAF
+# Die attach film
+DAF is a thin adhesive layer on the back of the wafer that becomes the glue holding each die to its substrate or to the die below. It replaces liquid epoxy dispensing, which gives uneven bondline thickness, a problem for thin or stacked die. Pre-applied film is uniform and has no epoxy bleed (textbook).
+
+# Cool expansion
+The difficulty is cutting it. DAF stretches rather than snaps at room temperature, leaving stringy film between die. Cool expansion stretches the frame cold, where the film is brittle and tears along the die edges. Lintec and others make films engineered for this. A patent family on laser-scribing the adhesive before expansion also targets weakening the film between die.
+
+The page names Resonac, Nitto Denko, Lintec and Furukawa Electric as suppliers. For stacked memory, film performance feeds directly into bonded-die yield.
+
+# Sources
+imapsource.org/api/v1/articles/74636-development-of-all-new-structure-of-dicing-die-attach-film-ddaf-for-stealth-dicing-and-cool-expansion-processes.pdf
+disco.co.jp/eg/products/separator/dds2300.html
+image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10607861
+
+== EXPAND + PICK
+# Expand, then pick good die
+Once the wafer is cut, the tape is stretched radially. This widens the gaps so neighbours do not touch during pick-up, and makes sure the stealth cracks or DAF fully separate. A ring pushes the frame down while the centre stays held. Heat shrink then removes slack so die spacing holds on the frame.
+
+# Handoff to bonding
+The picker uses the wafer map from wafer sort: only die marked good are lifted, the rest stay on the tape and are scrapped. The map follows the wafer as a data file, a quiet but critical flow of information. PICK covers the mechanics.
+
+In a 12-high HBM stack every die must be known good, so a sorting miss multiplies. DISCO's DDS series lets die move on to bonding without re-laminating tape (page, DISCO).
+
+# Sources
+disco.co.jp/eg/solution/library/dbg/sdbg.html
+disco.co.jp/eg/products/separator/dds2300.html
+
+== 750 um in
+# Starting thickness
+Incoming 300 mm wafers are 725-775 um thick (SemiconductorX), roughly 750 um per Wikipedia. It is a SEMI standard compromise: thick enough to survive hundreds of hot, stressful front-end steps and robot handling, thin enough not to waste silicon (textbook). The same for logic, memory and power chips.
+
+# The thickness budget
+Thinning to 75 um removes about 90% of the silicon (arithmetic: 675 of 750 um). It is lost as swarf. The ground surface carries a damaged layer, so a final polish, dry polish or plasma etch follows.
+
+The HBM4 height budget is 775 um (JEDEC, per TrendForce), so the thinner each die, the more dies fit. That ties backgrinding capacity to AI memory capacity.
+
+# Sources
+semiconductorx.com/mfg-back-end-dicing.html
+en.wikipedia.org/wiki/Wafer_backgrinding
+trendforce.com/news/2025/04/28/news-following-jedecs-hbm4-standard-whats-next-for-sk-hynix-samsung-and-micron/
+
+== DISCO net sales
+# DISCO as the bellwether
+DISCO (6146.T, ADR DSCSY) reported net sales of 436.889 billion yen for the fiscal year ended March 2026, against 393.3 billion yen the year before (the page uses Roic's figure; a conflicting SWOT-site number was discarded). Shipments were 442.824 billion yen. For the nine months to December 2025, sales rose 11.5% and net income 8.7%.
+
+# How to read it
+Consumables hit a record high while grinders were flat for IC and down for power and other uses. Consumables (blades, wheels) are recurring, tied to wafer volume, and higher margin than machines (textbook). Record consumables with flat grinders says the installed base is running hard while new tool orders are lumpy.
+
+The AI link is indirect: thinned DRAM for HBM, stealth saws and cool expanders. Risks: yen moves, smartphone and auto cycles, China. Check the primary results PDF.
+
+# Sources
+disco.co.jp/eg/ir/library/doc/fr/fr20260422.pdf
+roic.ai/quote/DSCSY/classic
+
+== Lintec
+# Tapes and films concentration
+Dicing tape and DAF come from a short list of Japanese materials companies: Lintec (7966.T), Mitsui Chemicals (4183.T), Nitto Denko (6988.T) and Furukawa Electric (5801.T) for tape; Resonac (4004.T), Nitto Denko, Lintec and Furukawa for DAF.
+
+# Why it sticks
+Each wafer uses tape and film once, so volumes scale with wafer starts and die per stack. The film is qualified together with a specific saw and expander recipe, so switching suppliers takes qualification time and gives incumbents pricing power in a niche too small for many entrants (textbook).
+
+Lintec published a paper on an all-new dicing die attach film structure for stealth dicing and cool expansion, with DAF and base film cut close to wafer diameter to reduce film ejection. No sourced market shares were found.
+
+# Sources
+imapsource.org/api/v1/articles/74636-development-of-all-new-structure-of-dicing-die-attach-film-ddaf-for-stealth-dicing-and-cool-expansion-processes.pdf
+
+== Risk
+# One vendor, many chokepoints
+DISCO dominates saws, wheels and blades, and HBM stacks need wafers thinned to tens of um, so grinder and laser-saw supply gates AI memory output (page; an inference from the numbers, not a sourced shortage claim).
+
+# Second sources and scenarios
+Accretech (Tokyo Seimitsu, 7729.T) is second for dicers and grinders; ASMPT (0522.HK), ADT of Israel and Okamoto also compete. For laser and plasma: Synova, Plasma-Therm and Oxford Instruments (OXIG.L). No sourced share numbers were found.
+
+An earthquake or export restriction in Japan would hit blades, wheels, tapes and film at once. Tools are qualified per recipe, so an HBM maker cannot swap saws quickly. DISCO's shipments and consumables are a read-through to memory back-end output.
+
+# Sources
+disco.co.jp/eg/ir/library/doc/fr/fr20260422.pdf
+disco.co.jp/eg/news/corp/20251215_2.html

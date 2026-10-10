@@ -55,7 +55,7 @@ end
 --- blocking on the live E*TRADE pull once. Either way, a live pull always
 --- runs in the background afterward to keep the cache warm for next time;
 --- fzf-lua has no live-reload hook for an already-open custom picker, so
---- that refresh lands silently and shows up on the *next* `<leader>st`.
+--- that refresh lands silently and shows up on the *next* `<leader>vt`.
 --- Fuzzy-search any column: date, symbol, type, or description. <CR>
 --- shows the full raw record.
 function M.pick()

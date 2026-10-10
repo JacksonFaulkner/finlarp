@@ -1,0 +1,117 @@
+# 1. What happens: a rod of silicon pulled out of a melt
+
+ ┌───────────────┐  ┌────────────────┐  ┌─────────────┐  ┌──────────┐  ┌──────────────┐  ┌─────────────┐
+ │ LOAD          │  │ MELT           │  │ SEED + NECK │  │ SHOULDER │  │ BODY         │  │ TAIL        │
+ │ poly + dopant │─▶│ ~1414 C, argon │─▶│ 2-4 mm neck │─▶│ widen    │─▶│ 300 mm, slow │─▶│ taper, cool │
+ └───────────────┘  └────────────────┘  └─────────────┘  └──────────┘  └──────────────┘  └─────────────┘
+
+  (poly chunks from POLYSILICON are the charge; the finished rod is the INGOT node)
+
+# 2. Inside a Czochralski puller
+
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ PULL CHAMBER: water-cooled steel, argon at ~2500 Pa (COMSOL model)                           │
+  │                         │                           pull wire / shaft: rotates + lifts       │
+  │                       ┌─┴─┐                         oriented SEED crystal                    │
+  │                       └─┬─┘                                                                  │
+  │                         │                           thin NECK, 2-4 mm: dislocations grow out │
+  │                        ╱ ╲                          SHOULDER widens to 300 mm                │
+  │                       ╱   ╲                                                                  │
+  │                ║                  ║                                                          │
+  │                ║  SINGLE CRYSTAL  ║                 BODY, up to ~2 m                         │
+  │                ║      300 mm      ║                 grows as the seed rises                  │
+  │                ║                  ║                                                          │
+  │    ┌───────────╨──────────────────╨───────────┐     hot screen / heat shield                 │
+  │    │             QUARTZ CRUCIBLE              │     holds the melt                           │
+  │    │       solid-melt interface, 1414 C       │                                              │
+  │    │≈≈≈≈≈≈≈≈≈≈≈≈≈ MOLTEN SILICON ≈≈≈≈≈≈≈≈≈≈≈≈≈│                                              │
+  │    │≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈│                                              │
+  │    └──────────────────────────────────────────┘     graphite crucible around the quartz      │
+  │                         ║                           crucible shaft: spins opposite, lifts    │
+  │                                                                                              │
+  │ ≈≈≈ GRAPHITE HEATER around the crucible (310 kW in model) + graphite felt insulation ≈≈≈     │
+  │ argon ≈≈▶ in at top, sweeps down past the crystal, out at the bottom carrying SiO and CO     │
+  └──────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (schematic. Crystal and crucible counter-rotate, 5 rpm and -5 rpm in the COMSOL example;
+   the crucible is lifted as the melt level drops so the interface stays put)
+
+# 3. The physics and chemistry
+
+  Growth       a seed touches the melt at the freezing point; atoms attach in the seed's orientation,
+               so pulling up extends one crystal (melting point 1414 C in the COMSOL model; 1425 C on
+               Wikipedia for semiconductor grade, sources differ by a few degrees)
+  Mass flow    pull rate v x crystal cross-section x density = kg of silicon frozen per hour
+               worked example (computed here, density 2.33 g/cm3 is textbook): 300 mm body,
+               v = 1.0 mm/min ──▶ ~71 cm3/min ──▶ ~165 g/min ──▶ ~9.9 kg/h
+               v = 1.6 mm/min ──▶ ~15.8 kg/h
+  Oxygen       melt dissolves the quartz crucible: SiO2 + Si ──▶ 2SiO (textbook, unsourced); most SiO
+               evaporates, some freezes in. Crystal ends up ~1e18 oxygen atoms/cm3 (Wikipedia).
+               Crucible rotation, melt depth, pull speed and magnetic fields tune the oxygen level
+  Dopants      boron / phosphorus added to the melt. Segregation: solute prefers the liquid, so the
+               melt gets richer and the tail gets more doped than the head (textbook, unsourced)
+  Dash neck    pull a 2-4 mm neck fast (up to ~6 mm/min); dislocations slide out the surface within
+               ~100-125 mm of neck (US 6,866,713). Another patent: neck at 1.0-3.0 mm/min, e.g. 2.4
+               mm/min, 200 mm long. Dash-necked crystals are limited to about 100 kg by neck strength
+
+# 4. By the numbers
+
+  melt temp          ~1414 C (COMSOL); contact temperature 1403-1407.5 C in the model
+  axial gradient     500 down to 100 C per metre along the rod (model)
+  atmosphere         argon, 100 L/min, furnace at 2500 Pa (model, not a vendor spec)
+  heater power       310 kW graphite heater (model)
+  rotation           crucible 5 rpm, crystal -5 rpm (model)
+  diameter           300 mm wafers need ~300 mm+ body; 450 mm was planned for 2018, stopped in 2016
+  length / mass      up to 2 m, several hundred kg (Wikipedia)
+  pull rate (300mm)  1.6 mm/min simulated: interface shifts 33 mm, growth time -46.4%, power -4.97%
+                     (2023 study aimed at photovoltaic silicon)
+  steady state       model reaches steady contact temperature after ~400 minutes
+
+# 5. Pull-rate figures from the literature, mm/min
+
+  Dash neck max   ████████████████████████████████████████ 6.0  (US 6,866,713)
+  300mm sim       ███████████ 1.6  (2023 simulation)
+  Neck example    ████████████████ 2.4  (US 5,578,284)
+  Dash-free neck  ███ <= 0.5  (US 7,179,330)
+  (the neck runs fast to purge dislocations; the body runs slow to keep the interface flat and stable)
+
+# 6. Who owns the crystal: 300 mm wafer share 2024 (Report Prime estimate, low reliability)
+
+  Shin-Etsu     ████████████████████████████████████████ 26.7%
+  SUMCO         █████████████████████████████████████ 25.0%
+  GlobalWafers  ██████████████████████ 15.0%
+  Siltronic     ██████████████████ 11.7%
+  SK Siltron    ██████████████ 9.2%
+  Top two about 51.7%, top five about 77%. Other sources: Omdia 2020 top five 94% of an $11.2B market;
+  Shin-Etsu + SUMCO >55% (2020) or ~53% (Envisioning); top five 82-85% in 2023 (vendor blurbs).
+  Wafer makers grow their own crystals in-house; the puller is the capital item.
+
+# 7. Chokepoints and risks
+
+  - Quartz crucibles: high-purity quartz mostly from Spruce Pine, NC (see SAND). Crucibles are consumed
+    every pull; a Spruce Pine outage idles pullers.
+  - Yield: a dislocation anywhere in the body means remelting. Big hot zones and long cycles make a
+    ruined pull expensive. Cycle times are not sourced here.
+  - Oxygen and dopant uniformity at 300 mm is the hard control problem (patents on crucible rotation).
+  - Demand is cyclical: SEMI says 2023 silicon wafer revenue fell 10.9% to $12.3B; polished 300 mm
+    shipments fell 13% and epi 300 mm 5%, total area 12,602 million sq in (-14.3%).
+
+# 8. Listed names
+
+  Shin-Etsu Chemical 4063.T   SUMCO 3436.T   GlobalWafers 6488.TWO   Siltronic SSG.DE (also WAF.DE)
+  SK Siltron is held by SK Inc (034730.KS). Puller makers e.g. PVA TePla (TPL.DE), Ferrotec 6890.T.
+  (tickers and puller makers are general knowledge, not from a fetched source)
+
+# Sources
+
+  [1] COMSOL, Thermal Analysis of a Czochralski Crystal Growth Furnace:
+      comsol.com/blogs/thermal-analysis-of-a-czochralski-crystal-growth-furnace
+  [2] Wikipedia, Czochralski method: en.wikipedia.org/wiki/Czochralski_method
+  [3] Neck rates and 100 kg limit: patents.google.com/patent/US6866713 and
+      image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/5578284, .../7179330
+  [4] 300 mm pull-rate simulation: Journal of Synthetic Crystals 52(4) 562 (2023),
+      m.researching.cn/articles/OJb10e1fbe7354a8df
+  [5] Wafer shares: reportprime.com/300mm-12-inch-silicon-wafer-r3645/company
+  [6] SEMI 2023 revenue and shipments: marklapedus.substack.com/p/silicon-wafer-market-upturn-higher
+  [7] Omdia 2020 shares via KED Global: kedglobal.com/newsView/ked202203160007
+  [8] Wikipedia, Wafer (electronics): en.wikipedia.org/wiki/Wafer_(electronics)

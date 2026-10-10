@@ -1,0 +1,117 @@
+# 1. What happens: metallurgical Si to 9N+ polysilicon
+
+ ┌────────┐  ┌───────────┐  ┌───────────┐  ┌────────────┐  ┌────────────┐  ┌───────────┐
+ │ MG-Si  │  │ Si + HCl  │  │ DISTILL   │  │ BELL JAR   │  │ CRUSH      │  │ POLY      │
+ │ 98-99% │─▶│ 300 C bed │─▶│ TCS clean │─▶│ Si on rods │─▶│ etch, pack │─▶│ 9N+ chunk │
+ └────────┘  └───────────┘  └───────────┘  └────────────┘  └────────────┘  └───────────┘
+
+  (MG-Si is the output of SAND; polysilicon is the input to MELT + PULL; the loop recycles H2, HCl, STC)
+
+# 2. Inside a Siemens bell jar reactor
+
+  TCS + H2 gas in (nozzles in base plate)         off-gas out: HCl, H2, STC, TCS
+          │       │                                              ▲
+          ▼       ▼                                              │
+  ┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ WATER-COOLED STEEL BELL JAR  (cold wall, so silicon does not plate the walls)                │
+  │                                                                                              │
+  │    ╔══════╩════════════════════════════════════════╩══════╗  <- U-bridge                     │
+  │    ║▓▓▓▓▓▓║      hot gas, rod surface ~1100 C      ║▓▓▓▓▓▓║                                  │
+  │    ║▓▓▓▓▓▓║       SiHCl3 + H2 ──▶ Si + 3HCl        ║▓▓▓▓▓▓║                                  │
+  │    ║▓▓▓▓▓▓║        Si grows on the rod skin        ║▓▓▓▓▓▓║                                  │
+  │    ║▓▓▓▓▓▓║             slim rod 20 mm             ║▓▓▓▓▓▓║                                  │
+  │    ║▓▓▓▓▓▓║          grows to 150-180 mm           ║▓▓▓▓▓▓║                                  │
+  │    ║▓▓▓▓▓▓║                                        ║▓▓▓▓▓▓║                                  │
+  │    ╨──────╨                                        ╨──────╨  <- graphite chucks + electrodes │
+  │   current goes up one rod, over the bridge, down the other: rods are their own heater        │
+  └──────────────────────────────────────────────────────────────────────────────────────────────┘
+        ▲ high-current power feed through the base plate; gas nozzles and exhaust ports also in base
+
+  (schematic; real jars hold many rod pairs, rods heated by their own current. Batch length: not sourced)
+
+# 3. The chemistry
+
+  TCS synthesis   Si + 3HCl ──▶ SiHCl3 + H2        (about 300 C, fluidised bed; Fraunhofer lists
+                  Si + 3.1HCl ──▶ 0.9SiHCl3 + 0.1SiCl4 + 1.1H2   as the practical mix)
+  Distillation    SiHCl3 and SiCl4 (STC) separated at 30-60 C in multi-stage columns
+  Deposition      SiHCl3 + H2 ──▶ Si + 3HCl         on rods at ~1100 C (main reaction, gives Si)
+  Side reaction   4SiHCl3 ──▶ Si + 3SiCl4 + 2H2    (textbook, no source fetched; makes STC)
+  Recycle         H2 and HCl recovered and re-fed; STC is a byproduct (silicones, silica, or
+                  hydrogenated back to TCS in modified Siemens routes)
+  Finish          rods crushed, then acid etch (HNO3 + HF, room temp) or alkaline etch (70-80 C)
+
+  Slim rods start at 20 mm; final rods are 150-180 mm; growth is up to 1.9 mm/h. Electronic grade
+  uses slower, uniform growth (steady H2:TCS ratio, low HCl, even temperature) so the rod stays
+  smooth and dense. Solar grade pushes speed and tolerates rough surfaces.
+
+# 4. By the numbers
+
+  deposition temp     about 1100 C rod surface; 1000-1150 C range in patents
+  rod diameter        20 mm slim rod in, 150-180 mm out
+  growth rate         up to 1.9 mm/h on the diameter
+  electricity (SoG)   60-70 kWh/kg in 2023 (CPIA / Fraunhofer ISE); ~35-45 kWh/kg of it in CVD
+                      (70-85% of CVD heat recoverable); TCS synthesis ~9; other (PEM H2, scrubbers) 16
+  electricity (EG)    higher; company averages: Wacker 91.9 (2020, multi-product), REC 123 (2020),
+                      Hemlock 126 (2019), Wacker EG-only 150 (2002), Tokuyama 274 all energy (2019)
+  patents quote       a looser 65 to 200 kWh/kg range for Siemens reactors in background text
+  purity              electronic grade: donors <= 1.5e12 atoms/cm3 (Special EG), base metals <= 0.1 ppbw
+                      solar grade allows donors <= 2.5e14, i.e. about 100x more
+  price pressure      electronics grade is only ~5% of volume yet needs purity near 11N
+  note                Bernreuter says 12N purity claims are not achieved for EG polysilicon
+
+# 5. Impurity limits: Special EG vs solar grade (GB/T 12963-2022 and Fraunhofer ISE)
+
+  donors  P,As,Sb (atoms/cm3, log-ish bar by exponent)
+  Special EG    ███████████████ 1.5e12
+  EG3           ███████████████████ 5e12
+  Solar grade   ███████████████████████████████ 2.5e14
+  (bar length proportional to exponent above 1e10; each step right is 10x dirtier)
+
+# 6. Who makes it: top polysilicon makers, 2024 ranking figures, thousand tonnes
+
+  Tongwei       ██████████████████████████████████████████████ 910
+  GCL Tech      ████████████████████████ 480
+  Daqo          ██████████████████ 350
+  Xinte         ███████████████ 300
+  Wacker (8th)  ████ ~80 (capacity)
+  Top four = 65% of 2024 global output; China = 93.5% of 2024 output (Bernreuter).
+  (TaiyangNews labels these output; pv magazine calls the same numbers capacity. Treat as indicative.)
+  Ranking 5-10: Qinghai Lihao (5th), Wacker (8th), Hongyuan (9th). Hemlock 14th, OCI 16th.
+
+# 7. Solar volume vs chip-grade: two different businesses
+
+  Almost all tonnes are solar. Semiconductor grade is a small, high-margin niche where non-Chinese
+  producers still matter. Shares of EG supply are NOT published openly; a paid-report aggregator
+  lists Wacker ~22.6% and Hemlock ~19.2% (low reliability, unverified). Tokuyama, Mitsubishi
+  Materials and REC Silicon are the other names usually cited in electronic grade.
+
+# 8. Chokepoints and risks
+
+  - 9N-11N supply sits with a handful of plants: Wacker (Burghausen, Germany), Hemlock (Michigan),
+    Tokuyama (Japan). Wafer makers qualify chunk lots for years, so switching is slow.
+  - China makes 93.5% of polysilicon but almost all of it is solar grade. A 2024 Chinese overcapacity
+    glut hit Wacker and others; top four Chinese producers lost money in H1 2024 (Bernreuter).
+  - Electricity is a large cost line, so power price decides who survives.
+  - Wacker is investing to lift hyperpure cleaning capacity by more than 50% (2024 annual report).
+
+# 9. Listed names
+
+  Tongwei 600438.SS    GCL Technology 3800.HK    Daqo New Energy DQ    Xinte Energy 1799.HK
+  Wacker Chemie WCH.DE   OCI Holdings 010060.KS   Tokuyama 4043.T   Hemlock = private JV (Dow, Corning,
+  Shin-Etsu stakes)   (tickers and Hemlock ownership are from general knowledge, not a fetched source)
+
+# Sources
+
+  [1] Bernreuter, Top Ten Polysilicon Makers (25 Nov 2025):
+      bernreuter.com/files/data/newsroom/press-releases/
+      2025-11-25-Bernreuter-Research-Top-Ten-Polysilicon-Makers-Nearly-All-Chinese.pdf
+  [2] TaiyangNews, China Dominates 2024 Global Polysilicon Production:
+      taiyangnews.info/business/china-dominates-2024-global-polysilicon-production
+  [3] Fraunhofer ISE for Wacker, Electricity consumption of EG polysilicon (18 Aug 2025):
+      ise.fraunhofer.de/content/dam/ise/en/documents/publications/studies/
+      25_en_ISE_Report_Analysis-of-the-Electricity-Consumption-for-the-
+      Production-of-Electronic-Grade-Polysilicon.pdf
+  [4] pv magazine India on capacity: pv-magazine-india.com/?p=13589
+  [5] Wacker Annual Report 2024: reports.wacker.com/2024/annual-report/combined-management-report/
+      segments/wacker-polysilicon.html
+  [6] US patent background ranges: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10683209

@@ -6,6 +6,7 @@
 //   theme        colours + semantic styles (from nvim's colorscheme args)
 //   layout       standard screen frames (header / nav / detail / source bar)
 //   block_grid   blocks as a grid of bordered containers, spatial hjkl (dashboards)
+//   calendar     month / week / day views over dated events (weekends can be hidden)
 //   block_view   renders model::Block lists with a row/cell cursor (Table, Kv, Series, Bars, Text)
 //   section_list left nav: List + ListState over model::Section (long lists)
 //   section_tabs top nav: one row of tabs over model::Section (few, short sections)
@@ -20,6 +21,7 @@
 
 pub mod block_grid;
 pub mod block_view;
+pub mod calendar;
 pub mod charts;
 pub mod command_palette;
 pub mod help;

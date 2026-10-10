@@ -1,0 +1,122 @@
+# 1. What happens: carve the pattern into the wafer
+
+ ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────────┐  ┌───────────┐  ┌─────────┐
+ │ HARD MASK │  │ IGNITE    │  │ RADICALS  │  │ ION-ASSISTED │  │ SIDEWALL  │  │ STRIP + │
+ │ litho     │─▶│ PLASMA    │─▶│ + IONS    │─▶│ ETCH         │─▶│ PASSIVATE │─▶│ CLEAN   │
+ │           │  │ RF on gas │  │ in plasma │  │ vertical     │  │ film      │  │ strip   │
+ └───────────┘  └───────────┘  └───────────┘  └──────────────┘  └───────────┘  └─────────┘
+
+  (etch transfers the litho pattern into the film; each litho layer is followed by etch, then CLEAN)
+
+# 2. Inside a plasma etch chamber (capacitive RIE or inductive ICP)
+
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │   process gas in ──▶ gas plenum                                                                      │
+ │   ═════════════ SHOWERHEAD (top electrode, or dielectric window under the ICP coil) ═════════        │
+ │      ║   ║   ║   ║   ║   ║   ║   gas jets, 5-100 mTorr                                               │
+ │   ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈                     │
+ │   ≈≈≈  PLASMA: electrons, radicals (F, Cl), ions (CF3+, Ar+), density ~1e11 /cm3  ≈≈≈≈≈≈≈≈≈≈≈≈≈      │
+ │   ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈                     │
+ │       ▼   ▼   ▼   ▼   ▼   ▼   ▼    ions accelerated across the sheath by the RF bias                 │
+ │     ┌───────────────────────────────────────────────┐                                                │
+ │     │ WAFER (pattern under hard mask)               │    bias RF 13.56 MHz (textbook)                │
+ │     └───────────────────────────────────────────────┘    ICP source: tool spec up to 2500 W, 2.4 MHz │
+ │     ▓▓▓▓▓▓▓ ESC: electrostatic chuck, He back-side cooling ▓▓▓▓▓▓▓▓▓▓▓                               │
+ │     ▓▓▓▓▓▓▓ cathode (RF bias) + chiller, 0 to -30 C for cryo etch ▓▓▓▓▓▓                             │
+ │   byproducts (SiF4, CO ...) ◀── turbo + dry pump ◀────────────────────────────────                   │
+ └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (source power sets ion FLUX, bias power sets ion ENERGY; about 1 V per watt, geometry-dependent)
+
+# 3. Trench cross-section: why ions make it vertical
+
+ ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+ │   BEFORE                        DURING                                AFTER              │
+ │   ┌────┐    ┌────┐              ions ↓↓↓↓  radicals ≈ ≈               ┌────┐    ┌────┐   │
+ │   │mask│    │mask│              ┌────┐ ↓↓↓↓ ┌────┐                    │mask│    │mask│   │
+ │   ├────┴────┴────┤              │mask│      │mask│                    ├────┤    ├────┤   │
+ │   │  film (SiO2) │              ├────┤▓    ▓├────┤  ▓ = sidewall      │film│    │film│   │
+ │   │              │              │film│▓    ▓│film│  passivation       │    │    │    │   │
+ │   │              │              │    │▓    ▓│    │  (byproduct film)  │    │    │    │   │
+ │   │ stop layer   │              │ stop layer ▼    │  blocks sideways   ├────┴────┴────┤  │
+ │   └──────────────┘              └──────────────────┘  attack            │ stop layer   │ │
+ │                                                                         └──────────────┘ │
+ └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (ions hit the floor at normal incidence and break the film there; the sidewalls stay protected)
+
+# 4. The chemistry and physics
+
+  radicals   CF4 + e- ──▶ CF3 + F + e-             fluorine radicals made from fluorocarbon gas
+  SiO2       SiO2 + 4F ──▶ SiF4(gas) + O2          slow without ion bombardment to break Si-O bonds
+  Si         Si + 4F ──▶ SiF4  or  Si + 2Cl2 ──▶ SiCl4     (textbook: Cl2 / HBr for poly-Si and fins)
+  3D NAND    HF gas etches the oxide-nitride stack at cold wafer temp; PF3 catalyst raises rate [2]
+  ALE        cycle = self-limiting surface modification, then low-eV Ar+ removes only that layer [4]
+             Cl2 + 50 eV Ar+ on Si: molecular-dynamics yield 0.172 Si per ion [4]
+             C4F8/Ar+ on SiO2: 1.9 A per cycle [4]; GaN/AlGaN (not Si): 1.63 A per cycle
+
+# 5. By the numbers
+
+  pressure          5-100 mTorr (ICP-DRIE tool spec); RIE: few to few hundred mTorr [3]
+  ICP source        100-700 W in one patent example; tool spec up to 2500 W at 2.4 MHz [3]
+  plasma density    ~1e11 /cm3 for a high-density plasma [3]
+  cryo wafer temp   0 to -30 C, helium back-side cooling [2]
+  NAND channel hole ~10 um deep through a ~100 nm opening, <10 nm deviation (<0.1% of depth) [2]
+  aspect ratio      approaching 70:1 today; 100:1 described as much harder [2]
+  stack             tall two-tier stack about 30 um; word-line z-pitch about 40 nm [2]
+  Lam Cryo 3.0      >2x etch rate vs conventional dielectric etch, -40% energy per wafer [1]
+  installed base    nearly 1,000 Lam cryo chambers in NAND fabs, 5 million wafers (vendor claims) [1]
+
+# 6. Lam Research FY2025 revenue by region, % of $18.44B (Lam is the etch leader)
+
+  China           ██████████████████████████████████████████████████ 34%
+  Korea           ████████████████████████████████ 22%
+  Taiwan          ████████████████████████████ 19%
+  Japan           ███████████████ 10%
+  United States   ██████████ 7%
+  SE Asia         ███████ 5%
+  Europe          ████ 3%
+  (systems 62% of revenue, services 38%; end markets: memory 42, foundry 45, logic/other 13)
+
+# 7. Etch + clean as a slice of wafer-fab equipment (Yole Group)
+
+  Patterning 24e    ██████████████████████████████████████████████████ 29% of WFE
+  Deposition 24e    ███████████████████████████████████████████ 25% of WFE
+  Etch+clean 22     ███████████████████████████████████████████████ 27% of WFE
+  Etch+clean H1-24  █████████████████████████████████ 19% of WFE
+  (etch+clean revenue fell 16.7% in 2023 on the NAND capex downturn; patterning = lithography)
+
+# 8. Why deep holes are hard (HAR etch)
+
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │   top of hole                                  failure modes as the hole deepens [2]            │
+ │   ┌──┐   ┌──┐   polymer at the mouth           * polymer at top can block ions                  │
+ │   │  │   │  │   narrows the opening           * conventional RIE rate drops as holes get deeper │
+ │   │  │   │  │                                 * allowed deviation <10 nm over 10 um             │
+ │   │  │   │  │   ions lose energy and angle    * 30+ recipe knobs; 33 tuned by AI once [2]       │
+ │   │  │   │  │   on the way down               * ~30% more word lines per generation [2]         │
+ │   │  │   │  │                                                                                   │
+ │   └──┘   └──┘   floor: ions + HF / F reach it, byproducts must get out                          │
+ │   cold wafer (cryo): less sidewall attack, more adsorbed neutrals, faster floor etch [2]        │
+ └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 9. Who makes it, structure, risks
+
+  Share is only known from secondary reports: Lam + Applied about 60% of etch revenue, TEL about 20%;
+  another report says the top three hold about 90%. Definitions differ; no primary split is public. [5]
+  Lam Research (LRCX)       etch leader; cryo dielectric etch for NAND high-aspect-ratio holes
+  Tokyo Electron (8035.T)   first cryo etcher 2023; reports 84% lower carbon vs its first cryo run [2]
+  Applied Materials (AMAT)  conductor etch and selective removal; bigger in deposition
+  Hitachi High-Tech         etch tools too (parent Hitachi, 6501.T); ticker is textbook, not sourced
+  Risks: NAND capex swings (2023 drop above), China at 34% of Lam sales (export controls), and the
+  etch-step count rising with every NAND layer and GAA node (textbook).
+
+# Sources
+
+  [1] Lam Cryo 3.0: emsnow.com/?p=42504
+  [2] Cryogenic etch for 3D NAND: semiengineering.com/cryogenic-etch-a-key-enabler-of-3d-nand/
+  [3] RIE/ICP: en.wikipedia.org/wiki/Reactive-ion_etching ; patents.google.com/patent/US6402974
+  [4] ALE: plasma.oxinst.com/technology/atomic-layer-etching ; sst.semiconductor-digest.com/?p=72758
+  [5] Shares: alliedmarketresearch.com/etch-process-market-A317527 and similar aggregator pages
+  [6] Lam FY2025 10-K: sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+  [7] WFE segments: yolegroup.com/strategy-insights/ (2024 WFE revenue stable before a 2025 surge)

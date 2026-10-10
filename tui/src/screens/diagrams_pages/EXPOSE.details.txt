@@ -1,0 +1,187 @@
+== TIN DROPLET
+# Why tin
+EUV has no practical laser or lamp at 13.5 nm, so ASML makes it by turning molten tin into a hot plasma. Highly ionised tin ions radiate strongly in a band around 13.5 nm, which is also where molybdenum/silicon multilayer mirrors reflect best (textbook).
+
+# Droplets and debris
+A droplet generator fires a stream of tiny tin drops across the source vessel, and every drop must be hit at exactly the right place and moment, tens of thousands of times a second. Every pulse leaves tin vapour, ions and fragments that fly toward the optics, which is why the source needs hydrogen flow and the collector is a consumable. A Laser Focus World account of the Cymer pre-pulse work describes a droplet of roughly 30 um being enlarged to over 100 um before the main pulse. Droplet stability and tin cleanliness set source uptime, and uptime is wafers per hour.
+
+# Sources
+https://www.laserfocusworld.com/lasers-sources/article/16557052/lithography-pre-pulse-technology-scales-euv-source-power
+https://www.laserfocusworld.com/articles/2017/08/the-secret-of-euv-generation.html
+
+== 2 LASER SHOTS
+# Why two pulses
+A single CO2 pulse on a small round droplet couples poorly: much of the energy is reflected or wasted. A low-intensity pre-pulse first flattens and expands the droplet into a thin pancake or mist cloud, giving the 10.6 um main pulse a larger, better-matched target. Cymer said in 2013 that the pre-pulse approach would give about a 2x improvement in conversion efficiency between CO2 laser power and EUV power, aimed at the 250 W level.
+
+# Efficiency and alternatives
+Conversion efficiency is still small. The page quotes about 5-6% of laser light into in-band EUV. The same Laser Focus World source says the CO2 drive laser must deliver more than 20 kW at only a few percent efficiency and is pulsed at 50 kHz. That drive laser is built by TRUMPF (textbook) and is why the tool draws 1.31 MW. Competing approaches exist: Gigaphoton reported a peak 5.2% with 150 mJ CO2 pulses, and a 2018 paper showed 3.2% with solid-state lasers. Neither is in ASML scanners.
+
+# Sources
+https://www.laserfocusworld.com/lasers-sources/article/16557052/lithography-pre-pulse-technology-scales-euv-source-power
+https://siliconsemiconductor.net/article/75511/Gigaphoton_raises_EUV_light_bar
+https://www.laserfocusworld.com/articles/2017/08/the-secret-of-euv-generation.html
+
+== PLASMA
+# The 13.5 nm emitter
+The main pulse heats the pancake of tin to a plasma of about 100 um with electron temperature 20-50 eV (per the page). Multiply charged tin ions in that plasma radiate in a narrow band around 13.5 nm. Only a few percent of the laser energy ends up as usable EUV; most is lost as heat and out-of-band light (textbook), which is why the collector and vessel need heavy thermal management.
+
+# Source power
+Source power is the throughput limit of the whole machine. The page notes about 250 W at the intermediate focus in current tools, and the NXE:3800E uses a 500 W source (ASML, Nov 2024) to reach 220 wafers per hour. Demonstrations of 210 W for one hour in 2015-2016 on a modified NXE:3300B were milestones on the path to volume production. More watts let a scanner use the same 30 mJ/cm2 dose in less time, or run lower doses with stochastic risk.
+
+# Sources
+https://www.laserfocusworld.com/articles/2017/08/the-secret-of-euv-generation.html
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+https://www.sec.gov/Archives/edgar/data/937966/000093796624000026/exhibit994.htm
+
+== COLLECTOR
+# A consumable mirror
+The collector is a large ellipsoidal multilayer mirror that sits in the debris path, so it is the most exposed optic in the tool. A patent on collector contamination reduction names deposited particles, such as tin debris, as the dominant wear mechanism. Hydrogen is injected near the mirror: hydrogen reacts with tin to form stannane (SnH4), which is pumped away. The same patent states hydrogen flow does not completely prevent contamination, consistent with the page's note that the collector loses reflectivity over billions of pulses.
+
+# Wear and cleaning
+ASML engineers described a 2018 episode in which the collector degraded extremely fast after several hours; they concluded it was a chemistry problem, and combinations with hydrogen plasma were hard to deal with. Standard practice is removing and cleaning the collector, which means downtime. Academic work (Qerimi et al., 2022) proposed in-situ tin removal with a surface-wave plasma at etch rates 20x the contamination rate (research, not a product). Collector lifetime sets scanner availability and service revenue.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9625824
+https://www.asml.com/en/company/stories/2022/kempen-fellow
+https://www.aip.org/scilights/in-situ-cleaning-technique-improves-extreme-ultraviolet-lithography-efficiency
+
+== INTERMEDIATE FOCUS
+# Handoff between source and scanner
+The intermediate focus (IF) is the second focal point of the collector's ellipse and the interface between the light-source module and the scanner. Power is quoted at this point, which is why the page says about 250 W at IF today. Everything downstream (illuminator, reticle, six projection mirrors) can only lose light, so the wafer sees roughly 1 W from 100 W in, per the page's light budget.
+
+# A pinch point
+A key design role of the IF is as a pinch point (textbook): a small aperture there lets the scanner block tin debris and out-of-band light, such as residual 10.6 um CO2 light, from entering the optics. Gas flow and vacuum separation at the IF also keep the scanner clean from the contaminated source vessel (textbook). Because source module and scanner meet here, source upgrades such as the 500 W source in the NXE:3800E can be swapped without redesigning the optical train.
+
+# Sources
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+https://www.laserfocusworld.com/optics/article/16566714/optics-for-scanning-multilayer-mirrors-enable-next-generation-euv-lithography
+
+== ILLUMINATOR
+# Shaping the beam
+The illuminator takes light from the intermediate focus and turns it into a uniform, controlled beam that lands on the reticle at a small angle off the normal. Its mirrors shape the angular distribution (the illumination mode, such as dipole or annular), which tunes which diffraction orders the projection optics collect and so tunes the achievable k1 in CD = k1 * lambda / NA (textbook). Illumination tuning is a software-visible knob for computational lithography, bounded by the tiny photon budget.
+
+# Light budget
+Each mirror costs light. The page's budget uses about 0.67-0.70 reflectivity per Mo/Si mirror, so two or more illuminator mirrors alone cut power to about half before the reticle. Combined with the reticle and six projection mirrors (about 10 reflections), under 2% survives: 0.7^10 = 2.8% and 0.67^10 = 1.8% (computed on the page). The illuminator and projection optics come from Carl Zeiss SMT (textbook), a private company with no ticker.
+
+# Sources
+https://www.laserfocusworld.com/optics/article/16566714/optics-for-scanning-multilayer-mirrors-enable-next-generation-euv-lithography
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+
+== RETICLE + MIRRORS
+# A reflective mask
+Because all materials absorb 13.5 nm light, the reticle must be a mirror, not a window: a Mo/Si multilayer reflector with a Ta-based absorber patterned on top (per the page). Light hits at an angle, so tall absorber features cast shadows that shift the printed pattern (textbook, called mask 3D effects). The pattern is reduced 4x by six projection mirrors.
+
+# Inspection and vendors
+Mask defects are a major yield issue because a defect buried in the multilayer prints on every die. Lasertec is cited as maker of actinic (13.5 nm) mask inspection, and in July 2025 it released the PELMIS EPM200 to inspect carbon-nanotube (CNT) pellicles for particles. Sources disagree on how exclusive Lasertec is: Canatu names Lasertec, KLA, Applied Materials and Zeiss as key EUV mask inspection toolmakers. Hoya supplies mask blanks (textbook).
+
+# Sources
+https://www.lasertec.co.jp/en/news/20250711_E_%20PELMIS_EPM200.pdf
+https://canatu.com/?p=18603
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+
+== Pellicle
+# Dust cover that must be transparent
+A pellicle is a thin membrane over the reticle so that falling particles land out of focus instead of printing. At 13.5 nm it must be free-standing and extremely thin, since any solid absorbs EUV. The page quotes an NXE:3400B membrane transmission of 85-90%. One Bits&Chips item says ASML earlier reported 83% for its silicon-based pellicle (undated, so treat as older).
+
+# Carbon nanotubes next
+The next step is carbon nanotube membranes. Imec reports CNT membranes with greater than 95% EUV transmission and durability compatible with the power roadmap, and an academic abstract reports up to 99% transmission, with a known failure mode: instability in the hydrogen radical environment of the reticle chamber. Canatu states ASML certification is required before CNT pellicles can be used in scanners. A pellicle lowers dose through absorption, and as source power rises to 500 W it must survive more heat.
+
+# Sources
+https://bits-chips.com/article/imec-develops-carbon-nanotube-euv-pellicle
+https://canatu.com/?p=23022
+https://www.lasertec.co.jp/en/news/20250711_E_%20PELMIS_EPM200.pdf
+
+== PROJECTION OPTICS
+# Six mirrors, no lenses
+Projection optics for the 0.33 NA tools are six multilayer mirrors with 4x reduction (per the page). Mirror surface accuracy is at the sub-nanometre level (textbook), and Carl Zeiss SMT makes them. Each Mo/Si mirror reflects about 67-70%, so mirror count is a design trade-off: more mirrors help correct aberrations, but each costs about 30% of the light. About 10 reflections leave under 2%, matching the patent figure Laser Focus World cites.
+
+# High-NA optics
+High-NA changes the design: 0.55 NA uses anamorphic mirrors (4x one direction, 8x the other) and halves the field to 26 x 16.5 mm, so a wafer needs about 2x as many exposures. Resolution improves from 13.5 nm to about 8 nm, but depth of focus shrinks by 2.8x. The optics are a single-vendor chokepoint with long lead times.
+
+# Sources
+https://www.laserfocusworld.com/optics/article/16566714/optics-for-scanning-multilayer-mirrors-enable-next-generation-euv-lithography
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+
+== WAFER on stage
+# Where the photons are counted
+The wafer stage scans opposite to the reticle, synchronised, and the resist absorbs the 92 eV photons. The page notes a 20 nm resist film absorbs only about 10% of EUV light, so very few photons form the image. Research summaries say EUV photon density is about 1/14 that of 193 nm ArF, so photon shot noise increases, and raising dose helps only partly while slowing production.
+
+# Stochastics and overlay
+A Monte Carlo study (JM3, 2020) reports defect probability rises exponentially as feature size shrinks, and is highly sensitive to process and mask conditions. For High-NA, thinner resists capture fewer photons, which may worsen roughness and stochastic effects. Overlay also matters: the NXE:3800E improves overlay by 13% (ASML). The wafer must be very flat as depth of focus tightens. Stochastics, not the optics, may set the real cost floor at 2 nm and below.
+
+# Sources
+https://www.doi.org/10.1117/12.2515926
+https://semiengineering.com/new-challenges-emerge-with-high-na-euv
+https://www.sec.gov/Archives/edgar/data/937966/000093796624000026/exhibit994.htm
+
+== Rayleigh resolution
+# The equations
+The Rayleigh equations on the page, CD = k1 * lambda / NA and DOF = k2 * lambda / NA^2 (textbook), explain the whole EUV roadmap. Three levers: shorter wavelength (193 nm to 13.5 nm), larger NA (0.33 to 0.55), or lower k1 (computational lithography, better resists and masks). The page computes 13.5 nm at 0.33 NA and 8.1 nm at 0.55 NA with k1 = 0.33; ASML quotes 13 nm and 8 nm.
+
+# The price of NA
+The price of NA is depth of focus: (0.55/0.33)^2 = 2.8x smaller. That forces thinner resist, flatter wafers, and tighter focus control, and thin resists absorb fewer photons, worsening stochastics. High-NA also uses a half-size field, so throughput drops: the EXE:5000 is at 110 wafers per hour versus 220 for the NXE:3800E. Customers weigh High-NA single patterning against low-NA double patterning on cost; reports suggest TSMC adoption around 2029-2030 (unconfirmed).
+
+# Sources
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+https://www.heise.de/-9690285
+https://semiengineering.com/new-challenges-emerge-with-high-na-euv
+
+== 91.8 eV
+# Photon arithmetic
+E = 1239.8 eV*nm / 13.5 nm = 91.8 eV, about 14x the energy of a 193 nm ArF photon (6.4 eV). At the 30 mJ/cm2 reference dose, the page computes 2.0e15 photons per cm2, about 20 per nm2. An ArF dose of equal energy would have 14x more photons, which is why EUV suffers 14x more shot noise (shot noise scales as 1/sqrt(N)).
+
+# Sensitivity vs defects
+Because each EUV photon is so energetic, absorbed photons release secondary electrons in the resist that generate extra acid, which blurs the image on a scale of a few nanometres (textbook). Resist designers work between sensitivity (low dose) and stochastic defects: reports show a strong trade-off between resist sensitivity and defectivity. Practical example from the page: 20 mJ/cm2 enables 180 wafers per hour on the 3600D, but at 30 mJ/cm2 it delivers 160.
+
+# Sources
+https://www.doi.org/10.1117/12.2515926
+https://spectrum.ieee.org/getting-euv-ready-for-2020
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+
+== NXE:3800E
+# Specs
+ASML's NXE:3800E is the 2 nm-generation low-NA tool. Per ASML's 6-K it has a 500 W source and a 220 wafers per hour spec, up from 160 on the 3600D (+38%), and improves overlay by 13%. The page also lists a reported NXE:3800F at 260 wafers per hour (Tom's Hardware), a reported figure, not a spec verified here.
+
+# Cost and power
+Throughput matters because the tool is priced per wafer capacity: the page quotes low-NA at about $180M (Wikipedia, AnandTech) and a 200-ton footprint. Power is a cost too: NXE:3400C draws 1.31 MW and 9.64 kWh per wafer pass versus 0.45 kWh for ArF immersion (Wikipedia). The 3800E needs the whole stack to keep up: a longer-lived collector, pellicle survival at higher heat load, and resists that print at lower dose without stochastic defects.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/937966/000093796624000026/exhibit994.htm
+https://at-web1.www.anandtech.com/show/21297/asml-delivers-first-2nm-generation-low-na-euv-tool-twinscan-3800e
+https://en.wikipedia.org/wiki/Extreme_ultraviolet_lithography
+
+== EXE:5000
+# High-NA: first generation
+The EXE:5000 is the 0.55 NA research tool, rated 110 wafers per hour on the page (target above 200 by 2030). Price is reported at EUR 350M+, about $380-400M, versus roughly $180M for low-NA (heise, Wikipedia, AnandTech). Intel took delivery first and completed assembly of the first commercial High-NA scanner at its D1X fab in Oregon.
+
+# Adoption and doubt
+The production successor is the EXE:5200B. Search results indicate Intel began acceptance testing and SK Hynix started installing one; claims about Intel shipping production chips and one million High-NA wafers come from single unverified sites, so treat them as unconfirmed. TSMC's timing is disputed in the press: some say 2028, others 2029-2030 or later (A14P to A10), so 2028 looks like the outlier. The economic question is whether High-NA single patterning beats low-NA multi-patterning at half the throughput and double the price.
+
+# Sources
+https://bits-chips.com/article/intel-begins-acceptance-testing-of-asmls-exe5200b-high-na-euv-scanner
+https://www.trendforce.com/news/?p=32988
+https://www.heise.de/-9690285
+https://eetimes.itmedia.co.jp/ee/articles/2501/15/news015_5.html
+
+== ASML 2025
+# Scale of the franchise
+Per ASML's FY2025 6-K and the eeNews recap: net sales EUR 32.7B and net income EUR 9.6B; EUV system sales EUR 11.6B (+39%) from 48 EUV systems; backlog EUR 38.8B of which EUV EUR 25.5B. EUV was 48% of net system sales in 2025 versus 38% in 2024.
+
+# Reading the numbers
+Implied average (computed here from the page's figures): EUR 11.6B / 48 systems is about EUR 242M per EUV system, which blends low-NA and the first High-NA tools and may include upgrade revenue, so treat it as a rough guide. The EUV backlog of EUR 25.5B is roughly 2.2x annual EUV sales (computed). AI demand drives it: leading-edge logic and DRAM both use more EUV layers per node (textbook). Risks beyond the page: export controls on China shipments, customer capex cycles, and pricing friction.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/937966/000162828026003701/a2026_01x28xpresentation.htm
+https://www.eenewseurope.com/en/asml-reports-e32-7bn-sales-e9-6bn-net-income-for-2025/
+
+== Chokepoints
+# Single points of failure
+The page names one scanner vendor (ASML, which owns Cymer), one mirror maker (Carl Zeiss SMT), and one CO2 laser maker (TRUMPF). Adjacent specialists: Lasertec for actinic mask inspection, Hoya for mask blanks, and Tokyo Electron for the tracks that attach to the scanner (all textbook, not backed by a page fetched on the original page). A roughly 200-ton tool ships in many containers, and collector and tin consumables recur.
+
+# Tickers and risks
+Competing sources exist only at research level: Gigaphoton reported 5.2% CE for a CO2-based source and a solid-state laser study reached 3.2%. Pellicle certification (Canatu says ASML certification is required for CNT pellicles) and chemistry downstream (see DEVELOP) add dependencies. Ticker map: ASML (ASML, ASML.AS), Lasertec (6920.T), Hoya (7741.T), TEL (8035.T); Zeiss and TRUMPF are private. Customers named are TSMC, Samsung, SK Hynix, Intel, Micron. Also flagged: export controls and High-NA yield and cost.
+
+# Sources
+https://siliconsemiconductor.net/article/75511/Gigaphoton_raises_EUV_light_bar
+https://canatu.com/?p=23022
+https://www.lasertec.co.jp/en/news/20250711_E_%20PELMIS_EPM200.pdf

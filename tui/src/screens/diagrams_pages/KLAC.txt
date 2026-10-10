@@ -1,0 +1,121 @@
+# 1. What happens: measuring every layer so the next one lands right
+
+ ┌───────────┐   ┌───────────────┐   ┌────────────────┐   ┌────────────────┐   ┌────────────┐
+ │ WAFER     │──▶│ INSPECT       │──▶│ MEASURE        │──▶│ ANALYSE        │──▶│ FEED BACK  │
+ │ post-etch │   │ find defects  │   │ overlay, CD,   │   │ bin + classify │   │ to scanner │
+ │           │   │ light, e-beam │   │ film thickness │   │ excursion?     │   │ next layer │
+ └───────────┘   └───────────────┘   └────────────────┘   └────────────────┘   └────────────┘
+
+  (KLA sells the inspection, metrology and data-analytics tools; it makes no chips, it tells fabs when
+      a layer is wrong)
+
+# 2. Inside the loop: one wafer, one layer
+
+   SCANNER (ASML) exposes layer N+1; wafer then goes to the overlay tool and the inspector
+
+ ┌───────────────────┐   ┌────────────────────┐   ┌──────────────────┐   ┌───────────────────────┐
+ │ WAFER on chuck    │──▶│ ARCHER             │──▶│ OVERLAY ERROR    │──▶│ APC analytics         │
+ │ layer N grating   │   │ light reads both   │   │ in nm, per field │   │ fits shift, scale,    │
+ │ layer N+1 grating │   │ gratings, compares │   │ per wafer        │   │ rotation, dose, focus │
+ └───────────────────┘   └────────────────────┘   └──────────────────┘   └───────────────────────┘
+   APC sends corrections back to the scanner (shift, scale, rotation, dose, focus) for the next lot
+
+┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ DEFECT INSPECTOR (broadband plasma optical, or e-beam): flags particles, bridges, voids          │
+│ REVIEW SEM classifies each hit; out of spec ──▶ hold the lot, fix etch/CMP/litho before next lot │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (schematic, not to scale; Archer reads overlay marks, the inspector scans for defects)
+
+# 3. Three tool families and what they see
+
+  optical inspection   broadband plasma light scans the whole wafer, fast; finds killer defects on
+      patterned wafer
+  e-beam inspection    scanning electron beam, much slower, sees tiny voids/opens that light cannot
+      resolve
+  overlay metrology    measures how well layer N+1 aligns to layer N (Archer family)
+  CD / film metrology  line width and film thickness (KLA SpectraShape etc.; CD-SEM is Hitachi/AMAT turf)
+  unpatterned wafer    bare/blanket wafers incoming and after CMP (Surfscan; KLA and Hitachi High-Tech
+      lead)
+  reticle inspection   checks the mask itself before it prints errors onto every wafer (Lasertec EUV
+      blanks)
+
+  Why feedback matters: an overlay miss of a few nm between two layers can open or short a via
+      (textbook knowledge).
+  The data path: tool measurements ──▶ fab host ──▶ run-to-run control ──▶ scanner/etch recipe offsets,
+      lot by lot.
+  Defect review ladder: optical finds candidates, review SEM images them, classifier sorts killer vs
+      nuisance.
+  Physics in one line: each tool trades speed against sensitivity. Optical covers 100% of the wafer
+      area in
+  minutes; e-beam resolves smaller defects but samples a few dies. Fabs combine them (textbook
+      knowledge).
+
+# 4. By the numbers
+
+  KLA semiconductor process-control share   58% in 2025, up 360 bp since 2021; ~7x nearest rival (KLA
+      investor day)
+  KLA optical patterned-wafer inspection    claimed >85% share in 2024 (company presentation, vendor
+      claim)
+  Advanced-packaging process control rev    ~$635M (2025) ──▶ ~$1B (2026 guide); an earlier call said
+      >$800M, sources conflict
+  Overlay error claim (Archer 600)          'sub-3nm overlay error' for advanced logic and memory (KLA,
+      capability claim)
+  WFE outlook                               ~$140B calendar 2026; KLA expects process control to
+      outgrow WFE to 2030
+  Services                                  $775M in the March 2025 quarter, up 16% YoY
+  Top-8 process control vendors             nearly 90% of the market (DRI / LP Information)
+
+# 5. KLA revenue by segment, fiscal year ended June 2026, $ million (10-K)
+
+  Semiconductor Process Control ████████████████████████████████████ 12,240
+  PCB + Component Inspection    ██ 750
+  Specialty Semi Process        ██ 584
+  Total segment revenue about $13.58B, up 12%. SPC +12% (foundry/logic + memory, AI/HPC); PCB +21%
+      (adv. packaging)
+
+# 6. KLA revenue by product group, trailing twelve months to Q1 FY26, $ billion (TickerLeague aggregator)
+
+  Defect inspection ████████████████████████████████████ 6.60
+  Service           ████████████████ 3.02
+  Patterning        █████████████ 2.46
+  (third-party split of 50.4% / 23.1% / 18.8%; not the 10-K segment table, treat as indicative)
+
+# 7. Market share, process control 2025 (GMI Insights)
+
+  KLA            █████████████████████████ 49%
+  Top 5 combined ████████████████████████████████████████ 78.8%
+  Top 5 named: KLA, Applied Materials, Lasertec, Onto Innovation, ASML. Note this differs from KLA's
+      own 58% figure,
+  which uses a different market definition (semiconductor process control only).
+
+# 8. Who makes it, market structure, chokepoints
+
+  KLA (KLAC)             the near-monopoly in optical wafer and mask-adjacent inspection and overlay
+  Applied Materials (AMAT)  e-beam review + CD-SEM, with Hitachi High-Tech (Hitachi parent, 6501.T)
+  Lasertec (6920.T)      EUV mask-blank and actinic mask inspection
+  Onto Innovation (ONTO) packaging + 3D metrology and inspection
+  Nova (NVMI)            optical CD/film metrology; ASML (ASML) sells overlay-adjacent YieldStar
+      metrology
+
+  Risks: China export controls hit KLA sales (Q2 2025 call cited export challenges); Specialty Semi
+      segment fell 1%
+  on lower China investment. Dependence on leading-edge capex: process control rises faster than WFE
+      when nodes
+  shrink because each new layer needs more measurement. 'Next layer feedback' lock-in makes switching
+      costly.
+
+# Sources
+
+  [1] KLA 10-K FY2026 (segments):
+      sec.gov/Archives/edgar/data/0000319201/000031920126000027/klac-20260630.htm
+  [2] KLA Investor Day share 58% / adv. packaging:
+      nasdaq.com/articles/kla-biggest-process-control-winner-ai-spending
+      and chartmill.com/news/external/59879 (Can KLAC keep outgrowing the wafer equipment market)
+  [3] Q3 FY25 call (services $775M): marketbeat.com/earnings/reports/2025-4-30-kla-co-stock
+  [4] Product-group split: tickerleague.com/companies/KLAC/how-it-makes-money
+  [5] Share table, vendors:
+      gminsights.com/industry-analysis/semiconductor-process-control-equipment-market
+  [6] DRI / LP Information top-8 + CD-SEM leaders:
+      dri.co.jp/auto/report/lpi/260603-global-semiconductor-process-control.html
+  [7] Archer 600 sub-3nm claim: laserfocusworld.com (KLA-Tencor overlay)

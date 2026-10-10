@@ -1,0 +1,237 @@
+== AS-PULLED
+# A rough cylinder
+
+The as-pulled crystal is a rough, slightly wavy cylinder: seed cone and neck at one end, tail cone at the other, with a diameter deliberately a little over 300 mm so it can be ground true. It is up to about 2 m long and several hundred kg (Wikipedia), and holds the entire value of one multi-hour furnace cycle.
+
+# Handling
+
+The crystal comes off the puller still warm and is handled with care: it has built-in thermal stress from the gradient it grew in, and a crack here scraps the lot. Wafer makers measure the crystal early to decide how it will be cut and who it will be sold to. A 450 mm crystal would have weighed about 1 tonne, one reason that program was dropped.
+
+# Capacity limit
+
+Crystal output, not sawing, is the capacity limit. GlobalWafers said in August 2026 that its existing 300 mm capacity runs at full utilisation, tied to AI demand, so every usable ingot counts.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Czochralski_method ; https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/)
+
+== CROP
+# The cuts
+
+Cropping saws off the seed cone with its neck and the tail cone. Patent text says cropping also removes zones with voids or contamination. The off-cuts are the lowest-value silicon in the process, but they are not wasted entirely: scrap can be recycled as feedstock or sold into solar (textbook).
+
+# Measured, not fixed
+
+Where the cuts go is set by measurement. The tail end is richest in dopant and metal impurities because solutes concentrate in the remaining melt (textbook), and the shoulder and neck zone carried the early thermal stress. A longer crop gives cleaner wafers but fewer of them per ingot, so the cut position is a yield decision for each crystal.
+
+# Missed defects
+
+A missed defect zone leaves bad wafers that are only found at the slicing or inspection stage. Crop length is part of the wafers-per-pull number that no source here quantifies (no number found).
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12617032 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12605863)
+
+== TEST
+# Orientation check
+
+After cropping, test samples are taken from the cut faces to confirm the crystal orientation, doping type and resistivity before the ingot is committed to grinding and slicing. Orientation is checked by X-ray diffraction against the intended Miller plane; the notch tolerance on this page is <110> +/- 1 degree (vendor datasheet).
+
+# Orientation matters
+
+{100} is the standard for logic and CMOS, while {111} goes to bipolar, power and MEMS (Wikipedia infobox). Orientation is set by the seed in the MELT + PULL step, so a mis-seeded crystal is discovered here.
+
+# Last cheap point
+
+This is the last cheap point to reject a crystal. Rejecting after slicing wastes saw time and wire. The page notes a resistivity check step had no source found (textbook: a four-point probe on a slice). Customers audit these specs during qualification, which takes years.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Wafer_(electronics) ; https://www.universitywafer.com/300mm-silicon-wafers.html)
+
+== GRIND OD
+# Grinding to size
+
+A grind wheel brings the ingot to the target outer diameter and length (patent text). The as-pulled crystal is slightly oversize and not round; the wheel removes the surface so the finished cylinder meets the 300 mm spec, with a tolerance of +/- 0.2 mm (vendor datasheet for the finished wafer).
+
+# Why diameter matters
+
+Diameter control matters because wafer handling robots, FOUPs and every downstream tool assume the 300 mm standard. This step also removes the surface layer that grew in contact with the hot zone, where the crystal might carry surface contamination.
+
+# Silicon lost
+
+Material removed is silicon that was already pulled and paid for, so tighter as-grown diameter control reduces both grind time and silicon loss. Failure modes are grinding damage or chipping at the ends, and wheel wear causing taper.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12617032 ; https://www.universitywafer.com/300mm-silicon-wafers.html)
+
+== NOTCH
+# The groove
+
+A V-shaped groove is ground along the full length of the cylinder to mark crystal orientation. Detail from a vendor datasheet: 90 degree included angle, depth 1.0 mm (+0.25 / -0.00), on <110> with +/- 1 degree tolerance.
+
+# Why <110>
+
+Silicon cleaves along {110}-family directions in a {100} wafer, so the notch lines the dies up with the cleavage planes (textbook), and tools use the notch to align the wafer in every step from lithography to dicing.
+
+# Notch vs flat
+
+Wafers of 200 mm and up carry a single notch instead of flats because it wastes less area; it marks <110> and does not show doping type. 450 mm wafers were to be notchless with a laser mark. Failure modes: misalignment shows up as pattern placement errors and chipping at dicing; a notch that is too sharp can seed a crack at the wafer edge (textbook).
+
+# Sources
+
+(Sources: https://www.universitywafer.com/300mm-silicon-wafers.html ; https://en.wikipedia.org/wiki/Wafer_(electronics))
+
+== WIRE SAW
+# Wire web
+
+A single long wire is wound around grooved guide rollers to form a web, and the ingot, bonded to a mounting beam, is fed down through it. Diamond abrasive on the wire does the cutting, all wafers at once. Wire pitch sets wafer thickness plus kerf.
+
+# Kerf
+
+This page found no kerf, speed or wafers-per-ingot number for 300 mm semiconductor sawing. For solar wafers, diamond wire runs about 2x faster than slurry and cuts with about 125 um kerf versus about 150 um for slurry (TaiyangNews/ITRPV), with a path to about 85 um. Diamond-impregnated wire patents describe slurry sawing as having long cut times and frequent wire breakage as diameters grow to 300-400 mm.
+
+# Cut geometry
+
+Wafer count per ingot is ingot length divided by thickness plus kerf (textbook). Saw loss is silicon you already grew, so thinner wire is a direct yield gain.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US5964210 ; https://taiyangnews.info/technology/diamonds-are-a-wafers-friend)
+
+== CROP LINE
+# Where the lines go
+
+The two crop lines mark where the seed end and the tail end are sawn off. They are placed after the crystal is characterised, not at fixed distances, because the usable length depends on where resistivity, oxygen and defects stay in spec. The seed side is limited by the dislocation-free start and the tail side by dopant build-up and the end taper.
+
+# Decided by measurement
+
+Industry practice is to measure resistivity at the cut faces and decide how much to remove (textbook; the page's own resistivity-check step had no source).
+
+# Trade-off
+
+A conservative crop loses more silicon, while an aggressive crop passes marginal wafers to customers who audit for defects. Since qualification of a wafer supplier takes years (page text), a single batch of poor wafers risks a customer relationship.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12617032 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12605863)
+
+== tail cone off
+# Most contaminated
+
+The tail cone is the last frozen section of the crystal and the most contaminated. Segregation concentrates dopants and impurities in the remaining liquid, so the tail has the highest levels (textbook). The patent text on cropping says it removes zones with voids or contamination.
+
+# Slip dislocations
+
+A tail that was pulled off the melt too fast can also carry slip dislocations that run up into the body. A patent (US 9,988,736) describes growing the tail so as to suppress slip dislocation generation, since a long slip line costs usable body length.
+
+# Value hit
+
+The tail is the end of a day-long pull, and cutting it off removes silicon that cost the same furnace time as the rest. Better tail control (less taper length, fewer slips) raises wafers per kilogram of polysilicon, the scarce input.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9988736 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12617032)
+
+== mounting beam
+# Glue-on plate
+
+The ingot is bonded to a mounting beam (a glue-on plate, often graphite or similar; textbook) so it can be held during the cut and so the wafers stay attached to the beam while the wire exits. That keeps hundreds of thin wafers aligned and lets them be removed together afterwards.
+
+# Thickness reference
+
+Wafer thickness on a 300 mm wafer is 775 um +/- 25 um in vendor sheets (a drawing shows +/- 20 um), and the saw must hold that across the full ingot length with the beam as the reference.
+
+# Alignment
+
+Alignment of orientation to the beam sets wafer crystal angle; in practice the ingot is aligned by X-ray before bonding (textbook).
+
+# Sources
+
+(Sources: https://www.universitywafer.com/300mm-silicon-wafers.html ; https://en.wikipedia.org/wiki/Wafer_(electronics))
+
+== Orientation
+# Miller indices
+
+Orientation names the crystal plane that faces up, in Miller indices. {100} is the standard for logic and CMOS and {111} is used for bipolar, power and MEMS (Wikipedia infobox). The orientation is set by the seed crystal in the MELT + PULL step and verified in TEST.
+
+# Why {100}
+
+The silicon-silicon dioxide interface on {100} has a low density of interface traps, which gives good transistor behaviour. {111} has higher trap density but is mechanically and etch-wise attractive for some power and MEMS uses (textbook).
+
+# Industry constant
+
+The notch marks <110>, which in a {100} wafer lies along the cleavage directions. Every AI accelerator, HBM stack and CPU die runs on wafers with this orientation, so wafer makers cannot easily change it, which cements the incumbents. SEMI M1 is the governing standard for polished single-crystal wafers (tables not fetched).
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Wafer_(electronics) ; https://store-us.semi.org/products/m00100-semi-m1-specification-for-polished-single-crystal-silicon-wafers)
+
+== Doping
+# Dopants
+
+Boron, phosphorus, arsenic or antimony is added to the melt at 1e13 to 1e16 atoms per cm3 (Wikipedia), which sets the wafer's conductivity type and resistivity. Boron gives p-type and phosphorus n-type (textbook). Heavier arsenic and antimony doping is used for low-resistivity substrates (textbook).
+
+# Segregation
+
+Segregation is the difficulty: dopant prefers the liquid, so concentration rises along the crystal and the tail is more doped than the head (textbook, as noted on the MELT + PULL page). Sawing and sorting the wafers by measured resistivity then bins them to customer specs.
+
+# Purity and binning
+
+Purity is stated as still above 99.9999%, with transition metals below parts per billion (Wikipedia). Metals are especially harmful because they create deep traps and leakage in transistors. Customers buy resistivity bins, so only part of every ingot sells at a given spec. The notch does not show doping type; it must be checked by test.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Wafer_(electronics) ; https://en.wikipedia.org/wiki/Czochralski_method)
+
+== 775 um
+# Size ladder
+
+The standard 300 mm thickness is 775 um, introduced in 1999 (Wikipedia table), with +/- 25 um in vendor sheets. The size ladder on this page shows thickness rising with diameter: 525 um (100 mm), 675 (150), 725 (200), 775 (300) and 925 for the cancelled 450 mm.
+
+# Why thicker
+
+Thicker wafers resist breakage and warping under their own weight; thinning for packaging is done later and separately (textbook). Mass is about 125 g for 300 mm, and a wafer yields 640 ideal dies of 100 mm2.
+
+# Why 450 mm died
+
+300 mm gives 640 dies versus 269 at 200 mm. 450 mm, 342 g and 1490 dies, was proposed for 2018 and stopped in 2016 because tool makers declined retooling costs. That is why the 300 mm standard has lasted 25+ years.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Wafer_(electronics) ; https://www.universitywafer.com/300mm-silicon-wafers.html)
+
+== Pricing
+# Long-term agreements
+
+Wafers are sold mainly under long-term agreements (LTAs). Shin-Etsu said LTA prices should rise on capex and raw material costs; fixed-LTA customers saw no 2024 increase while step-up LTAs might (page, from Mark LaPedus's summary of the earnings commentary).
+
+# Tightening since
+
+SEMI said 2025 shipments rose 5.8% to 12,973 million sq in while revenue fell 1.2% to $11.4B, with growth from advanced epitaxial wafers for logic and polished wafers for HBM. GlobalWafers said in August 2026 that existing 300 mm capacity was fully used, and a May 2026 shareholder-meeting summary reported plans to raise prices with Asian capacity fully booked. A single unconfirmed source claims 18-22% increases for AI-dedicated wafers.
+
+# Investor read
+
+Wafer makers (Shin-Etsu 4063.T, SUMCO 3436.T, GlobalWafers 6488.TWO, Siltronic SSG.DE) swing from weak mature-node demand to AI strength; HBM and advanced logic carry the growth.
+
+# Sources
+
+(Sources: https://marklapedus.substack.com/p/silicon-wafer-market-upturn-higher ; https://www.eetasia.com/?p=72562 ; https://www.digitimes.com/news/a20260526PD214.html ; https://www.sunsirs.com/commodity-news/petail-35761.html)
+
+== Five firms
+# Share
+
+Five firms make nearly all large silicon wafers: Shin-Etsu, SUMCO, GlobalWafers, Siltronic and SK Siltron. The page's sources put their combined share at 82-94% depending on year (Omdia 2020 said 94% of an $11.2B market). The Report Prime estimate for 2024 has Shin-Etsu 19.9%, SUMCO 17.2%, GlobalWafers 12.9%, Siltronic 9.9% and SK Siltron 8.6% (low reliability).
+
+# Moat
+
+Qualification takes chipmakers years, so new entrants rarely win share. Geography is concentrated: Japan, Taiwan, Germany, Korea. Upstream there are further chokepoints: crucible quartz from Spruce Pine, where Sibelco and The Quartz Corp supply about 95% of ultra-high-purity quartz, and electronic-grade polysilicon.
+
+# Analyst moves
+
+An August 2026 report notes analyst upgrades of Siltronic to Buy (UBS, Deutsche Bank, Kepler Cheuvreux, DZ Bank), though the UBS case rests on significantly higher prices still to be proven. This oligopoly sits under every AI chip, and its volume is a read-through to leading-edge fab activity.
+
+# Sources
+
+(Sources: https://kedglobal.com/newsView/ked202203160007 ; https://www.reportprime.com/large-semiconductor-wafers-r3643/company ; https://stock3.com/news/siltronic-analysten-voll-des-lobes-17219353 ; https://konvoy.beehiiv.com/p/semiconductor-s-reliance-on-north-carolina)

@@ -52,6 +52,13 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "latest earnings research report",
         'e',
     ),
+    (
+        "Diagrams",
+        "diagrams",
+        "chip fab, fiber optics, data center power",
+        'x',
+    ),
+    ("Events", "events", "catalyst calendar", 'v'),
 ];
 
 pub struct Home {

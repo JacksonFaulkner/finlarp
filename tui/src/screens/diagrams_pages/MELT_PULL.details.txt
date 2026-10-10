@@ -1,0 +1,237 @@
+== LOAD
+# The charge
+
+The charge is polysilicon chunks plus a measured dose of dopant, packed into a quartz crucible before the chamber is sealed. Chunks leave voids, so many fabs top up with extra poly during the pull (recharge) so one crucible makes a longer crystal (textbook). The dopant mass sets the target resistivity of the whole crystal.
+
+# Dopant compromise
+
+Because of segregation, the first-frozen head is lighter doped than the tail, so the recipe is a compromise across the length. Purity is the point: the poly must already be electronic grade, because any metal or carbon contamination loaded here is dissolved in the melt and cannot be removed later.
+
+# Batch economics
+
+A 300 mm pull consumes the charge as one batch, so poly shortages or quality excursions idle whole pullers. Wafer makers sign long-term supply deals for poly for this reason. Roughly 1 kg of poly in gives a bit less of crystal out, with the leftover melt and the crucible scrapped (textbook).
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Czochralski_method ; https://marklapedus.substack.com/p/silicon-wafer-market-upturn-higher)
+
+== ~1414 C, argon
+# Melt under argon
+
+The melt step heats the charge in a graphite-heated furnace under flowing argon until everything is liquid, then holds just above the freezing point so a seed can touch it. The COMSOL furnace model uses a melt near 1414 C, with a contact temperature of 1403-1407.5 C, argon at 100 L/min and a furnace pressure of 2500 Pa. Wikipedia quotes 1425 C for semiconductor-grade silicon, so treat the exact figure as model- and source-dependent.
+
+# What argon does
+
+Argon is the carrier gas: it sweeps down past the crystal and out the bottom, carrying SiO and CO away so they do not condense on cold parts and rain back into the melt. Low pressure speeds that evaporation, which reduces oxygen pickup.
+
+# Slow thermal loop
+
+The model needs about 400 minutes to reach a steady contact temperature, a hint of how slow the thermal loop of a large hot zone is. Operators therefore hold a stable melt before seeding; rushing causes temperature drift and a diameter that wanders.
+
+# Sources
+
+(Sources: https://www.comsol.com/blogs/thermal-analysis-of-a-czochralski-crystal-growth-furnace ; https://en.wikipedia.org/wiki/Czochralski_method)
+
+== SEED + NECK
+# Seed and neck
+
+The seed is a small oriented single crystal (set to {100} or {111}) dipped into the melt. Thermal shock on contact generates dislocations, so the operator pulls a thin neck, 2-4 mm in diameter, at high speed (up to about 6 mm/min per US 6,866,713) so the dislocations slide to the surface and leave the crystal. Roughly 100-125 mm of neck is needed per that patent.
+
+# The limit
+
+Everything hangs from this neck. A conventional Dash-necked crystal is limited to about 100 kg because the thin neck can fracture and drop the body into the crucible (patent text). A 300 mm crystal of several hundred kg is far past that, so newer methods exist: a sharp-tipped seed that avoids the Dash neck, or a dash-free neck pulled at 0.5 mm/min or less (US 7,179,330).
+
+# Failure mode
+
+A neck that retains a dislocation propagates it into the body and forces a remelt. Neck breaks are the most expensive single failure in the process, because a whole crystal drops into hot silicon. Other patents quote a slower neck of 1.0-3.0 mm/min, for instance 2.4 mm/min over 200 mm.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US6866713 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7179330 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7628854)
+
+== SHOULDER
+# Flaring out
+
+The shoulder is the transition from the 2-4 mm neck to full diameter. The operator cools the melt slightly and slows the pull so the crystal flares out along a cone until it reaches the target, 300 mm for modern wafers.
+
+# Temperature takes over
+
+This is the first moment diameter is controlled by the temperature loop rather than by pull speed alone: a growing crystal releases latent heat at the interface, so the controller has to keep adjusting heater power as the freezing area grows.
+
+# Scrap and risk
+
+The shoulder cone is later cut off as scrap (see INGOT, crop step), so a shorter, steeper shoulder gives more usable body per charge, but too steep a flare risks new dislocations or a twisted crystal. Dislocations that survived the neck can multiply as the crystal widens, and a failure here wastes the whole charge.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US6866713 ; https://en.wikipedia.org/wiki/Czochralski_method)
+
+== 300 mm, slow
+# Body growth
+
+The body is the saleable part: up to roughly 2 m long and several hundred kg (Wikipedia). It grows slowly, around 1.0 to 1.6 mm/min in the examples on this page, because the freezing front must stay flat and stable. A faster pull pushes the interface convex or concave, locks in stress and defects, and shifts oxygen.
+
+# Throughput arithmetic
+
+The worked arithmetic on this page: 1.0 mm/min of 300 mm crystal is about 9.9 kg/h, and 1.6 mm/min about 15.8 kg/h. So a 300 kg crystal takes roughly a day, tying up a puller for the whole pull. A 2023 simulation at 1.6 mm/min moved the interface by 33 mm, cut growth time 46.4% and power 4.97% (PV-oriented study).
+
+# Controls during the body
+
+Crystal rotates at 5 rpm and the crucible at -5 rpm (COMSOL example), the crucible is lifted as the melt level falls, and heater power is trimmed to hold diameter. Large-diameter production commonly adds a horizontal or cusp magnetic field to calm melt convection (patent descriptions). Yield and oxygen uniformity are set here.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Czochralski_method ; https://www.comsol.com/blogs/thermal-analysis-of-a-czochralski-crystal-growth-furnace ; https://patents.justia.com/patent/20100288185)
+
+== TAIL
+# End cone
+
+At the end the diameter is tapered into an end cone and the crystal is lifted clear while cooling. The taper is not cosmetic: if the crystal is pulled off the melt abruptly, thermal shock sends slip dislocations back up into the body. A patent specifically addresses growing the tail to suppress slip dislocations (US 9,988,736).
+
+# Segregation
+
+The tail is also the most contaminated, most heavily doped zone. Segregation pushes dopants and metal impurities into the remaining liquid, so the last silicon to freeze is richest in them (textbook). That is why the tail cone is cropped off in the INGOT step, and why resistivity varies along the crystal.
+
+# Yield cost
+
+The charge left in the crucible, the tail and the seed end are all non-wafer silicon, so they drive material yield per pull. A slip in the tail can also cost usable body length if it runs far upward.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9988736 ; https://en.wikipedia.org/wiki/Czochralski_method)
+
+== QUARTZ CRUCIBLE
+# A consumable
+
+The crucible is fused high-purity quartz, held in a graphite susceptor. It is a consumable: the melt dissolves its inner surface, which is the source of oxygen in the crystal (about 1e18 atoms per cm3 per Wikipedia). Crucibles are used once per pull in the page's framing; one source says quartz crucibles can be reused up to seven times in the broader wafer process, so practice varies.
+
+# Supply
+
+High-purity quartz comes largely from Spruce Pine, North Carolina, from Sibelco and The Quartz Corp, which together supply about 95% of ultra-high-purity quartz (ABC News / Konvoy). An estimated 70-90% of polysilicon-melting crucibles use Spruce Pine quartz (Vince Beiser). Hurricane Helene halted both producers on Sept 26, 2024.
+
+# Why it matters
+
+No quartz, no crucible, no wafer. It is an upstream single point of failure for every AI chip.
+
+# Sources
+
+(Sources: https://abcnews.go.com/US/wireStory/north-carolina-maker-high-purity-quartz-back-operating-114699814 ; https://konvoy.beehiiv.com/p/semiconductor-s-reliance-on-north-carolina ; https://semiconductor-digest.com/?p=28345)
+
+== MOLTEN SILICON
+# Melt convection
+
+The melt is a convecting liquid, and its flow is what makes 300 mm growth hard. Temperature differences between the hot crucible wall and the cool crystal drive buoyancy flow, and rotation adds forced convection. A 2023 modelling study found that this convection causes non-uniform temperature, growth rate and oxygen concentration at the crystallization interface.
+
+# Magnetic damping
+
+Manufacturers damp the flow with a magnetic field: horizontal (HMCZ) or cusp fields, adopted in the early 2000s as the move to 300 mm made melt volumes larger (patent background). A cusp-field study shows that the position of the zero-Gauss plane changes melt convection and oxygen transport. Molten silicon is a good conductor, so the field acts directly on it.
+
+# Axial gradient
+
+The axial gradient in the COMSOL model drops from 500 to 100 C per metre along the rod. A calmer, more reproducible interface means uniform oxygen and dopant, which means a higher yield of in-spec wafers per crystal.
+
+# Sources
+
+(Sources: https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11932962 ; https://www.preprints.org/manuscript/202308.0105/v1 ; https://www.comsol.com/blogs/thermal-analysis-of-a-czochralski-crystal-growth-furnace)
+
+== GRAPHITE HEATER
+# Hot zone
+
+A resistive graphite heater surrounds the crucible, with graphite felt insulation outside it. The COMSOL model uses 310 kW. The hot-zone parts (heater, felt, susceptor, heat shield) are consumables and are changed periodically (textbook).
+
+# Graphite and SiO
+
+Graphite is chosen for temperature tolerance, but it is also a contamination source: it reacts with SiO from the melt to make CO, which is why argon flows down and out carrying SiO and CO.
+
+# Power per kg
+
+In the 2023 pull-rate study a faster 1.6 mm/min pull cut power use by 4.97% versus the base case, a reminder that power per kg of crystal is an optimisation target alongside defects. Hot-zone design is the main know-how of a wafer maker and is typically proprietary.
+
+# Sources
+
+(Sources: https://www.comsol.com/blogs/thermal-analysis-of-a-czochralski-crystal-growth-furnace ; https://researching.cn/articles/OJb10e1fbe7354a8df)
+
+== PULL CHAMBER
+# The envelope
+
+The chamber is water-cooled steel with argon at about 2500 Pa in the COMSOL model (a model value, not a vendor spec). It provides the vacuum-tight, gas-controlled envelope, the viewing port for the diameter camera, and the lift mechanism for the pull shaft. Water cooling pulls heat out of the crystal and protects the seals.
+
+# Diameter control
+
+Control is closed-loop: an optical sensor reads the bright ring at the meniscus, and heater power and pull speed are trimmed to keep diameter constant (textbook). The crystal's own thermal gradient (500 to 100 C per metre in the model) is a result of cooling plus the heat shield.
+
+# Failure modes
+
+Failure modes include argon leaks, pump issues, and a dropped crystal. Because a cycle is long, an interruption near the end is costly. Each chamber is a capital item and an hours-per-crystal bottleneck, and wafer makers quote full 300 mm utilisation in 2026, so puller count effectively caps AI-grade wafer supply.
+
+# Sources
+
+(Sources: https://www.comsol.com/blogs/thermal-analysis-of-a-czochralski-crystal-growth-furnace ; https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/)
+
+== Oxygen
+# Where oxygen comes from
+
+Oxygen enters from the dissolving crucible: SiO2 + Si gives 2SiO (textbook). Most SiO evaporates and is swept away by argon; some freezes in, leaving about 1e18 oxygen atoms per cm3 (Wikipedia). Crucible rotation, melt depth, pull speed and magnetic fields tune the level.
+
+# Villain and tool
+
+Oxygen is both. Unwanted, it forms precipitates and defects that hurt devices. Controlled, it makes the bulk strong and can trap metals (gettering) away from the device surface, so many logic wafers want a defined mid-range oxygen and tight uniformity (textbook). Power and memory wafers have different targets.
+
+# Control at 300 mm
+
+The crucible wall area is large and the melt depth falls as the pull proceeds, so oxygen drifts along the crystal unless crucible rotation and the magnetic field are scheduled. A 2023 study ties melt convection directly to non-uniform oxygen at the interface. Oxygen spec adherence decides how much of each crystal is sellable.
+
+# Sources
+
+(Sources: https://en.wikipedia.org/wiki/Czochralski_method ; https://www.preprints.org/manuscript/202308.0105/v1)
+
+== Dash neck
+# Necking
+
+Dash necking is the standard cure for dislocations at the seed. The seed is narrowed to 2-4 mm and pulled fast (as high as 6 mm/min), so dislocations that follow slip planes reach the surface and exit. Per US 6,866,713, about 100-125 mm of neck purges them.
+
+# The trade-off
+
+The neck is then the weak link. Crystals with a Dash neck are limited to about 100 kg (patent text for 200 mm crystals), well under what 300 mm ingots weigh. Neck strength sets the maximum ingot mass, hence wafers per pull and cost per wafer.
+
+# Pull rate in context
+
+Different patents give different speeds, so these are examples, not standards: Dash max 6.0 mm/min, a neck example 2.4, the 300 mm body 1.6, and a dash-free neck of 0.5 or less.
+
+# Sources
+
+(Sources: https://patents.google.com/patent/US6866713 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7179330 ; https://patents.google.com/patent/US5628823)
+
+== Shin-Etsu
+# Top two
+
+Shin-Etsu Chemical (4063.T) and SUMCO (3436.T) hold the top two spots in 300 mm wafers. The page's Report Prime estimate has 26.7% and 25.0% for 2024 (low reliability), and other sources say the two together exceed 55%.
+
+# The cycle
+
+SEMI reported 2025 shipments up 5.8% to 12,973 million sq in, while revenue fell 1.2% to $11.4B; growth came from advanced epitaxial wafers for logic and polished wafers for HBM. A report says SUMCO raised its 2026 300 mm shipment forecast 12% in January, and Shin-Etsu said all wafer makers run at full capacity. GlobalWafers (6488.TWO) said in August 2026 its existing 300 mm capacity is at full utilisation, tied to AI demand.
+
+# Pricing power
+
+Tight pullers plus long qualification gives these firms pricing power. A single source claims a second round of price hikes of 18-22% on AI-dedicated wafers, which is unconfirmed.
+
+# Sources
+
+(Sources: https://www.eetasia.com/?p=72562 ; https://faxiangongchang.com/en/reports/china-semiconductor-silicon-wafer-2026 ; https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/ ; https://www.sunsirs.com/commodity-news/petail-35761.html)
+
+== Yield
+# Structure losses
+
+A dislocation anywhere in the body means the affected length is lost, and often the crystal is remelted and restarted (page text). Because a 300 mm cycle runs about a day for a few hundred kg, a ruined pull wastes puller time, poly, crucible and power. Losses come from slip dislocations from thermal shock, loss of the zero-dislocation state, neck failure and diameter excursions.
+
+# Cyclicality
+
+SEMI said 2023 silicon wafer revenue fell 10.9% to $12.3B and area shipped fell 14.3% to 12,602 million sq in. 2025 revenue was $11.4B on 12,973 million sq in. So revenue still lags the 2022 era even as AI logic and HBM wafers sell tight.
+
+# Open problems
+
+Recent patents attack the tail slip problem (US 9,988,736) and neck dislocation removal (US 5,628,823, US 6,080,237), showing these remain active problem areas. Yield and utilisation drive wafer maker margins; when 300 mm lines are full, each lost crystal costs real revenue.
+
+# Sources
+
+(Sources: https://marklapedus.substack.com/p/silicon-wafer-market-upturn-higher ; https://www.eetasia.com/?p=72562 ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9988736)

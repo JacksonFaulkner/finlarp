@@ -26,12 +26,22 @@ local HELP_LINES = {
   " c           CANSLIM scorecard for focused tile",
   " f           search filings for focused tile",
   " p           research dossier for focused tile",
-  " <leader>sf  search filings (all)",
-  " <leader>sg  chart selected/focused symbol",
-  " <leader>sh  daily % change history",
-  " <leader>st  search transaction history",
-  " <leader>sw  AI universe: pick bucket/sub/region",
-  " <leader>so  switch open dashboards",
+  " <leader>vC  CANSLIM scorecard picker",
+  " <leader>vf  search filings (all)",
+  " <leader>vc  chart selected/focused symbol",
+  " <leader>vh  daily % change history",
+  " <leader>vwl pick watchlist (left half)",
+  " <leader>vp  portfolio suite",
+  " <leader>vwr pick watchlist (right half)",
+  " <leader>vww pick watchlist (fullscreen)",
+  " <leader>vt  search transaction history",
+  " <leader>vu  AI universe: pick bucket/sub/region",
+  " <leader>vo  switch open dashboards",
+  " <leader>vn  new note on cursor word",
+  " <leader>vm  browse notes",
+  " <leader>vd  dossier picker",
+  " <leader>vD  diagrams",
+  " <leader>ve  catalyst calendar",
   " q / <Esc>   close this dashboard",
   " ?           toggle this help",
 }
@@ -193,7 +203,7 @@ end
 --- Toggles tile-selection under `win`, within its session's ordered list
 --- (up to MAX_SELECTED). Each slot gets a stable color from `colors.SERIES`
 --- so a tile's border color matches its line color in the overlay chart.
---- <leader>sg reads `s.selected` to know which symbols to chart together.
+--- <leader>vc reads `s.selected` to know which symbols to chart together.
 --- @param win integer
 local function toggle_select(win)
   local _, s = session_for_win(win)

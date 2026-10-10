@@ -1,0 +1,138 @@
+# 1. What happens: building the chip's layers one film at a time
+
+ ┌──────────────┐   ┌──────────────┐   ┌────────────┐   ┌─────────────┐   ┌────────────┐
+ │ GAS / TARGET │   │ CHAMBER      │   │ FILM       │   │ PUMP        │   │ CMP/ETCH   │
+ │ precursor    │──▶│ vacuum,      │──▶│ atoms bond │──▶│ by-products │──▶│ pattern or │
+ │ or metal     │   │ heated wafer │   │ on surface │   │ removed     │   │ planarise  │
+ └──────────────┘   └──────────────┘   └────────────┘   └─────────────┘   └────────────┘
+
+  (three families: CVD builds from gas, ALD builds one atomic layer per cycle, PVD sputters from a solid)
+
+# 2. Inside a CVD chamber (showerhead reactor)
+
+ ┌────────────────────────────────────────────────────────────────────────────────────┐
+ │         PRECURSOR + CARRIER GAS IN (e.g. WF6, SiH4, H2)                            │
+ │                          │                                                         │
+ │                          ▼                                                         │
+ │    ═══════════ SHOWERHEAD (also RF electrode in PECVD) ═══════════                 │
+ │       ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   gas spreads evenly           │
+ │       ·   ·   ·  ≈ plasma / reactive gas ≈  ·   ·   ·                              │
+ │    ┌─────────────────────────────────────────────────────────┐                     │
+ │    │▓▓▓▓▓▓▓▓▓▓▓▓▓▓ WAFER with growing film ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                     │
+ │    └─────────────────────────────────────────────────────────┘                     │
+ │    ═══════════ HEATED PEDESTAL / CHUCK (hundreds of C) ═══════════                 │
+ │                          │                      by-product gas                     │
+ │                          ▼                      ◀──── to PUMP ────▶ scrubber       │
+ │    reaction at surface:  gas ──heat or plasma──▶ solid film + volatile by-products │
+ └────────────────────────────────────────────────────────────────────────────────────┘
+
+# 3. The ALD cycle (self-limiting, one monolayer at a time)
+
+ ┌────────────┐   ┌───────────┐   ┌─────────────┐   ┌─────────────┐
+ │ 1 PULSE A  │   │ 2 PURGE   │   │ 3 PULSE B   │   │ 4 PURGE     │
+ │ precursor  │   │ inert gas │   │ reactant    │   │ remove      │
+ │ sticks to  │──▶│ removes   │──▶│ reacts with │──▶│ by-products │
+ │ every site │   │ excess    │   │ layer A     │   └─────────────┘
+ └────────────┘   └───────────┘   └─────────────┘                  
+                                                                          │
+   ◀──────────────────── repeat N times, each cycle adds a fixed thickness ◀┘
+
+  Example, Al2O3:   Al(CH3)3 + surface-OH ──▶ surface-O-Al(CH3)2 + CH4   (pulse A, TMA)
+                    surface-Al-CH3 + H2O ──▶ surface-Al-OH + CH4          (pulse B, water)
+  UPenn recipe, 200 C TMA/H2O: 0.015 s pulses, 8 s purges, precursor lines at 150 C
+  (growth is about 1 A/cycle for TMA/H2O; textbook, my source gave only ozone-process numbers)
+  Ozone Al2O3: about 0.6 A/cycle at 100 C and 0.9 A/cycle at 250 C (UPenn)
+  HfO2 from TDMAH + water: 1.2 to 1.6 A/cycle, below 400 C; better crystal + higher k above 300 C (PMC)
+
+# 4. PVD: sputtering a metal off a target
+
+ ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │       Ar+ ions                         ┌──────────────────────┐                                   │
+ │       ↓  ↓  ↓  ↓      ◀────────────────│ TARGET (Ta, Ti, Cu)  │ biased negative                   │
+ │      ≈≈≈ Ar plasma ≈≈≈                 └──────────────────────┘                                   │
+ │       metal atoms knocked out fly across the vacuum gap                                           │
+ │       ↓  ↓  ↓  ↓                                                                                  │
+ │      ┌──────────────────────┐   ▓ wafer on chuck (sometimes RF-biased for trench bottom coverage) │
+ │      │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                                                                     │
+ └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+  PVD is line-of-sight, so ALD or CVD takes over where trenches get narrow (textbook).
+
+# 5. Chemistry and process windows
+
+  TEOS SiO2        Si(OC2H5)4 ──heat/plasma──▶ SiO2 + organic by-products
+    LPCVD          650-800 C, rate rises exponentially with T; below about 5 Torr (patents)
+    PECVD          typical under 1 Torr; one example 200-400 C up to 50 Torr (patent claim)
+    PECVD rates    reported 41 A/s (about 2,460 A/min) at 4 Torr, 200 C; high rate means low density
+  Tungsten fill    WF6 + 3H2 ──▶ W + 6HF ;  2WF6 + 3SiH4 ──▶ 2W + 3SiF4 + 6H2  (textbook)
+    window         wafer at about 400-500 C; SiH4 nucleation layer under 100 nm, then H2 bulk fill
+    resistivity    pulsed nucleation about 100 uohm-cm vs about 25 for conventional (400 C study)
+  Sequence logic   silane makes nucleation and protects Ti / Si from WF6; H2 gives conformal low-R bulk
+
+# 6. By the numbers
+
+  ALD 2025         ASM International: record revenue EUR 3.2B, up 12% constant currency
+  ASM margins      gross margin 51.8% (record); adjusted operating margin 30.2%
+  ASM mix          memory 16% of equipment sales; China over 30% of revenue; spares/services +18%
+  ASM 2030 goal    revenue above EUR 5.7B, ALD + epitaxy named as main growth drivers
+  Mo ALD           molybdenum ALD and area-selective deposition entered HVM for 2nm (ASM)
+  Applied FY2025   Semiconductor Systems $20.80B (73% of $28.37B total), up 4%
+  global market    thin-film deposition about $23.5B in 2023 (one market-research listing, low
+      confidence)
+
+# 7. Who makes it: Applied Materials Semiconductor Systems by end market, FY2025 vs FY2024, percent
+
+  Foundry/logic FY25 ███████████████████████████████████████ 67%
+  Foundry/logic FY24 ████████████████████████████████████████ 68%
+  DRAM FY25          ███████████████ 26%
+  DRAM FY24          ████████████████ 28%
+  NAND FY25          ████ 7%
+  NAND FY24          ██ 4%
+  (segment covers all of Applied's chip tools, not deposition alone; Applied does CVD, PVD, epi +
+      polysilicon)
+
+  Historical deposition share, 2009 (Barclays / Gartner via trade press; old, shown for structure only),
+      percent
+
+  Applied Materials  ████████████████████████████████████████ 49%
+  Tokyo Electron     ██████████████ 17%
+  Novellus (now Lam) █████████████ 16%
+
+# 8. Market structure, tickers, chokepoints
+
+  Applied Materials (AMAT)  CVD, PVD, epi; Lam Research (LRCX) CVD + ALD (via Novellus); Tokyo Electron
+  (8035.T)  Kokusai Electric (6525.T) batch CVD/ALD; ASM International (ASM.AS) single-wafer ALD + epi.
+  (company-to-technology mapping is textbook; only the names in market-report lists are sourced)
+  Trade-press: Japanese vendors (Kokusai, TEL) dominate worldwide CVD (older, dated); a 2015 comment
+  names ASM the largest ALD supplier. Applied and TEL each lost share within their served markets
+  in 2025 while Lam, KLA and ASML gained (Castellano substack, paywalled detail).
+  Risks: Chinese domestic toolmakers (Naura) rising; export controls; precursor chemistry from a
+  few specialty vendors; per-cycle ALD is slow, so more layers means more tools and more fab time.
+  Taiwan is the largest deposition equipment market, China the fastest growing (GIA, 2015 vintage).
+
+  What a 300 mm wafer becomes (textbook): hundreds of dies per wafer, each built from dozens of
+  deposited and etched layers; DEPOSIT repeats many times per wafer pass through the fab.
+
+# 9. Caveats
+
+  No current, primary-sourced percentage split of CVD / ALD / PVD by vendor was found; the 2009 chart
+  and the Applied end-market chart are the quantified items. Paid reports (TechInsights, Gartner) hold
+      more.
+
+# Sources
+
+  [1] ASM FY2025 results: investegate.co.uk/announcement/gnw/asm-international-nv--0nx3/
+      asm-reports-q4-and-full-year-2025-results/9456685 ;
+          asm.com/media/qfhoszrk/agm-2026-ceo-and-cfo-presentation.pdf
+  [2] Applied Materials FY2025: nasdaq.com/press-release/applied-materials-announces-fourth-quarter-and-
+      fiscal-year-2025-results-2025-11-13 ; 10-K
+          sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm
+  [3] ALD recipes: seas.upenn.edu/~nanosop/ALD_Recipes.htm
+  [4] HfO2 TDMAH/water: pmc.ncbi.nlm.nih.gov/articles/PMC10254648/
+  [5] TEOS PECVD / LPCVD: image-ppubs.uspto.gov 5354715, RE36623 ;
+      ir.lib.ncu.edu.tw/handle/987654321/68270
+  [6] Tungsten CVD: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6358844 ; 7141494 ;
+      ir.lib.nycu.edu.tw
+  [7] Deposition shares 2009 + vendors: sst.semiconductor-digest.com/?p=65015
+  [8] Share trend 2025: drrobertcastellano.substack.com/p/applied-materials-lost-share-across
+  [9] Market listing:
+      gminsights.com/industry-analysis/thin-film-semiconductor-deposition-market/market-share

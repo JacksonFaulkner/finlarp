@@ -1,0 +1,146 @@
+== POLISHED
+# Prime wafer
+The starting point is a prime wafer: single-crystal silicon sliced from an ingot, lapped, etched and polished to a mirror on the top face. The fab never grows it; it buys it from a handful of suppliers and treats it as the flat reference for every later layer. Typical 300 mm product is 775 +/- 25 um thick with TTV of 5 um or less (vendor datasheets).
+
+# Why it matters
+SEMI reported 2025 shipments of 12,973 million square inches (MSI), up 5.8%, while revenue fell 1.2% to $11.4 billion. SEMI called 2025 an inflection year: advanced epitaxial wafers for logic and polished wafers for HBM were strong, mature-node demand stayed soft but inventories began to normalize. An Oct 2025 SEMI forecast saw a record 15,485 MSI by 2028.
+
+# Sources
+https://www.semi.org/en/semi-press-release/semi-reports-2025-annual-worldwide-silicon-wafer-shipments-and-revenue-results
+https://www.hpcwire.com/off-the-wire/semi-reports-global-silicon-wafer-shipments-to-rebound-5-4-in-2025-with-new-record-expected-by-2028/
+
+== OPTIONAL
+# Epitaxy
+Epi is a thin single-crystal layer grown by CVD on top of the polished wafer, done by the wafer maker, not the chipmaker. Patent examples use 1 to 10 um, with about 3 to 6 um typical, grown from trichlorosilane at 1100 to 1130 C on 300 mm wafers (patents, not a standard). SEMI singles out advanced epi wafers for sub-3nm logic as a 2025 demand driver.
+
+# The upgrade ladder
+Epi and SOI are the optional upgrades that separate commodity wafers from the AI-grade ones. SOI adds a buried oxide layer by bonding, see the SOI card. Each rung up the ladder has fewer qualified suppliers and a higher price per wafer (textbook).
+
+# Sources
+https://www.semi.org/en/semi-press-release/semi-reports-2025-annual-worldwide-silicon-wafer-shipments-and-revenue-results
+https://www.aap.com.au/aapreleases/cision20251104ae14102
+https://pmarketresearch.com/worldwide-silicon-epi-wafer-market-research/
+
+== INSPECT
+# What is checked
+Inspection decides whether a wafer is shippable. Flatness is checked as TTV, SFQR and nanotopography, and surface particles are counted by laser scanning (textbook). Buyers set limits per node and per customer, so a wafer that passes for one fab can fail another.
+
+# Why flatness gets attention
+A patent family on flatness evaluation notes that SFQR is derived from the wafer's thickness distribution as if it were chucked on an ideal plane, but the scanner sees the wafer on its real chuck. A wafer rated flat by SFQR can still exceed the focus budget and push critical-dimension variation out of tolerance. Vendor guidance quotes TTV under 1 um and site flatness under 0.1 um at 10 nm nodes and beyond (guidance, not a standard).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7365830
+https://universitywafer.com/silicon-wafer-flatness.html
+
+== PACK
+# The FOUP
+Finished wafers ship to the fab in sealed carriers. For 300 mm the standard carrier is the FOUP (front opening unified pod), which replaced SMIF pods in the mid-1990s when 300 mm tools arrived. A standard FOUP holds 25 wafers at a 10 mm slot pitch (secondary sources).
+
+# Who and why purge
+Entegris sells the A300 line in a 25-slot version for standard wafers and a 13-slot version for bonded and thin wafers, and the Spectra line with inert gas purge and hydrophobic materials to control moisture and volatile organics. Shin-Etsu Polymer is named in market-research pages as another key FOUP supplier (no datasheet found). Purge options exist because moisture and airborne molecular contamination in the carrier can corrupt a wafer between steps.
+
+# Sources
+https://www.entegris.com/content/dam/product-assets/a300foups/datasheet-a300foups.pdf
+https://www.entegris.com/content/dam/product-assets/spectrafoups/datasheet-spectrafoups.pdf
+https://wikipedia.com/wiki/FOUP
+
+== FAB
+# Wafer quality is yield
+Everything downstream starts from the wafer's flat top face. Defects, warp or particles that arrive with the wafer travel through hundreds of process steps and are rarely recoverable, so incoming wafer quality shows up as yield (textbook).
+
+# Market tone 2026
+Company commentary points to tightness at the leading edge. GlobalWafers said on its Aug 4, 2026 Q2 call that existing 300 mm capacity, excluding newly expanded lines, is fully utilized. Shin-Etsu said on its July 24 call that 300 mm market growth was mid-single digit year on year with a record June shipment month. A UBS note dated Sept 18, 2026 projects 12-inch utilization rising from 84% in 2026 to 99% in 2028 (broker view, secondary report).
+
+# Sources
+https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/
+https://www.kucoin.com/news/flash/ubs-report-40-price-hike-needed-to-spur-silicon-wafer-expansion
+
+== EPITAXIAL
+# What epi is
+An epi wafer carries a thin single-crystal layer grown by CVD on top of a bulk substrate. The layer can differ in doping and purity from the substrate, giving fewer crystal defects and better-controlled electrical properties where transistors sit. Patent examples put the layer at 1 to 10 um, about 3 to 6 um typical (not a standard); for imaging sensors one patent prefers 3 to 6 um.
+
+# Demand signal
+SEMI attributes 2025 growth partly to advanced epitaxial wafers for sub-3nm logic, tying epi to AI accelerator and leading-edge foundry volumes. But SEMI's Q3 2025 data showed sequential softness for epitaxial wafers, so the segment is lumpy and tied to foundry utilization. Two Japanese firms held more than 60% of 300 mm epitaxial wafers in 2H 2020 (SEMI, via Semiconductor Engineering).
+
+# Sources
+https://www.semi.org/en/semi-press-release/semi-reports-2025-annual-worldwide-silicon-wafer-shipments-and-revenue-results
+https://www.semiconductor-digest.com/?p=31997
+
+== SOI (silicon on insulator)
+# Smart Cut steps
+SOI wafers sandwich a buried oxide (BOX) between a thin device layer and a handle wafer. They are made with Soitec's Smart Cut process: a hydrogen implant forms a weak layer, the donor is bonded to a handle wafer, an anneal splits it at the hydrogen layer, and the transferred film is polished by CMP. The donor wafer is reused.
+
+# What you get
+The finished stack has a thin top silicon device layer, a buried oxide, and a handle wafer. Implant parameters give good control of the top-layer thickness. A patent notes the SOI layer is bounded by implant depth, about 2 um max at roughly 200 keV. Soitec is the SOI name in the share table (5.5% about 2021). No current FD-SOI capacity figures were found.
+
+# Sources
+https://www.electronicdesign.com/technologies/embedded/article/21768797/smart-cut-process-techniquean-overview
+https://patents.google.com/patent/US5882987
+
+== TTV
+# Definition and spec
+Total thickness variation is the max minus min thickness across the wafer. The vendor sheets on the page give 775 +/- 25 um thickness, TTV of 5 um or less and 3.0 mm edge exclusion for standard 300 mm p-type Cz product. TTV is the coarse number; the tighter ones are SFQR (per exposure site) and nanotopography.
+
+# Commodity vs leading edge
+One patent notes wafer shape itself runs from a few micron to a few hundred micron, while TTV or GBIR is of order tens or hundreds of nanometers on good product. Vendor guidance quotes TTV under 1 um at 10 nm nodes and beyond, far tighter than the 5 um commodity spec. Tighter TTV and SFQR means more polishing, more metrology and lower yield at the wafer maker, part of why leading-edge wafers price above commodity.
+
+# Sources
+https://universitywafer.com/silicon-wafer-flatness.html
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7209857
+
+== SFQR
+# What it measures
+Site flatness quality requirement: the range of wafer topography within one scanner-field-sized site, measured against a best-fit focal plane. It is the number that maps most directly onto lithography focus. ESFQR is the same idea on edge sites.
+
+# The catch
+Patents argue SFQR is computed from the wafer's thickness distribution as if it were perfectly chucked, whereas a real scanner holds the wafer on its own chuck. A wafer flat by SFQR may therefore underperform in the scanner and exceed the focus budget, raising critical-dimension variation. This motivates measuring flatness in a chucked state. An older interferometry paper cites an ITRS nanotopography projection of 13 nm or less by 2010 (dated).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7474386
+https://patents.google.com/patent/US7365830
+
+== Shin-Etsu
+# Position
+Shin-Etsu Chemical (4063.T) is the largest wafer maker: 29.4% about 2021 per the page chart and about 28% in a 2025 Chinese industry report. It also sells the photoresist and other materials seen on the COAT page.
+
+# 2026 commentary
+On its July 24, 2026 call Shin-Etsu reported mid-single-digit year on year growth in the 300 mm market and a record June shipment month, and said wafer makers appear to be at full capacity with capacity starting to limit supply. UBS (Sept 2026) rates Shin-Etsu, GlobalWafers and Siltronic Buy and SUMCO Neutral. Wafers are a tiny line item per chip but have no substitute; a shortage after 2028 is the scenario UBS flags if prices do not rise enough (broker view).
+
+# Sources
+https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/
+https://www.kucoin.com/news/flash/ubs-report-40-price-hike-needed-to-spur-silicon-wafer-expansion
+https://faxiangongchang.com/en/reports/china-semiconductor-silicon-wafer-2026
+
+== 2025 revenue
+# Area up, revenue down
+Revenue of $11.4 billion fell 1.2% even though area rose 5.8% to 12,973 MSI. That is about $0.88 per square inch on the page's arithmetic, and falling.
+
+# Why price per area fell
+SEMI attributes the revenue softness mostly to slow momentum in traditional applications, where demand and pricing have yet to improve. The legacy segment shows gradual signs of stabilization and mature-node inventories (automotive, industrial, consumer) have begun to normalize. The mix is two-speed. SEMI's October 2025 forecast put 2025 shipments at 12,824 MSI (actual came in higher) and a record 15,485 MSI by 2028.
+
+# Sources
+https://www.semi.org/en/semi-press-release/semi-reports-2025-annual-worldwide-silicon-wafer-shipments-and-revenue-results
+https://www.hpcwire.com/off-the-wire/semi-reports-global-silicon-wafer-shipments-to-rebound-5-4-in-2025-with-new-record-expected-by-2028/
+
+== long qualification
+# Why switching is slow
+Each fab qualifies wafers per process, so changing supplier takes many months (textbook; the page gives no number). That gives incumbents stickiness and makes capacity additions a long-lead bet.
+
+# Supply picture
+UBS projects 12-inch utilization of 84% in 2026 rising to 99% in 2028 and says capacity expansion would need price increases of roughly 40% to 50% or more. GlobalWafers says its existing 300 mm capacity, excluding new lines, is fully utilized and cautioned that tightness is not uniform across grades. A Taiwan News item says suppliers signalled further price increases in 2H, with 6-inch hikes done and 8-inch and 12-inch under negotiation. All forward-looking items are broker or company commentary.
+
+# Sources
+https://www.kucoin.com/news/flash/ubs-report-40-price-hike-needed-to-spur-silicon-wafer-expansion
+https://xenospectrum.com/en/globalwafers-300mm-wafer-tightness/
+https://www.taiwannews.com.tw/news/6393084
+
+== SUMCO
+# Position
+SUMCO (3436.T) is the second-largest maker: 21.9% about 2021 on the page chart and about 25% in a 2025-vintage Chinese report. UBS rates it Neutral while rating Shin-Etsu, GlobalWafers and Siltronic Buy (Sept 2026, secondary report).
+
+# Concentration risk
+The page flags that an earthquake or outage in Japan would hit every maker at once, since two Japanese firms lead. SUMCO said in 2021 that 300 mm logic supply was struggling to keep up and 200 mm was tight because of auto demand. No SUMCO-specific 2026 utilization or pricing disclosure was found, so check SUMCO's own filings.
+
+# Sources
+https://www.kucoin.com/news/flash/ubs-report-40-price-hike-needed-to-spur-silicon-wafer-expansion
+https://faxiangongchang.com/en/reports/china-semiconductor-silicon-wafer-2026

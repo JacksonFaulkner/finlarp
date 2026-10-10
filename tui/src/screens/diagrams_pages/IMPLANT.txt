@@ -1,0 +1,121 @@
+# 1. What happens: shoot dopant atoms into the crystal, then repair it
+
+ ┌────────────┐  ┌──────────┐  ┌─────────┐  ┌────────────┐  ┌───────────┐  ┌───────┐  ┌────────────┐
+ │ SOURCE     │  │ EXTRACT  │  │ MASS    │  │ ACCEL /    │  │ SCAN +    │  │ WAFER │  │ ANNEAL     │
+ │ arc plasma │─▶│ pull out │─▶│ FILTER  │─▶│ DECEL      │─▶│ TILT      │─▶│ dose  │─▶│ fix damage │
+ │            │  │          │  │ one ion │  │ set energy │  │ even dose │  │       │  │            │
+ └────────────┘  └──────────┘  └─────────┘  └────────────┘  └───────────┘  └───────┘  └────────────┘
+
+  (places dopants at a controlled depth and dose, with no film left on the wafer)
+
+# 2. Inside a beamline implanter
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                    ┌────────┐   ┌────────────┐     ┌───────────┐    ┌─────────────┐                │
+ │  gas: BF3, AsH3,   │ SOURCE │   │ ANALYZER   │     │ ACCELERATE│    │ SCAN/PARALLEL│               │
+ │  PH3 or vapour ──▶ │ arc    │═══│ magnet 90° │═════│ or DECEL  │════│ LENS: makes  │═══╗           │
+ │                    │ chamber│   │ B bends by │     │ column    │    │ beam wide    │   ║           │
+ │                    └────────┘   │ mass/charge│     └───────────┘    └─────────────┘   ║            │
+ │     extraction electrodes       └────────────┘                                          ▼          │
+ │     pull ions out, ~kV          wrong masses hit the slit and stop       ┌──────────────────┐      │
+ │                                                                          │ WAFER, tilted and│      │
+ │                                 Faraday cup counts beam current ──────▶  │ spun (channeling)│      │
+ │                                                                          └──────────────────┘      │
+ │  vacuum throughout so the beam hits nothing but the wafer; either the beam or the wafer is scanned │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 3. Dopant depth profile: what the beam does inside silicon
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  ion path                      concentration vs depth (Gaussian-like, textbook)                │
+ │   ↓ ↓ ↓ ↓ ↓                                 *****                                              │
+ │  ┌──────────────┐ surface                 ***     ***                                          │
+ │  │ . .          │  ◀ nuclear + electronic ***       ***        peak sits at projected range Rp │
+ │  │   . ▒▒▒▒     │    stopping slows ions **           **       energy up ──▶ Rp deeper         │
+ │  │     ▒▒▒▒▒▒   │  ▒ = damaged / amorphous    *           *    dose up ──▶ taller peak         │
+ │  │       ▒▒ .   │  after the beam stops         *         *                                    │
+ │  └──────────────┘  tilt + rotation blocks channeling down crystal planes                       │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (the beam leaves vacancies and interstitials; ANNEAL puts dopants on lattice sites, heals crystal)
+
+# 4. The physics
+
+  dose            Q = (1/qA) * integral I(t) dt      ions per cm2, time integral of beam current [2]
+  magnet          r = m v / (q B)                   only the right mass/charge passes the slit (textbook)
+  energy          E = q V                           each charge gains q x accelerating volts (textbook)
+  channeling      ions running along crystal planes go too deep; tilt or pre-amorphization limits it
+  activation      spike anneal: ramp >= 75 C/s, ~1 s soak, high activation, little diffusion [4]
+  laser anneal    10-200 us up to about 1350 C (vendor claim); +laser after spike raised activation [4]
+  ms anneal       millisecond anneals remove implant damage poorly, leakage risk [4]
+
+# 5. By the numbers: the three implanter classes
+
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ class          energy                       dose (ions/cm2)   beam current                          │
+ │ high current   0.1 - 100 keV                1e14 - 1e17       up to ~25-30 mA                       │
+ │ medium current 3 - 500 keV (some to ~600)   1e11 - 1e14       1 uA - 5 mA (Wikipedia: 10 uA - 2 mA) │
+ │ high energy    100 keV - 5 MeV (to 10 MeV)  1e10 - 1e13       lower, deep wells                     │
+ └─────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  (approximate ranges from patents, Wikipedia and Axcelis; the sources say not strict) [1][2][3]
+  Highest dose with economical throughput: about 1e16 /cm2 [3]
+
+# 6. Ion implanter unit sales 2024, % share (third-party estimate, not a filing)
+
+  Applied Mat.    ██████████████████████████████████████████████████ 62.65%
+  Axcelis         █████████████████ 21.19%
+  Others (calc)   █████████████ 16.16%
+  (the estimate says Applied sold 686 units; 'Others' is my arithmetic: 100 minus the two named shares)
+  (an analyst piece had Applied at 62% in 2022; Varian held ~75% when Applied bought it in 2011)
+
+# 7. Who, structure, chokepoints
+
+  Applied Materials (AMAT)      owns Varian Semiconductor (bought 2011); the incumbent leader [7]
+  Axcelis (ACLS)                Purion line; implant was 98.2% of FY2025 revenue (aggregator figure);
+                                agreed to merge with Veeco (VECO) Oct 2025, pending in 2026 sources [5]
+  SEN (Sumitomo Heavy 6302.T)   50/50 JV of Axcelis and Sumitomo; leader in Japan (2004 10-K) [6]
+  SiC power devices             one analysis puts Axcelis at ~70-80% of SiC implant (could not verify)
+  Chokepoints: a near-duopoly in the West; SiC and power-chip demand swings; and dopant gases (AsH3, PH3
+  are toxic) under tight safety rules (textbook, unsourced).
+
+# 8. Why implant still matters at the leading edge
+
+  Every transistor needs wells, source/drain extensions, halos and contact doping (textbook). SiC and
+  power devices lean on high-energy, hot implants, which is the niche Axcelis emphasises.
+
+# 8. Where each class is used (textbook, unsourced) and the anneal that follows
+
+ ┌──────────────────────────────────────────────────────────────────────────────────────────┐
+ │ high current   source/drain and extensions: shallow, heavy dose (B, As, P), low energy   │
+ │ medium current wells, channel and threshold-voltage adjust, halos: moderate energy, dose │
+ │ high energy    retrograde / deep wells, image-sensor and power devices: MeV depth        │
+ └──────────────────────────────────────────────────────────────────────────────────────────┘
+
+  implant (damage)  ──▶  anneal (heal + activate)  ──▶  dopants electrically active
+
+ ┌─────────────────────────────────────────────────────────────────────────────────────┐
+ │   AFTER IMPLANT                       AFTER SPIKE / LASER ANNEAL                    │
+ │   ┌──────────────────────┐            ┌──────────────────────┐                      │
+ │   │ ▒▒▒▒ amorphous ▒▒▒▒  │   heat     │ crystal regrown      │                      │
+ │   │ ▒▒ dopant on random  │  ≈≈≈≈≈▶    │ dopant on lattice    │                      │
+ │   │ ▒▒ interstitials ▒▒  │  ramp      │ sites = ACTIVE       │                      │
+ │   │ crystal below, intact│  >=75 C/s  │ little diffusion     │                      │
+ │   └──────────────────────┘            └──────────────────────┘                      │
+ │   risk: transient enhanced diffusion pushes dopant deeper if the anneal is slow [4] │
+ └─────────────────────────────────────────────────────────────────────────────────────┘
+
+  (implant also makes SOI wafers by oxygen implant (SIMOX), per Wikipedia [1])
+
+  Trade-off in one line: more heat activates more dopant but also diffuses it, so anneals keep getting
+  shorter and hotter (spike, then millisecond, then microsecond laser) while keeping damage low. [4]
+
+# Sources
+
+  [1] Implanter classes: en.wikipedia.org/wiki/Ion_implantation
+  [2] Ranges: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9336992 (and /9293295)
+  [3] Axcelis, Ion Implantation in Silicon Technology (PDF): axcelis.com/wp-content/uploads/2019/02/
+  [4] Anneal: patents.google.com/patent/US6897131 ; siliconsemiconductor.net/article/66798/
+  [5] Axcelis 10-K FY2024: sec.gov/Archives/edgar/data/1113232/000155837025001855/acls-20241231x10k.htm ;
+      shares: dcf-analysis.com/products/acls-marketing-mix ; findmymoat.com/stocks/XNAS%3AACLS
+  [6] SEN JV: sec.gov/Archives/edgar/data/1113232/000111323204000002/form10k.htm
+  [7] Applied 2022 share: seekingalpha.com/article/4585639-applied-materials-worried-about-axcelis...

@@ -1,0 +1,222 @@
+== INTERPOSER
+# The silicon wiring board
+CoWoS puts the GPU dies and HBM stacks side by side on an interposer, a passive slab of silicon with no transistors (CoWoS-S) that carries thousands of fine wires between them. Only silicon can be patterned at micrometre pitch, which is how a 1024-bit bus per HBM stack, about 1 TB/s, is routed to the GPU.
+
+# Reticle limits
+TSMC's CoWoS-S interposers reach up to 3.3x the reticle (about 2,700 mm2). Beyond that TSMC points to CoWoS-L (local silicon bridges plus RDL) or CoWoS-R (RDL only; 4 um minimum RDL pitch per a secondary source). A paper shows CoWoS-L with about 3x reticle and 8 HBM; 6x reticle is a development target.
+
+# Why it bottlenecks
+The interposer is built on a wafer: TSVs are etched, filled with copper, and the wafer is thinned to expose them. Larger interposers waste more wafer area and warp more. TSMC is the main source (textbook). Morgan Stanley, quoted by a news summary, put CoWoS-L at about 68k wafers in 2026 of 90-95k total (secondary).
+
+# Sources
+https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm ; https://conferences.computer.org/ectc/pdfs/ECTC2023-1NkkviSxgDnmPjptC1ysqm/349800b022.pdf ; https://www.semiwiki.com/semiconductor-manufacturers/tsmc/371759-the-difference-between-cowos-s-and-cowos-r/
+
+
+== CHIP-ON-WAFER
+# CoW step
+Known-good GPU and HBM dies are placed face-down on the interposer wafer and the microbumps reflowed. Because the interposer is still a full wafer, many packages are processed in parallel. Underfill then flows between dies by capillary action and a compression mold fixes the assembly.
+
+# Known-good die
+Every GPU die and HBM stack mounted is an expensive part, so a failed placement scraps all of them. This is why the PICK page insists on sorting first. A B200 carries 2 GPU dies and 8 HBM3E stacks on one package, so each package has 10 placements and each one multiplies risk. Placement accuracy and thermal drift at reflow decide yield.
+
+# The name
+After CoW, the wafer is thinned, C4-bumped, diced and flipped onto the organic substrate. The name Chip on Wafer on Substrate is steps 2 and 4 (textbook).
+
+# Sources
+https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm ; https://www.anandtech.com/show/21310
+
+
+== FLIP ONTO
+# Wafer-on-substrate
+After CoW, the wafer is thinned, C4 bumps are formed on the underside, and it is diced into interposer-plus-chip modules. Each is flipped onto an organic substrate and reflowed, then a second underfill protects the C4 joints. A lid and thermal interface material are fitted and BGA balls attached.
+
+# Expansion mismatch
+The hard physics is mismatch: silicon expands about 3 ppm/C and an organic substrate about 15-20 ppm/C (textbook), so a big package warps with every heat cycle. Underfill, a stiffener ring and the lid keep the bumps from cracking. Warpage and yield loss rise with interposer area per the page.
+
+# Who does it
+Capacity here is partly outsourced. ASE (ASX) and Amkor (AMKR) take overflow oS (on-substrate) work; SPIL is part of ASE. That makes the back half of CoWoS the place where OSAT partners gain, while TSMC retains the interposer and CoW steps (textbook).
+
+# Sources
+https://www.trendforce.com/presscenter/news/20250513-12577.html ; https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+
+
+== MOLD +
+# Seal and finish
+The last steps seal and finish the package. Compression mold and the second underfill lock the structure; the lid (or a direct cold plate) spreads heat, and a thermal interface material (TIM) fills the microscopic gap between die backs and the lid. Then BGA balls, about 1 mm class (textbook), are attached.
+
+# What can fail
+Failure modes: voids in underfill, die tilt, cracked bumps from thermal cycling, and lid delamination. Since a B200 package pairs 208B transistors with 192 GB of HBM3E, a single scrap at this late stage destroys the most expensive stage of work.
+
+# Materials
+Epoxy mold compound and underfill makers are mostly Japanese per the page (textbook, no share sourced). Filler size must be small enough to flow through narrow microbump gaps without voids. In a liquid-cooled rack the lid becomes a cold plate.
+
+# Sources
+https://www.anandtech.com/show/21310 ; https://www.tomshardware.com
+
+
+== [1] LID
+# Lid and cold plate
+The lid sits above the dies and spreads heat from the GPU and HBM hot spots to a cooling plate. In an AI rack the lid carries liquid-cooled cold plates, which is why the diagram labels it as liquid cooled.
+
+# Flatness and warpage
+Lid flatness and stiffness matter: the lid works with the stiffener ring and underfill to keep warpage down as the organic substrate expands more than silicon. The GPU dies and HBM stacks sit at different heights with different temperature limits, so the TIM under the lid must contact both.
+
+# Supply
+Lids and stiffeners are metal parts (copper or alloys) from precision-metal makers; no sourced supplier data was found. For investors the lid is a minor cost item, and the liquid-cooling vendors in the rack are the larger beneficiaries (textbook, not sourced).
+
+# Sources
+https://www.anandtech.com/show/21310 ; https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+
+
+== [2] TIM
+# Thermal interface material
+TIM is a thin layer between die backs and the lid that displaces air gaps. Common types are thermal greases, gels, and metal-based pads or indium solder (textbook). It must carry heat out with low resistance and be thin enough not to add resistance.
+
+# Different heights
+In a GPU plus HBM package the TIM must bridge dies of slightly different heights. JEDEC raised the HBM stack height limit from 720 to 775 um (Tom's Hardware), so height differences between the GPU and tall stacks are real.
+
+# Slow failure
+It must tolerate warpage and thermal cycling for years without pumping out or drying. Failure modes: voids, pump-out after many cycles, and delamination. Because these degrade slowly they show up as throttled GPUs in the field, not at test. No sourced TIM suppliers or numbers were found.
+
+# Sources
+https://www.tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+
+
+== [3] HBM
+# HBM stack on the package
+Each HBM stack is a base die plus thinned DRAM dies joined by TSVs, bonded with TC-NCF or SK hynix MR-MUF. Per stack there is a 1024-bit bus and about 1 TB/s. B200 carries 8 HBM3E stacks of 24 GB each (Tom's Hardware), 4 per GPU die, for 192 GB and about 8 TB/s. A 12-high 36 GB stack is the next step.
+
+# Share and supply
+Counterpoint puts Q2 2026 HBM revenue at SK hynix 50%, Samsung 33% and Micron 18%, versus SK hynix 58% and Samsung and Micron 21% each in Q1 2026. SK hynix and Samsung say 2026 HBM is sold out; Micron says most of its 2027 HBM bits are contracted. HBM3E is still roughly two-thirds of 2026 shipments, HBM4 ramps in 2H.
+
+# HBM4 and price
+HBM4 doubles the bus to 2048 bits, with pin speeds of 10-11.7 Gbps reported (SK hynix 10, Micron up to 11, Samsung 11.7), and its base die is made on a foundry logic process. A 12-high 36 GB HBM4 stack is estimated near $600 in 2026 and about $1,300 in 2027 (Korean press). New fab capacity only lands in 2027+. HBM is the largest bill-of-materials item after the GPU die and sets the memory wall.
+
+# Sources
+https://www.anandtech.com/show/21310 ; https://counterpointresearch.com/insights/global-dram-and-hbm-market-share ; https://www.trendforce.com/news/?p=56780 ; https://siliconanalysts.com/analysis/hbm4-market-share-race-2026 ; https://www.trendforce.com/news/2026/02/09/news-samsung-hbm4-reportedly-to-ship-first-after-lunar-new-year-initial-share-projected-at-mid-20/ ; https://en.sedaily.com/finance/2026/10/01/hbm-prices-to-more-than-double-next-year-as-shortage ; https://www.tomshardware.com/pc-components/gpus/nvidias-next-gen-ai-gpu-revealed-blackwell-b200-gpu-delivers-up-to-20-petaflops-of-compute-and-massive-improvements-over-hopper-h100
+
+
+== GPU DIE A
+# The compute die
+Each Blackwell B200 GPU die is made on TSMC 4NP with about 104B transistors and sits near the reticle limit, the largest single exposure a scanner can print (Tom's Hardware: two full-reticle chips). Guru3D calls the node N4P, so check Nvidia's own material for the exact name.
+
+# Why two dies
+Two dies together give 208B transistors. Because each die is already as large as the scanner allows, Nvidia cannot add compute by growing one die; it adds a second and joins them. The dies face down onto the interposer, back-end metal toward the microbumps.
+
+# Package totals
+Package-level numbers from the page: 192 GB HBM3E, about 8 TB/s memory bandwidth, and 10 TB/s die-to-die. Big-die yield is the concern: a defect anywhere on a near-reticle die scraps it, so these dies are sorted before packaging (see PICK). One packaging line gates Nvidia, AMD and custom ASIC output.
+
+# Sources
+https://www.anandtech.com/show/21310 ; https://www.tomshardware.com/pc-components/gpus/nvidias-next-gen-ai-gpu-revealed-blackwell-b200-gpu-delivers-up-to-20-petaflops-of-compute-and-massive-improvements-over-hopper-h100 ; https://www.guru3d.com/story/nvidia-b200-and-gb200-ai-gpus-technical-overview-unveiled-at-gtc-2024
+
+
+== [7] NV-HBI
+# Die-to-die link
+NV-HBI (Nvidia High-Bandwidth Interface) joins the two Blackwell GPU dies into one logical GPU at about 10 TB/s, so software sees a single device. It runs through the interposer's RDL wiring layers or, in CoWoS-L, across local silicon bridges, which is possible only because those layers have micrometre pitch.
+
+# Why it matters
+Reticle limits cap one die near 800 mm2, so more compute means more dies. If the die-to-die link is slow, the GPU behaves like two chips and efficiency drops. 10 TB/s is above the roughly 8 TB/s of HBM bandwidth to memory, close to on-die wiring.
+
+# Packaging link
+This connection is why CoWoS-L matters. Beyond about 3.3x reticle (CoWoS-S) TSMC points to CoWoS-L with LSI bridges that carry exactly this chip-to-chip traffic. Bridge alignment and warpage control drive yield, and a failed link scraps an expensive assembly (textbook). The same bridge technology carries Rubin's multi-die layout. Tickers: NVDA, TSM.
+
+# Sources
+https://www.anandtech.com/show/21310 ; https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm ; https://www.trendforce.com/news/?p=7673
+
+
+== [6] TSV
+# Through-silicon vias
+A TSV is a copper-filled hole through silicon. Two levels exist in this package: inside the HBM stack, TSVs run through each thinned DRAM die so the layers act as one memory; in the interposer, TSVs carry power and signal from the top microbumps to the underside C4 bumps.
+
+# How a TSV is made
+Etch a deep narrow hole, line it with oxide and barrier, fill with copper, then grind the wafer thin until the via tips show. In an interposer there are no transistors, so TSV density is the main constraint rather than device impact.
+
+# Risks
+Risks are copper voids, copper-silicon stress that cracks the silicon, and thinning breakage. Each added HBM layer (12-high now, 16-high next) multiplies the chance of one bad die scrapping the stack, which favours DRAM makers with good yield. Deep-etch and plating tool vendors (LRCX, AMAT) benefit (textbook).
+
+# Sources
+https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm ; https://siliconanalysts.com/analysis/hbm4-market-share-race-2026
+
+
+== [4] microbumps
+# Pitch ladder
+Microbump pitch was about 40 um, is near 25 um in volume and about 10 um on the latest memory. TSMC reportedly asked partners for roughly 5 um class bumps, with mass production estimated for 2H 2028 (TrendForce). Smaller pitch means more connections per mm2 and more bandwidth, but solder bridging and void risk grow.
+
+# Hybrid bonding
+Hybrid bonding removes the bump entirely, copper pad to copper pad, at about 6 um pitch now, 4.5 and 3 um coming. It lowers stack height and thermal resistance, which matters for 16-high HBM4E. BESI (BESI.AS) with Applied Materials is the key hybrid bonder supplier, with ASMPT (0522.HK) and Hanmi (042700.KS) in TC bonders today. Hybrid bonding validated at 12-high is not yet in volume.
+
+# Underfill gap
+Underfill epoxy flows between bumps by capillary action, so bump height and spacing must leave enough gap. JEDEC raised the HBM height limit from 720 to 775 um so HBM4 can retain microbumps. Bonder throughput and yield cap HBM supply as much as DRAM wafers do.
+
+# Sources
+https://www.trendforce.com/news/?p=56780 ; https://www.semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/ ; https://www.tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+
+
+== [8] C4 bumps
+# C4 bumps
+C4 (Controlled Collapse Chip Connection) bumps join the interposer module to the organic substrate at a much coarser pitch (roughly 100-150 um class, textbook) than microbumps. The substrate cannot hold micrometre-scale wiring, so pitch relaxes here. These joints get their own underfill, the second underfill step.
+
+# Shear at the corners
+Silicon (about 3 ppm/C) and organic substrate (15-20 ppm/C) expand differently, so corner C4 joints take shear at every power cycle. Larger interposers worsen it. Second underfill, stiffener ring and lid reduce the stress.
+
+# Why it matters
+Warpage and cracked C4 joints are a top yield risk as packages grow beyond 3x reticle, and a failure here scraps the already assembled GPU and HBM. Underfill and bump materials come mostly from Japanese specialty makers; no share sourced. Tickers touching this step: TSM, ASX, AMKR.
+
+# Sources
+https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+
+
+== [9] ORGANIC SUBSTRATE
+# ABF substrate
+The substrate is a multilayer build-up board insulated with ABF (Ajinomoto Build-up Film) over glass-cloth cores. It fans C4 pitch out to BGA pitch and carries power planes and decoupling caps on the underside. A single AI chip uses roughly 10x more ABF material than a PC chip (Counterpoint).
+
+# 2026 squeeze
+Counterpoint (Mar 2026) sees a ~20% ABF substrate supply gap with new greenfield capacity not arriving until 2027, and a 10%+ gap in T-glass (low-expansion glass cloth), where Nittobo (3110.T) supplies about 70% of ABF-grade cloth and is investing 150 billion yen to triple capacity. Relief is not expected before late 2026, with full impact 2027. A missing substrate stops shipment of a finished GPU.
+
+# Suppliers
+Ajinomoto (2802.T) makes the film; Ibiden (4062.T), Unimicron (3037.TW) and others build substrates. Unimicron's chairman expects AI-application PCBs to pass smartphone PCBs in value by 2029. No sourced capacity or share for Ibiden. Watch panel-level packaging and glass cores (not sourced), which would change the vendor map.
+
+# Sources
+https://counterpointresearch.com/de/reports/From-T-Glass-Crisis-Capacity-Erosion-The-Multi-Year-Substrate-Shortage ; https://borncity.com/news/ki-chip-mangel-tsmc-und-nvidia-passen-produktion-an/
+
+
+== CoWoS-L
+# The scaling route
+CoWoS-L swaps the full silicon interposer for RDL layers plus small local silicon interconnect (LSI) bridges only where die-to-die wiring is dense. That lets a package exceed the ~3.3x reticle (about 2,700 mm2) of CoWoS-S. An ECTC paper shows CoWoS-L with about 3x reticle and 8 HBM. Nvidia Blackwell Ultra and Rubin depend on it, with Rubin carrying more HBM4 stacks.
+
+# Capacity estimates
+TSMC does not disclose capacity. End-2026 totals range 115-140k wafers per month (TrendForce 120-140k; some outlets claim up to 150k), from ~80k at end-2025, plus OSAT adds of 50-60k. Morgan Stanley (via summary) has CoWoS-L ~68k of 90-95k wafers. A January 2026 report ties TSMC's capex plan (about $56B) partly to doubling CoWoS. Treat all as estimates.
+
+# Demand and risk
+Nvidia is estimated at 50-60% of 2026 allocation. KGI expects most of the 2027 expansion to be CoWoS-L, benefiting Nvidia and Broadcom. The page cites a TSMC CoWoS CAGR above 80% from 2022 to 2027 (TSMC symposium, May 2026). Risk: bridge alignment, warpage and yield on large packages. Tickers: TSM, NVDA, AVGO.
+
+# Sources
+https://conferences.computer.org/ectc/pdfs/ECTC2023-1NkkviSxgDnmPjptC1ysqm/349800b022.pdf ; https://exponentialindustry.com/blog/2026-08-10-tsmc-cowos-soic-ai-advanced-packaging-bottleneck/ ; https://eu.36kr.com/en/p/3892020701149697 ; https://eu.36kr.com/en/p/3631956080985095 ; https://www.kgi.com.hk/en/-/media/files/kgishk/research-reports/tw-reports/tsmc_2330-tt_09032026e.pdf
+
+
+== supply gap
+# Allocation, not just capacity
+TrendForce puts the CoWoS supply gap near 20% now, narrowing toward 10% by end-2026. With demand above supply, TSMC allocates capacity among Nvidia, AMD, Broadcom and custom ASIC customers: Nvidia roughly 50-60%, so smaller customers wait. Another summary projects global demand doubling from ~1.3-1.4M wafers in 2026 to 2.5-2.7M in 2027.
+
+# Capacity forecasts
+End-2026 capacity forecasts vary widely: 90k (TrendForce Dec 2024), 95k (JPM Sep 2025), about 120k (36Kr), 127k (equipment) and 120-140k (TrendForce Jun 2026), from about 80k at end-2025. Industry total could approach 200k including OSAT partners. Treat all as estimates.
+
+# Three shortages
+CoWoS wafers, HBM (2026 sold out at SK hynix and Samsung, Micron mostly 2027 contracted) and ABF/T-glass substrates (~20% gap) are stacked. GPU shipments follow the scarcest of the three, so revenue timing for NVDA, AMD and AVGO tracks packaging output. A secondary source cites 36-52 week lead times, unverified. Tickers: TSM, ASX, AMKR, MU, 000660.KS.
+
+# Sources
+https://www.trendforce.com/news/?p=59316 ; https://eu.36kr.com/en/p/3892020701149697 ; https://counterpointresearch.com/de/reports/From-T-Glass-Crisis-Capacity-Erosion-The-Multi-Year-Substrate-Shortage ; https://www.softwareseni.com/tsmc-cowos-packaging-the-silent-bottleneck-in-the-ai-chip-supply-chain
+
+
+== ASE
+# OSAT leaders
+TrendForce's 2024 OSAT ranking: ASE (ASX) $18.54B revenue, about 45% of the top-10 total, Amkor (AMKR) $6.32B (down 2.8% YoY) and JCET $5.0B (up 19.3%, about 12%). Top-10 revenue was $41.56B (up 3%). Other shares: Tongfu 8%, Powertech 5.5%, HT-Tech 4.8%, WiseRoad 3.7%, Hana Micron 2.2%, KYEC 2.2%, ChipMOS 1.7%. Chinese players grew double digits.
+
+# Role in AI
+TSMC keeps the interposer and chip-on-wafer steps; ASE (including SPIL) and Amkor take overflow on-substrate (oS) and back-end work. Estimates put OSAT CoWoS-type add at 50-60k wafers per month in 2026 (TrendForce June; an equipment view says 40k). I found no sourced 2026 advanced-packaging revenue for ASE or Amkor; use company filings for current figures.
+
+# Investor angle
+OSATs earn lower margins than TSMC but gain volume while CoWoS is short. ASX is the largest exposure, AMKR is US-listed with US fab plans (textbook), and JCET (600584.SS) carries geopolitical risk.
+
+# Sources
+https://www.trendforce.com/presscenter/news/20250513-12577.html ; https://www.evertiq.com/news/2025-05-23-chinese-firms-gain-ground-in-2024-top-10-osat-ranking ; https://eu.36kr.com/en/p/3892020701149697

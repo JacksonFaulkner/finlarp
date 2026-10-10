@@ -1,0 +1,158 @@
+== PRIME+BARC
+# Primer and BARC
+Before resist goes on, the wafer is primed so resist sticks, and often coated with a BARC (bottom anti-reflective coating) so light does not bounce off the substrate and distort the pattern. The page notes BARC is textbook for DUV ArF stacks, while EUV stacks use thin underlayers and details vary by fab. Adhesion failure lifts or collapses small resist lines; reflections give standing waves and linewidth variation (textbook).
+
+# Thin-film pressure
+An EUV resist layer is about 20 nm and absorbs only about 10% of 13.5 nm light, so every underlayer must be thin and very uniform (Frederick Chen substack). No sourced numbers on BARC thickness were found. Both adhesion and reflection problems reduce yield in lithography, the step that sets the transistor pitch.
+
+# Sources
+https://frederickchen.substack.com/p/edge-roughness-differences-among
+
+== DISPENSE
+# Dispense
+A small pool of liquid resist is dropped onto the wafer centre from a nozzle fed by a pump and filter. Too little gives voids, too much wastes expensive resist.
+
+# Defects and dry resist
+Dried particles or bubbles in the dispense line leave striations and comets. Resist lots and filters must stay defect-free. Metal-oxide and dry-deposited resists are changing this step: Lam's dry photoresist is deposited in vacuum rather than spun, and an SPIE paper reports post-develop defect levels under 10 particles per 300 mm blanket wafer (lab result). Inpria's metal-oxide resists are shown ready for P28 single exposure on a 0.33 NA EUV scanner (SPIE abstracts, lab results).
+
+# Sources
+https://spiedigitallibrary.org/conference-proceedings-of-spie/0/PC120550/Achieving-zero-EUV-patterning-defect-with-dry-photoresist-system/10.1117/12.2623499.full
+
+== SPIN
+# Spin physics
+The wafer ramps to a few thousand rpm and centrifugal force flings off the excess, leaving a uniform film. Thickness falls roughly as the inverse square root of spin speed, an empirical fit for photoresist (a model that includes evaporation gives a different exponent, so treat 1/sqrt as a rule of thumb). Measured example, AZ 4533 thick resist: 4.0 um at 2000 rpm, 3.3 um at 4000, 2.3 um at 6000.
+
+# Recipe numbers
+Conventional spin is 2000 to 4000 rpm for 20 to 30 s. A TEL Mark 8 recipe used 1500 to 4000 rpm to reach a 280 nm film (patent). AZ 1518 gives 1.8 um at 4000 rpm. Stopping the spin early makes thickness sensitive to spin time.
+
+# Sources
+https://www-eng.lbl.gov/~shuman/XENON/MATERIALS&COMPONENTS/spincoating/spin_coating_photoresist.pdf
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7404681
+
+== EDGE BEAD
+# Why the rim piles up
+Surface tension piles resist at the wafer rim after spinning. A thick bead can flake off, contaminate tools, and interfere with scanner handling and clamping, so an EBR (edge bead removal) nozzle sprays solvent on the rim only to trim it (page, textbook).
+
+# Scale
+The EBR band is typically a few millimetres wide: patents give 1 to 5 mm. The wafer vendor sheets specify a 3.0 mm edge exclusion for incoming wafers (SVMI datasheets), so the edge is already a marginal zone. Residual beads cause particles that land on neighbouring dies; an over-aggressive trim exposes substrate that is not meant to be bare.
+
+# Sources
+https://svmi.com/wp-content/uploads/2021/01/SV029.pdf
+
+== SOFT BAKE
+# What the bake does
+The soft bake (post-apply bake, PAB) on a hot plate drives off solvent, densifies the film, improves adhesion and stabilises exposure response. Typical 90 to 110 C for a few minutes (patent text); the TEL Mark 8 example baked 60 s at 110 C.
+
+# Why the temperature is bounded
+The acid generator (PAG) in the resist survives this bake intact, so it must not be hot enough to decompose it (page). Over-bake changes dissolution and sensitivity; under-bake leaves residual solvent that outgasses in the scanner and evaporates unevenly, shifting thickness (textbook). Plate temperature uniformity maps to linewidth uniformity after development (textbook; no sourced tolerances).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/5985363
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7404681
+
+== COOL
+# Chill plate
+After the bake, a chill plate returns the wafer to room temperature (textbook). A warm wafer would change resist thickness and chemistry and distort when the scanner measures and aligns it, so thermal equilibrium before exposure is required.
+
+# Track keeps pace
+The track is inline with the scanner, so every module must keep pace with scanner throughput in wafers per hour. Cooling modules are stacked vertically to save floor space, and they are one of the places where wafers wait, which is why track scheduling software is part of the product. The TEL CLEAN TRACK line is sold next to the ASML scanner per the page. Wait-time limits are not sourced.
+
+# Sources
+https://www.trendforce.com/news/?p=46933
+
+== NOZZLE
+# Dispense control
+The nozzle swings to the wafer centre and drops a metered volume of resist, fed from a pump through a filter. Dispense volume and timing set film thickness uniformity and cost per wafer, since EUV resists are expensive (textbook; no price found). Bubbles, dried resist crusting at the tip and particles shed from the line cause comets and striations; suck-back and tip cleaning are standard countermeasures (textbook).
+
+# Direction of travel
+Dry-deposited resist removes the nozzle entirely: Lam describes a dry deposition and dry development process producing a homogeneous metal oxide network, with post-develop defects under 10 particles per 300 mm wafer in an SPIE report (lab result, not production).
+
+# Sources
+https://spiedigitallibrary.org/conference-proceedings-of-spie/0/PC120550/Achieving-zero-EUV-patterning-defect-with-dry-photoresist-system/10.1117/12.2623499.full
+
+== CHUCK
+# Vacuum chuck
+The vacuum chuck holds the wafer by its backside as the spindle spins it. Concentricity, vacuum seal and flatness of the chuck couple into film uniformity; a wafer with bow or warp can leak vacuum and wobble (textbook). The spin cup and exhaust carry droplets to drain, and humidity and temperature controlled airflow keeps solvent evaporation constant (page).
+
+# Link to wafer specs
+The wafer's TTV and edge condition arrive from the wafer maker: typical 300 mm product is 775 +/- 25 um thick with TTV of 5 um or less and 3.0 mm edge exclusion (SVMI datasheets). Backside particles from the chuck transfer to the wafer and later to the scanner stage, where they cause focus defects.
+
+# Sources
+https://svmi.com/wp-content/uploads/2021/01/SV029.pdf
+https://svmi.com/wp-content/uploads/2020/09/SV031.pdf
+
+== EBR nozzle
+# Rim-only solvent
+A solvent nozzle aimed only at the rim, run during or just after the spin, dissolving the bead without touching the active area. Solvent choice, flow and position (distance in from the edge) are set per resist (textbook). The band is typically 1 to 5 mm wide (patents).
+
+# Cost of getting it wrong
+Too much solvent wicks inward and ruins edge dies; too little leaves a bead that peels. Edge defects matter because modern wafers are expected to give good die right to the edge, so fabs push edge exclusions small, and the SVMI sheets show 3.0 mm for incoming wafers. The EBR is a cheap module with outsized yield impact at the edge (textbook; no defect rates found).
+
+# Sources
+https://svmi.com/wp-content/uploads/2021/01/SV029.pdf
+
+== PGMEA
+# What is in resist
+PGMEA (propylene glycol methyl ether acetate) is a common resist solvent per the page. Resist is mostly solvent when dispensed; after the bake the film is mostly polymer plus PAG. The ingredients are a polymer backbone, a PAG (photo-acid generator), a quencher base and the solvent.
+
+# Chemical amplification
+Under exposure the PAG releases acid which, in a chemically amplified resist, catalyses a change in solubility during the post-exposure bake. Quencher concentration and uniformity, PAG distribution and PEB temperature are critical for roughness and defects according to a 2024 review. The resist chemistry chokepoint sits with Japanese firms: JSR, TOK, Shin-Etsu and Sumitomo Chemical (textbook, no share figure sourced).
+
+# Sources
+https://newsletter.semianalysis.com/p/lam-research-tokyo-electron-jsr-battle
+https://m.researching.cn/articles/OJ986eccd204c4a168
+
+== EUV film
+# Thin film, few photons
+An EUV resist is only about 20 nm thick and absorbs only about 10% of 13.5 nm light; 90% passes through (Frederick Chen substack). The film must be thin to avoid pattern collapse, so few photons are caught per pixel. Shot noise, meaning random photon counts, leads to stochastic defects such as line roughness and missing or merged features. At 20 nm a 1 nm thickness error is 5% of the film (page arithmetic).
+
+# Industry response
+Chemically amplified resists have random component distribution, adding to stochastics. Metal-oxide resists (Inpria) are positioned to improve resolution, sensitivity and stochastic defects, and Lam's dry resist aims to break the dose, roughness and defect trade-off. A study reports single-exposure P28 with Inpria MOx on a 0.33 NA scanner (lab).
+
+# Sources
+https://frederickchen.substack.com/p/edge-roughness-differences-among
+https://spiedigitallibrary.org/conference-proceedings-of-spie/0/PC120550/Achieving-zero-EUV-patterning-defect-with-dry-photoresist-system/10.1117/12.2623499.full
+
+== Tokyo Electron
+# Position
+Tokyo Electron (8035.T) makes the CLEAN TRACK coater/developer. A February 2026 earnings-call transcript describes the line as holding more than 90% global share, with the newest model shipped to several customers including for EUV. Envalith puts it at 91% for CY2025. TrendForce (Oct 2025), citing Nikkan Kogyo, reports 100% share of coater/developers used with EUV scanners; a 2021 SemiAnalysis note said the same. No 2026 EUV-only update was found, so treat 100% as approximate.
+
+# Why it matters
+Track and scanner are one inline system, so TEL is bundled beside ASML. TrendForce also reported TEL expected net profit to fall for the fiscal year ending March 2026. Share figures conflict across aggregators: treat 80 to 100% as near-monopoly.
+
+# Sources
+https://financialfilings.com/filings/tokyo-electron-limited/call-transcript/2026/48489164/
+https://www.trendforce.com/news/?p=46933
+https://envalith.com/en/companies/8035/reports/019dde03-c63a-77c7-a8e9-f02d1a486536
+
+== SCREEN Holdings
+# Number two
+SCREEN Holdings (7735.T) is the number two coater/developer maker, strong in Asia per profile text. Combined, TEL and SCREEN are estimated at about 88% of coater/developer sales by an industry overview (aggregator, not audited). Others in market listings: SUSS MicroTec, Tazmo, Kingsemi, Litho Tech Japan; SEMES (Samsung affiliate) supplies Korean tracks with no share figure found.
+
+# Risk
+Being the only scaled alternative to TEL makes SCREEN the natural second source for fabs that avoid single-vendor dependence on non-EUV layers. Per the page, the duopoly means a TEL outage or export-control action affects the whole industry. China's domestic coater/developer efforts (Kingsemi named in listings) are the main long-term challenger; no sourced figures were found.
+
+# Sources
+https://komal.odoo.com/blog/news-2/coater-and-developer-for-wafer-processing-market-2025-2032-1193
+https://www.reportprime.com/coaters-and-developers-r3845
+
+== striations / comets
+# What they are
+Striations are radial streaks and comets are tails behind a particle or bubble in the resist film. They come from dried particles or bubbles in the dispense line (page).
+
+# Impact and fixes
+Each creates a local thickness error that becomes a pattern defect after exposure and development. With a 20 nm EUV film, a 1 nm error is 5% of the thickness. Countermeasures: point-of-use filtration, bubble-free pumps, and clean-room control (textbook); the SPIE literature on point-of-use filter optimisation is an active area. A dry-deposited resist sidesteps spin-coat defects entirely (under 10 post-develop particles per 300 mm blanket wafer, lab, Lam). No quantitative defect rates were found.
+
+# Sources
+https://ebooks.spiedigitallibrary.org/conference-proceedings-of-spie/12957/129571J/An-update-on-the-improvement-in-optimization-of-point-of/10.1117/12.3009767.full
+https://spiedigitallibrary.org/conference-proceedings-of-spie/0/PC120550/Achieving-zero-EUV-patterning-defect-with-dry-photoresist-system/10.1117/12.2623499.full
+
+== thickness drift
+# Why thickness moves
+Temperature or humidity shifts change solvent evaporation rate, so film thickness moves (page). That is why spin modules have temperature and humidity controlled airflow and why chemistry, hot plate and ambient are all controlled together. Thickness changes the exposure dose needed, so drift shows up as linewidth variation at the scanner (textbook; no quantitative figure sourced).
+
+# Scale
+The AZ 4533 data shows sensitivity to process variables: 4.0 um at 2000 rpm falls to 3.3 at 4000 and 2.3 at 6000. Between those points the slope is about 0.35 um per 1000 rpm and then 0.5 um per 1000 rpm (arithmetic here on thick resist, not an EUV resist). Stopping spin early makes thickness depend on spin time. At 280 nm (TEL example) or 20 nm (EUV), tolerances are tighter in absolute terms.
+
+# Sources
+https://www-eng.lbl.gov/~shuman/XENON/MATERIALS&COMPONENTS/spincoating/spin_coating_photoresist.pdf

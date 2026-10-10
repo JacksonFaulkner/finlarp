@@ -1,6 +1,6 @@
 -- Launcher for the ratatui binary `fl` (tui/): one binary, several
 -- screens (home | chart | portfolio | canslim | dossier | earnings | search |
--- universe), all opened through M.open_screen. All navigation lives in the
+-- universe | diagrams | events), all opened through M.open_screen. All navigation lives in the
 -- binary; this file only hosts it in a popup and carries colours in. Inside tmux the binary runs in a full-size
 -- `tmux display-popup` (a real terminal pane, no nested libvterm redraw
 -- lag); outside tmux it falls back to a floating :terminal.
@@ -126,6 +126,17 @@ function M.dispatch(a)
     end
   elseif a.action == "picker" then
     M.open_screen(a.screen) -- no argument = the screen's ticker picker
+  elseif a.action == "claude" then
+    -- <space>ac / <space>as inside the TUI: same as the nvim keys. Text is
+    -- written to a file and added like any other file context.
+    if a.text then
+      local dir = vim.fn.stdpath("cache") .. "/finlarp/ctx"
+      vim.fn.mkdir(dir, "p")
+      local path = ("%s/%s.md"):format(dir, os.date("%Y%m%d-%H%M%S"))
+      vim.fn.writefile(vim.split(a.text, "\n", { plain = true }), path)
+      vim.cmd("ClaudeCodeAdd " .. vim.fn.fnameescape(path))
+    end
+    vim.cmd("ClaudeCodeFocus")
   else
     vim.notify("finlarp: unknown action " .. vim.inspect(a), vim.log.levels.WARN)
   end
@@ -206,7 +217,7 @@ local function open_in_float(cmd, env, title, on_exit)
 end
 
 --- Opens a screen of the binary.
---- @param screen string "home" | "chart" | "portfolio" | "canslim" | "dossier" | "earnings" | "search" | "universe"
+--- @param screen string "home" | "chart" | "portfolio" | "canslim" | "dossier" | "earnings" | "search" | "universe" | "diagrams" | "events" | "events"
 --- @param arg string|nil screen argument (symbol, query, range)
 --- @param opts table|nil { title = string, env = table<string,string>, on_exit = fun(code: integer, action: table|nil) }
 function M.open_screen(screen, arg, opts)

@@ -7,8 +7,8 @@
 // `day_change_pct` (which py/sources/etrade.py computes net of same-day
 // transfers), so deposits and withdrawals never show up as performance.
 
-use std::collections::HashMap;
-use std::path::{Path, PathBuf};
+use std::collections::{HashMap, HashSet};
+use std::path::Path;
 
 use chrono::{DateTime, NaiveDate};
 
@@ -30,7 +30,7 @@ pub struct Position {
     pub value: f64,
     pub day_gain: f64,
     pub day_pct: f64,
-    /// Dominant niche from ai_stocks.json ("memory storage"), "Other" if unknown.
+    /// Dominant niche from the universe tables ("memory storage"), "Other" if unknown.
     pub industry: String,
 }
 
@@ -121,16 +121,20 @@ pub struct Data {
     /// Unix seconds the positions were last pulled from E*TRADE.
     pub positions_at: Option<f64>,
     pub bench: HashMap<&'static str, Vec<(NaiveDate, f64)>>,
-    /// Daily closes per held symbol (longest cached range), oldest first.
+    /// Daily closes per held or traded symbol (longest cached range), oldest first.
     pub closes: HashMap<String, Vec<(NaiveDate, f64)>>,
     /// Cached E*TRADE transactions (all accounts), oldest first.
     pub txns: Vec<Txn>,
+    /// Derived from the rows above; filled in by `load`.
+    pub exposure: Exposure,
 }
 
 /// One cached E*TRADE transaction. `amount` is the cash effect (buys
 /// negative, sells and income positive); `qty` is signed shares.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Txn {
+    /// E*TRADE `transaction_id`. The cache can hold the same record twice.
+    pub id: String,
     pub date: NaiveDate,
     pub kind: String,
     pub symbol: String,
@@ -152,6 +156,11 @@ pub fn parse_txns(json: &str) -> Vec<Txn> {
         .filter_map(|t| {
             let ms = t.get("date")?.as_i64()?;
             Some(Txn {
+                id: t
+                    .get("transaction_id")
+                    .and_then(|v| v.as_str())
+                    .unwrap_or_default()
+                    .to_string(),
                 date: DateTime::from_timestamp_millis(ms)?.date_naive(),
                 kind: t.get("type")?.as_str()?.to_string(),
                 symbol: t.get("symbol")?.as_str()?.to_string(),
@@ -161,6 +170,13 @@ pub fn parse_txns(json: &str) -> Vec<Txn> {
             })
         })
         .collect()
+}
+
+/// Drops repeat records of the same E*TRADE transaction, keeping the first.
+/// Rows without an id are never treated as duplicates.
+pub fn dedupe_txns(txns: &mut Vec<Txn>) {
+    let mut seen = HashSet::new();
+    txns.retain(|t| t.id.is_empty() || seen.insert(t.id.clone()));
 }
 
 /// Whole-history roll-up for one symbol from the transaction cache.
@@ -253,7 +269,7 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         }
     }
 
-    let industries = load_industries();
+    let industries = load_industries(&conn);
     let mut positions = Vec::new();
     let mut positions_at = None;
     {
@@ -271,7 +287,22 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         }
     }
 
+    let mut txns = Vec::new();
+    {
+        let mut stmt = conn
+            .prepare("SELECT transactions_json FROM transactions_cache")
+            .map_err(e)?;
+        let rows = stmt.query_map([], |r| r.get::<_, String>(0)).map_err(e)?;
+        for json in rows.flatten() {
+            txns.extend(parse_txns(&json));
+        }
+        txns.sort_by_key(|t| t.date);
+        dedupe_txns(&mut txns);
+    }
+
     // Longest cached daily range per symbol; the cache holds 1y and 2y.
+    // Traded symbols too, so the drift replay can price names sold off.
+    let traded: HashSet<&str> = txns.iter().map(|t| t.symbol.as_str()).collect();
     let mut closes = HashMap::new();
     {
         let mut stmt = conn
@@ -285,7 +316,8 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
             .map_err(e)?;
         for (sym, json) in rows.flatten() {
             let held = positions.iter().any(|p| p.symbol == sym);
-            if held || Bench::ALL.iter().any(|b| b.symbol() == sym) {
+            let bench = Bench::ALL.iter().any(|b| b.symbol() == sym);
+            if held || bench || traded.contains(sym.as_str()) {
                 closes.insert(sym, parse_closes(&json));
             }
         }
@@ -294,17 +326,7 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         .iter()
         .filter_map(|b| Some((b.symbol(), closes.get(b.symbol())?.clone())))
         .collect();
-    let mut txns = Vec::new();
-    {
-        let mut stmt = conn
-            .prepare("SELECT transactions_json FROM transactions_cache")
-            .map_err(e)?;
-        let rows = stmt.query_map([], |r| r.get::<_, String>(0)).map_err(e)?;
-        for json in rows.flatten() {
-            txns.extend(parse_txns(&json));
-        }
-        txns.sort_by_key(|t| t.date);
-    }
+    let exposure = build_exposure(&history, &positions, &txns, &closes, &industries);
     Ok(Data {
         history,
         positions,
@@ -312,6 +334,7 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         bench,
         closes,
         txns,
+        exposure,
     })
 }
 
@@ -365,51 +388,21 @@ pub fn parse_closes(json: &str) -> Vec<(NaiveDate, f64)> {
         .collect()
 }
 
-/// ticker -> dominant niche, from data/ai_stocks.json next to the crate.
-/// Missing file or ticker just means "Other"; FINLARP_UNIVERSE
-/// overrides the path.
-fn load_industries() -> HashMap<String, String> {
-    let path = std::env::var_os("FINLARP_UNIVERSE")
-        .map(PathBuf::from)
-        .or_else(|| {
-            // target/release/finlarp -> crate -> plugin dir
-            let exe = std::env::current_exe().ok()?;
-            let plugin = exe.ancestors().nth(4)?;
-            Some(plugin.join("data/ai_stocks.json"))
-        });
-    let Some(text) = path.and_then(|p| std::fs::read_to_string(p).ok()) else {
+/// ticker -> dominant niche ("memory storage") from the universe tables.
+/// A missing table or ticker just means "Other".
+fn load_industries(conn: &duckdb::Connection) -> HashMap<String, String> {
+    let sql = "SELECT ticker, arg_max(category, weight) FROM ai_universe_category \
+               WHERE level = 'sub' GROUP BY ticker";
+    let Ok(mut stmt) = conn.prepare(sql) else {
         return HashMap::new();
     };
-    parse_industries(&text)
-}
-
-pub fn parse_industries(text: &str) -> HashMap<String, String> {
-    let Ok(v) = serde_json::from_str::<serde_json::Value>(text) else {
+    let Ok(rows) = stmt.query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, String>(1)?)))
+    else {
         return HashMap::new();
     };
-    let mut out = HashMap::new();
-    for s in v
-        .get("stocks")
-        .and_then(|s| s.as_array())
-        .into_iter()
-        .flatten()
-    {
-        let (Some(t), Some(subs)) = (
-            s.get("ticker").and_then(|t| t.as_str()),
-            s.get("subs").and_then(|s| s.as_object()),
-        ) else {
-            continue;
-        };
-        // dominant niche = highest weight
-        if let Some((k, _)) = subs.iter().max_by(|a, b| {
-            a.1.as_f64()
-                .unwrap_or(0.0)
-                .total_cmp(&b.1.as_f64().unwrap_or(0.0))
-        }) {
-            out.insert(t.to_string(), k.replace('_', " "));
-        }
-    }
-    out
+    rows.flatten()
+        .map(|(t, c)| (t, c.replace('_', " ")))
+        .collect()
 }
 
 /// Trailing window of `range`, anchored to the last snapshot.
@@ -587,6 +580,280 @@ pub fn allocation(positions: &[Position], t: &Totals, max: usize) -> Vec<(String
     }
     rows.push(("Cash".into(), t.cash / t.value * 100.0));
     rows
+}
+
+/// Pairs at or above this daily-return correlation are linked into a cluster.
+const CLUSTER_RHO: f64 = 0.7;
+/// Fewest shared return days before a pair's correlation is trusted.
+const CLUSTER_MIN_DAYS: usize = 30;
+
+/// Derived inputs for the Exposure tab, built once per load.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Exposure {
+    /// Snapshot dates the drift series are sampled on, oldest first.
+    pub dates: Vec<NaiveDate>,
+    /// Industry -> weight % of invested at each date, largest latest weight first.
+    pub drift: Vec<(String, Vec<f64>)>,
+    /// Held names that move together, largest share of the book first.
+    pub clusters: Vec<Cluster>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct Cluster {
+    pub symbols: Vec<String>,
+    /// Mean correlation over the linked pairs in this cluster.
+    pub avg_rho: f64,
+    /// Share of account value held in the cluster, %.
+    pub weight_pct: f64,
+}
+
+/// Concentration of the book. `top*` are % of account value (cash counted
+/// in the denominator); `hhi` is over invested weights, 0..1, where an even
+/// split across n names gives 1/n.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct Concentration {
+    pub top1: f64,
+    pub top3: f64,
+    pub top5: f64,
+    pub hhi: f64,
+    pub count: usize,
+}
+
+pub fn concentration(positions: &[Position], tot: &Totals) -> Concentration {
+    let mut vals: Vec<f64> = positions
+        .iter()
+        .map(|p| p.value)
+        .filter(|v| *v > 0.0)
+        .collect();
+    vals.sort_by(|a, b| b.total_cmp(a));
+    let invested: f64 = vals.iter().sum();
+    let top = |n: usize| {
+        if tot.value > 0.0 {
+            vals.iter().take(n).sum::<f64>() / tot.value * 100.0
+        } else {
+            0.0
+        }
+    };
+    let hhi = if invested > 0.0 {
+        vals.iter().map(|v| (v / invested).powi(2)).sum::<f64>()
+    } else {
+        0.0
+    };
+    Concentration {
+        top1: top(1),
+        top3: top(3),
+        top5: top(5),
+        hhi,
+        count: vals.len(),
+    }
+}
+
+/// Exposure inputs derived from the loaded rows. Weights for clusters are
+/// % of account value, same basis as the allocation rows.
+pub fn build_exposure(
+    history: &[Snapshot],
+    positions: &[Position],
+    txns: &[Txn],
+    closes: &HashMap<String, Vec<(NaiveDate, f64)>>,
+    industries: &HashMap<String, String>,
+) -> Exposure {
+    let dates: Vec<NaiveDate> = history.iter().map(|s| s.date).collect();
+    let tot = totals(history, positions);
+    let weights: HashMap<&str, f64> = positions
+        .iter()
+        .map(|p| {
+            let w = if tot.value > 0.0 {
+                p.value / tot.value * 100.0
+            } else {
+                0.0
+            };
+            (p.symbol.as_str(), w)
+        })
+        .collect();
+    Exposure {
+        drift: industry_drift(&dates, txns, closes, industries),
+        clusters: correlation_clusters(closes, &weights, CLUSTER_RHO, CLUSTER_MIN_DAYS),
+        dates,
+    }
+}
+
+/// Industry weight (% of invested) on each date, rebuilt from the trade log:
+/// shares held that day × the symbol's last close on or before it. A
+/// symbol with no close yet on a date contributes nothing. Transfers are not
+/// in `txns`, and lots bought before the cache starts are missing too, so
+/// the replay can under-count holdings that were not bought inside the window.
+pub fn industry_drift(
+    dates: &[NaiveDate],
+    txns: &[Txn],
+    closes: &HashMap<String, Vec<(NaiveDate, f64)>>,
+    industries: &HashMap<String, String>,
+) -> Vec<(String, Vec<f64>)> {
+    let mut shares: HashMap<&str, f64> = HashMap::new();
+    // symbol -> (next close index, last close seen); dates only move forward.
+    let mut cursor: HashMap<&str, (usize, f64)> = HashMap::new();
+    let mut next = 0;
+    let mut per_date: Vec<HashMap<String, f64>> = Vec::with_capacity(dates.len());
+    for &d in dates {
+        while next < txns.len() && txns[next].date <= d {
+            let held = shares.entry(txns[next].symbol.as_str()).or_default();
+            // A sale larger than the lots we can see means the opening lot
+            // predates the cache, so the replay floors the balance at zero.
+            *held = (*held + txns[next].qty).max(0.0);
+            next += 1;
+        }
+        let mut vals: HashMap<String, f64> = HashMap::new();
+        for (&sym, &n) in &shares {
+            if n.abs() < 1e-9 {
+                continue;
+            }
+            let Some(series) = closes.get(sym) else {
+                continue;
+            };
+            let (idx, last) = cursor.entry(sym).or_insert((0, 0.0));
+            while *idx < series.len() && series[*idx].0 <= d {
+                *last = series[*idx].1;
+                *idx += 1;
+            }
+            if *last <= 0.0 {
+                continue;
+            }
+            let ind = industries.get(sym).map_or("Other", String::as_str);
+            *vals.entry(ind.to_string()).or_default() += n * *last;
+        }
+        let total: f64 = vals.values().sum();
+        per_date.push(
+            vals.into_iter()
+                .map(|(k, v)| (k, if total > 0.0 { v / total * 100.0 } else { 0.0 }))
+                .collect(),
+        );
+    }
+
+    let mut names: Vec<String> = per_date
+        .iter()
+        .flat_map(|m| m.keys().cloned())
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect();
+    let latest = per_date.last();
+    let w = |m: Option<&HashMap<String, f64>>, k: &str| {
+        m.and_then(|m| m.get(k)).copied().unwrap_or(0.0)
+    };
+    names.sort_by(|a, b| w(latest, b).total_cmp(&w(latest, a)).then_with(|| a.cmp(b)));
+    names
+        .into_iter()
+        .map(|name| {
+            let series = per_date.iter().map(|m| w(Some(m), &name)).collect();
+            (name, series)
+        })
+        .collect()
+}
+
+/// Daily simple returns keyed by the date they land on.
+fn daily_returns(series: &[(NaiveDate, f64)]) -> HashMap<NaiveDate, f64> {
+    series
+        .windows(2)
+        .filter(|w| w[0].1 > 0.0)
+        .map(|w| (w[1].0, w[1].1 / w[0].1 - 1.0))
+        .collect()
+}
+
+/// Pearson correlation over the return dates both series share.
+fn pearson(
+    a: &HashMap<NaiveDate, f64>,
+    b: &HashMap<NaiveDate, f64>,
+    min_days: usize,
+) -> Option<f64> {
+    let pairs: Vec<(f64, f64)> = a
+        .iter()
+        .filter_map(|(d, x)| b.get(d).map(|y| (*x, *y)))
+        .collect();
+    if pairs.len() < min_days {
+        return None;
+    }
+    let n = pairs.len() as f64;
+    let mx = pairs.iter().map(|p| p.0).sum::<f64>() / n;
+    let my = pairs.iter().map(|p| p.1).sum::<f64>() / n;
+    let (mut sxy, mut sxx, mut syy) = (0.0, 0.0, 0.0);
+    for (x, y) in &pairs {
+        let (dx, dy) = (x - mx, y - my);
+        sxy += dx * dy;
+        sxx += dx * dx;
+        syy += dy * dy;
+    }
+    if sxx <= 0.0 || syy <= 0.0 {
+        return None;
+    }
+    Some(sxy / (sxx * syy).sqrt())
+}
+
+fn find(parent: &mut [usize], i: usize) -> usize {
+    if parent[i] != i {
+        parent[i] = find(parent, parent[i]);
+    }
+    parent[i]
+}
+
+/// Groups held names whose daily-return correlation is at least `min_rho`
+/// (single linkage). Singletons are dropped. `weights` is % of account value
+/// per symbol; names without a close series are skipped.
+pub fn correlation_clusters(
+    closes: &HashMap<String, Vec<(NaiveDate, f64)>>,
+    weights: &HashMap<&str, f64>,
+    min_rho: f64,
+    min_days: usize,
+) -> Vec<Cluster> {
+    let mut syms: Vec<&str> = weights
+        .keys()
+        .copied()
+        .filter(|s| closes.contains_key(*s))
+        .collect();
+    syms.sort();
+    let rets: Vec<HashMap<NaiveDate, f64>> =
+        syms.iter().map(|s| daily_returns(&closes[*s])).collect();
+
+    let mut parent: Vec<usize> = (0..syms.len()).collect();
+    let mut links: Vec<(usize, usize, f64)> = Vec::new();
+    for i in 0..syms.len() {
+        for j in i + 1..syms.len() {
+            if let Some(r) = pearson(&rets[i], &rets[j], min_days).filter(|r| *r >= min_rho) {
+                links.push((i, j, r));
+                let (ri, rj) = (find(&mut parent, i), find(&mut parent, j));
+                parent[ri] = rj;
+            }
+        }
+    }
+
+    let mut groups: HashMap<usize, (Vec<usize>, f64, usize)> = HashMap::new();
+    for i in 0..syms.len() {
+        let root = find(&mut parent, i);
+        groups
+            .entry(root)
+            .or_insert_with(|| (Vec::new(), 0.0, 0))
+            .0
+            .push(i);
+    }
+    for (i, _, r) in &links {
+        let root = find(&mut parent, *i);
+        let g = groups.get_mut(&root).expect("linked pair has a group");
+        g.1 += r;
+        g.2 += 1;
+    }
+
+    let mut out: Vec<Cluster> = groups
+        .into_values()
+        .filter(|(members, _, _)| members.len() >= 2)
+        .map(|(members, rho_sum, links_n)| Cluster {
+            symbols: members.iter().map(|&i| syms[i].to_string()).collect(),
+            avg_rho: rho_sum / links_n as f64,
+            weight_pct: members.iter().map(|&i| weights[syms[i]]).sum(),
+        })
+        .collect();
+    out.sort_by(|a, b| {
+        b.weight_pct
+            .total_cmp(&a.weight_pct)
+            .then_with(|| a.symbols.cmp(&b.symbols))
+    });
+    out
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -789,10 +1056,7 @@ mod tests {
 
     #[test]
     fn parses_positions_and_industries() {
-        let ind = parse_industries(
-            r#"{"stocks":[{"ticker":"MU","subs":{"memory_storage":0.9,"x":0.1}}]}"#,
-        );
-        assert_eq!(ind["MU"], "memory storage");
+        let ind = HashMap::from([("MU".to_string(), "memory storage".to_string())]);
         let ps = parse_positions(
             r#"[{"symbol":"MU","quantity":2,"last_price":10,"price_paid":5,
                  "total_gain":10,"market_value":20,"change_close":1,"change_close_pct":5.0},
@@ -833,5 +1097,177 @@ mod tests {
         assert_eq!(h.all_time_pnl(120.0), 82.0);
         assert!(h.complete(6.0));
         assert!(!h.complete(9.0));
+    }
+
+    fn flat(prices: &[f64]) -> Vec<(NaiveDate, f64)> {
+        let start = d("2026-01-01");
+        prices
+            .iter()
+            .enumerate()
+            .map(|(i, p)| (start + chrono::Duration::days(i as i64), *p))
+            .collect()
+    }
+
+    fn txn(date: &str, sym: &str, qty: f64) -> Txn {
+        Txn {
+            id: String::new(),
+            date: d(date),
+            kind: "trade".into(),
+            symbol: sym.into(),
+            qty,
+            price: 10.0,
+            amount: -qty * 10.0,
+        }
+    }
+
+    #[test]
+    fn drift_follows_trades_and_prices() {
+        let dates: Vec<NaiveDate> = ["2026-01-01", "2026-01-02", "2026-01-03", "2026-01-04"]
+            .iter()
+            .map(|s| d(s))
+            .collect();
+        let closes = HashMap::from([
+            ("AAA".to_string(), flat(&[10.0; 4])),
+            ("BBB".to_string(), flat(&[10.0; 4])),
+        ]);
+        let industries = HashMap::from([
+            ("AAA".to_string(), "semis".to_string()),
+            ("BBB".to_string(), "software".to_string()),
+        ]);
+        let txns = vec![
+            txn("2026-01-01", "AAA", 10.0),
+            txn("2026-01-02", "BBB", 10.0),
+            txn("2026-01-03", "AAA", -10.0),
+        ];
+        let drift = industry_drift(&dates, &txns, &closes, &industries);
+        // latest weight decides order: software ends at 100%, semis at 0%
+        assert_eq!(drift[0].0, "software");
+        assert_eq!(drift[0].1, vec![0.0, 50.0, 100.0, 100.0]);
+        assert_eq!(drift[1].0, "semis");
+        assert_eq!(drift[1].1, vec![100.0, 50.0, 0.0, 0.0]);
+    }
+
+    #[test]
+    fn drift_weights_by_value_not_shares() {
+        let dates = vec![d("2026-01-01")];
+        let closes = HashMap::from([
+            ("AAA".to_string(), flat(&[10.0])),
+            ("BBB".to_string(), flat(&[30.0])),
+        ]);
+        let industries = HashMap::from([
+            ("AAA".to_string(), "semis".to_string()),
+            ("BBB".to_string(), "software".to_string()),
+        ]);
+        let txns = vec![
+            txn("2026-01-01", "AAA", 10.0),
+            txn("2026-01-01", "BBB", 10.0),
+        ];
+        let drift = industry_drift(&dates, &txns, &closes, &industries);
+        // 10 × $10 vs 10 × $30 is a 25/75 split
+        assert_eq!(drift[0], ("software".to_string(), vec![75.0]));
+        assert_eq!(drift[1], ("semis".to_string(), vec![25.0]));
+    }
+
+    #[test]
+    fn drift_floors_sales_without_a_known_lot() {
+        let dates = vec![d("2026-01-02")];
+        let closes = HashMap::from([("AAA".to_string(), flat(&[10.0]))]);
+        let industries = HashMap::from([("AAA".to_string(), "semis".to_string())]);
+        let txns = vec![
+            txn("2026-01-01", "AAA", -8.0),
+            txn("2026-01-02", "AAA", 5.0),
+        ];
+        let drift = industry_drift(&dates, &txns, &closes, &industries);
+        // the sale of 8 floors the balance at 0, so the later buy of 5 is the whole book
+        assert_eq!(drift[0], ("semis".to_string(), vec![100.0]));
+    }
+
+    #[test]
+    fn dedupe_keeps_first_record_per_transaction_id() {
+        let mut t = vec![
+            Txn {
+                id: "7".into(),
+                ..txn("2026-06-05", "GOOGL", 7.0)
+            },
+            Txn {
+                id: "7".into(),
+                ..txn("2026-06-05", "GOOGL", 7.0)
+            },
+            Txn {
+                id: "8".into(),
+                ..txn("2026-06-12", "GOOGL", 10.0)
+            },
+            // rows without an id are never collapsed together
+            txn("2026-06-12", "GOOGL", 10.0),
+            txn("2026-06-12", "GOOGL", 10.0),
+        ];
+        dedupe_txns(&mut t);
+        assert_eq!(t.len(), 4);
+        assert_eq!(t[0].id, "7");
+    }
+
+    #[test]
+    fn concentration_counts_cash_in_account_value() {
+        let positions = vec![
+            pos("AAA", 500.0, 0.0, "semis"),
+            pos("BBB", 300.0, 0.0, "software"),
+            pos("CCC", 200.0, 0.0, "power"),
+        ];
+        let tot = Totals {
+            value: 1000.0,
+            ..Default::default()
+        };
+        let c = concentration(&positions, &tot);
+        assert_eq!(c.top1, 50.0);
+        assert_eq!(c.top3, 100.0);
+        assert_eq!(c.top5, 100.0);
+        assert!((c.hhi - 0.38).abs() < 1e-9);
+        assert_eq!(c.count, 3);
+    }
+
+    /// Prices from a return pattern, starting at 100.
+    fn priced(returns: impl Iterator<Item = f64>) -> Vec<(NaiveDate, f64)> {
+        let mut p = 100.0;
+        let mut out = vec![100.0];
+        for r in returns {
+            p *= 1.0 + r;
+            out.push(p);
+        }
+        flat(&out)
+    }
+
+    #[test]
+    fn clusters_link_co_moving_names_only() {
+        let n = 60;
+        // alternating returns: A and B move together, C is orthogonal to them
+        let alt = |i: usize, s: f64| if i % 2 == 0 { s } else { -s };
+        let period4 = |i: usize| [0.01, 0.01, -0.01, -0.01][i % 4];
+        let closes = HashMap::from([
+            ("AAA".to_string(), priced((1..n).map(|i| alt(i, 0.01)))),
+            ("BBB".to_string(), priced((1..n).map(|i| alt(i, 0.02)))),
+            ("CCC".to_string(), priced((1..n).map(period4))),
+        ]);
+        let weights = HashMap::from([("AAA", 40.0), ("BBB", 20.0), ("CCC", 30.0)]);
+        let clusters = correlation_clusters(&closes, &weights, 0.7, 30);
+        assert_eq!(clusters.len(), 1);
+        assert_eq!(clusters[0].symbols, vec!["AAA", "BBB"]);
+        assert!((clusters[0].avg_rho - 1.0).abs() < 1e-6);
+        assert!((clusters[0].weight_pct - 60.0).abs() < 1e-9);
+    }
+
+    #[test]
+    fn clusters_need_enough_shared_days() {
+        let closes = HashMap::from([
+            (
+                "AAA".to_string(),
+                priced((1..10).map(|i| if i % 2 == 0 { 0.01 } else { -0.01 })),
+            ),
+            (
+                "BBB".to_string(),
+                priced((1..10).map(|i| if i % 2 == 0 { 0.02 } else { -0.02 })),
+            ),
+        ]);
+        let weights = HashMap::from([("AAA", 50.0), ("BBB", 50.0)]);
+        assert!(correlation_clusters(&closes, &weights, 0.7, 30).is_empty());
     }
 }

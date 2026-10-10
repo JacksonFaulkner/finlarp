@@ -1,0 +1,203 @@
+== PROBER
+# The robot that steps the wafer
+The prober loads wafers from a FOUP, finds the notch, pre-aligns optically and vacuums the wafer onto the chuck. Cameras then align the pads and the chuck indexes die to die, lifting in Z to bring the needles into contact (page). Tokyo Electron (8035.T) and Accretech / Tokyo Seimitsu (7729.T) are the listed prober makers, with no sourced share.
+
+# Why stepping accuracy matters
+HBM micro-bump probing needs pitch below 60 um (FormFactor deck), so alignment errors of a few microns matter. Probers also hold chuck temperature for hot or cold test.
+
+With 128 to 256 HBM sites contacted at once (FormFactor deck), the chuck must stay planar and the prober needs high Z force, since many probes push at once (textbook inference). Test time per die has no sourced number on the page and varies from milliseconds to seconds by device.
+
+# Sources
+formfactor.com/wp-content/uploads/SWTW_HBM2_KGD-June-2017-Final-3.pdf
+semiconductorx.com/mfg-back-end-testing.html
+
+== PROBE CARD
+# The consumable that touches the die
+The probe card is a custom board with needles or MEMS springs matched to one chip's bond pad layout, so each product needs its own card. It has a PCB, a space transformer and the probes (page diagram). Card cost and lead time are part of every new chip launch (textbook).
+
+# Probe counts and suppliers
+FormFactor figures on the page: 1K to 5K probes per die for advanced packaging devices, 15K to 60K probes on an advanced packaging SoC card, HBM at 128 to 256 sites in parallel. A 1995 high-end card had 500 probes, 60 um tips and 100 um pads on 125 um pitch (Keithley note), so probe counts rose by orders of magnitude.
+
+Technoprobe 2025 revenue was EUR 628.4M versus 543.2M in 2024 (page). One secondary report says FormFactor HBM revenue grew fourfold in fiscal 2024, and another puts Micronics Japan probe card sales at JPY 68.5 billion in fiscal 2025, up 28.0%.
+
+# Sources
+compass.formfactor.com 2021 probe card solution (Alan Liao)
+xdevs.com/doc/Keithley/Appnotes/2871%20Probe%20Card%20WP.pdf
+technoprobe.com 2026 company presentation
+
+== ATE TESTER
+# The tester mainframe
+The mainframe holds pin electronics, power supplies and timing, and drives patterns into the die through the test head and probe card (page). Tests include DC (shorts, opens, leakage), functional, speed binning and analog trims.
+
+# The duopoly
+Advantest (6857.T) and Teradyne (TER) are the duopoly; Cohu and Keysight are smaller. A blog-grade 2023 estimate on the page gave Advantest 50%, Teradyne 30%, others 20%.
+
+Advantest's notes say FY2025 set records in sales, operating profit and net income and that the tester market grew a second year in calendar 2025 with the company gaining share. Teradyne 2025: $3.2B revenue, +13%, test about 80%, Q4 test $883M (+45%).
+
+# Sources
+advantest.com/document/en/investors/ir-library/result/JE_BIZ_260427_note.pdf
+simplywall.st/stocks/jp/semiconductors/tse-6857/advantest-shares/news
+sec.gov Teradyne 2025 annual report
+nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead
+
+== WAFER MAP
+# Binning and the map
+The tester returns a bin number per die and the map is stored as a data file or marked by ink (page). Bin 1 is full-speed good, higher bins are slower sellable grades or hard fails. Packaging and dicing skip the bad die, so test avoids spending assembly cost on them.
+
+# A map is a diagnostic
+Clusters of failing die at the edge point to process problems, and a ring points to CMP (page's drawing notes). Systematic patterns at the same reticle position point to a mask or litho issue (textbook).
+
+For HBM, wafer-level test is the known-good-die gate; one market report puts wafer-level testing at 44.13% of the HBM KGD test market in 2025 (research sales page, treat as indicative). The sample map on the page is illustrative, not fab data.
+
+# Sources
+researchandmarkets.com/reports/6261110/hbm-known-good-die-kgd-screening-test-market
+semiconductorx.com/mfg-back-end-testing.html
+
+== space transformer
+# Re-routing pad pitch to board pitch
+Chip pads are tight and the probe card PCB is coarse, so the space transformer (a multilayer ceramic or organic substrate) fans out from the probe pitch to the PCB pitch (page). It sets probe layout accuracy and, at large probe counts, limits how many probes fit.
+
+# Why MEMS probes
+HBM micro-bump probing is below 60 um pitch, with 45 um fine pitch and probe force under 1.5 gf (FormFactor deck). A 1995 card used 125 um pad pitch. At 45 um pitch each probe must be tiny, which is why MEMS spring probes replaced hand-made needles (textbook).
+
+A FormFactor presentation notes each new HBM generation adds stacked die and heat, which affects probe-to-pad alignment, so the transformer must keep its geometry across temperature. The page calls fine-pitch cards a bottleneck with a single-digit number of vendors (FormFactor, Technoprobe, MPI, CHPT, Micronics Japan).
+
+# Sources
+formfactor.com/wp-content/uploads/SWTW_HBM2_KGD-June-2017-Final-3.pdf
+compass.formfactor.com 2021 probe card solution
+
+== TEST HEAD
+# Pogo pins between tester and card
+The test head carries the tester's pin electronics close to the wafer, and a pogo-pin or spring-contact interface connects it to the probe card PCB (page). A short electrical path protects signal timing for fast interfaces (textbook).
+
+# Why the path matters
+Modern AI chips and HBM run high-speed I/O, so the head, pogo interface and card must hold impedance and power delivery. Accelerators draw high currents even during wafer test (textbook inference).
+
+Teradyne and Advantest design heads with their mainframes, so the interface is vendor-specific, which adds switching cost (textbook). Teradyne semiconductor test revenue rose 19% in 2025 and Q4 test revenue was $883M, up 45% year on year (page). Worn pogo pins add contact resistance and false fails, a routine maintenance item (textbook).
+
+# Sources
+sec.gov/Archives/edgar/data/97210/000119312526127510/2025_ter-ars.pdf
+nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead
+
+== WAFER CHUCK
+# Vacuum, motion and temperature
+The chuck holds the wafer by vacuum on an X-Y-Z-theta stage and may be heated or cooled (page). Hot or cold test screens temperature-sensitive fails (textbook). Planarity matters because hundreds of probes push on the wafer and the contact force sums over all of them.
+
+# The HBM stress case
+With 128 to 256 sites at once and probe force under 1.5 gf each on fine-pitch pads (FormFactor deck), the total load is large yet each pad sees little, so wafer flatness and Z control must hold.
+
+Thin wafers for stacked memory are fragile on the chuck, so vacuum and support design matter (textbook). AI chips dissipate heat during test, so chuck cooling capacity limits how hard a device can be exercised (textbook inference). No sourced figure on stage accuracy was found.
+
+# Sources
+formfactor.com/wp-content/uploads/SWTW_HBM2_KGD-June-2017-Final-3.pdf
+semiconductorx.com/mfg-back-end-testing.html
+
+== overdrive
+# Overdrive: the contact trade-off
+Overdrive is extra Z travel after the tips first touch the pads. It bends the needle so the tip scrubs across the pad, breaking the native oxide. A patent on the page uses about 3 mils (about 76 um); too little overdrive gives bad contact, too much damages the pad or slides the tip off.
+
+# Why the scrub works
+Aluminium pads grow an insulating oxide, one patent puts it at about 5 to 10 nm, and it dominates contact resistance. A tungsten needle card typically needs about 0.002 to 0.004 inch of overdrive for good contact (patent).
+
+Cantilever tips scrub more and put shear load under the pad, while vertical probes mostly apply compression (probe-test papers). Deep scrub marks make wire bonding harder, and high overdrive wears and breaks probe tips. Overdrive distance is hard to control precisely.
+
+# Sources
+patents.google.com/patent/US6078186
+swtest.org/swtw_library/2016proc/PDF/S07_02_Vettori_SWTW2016.pdf
+swtest.org/swtw_library/2005proc/PDF/S06_04_%20Nagler.pdf
+swtest.org/swtw_library/2000proc/PDF/S21_Huebner.pdf
+
+== HBM parallelism
+# 128 to 256 sites at once
+The page gives HBM parallelism of 128 to 256 sites at once from a FormFactor deck. One probe card contacts many die per touchdown, so a wafer needs fewer steps and test cost per die falls (textbook). The same deck gives HBM micro-bump probing pitch below 60 um, with fine pitch 45 um and probe force under 1.5 gf.
+
+# Why HBM needs known-good die
+Every die in a stack must be good before stacking, because a bad die ruins the whole stack, so wafer-level known-good-die testing gates yield (textbook). One market summary says FormFactor HBM revenue grew fourfold in fiscal 2024.
+
+Micronics Japan memory probe cards hit a quarterly record in Q1 2026, with sales up 51.0% year on year (secondary summary). HBM supply therefore partly depends on probe card capacity (textbook inference).
+
+# Sources
+formfactor.com/wp-content/uploads/SWTW_HBM2_KGD-June-2017-Final-3.pdf
+researchandmarkets.com/reports/6261110/hbm-known-good-die-kgd-screening-test-market
+meticulousresearch.com/product/probe-cards-market-6920
+
+== Teradyne total 2025
+# Teradyne
+Teradyne 2025 revenue was $3.2B (about 80% test), up 13%; Semiconductor Test rose 19% and Q4 test revenue was $883M, up 45% year on year (page, from its annual report and a market write-up). The Q4 jump is the AI signal: custom accelerators and networking silicon need more test capacity.
+
+# Reading the numbers
+Ticker TER. Its main competitor is Advantest; the page's rough 2023 estimate gives Teradyne 30% of ATE versus Advantest 50%. Other lines (robotics, industrial automation) make up roughly 20% of revenue (page).
+
+Units differ by line (Teradyne in USD millions), so compare each company's own growth, not bar lengths. A duopoly means a few test lines can gate AI chip ramps, and demand follows a few hyperscaler and GPU programs (textbook inference).
+
+# Sources
+sec.gov/Archives/edgar/data/97210/000119312526127510/2025_ter-ars.pdf
+nasdaq.com/articles/ter-gains-strong-semiconductor-test-segment-more-upside-ahead
+
+== Advantest FY ending Mar 2025
+# Advantest
+The page shows 779.7 billion yen for the fiscal year ended March 2025. Advantest's notes say FY2025 set records in sales, operating profit and net income, above projections made in January 2026, because of AI demand in Q4, with FY2026 expected to hit record highs.
+
+# Fiscal-year label warning
+A German-language summary gives FY2025 sales of 1,128.6 billion yen (+44.7%), operating profit 499.1 billion yen and margin 44.2%, with SoC tester sales up 44% and memory tester sales down 36%. I did not verify these against the annual report, and they conflict with the page figure, so the fiscal-year labels differ.
+
+Ticker 6857.T, ADR ATEYY. The summary says the stock fell after a conservative forward forecast citing wafer starts, CoWoS capacity and memory supply risks. Yen revenue is not comparable with the USD and EUR lines on the page.
+
+# Sources
+advantest.com/document/en/investors/ir-library/result/JE_BIZ_260427_note.pdf
+simplywall.st/stocks/jp/semiconductors/tse-6857/advantest-shares/news
+
+== FormFactor 2025
+# FormFactor
+FormFactor (FORM) is the US probe card leader on the page, with a record 2025 revenue of $785M. HBM is the growth driver: a market summary says HBM revenue grew fourfold in fiscal 2024 and that it was shipping in volume to all three major HBM makers by Q2 2025 (secondary source).
+
+# Competitors and risk
+Its decks supply many figures on this page: 1K to 5K probes per die, 15K to 60K per advanced packaging SoC card, 128 to 256 HBM sites in parallel, 45 um fine pitch at under 1.5 gf. Competitors: Technoprobe (TPRO.MI), MPI, CHPT and Micronics Japan (6871.T).
+
+Probe cards are custom consumables whose demand follows new chip tape-outs and memory capex (textbook inference), tied to HBM yields at SK hynix, Samsung and Micron (textbook).
+
+# Sources
+compass.formfactor.com 2021 probe card solution (Alan Liao)
+technoprobe.com 2026 company presentation
+meticulousresearch.com/product/probe-cards-market-6920
+
+== Technoprobe 2025
+# Technoprobe
+Technoprobe (TPRO.MI) grew from EUR 543.2M in 2024 to EUR 628.4M in 2025, about 16% growth (arithmetic from the page figures; source is the company's May 2026 presentation). It is an Italian probe card maker with MEMS probes made in house (textbook).
+
+# Market context
+It competes with FormFactor, MPI, CHPT and Micronics Japan. The page calls fine-pitch cards a bottleneck with a single-digit number of vendors.
+
+A 2026 research forecast puts the probe card market at USD 3.5 to 5.5 billion with 6.5% to 9.5% yearly growth through 2031 (research-firm estimate, not confirmed). Makers compete on pitch, current capacity and lifetime in touchdowns (textbook). EUR figures should not be compared directly with FormFactor's USD.
+
+# Sources
+technoprobe.com/wp-content/uploads/2026/05/Technoprobe-Company-Presentation-May-2026.pdf
+researchandmarkets.com/reports/6234961/semiconductor-probe-card-market-analysis-and
+
+== ATE market share, 2023
+# How concentrated is test
+A Substack estimate on the page puts 2023 ATE share at Advantest 50%, Teradyne 30%, others 20% (blog-grade). Another report cites Teradyne, Advantest and Keysight together at 46% of a broader test-equipment market. The definitions differ (all test versus SoC ATE), so they do not reconcile.
+
+# Reading shares
+Advantest says it gained share in a tester market that grew in calendar 2025 (company note). A wafer-sort explainer describes ATE as a duopoly and probe cards as a tightening three-vendor oligopoly, but this could not be confirmed from other sources.
+
+Test time per chip is rising with chip complexity, and a duopoly with finite factory output can limit how fast new accelerators ramp (textbook inference). Use each company's filings for share trends and treat a single blog-grade percentage as a rough guide.
+
+# Sources
+tspasemiconductor.substack.com/p/advantest-leading-the-ai-testing
+advantest.com/document/en/investors/ir-library/result/JE_BIZ_260427_note.pdf
+semiconductorx.com/mfg-back-end-testing.html
+
+== Repair step
+# Memory repair after test
+For memory, failing rows or columns are replaced with spare ones and the die is retested (page procedure, textbook). Repair is done by fusing or laser trimming links, or programming on-die fuses (textbook). Spare capacity lets a die with a few defective cells be sold as fully good, so wafer sort raises effective yield rather than just rejecting die.
+
+# Why repair matters for HBM
+DRAM die used in HBM stacks must be fully good after repair before stacking, since a bad die ruins the stack. That is the known-good-die logic behind the 128 to 256 site parallel probing on the page.
+
+The tester drives memory test patterns and logs failing addresses, so it needs fast built-in redundancy analysis (textbook). The Advantest summary reports memory tester sales down 36% in FY2025 while SoC tester sales rose 44% (secondary summary). No sourced figure was found for repair yield uplift.
+
+# Sources
+semiconductorx.com/mfg-back-end-testing.html
+researchandmarkets.com/reports/6261110/hbm-known-good-die-kgd-screening-test-market
+simplywall.st/stocks/jp/semiconductors/tse-6857/advantest-shares/news

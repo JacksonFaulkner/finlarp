@@ -1,0 +1,123 @@
+# 1. What it is: the finished substrate that enters the fab
+
+ ┌─────────────┐   ┌──────────────┐   ┌───────────┐   ┌────────────┐   ┌──────────────┐
+ │ POLISHED    │   │ OPTIONAL     │   │ INSPECT   │   │ PACK       │   │ FAB          │
+ │ 300 mm      │──▶│ EPI layer or │──▶│ flatness, │──▶│ FOUP-ready │──▶│ litho, etch, │
+ │ prime wafer │   │ SOI bond     │   │ particles │   │ boxes      │   │ deposit, CMP │
+ └─────────────┘   └──────────────┘   └───────────┘   └────────────┘   └──────────────┘
+
+  (a wafer is bought, not made, by almost every chipmaker; step names here are textbook)
+
+# 2. Cross-sections of the three common flavours
+
+ ┌──────────────────────────────────────────────┐
+ │ POLISHED (bulk)                              │
+ │                                              │
+ │   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                   │
+ │   ▓▓ single-crystal Si ▓▓▓▓▓▓▓               │
+ │   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                   │
+ │   775 um +/- 25 um                           │
+ │   top face mirror polished                   │
+ └──────────────────────────────────────────────┘
+
+ ┌──────────────────────────────────────────────┐
+ │ EPITAXIAL (epi on bulk)                      │
+ │                                              │
+ │   ░░░ epi layer, a few um ░░░                │
+ │   (grown by CVD from gas)                    │
+ │   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                   │
+ │   ▓▓ bulk Si substrate ▓▓▓▓▓▓                │
+ │   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                   │
+ └──────────────────────────────────────────────┘
+
+ ┌──────────────────────────────────────────────┐
+ │ SOI (silicon on insulator)                   │
+ │                                              │
+ │   thin top Si device layer                   │
+ │   ═══ buried oxide (BOX) ═══                 │
+ │   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓                   │
+ │   ▓▓ handle wafer ▓▓▓▓▓▓▓▓▓▓                 │
+ │   Smart Cut: implant + bond + split          │
+ └──────────────────────────────────────────────┘
+
+  (epi thickness not sourced here; SOI layer is bounded by implant depth: ~2 um max at ~200 keV, patent)
+
+# 3. Specs and how flatness is measured
+
+  Spec fields in a typical 300 mm p-type Cz vendor sheet (svmi.com SV029 / SV031):
+    thickness 775 +/- 25 um     TTV 5 um or less     edge exclusion 3.0 mm
+  TTV    total thickness variation across the wafer (max - min thickness)
+  SFQR   site flatness: deviation within a small scanner-field-sized site (SEMI M1 / M67 family)
+  ESFQR  same idea on the edge sites; flatness must hold on partial sites too, with tiny edge exclusion
+  nano   short-wavelength surface height, reported per SEMI M43 (a separate guide from M1)
+  area   pi * (150 mm)^2 = 70,686 mm^2  (my arithmetic: about 109.6 sq in per wafer face)
+  (SEMI M1 numeric limits for SFQR / nanotopography are not public in what I found; buyers set them per
+      node)
+
+# 4. By the numbers
+
+  2025 shipments    12,973 million square inches, up 5.8% (SEMI SMG)
+  2025 revenue      $11.4 billion, down 1.2% (SEMI)
+  2024 (derived)    about 12,262 MSI and about $11.5 billion, back-calculated from the % changes
+  revenue per area  $11.4B / 12,973 MSI = about $0.88 per sq in  (my arithmetic, all diameters mixed)
+  market size est.  $13.6 B in 2025 vs $11.5 B in 2024 in one market-research blog (differs from SEMI;
+                    its basis is unclear, low confidence)
+  300 mm share      67% of the polished-wafer market in 2023, top-5 85% (same blog, low confidence)
+  demand drivers    AI: advanced epitaxial wafers for sub-3nm logic and polished wafers for HBM
+  soft spots        mature nodes (auto, industrial, consumer) still waiting on price + demand
+
+# 5. Wafer market share by supplier, about 2021 (GlobalWafers via Semiconductor Engineering), percent
+
+  Shin-Etsu    ████████████████████████████████████████ 29.4%
+  SUMCO        ██████████████████████████████ 21.9%
+  GlobalWafers █████████████████████ 15.2%
+  Siltronic    ████████████████ 11.5%
+  SK Siltron   ████████████████ 11.4%
+  Soitec       ███████ 5.5%
+  (article dated Feb 2021; one 2025-ish source puts Shin-Etsu 28, SUMCO 25, GW 15, Siltronic 12, SKS 11)
+
+# 6. Market structure and tickers
+
+  Five makers dominate: top five above 90% of the market (GEP 2018); the list is consistent since.
+  Shin-Etsu Chemical (4063.T)  SUMCO (3436.T)  GlobalWafers (6488.TWO)  Siltronic (WAF.DE)
+  SK Siltron (owned by SK Inc, 034730.KS)  Soitec (SOI.PA, SOI wafers).  (tickers are textbook, not
+      sourced)
+  Two Japanese firms held more than 60% of 300 mm epitaxial wafers in 2H 2020 (SEMI, via
+      SemiEngineering).
+  SUMCO said in 2021 that 300 mm logic supply was struggling to keep up and 200 mm was tight (auto).
+  GlobalWafers' planned buy of Siltronic would have made it #2 with 26.7%; it did not complete
+      (textbook).
+
+# 7. Chokepoints and risks
+
+  - five suppliers, mostly Japan: a quake or outage hits everyone (textbook; see crucibles in SAND)
+  - long qualification: each fab qualifies wafers per process, so switching supplier takes many months
+  - the market runs two-speed: AI epi and HBM wafers strong, mature-node wafers soft ('two-track', SEMI)
+  - 2025 revenue fell 1.2% while area rose 5.8%: price per sq in is falling, a margin risk for makers
+  - China is building domestic 300 mm wafer capacity (see the China landscape report in Sources)
+
+  Wafer sizes in use (textbook): 200 mm and 300 mm dominate volume; 150 mm and below are legacy.
+  Variant ladder: bulk polished  <  epi (adds a device-quality layer)  <  SOI (adds buried oxide,
+      bonded).
+  Each step up costs more and has fewer qualified suppliers (Soitec is the SOI name in the share table).
+
+# 8. How it connects
+
+  upstream: SLICE + POLISH makes the surface; POLYSILICON + MELT + PULL make the crystal.
+  downstream: every DEPOSIT, LITHO and ETCH step starts from this flat reference. Flatness feeds focus
+  budget at the scanner, so SFQR is a lithography number as much as a wafer one.
+
+# Sources
+
+  [1] SEMI, 2025 annual silicon wafer shipments + revenue (10 Feb 2026): semi.org/en/semi-press-release/
+      semi-reports-2025-annual-worldwide-silicon-wafer-shipments-and-revenue-results (read via aap.com.au
+      /aapreleases/cision20260210ae83978 as semi.org blocked fetch)
+  [2] Vendor 300 mm datasheets: svmi.com/wp-content/uploads/2021/01/SV029.pdf and 2020/09/SV031.pdf
+  [3] SEMI M1 scope + M43 nanotopography: store-us.semi.org/products/m00100-semi-m1-specification-for-
+      polished-single-crystal-silicon-wafers
+  [4] SFQR / ESFQR and edge exclusion: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12635427
+  [5] Market shares 2021: semiengineering.com/more-silicon-wafer-consolidation
+  [6] Top-5 concentration: gep.com/mind/blog/outlook-for-the-global-semiconductor-silicon-wafer-industry
+  [7] SOI implant depth: patents.google.com/patent/US8497187B2/en
+  [8] 300 mm blog (low confidence): komal.odoo.com/blog/news-2/300mm-silicon-wafers-market-2025-2032-1097
+  [9] China wafer landscape: faxiangongchang.com/en/reports/china-semiconductor-silicon-wafer-2026

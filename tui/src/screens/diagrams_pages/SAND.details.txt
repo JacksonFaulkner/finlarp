@@ -1,0 +1,260 @@
+== QUARTZITE
+# Feed rock
+Metamorphosed sandstone, almost pure SiO2, low in the clay and iron that would end up in the metal. It must be hard lump rock: fines choke the gas flow through the furnace and cause blowouts (textbook).
+
+# How much
+Each SiO2 is only 47% silicon by mass, so a tonne of Si needs well over 2 tonnes of quartz (textbook arithmetic, before yield losses). World Si metal output was about 4.6 Mt in 2025 (USGS, estimated), China about 4.0 Mt.
+
+# Not the scarce one
+This is cheap bulk rock. The constraint is electricity and furnace permits, not geology. The scarce stuff is high-purity quartz (HPQ, 99.998+% SiO2) from Spruce Pine for crucibles. Each crucible is consumed per ingot pull, so HPQ gates 300mm wafer output, and Hurricane Helene showed the risk.
+
+   Spruce Pine ore -> crush -> flotation -> acid leach -> HPQ -> fused quartz crucible (holds ~1420C melt)
+
+(Sources: USGS MCS 2026 silicon; Fortune 2024-10-02 on Helene)
+
+== CRUSH
+# Sizing the burden
+
+Crushing and screening make lumps of a controlled size. The goal is a burden porous enough for hot CO and SiO gas to rise through it while the solid sinks evenly (textbook furnace practice). Screened-out fines are usually sold or briquetted rather than fed.
+
+# Keep impurities out
+
+Operators pre-wash or sort quartz to keep clay, iron and aluminum out. Those elements carry straight through into the metal. They set how much work polysilicon must do later.
+
+# Fume loss
+
+An old US DOE study of a DC silicon furnace measured silicon loss to fume at about 19.5% of silicon charged. Much of the unreacted SiO escapes as vapour. Good raw-material sizing is one of the main levers on that number.
+
+# Sources
+
+(Sources: https://www.osti.gov/biblio/87367 ; https://www.slideshare.net/slideshow/mgs-38858015/38858015)
+
+== BLEND
+# The mix
+
+The charge is quartzite plus carbon: coal, coke and wood chips. Coke and coal supply the fixed carbon that takes oxygen off SiO2. Wood chips open up the burden so gas passes, and being volatile and low in ash they add little contamination (textbook). Charcoal is sometimes used where cost and purity call for it.
+
+# Carbon purity
+
+Ash in the reductant (aluminum, iron, calcium, boron, phosphorus) goes into the molten silicon. Boron and phosphorus are the worst for the next stage because they are the acceptor and donor dopants that polysilicon purification must push to ppb levels.
+
+# Carbon balance
+
+Carbon balance sets yield. Too little carbon lets SiO escape up the stack. Too much builds silicon carbide at the furnace bottom, which makes tapping hard (textbook). The overall reaction SiO2 + 2C giving Si + 2CO is why the mix is roughly two carbon atoms per silicon.
+
+# Sources
+
+(Sources: https://hrcak.srce.hr/347941 ; https://en.wikichip.org/wiki/metallurgical-grade-silicon)
+
+== ARC FURNACE
+# Submerged arc
+
+A submerged arc furnace is a steel shell lined with carbon refractory, fed from above, with three large electrodes buried in the charge. Power comes as three-phase AC and the burden itself is the resistor, so heat is released deep inside the pile. The arc zone is above 1800 C.
+
+# Power and cost
+
+The page puts electricity at 11 to 13 MWh per tonne of silicon (one patent example 11.2 MWh/t). A DOE-linked study reported commercial units using about three times the theoretical energy of the reaction, and electrode use of 0.144 lb per lb of silicon. Electricity is the largest cost line.
+
+# Why 24/7 and why hydro
+
+Furnaces run 24/7 because stopping lets the charge freeze, so power outages are costly (textbook). Electricity is the biggest cost, so smelters cluster by cheap hydro power in Norway, Iceland, Brazil and Canada. Ferroglobe carries long-term energy contracts: its Q2 2026 results booked a $59.9 million fair-value gain on them.
+
+# Sources
+
+(Sources: https://hrcak.srce.hr/347941 ; https://www.osti.gov/biblio/87367 ; https://www.sec.gov/Archives/edgar/data/0001639877/000110465926090465/gsm-20260804x6k.htm)
+
+== TAP
+# Tapping the metal
+
+At intervals a tap hole near the furnace bottom is opened, by burning or drilling, and molten silicon runs into a ladle. The ladle may be treated with oxygen or slag-forming additions to refine the metal, removing calcium and aluminum, before casting (textbook; no source fetched).
+
+# Fume at the tap floor
+
+Tapping is when SiO-rich gas and fume escape. Elkem's Thamshavn plant in Norway was the site of a measurement campaign on tapping-gas composition, dust and NOx. The gas burns to fine SiO2 particles that cause fugitive dust, so hoods and bag-houses sit over the tap floor.
+
+# Recovery
+
+A metallurgical overview puts silicon recovery at 80-90% of the silicon charged, with the rest leaving as fume. That fume is the silica fume (microsilica) sold into concrete, a by-product credit for smelters.
+
+# Sources
+
+(Sources: https://link.springer.com/article/10.1007/s11837-022-05389-8 ; https://www.slideshare.net/slideshow/mgs-38858015/38858015)
+
+== CAST + CRUSH
+# Product form and grade
+
+Cooled silicon is cast into beds or ingots, then crushed and screened into lumps and powder. Metallurgical-grade silicon is 98-99% pure (about 2N) with roughly 10,000 ppm impurities, per the page.
+
+# Where it goes
+
+Most of it never goes to chips. The page notes silicon metal plus ferrosilicon is almost 80% of all silicon materials. A large share of silicon metal goes to aluminum alloying and silicones, with only a minority reaching polysilicon (textbook; no share figure fetched).
+
+# Price
+
+Ferroglobe reported a Q2 2026 average silicon metal selling price of $2,592 per tonne (down 5.9% on the quarter) and shipments of about 40,818 tonnes. The silicon metal segment still had an adjusted EBITDA loss of about $2.7 million. Management cited Chinese and Angolan imports pressuring European prices.
+
+# Sources
+
+(Sources: https://www.sec.gov/Archives/edgar/data/0001639877/000110465926090465/gsm-20260804x6k.htm ; https://en.wikichip.org/wiki/metallurgical-grade-silicon)
+
+== ELECTRODE 2
+# Carbon columns
+
+Electrodes are large carbon columns, typically baked graphite or self-baking Soderberg type fed with paste from above (textbook; the type varies by plant). They carry tens of kiloamperes into the charge and are consumed slowly.
+
+# Three phases
+
+The three electrodes sit in a triangle, one per phase. Each forms its own arc cavity under the burden, and current returns through the charge and the molten pool. Operators control electrode depth and power: too high wastes heat up the stack, too deep shifts the cavity and tapping goes cold (textbook).
+
+# Wear and contamination
+
+The DOE study of a DC furnace measured 0.144 lb of electrode per lb of silicon, and noted much is consumed above the burden pile where it oxidises. Ash in the electrode ends up in the metal, so smelters balance cost against purity for the next stage.
+
+# Sources
+
+(Sources: https://www.osti.gov/biblio/87367 ; https://hrcak.srce.hr/347941)
+
+== CHARGE
+# The sinking burden
+
+The burden descends slowly as lower layers are consumed, and fresh charge is added from the top. It is resistor for the electrical heating, reactant bed and filter. In the cooler upper zone SiO reacts with carbon to form SiC, which captures part of the SiO.
+
+# When it goes wrong
+
+A sound burden is porous and sinks evenly. Crust formation or sintering blocks gas, leading to eruptions where gas and SiO burst up through the surface (textbook), and wasted fume.
+
+# Fume loss
+
+The OSTI furnace report reviewed energy-efficient operation of a silicon furnace and measured about 19.5% of silicon charged lost to fume in a DC case. The page notes bigger furnaces and better control are pushing MWh/t down.
+
+# Sources
+
+(Sources: https://www.osti.gov/biblio/87367 ; https://hrcak.srce.hr/347941)
+
+== ARC CAVITIES
+# Where the chemistry happens
+
+Below the burden each electrode tip sits in a gas-filled cavity where the arc burns above 1800 C (page figure). SiO2 + C gives SiO gas + CO there, and SiC reacts with SiO to give liquid silicon. The gas stage is why SiO recapture higher up decides yield.
+
+# Recapture and fume
+
+The patent literature cited on the page notes that SiO is gaseous at reaction temperature and is lost as vapour if it does not fully react. That vapour leaves the top, meets air, and burns to amorphous silica of well under a micron: silica fume, average particle size about 150 nm.
+
+# Sources
+
+(Sources: https://hrcak.srce.hr/347941 ; https://www.slideshare.net/slideshow/mgs-38858015/38858015 ; https://en.wikipedia.org/wiki/Silica_fume)
+
+== MOLTEN SILICON POOL
+# Silicon hearth
+
+The pool at the bottom collects liquid silicon as SiC and SiO react. Silicon melts at 1414 C (textbook), but the pool sits hotter because the arcs superheat the zone above it. Pool depth and condition set how steady tapping is.
+
+# Purity is set here
+
+The pool is the only place purity is set: whatever Al, Fe, Ca, B and P the charge delivers goes in, with some leaving as slag or in ladle refining. The product is 98-99% Si with about 10,000 ppm impurities.
+
+# Sources
+
+(Sources: https://hrcak.srce.hr/347941 ; https://en.wikichip.org/wiki/metallurgical-grade-silicon)
+
+== tap hole
+# Opening and closing
+
+The tap hole is a refractory-lined channel in the hearth wall, plugged with clay and opened periodically. Opening is by oxygen lancing or drilling, and it is closed with a mud gun (textbook). A tap can run tens of minutes. Metal flows via a launder into a ladle, then to the casting bed.
+
+# Fume and environment
+
+Tapping is when fume is worst. Elkem's Thamshavn campaign measured tapping gas composition, dust and NOx because SiO in the gas burns to fine SiO2 particles that create fugitive emissions. Plants use hoods over the tap floor linked to the same bag-house system as the main stack.
+
+# Wear
+
+Refractory wear at the tap hole is the usual limiting item for furnace campaign life (textbook), so tap hole maintenance is a recurring cost.
+
+# Sources
+
+(Sources: https://link.springer.com/article/10.1007/s11837-022-05389-8)
+
+== CO + SiO fume
+# Off-gas
+
+Gas leaving the top is mostly CO plus SiO. The SiO meets air above the burden and oxidises to silica fume, trapped in large bag-house filters beside the furnaces. The CO is combustible: many plants burn it, and some use waste-heat boilers to make electricity.
+
+# Silica fume
+
+Silica fume is a by-product of making silicon or ferrosilicon in electric arc furnaces. It consists of spherical particles with an average diameter of about 150 nm. It is sold as microsilica for concrete and refractories, a by-product credit for smelters.
+
+# Yield lost
+
+The fume is also yield lost. The DOE study found about 19.5% of silicon charge lost to fume in a DC furnace case. Every percentage point recaptured is worth real money at the page's price of 130 cents per pound for 2025e.
+
+# Sources
+
+(Sources: https://www.slideshare.net/slideshow/mgs-38858015/38858015 ; https://www.osti.gov/biblio/87367 ; https://eureka.patsnap.com/patent-CN1563872A ; https://en.wikipedia.org/wiki/Silica_fume)
+
+== electricity
+# The cost line
+
+At 12 MWh per tonne of silicon, each 10 dollars per MWh of power adds 120 dollars per tonne to cost (simple arithmetic). Ferroglobe's Q2 2026 realised price was $2,592 per tonne, so $10/MWh is about 4.6% of that.
+
+# Power contracts
+
+The cited patent gives 11.2 MWh/t as an example and states that actual commercial units use about three times the theoretical energy. Long-term power contracts shape margins: Ferroglobe booked a $59.9 million fair-value gain on them in Q2 2026, which drove its $60.4 million net profit even though silicon metal lost money.
+
+# What it means for chips
+
+For AI-chip supply chains the implication is that the silicon feedstock is priced by power and trade policy, not by chip demand.
+
+# Sources
+
+(Sources: https://hrcak.srce.hr/347941 ; https://www.sec.gov/Archives/edgar/data/0001639877/000110465926090465/gsm-20260804x6k.htm ; https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/4680096)
+
+== World total
+# Concentration
+
+The USGS 2025 estimate is 4.6 million tonnes of world silicon metal, with China 4.0 million, about 87%. Brazil and Norway follow at 180 and 130 thousand tonnes. The figure includes ferrosilicon, so it covers far more than chip feedstock.
+
+# Trade pressure
+
+The Chinese position rests on cheap coal power and, in provinces such as Yunnan and Sichuan, hydro in the wet season (textbook; seasonal pattern not sourced here). Ferroglobe's Q2 2026 report points to imports from China and Angola pressing European prices and pending European Commission trade action. US imports rose from 117 kt (2024) to 180 kt (2025e), and silicon was added to the US critical minerals list in November 2025.
+
+# Price
+
+US silicon metal fell from 362 cents per pound in 2022 to 130 in 2025e (USGS / S&P Platts, per the page). The page notes 2025 oversupply and weak demand.
+
+# Sources
+
+(Sources: https://pubs.usgs.gov/periodicals/mcs2026/mcs2026-silicon.pdf ; https://www.sec.gov/Archives/edgar/data/0001639877/000110465926090465/gsm-20260804x6k.htm)
+
+== Spruce Pine
+# Crucible quartz chokepoint
+
+Spruce Pine, North Carolina, supplies an estimated 70-90% of the quartz for the crucibles in which polysilicon is melted for wafers (Vince Beiser, per news reports). Sibelco and The Quartz Corp together supply about 95% of ultra-high-purity quartz (ABC News / Konvoy).
+
+# Helene timeline
+
+When Hurricane Helene hit in late September 2024, Sibelco said initial assessments found only minor damage and then restarted mining and processing. Both producers halted on Sept 26 2024 and Sibelco restarted about two weeks later. Sibelco had earlier announced $200 million to double capacity at Spruce Pine.
+
+# No easy substitute
+
+This is why the page separates it from the metallurgical stream: crucible quartz is the same SiO2 chemistry but with ppm-level metal limits, and there is no easy substitute. An outage there is a single point of failure for every AI chip.
+
+# Sources
+
+(Sources: https://www.carolinajournal.com/sibelco-spruce-pine-quartz-mine-operations-shown-resilience/ ; https://abcnews.go.com/US/wireStory/north-carolina-maker-high-purity-quartz-back-operating-114699814)
+
+== Ferroglobe
+# Q2 2026
+
+Ferroglobe (GSM) is the largest listed pure play on Western silicon metal. In Q2 2026 company sales were $378.6 million and net profit $60.4 million, driven by a $59.9 million fair-value gain on long-term energy contracts. Management expects improvement in H2 2026 pending European Commission trade actions.
+
+# Read-through
+
+Silicon metal is a commodity price and power-cost story, with weak oversupply pricing (the page cites 130 cents per pound in 2025e, below 362 in 2022). Tariff or critical-mineral policy is the swing factor.
+
+# Other listed names
+
+Elkem (ELK.OL) is the other listed name, per the page. Sibelco and The Quartz Corp are private, so Spruce Pine quartz has no direct listed exposure.
+
+# Sources
+
+(Sources: https://ferroglobe.gcs-web.com/node/13461 ; https://www.sec.gov/Archives/edgar/data/0001639877/000110465926090465/gsm-20260804x6k.htm ; https://www.marketbeat.com/instant-alerts/ferroglobe-q2-earnings-call-highlights-2026-08-05/)

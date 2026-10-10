@@ -1,0 +1,120 @@
+# 1. What happens: bare wafer to resist-coated wafer
+
+ ┌──────────────┐  ┌─────────────┐  ┌──────────────┐  ┌───────────┐  ┌─────────────┐  ┌───────────┐
+ │ PRIME+BARC   │  │ DISPENSE    │  │ SPIN         │  │ EDGE BEAD │  │ SOFT BAKE   │  │ COOL      │
+ │ adhesion,    │  │ resist drop │  │ fling off    │  │ solvent   │  │ hot plate   │  │ back to   │
+ │ anti-reflect │─▶│ on centre   │─▶│ excess; film │─▶│ trims rim │─▶│ (PAB) dries │─▶│ room temp │
+ │ underlayer   │  └─────────────┘  │ levels       │  └───────────┘  │ the film    │  └───────────┘
+ └──────────────┘                   └──────────────┘                 └─────────────┘
+
+  (all on one TRACK: robot arms shuttle the wafer between modules, then hand off to the scanner)
+  (BARC step is textbook for DUV/ArF stacks; EUV stacks use thin underlayers, details differ by fab)
+
+# 2. Inside a spin-coat module (cross-section)
+
+  ┌────────────────────────────────────────────────────────────────────┐
+  │         resist line from pump + filter                             │
+  │                    │                                               │
+  │               ┌────┴────┐   nozzle swings to wafer centre          │
+  │               │ NOZZLE  │                                          │
+  │               └────┬────┘                                          │
+  │                    ▼  drop                                         │
+  │    ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░   ░ = liquid resist     │
+  │    ═══════════════════════════════════════   WAFER, 300 mm         │
+  │                  ┌─────────┐                                       │
+  │                  │  CHUCK  │ ◀── holds wafer by backside vacuum    │
+  │                  └────┬────┘                                       │
+  │                       │ spindle: ramps to a few thousand rpm       │
+  │                       ▼ motor + vacuum line                        │
+  │                                                                    │
+  │   centrifugal force ──▶  resist flows outward, excess flies off the rim │
+  │   CUP + exhaust pull airflow down and carry droplets to drain  ▼   │
+  │   EBR nozzle (edge bead removal) sprays solvent on the rim only    │
+  └────────────────────────────────────────────────────────────────────┘
+
+  (drawing is schematic; real modules add temperature + humidity controlled airflow, textbook)
+
+# 3. The physics and chemistry
+
+  film thickness  t  falls roughly with the inverse square root of spin speed:
+
+          t  ~  k * c * eta^(1/3) / sqrt(w)          w = rpm, c = solids content, eta = viscosity
+          (Meyerhofer-type scaling; textbook form, constants fitted per resist)
+
+  Measured example, AZ 4533 thick resist: 4.0 um at 2000 rpm, 3.3 um at 4000, 2.3 um at 6000.
+  Conventional spin: 2000-4000 rpm for 20-30 s; stopping early makes thickness sensitive to spin time.
+
+  resist = POLYMER (backbone) + PAG (photo-acid generator) + QUENCHER base + SOLVENT (PGMEA is common)
+           the solvent is most of the liquid; after the bake the film is mostly polymer + PAG
+  soft bake (PAB) typically 90-110 C, a few minutes on a hot plate in the textbook range;
+  one TEL Mark 8 example baked 60 s at 110 C and used 1500-4000 rpm to reach a 280 nm film.
+  Goals of the bake: drive off solvent, densify the film, improve adhesion, stabilise exposure response.
+
+# 4. By the numbers
+
+  spin speed      2000-4000 rpm conventional; 1500-4000 rpm in a TEL Mark 8 recipe
+  spin time       20-30 s (university guide); soft bake 60 s at 110 C in the TEL example
+  soft bake       90-110 C (patent text: 'typically'), few minutes on a hot plate
+  film thickness  280 nm in the TEL example (DUV era); 1.8 um for AZ 1518 at 4000 rpm (thick, MEMS-class)
+  EUV film        ~20 nm layer absorbs only about 10% of 13.5 nm light, 90% passes through
+  consequence     thin film means few photons caught per pixel: shot noise, see EXPOSE and DEVELOP
+  market          Tokyo Electron + SCREEN: roughly 88-91% of coater/developer sales (aggregators)
+  (bake is 90-110 C; the acid generator in the resist survives it intact)
+
+# 5. Thickness vs spin speed, AZ 4533 (um, lab reference)
+
+  2000 rpm      ████████████████████████████████████████████████ 4.0
+  4000 rpm      ████████████████████████████████████████ 3.3
+  6000 rpm      ████████████████████████████ 2.3
+  (faster spin, thinner film: not exactly 1/sqrt(w), resist and bake also matter)
+
+  Share of coater/developer sales, estimates from market-research aggregators (not audited), %
+  TEL, low est.    ████████████████████████████████ 80+  (market report: over 80%)
+  TEL+SCREEN       ███████████████████████████████████ 88  (industry overview, combined)
+  TEL, high est.   ████████████████████████████████████ 91  (company profile, CY2025)
+  TEL, EUV tracks  ████████████████████████████████████████ ~100 (TrendForce citing Nikkan Kogyo)
+
+# 6. Who makes it, risks
+
+  Tokyo Electron (8035.T)   CLEAN TRACK line; the dominant maker, near 100% of EUV-linked tracks per
+                            TrendForce/Nikkan Kogyo; sold bundled next to the ASML scanner
+  SCREEN Holdings (7735.T)  number two in coater/developers; strong in Asia (profile text)
+  SEMES (Samsung affiliate, private)   Korean tracks; no share figure found
+  Others named in market listings: SUSS MicroTec (SSYS.DE), Tazmo, Kingsemi, Litho Tech Japan
+  Resist chemistry itself is a different chokepoint: JSR, TOK, Shin-Etsu, Sumitomo Chemical (Japan,
+  textbook knowledge, no share figure in my sources).
+
+  Chokepoints: a duopoly in the track; track throughput must match the scanner (wafers/hour),
+  since the track is inline with it. Resist lots and filters must stay defect-free to the particle.
+  (share figures conflict across sources: treat 80-100% as 'TEL near-monopoly in EUV', not exact)
+
+# 7. The track: where COAT sits in the line
+
+  FOUP in ─▶ PRIME ─▶ COAT ─▶ SOFT BAKE ─▶ COOL ─▶ interface ─▶ SCANNER (see EXPOSE)
+                                                       ▲                    │
+                                                       │                    ▼
+  FOUP out ◀ COOL ◀ DEVELOP ◀ POST-EXPOSURE BAKE ◀─────┴───────── exposed wafer returns
+
+  The track is one machine with coat, bake and develop modules stacked around robot arms; the scanner
+  sits at the interface. Wafers leave coat, go to EXPOSE, and come back for PEB and DEVELOP.
+  (layout is a generic textbook sketch; real tracks stack modules vertically to save floor space)
+
+# 8. What goes wrong
+
+  striations / comets   dried particles or bubbles in the dispense line leave streaks
+  edge bead             resist piles on the rim; the EBR solvent step trims it
+  thickness drift       temperature or humidity shifts solvent evaporation rate, so film thickness moves
+  thin-film penalty     at ~20 nm, a 1 nm error is 5% of the film (arithmetic)
+  (this list is textbook process knowledge; no quantitative defect rates found in sources)
+
+# Sources
+
+  [1] Spin speed vs thickness, soft bake (LBL lab note):
+      www-eng.lbl.gov/~shuman/XENON/MATERIALS&COMPONENTS/spincoating/spin_coating_photoresist.pdf
+  [2] Soft bake 90-110 C: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/5985363
+  [3] TEL Mark 8, 280 nm film recipe: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7404681
+  [4] 20 nm film absorbs ~10%: frederickchen.substack.com/p/edge-roughness-differences-among
+  [5] TEL EUV track share: trendforce.com/news/?p=46933
+  [6] TEL+SCREEN and TEL 80%+ estimates (low quality): komal.odoo.com/blog/news-2/
+      coater-and-developer-for-wafer-processing-market-2025-2032-1193
+      reportprime.com/coaters-and-developers-r3845

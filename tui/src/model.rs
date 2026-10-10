@@ -67,6 +67,25 @@ impl Source {
         self.formula.is_some()
     }
 
+    /// Plain-text citation for pasting into Claude: label, URL, and the
+    /// formula with its inputs when the value is computed.
+    pub fn to_context(&self) -> String {
+        let mut out = self.label.clone();
+        if let Some(u) = &self.url {
+            out.push_str(&format!("\nsource: {u}"));
+        }
+        if let Some(f) = &self.formula {
+            out.push_str(&format!("\nformula: {f}"));
+            for i in &self.inputs {
+                out.push_str(&format!("\n  input: {}", i.label));
+                if let Some(u) = &i.url {
+                    out.push_str(&format!(" ({u})"));
+                }
+            }
+        }
+        out
+    }
+
     /// URL without the `#:~:text=` quote fragment.
     pub fn doc_url(&self) -> Option<&str> {
         self.url
@@ -251,6 +270,17 @@ pub struct Section {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn to_context_has_label_url_and_formula() {
+        let a = Source::url("Rev Q2", "https://a/b");
+        let d = Source::derived("Growth", "2 / 1 - 1", vec![a.clone()]);
+        assert_eq!(a.to_context(), "Rev Q2\nsource: https://a/b");
+        assert_eq!(
+            d.to_context(),
+            "Growth\nformula: 2 / 1 - 1\n  input: Rev Q2 (https://a/b)"
+        );
+    }
 
     #[test]
     fn quote_decodes_fragment() {

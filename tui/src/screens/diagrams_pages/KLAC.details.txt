@@ -1,0 +1,206 @@
+== INSPECT
+# Light versus electrons
+Inspection looks for physical defects (particles, bridges, voids) across the whole wafer, then decides which are killers. Optical (broadband plasma) tools cover the full wafer in minutes; e-beam tools resolve smaller defects but sample only a few dies (textbook, per the page). Fabs run both.
+
+KLA says it held over 85% of optical patterned-wafer inspection in 2024 (company presentation, vendor claim). Applied Materials with Hitachi High-Tech is the main e-beam review and CD-SEM competition.
+
+# A real e-beam tool
+KLA's eSL10, announced 20 July 2020, was pitched at defects that optical and other e-beam platforms often miss on logic and memory chips, including EUV-printed layers. KLA's product page says it uses the industry's highest landing energy with high resolution to catch small physical and high aspect ratio defects.
+
+The release describes a Yellowstone scanning mode that uses 10 billion pixels of information per scan.
+
+# Sources
+nasdaq.com/press-release/kla-introduces-breakthrough-electron-beam-defect-inspection-system-2020-07-20
+kla.com/products/chip-manufacturing
+
+== MEASURE
+# Three measurements
+Measurement is KLA's second job. Overlay asks how well layer N+1 sits on layer N, CD is line width, and film metrology is thickness. The page's tools: Archer for overlay, SpectraShape for CD and film; CD-SEM is Hitachi and Applied turf, and Nova (NVMI) sells optical CD and film metrology.
+
+Why each matters (textbook): CD drift changes transistor speed and leakage, a wrong film thickness shifts later etch depth, and an overlay error of a few nm can open or short a via.
+
+# Archer 750 and SpectraShape 11k
+KLA announced the Archer 750 imaging overlay tool and the SpectraShape 11k optical CD tool together on 24 February 2020 (KLA press release). Archer 750 uses rAIM overlay targets and is pitched at scatterometry-class productivity, so fabs can sample more points for higher order scanner corrections (vendor claims).
+
+SpectraShape 11k tracks 3D shapes such as transistors and memory cells for logic, DRAM and 3D NAND.
+
+# Sources
+kla.com/products/chip-manufacturing/metrology
+semiconductor-digest.com/?p=7647
+ir.kla.com/news-events/press-releases/detail/24/kla-introduces-new-ic-metrology-systems
+laserfocusworld.com KLA-Tencor overlay article
+
+== ANALYSE
+# The review ladder
+The analyse box is where raw detections become decisions. Optical finds candidates, a review SEM images them, and a classifier sorts killer from nuisance. If counts exceed spec, the lot is held and etch, CMP or litho is fixed before the next lot (page text).
+
+# Why the software sticks
+Measurements go to the fab host, then run-to-run control, then recipe offsets, lot by lot. The page calls this next-layer feedback lock-in that makes switching vendors costly. Killer-defect classification depends on years of tuned recipes and image libraries (textbook inference).
+
+KLA services revenue was $775M in the March 2025 quarter, up 16% year on year (quarterly-call summary on the page). Excursion control is yield insurance: a missed bad lot can scrap many wafers before anyone sees it (textbook).
+
+# Sources
+marketbeat.com/earnings/reports/2025-4-30-kla-co-stock
+chartmill.com/news/external/59879
+
+== FEED BACK
+# Closing the loop
+The end of the flow sends corrections upstream. Per the page's APC box, overlay data fits shift, scale, rotation, dose and focus terms and goes back to the ASML scanner for the next lot (run-to-run control, textbook).
+
+Higher-order corrections need dense sampling. Archer 750's pitch is that scatterometry-class throughput lets fabs measure more points per wafer (vendor claim).
+
+# Why process control outgrows WFE
+KLA says it expects process control to outgrow wafer fab equipment through 2030, with WFE around $140B in calendar 2026 (per the page). Each new layer and structure (GAA, backside power, HBM stacks) adds measurement steps.
+
+KLA reported fiscal 2026 revenue of $13.58B, with June-quarter revenue of $3.66B. CEO Rick Wallace said AI infrastructure demand is lifting process control for advanced foundry/logic and memory.
+
+# Sources
+ycharts.com/news/story/PRN-CG12657-20260728
+chartmill.com/news/external/59879
+
+== ARCHER
+# Two gratings, one number
+Archer is KLA's overlay family. The wafer carries a grating from layer N and one from layer N+1; the tool images both and compares their centres, which gives overlay error in nm per field.
+
+# Imaging versus scatterometry
+Imaging-based overlay (as in Archer 750) reads marks directly; scatterometry-based overlay infers error from diffraction (textbook). Archer 750 uses rAIM targets to improve the match between target error and real device error (KLA release). The page's Archer 600 claim is sub-3nm overlay error.
+
+EUV and multi-patterning leave fewer nanometres of margin, so overlay tolerance tightens by node (textbook). Competitors are ASML's YieldStar and in-scanner alignment; the page treats KLA as a near-monopoly in optical overlay.
+
+# Sources
+kla.com/products/chip-manufacturing/metrology
+laserfocusworld.com KLA-Tencor overlay article
+semiconductor-digest.com/?p=7647
+
+== OVERLAY ERROR
+# A via off its line
+Overlay error is the vector offset between two layers, measured per field and per wafer. Too large, and a via lands partly off its metal line, raising resistance or opening a contact, or slides into a neighbour and shorts (textbook, as stated on the page).
+
+# The edge placement budget
+Edge placement error is the sum of overlay, CD and stochastic variation, and it is the budget fabs care about at EUV (textbook). That is why KLA sells overlay, CD and defect tools together. The page notes process control rises faster than WFE as nodes shrink, because each new layer needs more measurement.
+
+KLA's claim for Archer 600 is sub-3nm overlay error; scanner overlay is a separate matter that ASML and fab teams work on (textbook).
+
+# Sources
+laserfocusworld.com KLA-Tencor overlay article
+chartmill.com/news/external/59879
+
+== APC analytics
+# Measure, compute, adjust
+APC is software that turns measurements into recipe changes. In the page's diagram it fits shift, scale, rotation, dose and focus from the overlay data and sends them to the scanner for the next lot. Run-to-run control is the textbook name: measure, compute offsets, adjust, repeat.
+
+It lets a stable process absorb drift in lenses, wafer heating or chuck wear without human tuning.
+
+# Why software is sticky
+Analytics sell with tools and give recurring services-type revenue. The page states KLA services were $775M in the March 2025 quarter (up 16% YoY). The same fab-host data path ties inspection results to etch and CMP chambers, so a rising defect count at one chamber can trigger a hold (textbook).
+
+Scanner makers include their own correction loops, but inline cross-tool analytics sit with metrology and fab-software vendors (textbook inference). No sourced figure was found for analytics revenue alone.
+
+# Sources
+marketbeat.com/earnings/reports/2025-4-30-kla-co-stock
+chartmill.com/news/external/59879
+
+== DEFECT INSPECTOR
+# Compare each die with its neighbours
+Optical patterned-wafer tools use a bright plasma light source and compare each die image to its neighbours, flagging differences (textbook). The page says KLA claimed over 85% of optical patterned-wafer inspection in 2024.
+
+At small sizes the defect signal is lost in pattern noise, and e-beam must be used (textbook, per the page's speed-sensitivity trade).
+
+# Who leads which niche
+Unpatterned wafers use a different tool class: the Surfscan family, which a third-party listing describes as DUV-laser based, running darkfield and optional brightfield modes together. KLA and Hitachi High-Tech lead there, per the page. These tools check bare wafers coming in and after CMP.
+
+Lasertec leads actinic EUV mask-blank inspection; Applied and Hitachi lead e-beam review.
+
+# Sources
+moov.co surfscan sp a2 listing (third party)
+ir.kla.com
+dri.co.jp/auto/report/lpi/260603-global-semiconductor-process-control.html
+
+== REVIEW SEM
+# Image the candidates
+A review SEM goes to coordinates flagged by an inspector and takes a high resolution image so the defect can be classified. The output is a class code: particle, bridge, void, scratch, or nuisance. Counts by class point at the chamber or step at fault (textbook).
+
+The page lists Applied Materials with Hitachi High-Tech as leaders in e-beam review and CD-SEM, so this is a place where KLA is not the near-monopoly.
+
+# The sensitivity trade-off
+Set the inspector too sensitive and review time is wasted on nuisance defects, and the tool is slow. Set it too low and a killer type escapes (textbook trade-off).
+
+Rule on the page: out of spec means hold the lot. A hold costs delay; passing a bad layer costs every later layer built on it (textbook).
+
+# Sources
+dri.co.jp/auto/report/lpi/260603-global-semiconductor-process-control.html
+gminsights.com/industry-analysis/semiconductor-process-control-equipment-market
+
+== e-beam inspection
+# Voids and opens light cannot see
+A scanning electron beam resolves voids and opens that light cannot (page). The cost is speed: it samples a few dies where optical covers the whole wafer in minutes.
+
+Demand rises because deep 3D NAND holes, buried contacts and EUV stochastic defects are hard to see optically (textbook). KLA's eSL10 (July 2020) targets small physical and high aspect ratio defects on logic and memory, including EUV layers.
+
+# Voltage contrast
+E-beam can also see voltage-contrast defects: a buried open shows up as a brightness difference, because a connected plug and a floating one charge differently under the beam (textbook).
+
+Competitors: Applied Materials and Hitachi High-Tech (e-beam review, CD-SEM), plus ASML's HMI multi-beam tools (textbook; not in this run's sources). KLA is not the sole leader here.
+
+# Sources
+nasdaq.com/press-release/kla-introduces-breakthrough-electron-beam-defect-inspection-system-2020-07-20
+dri.co.jp/auto/report/lpi/260603-global-semiconductor-process-control.html
+
+== Semiconductor Process Control
+# KLA's 10-K segment table
+Fiscal year ended June 2026: Semiconductor Process Control $12,240M, PCB and Component Inspection $750M, Specialty Semiconductor Process $584M, for total segment revenue near $13.58B, up 12% (page). SPC is about 90% of segment revenue (arithmetic from the page figures), so the stock is essentially a leading-edge process control bet.
+
+# What moved
+SPC rose 12% on foundry/logic and memory demand tied to AI and HPC; PCB rose 21% on advanced packaging; Specialty Semi fell 1% on lower China investment (page).
+
+June 2026 quarter revenue was $3.66B, above guidance midpoint, versus $3.415B in the prior quarter and $3.175B a year earlier. GAAP net income for the year was $4.83B. The segment names in the 10-K differ from the aggregator product split, which the page labels as indicative only.
+
+# Sources
+sec.gov/Archives/edgar/data/0000319201/000031920126000027/klac-20260630.htm
+ycharts.com/news/story/PRN-CG12657-20260728
+iconnect007.com/article/150980
+
+== Advanced-packaging process control rev
+# Packaging is the new growth leg
+The page shows about $635M of advanced-packaging process control revenue in 2025 rising to about $1B in the 2026 guide; an earlier call said over $800M, so sources conflict. The jump is tied to AI: CoWoS-style interposers, HBM stacks and chiplets add inspection of bumps, RDL, bonding and warpage (textbook).
+
+KLA's PCB and Component Inspection segment rose 21% in fiscal 2026 on advanced packaging, to $750M (10-K data on the page).
+
+# A focused rival
+Onto Innovation (ONTO) leads in packaging and 3D metrology and inspection per the page, so here KLA competes with a focused rival, not a near-monopoly.
+
+Packaging tool orders follow TSMC CoWoS and HBM supply; Advantest's recent commentary cited wafer starts, CoWoS capacity and memory supply risks (secondary summary).
+
+# Sources
+nasdaq.com/articles/kla-biggest-process-control-winner-ai-spending
+chartmill.com/news/external/59879
+ycharts.com/news/story/PRN-CG12657-20260728
+
+== Top 5 combined
+# Share depends on the definition
+GMI Insights puts KLA at 49% of process control in 2025 and the top five (KLA, Applied Materials, Lasertec, Onto Innovation, ASML) at 78.8%. KLA's investor-day number is 58% in 2025, up 360 basis points since 2021, about 7x the nearest rival, on a narrower definition (semiconductor process control only). DRI / LP Information says the top eight vendors hold nearly 90%.
+
+The ranking is robust (KLA first by a large margin) but the exact percentage is not. For modelling, use KLA's own segment revenue rather than an aggregator share.
+
+# Risks and the moat
+China export controls hit sales (Q2 2025 call), and Specialty Semi fell 1% on lower China investment. Orders follow foundry and memory capex cycles (textbook).
+
+A near-monopoly persists because of installed-base recipes and data pipelines, plus the hardware lead in broadband plasma optics (textbook inference).
+
+# Sources
+gminsights.com/industry-analysis/semiconductor-process-control-equipment-market
+dri.co.jp/auto/report/lpi/260603-global-semiconductor-process-control.html
+nasdaq.com/articles/kla-biggest-process-control-winner-ai-spending
+
+== Lasertec (6920.T)
+# One bad mask, every wafer
+Lasertec (6920.T) is listed on the page for EUV mask-blank and actinic mask inspection. A reticle error is multiplied: the mask prints onto every wafer, so reticle inspection checks the mask before it prints errors everywhere.
+
+# Actinic means at the EUV wavelength
+Actinic inspection looks at the mask with the EUV wavelength itself, so defects behave the way they will in the scanner (textbook). GMI Insights counts Lasertec among the top five process control vendors, which shows a narrow product line can still hold a top-five spot.
+
+For KLA the mask side is contested: the page calls KLA a near-monopoly in optical wafer and mask-adjacent inspection, yet Lasertec holds the EUV blank niche. No sourced revenue figure for Lasertec was found, so its share cannot be compared with KLA's.
+
+# Sources
+gminsights.com/industry-analysis/semiconductor-process-control-equipment-market
+dri.co.jp/auto/report/lpi/260603-global-semiconductor-process-control.html

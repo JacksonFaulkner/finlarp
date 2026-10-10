@@ -104,6 +104,10 @@ impl Pick {
 }
 
 impl Screen for Pick {
+    fn leader_ok(&self) -> bool {
+        false
+    }
+
     fn draw(&mut self, frame: &mut Frame) {
         let t = self.theme;
         let area = frame.area();

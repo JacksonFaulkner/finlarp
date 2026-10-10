@@ -1,0 +1,120 @@
+# 1. What happens: strip organics, oxide, particles and metals, many times per chip
+
+ ┌────────────┐  ┌──────────┐  ┌────────────┐  ┌────────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐
+ │ ORGANICS   │  │ RINSE    │  │ OXIDE      │  │ PARTICLES  │  │ METALS   │  │ RINSE    │  │ DRY        │
+ │ SPM        │─▶│ DI water │─▶│ DHF        │─▶│ SC1        │─▶│ SC2      │─▶│ DI water │─▶│ spin / IPA │
+ │ H2SO4/H2O2 │  │          │  │ HF + water │  │ NH4OH/H2O2 │  │ HCl/H2O2 │  │          │  │            │
+ └────────────┘  └──────────┘  └────────────┘  └────────────┘  └──────────┘  └──────────┘  └────────────┘
+
+  (SC1 + SC2 are the RCA clean; real fabs use many variants after almost every etch, strip and CMP step)
+
+# 2. Inside a single-wafer spin cleaner
+
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │     chem nozzle arm         DI water / N2 / IPA nozzle          megasonic transducer (optional)  │
+ │         ║                          ║                                     ║ high-frequency waves  │
+ │         ▼                          ▼                                     ▼                       │
+ │  ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈       │
+ │  ┌──────────────────────────────────────────────┐   liquid film ≈ spreads outward, carrying away │
+ │  │ WAFER, face up, held by edge pins or chuck   │   particles lifted by chemistry + cavitation   │
+ │  └──────────────────────────────────────────────┘                                                │
+ │                  │ spindle, spinning (textbook)                                                  │
+ │  ░░░░░░░░░░░░ splash guard / bowl ░░░░░░░░░░░░░░░░░░░░░░░                                        │
+ │                  ▼ drain: acid, base and solvent waste kept on separate lines                    │
+ │  (a batch wet bench instead dips a cassette of wafers in heated tanks of SC1 / SC2 / DHF)        │
+ └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 3. Particle removal mechanism
+
+ ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+ │   SC1: NH4OH etches Si a little, H2O2 regrows oxide; each cycle undercuts the particle  │
+ │   at high pH both surfaces share a charge sign, so the particle is repelled             │
+ │     o  particle                    ◀── pH about 10 (textbook)                           │
+ │   ───┴─────────── wafer             ◀── megasonic bubbles shear the boundary layer      │
+ │   too much power: bubble collapse (cavitation) damaged 55 nm lines in a patent test [3] │
+ └─────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 4. Recipes and chemistry
+
+  SC1   H2O : H2O2 : NH4OH   1000:1:1 to 1:1:1 by volume; preferred ~100:1:1 to 5:1:1 [2]
+        30-80 C, 5-30 min (patent); vendor bench 40:1:1 at about 50 C for 20 min [2][4]
+  SC2   H2O : H2O2 : HCl     vendor 160:4:1 at about 50 C for 20 min; metals become soluble chlorides [4]
+  SPM   H2SO4 : H2O2         patent example 99% : 1% at 140 C for 10 min, then SC1 at 55 C for 10 min [2]
+  DHF   HF : H2O             usually 1000:1 or 200:1; removes native or thin oxide [2]
+  order HF, then SC1, then SC2, DI water rinse between each [2]
+  Si + 2H2O2 ──▶ SiO2 + 2H2O    then    SiO2 + 6HF ──▶ H2SiF6 + 2H2O      (textbook, unsourced)
+
+# 5. By the numbers
+
+  megasonic         patents predict damage-free at <= 1 MHz; 0.1 ms pulse cycles gave
+                    no damage, 2 ms gave 1,216 damage sites on 55 nm features [3]
+  ultrasonic bath   80 kHz and 120 kHz selectable on one university RCA tank [4]
+  DI water          18.2 megohm-cm resistivity is the textbook spec (no source found this run)
+  vendors           SCREEN, Tokyo Electron, Lam and SEMES lead single-wafer clean per aggregators [5]
+
+# 6. Wafer cleaning equipment market, USD billion (aggregators disagree)
+
+  Report A 2024   ██████████████████████████████████ 7.39
+  Report B 2024   ██████████████████████████████████████████ 9.28
+  Report C 2023   ██████████████████████████████████████████████████ 10.92
+  (no clean source for the true size; the spread itself is the warning)
+
+# 7. SCREEN's claimed single-wafer share, % (two low-quality aggregators)
+
+  2024 est.       ██████████████████████████████████████████████████ 45%
+  end-2025 est.   ██████████████████████████████████████████ 38%
+  (SCREEN SPE itself says only 'top global share' in single-wafer, batch and spin scrubbers, no number)
+  SPE segment sales, FY to Mar 2026: 485,982 million yen (-6.5%), op profit 122,707 million yen [5]
+
+# 8. Clean inside WFE, and who sells it
+
+  Etch + clean was ~27% of WFE in early 2022 and ~19% in H1 2024 (Yole; dry and wet combined) [6]
+  SCREEN (7735.T)      claims #1 in single-wafer, batch and scrubbers; Tokyo Electron (8035.T) also big
+  Lam Research (LRCX)  sells clean beside etch and deposition; SEMES is a Samsung affiliate (textbook)
+  Wet ETCH (not clean) shares on one 2025 page: Applied 15.7%, TEL 13.8%, Lam 12.7%, Hitachi H-T 7.2% [7]
+  Chokepoints: ultra-pure chemicals and DI water supply, HF and H2SO4 waste handling, and gentle clean
+  for GAA and 3D NAND where fragile structures and deep holes limit megasonic power (textbook).
+
+# 9. Batch wet bench vs single-wafer, side by side (textbook comparison, unsourced)
+
+ ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ BATCH WET BENCH                                 SINGLE-WAFER SPIN                                 │
+ │ ┌────┐ ┌────┐ ┌────┐ ┌────┐ ┌─────┐              one wafer, one nozzle, fresh chemistry each time │
+ │ │SPM │▶│ DI │▶│SC1 │▶│SC2 │▶│ DRY │              + less cross-contamination, tight control        │
+ │ │tank│ │rin.│ │tank│ │tank│ │ IPA │              + better for fragile patterns, low damage        │
+ │ └────┘ └────┘ └────┘ └────┘ └─────┘              - fewer wafers per hour, needs many chambers     │
+ │ 25-50 wafers per cassette, heated recirculating  SCREEN SPE claims leadership in BOTH styles [5]  │
+ │ tanks; high throughput, big chemical volume      (single-wafer, batch-type and spin scrubbers)    │
+ └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 10. Drying and the pattern-collapse problem
+
+  After the last rinse the water must leave without leaving watermarks or pulling lines together.
+ ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │   water between fins              water evaporates                after IPA / Marangoni dry      │
+ │    |▒|  ≈≈≈  |▒|  ≈≈  |▒|          |▒|   ≈   |▒|    |▒|           |▒|       |▒|      |▒|         │
+ │    |▒|  ≈≈≈  |▒|  ≈≈  |▒|          |▒|  ╲ ╱  |▒|    |▒|           |▒|       |▒|      |▒|         │
+ │    |▒|__≈≈≈__|▒|__≈≈__|▒|          |▒|__╲╱___|▒|____|▒|           |▒|_______|▒|______|▒|         │
+ │   surface tension of the meniscus pulls tall, thin lines together (capillary collapse, textbook) │
+ └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Fixes (textbook): IPA vapour to lower surface tension, spin dry with N2, or supercritical CO2.
+
+# 11. What the clean has to remove (textbook, unsourced numbers omitted)
+
+  particles    SC1 + megasonic             organics    SPM (hot sulfuric/peroxide), ozone, plasma ash
+  metal ions   SC2 or dilute acids         native oxide DHF; leaves a hydrogen-terminated Si surface
+  residues     after etch: solvent strips  roughness   keep SC1 gentle, it etches Si slowly
+
+  Order inside a recipe (textbook): hot SPM first for organics, then DI rinse, DHF to strip the chemical
+  oxide SPM leaves, SC1 for particles, SC2 for metals, final rinse and dry.
+  Recipes vary by fab and layer; the ratios in section 4 are patent and vendor examples, not a standard.
+
+# Sources
+
+  [2] RCA recipes: patents.google.com/patent/US7449127 ; patents.google.com/patent/US6153014
+  [3] Megasonic damage: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10910244
+  [4] Vendor/university: noeltech.com/cleans/ ; aemd.sjtu.edu.cn/en/platform/882.html
+  [5] SCREEN: envalith.com/en/companies/7735/segments ; marketsandmarkets.com/ResearchInsight/
+      market size: gii.tw ; giikorea.co.kr ; credenceresearch.com (wafer cleaning equipment reports)
+  [6] WFE shares: yolegroup.com/strategy-insights/ (2024 WFE revenue stable before a 2025 surge)
+  [7] Wet etch: reportprime.com/semiconductor-wet-etching-system-r3629/company

@@ -8,7 +8,7 @@
 //                         terminal default background
 //
 // Screens: home | chart | portfolio | canslim | dossier | earnings | search
-// | universe. canslim/dossier without a ticker open a ticker picker.
+// | universe | diagrams | events. canslim/dossier without a ticker open a ticker picker.
 //
 // Launched by ui/tui.lua in a tmux popup (or a floating nvim :terminal), or
 // by hand. Inside nvim a screen that wants another screen hands the request
@@ -47,6 +47,8 @@ const SCREENS: &[&str] = &[
     "earnings",
     "search",
     "universe",
+    "diagrams",
+    "events",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -98,7 +100,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|universe] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events] [arg]";
 
 fn db_path() -> PathBuf {
     if let Some(p) = env::var_os("FINLARP_DB") {
@@ -118,7 +120,8 @@ fn upper(arg: Option<String>) -> Option<String> {
 /// was given.
 fn run_screen(ctx: &app::Ctx, screen: &str, arg: Option<String>) -> std::io::Result<app::Exit> {
     use screens::{
-        canslim, chart, dossier, earnings_report, home, pick, portfolio, search, universe,
+        canslim, chart, diagrams, dossier, earnings_report, events, home, pick, portfolio, search,
+        universe,
     };
     match (screen, upper(arg.clone())) {
         ("canslim", None) => app::run(&mut pick::open_symbols(ctx, "canslim")?),
@@ -142,6 +145,22 @@ fn run_screen(ctx: &app::Ctx, screen: &str, arg: Option<String>) -> std::io::Res
         ("earnings", _) => app::run(&mut earnings_report::open(ctx, arg)?),
         ("search", _) => app::run(&mut search::open(ctx, arg)?),
         ("universe", _) => app::run(&mut universe::open(ctx, arg)?),
+        ("events", _) => app::run(&mut events::open(ctx, arg)?),
+        ("diagrams", _) => match arg.as_deref().and_then(|a| a.strip_prefix("pdf")) {
+            Some(dir) => {
+                let dir = Some(dir.trim())
+                    .filter(|d| !d.is_empty())
+                    .unwrap_or("diagrams-pdf");
+                for p in diagrams::export_pdfs(std::path::Path::new(dir), &ctx.theme)? {
+                    println!("{p}");
+                }
+                Ok(app::Exit {
+                    code: 0,
+                    handoff: None,
+                })
+            }
+            None => app::run(&mut diagrams::open(ctx, arg)?),
+        },
         _ => app::run(&mut chart::open(ctx, arg)?),
     }
 }

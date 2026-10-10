@@ -55,6 +55,10 @@ pub enum NvimAction {
     Screen { screen: String, arg: Option<String> },
     /// Reopen the symbol picker for `screen`.
     Picker { screen: String },
+    /// `<space>ac` / `<space>as`: toggle the Claude Code window, or with
+    /// `text` add it to Claude's context (ui/tui.lua writes it to a file and
+    /// runs ClaudeCodeAdd).
+    Claude { text: Option<String> },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -91,6 +95,77 @@ pub trait Screen {
     /// running an animation return a frame-sized interval while it plays.
     fn poll_interval(&self) -> Duration {
         POLL
+    }
+    /// Whether `<space>` may start the leader chord. Screens that type text
+    /// (search, pickers, the command palette) return false so space stays a
+    /// plain character there.
+    fn leader_ok(&self) -> bool {
+        true
+    }
+    /// Text for `<space>as`: the selected value with its source, or None if
+    /// nothing is selected.
+    fn claude_context(&self) -> Option<String> {
+        None
+    }
+}
+
+/// Progress through the nvim-style `<space>a{c,s}` leader chord.
+#[derive(Clone, Copy, PartialEq)]
+enum Chord {
+    Idle,
+    Space,
+    SpaceA,
+}
+
+fn is_plain(key: &KeyEvent, c: char) -> bool {
+    key.code == KeyCode::Char(c)
+        && !key
+            .modifiers
+            .intersects(KeyModifiers::CONTROL | KeyModifiers::ALT)
+}
+
+/// Feeds one key through the leader chord, then to the screen. Matches the
+/// nvim bindings: `<space>ac` toggles Claude, `<space>as` adds context. A
+/// space not followed by `a` is replayed to the screen, so it still works
+/// (one key late).
+fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Action {
+    match *chord {
+        Chord::Idle => {
+            if is_plain(&key, ' ') && screen.leader_ok() {
+                *chord = Chord::Space;
+                Action::None
+            } else {
+                screen.on_key(key)
+            }
+        }
+        Chord::Space => {
+            *chord = Chord::Idle;
+            if is_plain(&key, 'a') {
+                *chord = Chord::SpaceA;
+                return Action::None;
+            }
+            let space = KeyEvent::new(KeyCode::Char(' '), KeyModifiers::NONE);
+            match screen.on_key(space) {
+                Action::None => screen.on_key(key),
+                a => a,
+            }
+        }
+        Chord::SpaceA => {
+            *chord = Chord::Idle;
+            if is_plain(&key, 'c') {
+                Action::Nvim(NvimAction::Claude { text: None })
+            } else if is_plain(&key, 's') {
+                match screen.claude_context() {
+                    Some(text) => Action::Nvim(NvimAction::Claude { text: Some(text) }),
+                    None => {
+                        screen.set_flash("nothing selected to add".into());
+                        Action::None
+                    }
+                }
+            } else {
+                Action::None
+            }
+        }
     }
 }
 
@@ -149,6 +224,7 @@ pub(crate) fn event_loop<B: Backend>(
     events: &mut dyn Events,
 ) -> io::Result<Exit> {
     let mut dirty = true;
+    let mut chord = Chord::Idle;
     loop {
         if dirty || screen.needs_redraw() {
             terminal
@@ -166,7 +242,7 @@ pub(crate) fn event_loop<B: Backend>(
                     {
                         Action::Quit
                     } else {
-                        screen.on_key(key)
+                        route_key(screen, &mut chord, key)
                     };
                 }
                 // Terminal::draw autoresizes; the flag just forces the redraw
@@ -212,6 +288,9 @@ pub(crate) fn event_loop<B: Backend>(
                     }
                     NvimAction::Chunk { .. } => {
                         screen.set_flash("opening a chunk needs the nvim plugin".into());
+                    }
+                    NvimAction::Claude { .. } => {
+                        screen.set_flash("Claude needs the nvim plugin".into());
                     }
                     a @ (NvimAction::Screen { .. } | NvimAction::Picker { .. }) => {
                         return Ok(Exit {
@@ -277,6 +356,16 @@ mod tests {
             to_json(&p),
             json!({"action": "picker", "screen": "canslim"})
         );
+        assert_eq!(
+            to_json(&NvimAction::Claude { text: None }),
+            json!({"action": "claude", "text": null})
+        );
+        assert_eq!(
+            to_json(&NvimAction::Claude {
+                text: Some("x".into())
+            }),
+            json!({"action": "claude", "text": "x"})
+        );
         // One line, so the Lua side can read the file whole and decode it.
         assert!(!serde_json::to_string(&s).expect("serialize").contains('\n'));
     }
@@ -325,6 +414,42 @@ mod tests {
     fn run_script(screen: &mut Probe, evs: Vec<Option<Event>>) -> io::Result<i32> {
         let mut term = Terminal::new(TestBackend::new(20, 3)).expect("terminal");
         event_loop(&mut term, screen, &mut Script(evs.into())).map(|e| e.code)
+    }
+
+    #[test]
+    fn leader_chord_toggles_and_adds_context() {
+        struct Ctx1;
+        impl Screen for Ctx1 {
+            fn draw(&mut self, _: &mut Frame) {}
+            fn on_key(&mut self, _: KeyEvent) -> Action {
+                Action::Quit
+            }
+            fn claude_context(&self) -> Option<String> {
+                Some("ctx".into())
+            }
+        }
+        let mut s = Ctx1;
+        let mut c = Chord::Idle;
+        let k = |ch| KeyEvent::new(KeyCode::Char(ch), KeyModifiers::NONE);
+        assert_eq!(route_key(&mut s, &mut c, k(' ')), Action::None);
+        assert_eq!(route_key(&mut s, &mut c, k('a')), Action::None);
+        assert_eq!(
+            route_key(&mut s, &mut c, k('s')),
+            Action::Nvim(NvimAction::Claude {
+                text: Some("ctx".into())
+            })
+        );
+        for ch in [' ', 'a'] {
+            route_key(&mut s, &mut c, k(ch));
+        }
+        assert_eq!(
+            route_key(&mut s, &mut c, k('c')),
+            Action::Nvim(NvimAction::Claude { text: None })
+        );
+        // space then a non-chord key replays both to the screen
+        route_key(&mut s, &mut c, k(' '));
+        assert_eq!(route_key(&mut s, &mut c, k('x')), Action::Quit);
+        assert!(c == Chord::Idle);
     }
 
     #[test]

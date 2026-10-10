@@ -236,6 +236,10 @@ impl EarningsReport {
 }
 
 impl Screen for EarningsReport {
+    fn claude_context(&self) -> Option<String> {
+        self.selected_source().map(|s| s.to_context())
+    }
+
     fn draw(&mut self, frame: &mut Frame) {
         let area = frame.area();
         let section_title = self

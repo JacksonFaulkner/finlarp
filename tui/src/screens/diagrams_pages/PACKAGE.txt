@@ -1,0 +1,132 @@
+# 1. What happens: loose dies to one GPU package
+
+ ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌───────────────┐   ┌───────────┐   ┌───────────┐
+ │ KNOWN-GOOD │──▶│ HBM STACK  │──▶│ INTERPOSER │──▶│ CHIP-ON-WAFER │──▶│ FLIP ONTO │──▶│ MOLD +    │
+ │ DIE (PICK) │   │ TSV + bond │   │ CoWoS-S/L  │   │ dies on Si    │   │ SUBSTRATE │   │ LID + BGA │
+ └────────────┘   └────────────┘   └────────────┘   └───────────────┘   └───────────┘   └───────────┘
+
+  (steps 1 and 2 come from PICK and the memory fabs; this node covers everything from the interposer up)
+
+# 2. Cross-section: GPU + HBM package, side view (not to scale)
+
+     ═════════════════════ [1] LID / COLD PLATE (liquid cooled in the rack) ═════════════════════
+     ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈ [2] TIM ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
+     ┌──────────────┐  [3] HBM = 12 DRAM dies + base die; GPU dies face down   ┌──────────────┐
+     │ ║ DRAM 12  ║ │                                                          │ ║ DRAM 12  ║ │
+     ├──────────────┤                                                          ├──────────────┤
+     │ ║ DRAM 11  ║ │                                                          │ ║ DRAM 11  ║ │
+     ├──────────────┤  ┌────────────────────────┐  ┌────────────────────────┐  ├──────────────┤
+     │ ║   ...    ║ │  │                        │  │                        │  │ ║   ...    ║ │
+     ├──────────────┤  │       GPU DIE A        │  │       GPU DIE B        │  ├──────────────┤
+     │ ║ DRAM 02  ║ │  │   TSMC 4NP, ~104B tr   │  │   TSMC 4NP, ~104B tr   │  │ ║ DRAM 02  ║ │
+     ├──────────────┤  │   near reticle limit   │  │   near reticle limit   │  ├──────────────┤
+     │ ║ DRAM 01  ║ │  │                        │  │                        │  │ ║ DRAM 01  ║ │
+     ├──────────────┤  │  back-end metal stack  │  │  back-end metal stack  │  ├──────────────┤
+     │ ║ BASE DIE ║ │  │ (faces DOWN, flipped)  │  │ (faces DOWN, flipped)  │  │ ║ BASE DIE ║ │
+     └──────────────┘  └────────────────────────┘  └────────────────────────┘  └──────────────┘
+    oooooooooooooooooooooooooooo [4] microbumps (tens of um pitch) ooooooooooooooooooooooooooooo
+   ┌────────────────────────────────────────────────────────────────────────────────────────────┐
+   │           [5] SILICON INTERPOSER (CoWoS-S)  or  RDL + local Si bridge (CoWoS-L)            │
+   │     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║        │
+   │     ║ [6] TSV   ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║        │
+   │     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║        │
+   │                                                                                            │
+   │     RDL wiring layers: die-to-die and die-to-HBM traces (HBM bus = 1024 bit per stack)     │
+   │        [7] NV-HBI die-to-die link here: 10 TB/s aggregate between the two GPU dies         │
+   └────────────────────────────────────────────────────────────────────────────────────────────┘
+    oooooooooooooooooooooooooooooo [8] C4 bumps (bigger, coarser) oooooooooooooooooooooooooooooo
+   ┌────────────────────────────────────────────────────────────────────────────────────────────┐
+   │         [9] ORGANIC SUBSTRATE (ABF build-up, many layers): fans out + routes power         │
+   │            plated through-holes, power planes, decoupling caps on the underside            │
+   │                                                                                            │
+   └────────────────────────────────────────────────────────────────────────────────────────────┘
+    OOOOOOOOOOOOOOOOOOOOOOO [10] BGA balls (about 1 mm class, textbook) OOOOOOOOOOOOOOOOOOOOOOOO
+   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ system board / socket ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+
+
+
+  Legend: [3] real B200 package carries 8 HBM3E stacks (4 per die side) and 2 GPU dies; drawn with 1 + 1
+  for width. [5] CoWoS-S interposers reach up to 3.3x reticle (~2,700 mm2); beyond that TSMC points to
+  CoWoS-L (small LSI bridge chips + RDL) or CoWoS-R. CoWoS-L with ~3x reticle and 8 HBM has been shown.
+
+# 3. Procedure and physics
+
+  1 interposer wafer   TSVs etched, Cu-filled; RDL on front; wafer thinned to expose TSVs.
+                       Interposer is passive silicon: wires only, no transistors (CoWoS-S).
+  2 chip-on-wafer      known-good GPU and HBM dies placed face-down, microbumps reflowed (CoW).
+  3 underfill + mold   epoxy flows between dies (capillary), then compression mold fixes the whole stack.
+  4 wafer-on-substrate CoW thinned, C4-bumped, diced, flipped onto organic substrate.
+  5 second underfill   C4 joints get their own underfill; lid + TIM fitted; BGA balls attached.
+  Why Si interposer: only silicon can route thousands of fine wires between GPU and HBM at um pitch.
+  Why the name matters: Chip on Wafer on Substrate = steps 2 then 4 (TSMC expansion, textbook).
+
+  Thermal stress: Si ~3 ppm/C vs organic substrate ~15-20 ppm/C (textbook) so a big package warps on
+  every heat cycle; underfill, stiffener ring and lid keep bumps from cracking.
+
+  Inside the HBM stack (memory makers, not TSMC):
+    DRAM dies thinned to tens of um, each pierced by TSVs, stacked and bonded, base die at the bottom
+    HBM3E 12-high = 12 DRAM dies; JEDEC raised stack height limit 720 to 775 um (Tom's)
+    microbump pitch: historically ~40 um, trending to ~10 um; volume standard cited ~25 um
+    bonding: TC-NCF or MR-MUF (SK hynix); hybrid bonding validated at 12-high, not yet volume
+    hybrid bonding ~6 um pitch now, 4.5 and 3 um coming; TSMC wants ~5 um class bumps by 2H 2028
+
+# 4. By the numbers
+
+  interposer limit      3.3x reticle, ~2,700 mm2 (CoWoS-S, TSMC); 6x reticle is a development target
+  B200 package          2 dies, 208B transistors, 192 GB HBM3E, ~8 TB/s memory, 10 TB/s die-to-die
+  HBM per stack         1024-bit bus, ~1 TB/s (Tom's Hardware launch report)
+  CoWoS-R RDL pitch     4 um minimum stated (secondary source)
+  OSAT top-10 revenue   $41.56 billion in 2024 (+3% YoY, TrendForce)
+  TSMC CoWoS CAGR       above 80% from 2022 to 2027 (TSMC symposium, May 2026, via Reuters/TrendForce)
+  supply gap            about 20% now, may narrow to about 10% by end-2026 (TrendForce, June 2026)
+
+# 5. CoWoS capacity, thousand wafers per month (estimates, not TSMC disclosures)
+
+  End-2025 level (36Kr analysis):
+  end-2025     ███████████████████████ 80
+
+  End-2026 forecasts by source and date:
+  TF Dec 2024  ██████████████████████████ 90
+  JPM Sep 2025 ███████████████████████████ 95
+  36Kr         ██████████████████████████████████ ~120
+  equip Dec 25 ████████████████████████████████████ 127
+  TF Jun 2026  ████████████████████████████████████████ 120-140 (top of range shown)
+  Also: JPM 112 by end-2027; OSAT-side add-on 40 (equipment) or 50-60 (TrendForce June).
+  Industry total could approach 200 (TSMC 120-140 + OSAT partners), per TrendForce June 2026.
+
+# 6. OSAT revenue 2024, $ billion (TrendForce) - the back-end that does the rest of packaging
+
+  ASE     ████████████████████████████████████████████ 18.54  (~45% of top 10)
+  Amkor   ███████████████ 6.32  (-2.8% YoY)
+  JCET    ████████████ 5.0  (+19.3% YoY, ~12%)
+
+  Other shares of top-10 (%): Tongfu 8, Powertech 5.5, HT-Tech 4.8, WiseRoad 3.7, Hana Micron 2.2,
+  KYEC 2.2, ChipMOS 1.7. Chinese players grew double digits in 2024.
+
+# 7. Who makes it, market structure, chokepoints
+
+  CoWoS (the advanced part)  TSM is the main CoWoS source (textbook); ASE (ASX),
+                             Amkor (AMKR) take overflow oS work. SPIL is part of ASE.
+  HBM                        SK hynix (000660.KS), Samsung (005930.KS), Micron (MU); see PICK for shares.
+  Substrates (ABF)           Ibiden (4062.T), Unimicron (3037.TW) (textbook, no share sourced)
+  Mold / underfill           epoxy-compound makers, mostly Japanese (textbook)
+  Risks                      one company's packaging lines gate Nvidia + AMD + custom ASIC output
+                             warpage and yield loss rise with interposer area; ABF substrate supply
+                             Taiwan concentration; ~20% supply gap (TrendForce) means allocation rules
+  Competition                panel-level packaging, glass cores (watch items, not sourced)
+
+# Sources
+
+  [1] TrendForce on CoWoS capacity (June 2026): trendforce.com/news/?p=59316 (also ?p=29317, ?p=30991)
+  [2] 36Kr CoWoS trajectory: eu.36kr.com/en/p/3631956080985095
+  [3] TrendForce OSAT 2024 ranking: trendforce.com/presscenter/news/20250513-12577.html
+      evertiq.com/news/2025-05-23-chinese-firms-gain-ground-in-2024-top-10-osat-ranking
+  [4] TSMC CoWoS: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+  [5] CoWoS-L / 8 HBM paper:
+      conferences.computer.org/ectc/pdfs/ECTC2023-1NkkviSxgDnmPjptC1ysqm/349800b022.pdf
+  [6] Blackwell B200 specs: anandtech.com/show/21310 ; tomshardware.com (Blackwell B200 reveal)
+  [7] HBM bonding + hybrid bonding status: trendforce.com/news/?p=56780 ;
+      semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
+  [8] CoWoS-R pitch:
+      semiwiki.com/semiconductor-manufacturers/tsmc/371759-the-difference-between-cowos-s-and-cowos-r/
