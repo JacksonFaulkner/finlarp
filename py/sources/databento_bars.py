@@ -32,7 +32,7 @@ import duckdb
 from databento.common.error import BentoServerError
 
 from core import db as cache_db
-from sources import universe
+from sources import keys, universe
 
 OUT_ROOT = universe.DATA_ROOT / "market" / "databento"
 BATCH = 40  # symbols per request
@@ -169,7 +169,7 @@ def fetch(client: db.Historical, ch: dict) -> int:
 
 
 def pull(tables: list[str], max_cost: float, plan_only: bool) -> None:
-    client = db.Historical()
+    client = db.Historical(keys.require("DATABENTO_API_KEY"))
     todo = [ch for t in tables for ch in chunks(t, client)]
     pending = [ch for ch in todo if not ch["path"].exists()]
     print(f"{len(todo)} chunks, {len(todo) - len(pending)} already on disk")

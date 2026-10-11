@@ -26,17 +26,21 @@ use crate::ui::text;
 use crate::ui::theme::Theme;
 
 const GROUPS_SQL: &str = "
-    SELECT 'primary' AS level, c.category, NULL AS parent, u.ticker, u.name, c.weight
+    SELECT 'primary' AS level, c.category, NULL AS parent, u.ticker, u.name, c.weight,
+           coalesce(t.primary_label, c.category) AS label, t.primary_sort AS sort
     FROM ai_universe_category c JOIN ai_universe u USING (ticker)
+    LEFT JOIN (SELECT DISTINCT primary_category, primary_label, primary_sort FROM ai_taxonomy) t
+      ON t.primary_category = c.category
     WHERE c.level = 'primary' AND u.eligible IS DISTINCT FROM false
     UNION ALL
-    SELECT 'sub', c.category, t.primary_category, u.ticker, u.name, c.weight
+    SELECT 'sub', c.category, coalesce(t.primary_label, t.primary_category), u.ticker, u.name, c.weight,
+           coalesce(t.label, c.category), t.sort
     FROM ai_universe_category c
     JOIN ai_universe u USING (ticker)
     LEFT JOIN ai_taxonomy t ON t.sub_category = c.category
     WHERE c.level = 'sub' AND u.eligible IS DISTINCT FROM false
     UNION ALL
-    SELECT 'region', region, NULL, ticker, name, 1.0
+    SELECT 'region', region, NULL, ticker, name, 1.0, region, NULL
     FROM ai_universe WHERE eligible IS DISTINCT FROM false AND region IS NOT NULL";
 
 const NOT_LOADED: &str = "The AI universe isn't loaded into DuckDB yet.\n\n  \
@@ -45,7 +49,7 @@ const NOT_LOADED: &str = "The AI universe isn't loaded into DuckDB yet.\n\n  \
 const PRESETS: [&str; 8] = ["1d", "1w", "1m", "3m", "6m", "ytd", "1y", "max"];
 const LEVELS: [(&str, &str); 3] = [
     ("primary", "Primary"),
-    ("sub", "Sub-bucket"),
+    ("sub", "Sub-sector"),
     ("region", "Region"),
 ];
 const TILE_W: u16 = 20;
@@ -64,6 +68,10 @@ struct Member {
 struct Group {
     level: String,
     name: String,
+    /// Display label (the taxonomy label for primary/sub, the key for regions).
+    label: String,
+    /// Stack order from the taxonomy; ties between equal returns break on it.
+    order: i32,
     parent: Option<String>,
     members: Vec<Member>,
 }
@@ -72,6 +80,7 @@ struct Group {
 struct Tile {
     title: String,
     sub: String,
+    order: i32,
     ret: Option<f64>,
     value: String,
 }
@@ -182,6 +191,8 @@ fn load_groups(ctx: &Ctx) -> Result<Vec<Group>, String> {
                     r.get::<_, String>(3)?,
                     r.get::<_, Option<String>>(4)?,
                     r.get::<_, Option<f64>>(5)?,
+                    r.get::<_, Option<String>>(6)?,
+                    r.get::<_, Option<i32>>(7)?,
                 ))
             })
             .map_err(|e| e.to_string())?;
@@ -189,12 +200,14 @@ fn load_groups(ctx: &Ctx) -> Result<Vec<Group>, String> {
     })?;
     let mut groups: Vec<Group> = Vec::new();
     let mut index: HashMap<(String, String), usize> = HashMap::new();
-    for (level, name, parent, ticker, tname, weight) in rows {
+    for (level, name, parent, ticker, tname, weight, label, order) in rows {
         let i = *index
             .entry((level.clone(), name.clone()))
             .or_insert_with(|| {
                 groups.push(Group {
                     level: level.clone(),
+                    label: label.unwrap_or_else(|| name.clone()),
+                    order: order.unwrap_or(i32::MAX),
                     name: name.clone(),
                     parent,
                     members: Vec::new(),
@@ -416,7 +429,8 @@ impl Universe {
                             None => format!("{n}/{} priced", g.members.len()),
                         };
                         Tile {
-                            title: g.name.clone(),
+                            title: g.label.clone(),
+                            order: g.order,
                             sub,
                             ret,
                             value: i.to_string(),
@@ -430,6 +444,7 @@ impl Universe {
                 .map(|m| Tile {
                     title: m.ticker.clone(),
                     sub: m.name.clone(),
+                    order: 0,
                     ret: self.returns.get(&m.ticker).copied(),
                     value: m.ticker.clone(),
                 })
@@ -439,6 +454,7 @@ impl Universe {
             b.ret
                 .unwrap_or(f64::NEG_INFINITY)
                 .total_cmp(&a.ret.unwrap_or(f64::NEG_INFINITY))
+                .then_with(|| a.order.cmp(&b.order))
                 .then_with(|| a.title.cmp(&b.title))
         });
         self.tiles = tiles;
@@ -495,7 +511,7 @@ impl Universe {
             View::Members(i) => {
                 let g = &self.groups[i];
                 let (ret, n) = self.basket(g);
-                spans.push(Span::styled(format!("› {} ", g.name), t.title()));
+                spans.push(Span::styled(format!("› {} ", g.label), t.title()));
                 if let Some(r) = ret {
                     spans.push(Span::styled(format!("{r:+.1}% "), t.signed(r)));
                 }
@@ -597,13 +613,14 @@ impl Screen for Universe {
             frame.render_widget(block.style(st), r);
             // Title, then as many words of the sub-label as fit beside it; the
             // rest wraps onto the return line.
-            let room = w.saturating_sub(text::width(&tile.title) + 4);
+            let title = text::truncate(&tile.title, w.saturating_sub(3));
+            let room = w.saturating_sub(text::width(&title) + 4);
             let (head, rest) = split_words(&short_name(&tile.sub), room);
             let rest = text::truncate(&rest, w.saturating_sub(text::width(&ret) + 5));
             let plain = st.remove_modifier(Modifier::BOLD);
             let lines = vec![
                 Line::from(vec![
-                    Span::styled(format!(" {}", tile.title), st.add_modifier(Modifier::BOLD)),
+                    Span::styled(format!(" {title}"), st.add_modifier(Modifier::BOLD)),
                     Span::styled(format!("  {head}"), plain),
                 ]),
                 Line::from(vec![

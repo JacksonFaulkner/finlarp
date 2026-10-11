@@ -549,6 +549,8 @@ def _ensure_universe_tables(con: duckdb.DuckDBPyConnection) -> None:
             description VARCHAR
         )
     """)
+    for col in ("label VARCHAR", "primary_label VARCHAR", "sort INTEGER", "primary_sort INTEGER"):
+        con.execute(f"ALTER TABLE ai_taxonomy ADD COLUMN IF NOT EXISTS {col}")
     con.execute("""
         CREATE TABLE IF NOT EXISTS ai_universe_meta (
             id INTEGER PRIMARY KEY,
@@ -603,25 +605,31 @@ def load_universe(path: Path = UNIVERSE_JSON, force: bool = False) -> dict:
             except ValueError as e:
                 invalid.append(str(e))
 
-        taxonomy_rows = []
         ext_desc = meta.get("taxonomy_extensions", {})
         clar = meta.get("taxonomy_scope_clarifications", {})
-        for primary, subs in taxonomy.items():
-            for sub in subs:
-                desc = ext_desc.get(primary, {}).get(sub) or clar.get(sub)
-                taxonomy_rows.append([sub, primary, desc])
+        descriptions = {sub: ext_desc.get(p, {}).get(sub) or clar.get(sub) for p, subs in taxonomy.items() for sub in subs}
 
         con.execute("BEGIN")
         con.execute("DELETE FROM ai_universe")
         con.execute("DELETE FROM ai_universe_category")
         con.execute("DELETE FROM ai_taxonomy")
-        con.executemany("INSERT INTO ai_taxonomy VALUES (?,?,?)", taxonomy_rows)
+        _insert_taxonomy(con, taxonomy, meta.get("taxonomy_labels", {}), descriptions)
         for stock in stocks:
             _write_stock(con, stock)
         con.execute("COMMIT")
         return {"loaded": True, "record_count": len(stocks), "invalid": invalid}
     finally:
         con.close()
+
+
+def _insert_taxonomy(con: duckdb.DuckDBPyConnection, taxonomy: dict, labels: dict, descriptions: dict) -> None:
+    """Rows carry display labels and stack order (dict order of `taxonomy`)."""
+    rows, n = [], 0
+    for ps, (primary, subs) in enumerate(taxonomy.items()):
+        for sub in subs:
+            rows.append([sub, primary, descriptions.get(sub), labels.get(sub, sub), labels.get(primary, primary), n, ps])
+            n += 1
+    con.executemany("INSERT INTO ai_taxonomy VALUES (?,?,?,?,?,?,?)", rows)
 
 
 def _write_stock(con: duckdb.DuckDBPyConnection, s: Stock) -> None:
@@ -643,7 +651,7 @@ def taxonomy() -> dict[str, list[str]]:
     try:
         _ensure_universe_tables(con)
         out: dict[str, list[str]] = {}
-        for sub, primary in con.execute("SELECT sub_category, primary_category FROM ai_taxonomy").fetchall():
+        for sub, primary in con.execute("SELECT sub_category, primary_category FROM ai_taxonomy ORDER BY sort").fetchall():
             out.setdefault(primary, []).append(sub)
         return out
     finally:

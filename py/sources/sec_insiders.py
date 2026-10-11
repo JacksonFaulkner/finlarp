@@ -87,10 +87,13 @@ def _download(stem: str, url: str) -> Path:
     return dest
 
 
-def _universe_map() -> list[tuple[int, str]]:
-    """(cik, ticker) for every CIK in the universe, predecessors included."""
+def _universe_map(only: set[str] | None = None) -> list[tuple[int, str]]:
+    """(cik, ticker) for every CIK in the universe, predecessors included.
+    `only` limits it to those tickers (backfill)."""
     out = {}
     for s in universe.stocks():
+        if only and s["ticker"] not in only:
+            continue
         for c in s["ciks"]:
             out.setdefault(int(c), s["ticker"])
     return sorted(out.items())
@@ -111,10 +114,13 @@ def _tx_select(table: str, kind: str) -> str:
     """
 
 
-def ingest_quarter(stem: str, url: str, keep_zip: bool = False) -> int:
+def ingest_quarter(stem: str, url: str, keep_zip: bool = False, only: set[str] | None = None) -> int:
     """Convert one zip to transactions/<stem>.parquet. Idempotent — returns
-    rows written, 0 if already loaded."""
-    if stem in loaded_quarters():
+    rows written, 0 if already loaded. With `only`, keeps just those tickers
+    and writes transactions/<stem>+<TICKERS>.parquet: the quarter's main file
+    only covers tickers that were in the universe when it was loaded."""
+    out_stem = stem if not only else f"{stem}+{'-'.join(sorted(only))[:80]}"
+    if out_stem in loaded_quarters():
         return 0
     zip_path = _download(stem, url)
     out = _dir(TMP_DIR / stem)
@@ -126,12 +132,12 @@ def ingest_quarter(stem: str, url: str, keep_zip: bool = False) -> int:
                 while chunk := src.read(1 << 20):
                     dst.write(chunk)
     sub, own, nd, dv, fn = (str(out / n) for n in _NAMES)
-    target = _dir(TX_DIR) / f"{stem}.parquet"
+    target = _dir(TX_DIR) / f"{out_stem}.parquet"
     part = target.with_suffix(".part")
     con = duckdb.connect()
     try:
         con.execute("CREATE TABLE uni (cik INTEGER, ticker VARCHAR)")
-        con.executemany("INSERT INTO uni VALUES (?, ?)", _universe_map())
+        con.executemany("INSERT INTO uni VALUES (?, ?)", _universe_map(only))
         con.execute(f"""
             CREATE TABLE sub AS
             SELECT s.ACCESSION_NUMBER acc, u.ticker, TRY_CAST(s.ISSUERCIK AS INTEGER) issuer_cik,
@@ -207,6 +213,12 @@ def ingest_quarter(stem: str, url: str, keep_zip: bool = False) -> int:
 def ensure_recent(n: int = 6) -> dict[str, int]:
     """Ingest any of the newest n quarters not yet loaded."""
     return {stem: ingest_quarter(stem, url) for stem, url in available_quarters(n)}
+
+
+def backfill(tickers: list[str], n: int = 6) -> dict[str, int]:
+    """Insider history for tickers added after the quarters were loaded."""
+    only = {t.upper() for t in tickers}
+    return {stem: ingest_quarter(stem, url, only=only) for stem, url in available_quarters(n)}
 
 
 def tx_sql() -> str:

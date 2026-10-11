@@ -43,7 +43,7 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
     (
         "AI universe",
         "universe",
-        "browse the buckets and regions",
+        "browse the sectors and regions",
         'u',
     ),
     (

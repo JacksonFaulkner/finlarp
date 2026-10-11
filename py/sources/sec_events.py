@@ -123,11 +123,11 @@ def _rows(ticker: str, cik: int, pred: bool) -> list[dict]:
     } for i in range(n)]
 
 
-def ingest(refresh: bool = False) -> None:
+def ingest(refresh: bool = False, tickers: list[str] | None = None) -> None:
     RAW.mkdir(exist_ok=True)
     t0 = time.time()
     fails: list[str] = []
-    ss = [s for s in universe.stocks() if s["ciks"]]
+    ss = [s for s in universe.stocks() if s["ciks"] and (not tickers or s["ticker"] in tickers)]
     for k, s in enumerate(ss, 1):
         out = RAW / f"{s['ticker']}.ndjson"
         if out.exists() and not refresh:

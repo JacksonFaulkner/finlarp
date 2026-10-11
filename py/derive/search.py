@@ -18,7 +18,7 @@ a second ranker over the same chunks table (hybrid, reciprocal-rank fusion).
 
 Query syntax — free text plus filters, any order:
     t:MRVL,NVDA        ticker(s)
-    s:memory           sector: primary bucket or sub-bucket, prefix match
+    s:memory           sector: primary layer or sub-sector (taxonomy key), prefix match
     i:semiconductors   Yahoo sector/industry, substring ("i:equipment", "i:software")
     r:US               region
     type:risk          10k | risk | new_risk | earnings | guidance | profile | patent (prefix ok)

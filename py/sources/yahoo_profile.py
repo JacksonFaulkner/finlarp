@@ -65,6 +65,28 @@ def row(ticker: str, res: dict) -> dict:
     }
 
 
+def update(tickers: list[str]) -> dict:
+    """Fetch just these tickers and merge them into profiles.parquet (the
+    full-universe `main` re-pulls ~430 names at 0.4s each)."""
+    session = yahoo.new_session()
+    rows, missing = [], []
+    for t in tickers:
+        res = fetch(session, t)
+        (rows if res else missing).append(row(t, res) if res else t)
+        time.sleep(0.4)
+    prev = OUT / "profiles.parquet"
+    if rows:
+        con = duckdb.connect()
+        con.execute("CREATE TABLE new AS SELECT * FROM (SELECT unnest($r, recursive := true))", {"r": rows})
+        if prev.exists():
+            con.execute(f"CREATE TABLE p AS SELECT * FROM '{prev}' WHERE ticker NOT IN (SELECT ticker FROM new)")
+            con.execute("INSERT INTO p BY NAME SELECT * FROM new")
+        else:
+            con.execute("CREATE TABLE p AS SELECT * FROM new")
+        pq.copy_atomic(con, "SELECT * FROM p ORDER BY ticker", prev)
+    return {"fetched": len(rows), "missing": missing}
+
+
 def main() -> None:
     session = yahoo.new_session()
     rows, missing = [], []
