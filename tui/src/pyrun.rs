@@ -46,6 +46,19 @@ pub fn run_script(script: &str, args: &[&str]) -> Result<String, String> {
     }
 }
 
+/// Runs `script` on a background thread; the result arrives on the receiver.
+/// Lets a screen open from cache immediately and swap in fresh data later.
+pub fn spawn_script(script: &str, args: &[&str]) -> std::sync::mpsc::Receiver<Result<String, String>> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    let script = script.to_string();
+    let args: Vec<String> = args.iter().map(|a| a.to_string()).collect();
+    std::thread::spawn(move || {
+        let a: Vec<&str> = args.iter().map(String::as_str).collect();
+        let _ = tx.send(run_script(&script, &a));
+    });
+    rx
+}
+
 /// Runs a snippet with the repo as cwd (`python -c`), for one-off calls
 /// into py/core/db.py such as loading the universe JSON.
 pub fn run_code(code: &str) -> Result<(), String> {

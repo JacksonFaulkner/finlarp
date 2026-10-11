@@ -107,12 +107,19 @@ pub struct Canslim {
     palette: Palette,
     flash: Option<String>,
     theme: Theme,
+    /// Background `canslim.py` run; polled in `tick`.
+    refresh: Option<std::sync::mpsc::Receiver<Result<String, String>>>,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Canslim> {
     let symbol = arg.unwrap_or_default().trim().to_uppercase();
     let mut s = Canslim::new(&symbol, ctx.db_path.clone(), ctx.theme);
     s.reload();
+    if !symbol.is_empty() {
+        // Without --force the script honors the cache TTL, so a fresh card costs nothing.
+        s.refresh = Some(crate::pyrun::spawn_script("py/derive/canslim.py", &[&symbol]));
+        s.flash = Some("refreshing…".into());
+    }
     Ok(s)
 }
 
@@ -144,6 +151,7 @@ impl Canslim {
             palette: Palette::default(),
             flash: None,
             theme,
+            refresh: None,
         }
     }
 
@@ -434,6 +442,25 @@ impl Screen for Canslim {
 
     fn set_flash(&mut self, msg: String) {
         self.flash = Some(msg);
+    }
+
+    fn tick(&mut self) -> Action {
+        let done = match self.refresh.as_ref().map(|r| r.try_recv()) {
+            Some(Ok(res)) => Some(res),
+            Some(Err(std::sync::mpsc::TryRecvError::Disconnected)) => Some(Err("refresh thread died".into())),
+            _ => None,
+        };
+        if let Some(res) = done {
+            self.refresh = None;
+            match res {
+                Ok(_) => {
+                    self.reload();
+                    self.flash = Some("updated".into());
+                }
+                Err(e) => self.flash = Some(format!("refresh failed: {}", e.lines().last().unwrap_or(""))),
+            }
+        }
+        Action::None
     }
 }
 
