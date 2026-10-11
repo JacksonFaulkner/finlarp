@@ -652,6 +652,9 @@ def validate(d: dict) -> list[str]:
     return bad
 
 
+from concurrent.futures import ThreadPoolExecutor  # noqa: E402
+
+_POOL = ThreadPoolExecutor(max_workers=2)
 HEALTH_LOG = D / "debug" / "dossier_health.jsonl"
 
 
@@ -702,12 +705,19 @@ def build(ticker: str) -> dict:
         prof = dict(zip([c[0] for c in con.description], r)) if r else None
     name = (prof or {}).get("long_name") or next((s["name"] for s in universe.rows() if s["ticker"] == t), t)
     health: list[dict] = []
+    # estimates_ is the one live (Yahoo) section: start it now so it overlaps the local ones.
+    est_health: list[dict] = []
+    est_future = _POOL.submit(_section, estimates_, t, health=est_health)
     sections = [s for s in (
         _section(sec_events_, t, F, health=health), _section(sec_earnings_, t, F, health=health),
         _section(sec_revenue_, t, F, con, health=health), _section(sec_holders_, t, con, health=health),
         _section(sec_insiders_, t, F, health=health), _section(sec_risks_, t, F, con, health=health),
         _section(sec_patents_, t, con, health=health), _section(sec_tweets_, t, con, health=health),
-        _section(estimates_, t, health=health), _section(profile_, t, prof, health=health)) if s]
+        _section(profile_, t, prof, health=health)) if s]
+    est = est_future.result()
+    health.extend(est_health)
+    if est:  # keep estimates before profile, the last section
+        sections.insert(max(len(sections) - 1, 0), est)
     for s in sections:
         rows = [it for b in s["blocks"] for it in b.get("rows", [])]
         s["new"] = any(it.get("new") for it in rows)

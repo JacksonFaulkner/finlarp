@@ -130,20 +130,9 @@ fn build_screen(
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
         ("dossier", None) => Box::new(pick::open_symbols(ctx, "dossier")?),
-        ("canslim", Some(sym)) => {
-            eprintln!("fetching {sym} canslim...");
-            if let Err(e) = pyrun::run_script("py/derive/canslim.py", &[&sym, "--force"]) {
-                eprintln!("finlarp: {e}"); // open anyway: the screen shows what is cached
-            }
-            Box::new(canslim::open(ctx, Some(sym))?)
-        }
-        ("dossier", Some(sym)) => {
-            eprintln!("building {sym} dossier...");
-            if let Err(e) = pyrun::run_script("py/derive/dossier.py", &[&sym, "--if-stale", "12"]) {
-                eprintln!("finlarp: {e}");
-            }
-            Box::new(dossier::open(ctx, Some(sym))?)
-        }
+        // Open from cache right away; the screen refreshes itself in the background.
+        ("canslim", Some(sym)) => Box::new(canslim::open(ctx, Some(sym))?),
+        ("dossier", Some(sym)) => Box::new(dossier::open(ctx, Some(sym))?),
         ("chat", _) => Box::new(chat::open(ctx, arg)?),
         ("home", _) => Box::new(home::open(ctx)?),
         ("portfolio", _) => Box::new(portfolio::open(ctx, arg)?),

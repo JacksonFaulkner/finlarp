@@ -299,12 +299,26 @@ def _market_internals(session, spy_hist: list[dict]) -> dict:
     """Everything M adds beyond SPY's trend: the other indices, distribution
     days on SPY and QQQ, and breadth across the finlarp universe. Any piece
     that fails to fetch comes back empty rather than sinking the scorecard."""
-    hists = {"SPY": spy_hist}
-    for sym in ("QQQ", "IWM", "RSP"):
+    from concurrent.futures import ThreadPoolExecutor
+
+    def _hist(sym):
         try:
-            hists[sym] = market.history(sym, session=session)
+            return market.history(sym)  # own session: requests sessions aren't thread-safe
         except Exception:
-            hists[sym] = []
+            return []
+
+    def _breadth():
+        try:
+            return market.breadth([x["ticker"] for x in universe.rows()])
+        except Exception:
+            return None
+
+    # Independent network pulls run side by side instead of one after another.
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        f_hists = {sym: pool.submit(_hist, sym) for sym in ("QQQ", "IWM", "RSP")}
+        f_breadth = pool.submit(_breadth)
+        hists = {"SPY": spy_hist} | {sym: f.result() for sym, f in f_hists.items()}
+        breadth_data = f_breadth.result()
     index_rows, trends = [], {}
     for sym, pts in hists.items():
         row, trends[sym] = _index_row(sym, pts)
@@ -315,12 +329,6 @@ def _market_internals(session, spy_hist: list[dict]) -> dict:
         pts = hists[sym]
         dist[sym] = (pts, market.distribution_days(pts) if pts and pts[-1].get("volume") else None)
 
-    breadth_data = None
-    try:
-        tickers = [x["ticker"] for x in universe.rows()]
-        breadth_data = market.breadth(tickers)
-    except Exception:
-        pass
     return {"index_rows": index_rows, "trends": trends, "dist": dist, "breadth": breadth_data}
 
 

@@ -126,6 +126,9 @@ pub struct Dossier {
     palette: Palette,
     flash: Option<String>,
     theme: Theme,
+    /// Background `dossier.py` run; polled in `tick`.
+    refresh: Option<std::sync::mpsc::Receiver<Result<String, String>>>,
+    db_path: std::path::PathBuf,
     /// Inner areas from the last draw (tests read the source bar from it).
     panes: Panes,
 }
@@ -142,10 +145,18 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
             )),
         })
     };
-    Ok(match res {
+    let mut d = match res {
         Ok(json) => Dossier::from_json(&symbol, &json, ctx.theme),
+        Err(_) if !symbol.is_empty() => Dossier::empty(&symbol, format!("{symbol}: building dossier…"), ctx.theme),
         Err(msg) => Dossier::empty(&symbol, msg, ctx.theme),
-    })
+    };
+    d.db_path = ctx.db_path.clone();
+    if !symbol.is_empty() {
+        // --if-stale: the script skips the rebuild when the cache is current.
+        d.refresh = Some(crate::pyrun::spawn_script("py/derive/dossier.py", &[&symbol, "--if-stale", "12"]));
+        d.flash = Some("refreshing…".into());
+    }
+    Ok(d)
 }
 
 fn load_json(db_path: &Path, symbol: &str) -> Result<Option<String>, String> {
@@ -180,6 +191,8 @@ impl Dossier {
             palette: Palette::default(),
             flash: None,
             theme,
+            refresh: None,
+            db_path: std::path::PathBuf::new(),
             panes: Panes::default(),
         }
     }
@@ -564,6 +577,40 @@ impl Screen for Dossier {
 
     fn set_flash(&mut self, msg: String) {
         self.flash = Some(msg);
+    }
+
+    fn tick(&mut self) -> Action {
+        let done = match self.refresh.as_ref().map(|r| r.try_recv()) {
+            Some(Ok(res)) => Some(res),
+            Some(Err(std::sync::mpsc::TryRecvError::Disconnected)) => Some(Err("refresh thread died".into())),
+            _ => None,
+        };
+        if let Some(res) = done {
+            self.refresh = None;
+            match res {
+                Ok(_) => match load_json(&self.db_path, &self.symbol) {
+                    Ok(Some(j)) => {
+                        let (db_path, focus_nav) = (self.db_path.clone(), self.focus);
+                        let sel = self.nav.selected_in(self.sections.len());
+                        *self = Dossier::from_json(&self.symbol.clone(), &j, self.theme);
+                        self.db_path = db_path;
+                        self.focus = focus_nav;
+                        if let Some(i) = sel.filter(|i| *i < self.sections.len()) {
+                            self.nav.select(i, self.sections.len());
+                        }
+                        self.flash = Some("updated".into());
+                    }
+                    _ => self.flash = Some("refresh: nothing cached".into()),
+                },
+                Err(e) => {
+                    if self.doc.is_none() {
+                        self.message = format!("{}: build failed\n\n{e}", self.symbol);
+                    }
+                    self.flash = Some(format!("refresh failed: {}", e.lines().last().unwrap_or("")));
+                }
+            }
+        }
+        Action::None
     }
 }
 
