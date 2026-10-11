@@ -553,6 +553,67 @@ function M.pick(slot)
 end
 
 --- AI-universe browser (picker lives in the binary).
+--- Onboard tickers: add to the universe if new, run every puller for just
+--- those tickers, build the dossier. Prompts for the ticker(s); a ticker not
+--- in the universe also prompts for its sub-sector. Runs in the background and
+--- notifies with the per-step report (py/jobs/onboard.py).
+--- @param tickers string|nil space/comma separated; prompts when nil
+function M.onboard(tickers)
+  local function go(list, sub)
+    local args = vim.split(list:gsub(",", " "):upper(), "%s+", { trimempty = true })
+    if #args == 0 then
+      return
+    end
+    vim.list_extend(args, { "--json" })
+    if sub then
+      vim.list_extend(args, { "--sub", sub })
+    end
+    vim.notify("finlarp: onboarding " .. table.concat(args, " "):gsub(" %-%-json", "") .. " …", vim.log.levels.INFO)
+    run("py/jobs/onboard.py", args, function(ok, rep)
+      if not ok then
+        vim.notify("finlarp onboard failed:\n" .. tostring(rep), vim.log.levels.ERROR)
+        return
+      end
+      local lines, need_sub = {}, false
+      for _, st in ipairs(rep.steps or {}) do
+        local mark = st.status == "ok" and "✓" or (st.status == "failed" and "✗" or "-")
+        table.insert(lines, ("%s %-12s %6.1fs  %s"):format(mark, st.step, st.secs, st.detail or ""))
+        if st.step == "universe" and st.status == "failed" and (st.detail or ""):find("pass --sub", 1, true) then
+          need_sub = true
+        end
+      end
+      if need_sub then
+        run("py/jobs/onboard.py", { "--list-subs" }, function(ok2, subs)
+          if not ok2 then
+            vim.notify(tostring(subs), vim.log.levels.ERROR)
+            return
+          end
+          vim.ui.select(subs, { prompt = "sub-sector for " .. list .. ": " }, function(choice)
+            if choice then
+              go(list, choice)
+            end
+          end)
+        end)
+        return
+      end
+      table.insert(lines, 1, ("onboard %s (%ss)"):format(table.concat(rep.tickers or {}, " "), rep.total_secs or "?"))
+      for t, bad in pairs(rep.health or {}) do
+        table.insert(lines, ("%s: %s"):format(t, #bad == 0 and "all dossier sections populated" or table.concat(bad, ", ")))
+      end
+      vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
+    end)
+  end
+  if tickers and tickers ~= "" then
+    go(tickers)
+  else
+    vim.ui.input({ prompt = "onboard ticker(s): " }, function(input)
+      if input and input ~= "" then
+        go(input)
+      end
+    end)
+  end
+end
+
 function M.pick_universe()
   require("finlarp.ui.tui").open_screen("universe", nil, { title = " AI universe " })
 end

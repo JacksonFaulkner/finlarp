@@ -35,7 +35,7 @@ local HELP_LINES = {
   " <leader>vwr pick watchlist (right half)",
   " <leader>vww pick watchlist (fullscreen)",
   " <leader>vt  search transaction history",
-  " <leader>vu  AI universe: pick bucket/sub/region",
+  " <leader>vu  AI universe: pick layer/sub-sector/region",
   " <leader>vo  switch open dashboards",
   " <leader>vn  new note on cursor word",
   " <leader>vm  browse notes",

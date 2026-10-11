@@ -88,7 +88,7 @@ Neovim, with lazy.nvim:
     { "<leader>vww", function() require("finlarp").pick() end, desc = "finlarp: pick watchlist (fullscreen)" },
     { "<leader>vwl", function() require("finlarp").pick("left") end, desc = "finlarp: pick watchlist (left half)" },
     { "<leader>vwr", function() require("finlarp").pick("right") end, desc = "finlarp: pick watchlist (right half)" },
-    { "<leader>vu", function() require("finlarp").pick_universe() end, desc = "finlarp: AI universe bucket/sub/region picker" },
+    { "<leader>vu", function() require("finlarp").pick_universe() end, desc = "finlarp: AI universe layer/sub-sector/region picker" },
     { "<leader>vf", function() require("finlarp").pick_search() end, desc = "finlarp: search SEC filings / earnings text" },
     { "<leader>vo", function() require("finlarp").switch() end, desc = "finlarp: switch open dashboards" },
     { "<leader>vc", function() require("finlarp").show_chart_current() end, desc = "finlarp: chart selected/focused symbol" },
