@@ -73,7 +73,11 @@ pub struct Diagrams {
     focus: Focus,
     /// Selected spot in the right-hand visual.
     vcur: usize,
+    /// First visible row of the right-hand visual (J/K, follows the cursor).
+    vscroll: u16,
     mol: Option<Mol>,
+    /// New-template card (big top visual + sub sections), when one exists.
+    card: Option<&'static super::diagrams_cards::Card>,
     mol_cur: usize,
 }
 
@@ -251,7 +255,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         pcur: 0,
         focus: Focus::Text,
         vcur: 0,
+        vscroll: 0,
         mol: None,
+        card: None,
         mol_cur: 0,
     })
 }
@@ -513,7 +519,8 @@ impl Diagrams {
             return;
         };
         let r = area;
-        let hint = " hjkl move (l into the visual)  H/L section  space page  q back ";
+        let hint =
+            " hjkl move (l into the visual)  J/K scroll visual  H/L section  space page  q back ";
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(t.accent())
@@ -524,59 +531,9 @@ impl Diagrams {
         frame.render_widget(Clear, r);
         frame.render_widget(block, r);
 
-        // Interactive header (formula, mass bar, atom grid, atom info), if any.
-        let mut body = inner;
-        if let Some(mol) = &self.mol {
-            let mut head = vec![mol.formula_line(t), mol.mass_line(t), Line::default()];
-            head.extend(mol.lines(
-                if self.focus == Focus::Grid {
-                    self.mol_cur
-                } else {
-                    usize::MAX
-                },
-                t,
-            ));
-            head.push(Line::default());
-            let info = wrap_words(mol.atoms[self.mol_cur].info, inner.width.max(1) as usize);
-            for i in 0..4 {
-                head.push(Line::from(Span::styled(
-                    info.get(i).cloned().unwrap_or_default(),
-                    t.base(),
-                )));
-            }
-            head.push(Line::from(Span::styled(
-                "─".repeat(inner.width as usize),
-                t.border(),
-            )));
-            let hh = (head.len() as u16).min(inner.height);
-            frame.render_widget(
-                Paragraph::new(head).style(t.base()),
-                Rect::new(inner.x, inner.y, inner.width, hh),
-            );
-            body = Rect::new(inner.x, inner.y + hh, inner.width, inner.height - hh);
-        }
-
-        // Left: section tabs + text with a line cursor. Right: that section's visual.
-        let n = self.secs.len();
-        let card = h.label;
-        self.ptab = self.ptab.min(n.saturating_sub(1));
-        let (sec_title, sec_text) = self.secs.get(self.ptab).copied().unwrap_or(("", ""));
-        let page = self
-            .nodes
-            .get(self.tab)
-            .and_then(|n| n.get(self.sel))
-            .and_then(|n| page_key(&n.label))
-            .unwrap_or("");
-        let vis = visual_for(page, card, sec_title);
-        const GAP: u16 = 3;
-        let lw = if vis.is_some() && body.width >= 70 {
-            body.width * 38 / 100
-        } else {
-            body.width
-        };
-        let left = Rect::new(body.x, body.y, lw, body.height);
-        let [tab_r, text_r] =
-            Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).areas(left);
+        let ov = self.ptab == 0 && (self.card.is_some() || self.mol.is_some());
+        let [tab_r, body] =
+            Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).areas(inner);
         let tabs: Vec<Span> = self
             .secs
             .iter()
@@ -596,6 +553,72 @@ impl Diagrams {
             Paragraph::new(Line::from(tabs)).wrap(Wrap { trim: false }),
             tab_r,
         );
+
+        // Overview tab: summary first, then the diagram (or atom grid) under it.
+        if ov {
+            if let Some(card) = self.card {
+                let desc = wrap_words(card.desc, body.width.max(1) as usize);
+                let mut lines: Vec<Line> = desc
+                    .into_iter()
+                    .map(|l| Line::from(Span::styled(l, t.base())))
+                    .collect();
+                lines.push(Line::default());
+                lines.extend(styled_lines(card.top.art, t));
+                let total = lines.len() as u16;
+                self.vscroll = self.vscroll.min(total.saturating_sub(body.height));
+                frame.render_widget(
+                    Paragraph::new(lines)
+                        .style(t.base())
+                        .scroll((self.vscroll, 0)),
+                    body,
+                );
+            } else if let Some(mol) = &self.mol {
+                let mut head = vec![mol.formula_line(t), mol.mass_line(t), Line::default()];
+                head.extend(mol.lines(
+                    if self.focus == Focus::Grid {
+                        self.mol_cur
+                    } else {
+                        usize::MAX
+                    },
+                    t,
+                ));
+                head.push(Line::default());
+                let info = wrap_words(mol.atoms[self.mol_cur].info, body.width.max(1) as usize);
+                for i in 0..4 {
+                    head.push(Line::from(Span::styled(
+                        info.get(i).cloned().unwrap_or_default(),
+                        t.base(),
+                    )));
+                }
+                frame.render_widget(Paragraph::new(head).style(t.base()), body);
+            }
+            return;
+        }
+        let body_full = body;
+
+        // Left: section tabs + text with a line cursor. Right: that section's visual.
+        let n = self.secs.len();
+        let card = h.label;
+        self.ptab = self.ptab.min(n.saturating_sub(1));
+        let (sec_title, sec_text) = self.secs.get(self.ptab).copied().unwrap_or(("", ""));
+        let page = self
+            .nodes
+            .get(self.tab)
+            .and_then(|n| n.get(self.sel))
+            .and_then(|n| page_key(&n.label))
+            .unwrap_or("");
+        let vis = match self.card {
+            Some(c) => c.secs.get(self.ptab - 1).map(|s| s.vis),
+            None => visual_for(page, card, sec_title),
+        };
+        const GAP: u16 = 3;
+        let lw = if vis.is_some() && body.width >= 70 {
+            body.width * 38 / 100
+        } else {
+            body.width
+        };
+        let body = body_full;
+        let text_r = Rect::new(body.x, body.y, lw, body.height);
         let para = Paragraph::new(styled_lines(sec_text, t))
             .style(t.base())
             .wrap(Wrap { trim: false });
@@ -624,14 +647,27 @@ impl Diagrams {
                 (body.x + body.width).saturating_sub(x),
                 body.height,
             );
-            frame.render_widget(
-                Paragraph::new(styled_lines(vis.art, t)).style(t.base()),
-                right,
-            );
             let spots = vis.placed();
             self.vcur = self.vcur.min(spots.len().saturating_sub(1));
             let art_h = vis.art.lines().count() as u16;
-            let info_y = right.y + art_h.min(right.height) + 1;
+            if self.focus == Focus::Visual {
+                if let Some(sp) = spots.get(self.vcur) {
+                    if sp.row < self.vscroll {
+                        self.vscroll = sp.row;
+                    } else if sp.row >= self.vscroll + right.height {
+                        self.vscroll = sp.row + 1 - right.height;
+                    }
+                }
+            }
+            self.vscroll = self.vscroll.min(art_h.saturating_sub(right.height));
+            let vs = self.vscroll;
+            frame.render_widget(
+                Paragraph::new(styled_lines(vis.art, t))
+                    .style(t.base())
+                    .scroll((vs, 0)),
+                right,
+            );
+            let info_y = right.y + art_h.saturating_sub(vs).min(right.height) + 1;
             let info_h = (right.y + right.height).saturating_sub(info_y);
             if self.focus == Focus::Visual {
                 let buf = frame.buffer_mut();
@@ -641,12 +677,12 @@ impl Diagrams {
                     } else {
                         t.accent().add_modifier(Modifier::UNDERLINED)
                     };
-                    if sp.row >= right.height {
+                    if sp.row < vs || sp.row - vs >= right.height {
                         continue;
                     }
                     for dx in 0..sp.len {
                         if sp.col + dx < right.width {
-                            buf[(right.x + sp.col + dx, right.y + sp.row)].set_style(style);
+                            buf[(right.x + sp.col + dx, right.y + sp.row - vs)].set_style(style);
                         }
                     }
                 }
@@ -671,6 +707,9 @@ impl Diagrams {
     }
 
     fn cur_visual(&self) -> Option<super::diagrams_vis::Visual> {
+        if let Some(c) = self.card {
+            return c.secs.get(self.ptab.checked_sub(1)?).map(|s| s.vis);
+        }
         let card = self.hots.get(self.hsel)?.label;
         let page = page_key(&self.nodes.get(self.tab)?.get(self.sel)?.label)?;
         visual_for(page, card, self.secs.get(self.ptab)?.0)
@@ -683,7 +722,13 @@ impl Diagrams {
         let spots: Vec<Placed> = self.cur_visual().map(|v| v.placed()).unwrap_or_default();
         let set_tab = |s: &mut Self, tab: usize| {
             s.ptab = tab;
+            if tab > 0 && s.focus == Focus::Grid {
+                s.focus = Focus::Tabs;
+            } else if tab == 0 && s.focus != Focus::Grid {
+                s.focus = Focus::Tabs;
+            }
             s.vcur = 0;
+            s.vscroll = 0;
             s.pcur = 0;
             s.pscroll = 0;
         };
@@ -697,6 +742,8 @@ impl Diagrams {
             KeyCode::Char('q') | KeyCode::Esc => self.detail = false,
             KeyCode::Tab | KeyCode::Char('L') => set_tab(self, (self.ptab + 1) % n),
             KeyCode::BackTab | KeyCode::Char('H') => set_tab(self, (self.ptab + n - 1) % n),
+            KeyCode::Char('J') => self.vscroll = self.vscroll.saturating_add(3),
+            KeyCode::Char('K') => self.vscroll = self.vscroll.saturating_sub(3),
             KeyCode::Char(' ') | KeyCode::PageDown => self.pcur = self.pcur.saturating_add(8),
             KeyCode::PageUp => self.pcur = self.pcur.saturating_sub(8),
             _ => match self.focus {
@@ -719,8 +766,10 @@ impl Diagrams {
                     } else if h {
                         set_tab(self, self.ptab.saturating_sub(1));
                     } else if j {
-                        self.focus = Focus::Text;
-                    } else if k && self.mol.is_some() {
+                        if self.ptab > 0 || (self.card.is_none() && self.mol.is_none()) {
+                            self.focus = Focus::Text;
+                        }
+                    } else if k && self.mol.is_some() && self.ptab == 0 {
                         self.focus = Focus::Grid;
                     }
                 }
@@ -819,15 +868,36 @@ impl Screen for Diagrams {
                 KeyCode::Enter => {
                     if let Some(h) = self.hots.get(self.hsel) {
                         self.detail = true;
-                        self.secs = sections(h.body);
+                        let page = self
+                            .nodes
+                            .get(self.tab)
+                            .and_then(|n| n.get(self.sel))
+                            .and_then(|n| page_key(&n.label))
+                            .unwrap_or("");
+                        self.card = super::diagrams_cards::find(page, h.label);
+                        self.secs = match self.card {
+                            Some(c) => c.secs.iter().map(|s| (s.title, s.text)).collect(),
+                            None => sections(h.body),
+                        };
+                        let has_mol = self.card.is_none() && mol_for(h.label).is_some();
+                        if self.card.is_some() || has_mol {
+                            self.secs.insert(0, ("Overview", ""));
+                        }
+                        self.vscroll = 0;
                         self.ptab = 0;
                         self.pscroll = 0;
                         self.pcur = 0;
                         self.vcur = 0;
-                        self.mol = mol_for(h.label);
+                        self.mol = if self.card.is_some() {
+                            None
+                        } else {
+                            mol_for(h.label)
+                        };
                         self.mol_cur = 0;
                         self.focus = if self.mol.is_some() {
                             Focus::Grid
+                        } else if self.card.is_some() {
+                            Focus::Tabs
                         } else {
                             Focus::Text
                         };

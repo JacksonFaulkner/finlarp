@@ -271,6 +271,14 @@ pub(crate) fn event_loop<B: Backend>(
                 };
                 screen.set_flash(msg);
             }
+            // Screen/picker requests always go to main's session stack (so q/esc
+            // in the child returns here), in nvim or not.
+            Action::Nvim(a @ (NvimAction::Screen { .. } | NvimAction::Picker { .. })) => {
+                return Ok(Exit {
+                    code: 0,
+                    handoff: Some(a),
+                });
+            }
             Action::Nvim(a) => {
                 if std::env::var_os(ACTION_FILE_ENV).is_some() {
                     write_nvim_action(&a)?;
@@ -292,12 +300,7 @@ pub(crate) fn event_loop<B: Backend>(
                     NvimAction::Claude { .. } => {
                         screen.set_flash("Claude needs the nvim plugin".into());
                     }
-                    a @ (NvimAction::Screen { .. } | NvimAction::Picker { .. }) => {
-                        return Ok(Exit {
-                            code: 0,
-                            handoff: Some(a),
-                        });
-                    }
+                    NvimAction::Screen { .. } | NvimAction::Picker { .. } => unreachable!(),
                 }
             }
         }

@@ -3,7 +3,7 @@ daily closes, so the ratatui chart has more than "today" to plot on first
 use.
 
 Reconstructs, for each trading day since your earliest transaction, both
-your stock holdings (from Bought/Sold/Stock Split quantities) and your
+your stock holdings (from Bought/Sold quantities, split-adjusted) and your
 cash balance (every transaction's `amount` is E*TRADE's own signed cash
 effect — buys negative, sells/dividends/interest/transfers positive —
 so summing it chronologically IS the cash balance). Total account value
@@ -18,6 +18,7 @@ Usage:
 
 from __future__ import annotations
 
+import re
 import sys
 import time
 from collections import defaultdict
@@ -26,7 +27,8 @@ from collections import defaultdict
 from core import db
 from sources import yahoo
 
-SHARE_AFFECTING_TYPES = {"Bought", "Sold", "Stock Split"}
+SHARE_AFFECTING_TYPES = {"Bought", "Sold"}
+SPLIT_RATIO_RE = re.compile(r"SPLIT RATIO\s+(\d+(?:\.\d+)?):(\d+(?:\.\d+)?)", re.I)
 
 
 def _epoch_ms_to_date(ms: int) -> str:
@@ -43,8 +45,22 @@ def main() -> None:
 
     share_txns = [t for t in transactions if t.get("type") in SHARE_AFFECTING_TYPES and t.get("symbol")]
     if not share_txns:
-        print("no Bought/Sold/Stock Split transactions found — nothing to backfill", file=sys.stderr)
+        print("no Bought/Sold transactions found — nothing to backfill", file=sys.stderr)
         return
+
+    # Yahoo closes are split-adjusted, so every trade quantity is converted to
+    # current-split terms (qty * ratios of splits after the trade) or a
+    # position is undervalued until the split date, then "recovers" as a fake
+    # gain. Stock Split rows themselves are not counted as share changes:
+    # E*TRADE emits them duplicated. Ratio comes from the description
+    # ("SPLIT RATIO 2:1"); one split per (symbol, date).
+    splits: dict[str, dict[str, float]] = defaultdict(dict)
+    for t in transactions:
+        if t.get("type") != "Stock Split" or not t.get("symbol"):
+            continue
+        m = SPLIT_RATIO_RE.search(t.get("description") or "")
+        if m and float(m.group(2)):
+            splits[t["symbol"]][_epoch_ms_to_date(t["date"])] = float(m.group(1)) / float(m.group(2))
 
     # Running share count checkpoints per symbol, in chronological order —
     # holdings on any given day = the last checkpoint at or before that day.
@@ -52,7 +68,12 @@ def main() -> None:
     running_shares: dict[str, float] = defaultdict(float)
     for t in share_txns:
         symbol = t["symbol"]
-        running_shares[symbol] += t.get("quantity") or 0
+        trade_date = _epoch_ms_to_date(t["date"])
+        qty = t.get("quantity") or 0
+        for split_date, ratio in splits.get(symbol, {}).items():
+            if split_date > trade_date:
+                qty *= ratio
+        running_shares[symbol] += qty
         checkpoints[symbol].append((_epoch_ms_to_date(t["date"]), running_shares[symbol]))
 
     # Cash balance checkpoints from every transaction's signed amount —

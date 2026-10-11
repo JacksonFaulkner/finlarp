@@ -2,9 +2,12 @@
 // and composes src/ui components; screens hold state + key handling only.
 
 pub mod canslim;
+pub mod catalyst_page;
 pub mod chart;
+pub mod chat;
 pub mod diagrams;
 mod diagrams_art;
+mod diagrams_cards;
 mod diagrams_desc;
 mod diagrams_mol;
 mod diagrams_vis;

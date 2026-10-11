@@ -8,7 +8,7 @@
 //                         terminal default background
 //
 // Screens: home | chart | portfolio | canslim | dossier | earnings | search
-// | universe | diagrams | events. canslim/dossier without a ticker open a ticker picker.
+// | universe | diagrams | events | chat. canslim/dossier without a ticker open a ticker picker.
 //
 // Launched by ui/tui.lua in a tmux popup (or a floating nvim :terminal), or
 // by hand. Inside nvim a screen that wants another screen hands the request
@@ -49,6 +49,7 @@ const SCREENS: &[&str] = &[
     "universe",
     "diagrams",
     "events",
+    "chat",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -100,7 +101,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events|chat] [arg]";
 
 fn db_path() -> PathBuf {
     if let Some(p) = env::var_os("FINLARP_DB") {
@@ -115,71 +116,98 @@ fn upper(arg: Option<String>) -> Option<String> {
         .filter(|a| !a.is_empty())
 }
 
-/// Opens one screen and runs it to completion. canslim/dossier build their
-/// cache first (the Python side), and open a ticker picker when no ticker
-/// was given.
-fn run_screen(ctx: &app::Ctx, screen: &str, arg: Option<String>) -> std::io::Result<app::Exit> {
+/// Builds one screen (running the Python cache build first for canslim/dossier
+/// when a ticker is given). No ticker opens a ticker picker.
+fn build_screen(
+    ctx: &app::Ctx,
+    screen: &str,
+    arg: Option<String>,
+) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
-        canslim, chart, diagrams, dossier, earnings_report, events, home, pick, portfolio, search,
-        universe,
+        canslim, chart, chat, diagrams, dossier, earnings_report, events, home, pick, portfolio,
+        search, universe,
     };
-    match (screen, upper(arg.clone())) {
-        ("canslim", None) => app::run(&mut pick::open_symbols(ctx, "canslim")?),
-        ("dossier", None) => app::run(&mut pick::open_symbols(ctx, "dossier")?),
+    Ok(match (screen, upper(arg.clone())) {
+        ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
+        ("dossier", None) => Box::new(pick::open_symbols(ctx, "dossier")?),
         ("canslim", Some(sym)) => {
             eprintln!("fetching {sym} canslim...");
             if let Err(e) = pyrun::run_script("py/derive/canslim.py", &[&sym, "--force"]) {
                 eprintln!("finlarp: {e}"); // open anyway: the screen shows what is cached
             }
-            app::run(&mut canslim::open(ctx, Some(sym))?)
+            Box::new(canslim::open(ctx, Some(sym))?)
         }
         ("dossier", Some(sym)) => {
             eprintln!("building {sym} dossier...");
             if let Err(e) = pyrun::run_script("py/derive/dossier.py", &[&sym, "--if-stale", "12"]) {
                 eprintln!("finlarp: {e}");
             }
-            app::run(&mut dossier::open(ctx, Some(sym))?)
+            Box::new(dossier::open(ctx, Some(sym))?)
         }
-        ("home", _) => app::run(&mut home::open(ctx)?),
-        ("portfolio", _) => app::run(&mut portfolio::open(ctx, arg)?),
-        ("earnings", _) => app::run(&mut earnings_report::open(ctx, arg)?),
-        ("search", _) => app::run(&mut search::open(ctx, arg)?),
-        ("universe", _) => app::run(&mut universe::open(ctx, arg)?),
-        ("events", _) => app::run(&mut events::open(ctx, arg)?),
-        ("diagrams", _) => match arg.as_deref().and_then(|a| a.strip_prefix("pdf")) {
-            Some(dir) => {
-                let dir = Some(dir.trim())
-                    .filter(|d| !d.is_empty())
-                    .unwrap_or("diagrams-pdf");
-                for p in diagrams::export_pdfs(std::path::Path::new(dir), &ctx.theme)? {
-                    println!("{p}");
-                }
-                Ok(app::Exit {
-                    code: 0,
-                    handoff: None,
-                })
-            }
-            None => app::run(&mut diagrams::open(ctx, arg)?),
-        },
-        _ => app::run(&mut chart::open(ctx, arg)?),
-    }
+        ("chat", _) => Box::new(chat::open(ctx, arg)?),
+        ("home", _) => Box::new(home::open(ctx)?),
+        ("portfolio", _) => Box::new(portfolio::open(ctx, arg)?),
+        ("earnings", _) => Box::new(earnings_report::open(ctx, arg)?),
+        ("search", _) => Box::new(search::open(ctx, arg)?),
+        ("universe", _) => Box::new(universe::open(ctx, arg)?),
+        ("events", _) => Box::new(events::open(ctx, arg)?),
+        ("diagrams", _) => Box::new(diagrams::open(ctx, arg)?),
+        _ => Box::new(chart::open(ctx, arg)?),
+    })
 }
 
-/// Runs screens until one ends the session. Inside nvim a handoff is written
-/// to the action file by `app::run`, so this loop runs once. Standalone it
-/// follows screen/picker requests, and falls back to home when a screen
-/// quits if the session started at home.
+/// `fl diagrams pdf [dir]`: exports and exits, no screen.
+fn export_diagram_pdfs(ctx: &app::Ctx, arg: &str) -> std::io::Result<()> {
+    let dir = Some(arg.trim())
+        .filter(|d| !d.is_empty())
+        .unwrap_or("diagrams-pdf");
+    for p in screens::diagrams::export_pdfs(std::path::Path::new(dir), &ctx.theme)? {
+        println!("{p}");
+    }
+    Ok(())
+}
+
+/// Runs a stack of live screens. A screen/picker request pushes the new screen
+/// on top (a picker is replaced by what it picks, so back skips it); q/esc in
+/// the top screen pops to the one beneath with its state intact. The session
+/// ends when the bottom screen quits, or on a nonzero exit code.
 fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Result<i32> {
     use app::NvimAction;
-    let via_home = start == "home";
-    let (mut screen, mut arg) = (start.to_string(), arg);
+    if start == "diagrams" {
+        if let Some(rest) = arg.as_deref().and_then(|a| a.strip_prefix("pdf")) {
+            export_diagram_pdfs(ctx, rest)?;
+            return Ok(0);
+        }
+    }
+    // (screen, is_picker)
+    let mut stack: Vec<(Box<dyn app::Screen>, bool)> = vec![(
+        build_screen(ctx, start, arg.clone())?,
+        upper(arg).is_none() && matches!(start, "canslim" | "dossier"),
+    )];
     loop {
-        let exit = run_screen(ctx, &screen, arg.take())?;
-        match exit.handoff {
-            Some(NvimAction::Screen { screen: s, arg: a }) => (screen, arg) = (s, a),
-            Some(NvimAction::Picker { screen: s }) => (screen, arg) = (s, None),
-            _ if exit.code != 0 || !via_home || screen == "home" => return Ok(exit.code),
-            _ => (screen, arg) = ("home".to_string(), None),
+        let top = stack.last_mut().expect("stack never empty here");
+        let exit = app::run(top.0.as_mut())?;
+        let next = match exit.handoff {
+            Some(NvimAction::Screen { screen, arg }) => Some((screen, arg)),
+            Some(NvimAction::Picker { screen }) => Some((screen, None)),
+            _ => None,
+        };
+        match next {
+            Some((screen, arg)) => {
+                let is_picker = upper(arg.clone()).is_none()
+                    && matches!(screen.as_str(), "canslim" | "dossier");
+                let child = build_screen(ctx, &screen, arg)?;
+                if stack.last().is_some_and(|t| t.1) {
+                    stack.pop(); // replace the picker with its pick
+                }
+                stack.push((child, is_picker));
+            }
+            None => {
+                stack.pop();
+                if exit.code != 0 || stack.is_empty() {
+                    return Ok(exit.code);
+                }
+            }
         }
     }
 }

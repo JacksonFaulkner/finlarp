@@ -1,0 +1,227 @@
+[
+  {
+    "date": "2026-10-14", "label": "ASML Q3",
+    "title": "ASML Q3 RESULTS", "tickers": "ASML", "when": "Wed 10-14 before the open", "status": "estimated",
+    "strip": {"label": "gross margin", "left": ["gross", 56.0], "right": ["cost", 44.0], "note": "guide midpoint"},
+    "tabs": [
+      {"name": "Setup", "text": "ASML is the sole EUV supplier, so its orders lead the capex cycle for TSMC, Samsung and the memory makers. Management raised 2026 guidance twice this year. The 2027 outlook is the key input."},
+      {"name": "Watch", "text": "- 2027 growth outlook, and whether FY26 is raised again.\n- Whether ASML reports orders at all. It has dropped bookings disclosure before.\n- EUV and High-NA shipments, China mix, export-control commentary."},
+      {"name": "Bull / Bear", "text": "Bull: Q3 sales above 12B EUR and a raised 2027 outlook.\n\nBear: a flat 2027 outlook or China restrictions after a year of guide raises.\n\nLast print (Jul 15): stock gained on a Q2 beat and a raised 2026 outlook. Size of move unknown."},
+      {"name": "Sources", "text": "https://www.sec.gov/Archives/edgar/data/0000937966/000162828026048235/pressreleasefinancialresul.htm\nhttps://seekingalpha.com/pr/20583068\nDate: two aggregators agree, ASML IR not seen."}
+    ],
+    "groups": [
+      {"title": "Net sales (EUR B)", "rows": [
+        {"label": "Q2 actual", "value": 9.3, "unit": "EUR B", "kind": "actual"},
+        {"label": "Q3 guide low", "value": 11.0, "unit": "EUR B", "kind": "guide"},
+        {"label": "Q3 guide high", "value": 12.0, "unit": "EUR B", "kind": "guide"},
+        {"label": "FY26 guide low", "value": 43.0, "unit": "EUR B", "kind": "guide"},
+        {"label": "FY26 guide high", "value": 45.0, "unit": "EUR B", "kind": "guide"}
+      ], "foot": "Consensus not shown: the one figure found was in USD and not comparable."},
+      {"title": "Q3 gross margin guide (%)", "rows": [
+        {"label": "low", "value": 55.0, "unit": "%", "kind": "guide"},
+        {"label": "high", "value": 57.0, "unit": "%", "kind": "guide"}
+      ]}
+    ]
+  },
+  {
+    "date": "2026-10-15", "label": "TSM Q3 + Q4 guide",
+    "title": "TSMC Q3 EARNINGS", "tickers": "TSM  2330.TW", "when": "Thu 10-15, 14:00 Taipei (~02:00 ET)", "status": "confirmed",
+    "strip": {"label": "gross margin", "left": ["gross", 66.0], "right": ["cost", 34.0], "note": "guide midpoint"},
+    "tabs": [
+      {"name": "Setup", "text": "TSMC is the bottleneck foundry for AI accelerators (N3/N2 and CoWoS packaging). Its Q4 guide and 2026 capex show whether AI demand is still accelerating, and its print sets the tone for the group. Quiet period runs Oct 5-14."},
+      {"name": "Watch", "text": "- Q4 revenue and gross margin guide against the 65-67% Q3 range.\n- 2026 capex and CoWoS capacity.\n- N2 ramp, AI accelerator growth, tariff or FX margin drag."},
+      {"name": "Bull / Bear", "text": "Bull: Q3 lands at or above the top of the range and the Q4 and capex guides go up.\n\nBear: gross margin slips below 65% or capex is flat, which would suggest AI demand digestion.\n\nLast reaction: unknown. September monthly sales are normally posted around the 10th; not confirmed."},
+      {"name": "Sources", "text": "https://investor.tsmc.com/quarterly-results\nCheck the call time: the IR page lists both 2:00 pm ET and 14:00 Taiwan time."}
+    ],
+    "groups": [
+      {"title": "Q3 revenue guide (USD B)", "rows": [
+        {"label": "low", "value": 44.6, "unit": "$B", "kind": "guide"},
+        {"label": "high", "value": 45.8, "unit": "$B", "kind": "guide"}
+      ], "foot": "Prior-quarter actual and consensus not found."},
+      {"title": "Q3 margin guide (%)", "rows": [
+        {"label": "gross low", "value": 65.0, "unit": "%", "kind": "guide"},
+        {"label": "gross high", "value": 67.0, "unit": "%", "kind": "guide"},
+        {"label": "operating low", "value": 56.0, "unit": "%", "kind": "guide"},
+        {"label": "operating high", "value": 58.0, "unit": "%", "kind": "guide"}
+      ], "foot": "FX assumption: 32.0 NTD per USD."}
+    ]
+  },
+  {
+    "date": "2026-10-15", "label": "Anthropic IPO target",
+    "title": "ANTHROPIC IPO", "tickers": "NVDA AMZN GOOGL AVGO MSFT CRWV ORCL AMD", "when": "October 2026, no date set", "status": "unconfirmed",
+    "tabs": [
+      {"name": "Setup", "text": "Anthropic filed a confidential S-1 on 2026-06-01. Bloomberg reported in mid-July that banks (Goldman, JPM, Morgan Stanley) were scheduling meetings for an October Nasdaq listing. As of Sept 15 no public S-1 was on EDGAR, and the public filing must come at least 15 days before the roadshow. A record IPO would reprice AI-lab exposure and could pull liquidity from AI large caps."},
+      {"name": "Watch", "text": "- A public S-1/A on EDGAR, which starts the 15-day clock.\n- Roadshow start, price range, Nasdaq pricing date.\n- Slippage into November or 2027 if markets weaken."},
+      {"name": "Bull / Bear", "text": "Bull: a strong debut validates lab revenue and lifts the AI supply chain (NVDA, AVGO, AMZN, GOOGL).\n\nBear: a $1T-$2T supply of new stock drains AI-fund liquidity, or a delay or weak pricing signals bubble fatigue.\n\nNo comparable lab IPO to measure against. Date and size are not company-confirmed."},
+      {"name": "Sources", "text": "https://goodfest.westfield.com/2026/05/anthropic-raises-65-billion-nears-1t-valuation-ahead-of-ipo/\nhttps://the-decoder.com/anthropic-approaches-1-trillion-valuation-as-revenue-grows-fivefold/\nhttps://www.datacenterdynamics.com/en/news/anthropic-confidentially-files-for-ipo-with-the-us-sec/"}
+    ],
+    "groups": [
+      {"title": "Valuation (USD B)", "rows": [
+        {"label": "OpenAI round", "value": 852.0, "unit": "$B", "kind": "actual", "note": "post-money, Mar 2026"},
+        {"label": "Anthropic Series H", "value": 965.0, "unit": "$B", "kind": "actual", "note": "post-money"},
+        {"label": "Reported IPO target", "value": 2000.0, "unit": "$B", "kind": "other", "note": "single source, uncorroborated"}
+      ]},
+      {"title": "Raise (USD B)", "rows": [
+        {"label": "OpenAI round", "value": 122.0, "unit": "$B", "kind": "actual"},
+        {"label": "Anthropic Series H", "value": 65.0, "unit": "$B", "kind": "actual"}
+      ]},
+      {"title": "Anthropic revenue run rate", "rows": [
+        {"label": "May 2026", "value": 47.0, "unit": "$B", "kind": "actual", "note": "annualized"}
+      ]}
+    ]
+  },
+  {
+    "date": "2026-10-27", "label": "SK Hynix Q3",
+    "title": "SK HYNIX Q3 RESULTS", "tickers": "000660.KS  MU  005930.KS", "when": "Tue 10-27 after the Korean close", "status": "estimated",
+    "strip": {"label": "Q2 op margin", "left": ["profit", 76.3], "right": ["cost", 23.7], "note": "KRW 60.5T on 79.3T"},
+    "tabs": [
+      {"name": "Setup", "text": "SK Hynix is the lead HBM supplier for Nvidia, and HBM4 mass shipments began in Q2. Its print shows memory pricing and HBM sold-out status. Samsung's Oct 8 preliminary figures already set a high bar for the group."},
+      {"name": "Watch", "text": "- HBM4 ramp, pricing, and whether 2027 HBM supply is sold out.\n- DRAM and NAND price trend; operating margin against 76%.\n- Capex raise and shareholder returns."},
+      {"name": "Bull / Bear", "text": "Bull: margin holds above 75% with 2027 HBM contracts locked in.\n\nBear: a DRAM price-peak signal, or HBM4 share loss to Samsung.\n\nLast print: Q2 revenue slightly missed consensus while profit was well above. Price move unknown."},
+      {"name": "Sources", "text": "https://pulse2.com/sk-hynix-reports-record-q2-2026-revenue-of-79-3-trillion-won-about-55-2-billion/\nhttps://news.samsung.com/global/samsung-electronics-announces-earnings-guidance-for-third-quarter-2026\nDate: TipRanks lists it as confirmed, Stockhub as tentative."}
+    ],
+    "groups": [
+      {"title": "SK Hynix (KRW T)", "rows": [
+        {"label": "Q2 2025 revenue", "value": 22.2, "unit": "T", "kind": "actual"},
+        {"label": "Q2 2026 revenue", "value": 79.3, "unit": "T", "kind": "actual"},
+        {"label": "Q2 2026 op profit", "value": 60.5, "unit": "T", "kind": "actual"}
+      ], "foot": "Q3 consensus not found."},
+      {"title": "Peer: Samsung Q3 prelim (KRW T)", "rows": [
+        {"label": "operating profit", "value": 107.4, "unit": "T", "kind": "guide", "note": "whole company, issued Oct 8"}
+      ]}
+    ]
+  },
+  {
+    "date": "2026-10-27", "label": "GOOGL Q3",
+    "title": "ALPHABET Q3 EARNINGS", "tickers": "GOOGL", "when": "~Tue 10-27 after the close", "status": "estimated",
+    "tabs": [
+      {"name": "Setup", "text": "Google Cloud growth and backlog show whether TPU and Gemini demand justifies the capex. The market punished the last capex raise: the stock fell about 4% after the 7-22 print despite an EPS beat (sources say -4% to -6%)."},
+      {"name": "Watch", "text": "- Cloud revenue growth and operating margin.\n- Any 2027 capex framing.\n- Search growth against AI-answer cannibalization."},
+      {"name": "Bull / Bear", "text": "Bull: cloud acceleration plus backlog growth outpaces the capex raise.\n\nBear: another capex raise without cloud upside.\n\nCloud growth, cloud backlog and consensus were not found."},
+      {"name": "Sources", "text": "Revenue: SEC 10-Q data in the local DB.\nhttps://www.webull.com/news/15277915120215040\nDate inferred from the usual late-October pattern."}
+    ],
+    "groups": [
+      {"title": "Quarterly revenue (USD B)", "rows": [
+        {"label": "Q1 2026", "value": 109.896, "unit": "$B", "kind": "actual"},
+        {"label": "Q2 2026", "value": 119.796, "unit": "$B", "kind": "actual"}
+      ], "foot": "From 10-Q filings."},
+      {"title": "2026 capex guide (USD B)", "rows": [
+        {"label": "AMZN", "value": 220.0, "unit": "$B", "kind": "guide", "note": "one source, verify"},
+        {"label": "GOOGL", "value": 200.0, "unit": "$B", "kind": "guide", "note": "midpoint of 195-205, raised 7-22"},
+        {"label": "MSFT", "value": 190.0, "unit": "$B", "kind": "guide", "note": "incl. finance leases; another source says 175"},
+        {"label": "META", "value": 137.5, "unit": "$B", "kind": "guide", "note": "midpoint of 130-145"}
+      ], "foot": "Big-4 combined 2026 estimate: about 725B."}
+    ]
+  },
+  {
+    "date": "2026-10-28", "label": "MSFT FQ1",
+    "title": "MICROSOFT FQ1 FY27", "tickers": "MSFT", "when": "Wed 10-28 after the close, call 17:30 ET", "status": "estimated",
+    "tabs": [
+      {"name": "Setup", "text": "Azure growth and the capex or finance-lease trajectory are the cleanest read on enterprise AI demand. The stock reportedly jumped about 9% after hours on the July 29 print. This quarter tests whether the capacity-driven acceleration holds. A search summary says Microsoft announced the date on 10-07, but the only Microsoft link found was last year's."},
+      {"name": "Watch", "text": "- Azure growth rate and capacity constraints.\n- FY27 capex and finance-lease commentary.\n- Copilot and OpenAI-related contribution and backlog."},
+      {"name": "Bull / Bear", "text": "Bull: Azure re-accelerates and capex converts to visible revenue.\n\nBear: capex rises faster than Azure growth and margins compress.\n\nAzure growth and consensus EPS were not found."},
+      {"name": "Sources", "text": "Revenue: SEC 10-Q data in the local DB.\nhttps://cryptobriefing.com/amazon-meta-microsoft-ai-earnings-surge/\nhttps://startupmap.iamsterdam.com/news/feed/us-big-tech-earnings-microsoft-meta-apple-amazon-face-revenue-test-as-ai-capex-nears-200b"}
+    ],
+    "groups": [
+      {"title": "Revenue (USD B)", "rows": [
+        {"label": "FQ3 FY26 (Mar)", "value": 82.886, "unit": "$B", "kind": "actual", "note": "+18% y/y per the Q3 report"}
+      ], "foot": "From the 10-Q filed 2026-04-29."},
+      {"title": "2026 capex guide (USD B)", "rows": [
+        {"label": "AMZN", "value": 220.0, "unit": "$B", "kind": "guide", "note": "one source, verify"},
+        {"label": "GOOGL", "value": 200.0, "unit": "$B", "kind": "guide", "note": "midpoint of 195-205"},
+        {"label": "MSFT", "value": 190.0, "unit": "$B", "kind": "guide", "note": "incl. finance leases; another source says 175"},
+        {"label": "META", "value": 137.5, "unit": "$B", "kind": "guide", "note": "midpoint of 130-145"}
+      ]}
+    ]
+  },
+  {
+    "date": "2026-10-28", "label": "FOMC decision",
+    "title": "FOMC RATE DECISION", "tickers": "NVDA AVGO AMD MSFT SMCI  QQQ SMH", "when": "Wed 10-28, statement 14:00 ET", "status": "estimated",
+    "tabs": [
+      {"name": "Setup", "text": "Rates are 3.50-3.75% as of the June 17 statement. A cut or a hawkish hold shifts the discount rate on long-duration AI equities and the cost of financing AI capex. The meeting lands the week before the midterms and during megacap earnings season."},
+      {"name": "Watch", "text": "- Live CME FedWatch odds into the meeting.\n- Statement and press-conference tone on inflation against labor.\n- Dots, balance-sheet commentary, and the yield reaction in long-duration tech."},
+      {"name": "Bull / Bear", "text": "Bull: a dovish surprise lowers yields and lifts high-multiple AI names.\n\nBear: a hawkish hold with sticky inflation hits AI valuations.\n\nThe odds shown are two undated Manifold snapshots, not CME FedWatch. Treat them as a rough signal. Date and 14:00 time come from the standard schedule; check federalreserve.gov."},
+      {"name": "Sources", "text": "https://manifold.markets/event/will-the-fed-cut-rates-by-at-least-gsyCdSpcsg\nhttps://manifold.markets/CalibratedGhosts/will-the-fed-cut-rates-by-at-least-gsyCdSpcsg"}
+    ],
+    "groups": [
+      {"title": "Fed funds target (%)", "rows": [
+        {"label": "lower bound", "value": 3.5, "unit": "%", "kind": "actual"},
+        {"label": "upper bound", "value": 3.75, "unit": "%", "kind": "actual"}
+      ], "foot": "As of the June 17, 2026 statement."},
+      {"title": "Odds of a 25bp cut (%)", "rows": [
+        {"label": "Manifold A", "value": 22.0, "unit": "%", "kind": "other", "note": "undated prediction market"},
+        {"label": "Manifold B", "value": 15.0, "unit": "%", "kind": "other", "note": "undated prediction market"}
+      ], "foot": "CME FedWatch reading not found."}
+    ]
+  },
+  {
+    "date": "2026-10-29", "label": "AMZN Q3",
+    "title": "AMAZON Q3 EARNINGS", "tickers": "AMZN", "when": "Thu 10-29, about 17:00 ET", "status": "estimated",
+    "tabs": [
+      {"name": "Setup", "text": "AWS growth is the key AI cloud signal, and Amazon's capex guide is the highest of the group. Q2 showed AWS at 28% or more y/y. The stock reportedly gained more than 5% after hours on the Q2 print."},
+      {"name": "Watch", "text": "- AWS growth against Azure and Google Cloud.\n- Trainium and Anthropic-related commentary.\n- Free cash flow compression from capex."},
+      {"name": "Bull / Bear", "text": "Bull: AWS holds 28% or higher growth with a growing backlog.\n\nBear: capex rises again while free cash flow turns weak.\n\nAn earlier preview put the capex guide near 200B; verify 220B against the filing. AWS consensus not found."},
+      {"name": "Sources", "text": "Revenue: SEC 10-Q data in the local DB.\nhttps://cryptobriefing.com/amazon-meta-microsoft-ai-earnings-surge/\nhttps://www.webull.com/news/15277915120215040\nDate: days.to says not officially confirmed."}
+    ],
+    "groups": [
+      {"title": "Quarterly revenue (USD B)", "rows": [
+        {"label": "Q1 2026", "value": 181.519, "unit": "$B", "kind": "actual"},
+        {"label": "Q2 2026", "value": 200.606, "unit": "$B", "kind": "actual"}
+      ], "foot": "From 10-Q filings."},
+      {"title": "2026 capex guide (USD B)", "rows": [
+        {"label": "AMZN", "value": 220.0, "unit": "$B", "kind": "guide", "note": "one source, verify; earlier guide about 200"},
+        {"label": "GOOGL", "value": 200.0, "unit": "$B", "kind": "guide", "note": "midpoint of 195-205"},
+        {"label": "MSFT", "value": 190.0, "unit": "$B", "kind": "guide", "note": "incl. finance leases; another source says 175"},
+        {"label": "META", "value": 137.5, "unit": "$B", "kind": "guide", "note": "midpoint of 130-145"}
+      ]}
+    ]
+  },
+  {
+    "date": "2026-11-03", "label": "AMD Q3",
+    "title": "AMD Q3 + AI GUIDE", "tickers": "AMD", "when": "Tue 11-03 after the close, call 17:00 ET", "status": "confirmed",
+    "strip": {"label": "Q2 mix", "left": ["data center", 58.1], "right": ["other", 41.9], "note": "6.7B of 11.54B"},
+    "tabs": [
+      {"name": "Setup", "text": "The Q2 beat came from Instinct accelerators and EPYC server CPUs. Data center is now 58% of revenue. The stock was up about 140% YTD before the Q2 print and fell on it, so expectations are very high. Q3 tests whether the AI GPU ramp (Anthropic and Microsoft wins were cited on the Q2 call) justifies the multiple."},
+      {"name": "Watch", "text": "- Q4 revenue guide and the Instinct MI4xx ramp.\n- Data center share of revenue (58% in Q2).\n- The 2027 'more than double' data center claim, customer wins, gross margin."},
+      {"name": "Bull / Bear", "text": "Bull: a Q4 guide well above the Street plus firm 2027 MI-series visibility restarts the AI GPU share story.\n\nBear: a beat-and-raise that only matches whisper numbers repeats the Q2 selloff after a 140% YTD run.\n\nLast print (Aug 4): down about 8-9% after hours despite beats. One source claimed +5%; the regular-session close is unconfirmed."},
+      {"name": "Sources", "text": "https://ir.amd.com/news-events/press-releases/detail/1300/amd-to-report-fiscal-third-quarter-2026-financial-results\nhttps://www.kucoin.com/blog/ama-q2-2026-earnings-data-center-revenue-doubles-as-ai-chips-challenge-nvidia\nhttps://www.implicator.ai/amd-data-center-sales-jump-107-to-6-7-billion-as-shares-slide-after-hours/"}
+    ],
+    "groups": [
+      {"title": "Revenue (USD B)", "rows": [
+        {"label": "Q1 2026", "value": 10.253, "unit": "$B", "kind": "actual"},
+        {"label": "Q2 2026", "value": 11.536, "unit": "$B", "kind": "actual"},
+        {"label": "Q2 consensus", "value": 11.31, "unit": "$B", "kind": "other"},
+        {"label": "Q3 guide (mid)", "value": 13.0, "unit": "$B", "kind": "guide", "note": "+/- 0.3B"}
+      ], "foot": "Q1 and Q2 from 10-Qs. Current Q3 consensus not found; the pre-Q2 figure was about 12.55B."},
+      {"title": "Q2 split (USD B)", "rows": [
+        {"label": "data center", "value": 6.7, "unit": "$B", "kind": "actual", "note": "+107% y/y"},
+        {"label": "everything else", "value": 4.836, "unit": "$B", "kind": "other", "note": "derived: total minus data center"}
+      ]}
+    ]
+  },
+  {
+    "date": "2026-11-03", "label": "ANET Q3",
+    "title": "ARISTA Q3 AI NETWORKING", "tickers": "ANET  CRDO ALAB COHR LITE NVDA", "when": "Tue 11-03 after the close, call 16:30 ET", "status": "confirmed",
+    "tabs": [
+      {"name": "Setup", "text": "Arista is the main Ethernet scale-out and back-end AI networking pure play. Its guide and full-year outlook set the tone for AI networking demand and the optics and connectivity chain. Q2 was its first $3B+ quarter."},
+      {"name": "Watch", "text": "- Non-GAAP operating margin against the 48-49% guide.\n- AI back-end networking revenue and FY2027 AI targets.\n- Customer concentration (Meta, Microsoft) and gross margin mix."},
+      {"name": "Bull / Bear", "text": "Bull: the AI back-end ramp pulls FY2026 above 12.6B and sets up another raise.\n\nBear: a margin dip from AI customer mix, or slower hyperscaler orders, hits a stock that gapped up in August.\n\nLast print (Aug 4): rose, about 11% premarket on Aug 5, up to 12.8% intraday. Close reports range from 4.7% to 15.9%, unconfirmed."},
+      {"name": "Sources", "text": "https://www.arista.com/company/news/press-release/24817-pr-20261006\nhttps://www.sec.gov/Archives/edgar/data/0001596532/000159653226000174/ex991q226-earningsrelease.htm\nhttps://seekingalpha.com/news/4625836-arista-surges-after-q2-results-and-outlook-keep-analysts-bullish"}
+    ],
+    "groups": [
+      {"title": "Revenue (USD B)", "rows": [
+        {"label": "Q1 2026", "value": 2.709, "unit": "$B", "kind": "actual"},
+        {"label": "Q2 2026", "value": 3.036, "unit": "$B", "kind": "actual", "note": "+37.7% y/y vs 2.83 consensus"},
+        {"label": "Q3 guide", "value": 3.3, "unit": "$B", "kind": "guide"}
+      ], "foot": "Q1 and Q2 from 10-Qs. Current Q3 consensus not found."},
+      {"title": "FY2026 revenue guide (USD B)", "rows": [
+        {"label": "FY26 guide", "value": 12.6, "unit": "$B", "kind": "guide", "note": "raised after Q2"}
+      ]},
+      {"title": "Non-GAAP EPS (USD)", "rows": [
+        {"label": "Q2 actual", "value": 1.02, "unit": "$", "kind": "actual", "note": "vs 0.89 consensus"},
+        {"label": "Q3 guide low", "value": 1.06, "unit": "$", "kind": "guide"},
+        {"label": "Q3 guide high", "value": 1.08, "unit": "$", "kind": "guide"}
+      ]}
+    ]
+  }
+]

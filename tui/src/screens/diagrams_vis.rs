@@ -4,6 +4,7 @@
 
 /// A selectable spot in a visual: the `nth` occurrence of `needle` in the art.
 /// `width` 0 highlights the needle itself, `TO_EOL` runs to the end of its line.
+#[derive(Clone, Copy)]
 pub struct Spot {
     pub needle: &'static str,
     pub nth: usize,
@@ -22,6 +23,7 @@ pub const fn spot(needle: &'static str, nth: usize, width: u16, info: &'static s
     }
 }
 
+#[derive(Clone, Copy)]
 pub struct Visual {
     pub art: &'static str,
     pub spots: &'static [Spot],

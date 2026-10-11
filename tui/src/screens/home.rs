@@ -59,6 +59,7 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         'x',
     ),
     ("Events", "events", "catalyst calendar", 'v'),
+    ("Chat", "chat", "ask Claude; open the tickers it names", 'a'),
 ];
 
 pub struct Home {

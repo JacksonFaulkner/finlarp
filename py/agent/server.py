@@ -10,6 +10,8 @@ every call is local and fast. Tools are all read-only:
     financials  stitched XBRL time series (handles predecessor CIKs,
                 concept renames, Q4 derivation)
     sql         read-only DuckDB SQL over views of every table
+    tweets      posts from followed X research accounts, filter by ticker/handle/date, returns coverage
+    tweet_sources  which accounts are stored and their date spans
     schema      the views `sql` can see, with columns
 
 Register with Claude Code:
@@ -26,6 +28,7 @@ from mcp.types import ToolAnnotations
 
 
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
+from sources import tweets as tweets_src
 from sources import yahoo_live
 from derive import search as fts
 
@@ -37,7 +40,8 @@ INSTRUCTIONS = """Local SEC dataset for ~428 AI-exposed stocks (universe table),
 from EDGAR: XBRL financials (15+ yrs), segment/geography revenue, 13F institutional
 holdings (6 quarters, whole market), 8-K event stream, Form 4 insider trades,
 10-K/20-F text (business, risk factors, MD&A...), YoY-new risk sentences,
-earnings press releases with extracted guidance, Yahoo company profiles, and
+earnings press releases with extracted guidance, Yahoo company profiles, tweets from followed research
+accounts (`tweets` tool), and
 ~1.5M granted US patents (PatentsView, thru 2025) matched to tickers.
 
 The local snapshot ends at the last completed session. For anything about today, premarket,
@@ -120,6 +124,11 @@ def _views(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
         "quotes_1m": (f"read_parquet('{D}/market/databento/quotes_1m/*.parquet', union_by_name=true)",
                       "Databento consolidated best bid/ask sampled per minute (bid_px_00/ask_px_00, sizes), last ~3 months; "
                       "includes pre/post-market quotes, which can be wide"),
+        "tweets": (f"'{D}/tweets/tweets.parquet'",
+                   "X posts from followed research accounts (handle, created_at UTC, full text, likes/retweets/replies/views, "
+                   "is_reply/is_quote/is_retweet); prefer the `tweets` tool for lookups"),
+        "tweet_tickers": (f"'{D}/tweets/tweet_tickers.parquet'",
+                          "cashtags per tweet (tweet_id -> ticker, in_universe flag); join tweets on tweet_id = tweets.id"),
         "patent_ai_by_ticker_year": (f"'{D}/patents/ai_by_ticker_year.parquet'",
                                      "ticker x grant year (<=2023): n_patents, n_ai_any/pct_ai, n_ai93/pct_ai93, n_<cat>; prefer pct_ai93 or n_ml"),
     }
@@ -306,6 +315,37 @@ def live_news(ticker: str, count: int = 8) -> str:
         return _dump(yahoo_live.news(ticker.upper(), count))
     except Exception as e:  # noqa: BLE001
         return _dump({"error": f"yahoo live_news failed: {e}"})
+
+
+@mcp.tool(annotations=READ_ONLY)
+def tweets(ticker: str = "", handle: str = "", since: str = "", until: str = "", text: str = "",
+           min_likes: int = 0, include_replies: bool = False, order: str = "recent", limit: int = 25) -> str:
+    """Tweets from the ~20 followed semiconductor/AI research accounts (Sep 2026+).
+    Filters: ticker (X cashtag, e.g. MU), handle, since/until (YYYY-MM-DD, UTC; until exclusive), text (substring,
+    case-insensitive), min_likes. Replies are excluded unless include_replies; retweets always are.
+    order: "recent" or "likes". Cashtags only: a tweet that says "Micron" without $MU won't match `ticker`,
+    so also try `text`. Use `sql` over the tweets/tweet_tickers views for aggregates.
+
+    The result's `coverage` says whether the query answered the question: matched vs returned,
+    truncated, span and per-account split of the matches, replies excluded, the store's own date
+    span, and `notes` with next-step hints. If coverage.truncated or matched is 0, adjust and re-query
+    before concluding anything. Absence of tweets only means absence from this store (see tweet_sources)."""
+    try:
+        res = tweets_src.query(ticker or None, handle or None, since or None, until or None, text or None,
+                               min_likes, include_replies, order, limit)
+    except (duckdb.Error, OSError) as e:
+        return _dump({"error": f"tweets unavailable (run sources/tweets.py ingest): {e}"})
+    return _dump(res)
+
+
+@mcp.tool(annotations=READ_ONLY)
+def tweet_sources() -> str:
+    """Which X accounts are in the tweet store, with tweet counts and first/last tweet dates.
+    Check this to see whether an account is covered at all, and how fresh its data is."""
+    try:
+        return _dump(tweets_src.sources())
+    except (duckdb.Error, OSError) as e:
+        return _dump({"error": f"tweets unavailable (run sources/tweets.py ingest): {e}"})
 
 
 @mcp.tool(annotations=READ_ONLY)
