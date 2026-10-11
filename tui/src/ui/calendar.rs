@@ -104,6 +104,10 @@ impl Calendar {
         self.view
     }
 
+    pub fn set_view(&mut self, view: View) {
+        self.view = view;
+    }
+
     pub fn cursor(&self) -> NaiveDate {
         self.cursor
     }
@@ -128,7 +132,10 @@ impl Calendar {
 
     /// Returns whether the key was a calendar key.
     pub fn on_key(&mut self, key: KeyEvent) -> bool {
-        if key.modifiers.intersects(KeyModifiers::CONTROL | KeyModifiers::ALT) {
+        if key
+            .modifiers
+            .intersects(KeyModifiers::CONTROL | KeyModifiers::ALT)
+        {
             return false;
         }
         match key.code {
@@ -206,11 +213,7 @@ impl Calendar {
             View::Week => {
                 let first = week_start(c);
                 let last = first + Duration::days(self.cols() as i64 - 1);
-                format!(
-                    "{} – {}",
-                    first.format("%b %-d"),
-                    last.format("%b %-d, %Y")
-                )
+                format!("{} – {}", first.format("%b %-d"), last.format("%b %-d, %Y"))
             }
             View::Day => c.format("%A, %B %-d, %Y").to_string(),
         }
@@ -219,7 +222,8 @@ impl Calendar {
     // --- drawing ---------------------------------------------------------
 
     pub fn draw(&self, frame: &mut Frame, area: Rect) {
-        let [head, body] = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(area);
+        let [head, body] =
+            Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(area);
         self.draw_head(frame, head);
         match self.view {
             View::Month => self.draw_month(frame, body),
@@ -231,7 +235,11 @@ impl Calendar {
     fn draw_head(&self, frame: &mut Frame, area: Rect) {
         let th = self.theme;
         let mut tabs: Vec<Span> = Vec::new();
-        for (v, name) in [(View::Month, "Month"), (View::Week, "Week"), (View::Day, "Day")] {
+        for (v, name) in [
+            (View::Month, "Month"),
+            (View::Week, "Week"),
+            (View::Day, "Day"),
+        ] {
             let style = if v == self.view {
                 th.accent().add_modifier(Modifier::BOLD)
             } else {
@@ -293,7 +301,10 @@ impl Calendar {
             let name = weekday_name(i);
             frame.render_widget(
                 Paragraph::new(Line::styled(
-                    format!(" {}", text::truncate(name, rect.width.saturating_sub(1) as usize)),
+                    format!(
+                        " {}",
+                        text::truncate(name, rect.width.saturating_sub(1) as usize)
+                    ),
                     th.dim(),
                 ))
                 .style(th.base()),
@@ -305,7 +316,8 @@ impl Calendar {
     fn draw_month(&self, frame: &mut Frame, area: Rect) {
         let th = self.theme;
         frame.render_widget(Block::new().style(th.base()), area);
-        let [names, grid] = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(area);
+        let [names, grid] =
+            Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(area);
         self.weekday_header(frame, names);
 
         let c = self.cursor;
@@ -343,12 +355,20 @@ impl Calendar {
         let mut lines = vec![Line::from(vec![
             Span::styled(format!("{}", d.day()), self.day_number_style(d, in_month)),
             Span::styled(
-                if events.is_empty() { String::new() } else { format!(" ·{}", events.len()) },
+                if events.is_empty() {
+                    String::new()
+                } else {
+                    format!(" ·{}", events.len())
+                },
                 Style::new().fg(th.dim),
             ),
         ])];
         let avail = inner.height as usize - 1;
-        let shown = if events.len() > avail { avail.saturating_sub(1) } else { events.len() };
+        let shown = if events.len() > avail {
+            avail.saturating_sub(1)
+        } else {
+            events.len()
+        };
         for e in &events[..shown] {
             lines.push(Line::styled(
                 text::truncate(&e.label, w),
@@ -383,10 +403,7 @@ impl Calendar {
             }
             let w = inner.width as usize;
             let mut lines = vec![Line::from(vec![
-                Span::styled(
-                    format!("{} ", weekday_name(i)),
-                    Style::new().fg(th.dim),
-                ),
+                Span::styled(format!("{} ", weekday_name(i)), Style::new().fg(th.dim)),
                 Span::styled(
                     format!("{}", d.day()),
                     self.day_number_style(d, true).add_modifier(Modifier::BOLD),
@@ -398,10 +415,15 @@ impl Calendar {
             let mut used = 0;
             let mut shown = 0;
             for e in events {
-                let t = e.time.as_deref().map(|t| format!("{t} ")).unwrap_or_default();
+                let t = e
+                    .time
+                    .as_deref()
+                    .map(|t| format!("{t} "))
+                    .unwrap_or_default();
                 let wrapped = text::wrap(&format!("{t}{}", e.label), w);
                 // keep a line free for "+N more" unless this is the last event that fits
-                if used + wrapped.len() > room.saturating_sub(usize::from(shown + 1 < events.len())) {
+                if used + wrapped.len() > room.saturating_sub(usize::from(shown + 1 < events.len()))
+                {
                     break;
                 }
                 used += wrapped.len();
@@ -424,11 +446,19 @@ impl Calendar {
         let th = self.theme;
         frame.render_widget(Block::new().style(th.base()), area);
         let events = self.events_on(self.cursor);
-        let detail_h = if events.is_empty() { 0 } else { 4.min(area.height / 3) };
+        let detail_h = if events.is_empty() {
+            0
+        } else {
+            4.min(area.height / 3)
+        };
         let [list, detail] =
             Layout::vertical([Constraint::Min(0), Constraint::Length(detail_h)]).areas(area);
         if events.is_empty() {
-            let msg = if self.cursor == self.today { "nothing scheduled today" } else { "nothing scheduled" };
+            let msg = if self.cursor == self.today {
+                "nothing scheduled today"
+            } else {
+                "nothing scheduled"
+            };
             frame.render_widget(
                 Paragraph::new(Line::styled(format!("  {msg}"), th.dim())).style(th.base()),
                 list,
@@ -442,7 +472,11 @@ impl Calendar {
             .map(|(i, e)| {
                 let time = e.time.as_deref().unwrap_or("all day");
                 let row = format!("  {time:<7} {}", e.label);
-                let base = if i == self.sel { th.selected() } else { th.base() };
+                let base = if i == self.sel {
+                    th.selected()
+                } else {
+                    th.base()
+                };
                 Line::styled(
                     format!("{:<w$}", text::truncate(&row, w), w = w),
                     base.patch(self.tone_style(e.tone)),
@@ -452,7 +486,10 @@ impl Calendar {
         frame.render_widget(Paragraph::new(lines).style(th.base()), list);
 
         if let Some(text) = events.get(self.sel).and_then(|e| e.detail.as_deref()) {
-            let block = Block::new().borders(Borders::TOP).border_style(th.border()).style(th.base());
+            let block = Block::new()
+                .borders(Borders::TOP)
+                .border_style(th.border())
+                .style(th.base());
             let inner = block.inner(detail);
             frame.render_widget(block, detail);
             let lines: Vec<Line> = text::wrap(text, inner.width.saturating_sub(2) as usize)
@@ -474,7 +511,11 @@ pub fn week_start(d: NaiveDate) -> NaiveDate {
 }
 
 pub fn days_in_month(year: i32, month: u32) -> u32 {
-    let (ny, nm) = if month == 12 { (year + 1, 1) } else { (year, month + 1) };
+    let (ny, nm) = if month == 12 {
+        (year + 1, 1)
+    } else {
+        (year, month + 1)
+    };
     let first = NaiveDate::from_ymd_opt(year, month, 1).expect("valid month");
     let next = NaiveDate::from_ymd_opt(ny, nm, 1).expect("valid month");
     (next - first).num_days() as u32
@@ -536,7 +577,11 @@ mod tests {
         t.draw(|f| c.draw(f, f.area())).unwrap();
         let b = t.backend().buffer();
         (0..h)
-            .map(|y| (0..w).map(|x| b[(x, y)].symbol().to_string()).collect::<String>())
+            .map(|y| {
+                (0..w)
+                    .map(|x| b[(x, y)].symbol().to_string())
+                    .collect::<String>()
+            })
             .collect::<Vec<_>>()
             .join("\n")
     }
@@ -655,7 +700,9 @@ mod tests {
     #[test]
     fn overflow_shows_more_and_tiny_areas_do_not_panic() {
         let d = date(2026, 10, 6);
-        let many: Vec<Event> = (0..12).map(|i| ev(d, Some("09:00"), &format!("event {i}"))).collect();
+        let many: Vec<Event> = (0..12)
+            .map(|i| ev(d, Some("09:00"), &format!("event {i}")))
+            .collect();
         let mut c = Calendar::new(d, many, Theme::default());
         assert!(render(&c, 100, 30).contains("more"));
         for view in ['m', 'w', 'd'] {

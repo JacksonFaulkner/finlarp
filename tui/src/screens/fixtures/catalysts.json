@@ -1,0 +1,458 @@
+[
+  {
+    "date": "2026-08-12",
+    "time": null,
+    "label": "CRWV + NBIS Q2",
+    "detail": "CRWV backlog $104B, capex $9.4B, stock +19%. NBIS ~$3B run-rate, adj. EBITDA positive, stock +34%.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-08-26",
+    "time": null,
+    "label": "CRM FQ2: Agentforce",
+    "detail": "Revenue $11.3B (+11%), Agentforce ARR over $1.5B (+240%), FY27 guide raised $200M, stock +18% next day.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-09-01",
+    "time": "16:05",
+    "label": "CRDO FQ1",
+    "detail": "EPS $1.20 vs $1.17 est, but stock reportedly fell ~20% next day (unverified).",
+    "tone": "bear",
+    "est": false
+  },
+  {
+    "date": "2026-09-02",
+    "time": "16:05",
+    "label": "AVGO FQ3",
+    "detail": "Revenue ~$29.6B (+86%), AI semis $16.7B. FQ4 AI guide $21.7B, FY27 AI ~$115B. Stock slipped 1-6% on lofty targets.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-09-03",
+    "time": "16:05",
+    "label": "CIEN FQ3",
+    "detail": "Reported; figures not retrieved, check the 8-K.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-09-10",
+    "time": "16:00",
+    "label": "ORCL FQ1: RPO $664B",
+    "detail": "Revenue $19.3B (+30%), OCI +121%, RPO $664B (+$26B q/q, >$30B new AI contracts), FCF -$5B, 300k+ GPUs delivered.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-09-30",
+    "time": null,
+    "label": "MU FQ4",
+    "detail": "Reported; figures not retrieved.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-10-08",
+    "time": null,
+    "label": "Samsung Q3 prelim",
+    "detail": "Issued Oct 8: sales about KRW 195T, operating profit about KRW 107.4T. Full results date unknown.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-10-10",
+    "time": null,
+    "label": "TSM Sep sales",
+    "detail": "Monthly revenue normally published around the 10th.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-12",
+    "time": null,
+    "label": "OCP Global Summit",
+    "detail": "Oct 12-15, San Jose, sold out. Rack, 800V DC power, cooling and networking announcements from Nvidia, AMD, Vertiv, Eaton, Arista, Astera, Credo. Headline catalyst, no numbers.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-10-13",
+    "time": null,
+    "label": "PLTR sets Q3 date",
+    "detail": "Palantir announced its Q3'25 date on Oct 13 last year.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-14",
+    "time": null,
+    "label": "ASML Q3",
+    "detail": "2027 order/backlog commentary, High-NA ramp, China exposure.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-15",
+    "time": null,
+    "label": "Anthropic IPO target",
+    "detail": "Secondary sources: confidential S-1 filed 2026-06-01, Nasdaq listing targeted Oct 2026. No official confirmation. Read-through: AMZN, GOOGL, NVDA, MSFT.",
+    "tone": "bull",
+    "est": true
+  },
+  {
+    "date": "2026-10-15",
+    "time": "02:00",
+    "label": "TSM Q3 + Q4 guide",
+    "detail": "Confirmed on TSMC IR. 14:00 Taipei (~02:00 ET): check the time. Q3 guide $44.6-45.8B, gross margin 65-67%. Q4 guide and capex are the focus.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-10-20",
+    "time": "08:00",
+    "label": "VRT Q3",
+    "detail": "Bullstory says 10-20, Nordnet 10-21; no company confirmation. Q3 guide $3.65-3.85B. Stock fell 17% on the Q2 print on revenue slippage, so Q3 is a credibility test.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-21",
+    "time": "17:00",
+    "label": "LRCX FQ1",
+    "detail": "Confirmed by Lam's Sept 30 release. Sept-quarter guide $8.1B +/-0.4B (single source, verify against the 8-K). December guide and 2027 WFE outlook are the focus.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-10-27",
+    "time": null,
+    "label": "SK Hynix Q3",
+    "detail": "Record HBM profit expected; HBM4 share and 2027 sold-out commentary. Q2 op margin 76.3%. Date tentative: TipRanks says confirmed, Stockhub tentative.",
+    "tone": "bull",
+    "est": true
+  },
+  {
+    "date": "2026-10-27",
+    "time": null,
+    "label": "Dreamforce 2026",
+    "detail": "Date unverified. Agentforce announcements expected.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-27",
+    "time": "16:05",
+    "label": "GOOGL Q3",
+    "detail": "Cloud growth/backlog and capex guide.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-27",
+    "time": "16:05",
+    "label": "TER + Samsung Q3",
+    "detail": "TER: AI compute test demand. Samsung: HBM4 qualification at Nvidia, memory pricing.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "08:00",
+    "label": "GEV + ETN Q3",
+    "detail": "GEV consensus EPS ~$4.25, revenue ~$12.0B after a Q2 EPS miss. ETN: data-center electrical backlog.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "14:00",
+    "label": "FOMC decision",
+    "detail": "Rates 3.50-3.75% as of the June statement. Cut odds from undated prediction markets: 15-22%. Date and time from the standard schedule, not verified.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "16:05",
+    "label": "MSFT FQ1",
+    "detail": "Azure growth and capex guide. FQ3: revenue $82.9B (+18%), capex above expectations.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "16:05",
+    "label": "META Q3",
+    "detail": "2026 capex guide was raised to $125-145B in April; a further raise or a 2027 outlook is the risk.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "16:05",
+    "label": "NOW Q3",
+    "detail": "Confirmed by the company, call at 2pm PT. Key read on the SaaS-disruption debate.",
+    "tone": "risk",
+    "est": false
+  },
+  {
+    "date": "2026-10-29",
+    "time": null,
+    "label": "CEG + VST + TLN Q3",
+    "detail": "Attention on new hyperscaler PPAs.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-29",
+    "time": "16:05",
+    "label": "AMZN Q3",
+    "detail": "AWS growth and capex.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-29",
+    "time": "16:05",
+    "label": "KLAC FQ1",
+    "detail": "Not confirmed by KLA. Guide $4.0B +/-0.2B.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-10-29",
+    "time": "17:00",
+    "label": "INTC Q3",
+    "detail": "Confirmed by Intel IR, call 5:00pm ET. Q3 guide raised to $15.8-16.8B (from $13.8-14.8B), gross margin 42%. Foundry customers for 18A/14A are the focus.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-10-31",
+    "time": null,
+    "label": "Anthropic round >$900B",
+    "detail": "Reports of a $30B+ round at a pre-money above $900B, passing OpenAI's $852B. Sources conflict.",
+    "tone": "bull",
+    "est": true
+  },
+  {
+    "date": "2026-11-03",
+    "time": null,
+    "label": "US midterm elections",
+    "detail": "Shifts the odds on AI regulation, tariffs and chip export policy. Section 232 Phase 1 put a 25% duty on certain advanced chips from Jan 15; Phase 2 rate unknown.",
+    "tone": "risk",
+    "est": false
+  },
+  {
+    "date": "2026-11-03",
+    "time": "16:05",
+    "label": "PLTR Q3",
+    "detail": "Date is a Benzinga estimate. Q3 guide $2.160-2.164B; Q2 revenue $1.935B (+93%). US commercial growth and the guide raise are the focus.",
+    "tone": "bull",
+    "est": true
+  },
+  {
+    "date": "2026-11-03",
+    "time": "16:30",
+    "label": "ANET Q3",
+    "detail": "Confirmed by Arista (release Oct 6), call 4:30pm ET. Q3 guide $3.3B, FY26 guide $12.6B. AI back-end networking and margin.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-11-03",
+    "time": "17:00",
+    "label": "AMD Q3",
+    "detail": "Confirmed by AMD IR (release dated Oct 6), call 5:00pm ET. Q3 guide $13.0B +/-0.3B. Data center was 58% of Q2 revenue. Stock fell ~8-9% on the Aug 4 print despite beats.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-11-04",
+    "time": "16:05",
+    "label": "QCOM + ARM + SMCI",
+    "detail": "QCOM: AI200 data-center narrative. ARM: royalty growth. SMCI: rack-scale revenue and margin recovery.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "OKLO + SMR + NNE Q3",
+    "detail": "NRC milestones, DOE reactor pilot progress, funding.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-11-05",
+    "time": "16:05",
+    "label": "ALAB Q3",
+    "detail": "Estimated (Earnings Whispers, StockAnalysis); other aggregators say 11-10. PCIe/UALink retimers and the Scorpio switch ramp. No numbers found.",
+    "tone": "bull",
+    "est": true
+  },
+  {
+    "date": "2026-11-10",
+    "time": null,
+    "label": "US-China truce",
+    "detail": "Original Busan truce expiry. A Sept 2026 report says a ~2-month extension was agreed; the new expiry is unconfirmed. H200 China sales carry a 25% fee. Not source-verified.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-11-10",
+    "time": "16:05",
+    "label": "CRWV Q3",
+    "detail": "Consensus EPS -$1.57. Capex and debt funding are the swing factors.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-11-12",
+    "time": "16:05",
+    "label": "AMAT FQ4",
+    "detail": "China export-control exposure and WFE outlook.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-11-12",
+    "time": "16:05",
+    "label": "COHR FQ1",
+    "detail": "800G/1.6T transceiver demand and datacom mix.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-11-17",
+    "time": null,
+    "label": "MSFT Ignite",
+    "detail": "Nov 17-20, San Francisco. Azure AI, Copilot, Maia chip updates likely.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-11-18",
+    "time": "16:05",
+    "label": "NVDA FQ3",
+    "detail": "Date estimated from last year. Vera Rubin supply and hyperscale re-acceleration; no China data center compute in guide.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-11-25",
+    "time": "16:05",
+    "label": "DELL + SNOW",
+    "detail": "DELL: AI server backlog and margin pressure. SNOW: AI-workload product revenue.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-11-26",
+    "time": "16:05",
+    "label": "MRVL FQ3",
+    "detail": "Custom silicon / AI guide is the focus.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-11-30",
+    "time": null,
+    "label": "AWS re:Invent",
+    "detail": "Nov 30-Dec 4, Las Vegas. Trainium and custom-silicon news, Bedrock/agent launches.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-12-01",
+    "time": "14:00",
+    "label": "Nvidia GTC DC keynote",
+    "detail": "Jensen Huang keynote, GTC Washington DC (Nov 30-Dec 3): AI factories, open models, physical AI.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-12-02",
+    "time": null,
+    "label": "EU AI Act labelling + NCII ban",
+    "detail": "Digital Omnibus deal: AI-content labelling deadline and NCII ban apply. Read-through: MSFT, GOOGL, META.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2026-12-02",
+    "time": "16:05",
+    "label": "CRDO FQ2",
+    "detail": "Prior print was followed by a ~20% drop.",
+    "tone": "risk",
+    "est": false
+  },
+  {
+    "date": "2026-12-02",
+    "time": "16:05",
+    "label": "CRM + SNOW FQ3",
+    "detail": "Last year both reported 2025-12-03; no 2026 date confirmed.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-12-09",
+    "time": null,
+    "label": "PJM 2029/30 capacity auction",
+    "detail": "Last three auctions cleared at the cap; the 28/29 BRA was 6,831 MW short. Read-through: CEG, VST, TLN, NRG.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-12-10",
+    "time": "16:05",
+    "label": "ORCL FQ2",
+    "detail": "RPO conversion, negative FCF and financing.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-12-10",
+    "time": "16:05",
+    "label": "CIEN FQ4",
+    "detail": "MarketBeat range Dec 10-14.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-12-17",
+    "time": "16:05",
+    "label": "MU FQ1",
+    "detail": "HBM4 ramp and DRAM pricing.",
+    "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-12-31",
+    "time": null,
+    "label": "FERC/PJM co-location ruling",
+    "detail": "Paper-hearing outcome and final rates unconfirmed; an order could land any time. Read-through: CEG, VST, TLN.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2027-01-06",
+    "time": null,
+    "label": "CES 2027",
+    "detail": "Jan 6-9, Las Vegas. Nvidia and AMD usually keynote around opening.",
+    "tone": "neutral",
+    "est": false
+  },
+  {
+    "date": "2027-03-15",
+    "time": null,
+    "label": "Nvidia GTC 2027",
+    "detail": "Mar 14-18, San Jose. Keynote day approximate.",
+    "tone": "bull",
+    "est": true
+  }
+]

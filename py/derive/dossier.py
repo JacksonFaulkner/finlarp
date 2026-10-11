@@ -27,6 +27,8 @@ JSON shape (what tui/src/screens/dossier.rs reads):
 
     python py/derive/dossier.py MRVL          # build + cache, print summary
     python py/derive/dossier.py MRVL --json   # print the JSON
+    python py/derive/dossier.py MRVL NVDA --debug [-v]   # section health grid, no cache write
+    python py/derive/dossier.py --all --debug            # health sweep over the universe
     python py/derive/dossier.py --all         # every ticker in the universe
     python py/derive/dossier.py MRVL --if-stale 12   # rebuild only if stale; JSON status (nvim)
 """
@@ -36,6 +38,7 @@ import json
 import re
 import sys
 import time
+import traceback
 from datetime import date, datetime, timedelta
 from urllib.parse import quote
 
@@ -435,6 +438,41 @@ def sec_patents_(t: str, con) -> dict | None:
     return {"id": "patents", "title": "Patents", "blocks": blocks}
 
 
+def sec_tweets_(t: str, con) -> dict | None:
+    """Tweets from the followed research accounts that cashtag this ticker (sources/tweets.py)."""
+    tw, tk = D / "tweets" / "tweets.parquet", D / "tweets" / "tweet_tickers.parquet"
+    if not (tw.exists() and tk.exists()):
+        return None
+    rows = con.execute(f"""
+        SELECT w.id, w.handle, w.created_at, w.text, w.likes, w.url, w.is_reply
+        FROM '{tw}' w JOIN '{tk}' k ON k.tweet_id = w.id
+        WHERE k.ticker = ? AND NOT w.is_retweet ORDER BY w.created_at DESC""", [t]).fetchall()
+    ds = src(f"X posts from followed research accounts, cashtag ${t}", "https://x.com/search?q=" + quote(f"${t}"))
+    if not rows:
+        return {"id": "tweets", "title": "Tweets", "blocks": [
+            {"type": "kv", "rows": [{"label": f"Cashtag ${t} mentions", "value": "0",
+                                     "src": derived("count of tweets", f"tweets with cashtag ${t}", [], ds)}]}]}
+    srcs = [src(f"@{h} · {c:%Y-%m-%d}", u) for _, h, c, _, _, u, _ in rows]
+    last = rows[0][2]
+    def window(days):
+        cut = datetime.now() - timedelta(days=days)
+        return [i for i, r in enumerate(rows) if r[2] >= cut]
+    d7, d30 = window(7), window(30)
+    kv = [
+        {"label": "Mentions (7d)", "value": f"{len(d7)} · {len({rows[i][1] for i in d7})} accounts", "new": bool(d7),
+         "src": derived("count of tweets", f"cashtag ${t} in the last 7 days", [srcs[i] for i in d7[:25]], ds)},
+        {"label": "Mentions (30d)", "value": f"{len(d30)} · {len({rows[i][1] for i in d30})} accounts",
+         "src": derived("count of tweets", f"cashtag ${t} in the last 30 days", [srcs[i] for i in d30[:25]], ds)},
+        {"label": "Latest", "value": f"{last:%Y-%m-%d %H:%M} UTC · @{rows[0][1]}", "src": srcs[0]},
+    ]
+    table = [{"cells": [f"{c:%Y-%m-%d}", f"@{h}", f"♥{l or 0}", " ".join(x.split())], "new": _is_new(c.date(), 7), "src": srcs[i]}
+             for i, (_, h, c, x, l, _, _) in enumerate(rows[:40])]
+    return {"id": "tweets", "title": "Tweets", "blocks": [
+        {"type": "kv", "rows": kv},
+        {"type": "table", "title": "Recent cashtag mentions (cashtags only, retweets excluded)",
+         "cols": ["date", "who", "likes", "tweet"], "rows": table}]}
+
+
 def profile_(t: str, prof: dict | None) -> dict | None:
     if not prof:
         return None
@@ -562,7 +600,7 @@ def estimates_(t: str) -> dict | None:
 FRESH = {  # source -> glob whose newest mtime is "last pulled"
     "events": "events/*.parquet", "earnings": "earnings/releases/*.parquet", "financials": "financials/facts/*.parquet",
     "segments": "segments/**/*.parquet", "insiders": "insiders/**/*.parquet", "filing_text": "filing_text/*.parquet",
-    "patents": "patents/*.parquet", "profiles": "profiles/*.parquet",
+    "patents": "patents/*.parquet", "profiles": "profiles/*.parquet", "tweets": "tweets/*.parquet",
 }
 
 
@@ -578,12 +616,24 @@ def freshness() -> list[dict]:
     return out
 
 
-def _section(fn, *a):
+def _section(fn, *a, health: list | None = None):
+    """Run one section builder. Never raises; outcome goes to `health` as
+    {section, status: ok|empty|error, rows, secs, error?, tb?}."""
+    sid = fn.__name__.strip("_")
+    t0 = time.time()
     try:
-        return fn(*a)
+        out = fn(*a)
     except Exception as e:  # one broken source shouldn't blank the screen
-        return {"id": fn.__name__.strip("_"), "title": fn.__name__.strip("_").replace("sec_", ""), "blocks": [
+        if health is not None:
+            health.append({"section": sid, "status": "error", "rows": 0, "secs": round(time.time() - t0, 3),
+                           "error": f"{type(e).__name__}: {e}", "tb": traceback.format_exc()})
+        return {"id": sid, "title": sid.replace("sec_", ""), "blocks": [
             {"type": "text", "text": f"error: {type(e).__name__}: {e}", "src": src("dossier.py", None, error=True)}]}
+    if health is not None:
+        rows = sum(len(b.get("rows", b.get("points", b.get("items", [])))) for b in (out or {}).get("blocks", []))
+        health.append({"section": sid, "status": "ok" if out and rows else "empty", "rows": rows,
+                       "secs": round(time.time() - t0, 3)})
+    return out
 
 
 def validate(d: dict) -> list[str]:
@@ -602,6 +652,45 @@ def validate(d: dict) -> list[str]:
     return bad
 
 
+HEALTH_LOG = D / "debug" / "dossier_health.jsonl"
+
+
+def _log_health(t: str, d: dict) -> None:
+    """Append non-ok sections and unsourced paths for t (one JSON line per build)."""
+    bad = [h for h in d["health"] if h["status"] != "ok"]
+    if not bad and not d["unsourced"]:
+        return
+    HEALTH_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with HEALTH_LOG.open("a") as f:
+        f.write(json.dumps({"ticker": t, "built_at": d["built_at"], "health": bad, "unsourced": d["unsourced"]}) + "\n")
+
+
+def debug_report(tickers: list[str], verbose: bool = False) -> None:
+    """Build each ticker (no cache write) and print a ticker x section status grid."""
+    ids, grid = [], {}
+    for t in tickers:
+        d = build(t)
+        grid[t] = d
+        for h in d["health"]:
+            if h["section"] not in ids:
+                ids.append(h["section"])
+    sym = {"ok": ".", "empty": "-", "error": "E"}
+    print(f"{'ticker':8}" + " ".join(i.replace("sec_", "")[:5].ljust(5) for i in ids) + "  unsrc")
+    for t, d in grid.items():
+        st = {h["section"]: h for h in d["health"]}
+        print(f"{t:8}" + " ".join(sym[st[i]["status"]].ljust(5) if i in st else "?".ljust(5) for i in ids) + f"  {len(d['unsourced'])}")
+        for h in d["health"]:
+            if h["status"] == "error":
+                print(f"    {h['section']}: {h['error']}")
+                if verbose:
+                    print("      " + h["tb"].strip().replace("\n", "\n      "))
+    n = len(grid)
+    print(f"\n{n} tickers   (. ok  - empty  E error)")
+    for i in ids:
+        c = {k: sum(1 for d in grid.values() for h in d["health"] if h["section"] == i and h["status"] == k) for k in sym}
+        print(f"  {i:16} ok={c['ok']:4} empty={c['empty']:4} error={c['error']:4}")
+
+
 def build(ticker: str) -> dict:
     t = ticker.upper()
     con = duckdb.connect()
@@ -612,10 +701,13 @@ def build(ticker: str) -> dict:
         r = con.execute(f"SELECT * FROM '{pf}' WHERE ticker = ?", [t]).fetchone()
         prof = dict(zip([c[0] for c in con.description], r)) if r else None
     name = (prof or {}).get("long_name") or next((s["name"] for s in universe.rows() if s["ticker"] == t), t)
+    health: list[dict] = []
     sections = [s for s in (
-        _section(sec_events_, t, F), _section(sec_earnings_, t, F), _section(sec_revenue_, t, F, con),
-        _section(sec_holders_, t, con), _section(sec_insiders_, t, F), _section(sec_risks_, t, F, con),
-        _section(sec_patents_, t, con), _section(estimates_, t), _section(profile_, t, prof)) if s]
+        _section(sec_events_, t, F, health=health), _section(sec_earnings_, t, F, health=health),
+        _section(sec_revenue_, t, F, con, health=health), _section(sec_holders_, t, con, health=health),
+        _section(sec_insiders_, t, F, health=health), _section(sec_risks_, t, F, con, health=health),
+        _section(sec_patents_, t, con, health=health), _section(sec_tweets_, t, con, health=health),
+        _section(estimates_, t, health=health), _section(profile_, t, prof, health=health)) if s]
     for s in sections:
         rows = [it for b in s["blocks"] for it in b.get("rows", [])]
         s["new"] = any(it.get("new") for it in rows)
@@ -625,8 +717,9 @@ def build(ticker: str) -> dict:
          "industry": (prof or {}).get("industry"), "country": (prof or {}).get("country"),
          "market_cap": (prof or {}).get("market_cap"), "employees": (prof or {}).get("employees"),
          "header_src": src("Yahoo Finance profile", f"https://finance.yahoo.com/quote/{quote(t)}/profile"),
-         "built_at": datetime.now().isoformat(timespec="seconds"), "freshness": freshness(), "sections": sections}
+         "built_at": datetime.now().isoformat(timespec="seconds"), "freshness": freshness(), "sections": sections, "health": health}
     d["unsourced"] = validate(d)
+    _log_health(t, d)
     con.close()
     return d
 
@@ -649,6 +742,9 @@ def _is_stale(t: str, hours: float) -> bool:
 
 def main(argv: list[str]) -> None:
     as_json = "--json" in argv
+    if "--debug" in argv:
+        ts = [x["ticker"] for x in universe.rows()] if "--all" in argv else [a.upper() for a in argv if not a.startswith("--")]
+        return debug_report(ts, verbose="-v" in argv or "--verbose" in argv)
     # --if-stale H: rebuild only if missing / older than H hours / older than
     # the data; prints one JSON status line per ticker (for init.lua `run`).
     stale_h = next((float(argv[i + 1]) for i, a in enumerate(argv[:-1]) if a == "--if-stale"), None)

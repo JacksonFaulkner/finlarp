@@ -557,6 +557,11 @@ function M.pick_universe()
   require("finlarp.ui.tui").open_screen("universe", nil, { title = " AI universe " })
 end
 
+--- Chat with Claude Code in the binary (tickers in replies open screens).
+function M.pick_chat()
+  require("finlarp.ui.tui").open_screen("chat", nil, { title = " chat " })
+end
+
 --- Lists currently open dashboard session names.
 function M.list_open()
   return require("finlarp.ui.window").list_open()

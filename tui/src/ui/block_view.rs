@@ -7,8 +7,8 @@
 //   Table  -> ratatui Table, content-sized columns (long text truncated with
 //             …; the cursor row wraps to show everything), h/l cell cursor
 //   Kv     -> two-column Table, values right-aligned
-//   Series -> x / value table with SparkBars beside it (None = gap), or a
-//             SparkBars row over the table when the width is too narrow
+//   Series -> x / value table with a horizontal bar beside each row (None =
+//             blank row); table alone when the width is too narrow
 //   Bars   -> horizontal bars: label, bar, value; `compare` as a dim second
 //             bar; negative values grow left from a shared zero column
 //   Text   -> wrapped paragraph (the whole text is one item)
@@ -37,7 +37,6 @@ use ratatui::widgets::{
 };
 
 use crate::model::{BarItem, Block, KvRow, Point, Row, Source};
-use crate::ui::charts::SparkBars;
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -864,20 +863,14 @@ fn kv(rows: &[KvRow], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     )
 }
 
-/// Rows the sparkline takes above the series table.
-const SPARK_H: u16 = 2;
-/// Side-by-side series: columns between the rows and the chart, and the
-/// narrowest chart worth drawing beside them.
+/// Side-by-side series: columns between the rows and the bars, and the
+/// narrowest bar worth drawing beside them.
 const SIDE_GAP: u16 = 3;
 const SIDE_MIN_CHART: u16 = 12;
 
 fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     let th = cx.th;
-    let spark = if points.iter().any(|p| p.y.is_some()) {
-        SPARK_H
-    } else {
-        0
-    };
+    let has_bars = points.iter().any(|p| p.y.is_some());
     let ys: Vec<f64> = points.iter().filter_map(|p| p.y).collect();
     let mut fmt = text::fmt_nums(&ys).into_iter();
     let grows: Vec<GridRow> = points
@@ -902,8 +895,9 @@ fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
         cell_style: &style,
     };
 
-    // Side by side when there's room: x / value rows on the left, a chart as
-    // tall as the rows on the right. Otherwise the sparkline sits on top.
+    // x / value rows on the left, one horizontal bar per row on the right
+    // (a missing point leaves its row blank). With no room (or in audit mode,
+    // where the source column takes it) the table stands alone.
     let col_w = |c: usize| {
         grows
             .iter()
@@ -913,72 +907,61 @@ fn series(points: &[Point], cx: &Cx, out: Option<(&mut Buffer, Rect)>) -> Geom {
     };
     let table_w = GUTTER + 2 + col_w(0) + col_w(1);
     let chart_room = cx.width.saturating_sub(table_w + SIDE_GAP);
-    if spark > 0 && !cx.audit && chart_room >= SIDE_MIN_CHART {
-        let tcx = Cx {
-            th,
-            audit: false,
-            width: table_w,
-            sel: cx.sel,
-            col: None,
-        };
-        let Some((buf, area)) = out else {
-            return grid(&spec, &grows, &tcx, None);
-        };
-        let g = grid(
-            &spec,
-            &grows,
-            &tcx,
-            Some((
-                buf,
-                Rect {
-                    width: table_w.min(area.width),
-                    ..area
-                },
-            )),
-        );
-        let bars = SparkBars {
-            points,
-            selected: cx.sel,
-            theme: th,
-        };
-        let (per, _) = bars.geometry(chart_room);
-        let chart_w = (per * points.len() as u16).clamp(1, chart_room);
-        let chart = Rect {
-            x: area.x + table_w + SIDE_GAP,
-            width: chart_w,
-            height: g.height.min(area.height),
-            ..area
-        };
-        bars.render(chart.intersection(area), buf);
-        return g;
+    if !(has_bars && !cx.audit && chart_room >= SIDE_MIN_CHART) {
+        return grid(&spec, &grows, cx, out);
     }
-
-    let mut g = match out {
-        None => grid(&spec, &grows, cx, None),
-        Some((buf, area)) => {
-            let spark_r = Rect {
-                x: area.x + GUTTER,
-                width: area.width.saturating_sub(GUTTER),
-                height: spark.min(area.height),
-                ..area
-            };
-            SparkBars {
-                points,
-                selected: cx.sel,
-                theme: th,
-            }
-            .render(spark_r, buf);
-            let rest = Rect {
-                y: area.y + spark,
-                height: area.height.saturating_sub(spark),
-                ..area
-            };
-            grid(&spec, &grows, cx, Some((buf, rest)))
-        }
+    let tcx = Cx {
+        th,
+        audit: false,
+        width: table_w,
+        sel: cx.sel,
+        col: None,
     };
-    g.height += spark;
-    for it in &mut g.items {
-        it.0 += spark;
+    let Some((buf, area)) = out else {
+        return grid(&spec, &grows, &tcx, None);
+    };
+    let g = grid(
+        &spec,
+        &grows,
+        &tcx,
+        Some((
+            buf,
+            Rect {
+                width: table_w.min(area.width),
+                ..area
+            },
+        )),
+    );
+    // shared scale with a zero column so mixed signs line up
+    let (lo, hi) = ys
+        .iter()
+        .fold((0.0_f64, 0.0_f64), |(l, h), &v| (l.min(v), h.max(v)));
+    let span = (hi - lo).max(f64::EPSILON);
+    let zero = ((-lo / span) * chart_room as f64).round() as u16;
+    for (i, p) in points.iter().enumerate() {
+        let (Some(y), Some(&(off, _))) = (p.y, g.items.get(i)) else {
+            continue;
+        };
+        if off >= area.height {
+            break;
+        }
+        let bar_style = if cx.sel == Some(i) {
+            th.accent()
+        } else {
+            th.signed(y)
+        };
+        hbar(
+            buf,
+            Rect {
+                x: area.x + table_w + SIDE_GAP,
+                y: area.y + off,
+                width: chart_room.min(area.width.saturating_sub(table_w + SIDE_GAP)),
+                height: 1,
+            },
+            zero,
+            y / span * chart_room as f64,
+            bar_style,
+        );
     }
     g
 }
@@ -1401,6 +1384,29 @@ mod tests {
         assert_eq!(end("$2.74B"), end("+36.5%"));
         // negative bar grows left of the positive one's start
         assert!(s.contains('█'));
+    }
+
+    #[test]
+    fn series_draws_a_horizontal_bar_per_row() {
+        let pt = |x: &str, y: Option<f64>| Point {
+            x: x.into(),
+            y,
+            src: None,
+        };
+        let blocks = vec![Block::Series {
+            title: "Rev".into(),
+            unit: "$M".into(),
+            points: vec![pt("Q1", Some(100.0)), pt("Q2", None), pt("Q3", Some(200.0))],
+        }];
+        let mut v = BlockView::new();
+        let (s, _) = draw(&mut v, &blocks, 60, 10);
+        let bar = |n: &str| s.lines().nth(line_of(&s, n)).unwrap().matches('█').count();
+        assert!(bar("Q3") > bar("Q1") && bar("Q1") > 0, "{s}");
+        assert_eq!(bar("Q2"), 0, "gap row stays blank\n{s}");
+        assert!(
+            !s.contains('▁') && !s.contains('▇'),
+            "no vertical bars\n{s}"
+        );
     }
 
     #[test]
