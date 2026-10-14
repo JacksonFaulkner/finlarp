@@ -1,0 +1,297 @@
+== SAQP
+# Why four-times pitch splitting
+Fins sit at a pitch (about 28-30 nm at N5/N7, see FIN FORM) far below what one 193 nm immersion exposure can print. Self-aligned quadruple patterning (SAQP) prints a coarse mandrel line once, deposits a spacer on its sidewalls, removes the mandrel, then repeats the spacer trick a second time so one exposure yields four fins per original pitch. One patent describes two spacer pitch-halvings as quartering the pitch. A Semiconductor Digest item reports imec targeting about 7.0 nm critical dimension after etch for 18-24 nm pitches with SAQP.
+
+# Where it was deployed
+A patent states front-end fin patterning has successfully deployed SAQP since the 10 nm node. Pitch is set by the spacer thickness, not by the scanner, so fin-to-fin pitch walk (error that alternates between fin pairs) and mandrel CD variation are the signature failure modes (textbook).
+
+# Fin cut
+SAQP prints a regular grating of fins everywhere, so unwanted fins are removed with cut masks. Patents note that once fins are this tight the cut mask has little room to land between wanted and unwanted fins and the process window is narrow. Overlay and edge-placement error show up as missing or partial fins.
+
+# Who matters
+Litho: ASML (ASML) sells the scanners; etch/deposition for spacers: Lam (LRCX), Applied Materials (AMAT), Tokyo Electron (8035.T). Design-rule tooling: SNPS, CDNS. Fab owners TSM, INTC, Samsung (005930.KS). No segment revenue for fin patterning alone is public.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10121785
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9842737
+https://community.cadence.com/cadence_blogs_8/b/breakfast-bytes/posts/cadence-and-imec-announce-world-39-s-first-5nm-takeout
+https://sst.semiconductor-digest.com/eds-threads/tag/rd/page/2
+
+== FIN FORM
+# Etching the fins
+After patterning, an anisotropic silicon etch (Cl2 or HBr chemistry, textbook) cuts trenches into the substrate leaving tall thin silicon fins. Profile control matters: a taper makes the fin wider at the base than the top, changing drive current and leakage fin-to-fin. Target width at advanced nodes is single-digit to around 10 nm (textbook; not found as a sourced figure for each node).
+
+# Measured fin pitch
+WikiChip estimates N7 fin pitch at 30 nm. Angstronomics measured a minimum fin pitch of 28 nm on TSMC N5 from Apple A15 SEM images, with a cell height of 210 nm and a 51 nm contacted gate pitch. Intel 22 nm fin pitch and height were not confirmed in this research pass.
+
+# Failure modes
+Fin collapse and bending when aspect ratio is high, line-edge roughness turning into threshold-voltage spread, and etch damage to the fin sidewalls that raises interface traps (textbook). Silicon-on-insulator fins exist (bulk fins dominate at TSMC and Samsung per general industry practice, textbook).
+
+# Who matters
+Etch leaders LRCX, AMAT, 8035.T; process-control and metrology KLA (KLAC). Foundries TSM, INTC.
+
+# Sources
+https://en.wikichip.org/wiki/N7
+https://www.angstronomics.com/p/the-truth-of-tsmc-5nm
+https://en.wikichip.org/wiki/N5
+
+== FIN REVEAL
+# Oxide fill and recess
+Shallow-trench isolation oxide fills the gaps between fins and is polished flat. A controlled oxide recess then exposes the upper part of each fin. The exposed height is the electrical fin height: it sets effective width per fin, Weff = 2 x Hfin + Wfin (textbook).
+
+# Doping below the gate
+The part of the fin buried in oxide is not controlled by the gate. A punch-through stop dopant or oxide-isolated base limits current flowing through this sub-fin path. This is the standard mitigation for the leakage route called sub-fin leakage in the LEAKAGE card (textbook).
+
+# Failure modes
+Recess depth variation across the wafer shifts fin height and so drive current by a few percent per nanometre of height change (textbook; no sourced figure). Over-recess exposes too much fin and risks bending; under-recess wastes width.
+
+# Who matters
+Wet and dry etch: LRCX, TEL (8035.T), AMAT. CMP: AMAT. Foundries TSM, INTC.
+
+# Sources
+textbook
+https://semiengineering.com/transistors-reach-tipping-point-at-3nm
+
+== GATE WRAP
+# Three gated faces
+In a FinFET the gate stack drapes over the top and both sidewalls of the fin, so the channel has three gated faces instead of the one face of a planar transistor. The extra electrostatic control suppresses short-channel effects such as drain-induced barrier lowering and lets the device be scaled to shorter gate lengths. The fin top and sidewalls carry a thin high-k dielectric (hafnium oxide based) with work-function metals and a fill metal (textbook).
+
+# Gate-last flow
+Leading nodes build a dummy polysilicon gate, form source/drain epitaxy, then replace the dummy with the high-k metal gate (replacement metal gate, textbook). Intel's 22 nm tri-gate process was described by press as using this high-k metal gate family on 3D fins.
+
+# Failure modes
+Gate metal filling the narrow gaps between tightly pitched fins can leave voids, and work-function metal thickness differences set threshold voltage. At N3 and N2 the gaps get so small that SemiEngineering-style analyses argue the gate cannot be filled uniformly; this is part of the move to nanosheets (see FIN LIMITS).
+
+# Who matters
+Atomic layer deposition tools: AMAT, LRCX, ASM International (ASM.AS), TEL (8035.T). Foundries TSM, INTC.
+
+# Sources
+https://www.realworldtech.com/?p=1082
+https://semiengineering.com/transistors-reach-tipping-point-at-3nm
+textbook
+
+== QUANTIZED W
+# Width comes in whole fins
+A planar transistor can be drawn to any width. A FinFET's effective width is a multiple of the single-fin Weff = 2 x Hfin + Wfin (textbook). So drive current comes in steps of one fin. A cell needing 1.4 fins of current must use 2 fins, wasting area and power, or 1 fin and run slow.
+
+# Consequences for design
+Standard cells and SRAM are built from 1, 2 or 3 fin devices. SRAM uses small fin counts and so FinFET SRAM needs assist circuits to hold read stability and write margin (textbook). Analog designs struggle because fine width tuning is lost; they get more fin multiples instead.
+
+# How the industry gets around it
+Fin depopulation (removing selected fins) and gate-length or work-function biasing give intermediate steps. TSMC's FinFlex on N3 adds cell libraries of 1, 2 and 3 fins so each block picks its own trade point (see FINFLEX and FIN COUNT).
+
+# Who matters
+Libraries and EDA to exploit it: SNPS, CDNS. Foundries TSM, INTC. SRAM-heavy chips such as AMD and NVDA GPUs care most about the fin-count choice.
+
+# Sources
+https://newsletter.semianalysis.com/p/iedm2022p1
+https://www.tsmc.com/english/news-events/blog-article-20220616
+textbook
+
+== FIN COUNT
+# What the count controls
+More fins in a transistor means more drive current and higher speed, at the cost of area, gate capacitance and dynamic power. Fewer fins means lower leakage and capacitance. WikiChip's analysis of TSMC's N3E paper says the three FinFlex options use the 2-fin medium-height library as base, the 2-1 option mixes in 1-fin cells for leakage reduction and the 3-2 option mixes in 3-fin cells for more drive current.
+
+# Cell height tradeoff
+Per SemiAnalysis, a 2-1 fin setup acts like a cell with a height of 1.5 fins, so fewer fins also shrink the cell. TSMC's claimed N3E FinFlex scaling spans 0.64x to 0.85x of N5 2-2 fin cell area depending on fin count (via a Wikipedia mirror of the symposium claim).
+
+# Failure modes
+Mixing fin counts in one block creates boundary cells and extra spacing rules; EDA place-and-route must model per-block fin choice, which increases design complexity and sign-off effort (textbook inference).
+
+# Who matters
+EDA that automates the pick: SNPS, CDNS. Foundry TSM. Chips using high-performance blocks (cores, GPUs) and low-power blocks on one die: NVDA, AMD, ARM-based SoCs.
+
+# Sources
+https://fuse.wikichip.org/?p=7375
+https://www.semianalysis.com/p/iedm2022p1
+https://kaweah.freedombox.rocks/kiwix/wikipedia_en_all_maxi_2023-10/3_nm
+
+== INTEL 22
+# First volume FinFET
+Intel announced its 22 nm Tri-Gate transistor in May 2011 and shipped it with Ivy Bridge in 2012. Press coverage of the announcement reports up to 37% lower gate delay than 32 nm planar at low operating voltage, or more than 50% lower power at the same performance. SemiAccurate reported only 2-3% added wafer cost.
+
+# Why it mattered
+It proved that a 3D fin could be made in volume on bulk silicon and gave Intel a lead over foundries, which only followed with Samsung 14 nm and TSMC 16 nm FinFETs in the mid-2010s.
+
+# What is not confirmed
+Fin pitch, height and width for 22 nm were not verified in this research pass. Intel's original presentation is linked below for verification.
+
+# Failure modes and later history
+Intel later struggled with its 10 nm node (the process now branded Intel 7) and its fortunes at INTC went from process leader to foundry catch-up. This card gives no Intel revenue figure.
+
+# Sources
+https://www.realworldtech.com/?p=1082
+https://www.intel.com/content/dam/www/public/us/en/documents/presentation/revolutionary-22nm-transistor-technology-presentation.pdf
+https://www.semiaccurate.com/2011/05/04/like-semiaccurate-said-intel-goes-finfet3d-on-22nm/
+https://www.techradar.com/news/computing-components/processors/intel-s-tri-gate-transistors-everything-you-need-to-know-952572
+
+== TSMC 16
+# 16FF+ versus 20 nm planar
+TSMC's November 2014 announcement of 16FF+ risk production said it runs 40% faster than the company's 20SoC planar process, or uses 50% less power at the same speed. Reports put the volume ramp around July 2015. A later report says 16FF+ gives up to 15% more performance than base 16FF at the same power, or 30% less power at the same clock.
+
+# Hybrid with 20 nm back end
+Press analysis noted the hybrid approach (FinFET front end, 20 nm interconnect) gave performance and power gains but did not shrink chips much compared with 20 nm. Consistent with that, WikiChip lists a 90 nm gate pitch for N16.
+
+# Customers named
+Reports on the risk production milestone named NVIDIA, MediaTek, LG and Xilinx among 16FF customers.
+
+# Who matters
+TSM (TSMC); NVDA's GPUs of the period used 16 nm; Samsung and Intel were competing FinFET sources.
+
+# Sources
+https://pr.tsmc.com/english/news/1835
+https://digitimes.com/news/a20141112PR203.html
+https://semiwiki.com/semiconductor-manufacturers/tsmc/1789-16nm-finfet-versus-20nm-planar/
+https://www.kitguru.net/?p=221629
+
+== TSMC N7
+# Pitches
+WikiChip's estimated design rules for N7 are a 57 nm contacted poly pitch, a 40 nm metal pitch and a 30 nm fin pitch, about 91.2 million transistors per mm2. These are estimates, not TSMC disclosures. Gate pitch shrank from 90 nm at N16 to 66 nm at 10 nm and 57 nm at N7.
+
+# Mix today
+N7 remains a large share of TSMC wafer revenue: 15% in Q1 2025, 14% in Q2, Q3 and Q4 2025. Advanced nodes (7 nm and below) were 74% of 2025 revenue versus 69% in the previous year.
+
+# Patterning
+N7 started with DUV immersion and SAQP-class multi-patterning (an EUV variant came later, textbook). Mature N7 capacity today serves AMD-class and other products; 7 nm has long been AMD's high-volume node (textbook; share not sourced).
+
+# Who matters
+TSM; AMD (AMD) and others as customers; SNPS, CDNS design libraries.
+
+# Sources
+https://en.wikichip.org/wiki/N7
+https://fuse.wikichip.org/?p=2567
+https://anysilicon.com/tsmcs-financial-results-2025-q1/
+https://finance.yahoo.com/news/chip-giant-set-strong-2026-195908674.html
+
+== TSMC N5
+# Measured, not marketing
+Angstronomics measured TSMC N5 in Apple A15 SEM images: 210 nm cell height, 51 nm contacted gate pitch, a minimum 28 nm fin pitch and about 137.6 MTr/mm2. WikiChip's table lists 51 nm and 138.2 MTr/mm2 with a 28 nm interconnect pitch. An older WikiChip estimate (48 nm poly, 30 nm metal, 171.3 MTr/mm2) was too aggressive. The author argues TSMC's density claim is based on a synthesis benchmark, not these pitches.
+
+# Revenue weight
+5 nm was 35-37% of TSMC wafer revenue through 2025 (36%, 36%, 37%, 35% by quarter), the biggest single node. Customers include Apple and NVDA/AMD parts (textbook).
+
+# Failure modes
+N5 introduced EUV layers for fewer patterning steps (textbook); defect density at the start of the ramp and EUV pellicle uptime drive yield.
+
+# Who matters
+TSM; ASML for EUV; NVDA, AMD, Apple as customers.
+
+# Sources
+https://www.angstronomics.com/p/the-truth-of-tsmc-5nm
+https://en.wikichip.org/wiki/N5
+https://fuse.wikichip.org/?p=3398
+https://www.webull.com/news/13698287613906944
+
+== TSMC N3
+# Pitches and density
+Coverage of TSMC's IEDM paper puts N3 contacted gate pitch at 45 nm and minimum metal pitch at 23 nm (an 18% reduction from N5). TSMC claimed 1.6x logic density for N3E over N5 at its June 2022 symposium (via a Wikipedia mirror). N3E SRAM cell area is the same as N5. TechInsights notes TSMC reverted to single patterning on some layers for N3E, which cost some density.
+
+# Last FinFET node
+N3 is still FinFET with FinFlex. TSMC says the nanosheet N2 follows with 10-15% more speed at the same power or 25-30% lower power at the same speed (2022 symposium claim).
+
+# Revenue
+3 nm was 22% of TSMC wafer revenue in Q1 2025, 24% in Q2, 23% in Q3 and 28% in Q4, about 24% for the year.
+
+# Failure modes
+SRAM stopped scaling at N3E, which limits cache-heavy chip density gains (NVDA, AMD, INTC). Design cost and wafer price are rising (see WAFER COST).
+
+# Who matters
+TSM; Apple, NVDA, AMD, INTC as N3 users (customer list textbook, not sourced here); SNPS, CDNS.
+
+# Sources
+https://www.techinsights.com/blog/tsmc-reveals-3nm-process-details
+https://semiengineering.com/iedm-tsmc-n3-details
+https://fuse.wikichip.org/?p=7375
+https://finance.yahoo.com/news/chip-giant-set-strong-2026-195908674.html
+
+== SAMSUNG
+# FinFET to GAA
+The results confirmed Samsung's 3 nm GAA/MBCFET mass production in 2022 as the first use of gate-all-around in volume. Samsung's earlier 3 nm projection against its 5 nm was up to 35% less area, 30% more performance or 50% lower power; a later report on the actual start cites smaller figures: up to 45% less power, 23% more performance and 16% smaller area. The date and details of Samsung's 14 nm FinFET start were not confirmed in this pass.
+
+# Why it jumped early
+Samsung moved to GAA before TSMC (N2) in an attempt to take foundry share, and the risk is yield learning on a new transistor while TSMC stayed on mature FinFET N3.
+
+# Who matters
+Samsung Electronics (005930.KS); Qualcomm and others as customers (textbook); TSM as the incumbent leader; no foundry revenue split sourced here.
+
+# Sources
+https://www.club386.com/samsung-starts-mass-production-on-3nm-process-node
+https://news.samsung.com/global/samsung-foundry-innovations-power-the-future-of-big-data-ai-ml-and-smart-connected-devices
+https://www.businesswire.com/news/home/20211007005441/en
+
+== FINFLEX
+# What it is
+TSMC's FinFlex is a feature of N3 and N3E that lets designers pick the fin configuration per functional block on the same die. Three options: 3-2 FIN for the fastest clocks, 2-2 FIN for balanced performance, power and density, and 2-1 FIN for the lowest power and highest density. TSMC's own blog says each block can be optimised without affecting the others.
+
+# Mechanism
+WikiChip reports TSMC built short, medium and tall standard cell libraries of 1, 2 and 3 fins; all three options use the 2-fin medium cell as a base. SemiAnalysis calls it an advanced form of fin depopulation.
+
+# Successor
+TSMC's N2 nanosheet process uses a similar idea named NanoFlex (TSMC's naming; the details were not found in this pass).
+
+# Failure modes
+EDA flows must handle mixed-height rows; sign-off, timing closure and library characterisation costs go up (textbook inference).
+
+# Who matters
+TSM; SNPS and CDNS (EDA support), NVDA/AMD/ARM-based SoCs (users).
+
+# Sources
+https://www.tsmc.com/english/news-events/blog-article-20220616
+https://fuse.wikichip.org/?p=7375
+https://www.semianalysis.com/p/iedm2022p1
+https://www.businesswire.com/news/home/20220616005367/en
+
+== FIN LIMITS
+# What runs out
+SemiEngineering coverage says finFETs run out of steam below 3 nm and that the industry moves to stacked nanosheets at the 3 nm node, which improve channel control and short-channel effects and give more drive current in the same footprint by widening the channel. A nanosheet is described as a finFET on its side with the gate wrapped around.
+
+# Specific limits
+As fin pitch shrinks the fins must be thin for electrostatics but tall for current, an aspect ratio that bends and tapers (textbook). The gate and contact must fit in gaps of a few nanometres, and fin width variation turns directly into threshold-voltage variation (textbook). Width quantization (see QUANTIZED W) prevents fine tuning.
+
+# What comes next
+Beyond 2 nm, SemiEngineering reports little consensus: candidates include CFETs, forksheets and vertical-transport FETs. Samsung used GAA at 3 nm in 2022; TSMC's N2 follows.
+
+# Who matters
+TSM, INTC, Samsung; ASML, LRCX, AMAT for the new etch/epi steps; SNPS, CDNS for design rules.
+
+# Sources
+https://semiengineering.com/transistors-reach-tipping-point-at-3nm
+https://semiengineering.com/new-transistor-structures-at-3nm-2nm/
+https://semiengineering.com/big-trouble-at-3nm
+https://semiengineering.com/moving-to-gaa-fets
+
+== LEAKAGE
+# Sources of leakage
+FinFETs cut subthreshold leakage versus planar because the gate controls three faces. Remaining paths (textbook): sub-fin leakage through the ungated base (blocked by punch-through stop doping), gate-induced drain leakage, band-to-band tunnelling at the drain, and gate dielectric tunnelling.
+
+# Measured gains
+Intel's 22 nm Tri-Gate press numbers: more than 50% less power at the same performance. TSMC 16FF+: 50% less power than 20 nm planar at the same speed. Fin count is a leakage lever: 2-1 FinFlex uses 1-fin cells for leakage reduction.
+
+# Failure modes
+Hot spots and process-corner spread (fast corners leak far more). Data-centre accelerators from NVDA and AMD consume power in the hundreds of watts, so leakage matters at the system level (textbook).
+
+# Who matters
+TSM, INTC, Samsung (005930.KS); SNPS and CDNS provide leakage-aware tools; ARM licenses low-power cores.
+
+# Sources
+https://www.techradar.com/news/computing-components/processors/intel-s-tri-gate-transistors-everything-you-need-to-know-952572
+https://pr.tsmc.com/english/news/1835
+https://fuse.wikichip.org/?p=7375
+
+== WAFER COST
+# No official prices
+TSMC does not publish wafer prices. Figures in the press and from analysts come from estimates. A search for current numbers returned nothing citable in this research pass. Unverified rumor ranges circulated in 2020-2022 (recalled, not sourced): N16 about $6,000, N7 about $9,000-9,500, N5 about $17,000, N3 about $20,000+. Treat these as orders of magnitude only.
+
+# Cost versus benefit
+Intel's 22 nm Tri-Gate was reported to add only 2-3% to wafer cost for a major power gain, while 16FF+ gave a performance and power gain but little shrink. From N5 onward cost per transistor stopped falling as fast (textbook; SRAM did not scale at N3E).
+
+# What is public
+TSMC revenue by node (see TSMC N3 and N5 cards): 3 nm 28%, 5 nm 35%, 7 nm 14% of Q4 2025 wafer revenue, 7 nm and below 77%. For price and gross margin, read TSM's annual report.
+
+# Who matters
+TSM; customers NVDA, AMD, Apple; EDA SNPS, CDNS (design cost rises with each node).
+
+# Sources
+https://anysilicon.com/tsmcs-financial-results-2025-q1/
+https://finance.yahoo.com/news/chip-giant-set-strong-2026-195908674.html
+https://www.semiaccurate.com/2011/05/04/like-semiaccurate-said-intel-goes-finfet3d-on-22nm/

@@ -77,45 +77,44 @@ const FAB: &str = r#"# 1. Wafer making
 
 const CHIP: &str = r#"# Cross-section (not to scale): wiring on top, silicon at the bottom
 
-  PACKAGE BUMPS     ●     ●     ●     ●     ●     ●     ●     ●     ●     ●     ●            (solder bumps to package)
-                    ┌────────────────────────────────────────────────────────────────────┐
-                    │ M10-M14  thick copper                                              │   (power, clock, long wires)
-                    └────────────────────────────────────────────────────────────────────┘
-                    ┌────────────────────────────────────────────────────────────────────┐
-                    │ M5-M9    medium copper                                             │   (block-to-block wiring)
-                    └────────────────────────────────────────────────────────────────────┘
-                    ┌────────────────────────────────────────────────────────────────────┐
-                    │ M1-M4    thin, dense                                               │   (local wiring inside cells)
-                    └────────────────────────────────────────────────────────────────────┘
-  CONTACTS                  │        │        │               │        │        │            (tungsten plugs to silicon)
-                    ┌────────────────────────────────────────────────────────────────────┐
-                    │    SOURCE   GATE   DRAIN             SOURCE   GATE   DRAIN         │
-                    │   ┌──────┐ ┌──────┐ ┌──────┐        ┌──────┐ ┌──────┐ ┌──────┐     │
-                    │   │  n+  │ │metal │ │  n+  │        │  p+  │ │metal │ │  p+  │     │
-                    │   │      │ │high-k│ │      │        │      │ │high-k│ │      │     │
-                    │   │      │ │      │ │      │        │      │ │      │ │      │     │
-  SILICON           │   └──────┘ └──────┘ └──────┘        └──────┘ └──────┘ └──────┘     │
-                    │                                                                    │
-                    │   NMOS: gate high = ON              PMOS: gate low = ON            │
-                    │   current flows S to D              current flows S to D           │
-                    │                                                                    │
-                    │   (the channel under each gate is the switch)                      │
-                    │   p-type silicon substrate                                         │
-                    └────────────────────────────────────────────────────────────────────┘
+  PACKAGE BUMPS     ●     ●     ●     ●     ●     ●     ●     ●     ●     ●     ●     ●       (solder to package)
+                    ┌──────────────────────────────────────────────────────────────────────┐
+                    │ TOP METAL   M10-M14, thick copper                                    │   (few, fat, low resistance)
+                    │ power grid, clock spine, bump pads                                   │
+                    └──────────────────────────────────────────────────────────────────────┘
+                    ┌──────────────────────────────────────────────────────────────────────┐
+                    │ MID METAL   M5-M9, medium copper                                     │   (RC delay set here)
+                    │ block-to-block wiring                                                │
+                    └──────────────────────────────────────────────────────────────────────┘
+                    ┌──────────────────────────────────────────────────────────────────────┐
+                    │ THIN METAL  M1-M4, dense                                             │   (EUV, resistance wall)
+                    │ local wiring inside cells, ~20-30 nm pitch                           │
+                    └──────────────────────────────────────────────────────────────────────┘
+                    ┌──────────────────────────────────────────────────────────────────────┐
+                    │ CONTACTS    tungsten plugs                                           │   (contact resistance)
+                    │ silicide + W/Co/Mo to source, drain, gate                            │
+                    └──────────────────────────────────────────────────────────────────────┘
+                    ┌────────────────────┐  ┌──────────────────────┐  ┌────────────────────┐
+                    │ NMOS               │  │ GATE STACK           │  │ PMOS               │
+  TRANSISTORS       │ n+ source / drain  │  │ metal gate + high-k  │  │ p+ source / drain  │   (the switches)
+                    │ electrons, gate hi │  │ HfO2, ~1 nm EOT      │  │ holes, gate low    │
+                    └────────────────────┘  └──────────────────────┘  └────────────────────┘
+                    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ p-type silicon substrate ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+
+  (CMOS = NMOS + PMOS in pairs: one is always off, so almost no current flows when idle)
 
 # Transistor generations: the gate wraps more of the channel each time
 
-  PLANAR (to 28nm)                FINFET (22nm to 5nm)                  GATE-ALL-AROUND (3nm and below)
-  ┌──────────┐                    ┌───┐ ┌───┐ ┌───┐                     ┌────────────────┐
-  │   gate   │                    │   │ │   │ │   │                     │  ══════════════│
-  └──────────┘                    │ ▓ │ │ ▓ │ │ ▓ │                     │                │
-  ┌──────────┐                    └───┘ └───┘ └───┘                     │  ══════════════│
-  │ channel  │                    ┌───────────────┐                     │                │
-  └──────────┘                    └────silicon────┘                     │  ══════════════│
-                                                                        └────────────────┘
-  gate on 1 side                  gate wraps 3 sides of each fin
-  leaks at small sizes            TSMC N5, Intel 22/14/10               gate wraps 4 sides of stacked nanosheets
-                                                                        TSMC N2, Samsung 3GAA, Intel 18A
+  ┌────────────────────────────┐       ┌────────────────────────────┐       ┌─────────────────────────────────┐
+  │ PLANAR                     │       │ FINFET                     │       │ GATE-ALL-AROUND                 │
+  │ to 28nm, gate on 1 side    │  ──▶  │ 22nm to 3nm, 3 sides       │  ──▶  │ 3nm and below, 4 sides          │
+  │ leaks as it shrinks        │       │ TSMC N5/N3, Intel 22-3     │       │ TSMC N2, Samsung SF3, Intel 18A │
+  └────────────────────────────┘       └────────────────────────────┘       └─────────────────────────────────┘
+
+       gate                                   ╔═╗ ╔═╗ ╔═╗                        ╔═══════════╗
+       ══════════                             ║▓║ ║▓║ ║▓║  fins                  ║ ▓▓▓▓▓▓▓▓▓ ║  stacked
+       ▓▓▓▓▓▓▓▓▓▓ channel                     ║▓║ ║▓║ ║▓║                        ║ ▓▓▓▓▓▓▓▓▓ ║  nanosheets
+       ░░░░░░░░░░ silicon                   ░░░░░░░░░░░░░░░░                     ╚═══════════╝
 "#;
 
 const PACKAGE: &str = r#"# Top view: why AI chips are limited by packaging, not only by the die

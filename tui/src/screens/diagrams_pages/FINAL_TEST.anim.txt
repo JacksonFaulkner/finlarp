@@ -1,0 +1,241 @@
+ms 450
+== bins cleared to MARK + SHIP; handler picks next part from tray
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│         [GPU]          │ │                       │ │     ▄▄████████▄▄        │
+│           ▼            │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ swap fast: index time  │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== pressed in: high force so thousands of BGA balls touch pins
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│         [GPU]          │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    ││││││││││││││││    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ contact check...       │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== hot package warps, corner balls lift: false OPEN, re-seat
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│        ╱[GPU]╲         │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │·││││││││││││·│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ OPEN: corner pins ✕    │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== re-seated: continuity + leakage first, then power up
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│         [GPU]          │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    ││││││││││││││││    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ continuity  PASS       │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== scan vectors stream: AI die needs 3-5x the test time (1 source)
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│         [GPU]          │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    ││││││││││││││││    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  1011001110100101101   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ scan  0 fails          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== memory BIST on HBM channels, NVLink / PCIe loopback
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│         [GPU]          │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    ││││││││││││││││    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  1101001011011001011   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ BIST + loopback PASS   │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== batch into burn-in: high temp + raised volts, for hours
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈  │ │ C low                   │
+│  │  TEST HEAD       │  │ │ [GPU]  [GPU]  [GPU]   │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== Arrhenius: failure rate rises exponentially with temperature
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈  │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │   ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ │ │ C low                   │
+│  │  TEST HEAD       │  │ │ [GPU]  [GPU]  [GPU]   │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap                 │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== infant mortality: weak part dies here, not in a 72-GPU rack
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈  │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │   ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈  │ │ C low                   │
+│  │  TEST HEAD       │  │ │ [GPU]  [ ✕ ]  [GPU]   │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== bathtub: burn-in ages survivors past the infant zone
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │ fail                  │ │        ▄▄▄▄▄▄           │
+│                        │ │ rate █            █   │ │     ▄▄████████▄▄        │
+│                        │ │      ██          ██   │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │      ███▄▄▄▄▄▄▄▄███   │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │      ──┬─────────▶ t  │ │  X     C     B     A    │
+│    └──────────────┘    │ │   burn-in ends ▲      │ │                         │
+│ LOAD BOARD ═══════════ │ │   (shape only)        │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │ [GPU]         [GPU]   │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== SLT: real workload, up to 2 kW/site (Titan HP, 4 kW roadmap)
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │ SLT: board like the   │ │        ▄▄▄▄▄▄           │
+│                        │ │ real one, boot +      │ │     ▄▄████████▄▄        │
+│                        │ │ stress workload       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │ catches: droop,       │ │  X     C     B     A    │
+│    └──────────────┘    │ │ block interplay, fw   │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU               │
+│  ║  ║  ║  ║  ║  ║  ║   │ │ ≤2 kW/site today      │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │ [GPU]         [GPU]   │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ slow: many slots      │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== fmax: part 1 hits high clock at low volts -> bin A, flagship
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                    ▲    │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU    ●          │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid                   │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │               [GPU]   │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== part 3: mid fmax -> bin B, where most of the bell sits
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │              ▲          │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU    ●          │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid        ●          │
+│  ┌──────────────────┐  │ │                       │ │ C low                   │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== next lot: low fmax -> bin C, cheaper SKU (2 more B)
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │        ▲                │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU    ●          │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid        ●●●        │
+│  ┌──────────────────┐  │ │                       │ │ C low        ●          │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut             │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== dead SM: fuse off the block, sell as cut-down SKU, not scrap
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │        ▲ fused          │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU    ●          │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid        ●●●        │
+│  ┌──────────────────┐  │ │                       │ │ C low        ●          │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut  ●          │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ (socket idle)          │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘
+== mature node lifts top-bin share; an escape costs a rack swap
+┌─ ATE + HANDLER ────────┐ ┌─ BURN-IN / SLT ───────┐ ┌─ SPEED BIN (fmax) ──────┐
+│ handler ▼ press + temp │ │                       │ │        ▄▄▄▄▄▄           │
+│                        │ │                       │ │     ▄▄████████▄▄        │
+│                        │ │                       │ │  ▄▄██████████████▄▄     │
+│    ┌─ SOCKET ─────┐    │ │                       │ │ ─┴─────┴─────┴─────┴─▶  │
+│    │┆┆┆┆┆┆┆┆┆┆┆┆┆┆│    │ │                       │ │  X     C     B     A    │
+│    └──────────────┘    │ │                       │ │                         │
+│ LOAD BOARD ═══════════ │ │                       │ │ A top SKU    ●●         │
+│  ║  ║  ║  ║  ║  ║  ║   │ │                       │ │ B mid        ●●●●       │
+│  ┌──────────────────┐  │ │                       │ │ C low        ●          │
+│  │  TEST HEAD       │  │ │                       │ │ S fused/cut  ●          │
+│  └──────────────────┘  │ │═══════════════════════│ │ X scrap      ●          │
+│ lot done               │ │ hot + raised V        │ │                         │
+└────────────────────────┘ └───────────────────────┘ └─────────────────────────┘

@@ -48,9 +48,13 @@ def live(symbol: str) -> dict:
     intra = _chart(s, symbol, "1d", "1m", pre_post=True)
     meta = daily["meta"]
     days = daily["bars"]
-    today = days[-1] if days else {}
-    prior = days[:-1]
-    prev_close = meta.get("chartPreviousClose") or (prior[-1]["close"] if prior else None)
+    # before the open, the last daily bar is the previous session, not today
+    reg_start = meta.get("currentTradingPeriod", {}).get("regular", {}).get("start")
+    has_today = bool(days) and (not reg_start or days[-1]["t"] >= reg_start)
+    today = days[-1] if has_today else {}
+    prior = days[:-1] if has_today else days
+    # chartPreviousClose is the close before the chart's first bar (~3mo ago here), not yesterday's
+    prev_close = prior[-1]["close"] if prior else meta.get("previousClose")
     avg20 = sum(b["volume"] or 0 for b in prior[-20:]) / max(len(prior[-20:]), 1) if prior else None
     ib = intra["bars"]
     last_bar = ib[-1] if ib else None

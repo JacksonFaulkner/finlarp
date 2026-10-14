@@ -18,6 +18,7 @@
 
 mod app;
 mod db;
+mod mock;
 mod model;
 mod pyrun;
 mod screens;
@@ -50,6 +51,11 @@ const SCREENS: &[&str] = &[
     "diagrams",
     "events",
     "chat",
+    "candles",
+    "intraday",
+    "godel",
+    "menu",
+    "notes",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -101,7 +107,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events|chat] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events|chat|candles|intraday|godel|menu|notes] [arg]";
 
 fn db_path() -> PathBuf {
     if let Some(p) = env::var_os("FINLARP_DB") {
@@ -124,8 +130,8 @@ fn build_screen(
     arg: Option<String>,
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
-        canslim, chart, chat, diagrams, dossier, earnings_report, events, home, pick, portfolio,
-        search, universe,
+        candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, godel, home,
+        intraday, menu, notes, pick, portfolio, search, universe,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -134,6 +140,11 @@ fn build_screen(
         ("canslim", Some(sym)) => Box::new(canslim::open(ctx, Some(sym))?),
         ("dossier", Some(sym)) => Box::new(dossier::open(ctx, Some(sym))?),
         ("chat", _) => Box::new(chat::open(ctx, arg)?),
+        ("candles", _) => Box::new(candles::open(ctx, arg)?),
+        ("notes", _) => Box::new(notes::open(ctx, arg)?),
+        ("menu", _) => Box::new(menu::open(ctx, arg)?),
+        ("godel", _) => Box::new(godel::open(ctx, arg)?),
+        ("intraday", _) => Box::new(intraday::open(ctx, arg)?),
         ("home", _) => Box::new(home::open(ctx)?),
         ("portfolio", _) => Box::new(portfolio::open(ctx, arg)?),
         ("earnings", _) => Box::new(earnings_report::open(ctx, arg)?),

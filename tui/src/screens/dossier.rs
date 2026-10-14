@@ -147,13 +147,18 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
     };
     let mut d = match res {
         Ok(json) => Dossier::from_json(&symbol, &json, ctx.theme),
-        Err(_) if !symbol.is_empty() => Dossier::empty(&symbol, format!("{symbol}: building dossier…"), ctx.theme),
+        Err(_) if !symbol.is_empty() => {
+            Dossier::empty(&symbol, format!("{symbol}: building dossier…"), ctx.theme)
+        }
         Err(msg) => Dossier::empty(&symbol, msg, ctx.theme),
     };
     d.db_path = ctx.db_path.clone();
     if !symbol.is_empty() {
         // --if-stale: the script skips the rebuild when the cache is current.
-        d.refresh = Some(crate::pyrun::spawn_script("py/derive/dossier.py", &[&symbol, "--if-stale", "12"]));
+        d.refresh = Some(crate::pyrun::spawn_script(
+            "py/derive/dossier.py",
+            &[&symbol, "--if-stale", "12"],
+        ));
         d.flash = Some("refreshing…".into());
     }
     Ok(d)
@@ -582,7 +587,9 @@ impl Screen for Dossier {
     fn tick(&mut self) -> Action {
         let done = match self.refresh.as_ref().map(|r| r.try_recv()) {
             Some(Ok(res)) => Some(res),
-            Some(Err(std::sync::mpsc::TryRecvError::Disconnected)) => Some(Err("refresh thread died".into())),
+            Some(Err(std::sync::mpsc::TryRecvError::Disconnected)) => {
+                Some(Err("refresh thread died".into()))
+            }
             _ => None,
         };
         if let Some(res) = done {
@@ -606,7 +613,10 @@ impl Screen for Dossier {
                     if self.doc.is_none() {
                         self.message = format!("{}: build failed\n\n{e}", self.symbol);
                     }
-                    self.flash = Some(format!("refresh failed: {}", e.lines().last().unwrap_or("")));
+                    self.flash = Some(format!(
+                        "refresh failed: {}",
+                        e.lines().last().unwrap_or("")
+                    ));
                 }
             }
         }

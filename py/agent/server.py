@@ -14,6 +14,10 @@ every call is local and fast. Tools are all read-only:
     describe_data  row counts, symbol counts and date spans per view
     tweets      posts from followed X research accounts, filter by ticker/handle/date, returns coverage
     tweet_sources  which accounts are stored and their date spans
+    sentiment   labelled views on one ticker from those tweets: stance, who holds it, trend, keywords, examples
+    sentiment_leaders  tickers ranked by mentions / bullish / bearish / contested / momentum
+    price_targets  price targets pulled out of tweets, against the last close
+    news        company news (ROIC.ai) by ticker/date/text/site, with article snippets
     schema      the views `sql` can see, with columns, bucket counts and query recipes
 
 Register with Claude Code:
@@ -41,9 +45,12 @@ from mcp.types import ToolAnnotations
 
 
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
+from sources import roic_news
 from sources import tweets as tweets_src
 from sources import yahoo_live
+from derive import account
 from derive import search as fts
+from derive import sentiment as sentiment_q
 from core.schemas import dictionary
 
 D = universe.DATA_ROOT
@@ -55,7 +62,8 @@ from EDGAR: XBRL financials (15+ yrs), segment/geography revenue, 13F institutio
 holdings (6 quarters, whole market), 8-K event stream, Form 4 insider trades,
 10-K/20-F text (business, risk factors, MD&A...), YoY-new risk sentences,
 earnings press releases with extracted guidance, Yahoo company profiles, tweets from followed research
-accounts (`tweets` tool), and
+accounts (`tweets` tool) with an LLM-labelled stance per ticker (`sentiment`, `sentiment_leaders`,
+`price_targets` tools; views tweet_sentiment and tweet_meta), company news snippets (`news` tool), and
 ~1.5M granted US patents (PatentsView, thru 2025) matched to tickers.
 
 The local snapshot ends at the last completed session. For anything about today, premarket,
@@ -295,6 +303,28 @@ def _views(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
                    "is_reply/is_quote/is_retweet); prefer the `tweets` tool for lookups"),
         "tweet_tickers": (f"'{D}/tweets/tweet_tickers.parquet'",
                           "cashtags per tweet (tweet_id -> ticker, in_universe flag); join tweets on tweet_id = tweets.id"),
+        "news": (f"'{D}/news/news.parquet'",
+                 "company news per ticker (ROIC.ai; free plan covers ~2 years): published_at UTC, title, site, url and text, "
+                 "which is a ~200 character snippet, not the full article; one row per (ticker, url). Includes press wires (globenewswire.com)"),
+        "tweet_sentiment": (f"'{D}/sentiment/tweet_sentiment.parquet'",
+                            "LLM labels per (tweet, cashtag): stance -2..+2, focus, whose view (view_holder), claim type, horizon, "
+                            "price_target, catalyst, evidence quote, confidence; join tweets on id. Weight by focus and view_holder"),
+        "tweet_meta": (f"'{D}/sentiment/tweet_meta.parquet'",
+                       "LLM metadata per labelled tweet: tweet_type, themes, keywords, entities named without a cashtag, "
+                       "is_repost, is_sarcastic; join tweets on id"),
+        "account_fills": (f"'{D}/account/fills.parquet'",
+                          "the user's own broker fills (E*TRADE), one row per buy/sell; qty_adj/price_adj are split-adjusted. "
+                          "Join to bars_1d on symbol + et_date"),
+        "account_round_trips": (f"'{D}/account/round_trips.parquet'",
+                                "the user's own FIFO-paired lots: entry/exit, pnl, ret, hold_days; matched=false for sells whose "
+                                "buy predates the cache (no entry/pnl)"),
+        "account_positions": (f"'{D}/account/positions.parquet'",
+                              "the user's open FIFO lots per symbol, reconciled with the broker's positions (broker uses its own "
+                              "cost method, so avg_cost can differ from broker_price_paid)"),
+        "account_equity_daily": (f"'{D}/account/equity_daily.parquet'",
+                                 "the user's portfolio value per calendar day with net deposits, time-weighted day_return, "
+                                 "twr_index and drawdown; value history is reconstructed, weekends are carried forward (is_stale)"),
+        "account_cash": (f"'{D}/account/cash.parquet'", "the user's deposits, withdrawals, dividends and interest"),
         "patent_ai_by_ticker_year": (f"'{D}/patents/ai_by_ticker_year.parquet'",
                                      "ticker x grant year (<=2023): n_patents, n_ai_any/pct_ai, n_ai93/pct_ai93, n_<cat>; prefer pct_ai93 or n_ml"),
     }
@@ -323,6 +353,7 @@ def _db() -> duckdb.DuckDBPyConnection:
         if threads := os.environ.get("FINLARP_DUCKDB_THREADS"):
             con.execute(f"SET threads={int(threads)}")
         SCRATCH.mkdir(parents=True, exist_ok=True)
+        account.build_if_stale()  # broker caches -> parquet; the connection below cannot open the broker DB itself
         _view_desc = _views(con)
         # `sql` takes arbitrary SELECTs, and read_text()/read_csv() would
         # otherwise read any file (.env, the E*TRADE token) into the LLM's
@@ -519,6 +550,65 @@ def tweet_sources() -> str:
         return _dump(tweets_src.sources())
     except (duckdb.Error, OSError) as e:
         return _dump({"error": f"tweets unavailable (run sources/tweets.py ingest): {e}"})
+
+
+@mcp.tool(annotations=READ_ONLY)
+def sentiment(ticker: str, since: str = "", until: str = "", min_agreement: float = 0.0, holder: str = "",
+              limit: int = 15) -> str:
+    """What the followed X accounts say about one stock, from LLM-labelled tweets (three passes per tweet).
+    A *view* is a tweet that is substantively about the stock where someone holds a position; passing mentions and
+    bare announcements count as `mentions` only. stance is -2 bearish .. +2 bullish. Returns summary (mentions, views,
+    bullish/bearish/neutral, avg_stance, avg_agreement, contested, price targets), by_holder (author vs quoted analyst
+    vs quoted person), by_claim, a daily series, top_authors, keywords, themes and `recent` examples with the
+    evidence quote and link.
+
+    Filters: since/until (YYYY-MM-DD, UTC; until exclusive), min_agreement (1 = unanimous across passes), holder
+    (author | quoted_analyst | quoted_person). The accounts are about 9-in-10 bullish, so compare a ticker with others
+    or with earlier weeks, not with zero. `coverage.notes` says what to do next (uncovered ticker, unlabelled tweets,
+    heavy disagreement); read it before concluding. Use `sentiment_leaders` to find tickers, `tweets` for raw posts."""
+    try:
+        return _dump(sentiment_q.ticker(ticker, since or None, until or None, min_agreement, holder, limit))
+    except (duckdb.Error, OSError) as e:
+        return _dump({"error": f"sentiment unavailable (run sources/tweet_sentiment.py run --all): {e}"})
+
+
+@mcp.tool(annotations=READ_ONLY)
+def sentiment_leaders(by: str = "mentions", since: str = "", until: str = "", min_views: int = 20, holder: str = "",
+                      limit: int = 20) -> str:
+    """Tickers ranked over the labelled tweets (see `sentiment` for what a view is).
+    by: "mentions" (most views), "bullish" (highest average stance), "bearish" (most bearish views), "contested"
+    (bulls and bears both present), or "momentum" (views in the last 7 days of the window against the 7 before, with
+    the stance in each). min_views drops thin tickers (default 20). holder narrows to author / quoted_analyst /
+    quoted_person. Returns rows plus `coverage` (store span, notes). Then call `sentiment` on a row for the detail."""
+    try:
+        return _dump(sentiment_q.leaders(by, since or None, until or None, min_views, holder, limit))
+    except (duckdb.Error, OSError) as e:
+        return _dump({"error": f"sentiment unavailable (run sources/tweet_sentiment.py run --all): {e}"})
+
+
+@mcp.tool(annotations=READ_ONLY)
+def price_targets(ticker: str, since: str = "", limit: int = 15) -> str:
+    """Price targets that tweets state for one stock, with the median, range and implied upside against the last daily
+    close, plus the individual tweets (author, date, target, stance, link). The target is whatever price the labeller found
+    for that ticker in the tweet: the horizon is usually unspecified and a comparison price is sometimes picked up by
+    mistake, so read the `text` before relying on one. since is YYYY-MM-DD (UTC)."""
+    try:
+        return _dump(sentiment_q.price_targets(ticker, since or None, limit))
+    except (duckdb.Error, OSError) as e:
+        return _dump({"error": f"sentiment unavailable (run sources/tweet_sentiment.py run --all): {e}"})
+
+
+@mcp.tool(annotations=READ_ONLY)
+def news(ticker: str = "", since: str = "", until: str = "", text: str = "", site: str = "", limit: int = 20) -> str:
+    """Company news pulled from ROIC.ai (about two years back on the free plan), newest first: date, ticker, site,
+    title, url and a ~200 character snippet (not the full article). Filters: ticker, since/until (YYYY-MM-DD, UTC;
+    until exclusive), text (title or snippet, case-insensitive), site (publisher substring, e.g. globenewswire for
+    company press releases, seekingalpha, fool). `coverage` says how much matched, the per-site split and what the store
+    holds; a ticker that was never pulled returns nothing. For the latest headlines use live_news."""
+    try:
+        return _dump(roic_news.query(ticker or None, since or None, until or None, text or None, site or None, limit))
+    except (duckdb.Error, OSError) as e:
+        return _dump({"error": f"news unavailable (run sources/roic_news.py pull TICKER): {e}"})
 
 
 @mcp.tool(annotations=READ_ONLY)

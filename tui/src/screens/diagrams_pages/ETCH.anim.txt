@@ -1,0 +1,235 @@
+ms 500
+== fresh film under hard mask: plasma lit, bias on
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4 ·  ·  ·  ──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│   ████████████        ████████████                                       │
+│   ████████████        ████████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ░░░░░░░ 0/7    floor etch rate --                                 │
+└──────────────────────────────────────────────────────────────────────────┘
+== ions ↓ hit the floor head-on, break Si-O bonds: depth 1/7
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│                                     SiF4  ·  ·  · ──▶ turbo pump         │
+│      ↓   ↓   ↓   ↓   ↓   ↓   ↓      (volatile byproducts out)            │
+│   ████████████        ████████████                                       │
+│   ████████████        ████████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓ ↓  ↓ ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth █░░░░░░ 1/7    floor etch rate 100%                               │
+└──────────────────────────────────────────────────────────────────────────┘
+== ▓ polymer coats the walls, ions sputter it off the floor
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4   ·  ·  ·──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│   ████████████        ████████████                                       │
+│   ████████████        ████████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓ ↓  ↓ ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ██░░░░░ 2/7    floor etch rate 95%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== mask faceting: corners erode first
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│                                     SiF4 ·  ·  ·  ──▶ turbo pump         │
+│      ↓   ↓   ↓   ↓   ↓   ↓   ↓      (volatile byproducts out)            │
+│   ███████████          ███████████                                       │
+│   ████████████        ████████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓   ·  ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓ ↓  ↓ ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ███░░░░ 3/7    floor etch rate 88%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== mask 3 → 2 rows: selectivity caps depth
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4  ·  ·  · ──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓   ·  ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░▓ ↓  ↓ ▓░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ████░░░ 4/7    floor etch rate 80%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== ARDE: ions lose energy and angle with depth, rate 70%
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│                                     SiF4   ·  ·  ·──▶ turbo pump         │
+│      ↓   ↓   ↓   ↓   ↓   ↓   ↓      (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓   ·  ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓ ╲    ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░▓  ↓   ▓░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  (ions ╲ hit walls)                   │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth █████░░ 5/7    floor etch rate 70%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== SiF4 must diffuse up and out (Knudsen), rate 60%
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4 ·  ·  ·  ──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░▓ ╲ ·  ▓░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░▓  ↓   ▓░░░░░░░░░░░░  (ions ╲ hit walls)                   │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ██████░ 6/7    floor etch rate 60%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== endpoint: stop layer reached, walls vertical
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│                                     SiF4  ·  ·  · ──▶ turbo pump         │
+│      ↓   ↓   ↓   ↓   ↓   ↓   ↓      (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░▓   ·  ▓░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░▓ ╲    ▓░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓  ↓   ▓░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ███████ 7/7    floor etch rate 50%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== NAND channel hole: 10 um through 100 nm, ~70:1, <10 nm drift
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4   ·  ·  ·──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░▓ ╲ ·  ▓░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  (<0.1% of depth)                     │
+│   ░░░░░░░░░░░░▓  ↓   ▓░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ███████ 7/7    floor etch rate 50%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== too little ▓: radicals undercut, wall bows (CD loss)
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│                                     SiF4 ·  ·  ·  ──▶ turbo pump         │
+│      ↓   ↓   ↓   ↓   ↓   ↓   ↓      (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░        ░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░          ░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░          ░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░          ░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░          ░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░        ░░░░░░░░░░░░  (no ▓: wall bows out)                │
+│   ░░░░░░░░░░░░   ↓    ░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ███████ 7/7    floor etch rate 50%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== too much polymer: mouth pinches shut, etch stops at 4/7
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4  ·  ·  · ──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████   ✗    ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓▓▓  ▓▓▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓▓    ▓▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░  (▓ closes the mouth)                 │
+│   ░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ████░░░ 4/7    floor etch rate 0% STOPPED                         │
+└──────────────────────────────────────────────────────────────────────────┘
+== deep hole twists: charging deflects ions, floor drifts sideways
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│                                     SiF4   ·  ·  ·──▶ turbo pump         │
+│      ↓   ↓   ↓   ↓   ↓   ↓   ↓      (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░░▓      ▓░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░░▓      ▓░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░░░▓      ▓░░░░░░░░░░  (misses cell below)                  │
+│   ░░░░░░░░░░░░░░▓  ↓   ▓░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ███████ 7/7    floor etch rate 50%                                │
+└──────────────────────────────────────────────────────────────────────────┘
+== fix: cryo 0 to -30 C + pulsed bias, Lam Cryo 3.0 >2x rate
+┌──────────────────────────────────────────────────────────────────────────┐
+│  ≈≈≈≈ PLASMA ≈≈ F radicals ≈≈ CF3+ Ar+ ions ≈≈ 5-100 mTorr ≈≈≈≈          │
+│    ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓    SiF4 ·  ·  ·  ──▶ turbo pump         │
+│                                     (volatile byproducts out)            │
+│                                                                          │
+│   ███████████          ███████████  ◀ hard mask (carbon / nitride)       │
+│   ████████████        ████████████    erodes slowly: selectivity         │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ◀ film SiO2                          │
+│   ░░░░░░░░░░░░        ░░░░░░░░░░░░                                       │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░  ▓ sidewall passivation (polymer)     │
+│   ░░░░░░░░░░░░        ░░░░░░░░░░░░    blocks sideways F attack;          │
+│   ░░░░░░░░░░░░▓      ▓░░░░░░░░░░░░    ions sputter it off the floor only │
+│   ░░░░░░░░░░░░        ░░░░░░░░░░░░  (cold wall, less ▓)                  │
+│   ░░░░░░░░░░░░▓ ↓  ↓ ▓░░░░░░░░░░░░                                       │
+│   ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒  ◀ etch-stop layer                    │
+│  depth ███████ 7/7    floor etch rate >2x, -40% energy                   │
+└──────────────────────────────────────────────────────────────────────────┘

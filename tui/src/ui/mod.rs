@@ -12,7 +12,9 @@
 //   section_tabs top nav: one row of tabs over model::Section (few, short sections)
 //   spacing      padding / gap tokens by screen size (theme.spacing)
 //   source_bar   one-line source of the selection + SourceInspector popup (formula + inputs)
+//   candles      OHLC candlestick chart with price axis + volume strip
 //   charts       grouped bars, sparklines with gaps, line chart helpers
+//   hcandles     horizontal candles (one row per bar) for the intraday tape
 //   help         `?` keymap overlay + footer key hints
 //   text         width-aware truncate / wrap, URL shortening, number formatting
 
@@ -22,8 +24,10 @@
 pub mod block_grid;
 pub mod block_view;
 pub mod calendar;
+pub mod candles;
 pub mod charts;
 pub mod command_palette;
+pub mod hcandles;
 pub mod help;
 pub mod layout;
 pub mod section_list;

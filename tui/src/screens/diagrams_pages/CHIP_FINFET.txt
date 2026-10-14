@@ -1,0 +1,95 @@
+# 1. What happens: stand the channel up as a fin and wrap the gate around it
+
+ ┌──────────┐    ┌──────────┐    ┌────────────┐    ┌──────────────┐    ┌─────────────┐    ┌─────────────┐
+ │ SAQP     │    │ FIN FORM │    │ FIN REVEAL │    │ GATE WRAP    │    │ QUANTIZED W │    │ FIN COUNT   │
+ │ 4x pitch │ ─▶ │ etch Si  │ ─▶ │ oxide      │ ─▶ │ hi-k + metal │ ─▶ │ width = N   │ ─▶ │ 1 to 3 fins │
+ │ split    │    │ fins     │    │ recess     │    │ 3 sides      │    │ fins        │    │ per cell    │
+ └──────────┘    └──────────┘    └────────────┘    └──────────────┘    └─────────────┘    └─────────────┘
+
+  (fins are cut from the substrate, oxide fills between and is etched back, the gate drapes over the fin)
+
+# 2. Cross-section: one fin under the gate (cut perpendicular to the fin, through the gate)
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │                                                                                                        │
+ │                gate metal (work-function + fill)         Weff per fin = 2 x Hfin + Wfin   (textbook)   │
+ │             ┌────────────────────────────────────┐                                                     │
+ │             │  ┌──────────────────────────────┐  │     Hfin  fin height   (tens of nm)                 │
+ │             │  │  hi-k dielectric (HfO2 based)│  │     Wfin  fin width    (single-digit to ~10 nm)     │
+ │             │  │  ┌────────────────────────┐  │  │     Pfin  fin pitch    (see section 4)              │
+ │             │  │  │       FIN (Si)         │  │  │                                                     │
+ │             │  │  │  channel, 3 gated sides│  │  │     gate wraps top + 2 sidewalls                    │
+ │             │  │  │                        │  │  │     bottom is NOT gated: sub-fin leakage            │
+ │             │  │  └────────────────────────┘  │  │     path, stopped by the punch-through stop         │
+ │   ░░░░░░░░░░┴──┴──────────────────────────────┴──┴░░░░░░░░░░  doping / STI oxide (reveal height)       │
+ │   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓  silicon substrate                        │
+ │                                                                                                        │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (planar had one gated face; the fin has three, so the gate keeps control as the channel shrinks)
+
+# 3. Node history: one FinFET family, six disclosures
+
+ ┌───────────────┐    ┌────────────┐    ┌───────────────┐    ┌─────────┐    ┌─────────┐    ┌──────────────┐
+ │ INTEL 22      │    │ TSMC 16    │    │ TSMC N7       │    │ TSMC N5 │    │ TSMC N3 │    │ SAMSUNG      │
+ │ 2011 tri-gate │ ─▶ │ 16FF+ 2015 │ ─▶ │ pitch 57 gate │ ─▶ │ gate 51 │ ─▶ │ gate 45 │ ─▶ │ 14nm FinFET, │
+ │ Ivy Bridge    │    │ vs 20nm    │    │ fin 30 (est)  │    │ fin 28  │    │ FinFlex │    │ 3nm GAA      │
+ └───────────────┘    └────────────┘    └───────────────┘    └─────────┘    └─────────┘    └──────────────┘
+
+  (the fin is stretched, not replaced, from 22nm to N3E; the next step is nanosheets, see the GAA node)
+
+# 4. By the numbers (measured or estimated pitches)
+
+  node        contacted gate pitch   fin pitch     logic density          source
+  TSMC N16    90 nm                  n/a found     n/a found              WikiChip table [4]
+  TSMC N7     57 nm (est)            30 nm (est)   ~91.2 MTr/mm2 (est)    WikiChip estimate [4]
+  TSMC N5     51 nm                  28 nm         ~137.6 - 138.2         A15 SEM, Angstronomics [4]
+  TSMC N3     45 nm                  not found     1.6x vs N5 (N3E claim) TechInsights / TSMC [5]
+  (MTr/mm2 = million transistors per mm2; TSMC density claims use a blend, not one pitch, per [4])
+
+# 5. FinFlex: pick fins per cell block on N3
+
+ ┌─────────────────┐  ┌───────────────┐  ┌─────────────┐  ┌──────────────────┐
+ │ FINFLEX         │  │ 3-2 FIN       │  │ 2-2 FIN     │  │ 2-1 FIN          │
+ │ 3-2 / 2-2 / 2-1 │  │ speed         │  │ balanced    │  │ low power, dense │
+ │ per block       │  │ 3-fin + 2-fin │  │ 2-fin cells │  │ 2-fin + 1-fin    │
+ └─────────────────┘  └───────────────┘  └─────────────┘  └──────────────────┘
+
+  libraries are 1, 2, 3 fins tall; all three options use 2-fin cells as the base; per block, same die [6]
+  density range 0.64x to 0.85x of N5 2-2 cell area depending on option (TSMC claim, via Wikipedia mirror) [5]
+
+# 6. TSMC wafer revenue by node, 2025 (7nm and below = 74% of the year, 69% in 2024)
+
+  quarter   3nm  5nm  7nm   7nm and below
+  Q1 25     22%  36%  15%   73%
+  Q2 25     24%  36%  14%   74%
+  Q3 25     23%  37%  14%   74%
+  Q4 25     28%  35%  14%   77%
+  3nm  █████████████████████████████████ 28% (Q4)      5nm  █████████████████████████████████████ 35% (Q4)
+
+# 7. What limits fins below 3nm
+
+ ┌───────────────┐    ┌───────────────┐    ┌─────────────┐
+ │ FIN LIMITS    │    │ LEAKAGE       │    │ WAFER COST  │
+ │ Wfin too thin │ ─▶ │ sub-fin, GIDL │ ─▶ │ N3 vs N5    │
+ │ Hfin too tall │    │ tunneling     │    │ price rises │
+ └───────────────┘    └───────────────┘    └─────────────┘
+
+  taller, thinner fins bend and etch with tapered profiles, and thinner fins raise variability (textbook)
+  (the response in the industry is nanosheets / GAA at N2, Samsung 3nm already; see GAA)
+
+(notes)
+  Pitches marked "est" are WikiChip estimates; N5 numbers are from Apple A15 SEM measurements [4].
+  TSMC wafer prices are not public; the card WAFER COST lists only labelled rumor ranges.
+  Intel 22nm fin pitch, height and width were not confirmed in this research pass.
+
+# Sources
+  [1] Intel 22nm: realworldtech.com/?p=1082 ; semiaccurate.com/2011/05/04/like-semiaccurate-said-intel-goes-finfet3d-on-22nm/
+  [2] TSMC 16FF+: pr.tsmc.com/english/news/1835 ; semiwiki.com/semiconductor-manufacturers/tsmc/1789-16nm-finfet-versus-20nm-planar/
+  [3] SAQP: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10121785 ; cadence blog on imec 5nm takeout
+  [4] WikiChip N7/N5: en.wikichip.org/wiki/N7 ; en.wikichip.org/wiki/N5 ; angstronomics.com/p/the-truth-of-tsmc-5nm
+  [5] N3: techinsights.com/blog/tsmc-reveals-3nm-process-details ; semiengineering.com/iedm-tsmc-n3-details
+  [6] FinFlex: tsmc.com/english/news-events/blog-article-20220616 ; semianalysis.com/p/iedm2022p1
+  [7] Samsung: club386.com/samsung-starts-mass-production-on-3nm-process-node ; news.samsung.com/global/samsung-foundry-innovations-power-the-future-of-big-data-ai-ml-and-smart-connected-devices
+  [8] TSMC mix: anysilicon.com/tsmcs-financial-results-2025-q1/ ; webull.com/news/13698287613906944 ; finance.yahoo.com/news/chip-giant-set-strong-2026-195908674.html
+

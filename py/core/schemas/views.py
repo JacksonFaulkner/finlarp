@@ -8,11 +8,13 @@ in VIEW_MODELS, and the docs show up everywhere with no further wiring.
 
 from __future__ import annotations
 
+import datetime as dt  # a field named `date` shadows the `date` type inside its own class body
 from datetime import date, datetime
 
 from pydantic import BaseModel, Field
 
 from core.schemas import sec_views as sv
+from core.schemas.sentiment import TweetItem, TweetLabel
 
 
 class UniverseView(BaseModel):
@@ -96,6 +98,129 @@ class TradingDay(BaseModel):
     is_thin_day: bool = Field(description="True when n_symbols is under 80% of the median day; data-gap suspect")
 
 
+class AccountFill(BaseModel):
+    """One buy or sell fill from the user's broker (E*TRADE), built by derive/account.py."""
+
+    fill_id: str = Field(description="Broker transaction id; a repeat id gets a #n suffix")
+    acct: str = Field(description="Short hash of the broker account number")
+    ts: datetime = Field(description="Fill time, UTC-aware")
+    et_ts: datetime = Field(description="Naive ET timestamp of the fill")
+    et_date: date = Field(description="ET calendar date; joins to bars_1d (trade date) and bars_5m.et_date")
+    et_minute: int = Field(description="Minutes since midnight ET; regular session = 570..959")
+    symbol: str = Field(description="Ticker, joins to bars_1d.symbol")
+    side: str = Field(description="buy or sell")
+    qty: float = Field(description="Shares as traded (always positive; direction is side)")
+    price: float = Field(description="Price per share as traded, USD")
+    amount: float = Field(description="Cash effect in USD after fees: negative for buys, positive for sells")
+    split_factor: float = Field(description="New shares per old share for splits after this fill; 1.0 if none")
+    qty_adj: float = Field(description="qty on today's share basis (qty * split_factor)")
+    price_adj: float = Field(description="price on today's share basis (price / split_factor); compare to current prices")
+    description: str | None = Field(description="Broker description, usually the company name")
+
+
+class AccountRoundTrip(BaseModel):
+    """One FIFO-paired lot: shares bought then sold, on a split-adjusted basis. Fees are not netted out."""
+
+    lot_id: str = Field(description="symbol-n, in exit order")
+    acct: str = Field(description="Short hash of the broker account number")
+    symbol: str = Field(description="Ticker, joins to bars_1d.symbol")
+    qty: float = Field(description="Shares in this lot (split-adjusted)")
+    matched: bool = Field(description="False when the sell has no buy in the cache (entry/pnl columns are null)")
+    entry_fill_id: str | None = Field(description="account_fills.fill_id of the buy")
+    exit_fill_id: str = Field(description="account_fills.fill_id of the sell")
+    entry_ts: datetime | None = Field(description="Buy time, UTC-aware")
+    exit_ts: datetime = Field(description="Sell time, UTC-aware")
+    entry_date: date | None = Field(description="ET date of the buy; join to bars_1d for entry context")
+    exit_date: date = Field(description="ET date of the sell")
+    entry_et_minute: int | None = Field(description="Minutes since midnight ET at entry; 570 = 09:30")
+    exit_et_minute: int = Field(description="Minutes since midnight ET at exit")
+    entry_price: float | None = Field(description="Buy price per share, split-adjusted, USD")
+    exit_price: float = Field(description="Sell price per share, split-adjusted, USD")
+    cost: float | None = Field(description="qty * entry_price, USD")
+    proceeds: float = Field(description="qty * exit_price, USD")
+    pnl: float | None = Field(description="Realized profit in USD, before fees")
+    ret: float | None = Field(description="exit_price / entry_price - 1 (fraction, not percent)")
+    hold_days: float | None = Field(description="Days between entry and exit fills")
+    same_day: bool | None = Field(description="True when bought and sold on the same ET date")
+
+
+class AccountPosition(BaseModel):
+    """Open lots per symbol from the fill history, side by side with the broker's own positions."""
+
+    symbol: str = Field(description="Ticker")
+    qty: float = Field(description="Open shares from FIFO over the cached fills (split-adjusted)")
+    avg_cost: float | None = Field(description="Average cost of the open FIFO lots, USD; null when qty is 0")
+    cost_basis: float = Field(description="Total cost of the open FIFO lots, USD")
+    n_lots: int = Field(description="Number of open FIFO lots")
+    first_entry_date: date | None = Field(description="ET date of the oldest open lot")
+    last_entry_date: date | None = Field(description="ET date of the newest open lot")
+    broker_qty: float | None = Field(description="Shares per the broker's positions cache; 0 if the broker no longer lists it")
+    broker_price_paid: float | None = Field(description="Broker's cost per share (its own cost method, not FIFO)")
+    last_price: float | None = Field(description="Last price when the broker positions were cached, USD")
+    market_value: float | None = Field(description="Broker market value, USD")
+    unrealized_pnl: float | None = Field(description="Broker total gain in USD")
+    qty_matches_broker: bool | None = Field(description="False means fills and broker disagree: missing history or a stale cache")
+    as_of: datetime | None = Field(description="When the broker positions were cached, UTC-aware")
+
+
+class AccountEquityDaily(BaseModel):
+    """Portfolio value per calendar day, reconstructed from fills and Yahoo closes (not broker balances)."""
+
+    date: dt.date = Field(description="Calendar date")
+    total_value: float = Field(description="Portfolio market value at the end of the day, USD")
+    net_flow: float = Field(description="Deposits minus withdrawals dated this day, USD")
+    day_return: float | None = Field(description="Time-weighted: value / (prior value + net_flow) - 1, flow counted at the start of the day")
+    twr_index: float = Field(description="Cumulative time-weighted index, 1.0 at the first date")
+    drawdown: float = Field(description="twr_index / running max - 1 (fraction, <= 0)")
+    is_stale: bool = Field(description="Value and flow unchanged from the prior day: a weekend/holiday carry-forward")
+
+
+class AccountCash(BaseModel):
+    """Non-trade cash events on the account."""
+
+    acct: str = Field(description="Short hash of the broker account number")
+    ts: datetime = Field(description="Event time, UTC-aware")
+    et_date: date = Field(description="ET calendar date")
+    kind: str = Field(description="deposit, withdrawal, dividend, interest or other")
+    symbol: str | None = Field(description="Ticker for dividends; null otherwise")
+    amount: float = Field(description="USD; positive is cash in")
+    description: str | None = Field(description="Broker description")
+
+
+class NewsView(BaseModel):
+    """One company news article (title, link and a ~200 character snippet), pulled from ROIC.ai by sources/roic_news.py."""
+
+    id: str = Field(description="Stable article id: sha1 of ticker|url, first 16 hex chars")
+    ticker: str = Field(description="Universe ticker the article was pulled for; one row per (ticker, url)")
+    published_at: datetime = Field(description="Publication time, naive UTC")
+    title: str | None = Field(description="Headline")
+    site: str | None = Field(description="Publisher domain as ROIC reports it, e.g. fool.com, globenewswire.com, seekingalpha.com")
+    url: str = Field(description="Link to the original article")
+    text: str = Field(description="Article snippet as ROIC returns it, about 200 characters (never the full article); use url for the rest")
+    text_chars: int = Field(description="Length of text in characters; filter on it to drop stubs")
+
+
+class TweetSentimentView(TweetLabel):
+    """One labelled view on one ticker in one tweet, from sources/tweet_sentiment.py. Column docs are the labeller's own
+    field descriptions (core.schemas.sentiment), so the rules the model followed are the rules documented here."""
+
+    id: str = Field(description="Tweet id; joins to tweets.id and tweet_meta.id. One row per (id, ticker)")
+    votes: int = Field(description="How many independent labelling passes named this ticker for the tweet. Stance is the median across them")
+    agreement: float = Field(description="Share of those passes whose stance has the same sign as the final stance, 0 to 1; low means a contested label")
+
+
+class TweetMetaView(BaseModel):
+    """Tweet-level metadata from the same labelling pass, one row per labelled tweet."""
+
+    id: str = Field(description="Tweet id; joins to tweets.id")
+    tweet_type: str = TweetItem.model_fields["tweet_type"]
+    themes: list[str] = TweetItem.model_fields["themes"]
+    keywords: list[str] = TweetItem.model_fields["keywords"]
+    entities: list[str] = TweetItem.model_fields["entities"]
+    is_repost: bool = TweetItem.model_fields["is_repost"]
+    is_sarcastic: bool = TweetItem.model_fields["is_sarcastic"]
+
+
 # view name -> model documenting its columns
 VIEW_MODELS: dict[str, type[BaseModel]] = {
     "universe": UniverseView,
@@ -131,4 +256,12 @@ VIEW_MODELS: dict[str, type[BaseModel]] = {
     "quotes_1m": sv.Quotes1m,
     "tweets": sv.TweetsView,
     "tweet_tickers": sv.TweetTickers,
+    "news": NewsView,
+    "tweet_sentiment": TweetSentimentView,
+    "tweet_meta": TweetMetaView,
+    "account_fills": AccountFill,
+    "account_round_trips": AccountRoundTrip,
+    "account_positions": AccountPosition,
+    "account_equity_daily": AccountEquityDaily,
+    "account_cash": AccountCash,
 }

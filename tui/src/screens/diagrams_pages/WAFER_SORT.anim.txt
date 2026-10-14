@@ -1,0 +1,289 @@
+ms 450
+== TD 1: chuck indexes to row 1, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│       ┬ ┬ ┬ ┬           │ PAD CLOSE-UP (one probe, side)     │
+│       ▓ ▓ ▓ ▓           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 0/8  tested  0/32  pass  0  fail 0  yield --              │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 1: touchdown, 76 um overdrive, test: 3 pass / 1 fail
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│       ▼ ▼ ▼ ▼           │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │        ╲                           │
+│                         │         ╲_____                     │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  ──────────·····●──────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  overdrive ~3 mil (76 um): tip     │
+│                         │  skates ▶, scrubs 5-10 nm oxide    │
+│       ░ ░ ░ ░           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 1/8  tested  4/32  pass  3  fail 1  yield 75.0%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 2: chuck indexes to row 2, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│   ┬ ┬ ┬ ┬               │        ╲  spring / needle tip      │
+│   ▓ ▓ ▓ ▓ ░ ░ ░ ░       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 1/8  tested  4/32  pass  3  fail 1  yield 75.0%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 2: touchdown, 76 um overdrive, test: 3 pass / 1 fail
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│   ▼ ▼ ▼ ▼               │                                    │
+│   ✗ ✓ ✓ ✓ ░ ░ ░ ░       │        ╲                           │
+│                         │         ╲_____                     │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  ──────────·····●──────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  overdrive ~3 mil (76 um): tip     │
+│                         │  skates ▶, scrubs 5-10 nm oxide    │
+│       ░ ░ ░ ░           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 2/8  tested  8/32  pass  6  fail 2  yield 75.0%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 3: chuck indexes to row 2, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│           ┬ ┬ ┬ ┬       │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ▓ ▓ ▓ ▓       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 2/8  tested  8/32  pass  6  fail 2  yield 75.0%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 3: touchdown, 76 um overdrive, test: 4 pass / 0 fail
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│           ▼ ▼ ▼ ▼       │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │        ╲                           │
+│                         │         ╲_____                     │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  ──────────·····●──────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  overdrive ~3 mil (76 um): tip     │
+│                         │  skates ▶, scrubs 5-10 nm oxide    │
+│       ░ ░ ░ ░           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 3/8  tested 12/32  pass 10  fail 2  yield 83.3%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 4: chuck indexes to row 3, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│           ┬ ┬ ┬ ┬       │          ●       ▲ chuck rises     │
+│   ░ ░ ░ ░ ▓ ▓ ▓ ▓       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 3/8  tested 12/32  pass 10  fail 2  yield 83.3%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 4: low overdrive, oxide not broken: 4 opens (false fails)
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│           ▼ ▼ ▼ ▼       │          ╲                         │
+│   ░ ░ ░ ░ ? ? ? ?       │  ─────────●────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  overdrive too low: tip rests      │
+│                         │  on oxide = open, false fail ?     │
+│       ░ ░ ░ ░           │  (raise OD, re-touchdown)          │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 3/8  tested 12/32  pass 10  fail 2  yield 83.3%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 4 retry at ~3 mil OD: contact made, all 4 pass bin 1
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │        ╲                           │
+│           ▼ ▼ ▼ ▼       │         ╲_____                     │
+│   ░ ░ ░ ░ ✓ ✓ ✓ ✓       │  ──────────·····●──────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  overdrive ~3 mil (76 um): tip     │
+│                         │  skates ▶, scrubs 5-10 nm oxide    │
+│       ░ ░ ░ ░           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 4/8  tested 16/32  pass 14  fail 2  yield 87.5%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 5: chuck indexes to row 3, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│   ┬ ┬ ┬ ┬               │          ●       ▲ chuck rises     │
+│   ▓ ▓ ▓ ▓ ✓ ✓ ✓ ✓       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 4/8  tested 16/32  pass 14  fail 2  yield 87.5%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 5: touchdown, 76 um overdrive, test: 3 pass / 1 fail
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │        ╲                           │
+│   ▼ ▼ ▼ ▼               │         ╲_____                     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────·····●──────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ░ ░ ░ ░ ░ ░ ░ ░       │  overdrive ~3 mil (76 um): tip     │
+│                         │  skates ▶, scrubs 5-10 nm oxide    │
+│       ░ ░ ░ ░           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 5/8  tested 20/32  pass 17  fail 3  yield 85.0%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 6: chuck indexes to row 4, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────────────────────        │
+│   ┬ ┬ ┬ ┬               │  ██████ Al bond pad ███████        │
+│   ▓ ▓ ▓ ▓ ░ ░ ░ ░       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 5/8  tested 20/32  pass 17  fail 3  yield 85.0%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 6: OD drifted high, passes but deep scrub mark ▒ on pads
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │        ╲                           │
+│                         │         ╲________                  │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────        ●───────        │
+│   ▼ ▼ ▼ ▼               │  ██████ Al ▒▒▒▒▒▒▒▒ ███████        │
+│   ✓ ✓ ✓ ✓ ░ ░ ░ ░       │  overdrive too high: deep gouge    │
+│                         │  ▒ hurts wire bond, wears tips     │
+│       ░ ░ ░ ░           │  (card life counted in TDs)        │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 6/8  tested 24/32  pass 21  fail 3  yield 87.5%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 7: chuck indexes to row 4, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────────────────────        │
+│           ┬ ┬ ┬ ┬       │  ██████ Al bond pad ███████        │
+│   ✓ ✓ ✓ ✓ ▓ ▓ ▓ ▓       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ░ ░ ░ ░           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 6/8  tested 24/32  pass 21  fail 3  yield 87.5%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 7: touchdown, 76 um overdrive, test: 3 pass / 1 fail
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │        ╲                           │
+│                         │         ╲_____                     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────·····●──────────        │
+│           ▼ ▼ ▼ ▼       │  ██████ Al bond pad ███████        │
+│   ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✗       │  overdrive ~3 mil (76 um): tip     │
+│                         │  skates ▶, scrubs 5-10 nm oxide    │
+│       ░ ░ ░ ░           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 7/8  tested 28/32  pass 24  fail 4  yield 85.7%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 8: chuck indexes to row 5, aligns pads, rises
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✗       │  (lift, chuck indexes next site)   │
+│       ┬ ┬ ┬ ┬           │                                    │
+│       ▓ ▓ ▓ ▓           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 7/8  tested 28/32  pass 24  fail 4  yield 85.7%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== TD 8: touchdown, 76 um overdrive, test: 3 pass / 1 fail
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │                                    │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │        ╲                           │
+│                         │         ╲_____                     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────·····●──────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✗       │  overdrive ~3 mil (76 um): tip     │
+│       ▼ ▼ ▼ ▼           │  skates ▶, scrubs 5-10 nm oxide    │
+│       ✗ ✓ ✓ ✓           │  (good: ohmic contact, shallow)    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 8/8  tested 32/32  pass 27  fail 5  yield 84.4%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘
+== map done, yield 84.4%: edge die 14/18 good vs center 13/14
+┌─ WAFER MAP, 4 sites/TD ─┬────────────────────────────────────┐
+│                         │ PAD CLOSE-UP (one probe, side)     │
+│       ✓ ✓ ✓ ✗           │                                    │
+│                         │        ╲  spring / needle tip      │
+│   ✗ ✓ ✓ ✓ ✓ ✓ ✓ ✓       │         ╲                          │
+│                         │          ●       ▲ chuck rises     │
+│   ✓ ✓ ✗ ✓ ✓ ✓ ✓ ✓       │  ──────────────────────────        │
+│                         │  ██████ Al bond pad ███████        │
+│   ✓ ✓ ✓ ✓ ✓ ✓ ✓ ✗       │  (lift, chuck indexes next site)   │
+│                         │                                    │
+│       ✗ ✓ ✓ ✓           │  ────── oxide, 5-10 nm ────────    │
+├─────────────────────────┴────────────────────────────────────┤
+│ TD 8/8  tested 32/32  pass 27  fail 5  yield 84.4%           │
+│ ░ untested  ▓ probing  ✓ bin 1  ✗ fail  ? open               │
+└──────────────────────────────────────────────────────────────┘

@@ -1,0 +1,226 @@
+ms 500
+== optical scan, column 1 of 6: light covers every die
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ DIE-TO-DIE COMPARE                 │
+ │    ▼                              │                                    │
+ │        ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒         │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ this die   ▒▒▒▒▒▒▒▒▒▒              │
+ │   ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ difference ··········              │
+ │   ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ ─▶ below threshold: pass           │
+ │        ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒         │                                    │
+ │                                   │                                    │
+ │ scan █░░░░░ 1/6 columns           │                                    │
+ │ candidates flagged: 0             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== die-to-die: each die minus its neighbours, column 2
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ DIE-TO-DIE COMPARE                 │
+ │         ▼                         │                                    │
+ │        ███  ▒▒▒  ▒▒▒  ▒▒▒         │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ this die   ▒▒▒▒•▒▒▒▒▒              │
+ │   ░░░  ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ███  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ difference ····✗·····              │
+ │   ░░░  █✗█  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ ─▶ above threshold: FLAG ✗         │
+ │        ███  ▒▒▒  ▒▒▒  ▒▒▒         │                                    │
+ │                                   │                                    │
+ │ scan ██░░░░ 2/6 columns           │                                    │
+ │ candidates flagged: 1             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== no difference above threshold in column 3
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ DIE-TO-DIE COMPARE                 │
+ │              ▼                    │                                    │
+ │        ░░░  ███  ▒▒▒  ▒▒▒         │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ███  ▒▒▒  ▒▒▒  ▒▒▒    │ this die   ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ███  ▒▒▒  ▒▒▒  ▒▒▒    │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ███  ▒▒▒  ▒▒▒  ▒▒▒    │ difference ··········              │
+ │   ░░░  ░✗░  ███  ▒▒▒  ▒▒▒  ▒▒▒    │ ─▶ below threshold: pass           │
+ │        ░░░  ███  ▒▒▒  ▒▒▒         │                                    │
+ │                                   │                                    │
+ │ scan ███░░░ 3/6 columns           │                                    │
+ │ candidates flagged: 1             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== column 4: difference image spikes, die flagged ✗
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ DIE-TO-DIE COMPARE                 │
+ │                   ▼               │                                    │
+ │        ░░░  ░░░  ███  ▒▒▒         │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ███  ▒▒▒  ▒▒▒    │ this die   ▒▒▒▒•▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  █✗█  ▒▒▒  ▒▒▒    │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ███  ▒▒▒  ▒▒▒    │ difference ····✗·····              │
+ │   ░░░  ░✗░  ░░░  ███  ▒▒▒  ▒▒▒    │ ─▶ above threshold: FLAG ✗         │
+ │        ░░░  ░░░  ███  ▒▒▒         │                                    │
+ │                                   │                                    │
+ │ scan ████░░ 4/6 columns           │                                    │
+ │ candidates flagged: 2             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== column 5: another flag, candidates now 3
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ DIE-TO-DIE COMPARE                 │
+ │                        ▼          │                                    │
+ │        ░░░  ░░░  ░░░  ███         │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ░░░  █✗█  ▒▒▒    │ this die   ▒▒▒▒•▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ░✗░  ███  ▒▒▒    │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ░░░  ███  ▒▒▒    │ difference ····✗·····              │
+ │   ░░░  ░✗░  ░░░  ░░░  ███  ▒▒▒    │ ─▶ above threshold: FLAG ✗         │
+ │        ░░░  ░░░  ░░░  ███         │                                    │
+ │                                   │                                    │
+ │ scan █████░ 5/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== column 6 done: whole wafer in minutes, 3 candidates
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ DIE-TO-DIE COMPARE                 │
+ │                             ▼     │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ███    │ this die   ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ███    │ neighbour  ▒▒▒▒▒▒▒▒▒▒              │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ███    │ difference ··········              │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ███    │ ─▶ below threshold: pass           │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== threshold set high-sensitivity: nuisance floods review
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ SENSITIVITY KNOB                   │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ low ░░░░░░░░░░●░ high              │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │                                    │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ more hits = more SEM time          │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ tool slows, review queue grows     │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ most hits are nuisance             │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== threshold too low: a killer type escapes to the next layer
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ SENSITIVITY KNOB                   │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ low ░░●░░░░░░░░░ high              │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │                                    │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ few hits, fast                     │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ but a real bridge is missed        │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ bad lot moves on unseen            │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== tuned threshold: 3 candidates sent to e-beam review
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ SENSITIVITY KNOB                   │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ low ░░░░░░●░░░░░ high              │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │                                    │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ optical finds candidates,          │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ review SEM images them,            │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ classifier sorts killer vs nuisance│
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== e-beam review 1 of 3: slow, so only flagged spots are imaged
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ REVIEW SEM at die r5 c2            │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ █  █  █  █  █  █                   │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │ █  █  █ ·█  █  █                   │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ █  █  █  █  █  █                   │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ class: grain / colour noise        │
+ │   ░░░  [✗]  ░░░  ░░░  ░░░  ░░░    │ nuisance ─▶ ignore                 │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== review 2 of 3: line edge variation, no electrical effect
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ REVIEW SEM at die r2 c5            │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ █  █  █  █  █  █                   │
+ │   ░░░  ░░░  ░░░  ░░░  [✗]  ░░░    │ █  █  █ ·█  █  █                   │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ █  █  █  █  █  █                   │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ class: edge roughness              │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ nuisance ─▶ ignore                 │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== review 3 of 3: particle bridges two lines = short
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ REVIEW SEM at die r3 c4            │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ █  █  █  █  █  █                   │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │ █  █══█  █  █  █                   │
+ │   ░░░  ░░░  ░░░  [✗]  ░░░  ░░░    │ █  █  █  █  █  █                   │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ class: BRIDGE (short)              │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ KILLER ─▶ count it                 │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ candidates flagged: 3             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== bridge count over spec: lot on HOLD before next layer
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ ANALYSE                            │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ killers this layer: 1 bridge       │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │ class codes: particle, bridge,     │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ void, scratch, nuisance            │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ over spec ─▶ HOLD THE LOT          │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ (a missed lot scraps many wafers)  │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ killer: 1   nuisance: 2           │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== fix sent upstream to etch / CMP / litho, next lot
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ FEED BACK via fab host             │
+ │                                   │                                    │
+ │        ░░░  ░░░  ░░░  ░░░         │ bridges cluster on one chamber     │
+ │   ░░░  ░░░  ░░░  ░░░  ░✗░  ░░░    │ ◀── fix ETCH chamber recipe        │
+ │   ░░░  ░░░  ░░░  ░✗░  ░░░  ░░░    │ ◀── check CMP / LITHO offsets      │
+ │   ░░░  ░░░  ░░░  ░░░  ░░░  ░░░    │ run-to-run control, lot by lot     │
+ │   ░░░  ░✗░  ░░░  ░░░  ░░░  ░░░    │ (overlay: shift, scale, rotation)  │
+ │        ░░░  ░░░  ░░░  ░░░         │                                    │
+ │                                   │                                    │
+ │ scan ██████ 6/6 columns           │                                    │
+ │ killer: 1   nuisance: 2           │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘
+== next lot loads: rescan to confirm the fix
+ ┌────────────────────────────────────────────────────────────────────────┐
+ │ WAFER, 6 x 6 die grid             │ NEXT LOT                           │
+ │                                   │                                    │
+ │        ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒         │ recipe offset applied              │
+ │   ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ rescan starts from column 1        │
+ │   ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │ target: 0 killers                  │
+ │   ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │                                    │
+ │   ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒    │                                    │
+ │        ▒▒▒  ▒▒▒  ▒▒▒  ▒▒▒         │                                    │
+ │                                   │                                    │
+ │ scan ░░░░░░ 0/6 columns           │                                    │
+ │ candidates flagged: 0             │                                    │
+ │ (▒ unscanned ░ scanned █ under the beam ✗ flagged)                     │
+ └────────────────────────────────────────────────────────────────────────┘

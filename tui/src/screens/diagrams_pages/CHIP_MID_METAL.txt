@@ -1,0 +1,151 @@
+# 1. What happens: build one wiring level (dual damascene), repeated for M5-M9
+
+ ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+ │ DEPOSIT ILD  │  │ PATTERN+ETCH │  │ BARRIER+SEED │  │ PLATE Cu     │  │ CMP          │  │ CAP+REPEAT   │
+ │ low-k stack  │─▶│ trench + via │─▶│ TaN/Ta, Ru   │─▶│ bottom-up Cu │─▶│ strip excess │─▶│ SiCN/SiN cap │
+ │ +etch stop   │  │ hard mask    │  │ PVD,ALD,CVD  │  │ ECD tool     │  │ stop on ILD  │  │ next level   │
+ └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘
+
+  (one pass makes one metal level plus the vias below it; M5-M9 is five such passes, each ~4-6 tool visits)
+
+# 2. Dual damascene cross-section of two medium-pitch levels (not to scale)
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ M6 trench level (ULK dielectric ░, Cu ▒, barrier/liner shown as the thin wall around each Cu body) │
+ │                                                                                                    │
+ │   ░░░░┌───────────┐░░░░░░░░┌───────────┐░░░░░░░░┌───────────┐░░░░░░░░░░░░░░░░                      │
+ │   ░░░░│▒▒▒▒▒▒▒▒▒▒▒│░░░░░░░░│▒▒▒▒▒▒▒▒▒▒▒│░░░░░░░░│▒▒▒▒▒▒▒▒▒▒▒│░░░░░░░░░░░░░░░░                      │
+ │   ░░░░│▒▒▒ line ▒▒│░░░░░░░░│▒▒▒ line ▒▒│░░░░░░░░│▒▒▒ line ▒▒│░░░░░░░░░░░░░░░░                      │
+ │   ░░░░└──┐▒▒▒▒┌───┘░░░░░░░░└───────────┘░░░░░░░░└───────────┘░░░░░░░░░░░░░░░░                      │
+ │   ░░░░░░░│▒via▒│░░░░░░░░░░░░░░░ via and trench filled in ONE plating step ░░░░                     │
+ │   ░░░░░░░│▒▒▒▒▒│░░░░░░░░░░░░░░░ barrier/liner coats the walls, not the via bottom                  │
+ │   ═══════╧═════╧═══════════════════════════════════════  cap / etch stop: SiCN or SiN (textbook)   │
+ │   ░░░░┌───────────┐░░░░░░░░┌───────────┐░░░░░░░░┌───────────┐░░░░░░░░░░░░░░░░                      │
+ │   ░░░░│▒▒▒ line ▒▒│░░░░░░░░│▒▒▒ line ▒▒│░░░░░░░░│▒▒▒ line ▒▒│░░░░░░░░░░░░░░░░                      │
+ │   ░░░░└───────────┘░░░░░░░░└───────────┘░░░░░░░░└───────────┘░░░░░░░░░░░░░░░░                      │
+ │ M5 trench level below (same ULK between lines)                                                     │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (trench and via are filled in ONE plating step, so each level has one Cu fill and one CMP; the via
+      bottom has no barrier on Cu)
+
+  (the cap layer is on the high-k side of the stack, so thinner caps and selective metal caps are used to
+      cut capacitance)
+
+# 3. RC delay: why wire levels get fatter going up
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │   wire delay  ~  R x C  =  (rho L / (W H)) x (k eps0 L H / S)  =  rho k eps0 L^2 / (W S)    (textbook)│
+ │   R = rho L / (W H)     C = mostly line-to-line, grows with k and with H / S (S = spacing)         │
+ │                                                                                                    │
+ │   thin M1-M4           medium M5-M9            thick M10-M14                                       │
+ │   ┌─┐┌─┐┌─┐            ┌──┐ ┌──┐ ┌──┐          ┌────┐   ┌────┐                                     │
+ │   └─┘└─┘└─┘            │  │ │  │ │  │          │    │   │    │                                     │
+ │   cell to cell         └──┘ └──┘ └──┘          └────┘   └────┘                                     │
+ │   highest R per um     block to block          power, clock, global                                │
+ │   (size effect)        balance R and C         lowest R, relaxed pitch                             │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (Cu resistivity rises as lines narrow: IBM study, ~2.0 uOhm-cm wide lines vs >3.0 uOhm-cm below ~60 nm
+      width [6])
+
+# 4. Pitch ladder and patterning choice per level (published data points)
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │   node / level           pitch        patterning (as reported)                          source         │
+ │   Intel 7 M2 / M4        44 / 52 nm   multipatterning (DUV)                             [3]            │
+ │   Intel 4 M2 / M4        45 nm        EUV for some metal and vias, DUV elsewhere        [3]            │
+ │   Intel 4 M0             30 nm        SAQP (self-aligned quad patterning), cobalt-clad  [3]            │
+ │   TSMC N5 Mx             ~30% tighter than N7, EUV, Cu reflow liner                        [4]         │
+ │   TSMC N3E M0            23 nm        EUV single pattern (3 layers were EUV double on N3B)  [5]        │
+ │   Intel IEDM 2024 test   <=25 nm      subtractive Ru + air gap, -25% line-line cap       [7]           │
+ │   M5-M9 'medium' pitch in the Chip tab is a class label; foundries do not publish per-level pitch tables.│
+ └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 5. Dielectric stack: k and stiffness trade (Young's modulus, GPa)
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │   SiO2 (k about 4.0)             ████████████████████████████████████████ 72 GPa                   │
+ │   C-doped oxide (k about 2.7)    ██████ 7-10 GPa                                                   │
+ │   Intel patent target k<=2.5     ████████ 15 GPa                                                   │
+ │   58% porous CDO (calc)          ██ 3 GPa                                                          │
+ │   spin-on k<2.0 (typ 1 to 3)     ██ 1-3 GPa                                                        │
+ │   (modulus falls an order of magnitude as k drops by one third [8]; below k=2 films are >=50% porous)│
+ └────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 6. Electromigration: how a Cu line fails
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │    electrons ──▶──▶──▶──▶──▶──▶──▶──▶        (current flows opposite)                                  │
+ │    ┌──────────────────────────────────────────────────────────────────────┐                            │
+ │    │▒▒ void grows here ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ hillock ▒▒▒▒▒▒│                         │
+ │    └──────────────────────────────────────────────────────────────────────┘                            │
+ │    atoms drift along the weakest path: the Cu / cap interface (textbook)                               │
+ │    MTTF = A * J^-n * exp(Ea / kT)   Black's equation, n often about 2 [9]                              │
+ │    Cu Ea about 0.7-1.1 eV vs Al 0.5-0.7 eV [9];  fix: CoWP / Co / Ru caps, Mn or Co liners, Cu reflow [4]│
+ └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 7. Applied Materials FY2025: China share of $28,368M net revenue
+
+  China           ███████████████ 30%   ($8,529M) [11]
+  Rest of world   ███████████████████████████████████ 70%
+  (AMAT: Endura CuBS barrier/seed with Ru CVD, Black Diamond low-k; Lam SABRE does Cu plating)
+
+# 8. Via and edge placement (where levels connect)
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │    ideal landing              misaligned via (EPE)               self-aligned via                      │
+ │    ┌─────┐                    ┌─────┐                            ┌─────┐                               │
+ │    │ via │                    │ via │  ◀ shifted, bottom narrows │ via │ edge set by line grating      │
+ │    └──┬──┘                    └─┬───┘                            └──┬──┘                               │
+ │   ════╧════ line below       ═══╧═══════ line below             ════╧════ line below                   │
+ │    R low, EM ok               R up, short or EM risk [10]        overlay budget ~1/4 pitch at <=70 nm [10]│
+ └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 9. Problem map: what limits a medium level
+
+ ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+ │ RC DELAY         │  │ LOW-K / ULK      │  │ EUV VS MULTI     │  │ ELECTROMIGRATION │
+ │ R x C of the wire│  │ k 2.5 or lower   │  │ EUV or SAQP      │  │ Cu atom drift    │
+ │ size effect + k  │  │ porous, soft     │  │ per-level choice │  │ cap + liner fix  │
+ └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘
+
+ ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐
+ │ VIA / EPE        │  │ AIR GAP          │  │ RU / SUBTRACTIVE │  │ EDA RC EXTRACT   │
+ │ overlay, landing │  │ remove dielectric│  │ no barrier, etch │  │ StarRC, Quantus  │
+ │ self-aligned vias│  │ cap -25%+        │  │ <=25 nm pitch    │  │ signoff timing   │
+ └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘
+
+# 10. Who makes it, structure, risks
+
+  Dep/etch/CMP/plating tools: Applied Materials (AMAT), Lam Research (LRCX), Tokyo Electron (8035.T),
+      Ebara (6361.T, textbook)
+ Fabs: TSMC (TSM), Intel (INTC), Samsung (005930.KS); design side: ARM, NVDA, AMD design to these rules
+ EDA RC extraction: Synopsys StarRC (SNPS), Cadence Quantus (CDNS) [12]
+  Risks: Cu resistance wall below ~20 nm pitch (switch to Ru), ULK damage, EM at higher current, China at
+      30% of AMAT sales,
+ and the move of tight levels to subtractive Ru, which changes who sells the tools (textbook).
+
+(notes)
+  M5-M9 are the 'intermediate' levels: wider and taller than M1-M4, routed block to block, patterned with
+      DUV or EUV.
+  Foundries do not publish per-level pitch or k values for all levels; numbers here are disclosed examples
+      only.
+
+# Sources
+
+  [1] IBM Cu history: ibm.com/history/copper-interconnects ; en.wikipedia.org/wiki/Copper_interconnects
+  [2] Barrier scaling: semiengineering.com/how-far-will-copper-interconnects-scale
+  [3] Intel 4: anandtech.com/show/17448 ; fuse.wikichip.org/news/6720/a-look-at-intel-4-process-
+      technology/3 ; realworldtech.com/intel-4/5
+  [4] N5: semiwiki.com TSMC IEDM2019 5nm article ; N3E: semianalysis.com/p/iedm2022p1
+  [5] fuse.wikichip.org/?p=7375 (TSMC N3)
+  [6] IBM Cu resistivity study: research.ibm.com/publications/the-effect-of-microstructure-on-resistivity-
+      and-reliability-in-copper-interconnects
+  [7] Intel IEDM 2024: newsroom.intel.com/intel-foundry/intel-foundry-unveils-technology-advancements-
+      iedm-2024
+  [8] Low-k modulus: patents.justia.com/patent/9766170 ; image-ppubs.uspto.gov 6964919
+  [9] EM: ifte.de/mitarbeiter/lienig/vlsi05.pdf ; halbleiter.org/en/reliability/electromigration-tddb-nbti/
+  [10] Via EPE: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11916010
+  [11] AMAT FY2025 ARS: sec.gov/Archives/edgar/data/6951/000119312526027318/d54380dars.pdf
+  [12] StarRC: synopsys.com/implementation-and-signoff/signoff/starrc.html

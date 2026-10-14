@@ -1,0 +1,149 @@
+# 1. What happens: build the thick top metal, then the bump on top
+
+ ┌────────────────┐  ┌────────────────┐  ┌────────────┐  ┌─────────────┐  ┌─────────────────┐  ┌──────────────┐
+ │ TRENCH ETCH    │  │ BARRIER + SEED │  │ CU PLATE   │  │ CMP         │  │ PAD + PASSIV    │  │ BUMP         │
+ │ dual damascene │─▶│ TaN + Cu PVD   │─▶│ Cu fill    │─▶│ polish flat │─▶│ SiN + polyimide │─▶│ UBM + solder │
+ └────────────────┘  └────────────────┘  └────────────┘  └─────────────┘  └─────────────────┘  └──────────────┘
+
+  (same copper damascene loop as thin layers, only wider and taller; then pad, passivation, bump)
+
+# 2. Whole stack: transistors at the bottom, bumps at the top
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│           package substrate (organic), underfill between die and substrate                             │
+│    ═══╤══════╤══════╤══════╤══════╤══════╤══════╤══════╤══════╤═══  C4 solder bumps ~150 um pitch [3]  │
+│       ●      ●      ●      ●      ●      ●      ●      ●      ●     (power, ground, I/O alternate)     │
+│    ▒▒▒▒▒▒▒ polyimide + SiN/oxide passivation, openings over pads ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒      │
+│    ▄▄▄ Al or Cu RDL / bond pads (top) ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄      │
+│    M14 ════════════════  power grid / clock trunk    thick Cu, wide, low resistance                    │
+│    M13 ═══║════════════   M12 ═══║═════════   M11 ═══║══   M10 ═══║══   (big vias between)             │
+│    ····························· M5-M9 medium Cu, block-level signals ······························   │
+│    ····························· M1-M4 thin Cu, cell wiring ···········································│
+│    ▓▓▓ W contacts ▓▓▓  NMOS / PMOS  source - gate - drain  (silicon) ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (wires get fatter going up: thin for density, thick for current and reach; exact pitches not public)
+
+# 3. Jobs of the thick top layers and the package side
+
+ ┌──────────────────┐   ┌─────────────────┐   ┌────────────────────┐   ┌────────────────┐   ┌───────────────────┐
+ │ POWER GRID       │   │ CLOCK TRUNK     │   │ LONG WIRES         │   │ RDL            │   │ UNDERFILL         │
+ │ Vdd/Vss stripes  │──▶│ low skew spine  │──▶│ cross-block buses  │──▶│ re-route pads  │──▶│ epoxy under die   │
+ └──────────────────┘   └─────────────────┘   └────────────────────┘   └────────────────┘   └───────────────────┘
+
+  (wire resistance R = rho*L/(W*T) (textbook): thicker T and wider W cut R)
+
+# 4. Power delivery path and why droop happens
+
+ ┌──────────────────┐   ┌─────────────────┐   ┌────────────────┐   ┌───────────────┐   ┌─────────────────┐
+ │ VRM              │   │ PACKAGE         │   │ BUMP ARRAY     │   │ IR DROP       │   │ EM LIMIT        │
+ │ board regulator  │──▶│ planes + caps   │──▶│ C4 current     │──▶│ V = I * R     │──▶│ Cu current cap  │
+ └──────────────────┘   └─────────────────┘   └────────────────┘   └───────────────┘   └─────────────────┘
+
+  supply path (each stage drops voltage; the die sees what is left):
+
+    VRM 0.9 V ─▶ package ─▶ bump ─▶ M14 ─▶ M10 ─▶ vias ─▶ M5-M9 ─▶ M1-M4 ─▶ cell rail ─▶ transistor
+       big thick wires carry most current ◀── ─────────────────────────── ──▶ thin wires carry the last mm
+       (the 0.9 V figure is illustrative, textbook)
+
+  (V = I*R at every stage; designers tolerate roughly 10% total droop (secondary [5]))
+
+# 5. Connection density: from C4 to microbump to hybrid bond
+
+ ┌──────────────────────┐   ┌──────────────────────┐   ┌────────────────────────┐
+ │ C4 BUMP              │   │ MICROBUMP            │   │ HYBRID BOND            │
+ │ ~150 um pitch [3]    │──▶│ ~40 um pitch [4]     │──▶│ <=10 um, Cu-Cu [4]     │
+ └──────────────────────┘   └──────────────────────┘   └────────────────────────┘
+
+  pitch  150 um  ──────────▶  40 um  ──────────▶  10 um and below      (smaller pitch = more connections per mm2)
+  joint  solder ball          solder-capped Cu pillar     direct copper-to-copper + oxide-to-oxide, no solder
+  where  chip to substrate    chiplet to interposer/die   die-to-die stacking
+
+  (20-25 um bumps with 15 um spacing give the 40 um pitch; microbumps are expected to hit a wall near
+  10 um [4])
+
+# 6. Backside power delivery (BSPDN): move power off the signal side
+
+┌───────────────────────┐
+│ BSPDN                 │
+│ power on the back     │
+└───────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   FRONTSIDE POWER (today, most chips)             BACKSIDE POWER (PowerVia / Super Power Rail)         │
+│                                                                                                        │
+│    package bumps                                   package bumps (on the back of the die)              │
+│         │                                               │   BM0-BM5 backside power metals [6]          │
+│    M14..M10 power + signal share the stack         ┌─────────────────────────────┐                     │
+│    M9..M5   power + signal                         │ thinned silicon, nano-TSV   │                     │
+│    M4..M1   power rails + signals                  ├─────────────────────────────┤                     │
+│    transistors                                     │ transistors                 │                     │
+│                                                    │ M0..M14 signals only [6]    │                     │
+│                                                    └─────────────────────────────┘                     │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (PowerVia (18A) uses nano-TSVs; TSMC A16 Super Power Rail contacts source/drain [6][7])
+
+# 7. By the numbers
+
+ 
+  C4 bump pitch        ~150 um typical conventional flip chip (patent example) [3]
+  copper pillar        ~40 um array in the same patent [3]
+  microbump            40 um pitch = 20-25 um bump + 15 um space; wall near 10 um [4]
+  hybrid bonding       10 um pitch and below, Cu-to-Cu [4]; commercial parts quoted 0.8-9 um (weak source)
+  Intel 4 metal        M0 pitch 30 nm (Intel 7: 40 nm); 16 metal layers per WikiChip [8]
+  Intel 18A stack      M0-M14 front + BM0-BM5 back per SemiAnalysis (layer counts illustrative) [6]
+  PowerVia M0          relaxed 30 nm to 36 nm because power moves to the back [6]
+  PowerVia test chip   >30% lower voltage droop, >6% speed, >90% cell utilization (Intel 4 base) [1]
+  18A brief (2026)     ~10x lower worst-case dynamic droop vs frontside; 8-10% routing closure [1]
+  TSMC A16 vs N2P      +8-10% speed or -15-20% power; density +7-10%; volume Q4 2026 [2]
+  imec nTSV            200 nm pitch, ~320 nm deep; 2.5D MIMCAP cuts modeled IR drop 32.1% [9]
+  Cu current density   ~1-3e6 A/cm2 (about 10-30 mA/um2) for damascene Cu, secondary source [10]
+  Cu vs Al             Cu tolerates ~5x the current density of Al at similar reliability [10]
+  top metal pitch/T    foundry-confidential; no public table, so none is given here
+
+# 8. Context: revenue of the public names tied to this layer (US$ B, latest full year)
+
+  Intel 2025       ██████████████████████████████████████████████████ 52.9
+  Synopsys FY2025  ███████ 7.1
+  Cadence 2025     █████ 5.3
+  TSMC 2025         NT$3.81T (about US$122B, secondary report); Intel is flat YoY, TSMC +31.6% in NT$ [11]
+
+  (Synopsys and Cadence sell the IR-drop / EM sign-off tools; TSMC and Intel make the stack; scale differs)
+
+# 9. How the top of the stack fails
+
+  FAILURE MODE            WHERE                       CAUSE                          FIX
+  ─────────────────────   ─────────────────────────   ────────────────────────────   ──────────────────────
+  IR drop / droop         M14 grid to cell rail       I*R plus fast di/dt            wider grid, more bumps, caps
+  electromigration        thin wires, vias, bumps     current density, hot metal     wider wires, redundant vias
+  via / barrier void      Cu damascene                poor barrier or seed coverage  process control
+  bump bridging           fine-pitch microbump        solder squeeze at <40 um       Cu pillar, hybrid bond
+  thermal-cycle fatigue   C4 joints                   die vs substrate CTE mismatch  underfill (>10x life) [12]
+
+# 10. Who matters
+
+  TSMC (TSM)       foundry for NVDA/AMD/ARM-based chips; A16 backside power late 2026 [2]
+  Intel (INTC)     PowerVia backside power on 18A, shipping in Panther Lake per teardown [1][6]
+  NVIDIA, AMD (NVDA, AMD)  big GPUs/CPUs with huge supply current and micro-bump 2.5D/3D parts (textbook)
+  Arm (ARM)        core IP whose power grid the foundry flow must fit (textbook)
+  Synopsys, Cadence (SNPS, CDNS)  IR-drop, EM, PDN sign-off and place-and-route tools [13]
+
+(notes)
+  Layer names M10-M14 follow the Chip tab; real stacks differ by foundry and node.
+  Numbers marked secondary come from press or aggregator pages, not foundry papers.
+
+# Sources
+
+  [1] Intel PowerVia / 18A: intel.com/content/www/us/en/foundry/process/18a.html ; tomshardware.com/news/intel-details-powervia-backside-power-delivery-network
+  [2] TSMC A16: anandtech.com/show/21369 ; tomshardware.com/tech-industry/tsmc-unveils-16nm-process-technology-with-backside-power-delivery-rivals-intels-competing-design
+  [3] C4 and Cu pillar pitch: patent image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/8896118
+  [4] Bump pitches: semiengineering.com/scaling-bump-pitches-in-advanced-packaging ; semiengineering.com/bumps-vs-hybrid-bonding-for-advanced-packaging
+  [5] PDN: semiengineering.com/current-problems-grow-for-power-delivery/ ; patsnap.com/resources/blog/articles/back-side-power-delivery-networks-cut-ir-drop-by-10/
+  [6] SemiAnalysis Panther Lake teardown: newsletter.semianalysis.com/p/intel-panther-lake-teardown
+  [7] TSMC SPR: trendforce.com/news/?p=19205
+  [8] Intel 4: fuse.wikichip.org/news/6720/a-look-at-intel-4-process-technology/3 ; anandtech.com/show/17448
+  [9] imec BSPDN: imec-int.com/en/articles/how-power-chips-backside
+  [10] EM: synopsys.com/glossary/what-is-electromigration.html ; rfessentials.com/rf-knowledge-base/what-is-the-electromigration-limit-of-a-gold-or-copper-interconnect-in-an-rf-mmi/
+  [11] Revenue: intc.com/news-events/press-releases/detail/1759 ; news.synopsys.com/2025-12-10-Synopsys-Posts-Financial-Results-for-Fourth-Quarter-and-Fiscal-Year-2025 ; businesswire.com/news/home/20260216202086/en
+  [12] C4 history/underfill: seas.ucla.edu/ethinfilm/Pb-freeWorkshop/abs/totta.html ; shmj.or.jp/english/pdf/pkg/exhibi515E.pdf
+  [13] EDA: synopsys.com ; cadence.com (tool names are vendor products, textbook)

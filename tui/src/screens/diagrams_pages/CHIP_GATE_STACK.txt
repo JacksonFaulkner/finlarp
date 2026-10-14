@@ -1,0 +1,127 @@
+# 1. What happens: build the gate dielectric + metal stack (gate-last, HKMG)
+
+ ┌──────────────┐  ┌────────────┐  ┌─────────┐  ┌──────────────┐  ┌───────────────┐  ┌────────────┐
+ │ IL GROWTH    │  │ HIGH-K ALD │  │ TiN CAP │  │ DIPOLE       │  │ WORK-FUNCTION │  │ METAL FILL │
+ │ chem oxide   │─▶│ HfO2 film  │─▶│ protect │─▶│ La / Al cap  │─▶│ TiN / TiAlC   │─▶│ W (or Co)  │
+ │ ~0.5 nm SiOx │  │ ~1.5-2 nm  │  │ high-k  │  │ anneal drive │  │ ALD layers    │  │ then CMP   │
+ └──────────────┘  └────────────┘  └─────────┘  └──────────────┘  └───────────────┘  └────────────┘
+
+  (the stack grows by ALD, one atomic layer per cycle; each layer sets a different electrical property)
+
+# 2. Gate-last (replacement metal gate) flow: the stack goes in after the hot steps
+
+ ┌──────────────────┐  ┌────────────────┐  ┌─────────────────┐  ┌──────────────┐  ┌───────────────┐
+ │ DUMMY POLY       │  │ SPACER + S/D   │  │ ILD + CMP       │  │ POLY PULL    │  │ RMG STACK     │
+ │ poly-Si + SiO2   │─▶│ implant, epi   │─▶│ oxide fill      │─▶│ etch dummy   │─▶│ IL, HfO2, WFM │
+ │ placeholder gate │  │ anneal ~1000 C │  │ expose poly top │  │ leave trench │  │ fill + CMP    │
+ └──────────────────┘  └────────────────┘  └─────────────────┘  └──────────────┘  └───────────────┘
+
+  (textbook: all high-temperature source/drain work finishes before high-k and metal exist, so they skip it)
+
+# 3. Cross-section of one replacement gate (schematic, not to scale)
+
+ ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ spacer + ILD0 oxide on both sides; gate contact (W via) lands on the fill                         │
+ │                                                                                                   │
+ │ ┌────────────────────────────────────────────────┐                                                │
+ │ │ W FILL (low resistance)                        │  <- fill metal; sets gate resistance           │
+ │ │ ┌────────────────────────────────────────────┐ │                                                │
+ │ │ │ TiN glue / barrier                         │ │  <- glue + barrier, blocks W diffusion         │
+ │ │ │ ┌────────────────────────────────────────┐ │ │                                                │
+ │ │ │ │ NMOS WFM TiAlC(N)                      │ │ │  <- NMOS: Al-rich, near Si conduction band     │
+ │ │ │ │ ┌────────────────────────────────────┐ │ │ │                                                │
+ │ │ │ │ │ PMOS WFM TiN                       │ │ │ │  <- PMOS: TiN, near valence band               │
+ │ │ │ │ │ ┌────────────────────────────────┐ │ │ │ │                                                │
+ │ │ │ │ │ │ HfO2 + dipole cap              │ │ │ │ │  <- HfO2: k ~20-25 (textbook), EOT ~1 nm class │
+ │ │ │ │ │ │                                │ │ │ │ │                                                │
+ │ │ │ │ │ └────────────────────────────────┘ │ │ │ │                                                │
+ │ │ │ │ └────────────────────────────────────┘ │ │ │                                                │
+ │ │ │ └────────────────────────────────────────┘ │ │                                                │
+ │ │ └────────────────────────────────────────────┘ │                                                │
+ │ └────────────────────────────────────────────────┘                                                │
+ │ ══════════════════════════════════════════════════  IL SiOx ~0.5 nm on Si                         │
+ │ source (n+/p+)              channel (Si)               drain                                      │
+ └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (layers wrap the trench floor and walls as U-shapes; the fill metal sits in the middle)
+
+# 4. Gate-first versus gate-last
+
+ ┌───────────────────────┐   ┌───────────────────────┐
+ │ GATE-FIRST            │   │ GATE-LAST             │
+ │ stack first, then     │   │ dummy poly first,     │
+ │ poly cap + S/D anneal │   │ stack added after S/D │
+ │ high-k sees ~1000 C   │   │ never sees hot steps  │
+ │ IBM Common Platform   │   │ Intel 45 nm [1]       │
+ │ 32/28 nm [4]          │   │ TSMC 28 nm [4]        │
+ └───────────────────────┘   └───────────────────────┘
+
+  (gate-first: denser, simpler layout, but Vt shifts from thermal budget; gate-last won as nodes shrank)
+
+# 5. Why the oxide had to go: EOT and leakage
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ SiO2 gate oxide thinned below ~1.2 nm at the 90 nm node: direct tunneling leakage unacceptable [3] │
+ │                                                                                                    │
+ │ EOT = t_highk x (3.9 / k_highk) + t_IL x (3.9 / k_IL)          3.9 = k of SiO2 (textbook)          │
+ │                                                                                                    │
+ │ physical HfO2 can be thicker than SiO2 for the same capacitance, so electrons tunnel far less      │
+ │ Intel 45 nm HKMG: HfO2 at ~1.0 nm EOT; >10x lower gate leakage, ~20% more drive current [1][2]     │
+ │ the IL has low k, so every 0.1 nm of IL eats EOT budget [3]                                        │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (EOT = the SiO2 thickness giving the same capacitance; scaling EOT now means thinning the IL)
+
+# 6. Threshold-voltage tuning in a nanosheet (GAA) gate
+
+ ┌─────────────────────────────────────────────────────────────────────────────────────────┐
+ │ gate wraps all 4 sides of each sheet; gaps between sheets are only a few nm,            │
+ │ so IL + HfO2 + WFM must all fit in the gap:                                             │
+ │                                                                                         │
+ │         ┌──────────────┐        ┌──────────────┐                                        │
+ │         │ sheet 3      │        │ sheet 3      │       multi-Vt = dipole caps + WFM     │
+ │         ├──────────────┤        ├──────────────┤       thickness and composition mix    │
+ │         │ sheet 2      │        │ sheet 2      │       (general practice; recipe varies │
+ │         ├──────────────┤        ├──────────────┤        by foundry)                     │
+ │         │ sheet 1      │        │ sheet 1      │                                        │
+ │         └──────────────┘        └──────────────┘                                        │
+ │         NMOS: La dipole, TiAlC  PMOS: Al dipole, TiN                                    │
+ └─────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (La-based caps lower Vt on nFET, Al-based raise it on pFET: general literature, not verified by a
+  source here)
+
+# 7. By the numbers
+
+ SiO2 limit        ~1.2 nm at the 90 nm node, tunneling leakage unacceptable [3]
+ Intel 45 nm       HfO2 ~1.0 nm EOT; TiN (PMOS) and TiAlN (NMOS) WFM; gate-last [2]
+ Intel claims      >10x lower gate leakage, ~20% more drive current; Penryn, 2007 [1]
+ HfO2 k            ~30 in one MRS source; films 20-25 in practice (textbook)
+ ASM Intl 2025     record revenue ~EUR 3.2B, gross margin 51.8%, 2 nm GAA capacity drove it [5]
+ single-wafer ALD  market $3.0B in 2024; ASM forecasts $5.1-6.1B by 2030 [5]
+ Lam FY2025        revenue $18.44B (company total; ALD is a part) [6]
+
+# 8. Who makes it, structure, risks
+
+ ASM International (ASM.AS)  ALD leader; HKMG ALD reactors; claims leading single-wafer ALD share [5]
+ Applied Materials (AMAT)   Centura dielectric stack; Endura PVD/ALD TiN, metal-gate integration [7]
+ Lam Research (LRCX)        ALD tungsten (ALTUS); ALTUS Halo moly, GAA among targets [8]
+ Tokyo Electron (8035.T)    furnace and ALD tools (textbook, not sourced here)
+ Foundries: TSM (28 nm gate-last [4]), INTC (45 nm, 2007 [1]); SNPS/CDNS model Vt flavors
+ Risks: Vt variability in tiny GAA gaps, ALD uniformity, IL thickness, fill voids as gates shrink.
+
+# Sources
+
+  [1] Intel 45 nm: newelectronics.co.uk/content/news/intel-uses-high-k-and-metal-gates-in-45nm-process
+  [2] EDN Intel 45 nm HKMG recipe: edn.com/?p=4005680
+  [3] HfO2/IL: cambridge.org MRS 'Scalability of MOCVD-deposited hafnium oxide';
+     technav.ieee.org/topic/high-k-gate-dielectrics/
+  [4] Gate-first/last: bit-tech.net/reviews/tech/global-foundries-gtc-2010/3/ ;
+     realworldtech.com/iedm-2010/5
+  [5] ASM FY2025: investegate.co.uk/announcement/gnw/asm-international-nv--0nx3/asm-reports-q4-and-full-
+     year-2025-results/9456685
+  [6] Lam FY2025 10-K: sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+  [7] Applied: appliedmaterials.com/us/en/product-library/endura-ilb-pvd-ald.html
+  [8] Lam Halo:
+     siliconsemiconductor.net/article/121172/Lam_Research_ushers_in_new_era_of_semiconductor_metallisation
+     _

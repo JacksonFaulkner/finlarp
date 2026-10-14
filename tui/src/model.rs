@@ -298,3 +298,20 @@ mod tests {
         assert_eq!(s.quote().as_deref(), Some("caf%é%2"));
     }
 }
+
+/// One OHLCV bar. `date` is the session date (YYYY-MM-DD).
+#[derive(Debug, Clone, PartialEq)]
+pub struct Candle {
+    pub date: String,
+    pub open: f64,
+    pub high: f64,
+    pub low: f64,
+    pub close: f64,
+    pub volume: u64,
+}
+
+impl Candle {
+    pub fn is_up(&self) -> bool {
+        self.close >= self.open
+    }
+}

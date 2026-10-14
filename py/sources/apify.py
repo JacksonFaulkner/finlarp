@@ -36,10 +36,12 @@ def run_actor(actor: str, run_input: dict | None = None, timeout: int = 300) -> 
     return resp.json()
 
 
-def start_run(actor: str, run_input: dict | None = None) -> dict:
-    """Start an actor run without waiting. Returns the run object (id, defaultDatasetId, status)."""
+def start_run(actor: str, run_input: dict | None = None, max_cost_usd: float | None = None) -> dict:
+    """Start an actor run without waiting. Returns the run object (id, defaultDatasetId, status).
+    max_cost_usd is Apify's hard spend cap for the run (maxTotalChargeUsd)."""
     resp = requests.post(
-        f"{BASE}/acts/{_actor_id(actor)}/runs", headers=_headers(), json=run_input or {}, timeout=30
+        f"{BASE}/acts/{_actor_id(actor)}/runs", headers=_headers(), json=run_input or {}, timeout=30,
+        params={"maxTotalChargeUsd": max_cost_usd} if max_cost_usd else None,
     )
     resp.raise_for_status()
     return resp.json()["data"]

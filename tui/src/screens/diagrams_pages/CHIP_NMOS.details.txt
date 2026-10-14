@@ -1,0 +1,255 @@
+== OFF STATE
+# Gate at zero
+With VG = 0 and the source at 0 V, the p-type body under the gate has plenty of holes and almost no electrons. The two n+ regions look like back-to-back diodes to each other, so no continuous electron path exists (textbook). What flows is only leakage: subthreshold current over the barrier, reverse junction current, and gate tunnelling.
+
+# Why leakage matters
+A chip has 1e10 to 2e11 switches that are mostly off at any instant. A tiny Ioff per device times that count becomes watts of static power, which is why Vt, halo doping and gate dielectrics are tuned together. Failure modes: Vt too low (leaky), high-temperature runaway, and DIBL at short channels.
+
+# Companies
+TSMC (TSM) 2025 revenue NT$3,809B, about US$122.4B; Intel (INTC) and Samsung ship competing leakage-tuned Vt menus. Intel 18A offers 4 NMOS Vt flavours over a 180 mV range.
+
+# Sources
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+https://www.sec.gov/Archives/edgar/data/1046179/000104617925000116/a3q25e_withguidancexfinal.htm
+https://semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+textbook
+
+== DEPLETION
+# Mechanism
+A small positive gate voltage repels holes from the surface of the p-type body, leaving a region of fixed negative boron ions with no free carriers (textbook). The depletion width grows with gate voltage until electrons begin to collect, at which point it stops growing.
+
+# Depletion capacitance
+That depleted layer acts as a capacitor Cdep in series with the body. The ratio Cdep/Cox enters the subthreshold swing S = (kT/q) ln10 (1 + Cdep/Cox), so a thin depletion layer or a fully depleted channel (FinFET, GAA) gets closer to the 60 mV/decade floor.
+
+# Why fully depleted won
+Planar bulk NMOS needs heavy channel doping to control short-channel effects, which scatters carriers and adds random dopant variation. Thin undoped fins and nanosheets avoid that. Beneficiary is the foundry stack: TSM, INTC, Samsung.
+
+# Sources
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+https://arxiv.org/pdf/1212.2684
+textbook
+
+== INVERSION
+# What inverts
+Above the threshold voltage the surface potential reaches about twice the Fermi potential and a thin sheet of electrons forms under the oxide (textbook). That sheet is the n-type channel linking source and drain. It is only 1-3 nm thick in planar devices and sits in the silicon next to the gate dielectric.
+
+# Why NMOS is faster
+Electrons have higher mobility than holes in silicon (textbook: roughly 2-3x), so NMOS delivers more drive current than PMOS of the same width. PMOS must be made wider or strained harder to match, which is why CMOS cells have unequal widths.
+
+# Failure modes
+Surface roughness scattering, remote Coulomb scattering from the high-k layer, and self-heating all cut mobility and so drive current. Gate-all-around channels add quantum confinement effects.
+
+# Sources
+textbook
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+https://semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+
+== LINEAR
+# Resistor regime
+When the drain voltage is small compared with the gate overdrive (VG - Vt), the channel behaves like a gate-controlled resistor and current grows linearly with VD (textbook). Id is about mu Cox (W/L)(VG - Vt) VD.
+
+# Uses
+Pass gates, SRAM access transistors and analogue switches operate here. The on-resistance sets the RC delay of local wiring, which, together with wire resistance, limits speed. External resistance (contacts, S/D epi) is now a large fraction of the total; Intel quotes -20% (NMOS) external resistance on 18A-P vs 18A.
+
+# Sizing
+Wider W or shorter L lowers resistance; more fins or sheets add width in discrete steps. Standard-cell libraries choose fin/sheet counts. EDA vendors SNPS and CDNS model this; FY2025 revenue $7.054B and $5.297B.
+
+# Sources
+https://semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+https://www.cimdata.com/de/industry-summary-articles/item/29048-synopsys-posts-financial-results-for-fourth-quarter-and-fiscal-year-2025
+https://seekingalpha.com/pr/20402555
+textbook
+
+== SATURATION
+# Pinch-off
+When VD exceeds VG - Vt the channel pinches off near the drain and extra voltage drops across a short depleted region; current becomes nearly independent of VD (textbook). Digital logic drives its outputs in this regime.
+
+# Velocity saturation
+In nanometre devices carriers hit a saturation velocity (about 1e7 cm/s in silicon, textbook) before pinch-off, so Id follows roughly (VG - Vt)^a with a near 1-1.3 instead of the long-channel square law. Drive current is therefore set by injection velocity at the source, not by mobility alone.
+
+# What boosts it
+Strain (Si:P), lower external resistance and higher gate-stack capacitance. Intel reports about +5% NMOS and +16% PMOS drive on 18A-P vs 18A.
+
+# Sources
+https://semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+textbook
+
+== TURN-OFF
+# Switching energy
+To turn off, the gate is discharged and electrons drain back out of the channel. Dynamic power is about C V^2 f; each switching event charges the gate and wire capacitance (textbook). Lower VDD is the main power lever, which is why Vt and swing matter.
+
+# Limits
+Because swing is at least 60 mV/dec, dropping VDD below roughly 0.5 V forces Ioff up sharply. Real devices show body factor m of 1.2-1.5, i.e. 70-90 mV/dec.
+
+# Hold-time failures
+Slow turn-off from RC and bias-temperature drift (NBTI mostly hits PMOS, PBTI hits high-k NMOS, textbook) shift Vt over years and eat timing margin. TSM, INTC and Samsung publish reliability targets in 10-year lifetimes.
+
+# Sources
+https://arxiv.org/pdf/1212.2684
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+textbook
+
+== N+ SOURCE
+# Role
+The source is the electron reservoir. Heavily doped (about 1e20 to 1e21 per cm3 for n+, textbook) so it is metal-like, with low resistance and a shallow extension under the gate edge. Electrons are injected over a barrier whose height the gate sets.
+
+# Construction
+An implanted extension (low energy, shallow) is followed by deep source/drain. In FinFET and GAA nodes the S/D is epitaxial Si:P grown in etched cavities beside the fins or sheets; the epi doubles as a strain source. A silicide or metal contact lands on top.
+
+# Parasitics
+Source resistance is series resistance that degrades drive current. Failure modes: dopant deactivation after anneals, contact-resistivity limits (1.5e-9 Ohm.cm2 reported on 2e21 /cm3 Si:P) and epi merging between neighbouring fins. Equipment: Applied Materials (AMAT) epi, Axcelis (ACLS) implant.
+
+# Sources
+https://ecs.confex.com/ecs/242/webprogram/Paper166416.html
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7960236
+textbook
+
+== GATE STACK
+# Stack
+A metal gate on a high-k dielectric on a thin interfacial oxide. Equivalent oxide thickness is about 1 nm class (textbook). The work function metals set Vt: Intel 18A uses dipole-based tuning to offer eight Vt options over a 180 mV range (4 NMOS, 4 PMOS).
+
+# Why not poly-Si/SiO2
+Gate leakage by direct tunnelling blew up when SiO2 dropped under about 1.5 nm (textbook); high-k plus metal gate (introduced at 45 nm, textbook) restored control. Poly depletion also disappeared with metal.
+
+# Variability
+Work-function grain variation and thickness variation produce Vt mismatch; SRAM cells fail first. Companies: TSM, INTC, Samsung for process; AMAT and Lam (LRCX) for ALD and etch; Synopsys and Cadence for modelling.
+
+# Sources
+https://semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+https://www.tomshardware.com/tech-industry/semiconductors/intel-details-18a-process-technology-boosts-performance-by-25-percent-or-lowers-power-consumption-by-36-percent
+textbook
+
+== N+ DRAIN
+# Role
+The drain collects the electrons and connects to the output node or to the next gate. It is built like the source but sees the high field: peak field near the drain edge heats carriers (hot-carrier injection).
+
+# Failure modes
+Hot carriers damage the gate dielectric and shift Vt over time. Drain-induced barrier lowering lets VD reduce the barrier at the source. Gate-induced drain leakage (GIDL) flows band-to-band at the overlap when the gate is off. Lightly doped extensions and halo pockets trade these against series resistance.
+
+# Symmetry
+Planar NMOS is symmetric; source and drain swap by bias. In logic gates the lower-potential terminal is the source.
+
+# Sources
+https://courses.ece.ucsb.edu/ECE125/125_W09Banerjee/Lectures/Lecture10.pdf
+textbook
+
+== P-WELL
+# What it is
+A p-type region (boron doped) built in the n-type or p-type wafer so NMOS devices sit in a doped well with the right Vt and isolation. Doping around 1e15 to 1e18 per cm3 (textbook). In CMOS an n-well holds PMOS next to the p-well holding NMOS.
+
+# Latch-up and isolation
+The parasitic npn/pnp thyristor between wells can latch if tapped wrongly, shorting VDD to ground; guard rings and well taps prevent that. STI (shallow trench isolation) separates neighbours; triple-well isolates sensitive blocks.
+
+# Why FinFET/GAA change it
+Fins and sheets are mostly undoped, so the well is replaced by a punch-through stopper below the fin or by a bottom dielectric isolation. Wafer supplier: Shin-Etsu and SUMCO (textbook, tickers 4063.T and 3436.T not sourced).
+
+# Sources
+textbook
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+
+== THRESHOLD
+# Definition
+The gate voltage at which a strong inversion layer forms. Vt = VFB + 2*phiF + sqrt(2 q eps Na (2 phiF))/Cox (textbook). Chip designers use a menu of Vt flavours: ultra-low (fast, leaky), standard and high (slow, low leakage).
+
+# Knobs
+Channel doping, gate work function, dielectric thickness and body bias. Intel 18A has four NMOS Vt flavours, 180 mV total span; 18A-P adds a fifth logic Vt pair between ULVT and LVT.
+
+# Failure modes
+Vt scatter from dopant fluctuation, work-function grains and line-edge roughness sets minimum SRAM voltage. Vt roll-off at short L and bias-temperature shift hurt margins.
+
+# Sources
+https://semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+
+== SUBTHRESHOLD
+# Swing
+Below Vt the current is diffusion over a barrier and varies exponentially with gate voltage: S = (kT/q) ln10 (1 + Cdep/Cox), about 60 mV/decade at 300 K for an ideal device (kT/q about 26 mV). Practical bulk devices have m = 1.2-1.5, so 70-90 mV/dec.
+
+# Why it limits scaling
+Because S has a thermal floor, lowering Vt 100 mV costs about 10-17x more Ioff, so supply voltage cannot fall freely. This is the Boltzmann tyranny that motivates negative-capacitance and tunnel-FET research (textbook).
+
+# Who fights it
+Wrap-around gates raise gate control so Cdep/Cox falls: FinFET (TSM, INTC, Samsung) and nanosheets get close to 60-70 mV/dec in good cases (textbook).
+
+# Sources
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+https://arxiv.org/pdf/1212.2684
+
+== Si:P
+# Why
+Silicon phosphorus epitaxy grown in S/D cavities gives very high active n-type doping and, because P is smaller than Si, tensile strain in the channel for NMOS. A patent example reached P at 1.2e21 /cm3 with resistivity 0.3 mOhm.cm and strain like about 0.55% substitutional carbon.
+
+# Limits
+Above about 1e21 /cm3 active carrier concentration saturates, and activation anneals can relax strain. Contact resistivity as low as 1.5e-9 Ohm.cm2 was reported on 2e21 /cm3 Si:P with a dynamic surface anneal. Low-temperature (450 C) tensile Si:P grown by Applied Materials reached 0.21 mOhm.cm at 5.8% P.
+
+# Tool vendors
+Epitaxy: Applied Materials (AMAT), ASM International, Kokusai. Companies using it: TSM, INTC, Samsung. GAA nodes shift the strain mechanism since the channel is a suspended sheet.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7960236
+https://ecs.confex.com/ecs/242/webprogram/Paper166416.html
+
+== ARSENIC
+# Why arsenic
+Arsenic is a heavy atom with low diffusivity, so implanted extensions stay shallow and abrupt, which helps short-channel behaviour. Its drawback is poor activation and high sheet resistance. Phosphorus activates better but diffuses faster and goes deeper; a P+As co-implant gives gentler junction profiles with As keeping contact resistance low.
+
+# Implant steps
+A halo (p-type pocket) is implanted at tilt below each n+ extension to block punch-through. Energies for P extensions of 400-1500 eV give junctions about 8-18 nm deep (patent examples). Anneals (spike, laser) set activation.
+
+# Suppliers
+Axcelis (ACLS) is the pure-play implanter; Applied Materials (AMAT) also sells implant. Failure modes: transient-enhanced diffusion, channeling, damage not fully annealed, dopant segregation.
+
+# Sources
+https://patents.google.com/patent/US4851360
+https://patents.google.com/patent/US8039375
+https://patents.google.com/patent/US5021851
+
+== DIBL
+# What
+Drain-induced barrier lowering: at short channel length the drain field penetrates to the source and lowers the barrier, so Vt drops as VD rises. It raises Ioff and wrecks analogue gain.
+
+# Threshold roll-off
+Vt also falls with shorter channel length as the junction depth to channel length ratio grows. Both worsen as L shrinks and are reduced by thin channels, halo doping, and gates that wrap the channel.
+
+# Why architecture changed
+Planar bulk could not keep DIBL acceptable below roughly 20 nm gate lengths (textbook), driving FinFET then GAA. TSM, INTC, Samsung all moved to GAA at 2nm class.
+
+# Sources
+https://courses.ece.ucsb.edu/ECE125/125_W09Banerjee/Lectures/Lecture10.pdf
+https://arxiv.org/pdf/1212.2684
+
+== BODY BIAS
+# Mechanism
+Applying a voltage between source and body shifts Vt: reverse body bias (negative on NMOS body) raises Vt and cuts leakage; forward bias lowers Vt and speeds up (textbook). Vt shift follows a square-root law in the source-body voltage.
+
+# Use
+Used for adaptive voltage and leakage control, e.g. standby leakage cut or speed boost, mostly in FD-SOI and in some bulk designs. In FinFET and GAA the body is thin, so body effect is weak and back bias is rarely used.
+
+# Failure modes
+Forward bias beyond about 0.5 V turns on the body diode; latch-up risk increases. Companies: GlobalFoundries (GFS) and Samsung offer FD-SOI with body bias (textbook, not sourced).
+
+# Sources
+textbook
+https://courses.ece.ucsb.edu/ECE225/225_W23Banerjee/Lectures/Lecture_05.pdf
+
+== TRANSISTOR COUNT
+# Figures
+NVIDIA B200: 208 billion transistors on two dies, TSMC 4NP, versus 80 billion for H100/H200. AMD Instinct MI300X: 153 billion across 12 chiplets (5nm and 6nm). Apple M4: 28 billion on TSMC N3E; M3 25B, M2 20B, M1 16B.
+
+# Why it grows
+Count scales with die area, density gains per node and now packaging that stitches chiplets. Even so, most of a GPU's switches are in caches and SMs, NMOS-PMOS pairs. A reticle-limited die is about 800 mm2.
+
+# Revenue context
+NVIDIA FY2026 revenue $215.9B, data center $193.7B. TSMC 2025 revenue NT$3,809B (about US$122.4B), 3nm 24% of wafer revenue, advanced nodes 74%. AMD (AMD) builds MI300X; Apple's chips are TSM-made.
+
+# Caveat
+Press transistor counts are vendor numbers, are counted differently (some include SRAM, some include HBM dies), and A18 Pro was reported as 20B by a single site only.
+
+# Sources
+https://www.anandtech.com/show/21310
+https://www.tweaktown.com/news/94342/amd-instinct-mi300x-ai-accelerator-teased-153-billion-transistors-192gb-of-hbm3-memory/
+https://en.wikipedia.org/wiki/Apple_M4
+https://heise.de/en/news/Neuer-Apple-Chip-M4-debuettiert-im-iPad-Pro-9711173.html
+https://www.sec.gov/Archives/edgar/data/1045810/000104581026000019/q4fy26pr.htm
+https://www.sec.gov/Archives/edgar/data/1046179/000104617925000116/a3q25e_withguidancexfinal.htm
+https://www.tomshardware.com/pc-components/gpus/nvidias-next-gen-ai-gpu-revealed-blackwell-b200-gpu-delivers-up-to-20-petaflops-of-compute-and-massive-improvements-over-hopper-h100

@@ -59,6 +59,13 @@ pub enum NvimAction {
     /// `text` add it to Claude's context (ui/tui.lua writes it to a file and
     /// runs ClaudeCodeAdd).
     Claude { text: Option<String> },
+    /// Feed a keymap (e.g. `<leader>vf`) to nvim so its real mapping fires
+    /// (the `<leader>v?` menu).
+    Keys { keys: String },
+    /// `<leader>vm`: reopen the Claude chat that answered note `id`.
+    NoteChat { id: String },
+    /// `<leader>vm` follow-up chip: save `question` as a new note anchored like `id`.
+    NoteAsk { id: String, question: String },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -299,6 +306,11 @@ pub(crate) fn event_loop<B: Backend>(
                     }
                     NvimAction::Claude { .. } => {
                         screen.set_flash("Claude needs the nvim plugin".into());
+                    }
+                    NvimAction::Keys { .. }
+                    | NvimAction::NoteChat { .. }
+                    | NvimAction::NoteAsk { .. } => {
+                        screen.set_flash("this needs the nvim plugin".into());
                     }
                     NvimAction::Screen { .. } | NvimAction::Picker { .. } => unreachable!(),
                 }

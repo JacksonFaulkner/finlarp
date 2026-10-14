@@ -1,0 +1,226 @@
+== HOLE MOBILITY
+# The core asymmetry
+In bulk silicon, electrons move at about 1400 cm2/Vs and holes at about 450 cm2/Vs (textbook), so for the same size and voltage a PMOS delivers roughly one third of the NMOS current. Holes are a missing-electron state in the valence band, which has a heavier effective mass and more scattering. Every other PMOS decision, from wider devices to SiGe stressors, is a patch for this gap.
+
+# What it costs
+A pull-up that is 2 to 2.5 times wider than the pull-down (UCSB inverter lecture, b = 2.4 for symmetric response) takes area and gate capacitance, so the PMOS side of every cell is the larger, slower, more power-hungry half. At nanosheet nodes the problem returns: one abstract notes stacked GAA favours nFET electron mobility but lowers pFET hole mobility because of the architecture and transport direction.
+
+# Who it matters to
+Foundries TSMC (TSM), Intel (INTC) and Samsung spend process effort on this. Fabless chip designers NVDA and AMD inherit whatever PMOS drive the node gives them. Current revenue splits for the PMOS-specific tools are not public in the sources found.
+
+# Sources
+https://www.ece.ucsb.edu/courses/ECE122/122_F14Banerjee/Slides/Lecture%209.pdf
+https://researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel
+textbook
+
+== N-WELL
+# What it is
+An n-type region implanted into the p-type wafer in which PMOS devices sit. The well is tied to Vdd through n+ taps, so the p+ source and drain junctions to it stay reverse biased and isolated (textbook). NMOS sits in the p-substrate or a p-well tied to ground.
+
+# Why it matters
+Wells set the threshold voltage, junction capacitance and, with taps, latch-up robustness. The parasitic p-n-p-n path between Vdd and ground formed by well and source/drain junctions is the latch-up thyristor; tap cells with well voltage modelling are used to prevent it (Intel-style latch-up patents).
+
+# Failure modes
+Poor tap spacing lets well resistance raise local voltage and trigger latch-up. Well-proximity effect shifts Vt for transistors near the well edge (textbook). Dopant steps use ion implanters from Applied Materials (AMAT), Axcelis (ACLS) and others (textbook).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10872190
+textbook
+
+== PMOS GATE
+# Gate stack
+The gate sits over the channel and decides when holes flow. Modern nodes use a high-k hafnium dielectric and a metal gate (HKMG, textbook). The PMOS and NMOS use different work-function metals so each gets the right threshold voltage (textbook).
+
+# Role in strain
+The gate and its spacers define where the source and drain recesses are etched. Placing the SiGe recess closer to the gate raises channel stress, which is why a US patent title talks about recessed SiGe close to the gate for drive current improvement.
+
+# Failure modes
+Work-function tuning drift, gate dielectric reliability (NBTI, a PMOS-specific bias instability, textbook) and gate-length variation all show up as Vt spread. Process tools come from Applied (AMAT), Lam (LRCX) and TEL (8035.T).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/7244654
+textbook
+
+== SiGe STRESSOR
+# Mechanism
+Silicon in the source and drain is etched out and regrown as epitaxial SiGe. Ge atoms are larger than Si, so the SiGe lattice wants to be bigger; confined by the surrounding silicon it pushes on the channel and creates uniaxial compressive stress, which raises hole mobility (patent description).
+
+# Numbers
+Intel's 90nm process (2003) used SiGe S/D for a 25% PMOS drive current gain, adding about 2% to process cost [Intel 90nm article]. Intel's VLSI 2004 paper reports 0.72 mA/um PMOS drive at 1.2 V. A 90nm abstract cites hole mobility up by more than 50%. Applied claimed over 65% drive gain at 65nm from its Centura epi (IEDM 2004, vendor claim). Higher Ge fraction gives more strain but is hard to reach with conventional epi.
+
+# Who sells it
+Applied Materials (AMAT) held 53% of the epi market in 2004 (Gartner via Applied release). Current share not found. TSM, INTC and Samsung apply the process at every FinFET and GAA node.
+
+# Sources
+https://siliconsemiconductor.net/article/66624/Intel_strains_ahead_with_90nm
+https://archive.vlsisymposium.org/14web/2004/technology/tec_pdf/SESSION 6.pdf
+https://ir.appliedmaterials.com/news-releases/news-release-details/applied-materials-extends-leadership-position-epitaxy
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9660082
+
+== BORON DOPING
+# Why boron
+Boron is the standard p-type dopant, but it is light and diffuses fast, especially when implant damage creates interstitials: transient-enhanced diffusion (TED) makes it spread (patent descriptions). That limits how abrupt the junction can be and how short the channel can get.
+
+# Mitigations
+In-situ boron doping during SiGe epitaxy avoids implant damage. Heavy doping lowers sheet resistance but can diffuse into the channel and roll off threshold voltage in short devices (patent). Carbon placed near the boron peak in SiGe traps boron interstitials.
+
+# Where it shows up
+Contact resistance in the p+ source and drain is a main PMOS series-resistance term, so activation matters as much as strain. Epi tools: Applied (AMAT), ASM International and Kokusai (textbook). No sourced concentration figure here.
+
+# Sources
+https://patents.justia.com/patent/20160240673
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/8394687
+
+== p+ SOURCE
+# Role
+The terminal that supplies holes, tied to Vdd in an inverter pull-up. It is heavily boron-doped so it makes a low-resistance contact (textbook). In modern nodes it is also the SiGe stressor on one side of the channel.
+
+# Limits
+Its resistance and the contact that lands on it reduce drive current. A thin silicide and a tungsten contact connect it to M1 (textbook). Strain from the source and drain together compresses the channel.
+
+# Failure modes
+Dopant loss to the channel (short-channel effects), epi defects that relax strain, and contact resistance growth at tighter pitch (textbook). Tools: AMAT epi, Lam (LRCX) etch, TEL (8035.T).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9660082
+textbook
+
+== PMOS CHANNEL
+# Where holes flow
+When the gate is pulled below the source voltage by more than the threshold, an inversion layer of holes forms beneath the gate and connects source to drain (textbook). Channel length is tens of nanometres at leading-edge nodes.
+
+# Strain and orientation
+Compressive stress along the current direction raises hole mobility; the effect depends on channel orientation and Ge content. At GAA, the channel is a stack of nanosheets, and an IBM SiGe-channel pFET abstract reports about 1 GPa compressive stress, +100% peak hole mobility and sub-70 mV/dec swing.
+
+# Failure modes
+Strain relaxation, interface roughness scattering and BTI. Companies TSM, INTC and Samsung design this; EDA models come from Synopsys (SNPS) and Cadence (CDNS).
+
+# Sources
+https://researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel
+textbook
+
+== p+ DRAIN
+# Role
+The output terminal where holes leave the channel and charge the load node in a pull-up transition. Built like the source, as a boron-doped SiGe stressor (patent description).
+
+# Why symmetric
+Source and drain swap roles by bias in logic, so both are formed in one epi step. Drain-side junction capacitance counts as part of the load the next stage sees; this feeds the C*V^2*f dynamic power.
+
+# Failure modes
+Junction leakage, drain-induced barrier lowering and parasitic capacitance growth with taller epi. Tools: Applied (AMAT) epi. No revenue split found.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11776998
+https://www.allaboutcircuits.com/technical-articles/power-dissipation-of-a-cmos-inverter/
+
+== INVERTER
+# Operation
+An inverter pairs one PMOS (pull-up to Vdd) with one NMOS (pull-down to ground), gates tied together as input and drains tied together as output (textbook). Input low: PMOS on, output high. Input high: NMOS on, output low.
+
+# Why it is the unit
+The inverter is the building block of NAND, NOR and flip-flops. Its switching threshold sits near Vdd/2 when drive is balanced, which maximises noise margin (UCSB lecture).
+
+# Failure modes
+Skewed ratio shifts the switching threshold and creates unequal rise and fall times. Companies: all logic makers, including NVDA, AMD, ARM licensees, using TSM or INTC fabs.
+
+# Sources
+https://www.ece.ucsb.edu/courses/ECE122/122_F14Banerjee/Slides/Lecture%209.pdf
+https://www.allaboutcircuits.com/technical-articles/power-dissipation-of-a-cmos-inverter/
+
+== CMOS POWER
+# Why pairs save power
+In steady state no direct path exists between Vdd and ground, so static power is ideally zero. Only switching draws power: P = alpha * C * Vdd^2 * f (lecture-note model) plus a short-circuit term during transitions when both devices conduct briefly.
+
+# Real world
+Leakage is not zero: subthreshold and reverse-junction currents make static power a large part of budget at advanced nodes. That is why designers use multi-Vt cells and power gating (textbook).
+
+# Why it mattered
+This was the reason CMOS displaced NMOS-only logic as integration grew (textbook). Revenue exposure: every logic chip from NVDA, AMD, INTC and ARM-based SoCs.
+
+# Sources
+https://www.allaboutcircuits.com/technical-articles/power-dissipation-of-a-cmos-inverter/
+https://www.ece.ucsb.edu/courses/ECE122/122_F14Banerjee/Slides/Lecture%209.pdf
+
+== NMOS PAIR
+# The partner
+The NMOS is the pull-down device and the stronger carrier-wise half. Electrons give it about three times the PMOS mobility at equal size (textbook), so it needs less width.
+
+# Separate strain
+NMOS wants tensile channel strain. Intel's 90nm process more than doubled the silicon nitride cap thickness to get a 10% NMOS drive gain [Intel 90nm article]. Later nodes use SiC or SiP source/drain (textbook).
+
+# Why dual optimisation
+The same wafer must carry both stress types, so the process uses masks to apply different stressors to each device, adding steps. This is a reason etch and epi tool counts rise with each node.
+
+# Sources
+https://siliconsemiconductor.net/article/66624/Intel_strains_ahead_with_90nm
+textbook
+
+== STD CELL
+# What it is
+A pre-drawn layout block (inverter, NAND, flip-flop) of fixed height placed in rows by place-and-route tools. Each row has a Vdd rail on top and ground rail below, the PMOS strip in the n-well near Vdd and the NMOS strip near ground (textbook).
+
+# Track height
+Cell height is counted in metal-2 tracks. ASAP7 offers 9T and 7.5T cells; a lecture says 7-8T favours area, 9-10T balances, 11-12T favours performance at the cost of leakage. Taller cells fit more or wider fins.
+
+# Who sells it
+Synopsys (SNPS) and Cadence (CDNS) provide the place-and-route and characterisation tools; Arm (ARM) sells physical IP libraries (textbook). Foundries TSM and INTC supply their own cell libraries with PDKs. No revenue split sourced here.
+
+# Sources
+https://arxiv.org/pdf/1807.11396
+https://www.eng.biu.ac.il/temanad/files/2017/02/Lecture-4-Standard-Cell-Libraries.pdf
+
+== TAP CELL
+# Purpose
+Tap cells connect the n-well to Vdd and the p-substrate to ground at regular intervals so well voltage stays fixed and latch-up is avoided (textbook).
+
+# Spacing
+Latch-up prevention patents model wells as distributed resistors to estimate voltage droop near cells and tap cells, and state that evenly spaced tap rows reduce risk further. The exact spacing is a foundry rule not found in public sources.
+
+# Cost
+Taps use area that could hold logic. Tools to place them are in Synopsys (SNPS) and Cadence (CDNS) flows (textbook).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10872190
+
+== WIDTH RATIO
+# The rule
+Equal drive needs mu_n*Wn = mu_p*Wp, so Wp/Wn follows the mobility ratio. Lecture slides give an optimum ratio near 1.9 for a switching threshold at Vdd/2 and 2.4 for symmetric transient response (UCSB slides).
+
+# Trade-offs
+Larger PMOS balances edges but adds capacitance and area. Many libraries pick smaller ratios as a delay-area compromise (textbook). Strain narrows the mobility gap, so the ratio shrinks at advanced nodes.
+
+# Discrete width
+In FinFET and GAA the width is set by fin count or sheet width, so designers choose integer fins or sheet widths rather than continuous W (textbook). This shapes the 6T-9T cell options.
+
+# Sources
+https://www.ece.ucsb.edu/courses/ECE122/122_F14Banerjee/Slides/Lecture%209.pdf
+https://www.eng.biu.ac.il/temanad/files/2017/02/Lecture-4-Standard-Cell-Libraries.pdf
+
+== GE CHANNEL
+# Why germanium
+Ge has higher hole mobility than Si, about 1900 vs 450 cm2/Vs bulk (textbook). Research puts SiGe or Ge in the channel to lift pMOS drive without relying only on strain.
+
+# What is known
+High-Ge SiGe (above 20%) is of interest for p-type nanosheets for hole mobility and gate reliability, but the channel ends become S/D extensions after anneal, complicating junctions (patent). The sources here do not show a production Ge-channel node.
+
+# Failure modes
+Poor Ge native oxide, junction leakage and boron diffusion. Pure Ge channels remain research; no company revenue depends on them today (textbook).
+
+# Sources
+https://researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11355649
+
+== GAA PFET
+# Structure
+Gate-all-around PMOS uses stacked nanosheets surrounded by the gate. The source and drain are regrown SiGe stacks; a patent describes graded Ge at about 55-60% to reduce strain mismatch among sheets.
+
+# Evidence
+An IBM abstract on a stacked SiGe nanosheet pFET reports about 1 GPa compressive stress, +100% peak hole mobility, 40% lower channel resistance and sub-70 mV/dec swing (SPIE 2022 abstract).
+
+# Who builds it
+TSMC (TSM) N2, Intel (INTC) RibbonFET and Samsung use nanosheets (textbook). Applied (AMAT) Centura Xtera epi is described as aimed at 2nm GAA (secondary source, unverified). Fabless users: NVDA, AMD.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11776998
+https://researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel
+https://www.deepresearchglobal.com/p/applied-materials-swot-analysis-report

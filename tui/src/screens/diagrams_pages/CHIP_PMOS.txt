@@ -1,0 +1,135 @@
+# 1. What happens: build a hole-carrying transistor and pair it with an NMOS
+
+ ┌───────────────┐   ┌────────────┐   ┌───────────┐   ┌───────────────┐   ┌──────────────┐   ┌────────────┐
+ │ HOLE MOBILITY │   │ N-WELL     │   │ PMOS GATE │   │ SiGe STRESSOR │   │ BORON DOPING │   │ INVERTER   │
+ │ holes slow    │──▶│ n-type tub │──▶│ HKMG      │──▶│ recess + epi  │──▶│ p+ S/D       │──▶│ P + N pair │
+ └───────────────┘   └────────────┘   └───────────┘   └───────────────┘   └──────────────┘   └────────────┘
+
+  (the hole is the weak carrier; every PMOS trick below exists to close the gap to the electron)
+
+# 2. Inside the PMOS: p+ source/drain in an n-well
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  PMOS cross-section (planar-style view; FinFET and GAA keep the same S/D-channel-S/D order)    │
+ │                                                                                                │
+ │                                 ┌────────────────────────────┐                                 │
+ │                                 │ PMOS GATE                  │                                 │
+ │                                 │ metal gate / HfO2 / spacer │                                 │
+ │                                 └────────────────────────────┘                                 │
+ │                                                                                                │
+ │                                              ▼ gate field pulls holes up                       │
+ │   ┌────────────────────────────┐  ┌────────────────────────┐  ┌────────────────────────────┐   │
+ │   │ p+ SOURCE                  │  │ PMOS CHANNEL           │  │ p+ DRAIN                   │   │
+ │   │ SiGe:B stressor, Vdd side  │  │ holes flow S to D      │  │ SiGe:B stressor, output    │   │
+ │   └────────────────────────────┘  └────────────────────────┘  └────────────────────────────┘   │
+ │                                                                                                │
+ │  ┌──────────────────────────────────────────────────────────────────────────────────────────┐  │
+ │  │ N-WELL   n-type Si, tied to Vdd through an n+ tap; reverse-biases the p+/n junctions     │  │
+ │  └──────────────────────────────────────────────────────────────────────────────────────────┘  │
+ │                                                                                                │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (SiGe in the source and drain is bigger than silicon, so it squeezes the channel along the current
+  direction)
+
+# 3. CMOS pairing and why it saves power
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  CMOS inverter: one PMOS on top, one NMOS below, gates tied, drains tied                       │
+ │                                                                                                │
+ │    ┌──────────────────────┐        ┌────────────────────────┐        ┌──────────────────────┐  │
+ │    │ PMOS pull-up         │        │ INVERTER               │        │ NMOS PAIR            │  │
+ │    │ Vdd to Out when In=0 │        │ In -> Out = NOT In     │        │ Out to Gnd when In=1 │  │
+ │    └──────────────────────┘        └────────────────────────┘        └──────────────────────┘  │
+ │                                                                                                │
+ │     In=0: PMOS on, NMOS off: Out charged to Vdd, no Vdd-to-Gnd path                            │
+ │     In=1: PMOS off, NMOS on: Out discharged to Gnd, no Vdd-to-Gnd path                         │
+ │                      ┌──────────────────────────────────────────────────┐                      │
+ │                      │ CMOS POWER                                       │                      │
+ │                      │ only a flip draws current (C*V^2*f)              │                      │
+ │                      └──────────────────────────────────────────────────┘                      │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (the two devices are never both on except briefly mid-transition; that is the short-circuit term)
+
+# 4. Standard cell layout
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  Standard cell row, schematic top view; cell height = tracks x metal-2 pitch                   │
+ │  Vdd rail  ═══════════════════════════════════════════════════════════════════════             │
+ │  ┌──────────────────────────────────┐            ┌──────────────────────────────────────┐      │
+ │  │ STD CELL                         │            │ TAP CELL                             │      │
+ │  │ PMOS strip in n-well on top      │            │ n+/p+ taps tie wells, latch-up       │      │
+ │  └──────────────────────────────────┘            └──────────────────────────────────────┘      │
+ │                                                                                                │
+ │  NMOS strip (p-substrate) below the PMOS strip, shared poly gate runs vertically               │
+ │  Gnd rail  ═══════════════════════════════════════════════════════════════════════             │
+ │                                                                                                │
+ │  Cell height: ASAP7 has 9T and 7.5T cells [7]; 7-8T favours area, 11-12T speed [8]             │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (library vendors draw thousands of these; synthesis and place-and-route tools tile them)
+
+# 5. NMOS vs PMOS balance
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  Drive balancing                                                                               │
+ │   ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐  │
+ │   │ WIDTH RATIO                              │   │ HOLE MOBILITY                            │  │
+ │   │ Wp/Wn about 2-2.5, equal edges [4]       │   │ Si: mu_n 1400, mu_p 450 (textbook)       │  │
+ │   └──────────────────────────────────────────┘   └──────────────────────────────────────────┘  │
+ │                                                                                                │
+ │  Equal drive needs mu_n*Wn = mu_p*Wp; strain narrows the gap, so modern ratios shrink          │
+ │  FinFET/GAA: width is quantised in fins or sheets, so PMOS gets more fins or wider sheets      │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 6. Strain and doping
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  Strain engineering: how each device is stretched or squeezed                                  │
+ │   ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐  │
+ │   │ SiGe STRESSOR                            │   │ BORON DOPING                             │  │
+ │   │ S/D regrown as SiGe: squeezes channel    │   │ in-situ B in epi; fast diffusion risk    │  │
+ │   └──────────────────────────────────────────┘   └──────────────────────────────────────────┘  │
+ │                                                                                                │
+ │  PMOS: compressive along channel (SiGe S/D). NMOS: tensile (nitride cap, SiC/SiP S/D)          │
+ │  Intel 90nm: PMOS +25% drive, NMOS cap +10%, ~2% added process cost [1]                        │
+ │  Intel VLSI 2004: PMOS 0.72 mA/um at 1.2 V [2]                                                 │
+ │  Applied Centura epi: >65% drive gain at 65nm per IEDM 2004 (vendor claim) [5]                 │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 7. Ge channel research and GAA PMOS
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │  Beyond Si: germanium in the PMOS channel                                                      │
+ │   ┌──────────────────────────────────────────┐   ┌──────────────────────────────────────────┐  │
+ │   │ GE CHANNEL                               │   │ GAA PFET                                 │  │
+ │   │ Ge mu_p ~1900 vs Si 450 (textbook)       │   │ SiGe sheets, ~1 GPa strain, IBM [3]      │  │
+ │   └──────────────────────────────────────────┘   └──────────────────────────────────────────┘  │
+ │                                                                                                │
+ │  IBM SiGe NS pFET: +100% peak hole mobility, -40% channel R, SS < 70 mV/dec [3]                │
+ │  Patent: graded SiGe S/D at about 55-60% Ge evens strain across stacked sheets [6]             │
+ │  Hard parts: Ge oxide quality, junction leakage, boron diffusing into the channel              │
+ └────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 8. Who matters
+
+  TSMC (TSM), Intel (INTC) and Samsung   build PMOS stressors in every FinFET and GAA node
+  Applied Materials (AMAT)               epi tools; 53% of the epi market in 2004 per Gartner [5]
+  ASM International, Kokusai             epi and furnace tools (textbook; no share figure sourced)
+  Synopsys (SNPS), Cadence (CDNS)        layout, place-and-route and cell characterisation
+  Arm (ARM)                              sells physical-IP cell libraries (textbook)
+  NVDA, AMD                              fabless; consume whatever PMOS drive the foundry gives them
+
+  (notes: current revenue and share splits for epi tools are not public in the sources found)
+
+# Sources
+
+  [1] Intel 90nm strain: siliconsemiconductor.net/article/66624/Intel_strains_ahead_with_90nm
+  [2] VLSI 2004 Intel 0.72 mA/um: archive.vlsisymposium.org/14web/2004/technology/tec_pdf/SESSION 6.pdf
+  [3] IBM SiGe NS pFET: researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel
+  [4] Inverter sizing: ece.ucsb.edu/courses/ECE122/122_F14Banerjee/Slides/Lecture 9.pdf
+  [5] Applied epi: ir.appliedmaterials.com/news-releases/news-release-details/applied-materials-extends-leadership-position-epitaxy
+  [6] GAA SiGe S/D: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11776998
+  [7] ASAP7 cells: arxiv.org/pdf/1807.11396
+  [8] Cell library lecture: eng.biu.ac.il/temanad/files/2017/02/Lecture-4-Standard-Cell-Libraries.pdf

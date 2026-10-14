@@ -1,0 +1,246 @@
+== PRE-CLEAN
+# Why it comes first
+The contact hole or trench is etched down to the silicon epi, leaving a native oxide and etch residue on the floor. Any oxide left is an insulating film in series with the plug, so the surface is cleaned in vacuum just before metal goes down (textbook). Applied packages pre-clean, PVD, ALD and CVD on one Endura platform so the wafer never sees air between steps.
+
+# Failure modes
+Under-clean leaves high-resistance contacts and yield loss at wafer sort; over-clean attacks the epi and the nearby gate spacer, widening the hole. Etch damage to the S/D surface also raises resistance (textbook).
+
+# Who matters
+Applied Materials (AMAT) FY2025 sales were $28.37B, Semiconductor Systems $20.80B, 67% foundry/logic/other. Lam (LRCX) and Tokyo Electron (8035.T) sell etch and clean tools into the same step (textbook).
+
+# Sources
+https://sst.semiconductor-digest.com/2018/06/applied-materials-breakthrough-accelerates-chip-performance-in-the-big-data-and-ai-era/
+https://www.sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm
+textbook
+
+== SILICIDE
+# What it is
+A metal-silicon alloy formed by depositing a thin metal (Ni, Ti, or Co in older nodes) on the source/drain epi and annealing so it reacts with the silicon (textbook). It sits between the metal plug and doped silicon to lower the barrier to current. NiSi replaced TiSi2 and CoSi2 around 65 nm because it stays low-resistance at small widths.
+
+# Numbers
+Schottky barrier height of NiSi to n-Si is about 0.65-0.7 eV and of TiSi2 about 0.58 eV (patent text). Contact resistivity in one patent background: pFET about 3e-9, nFET about 1e-8 ohm-cm2. A pre-silicide N2+ implant to segregate dopants was reported to cut the electron barrier from 0.7 to 0.34 eV, about 81% lower contact resistance (patent summary).
+
+# Failure modes
+Ni can pipe into the channel (NiSi2 spikes) and silicide agglomerates at high thermal budget. This is why silicide goes in late and cold (textbook). Thermal budget after silicide limits later steps.
+
+# Who matters
+Intel (INTC), TSMC (TSM) and Samsung choose the silicide; Applied (AMAT) sells the Endura PVD/ALD and Producer anneal tools.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10546856
+https://sst.semiconductor-digest.com/2018/06/applied-materials-breakthrough-accelerates-chip-performance-in-the-big-data-and-ai-era/
+
+== LINER/BARRIER
+# Job
+A thin Ti/TiN stack lines the contact before tungsten goes in. Ti reduces the native oxide and helps form silicide; TiN blocks fluorine from WF6 attacking silicon and gives W something to nucleate on (textbook).
+
+# Why it hurts
+The barrier is a few nm per side and does not shrink in proportion to the hole. SemiEngineering notes the ALD TiN barrier that tungsten requires does not scale with critical dimension, raising contact resistance and cutting on-state current. In a hole ~15 nm wide, liner can take a large share of the width (textbook arithmetic).
+
+# Fixes
+Thinner or no barrier: Applied claims its Volta W process deposits a tungsten-carbon film that serves as liner and nucleation layer, with up to 90% lower contact resistance depending on CD and flow (vendor claim). Molybdenum is pitched as barrier-free (vendor-linked).
+
+# Who matters
+AMAT (Endura PVD/ALD/CVD) and LRCX (ALTUS). Precursor suppliers such as Entegris (ENTG) are adjacent (textbook).
+
+# Sources
+https://semiengineering.com/keeping-up-power-and-performance-with-cobalt
+https://www.appliedmaterials.com/jp/ja/semiconductor/products/processes/cvd/endura-volta-w-cvd.html
+https://www.appliedmaterials.com/us/en/newsroom/blogs/powering-the-next-era-of-contact-scaling-with-ald-molybdenum.html
+
+== W FILL
+# Process
+Tungsten is deposited by CVD from WF6, reduced by H2 (WF6 + 3H2 gives W + 6HF) after a nucleation layer made with SiH4 or B2H6 (textbook). Lam describes ALTUS systems combining CVD and ALD to deposit conformal or selective W or Mo for contacts, vias and wordlines, with nucleation and bulk fill in the same chamber.
+
+# Why W
+It tolerates the thermal budget, fills high-aspect holes, resists electromigration, and has decades of process knowledge. Lam says tungsten ALD, which it pioneered, has been the dominant void-free contact fill for over two decades.
+
+# Limits
+Electron mean free path in W is 19.1 nm, so below ~20 nm resistivity rises as electrons scatter off surfaces and grain boundaries. Conformal fill pinches shut and leaves a seam or void in the center; WF6 fluorine can attack the barrier (textbook).
+
+# Who matters
+Lam (LRCX) FY2025 revenue $18.44B, foundry 45% / memory 42%. Applied (AMAT) Volta W. Both sell CVD/ALD W for logic and memory.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+https://doi.org/10.1103/PHYSREVB.86.045432
+https://www.appliedmaterials.com/jp/ja/semiconductor/products/processes/cvd/endura-volta-w-cvd.html
+
+== CMP
+# Step
+After fill, tungsten sits on top of the ILD. Chemical-mechanical polishing removes the overburden and stops on the dielectric (or gate cap), leaving plugs flush with the surface for M1 (textbook).
+
+# Failure modes
+Dishing and erosion thin the plug and ILD; over-polish eats the SiN gate cap that protects self-aligned contacts. Scratches or residual slurry cause shorts. In the self-aligned flows, one patent reports trench-contact RIE and CMP can cost more than 35 nm of gate height.
+
+# Who matters
+Applied Materials Reflexion CMP is part of its integrated cobalt suite. Others: Ebara (6361.T) for tools; Entegris (ENTG) and Fujifilm for slurries (textbook, unsourced).
+
+# Sources
+https://sst.semiconductor-digest.com/2018/06/applied-materials-breakthrough-accelerates-chip-performance-in-the-big-data-and-ai-era/
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11031295
+
+== VIA0 / M1
+# Handoff
+The first metal level lands on the contact plugs through via0 or directly. The reference Intel 10nm stack used Co at the lowest layers: WikiChip lists M0 at 40 nm pitch and M1 at 36 nm. Intel reported 2x lower via resistance and 5-10x better electromigration with Co (secondary summaries, ranges differ between sources).
+
+# Why it matters
+The plug-to-wire interface adds resistance; misalignment between via and plug changes contact area. Contact + via0 + M1 RC dominate delay of local nets, so SNPS and CDNS extract tools model it at every node (textbook).
+
+# Who matters
+Intel (INTC) pioneered Co M0/M1 at 10nm (2017). TSMC (TSM) reports up to 20% R and C reduction through the MoL at N2 (as reported, IEDM 2024).
+
+# Sources
+https://fuse.wikichip.org/news/525/iedm-2017-isscc-2018-intels-10nm-switching-to-cobalt-interconnects/
+https://community.cadence.com/cadence_blogs_8/b/breakfast-bytes/posts/intel-10nm
+https://www.semiconductor-digest.com/?p=30341
+
+== TRENCH CONTACT (TS)
+# What it is
+Instead of a round hole per transistor, a long metal bar (trench contact) lies over the source/drain and picks up several fins at once; a short plug then connects it up to M1 (textbook, FinFET-era practice). It lowers resistance because the contact area on the epi is large.
+
+# Why self-aligned
+Since gate length no longer scales with contacted poly pitch (CPP), the space between gates shrinks sharply; WikiChip notes SAC is used so that contact misalignment does not short to the gate.
+
+# Failure modes
+Gate-to-S/D shorts, parasitic capacitance (WikiChip: gate-SD contact capacitance rises significantly with SAC), and CMP/RIE height loss on the gate (patent: >35 nm).
+
+# Who matters
+TSMC (TSM), Intel (INTC), Samsung. Cell-library tools from SNPS and CDNS must model the added capacitance (textbook).
+
+# Sources
+https://en.wikichip.org/wiki/SAC
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11031295
+
+== GATE CONTACT
+# Old rule
+For many nodes the contact to the gate metal had to sit over isolation (field oxide) beside the active region, because landing on the thin gate above the channel risked shorting to the S/D contacts. The gate line therefore had to extend off the active area, eating cell height (textbook).
+
+# Resistance
+The gate plug adds resistance to the RC gate line. TSMC credited better gate contact resistance in its N2 IEDM 2024 talk (a 55% energy-efficiency claim in a secondary summary that I could not verify in the paper). SemiAnalysis infers barrier-less tungsten for gate contacts (inference, paywalled).
+
+# Who matters
+Everyone with a transistor: TSM, INTC, Samsung. AMD, NVDA, ARM licensees depend on foundry choice (textbook).
+
+# Sources
+https://www.semiconductor-digest.com/?p=30341
+https://newsletter.semianalysis.com/p/iedm2024
+
+== COAG
+# What it is
+Contact over active gate: the gate contact lands directly on the gate above the channel. Intel (Chris Auth, IEDM 2017) used COAG on 10nm; reported cell-height savings were ~10% (Intel claim, secondary), with another ~20% from a shared dummy gate in the same summary.
+
+# How it works
+Needs a SiN cap on the gate and a SiC or SiN fill on the S/D trench, then two selective etches so one opening cuts only the cap and the neighbour opening only the fill; Chipworks calls etch selectivity the key. Compared to a normal contact, Cadence counts about three more steps: one etch, one deposition, one polish.
+
+# Failure modes
+Cap loss in CMP and etch, resulting in gate-S/D short; overlay budget in the single-digit nm. Patents describe a three-color hardmask scheme versus the typical four-color.
+
+# Who matters
+INTC first in volume; TSMC and Samsung later added similar self-aligned gate contacts (textbook, unsourced). Lam (LRCX) and Tokyo Electron (8035.T) sell the selective etches.
+
+# Sources
+https://en.wikichip.org/wiki/COAG
+https://community.cadence.com/cadence_blogs_8/b/breakfast-bytes/posts/intel-10nm
+https://sst.semiconductor-digest.com/chipworks_real_chips_blog/2017/12/18/iedm-2017-intels-10nm-platform-process
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12198985
+
+== SAC CAP
+# Purpose
+A dielectric cap (SiN, SiCN or SiBCN per patent text) on top of the recessed metal gate acts as a contact etch stop, so the S/D contact etch cannot reach the gate even when misaligned.
+
+# Trade-offs
+The cap material has to etch much slower than the ILD; one patent notes the cap can erode if selectivity is limited, causing yield and reliability issues. Higher-k cap raises gate-to-contact capacitance, hurting AC performance.
+
+# Who matters
+Deposition and etch vendors: AMAT, LRCX, Tokyo Electron (8035.T). Foundries TSM and INTC specify the cap stack (textbook).
+
+# Sources
+https://en.wikichip.org/wiki/SAC
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10985062
+
+== SELECTIVE W
+# Idea
+Instead of coating the whole wafer, selective tungsten grows only on metal at the via or contact floor, from the bottom up, so no seam forms and no TiN liner is needed on the sidewalls. Applied says its selective W process showed more than a 40% contact-resistance drop vs conventional W in early via deployments (vendor claim).
+
+# Product
+Applied Endura Volta W CVD: tungsten-carbon film as liner and nucleation, up to 90% lower contact resistance depending on CD and flow (vendor claim).
+
+# Risks
+Selectivity loss leaves nodules on dielectric and shorts between plugs; requires clean metal surfaces. The claims have not been independently tested in what I found.
+
+# Who matters
+AMAT leads this niche; Lam (LRCX) offers selective W/Mo options in ALTUS.
+
+# Sources
+https://www.appliedmaterials.com/jp/ja/semiconductor/products/processes/cvd/endura-volta-w-cvd.html
+https://www.appliedmaterials.com/us/en/newsroom/blogs/powering-the-next-era-of-contact-scaling-with-ald-molybdenum.html
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+
+== Co / Ru / Mo
+# Why alternatives
+Bulk resistivities (textbook, approx, uOhm-cm): W 5.6, Co 6.2, Ru 7.1, Mo 5.3, Cu 1.7. Co and Ru win because their electron mean free paths are shorter than W (19.1 nm), so thin wires degrade less and thinner barriers work. SemiEngineering: Co is ~1.5-2x less resistive than W at small sizes in its source.
+
+# Status
+Intel put Co in contacts and local interconnect at 10nm. Applied announced an integrated Co suite in 2018 (pre-clean, PVD, ALD, CVD on Endura) citing 7nm-and-beyond foundry needs; SemiEngineering noted Co replaced W only in some cases. Lam says Mo is in high-volume 3D NAND and advanced logic (Lam co-produced Counterpoint analysis, company-sourced). Ru liners are in Applied CuBS for copper wiring.
+
+# Mo claims
+Entegris claims up to 30% lower resistivity than W in thin films (vendor); SemiEngineering says Mo needs no barrier and costs less than Ru. Mo has lower thermal stability than W (patent).
+
+# Who matters
+AMAT, LRCX (ALTUS Halo Mo), Entegris (ENTG), Merck KGaA (MRK.DE) precursors (textbook). Fabs: TSM, INTC, Samsung, SK hynix, Micron.
+
+# Sources
+https://semiengineering.com/keeping-up-power-and-performance-with-cobalt
+https://sst.semiconductor-digest.com/2018/06/applied-materials-breakthrough-accelerates-chip-performance-in-the-big-data-and-ai-era/
+https://www.counterpointresearch.com/insight/post-insight-research-notes-blogs-molybdenum-the-metal-enabling-next-big-leap-in-chip-manufacturing-for-the-ai-era/
+https://semiengineering.com/scaling-memory-with-molybdenum/
+https://investor.appliedmaterials.com/news-releases/news-release-details/applied-materials-unveils-chip-wiring-innovations-more-energy
+
+== CONTACT RESISTANCE
+# Definition
+Rc is roughly rho_c divided by contact area, plus the resistance of the plug body and liner (textbook). As pitch shrinks, area falls roughly with the square of pitch, so Rc grows from a small slice of total transistor resistance to a major one. SemiEngineering has covered it as the next device challenge.
+
+# Numbers
+Patent background: pFET rho_c ~3e-9, nFET ~1e-8 ohm-cm2. Electron mean free path in W 19.1 nm. Intel claims on Co: 2x via resistance. Applied: up to 90% lower with Volta W.
+
+# Impact
+Higher Rc cuts drive current at fixed voltage, so frequency or power suffers; companies like NVDA and AMD see that as lost clock or more watts per FLOP (textbook).
+
+# Who matters
+Vendors that sell the fixes: AMAT FY2025 $28.37B, LRCX $18.44B. Design side: SNPS and CDNS model MoL parasitics.
+
+# Sources
+https://semiengineering.com/next-device-challenge-contact-resistance
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10546856
+https://www.appliedmaterials.com/jp/ja/semiconductor/products/processes/cvd/endura-volta-w-cvd.html
+https://www.sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm
+
+== LINER SQUEEZE
+# Geometry
+Take a ~15 nm wide plug with 2 nm TiN and 1 nm Ti per side: only ~9 nm is tungsten (illustrative textbook arithmetic, not a measured process). Conductive cross-section falls much faster than the opening, and the tungsten itself is more resistive because 9 nm is well below the 19.1 nm mean free path.
+
+# Responses
+Barrierless or thin-barrier W (Applied Volta W); Mo (Lam, Applied); Co/Ru, which tolerate thinner liners; bottom-up selective growth.
+
+# Who matters
+AMAT and LRCX, plus the foundries TSM and INTC deciding when to switch. A fab switch re-qualifies the whole MoL, so new metals appear first on new nodes (textbook).
+
+# Sources
+https://semiengineering.com/keeping-up-power-and-performance-with-cobalt
+https://doi.org/10.1103/PHYSREVB.86.045432
+https://www.appliedmaterials.com/jp/ja/semiconductor/products/processes/cvd/endura-volta-w-cvd.html
+
+== BARRIER TUNING
+# What it targets
+Silicide-to-silicon Schottky barrier. NiSi sits at 0.65-0.7 eV; a pre-silicide N2+ implant that segregates dopants was reported to lower the n-type barrier to 0.34 eV and cut contact resistance by an estimated 81% (patent summary). Heavier epi doping (>1e20 per cm3, textbook) shrinks the depletion width so carriers tunnel through.
+
+# Other levers
+Ti-based contacts (TiSi has 0.58 eV to n-Si per patent), Ge-rich p-type epi, and rapid/laser anneal that boosts activation (textbook). Dopant activation caps thermal budget for upstream steps.
+
+# Who matters
+Epitaxy tool vendors: Applied (AMAT), ASM International (ASM.AS), Kokusai. Fabs: TSM, INTC, Samsung. Anneal: Applied Producer and Screen (7735.T) (textbook).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10546856
+https://sst.semiconductor-digest.com/2018/06/applied-materials-breakthrough-accelerates-chip-performance-in-the-big-data-and-ai-era/

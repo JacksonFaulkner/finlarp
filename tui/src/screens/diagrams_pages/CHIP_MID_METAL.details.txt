@@ -1,0 +1,201 @@
+== DEPOSIT ILD
+# The dielectric the wires sit in
+Each level starts with a blanket interlayer dielectric (ILD): an etch-stop/cap film (SiCN or SiN, textbook), then porous carbon-doped oxide (SiOCH), applied by PECVD with a porogen that is later burned out by UV cure. Applied Materials sells this as Black Diamond, an enhanced version lowers the minimum k for 2 nm and below and adds mechanical strength for 3D stacking (vendor claim, July 2024).
+
+# Why it matters for M5-M9
+Medium levels are tall (thick ILD) so they carry a lot of line-to-line capacitance. Lower k directly cuts C in RC delay, but each step down in k costs stiffness: SiO2 k=4.0 has a Young's modulus of ~72 GPa, carbon-doped oxide at k=2.7 only ~7-10 GPa (patent text). Weak ILD cracks in CMP, wire bonding and packaging.
+
+# Failure modes and companies
+Porosity lets moisture and metal in; etch and ash damage raises effective k. Tools: Applied Materials (AMAT, FY2025 net revenue $28,368M, China $8,529M, ~30%), Lam (LRCX, FY2025 $18.44B), Tokyo Electron (8035.T). Fabs: TSM, INTC, Samsung.
+
+# Sources
+https://www.appliedmaterials.com/us/en/semiconductor/products/semiconductor-products/endura-cubs-volta-ruthenium.html
+https://patents.justia.com/patent/9766170
+https://www.sec.gov/Archives/edgar/data/6951/000119312526027318/d54380dars.pdf
+
+== PATTERN+ETCH
+# Trench first or via first
+In dual damascene the trench and the via below it are patterned into the same ILD, then both are filled at once. Typical flow uses a metal or TiN hard mask (textbook): a litho + etch for the via, a second litho + etch for the trench, then a cap-open etch that exposes the Cu below. Two litho-etch pairs per level is the 'LELE' style; EUV single patterning can remove one.
+
+# Tight pitch is where cost lives
+Intel 4 M2 / M4 pitches are 45 nm (vs 44 / 52 nm on Intel 7), and the 30 nm M0 still needs SAQP. TSMC N3E M0 is 23 nm and moved three layers from EUV double patterning (N3B) to EUV single patterning (N3E). Medium levels M5-M9 are generally looser, so DUV multipatterning or single EUV applies (class label, no per-level table published).
+
+# Failure modes
+Plasma etch of porous low-k strips methyl groups and raises k (textbook); line-edge roughness and via misalignment raise resistance. Etch leaders are Lam (LRCX), Tokyo Electron (8035.T) and AMAT; the page ETCH node has the revenue split.
+
+# Sources
+https://www.anandtech.com/show/17448
+https://fuse.wikichip.org/news/6720/a-look-at-intel-4-process-technology/3
+https://www.semianalysis.com/p/iedm2022p1
+
+== BARRIER+SEED
+# Why a barrier at all
+Cu diffuses fast through oxide and silicon and poisons transistors, so every Cu body is wrapped in a liner (textbook). Classic stack is TaN (barrier) plus Ta (adhesion) by PVD, then a thin Cu seed. IBM's 1997 Cu process used Ta/TaN/SiN/SiC style barriers and caps (Wikipedia).
+
+# The barrier eats the wire
+As lines shrink the barrier is a larger fraction of the trench volume. A TaN/Ta bilayer of >4 nm is cited at half-pitch <=20 nm (Patsnap blog, vendor-grade). A Ru liner of 10-35 angstrom can do the diffusion job with a thin TaN for adhesion (patent). AMAT's Endura CuBS with Volta Ru CVD uses an RuCo liner under 20 angstrom and claims up to 25% lower resistance (vendor claim).
+
+# Players
+AMAT dominates PVD/CVD metal; TSMC N3E reports an innovative liner and barrier process cutting via RC by as much as 60% (IEDM 2022). Risk: Ru adhesion and CMP selectivity are still hard (SPIE 2020).
+
+# Sources
+https://semiengineering.com/how-far-will-copper-interconnects-scale
+https://www.appliedmaterials.com/us/en/semiconductor/products/semiconductor-products/endura-cubs-volta-ruthenium.html
+https://www.semianalysis.com/p/iedm2022p1
+https://en.wikipedia.org/wiki/Copper_interconnects
+
+== PLATE Cu
+# Bottom-up electrofill
+The wafer is the cathode in a Cu sulfate bath. Organic additives (accelerator, suppressor, leveler; textbook) make Cu grow faster at the bottom of the via than at the top so the trench fills void-free, with overburden on top that CMP removes. IBM chose electroplating in the late 1990s.
+
+# Equipment
+Lam's SABRE ECD family 'helped pioneer the copper interconnect transition' and plates Cu directly on various liner materials (Lam FY2025 10-K). A Lam investor deck claims 6,000 installed plating cells (company figure). Lam FY2025 revenue was $18.44B.
+
+# Failure modes
+Seam voids and pinch-off in narrow high-aspect trenches, plating on poorly nucleating Ru liners, and grain size after anneal. Anneal and Cu reflow improve fill; TSMC cited an improved trench liner plus Cu reflow at N5 so electromigration did not worsen despite ~30% tighter Mx pitch.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+https://semiwiki.com/semiconductor-manufacturers/tsmc/282339-tsmc-unveils-details-of-5nm-cmos-production-technology-platform-featuring-euv-and-high-mobility-channel-finfets-at-iedm2019/
+https://en.wikipedia.org/wiki/Copper_interconnects
+
+== CMP
+# Remove everything above the dielectric
+Chemical-mechanical polishing grinds the Cu overburden then the barrier until only metal in the trenches remains, flat for the next lithography level (textbook: focus depth is tens of nm). Typical flow uses a fast Cu slurry on one pad then a gentler barrier slurry on another, with a 'soft landing' when remaining Cu is 0.5 to 0.05 um (patent text).
+
+# Dishing and erosion
+Cu is softer than the dielectric, so wide lines dish and dense arrays erode. Both change line height and so R and C. One-slurry processes are explored to cut cost. Weak ULK adds delamination risk from CMP downforce.
+
+# Companies
+Polishers: AMAT (Reflexion), Ebara (6361.T); consumables: Entegris (ENTG), CMC/Merck and others (textbook, no market share sourced here).
+
+# Sources
+https://patents.google.com/patent/US6743268
+https://patents.google.com/patent/US6919276
+
+== CAP+REPEAT
+# Seal the top and go again
+After CMP a SiCN/SiN dielectric cap (textbook) or a selective metal cap such as Co is deposited so Cu atoms cannot diffuse up and so the next etch has a stop. Then the whole sequence repeats: M5 to M9 is five passes, each also forming the vias down to the previous level.
+
+# Cap trade
+The cap is a high-k film, adding capacitance, but the Cu/cap interface is the fast electromigration path, so a better cap raises lifetime. Metal caps reduce EM at the cost of selectivity and leakage risk.
+
+# Why it repeats
+Every level is a cycle through deposition, litho, etch, plating, CMP; this repeated wiring is why BEOL is a large share of fab steps and WFE spend (textbook).
+
+# Sources
+https://en.wikipedia.org/wiki/Copper_interconnects
+
+== RC DELAY
+# The equation
+Wire delay goes as R x C = rho k eps0 L^2 / (W S) for a given height (textbook). Lower k and lower rho both help, narrower W raises it. At long lengths, delay scales with L squared, which is why long block-to-block runs go to wider, thicker M10-M14.
+
+# Resistivity wall
+In IBM's study wide Cu lines were 2.0 +/- 0.1 uOhm-cm but sub-60 nm lines exceeded 3.0 uOhm-cm; the electron mean free path (~30 nm there) makes surface and grain-boundary scattering dominate. IBM history claims Cu cut resistance ~40% vs aluminum for ~15% speed gain in 1997 (company claim).
+
+# Consequence
+Wire delay no longer scales with gates, so designers insert repeaters and buffers and move critical nets to upper levels. This hits NVDA, AMD, ARM-based SoCs and drives EDA timing work at SNPS and CDNS; foundries TSM and INTC fight it with liners, Ru and air gaps.
+
+# Sources
+https://research.ibm.com/publications/the-effect-of-microstructure-on-resistivity-and-reliability-in-copper-interconnects
+https://www.ibm.com/history/copper-interconnects
+
+== LOW-K / ULK
+# Definitions
+Low-k means k below SiO2's 4.0. Carbon-doped oxide is k~2.7-3.0 (textbook). Ultra-low-k (ULK) is k <= 2.5 and reaches it by porosity. Films below k=2.0 are typically >=50% porous. An Intel patent claims k<=2.5 with modulus >=15 GPa.
+
+# Mechanical cost
+Modulus falls by about 10x for a one-third drop in k (patent text). A 58% porous CDO calculates to 3.0 GPa. TSMC research cites a k=2.5 porous route and k=2.4 / 2.0 materials in older papers.
+
+# Failure modes
+Plasma damage replaces methyl with silanol, raising k and moisture uptake; fix with pore sealing, UV cure, restoration. Effective k after integration is usually higher than film k. Suppliers: AMAT, Lam, TEL; fabs TSM / INTC / Samsung.
+
+# Sources
+https://patents.justia.com/patent/9766170
+https://research.tsmc.com/english/research/interconnect/on-chip-interconnect/publish-time-2.html
+
+== EUV VS MULTI
+# Per-level choice
+EUV prints one mask where 193 nm immersion needs 2 to 4 (LELE, SAQP). Cost of an EUV layer is higher than DUV single exposure but lower than SAQP chains for the tightest levels. TSMC moved three N3B critical layers from EUV double to EUV single on N3E; Intel 4 uses EUV for contacts and some metals/vias and SAQP for 30 nm M0.
+
+# What it means for M5-M9
+Medium pitches are mostly DUV multipatterning or a single EUV exposure, depending on the foundry. TSMC says N5 Mx scaled ~30% with EUV.
+
+# Companies
+ASML (ASML) is the sole EUV scanner supplier (textbook, see EXPOSE node). Risk: EUV mask defects, stochastics at small pitch.
+
+# Sources
+https://www.semianalysis.com/p/iedm2022p1
+https://www.realworldtech.com/intel-4/5
+https://fuse.wikichip.org/news/6720/a-look-at-intel-4-process-technology/3
+
+== ELECTROMIGRATION
+# Mechanism
+Momentum from the electron wind pushes Cu atoms along the weakest path, the Cu/cap interface, leaving voids at one end and hillocks at the other (textbook). Black's equation: MTTF = A J^-n exp(Ea/kT), n often ~2.
+
+# Numbers
+Cu Ea ~0.7-1.1 eV vs 0.5-0.7 eV for aluminum, one reason Cu replaced Al; design limit ~1 MA/cm2 for Cu in minimum lines vs ~0.2 MA/cm2 for Al (Lienig slides; definitions vary). Sources show projected densities of 2.11 and 2.80 MA/cm2 at 32 and 22 nm.
+
+# Fixes and risk
+Co or metal caps, Mn or Co liners, Cu reflow and bigger vias. A misaligned via can raise resistance and cause EM shorts or opens. EM sign-off is part of EDA flows (SNPS, CDNS) and a qualification gate at TSM / INTC (1,000 hour HTOL at N5).
+
+# Sources
+https://www.ifte.de/mitarbeiter/lienig/vlsi05.pdf
+https://www.halbleiter.org/en/reliability/electromigration-tddb-nbti/
+
+== VIA / EPE
+# Where levels connect
+A via is a Cu plug between levels; its resistance can dominate a short net. Edge placement error (EPE) is litho overlay plus CD error; Intel patent text says overlay needs ~1/4 of via pitch at pitches <=70 nm.
+
+# Self-aligned vias
+Grating or hard-mask features define the via edge instead of resist, cutting EPE (patents). Misalignment raises via resistance and shorting or EM risk.
+
+# Numbers and risk
+TSMC N3E's barrier process cut via RC by up to 60% (IEDM 2022). Via resistance, not line resistance, is the main RC problem at the tightest levels. Metrology firms (KLAC) and litho (ASML) set EPE capability.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11916010
+https://www.semianalysis.com/p/iedm2022p1
+
+== AIR GAP
+# Idea
+Replace solid dielectric between tightest lines with void (k~1) to cut line-to-line capacitance. Intel's IEDM 2024 work with subtractive Ru reported up to 25% lower line-to-line capacitance at pitches <=25 nm. A patent claims ~17.5% total capacitance reduction (assignee not confirmed).
+
+# Trade
+Voids are mechanically weak, hard to land vias on, and trap heat. TSMC's 22 nm-era page reports a selective air-gap process with gaps only at narrow spacing.
+
+# Who
+Intel (INTC) and TSMC (TSM) publish; tools from AMAT, Lam, TEL.
+
+# Sources
+https://newsroom.intel.com/intel-foundry/intel-foundry-unveils-technology-advancements-iedm-2024
+https://research.tsmc.com/page/on-chip-interconnect/16.html
+
+== RU / SUBTRACTIVE
+# Why leave Cu damascene
+Below about 20-25 nm pitch the barrier plus size effect makes Cu worse than Ru. Ru needs no barrier, has a short mean free path, and can be etched, so a subtractive flow (deposit metal, etch lines, fill gaps) replaces damascene. Intel showed this with air gaps at IEDM 2024 for the tightest layers, keeping Cu damascene for larger upper levels.
+
+# Implication
+M5-M9 are likely to stay Cu damascene for several nodes (inference, no source gives a date); Ru enters first in the thin M1-M4 and as a liner (AMAT RuCo). Semiengineering expects a shift to subtractive after 2 nm.
+
+# Risks
+Ru cost, Ru etch residue, adhesion, and Ru CMP selectivity.
+
+# Sources
+https://newsroom.intel.com/intel-foundry/intel-foundry-unveils-technology-advancements-iedm-2024
+https://semiengineering.com/how-far-will-copper-interconnects-scale
+https://www.appliedmaterials.com/us/en/semiconductor/products/semiconductor-products/endura-cubs-volta-ruthenium.html
+
+== EDA RC EXTRACT
+# Why EDA cares
+Designers see the BEOL as resistance and capacitance tables per layer. Synopsys StarRC (SNPS) is its signoff parasitic extraction product with FinFET modeling and a field solver; Cadence Quantus (CDNS) is the competitor, certified to 16 nm FinFET at its 2014 launch with a claim of up to 5x faster runtime (vendor claims).
+
+# Why it is hard
+Many metal layers, 3D coupling and variation mean millions of parasitics per net. Foundry certification of the extraction tech file decides adoption.
+
+# Companies
+SNPS and CDNS; foundries TSM and INTC supply the BEOL data; ARM, NVDA, AMD live on the resulting timing. Revenue figures not collected here.
+
+# Sources
+https://www.synopsys.com/content/synopsys/en-us/implementation-and-signoff/signoff/starrc.html
+https://www.techdesignforums.com/practice/?p=7325
