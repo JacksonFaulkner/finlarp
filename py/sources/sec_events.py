@@ -33,7 +33,7 @@ Pre-Aug-2004 8-Ks use whole-number items (1-12); they are labelled
 Resumable: each ticker's rows go to raw/<TICKER>.ndjson (skipped if
 present unless --refresh); Parquet is rebuilt from all raw files at the end.
 
-CLI:  uv run python sources/sec_events.py ingest [--refresh]
+CLI:  uv run python sources/sec_events.py ingest [TICKER ...] [--refresh] [--max-age SECONDS]
       uv run python sources/sec_events.py show TICKER [DAYS]
 """
 from __future__ import annotations
@@ -107,8 +107,8 @@ _COLS = ("form", "filingDate", "reportDate", "acceptanceDateTime", "accessionNum
          "primaryDocument", "primaryDocDescription", "items", "size", "isXBRL")
 
 
-def _rows(ticker: str, cik: int, pred: bool) -> list[dict]:
-    rec = universe.submissions(cik)["filings"]["recent"]
+def _rows(ticker: str, cik: int, pred: bool, max_age_s: float = 86400) -> list[dict]:
+    rec = universe.submissions(cik, max_age_s)["filings"]["recent"]
     n = len(rec["accessionNumber"])
     col = {k: rec.get(k) or [None] * n for k in _COLS}
     return [{
@@ -123,7 +123,10 @@ def _rows(ticker: str, cik: int, pred: bool) -> list[dict]:
     } for i in range(n)]
 
 
-def ingest(refresh: bool = False, tickers: list[str] | None = None) -> None:
+def ingest(refresh: bool = False, tickers: list[str] | None = None, max_age_s: float = 86400) -> None:
+    """Write raw/<T>.ndjson per ticker and rebuild the parquet. Tickers already on
+    disk are skipped unless refresh; max_age_s is the submissions cache age to
+    accept (lower it for intraday 8-K checks on a short list)."""
     RAW.mkdir(exist_ok=True)
     t0 = time.time()
     fails: list[str] = []
@@ -133,7 +136,8 @@ def ingest(refresh: bool = False, tickers: list[str] | None = None) -> None:
         if out.exists() and not refresh:
             continue
         try:
-            rows = [r for j, c in enumerate(s["ciks"]) for r in _rows(s["ticker"], c, j > 0)]
+            # predecessors stopped filing: their cached index never needs a refetch
+            rows = [r for j, c in enumerate(s["ciks"]) for r in _rows(s["ticker"], c, j > 0, max_age_s if j == 0 else 86400 * 365)]
         except Exception as e:  # noqa: BLE001 — keep going, report at end
             fails.append(f"{s['ticker']}: {e}")
             print(f"[{k}/{len(ss)}] {s['ticker']} FAILED {e}", flush=True)
@@ -238,7 +242,10 @@ def _show(ticker: str, days: int) -> None:
 if __name__ == "__main__":
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
     if cmd == "ingest":
-        ingest(refresh="--refresh" in sys.argv)
+        argv = sys.argv[2:]
+        age = next((float(argv[i + 1]) for i, a in enumerate(argv[:-1]) if a == "--max-age"), 86400)
+        names = [a.upper() for i, a in enumerate(argv) if not a.startswith("--") and not (i and argv[i - 1] == "--max-age")]
+        ingest(refresh="--refresh" in argv, tickers=names or None, max_age_s=age)
     elif cmd == "build":
         build()
     elif cmd == "show" and len(sys.argv) > 2:

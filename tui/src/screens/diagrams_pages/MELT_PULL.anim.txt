@@ -1,0 +1,323 @@
+ms 550
+== fresh charge melted, held ~1414 C under argon: 100 L/min at 2500 Pa
+  ┌────────────────────┬───────────────────┐
+  │ ▼                  │                 ▼ │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: lower
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │                    │                   │
+  │ ▼                  │                 ▼ │
+  │                    │                   │
+  │                    │                   │
+  │                   ▐█▌                  │  ▓ graphite heater, 310 kW
+  │   ▓                                 ▓  │
+  │   ▓  │                           │  ▓  │
+  │   ▓  │≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  │≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== seed touches the melt: thermal shock injects dislocations ×
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │ ▼                  │                 ▼ │    pull: hold
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │                    │                   │
+  │                    │                   │
+  │ ▼                  │                 ▼ │
+  │                    │                   │
+  │                    │                   │  ▓ graphite heater, 310 kW
+  │   ▓                │                ▓  │
+  │   ▓  │            ×█×            │  ▓  │
+  │   ▓  │≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  │≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== Dash neck: 2-4 mm thin, pulled fast, up to ~6 mm/min
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: 6 mm/min
+  │ ▼                  │                 ▼ │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │                    │                   │
+  │                    │                   │
+  │                    │                   │
+  │ ▼                  │                 ▼ │
+  │                    │                   │  ▓ graphite heater, 310 kW
+  │   ▓               ▐█▌               ▓  │
+  │   ▓  │            ×█×            │  ▓  │
+  │   ▓  │≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~│  ▓  │  ◀ solid-melt interface
+  │   ▓  │≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== dislocations slide out the neck surface within ~100-125 mm
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: 6 mm/min
+  │                    │                   │    crystal  ◀ 5 rpm
+  │ ▼                  │                 ▼ │
+  │                    │                   │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │                    │                   │
+  │                    │                   │
+  │                    │                   │
+  │                    │                   │
+  │ ▼                 ▐█▌                ▼ │  ▓ graphite heater, 310 kW
+  │   ▓             ×◀ █ ▶×             ▓  │
+  │   ▓  │             █             │  ▓  │
+  │   ▓  │≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  │≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== shoulder: melt cooled slightly, pull slowed, cone flares out
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: slow
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │ ▼                  │                 ▼ │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │                    │                   │
+  │                    │                   │
+  │                    │                   │
+  │                   ▐█▌                  │
+  │                    █                   │  ▓ graphite heater, 310 kW
+  │ ▼ ▓                █                ▓▼ │
+  │   ▓  │          ╱▒▒░▒▒╲          │  ▓  │
+  │   ▓  │~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  │~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== latent heat grows with the freezing area: heater loop now sets diameter
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: slow
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │ ▼                  │                 ▼ │    carries SiO + CO out
+  │                    │                   │
+  │                    │                   │
+  │                   ▐█▌                  │
+  │                    █                   │
+  │                    █                   │  ▓ graphite heater, 310 kW
+  │   ▓             ╱▒░▒▒▒╲             ▓  │
+  │ ▼ ▓  │       ╱▒▒▒▒░▒▒▒▒▒▒╲       │  ▓▼ │
+  │   ▓  │≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  │≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== 300 mm body at 1.0-1.6 mm/min = ~9.9-15.8 kg/h of crystal
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: 1.0-1.6
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │ ▼                  │                 ▼ │
+  │                   ▐█▌                  │
+  │                    █                   │
+  │                    █                   │
+  │                 ╱░▒▒▒▒╲                │  ▓ graphite heater, 310 kW
+  │   ▓          ╱▒▒▒░▒▒▒▒▒▒░╲          ▓  │
+  │   ▓  │      │▒▒▒▒░▒▒▒▒▒▒░▒│      │  ▓  │
+  │ ▼ ▓  │≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈│  ▓▼ │  ◀ solid-melt interface
+  │   ▓  │≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  │≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈│  ▓  │
+  │   ▓  └─────────────┬─────────────┘  ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== counter-rotation 5 / -5 rpm; magnetic field N S damps melt convection
+  ┌────────────────────┬───────────────────┐
+  │ ▼                  │                 ▼ │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: 1.0-1.6
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │                    │                   │    carries SiO + CO out
+  │                   ▐█▌                  │
+  │ ▼                  █                 ▼ │
+  │                    █                   │
+  │                 ╱▒▒▒▒▒╲                │
+  │              ╱▒▒░▒▒▒▒▒▒░▒╲             │  ▓ graphite heater, 310 kW
+  │   ▓  │      │▒▒▒░▒▒▒▒▒▒░▒▒│      │  ▓  │
+  │   ▓  │      │▒▒▒░▒▒▒▒▒▒░▒▒│      │  ▓  │
+  │ N ▓  │≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈│  ▓ S│  ◀ solid-melt interface
+  │   ▓  │≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  └─────────────┬─────────────┘  ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓····]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== melt dissolves the quartz: SiO ° forms, ~1e18 O atoms/cm3 freeze in
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │ ▼                  │                 ▼ │    pull: 1.0-1.6
+  │                    │                   │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                    │                   │  ▼ argon sweeps down,
+  │                   ▐█▌                  │    carries SiO + CO out
+  │                    █                   │
+  │                    █                   │
+  │ ▼               ╱▒▒▒▒▒╲              ▼ │
+  │              ╱▒░▒▒▒▒▒▒░▒▒╲             │
+  │             │▒▒░▒▒▒▒▒▒░▒▒▒│            │  ▓ graphite heater, 310 kW
+  │   ▓  │      │▒▒░▒▒▒▒▒▒░▒▒▒│      │  ▓  │
+  │   ▓  │ °    │▒▒░▒▒▒▒▒▒░▒▒▒│    ° │  ▓  │
+  │   ▓  │≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  │≈°≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈°≈│  ▓  │    ~1414 C, quartz crucible
+  │   ▓  └─────────────┬─────────────┘  ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓▓▓▓▓····]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== melt drops, crucible lifted so the interface stays at one height
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: 1.0-1.6
+  │ ▼                  │                 ▼ │    crystal  ◀ 5 rpm
+  │                    │                   │
+  │                   ▐█▌                  │  ▼ argon sweeps down,
+  │                    █                   │    carries SiO + CO out
+  │                    █                   │
+  │                 ╱▒▒▒▒░╲                │
+  │              ╱░▒▒▒▒▒▒░▒▒▒╲             │
+  │ ▼           │▒░▒▒▒▒▒▒░▒▒▒▒│          ▼ │
+  │      │      │▒░▒▒▒▒▒▒░▒▒▒▒│      │     │  ▓ graphite heater, 310 kW
+  │   ▓  │      │▒░▒▒▒▒▒▒░▒▒▒▒│      │  ▓  │
+  │   ▓  │      │▒░▒▒▒▒▒▒░▒▒▒▒│      │  ▓  │
+  │   ▓  │≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~│  ▓  │  ◀ solid-melt interface
+  │   ▓  └─────────────┬─────────────┘  ▓  │    ~1414 C, quartz crucible
+  │   ▓                ║                ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓········]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== segregation: dopant piles up in the melt, the tail freezes most doped
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: taper
+  │                    │                   │    crystal  ◀ 5 rpm
+  │ ▼                 ▐█▌                ▼ │
+  │                    █                   │  ▼ argon sweeps down,
+  │                    █                   │    carries SiO + CO out
+  │                 ╱▒▒▒░▒╲                │
+  │              ╱▒▒▒▒▒▒░▒▒▒▒╲             │
+  │             │░▒▒▒▒▒▒░▒▒▒▒▒│            │
+  │             │░▒▒▒▒▒▒░▒▒▒▒▒│            │
+  │ ▼    │      │░▒▒▒▒▒▒░▒▒▒▒▒│      │   ▼ │  ▓ graphite heater, 310 kW
+  │   ▓  │      │░▒▒▒▒▒▒░▒▒▒▒▒│      │  ▓  │
+  │   ▓  │         ╲▒▒▒▒░▒▒╱         │  ▓  │
+  │   ▓  │≈≈≈•≈≈~≈•≈≈≈≈•≈≈≈≈•≈~≈≈•≈≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  └─────────────┬─────────────┘  ▓  │    ~1414 C, quartz crucible
+  │   ▓                ║                ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓········]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== taper slowly: an abrupt lift-off sends slip back up the body
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                    │                   │    pull: taper
+  │                   ▐█▌                  │    crystal  ◀ 5 rpm
+  │                    █                   │
+  │ ▼                  █                 ▼ │  ▼ argon sweeps down,
+  │                 ╱▒▒░▒▒╲                │    carries SiO + CO out
+  │              ╱▒▒▒▒▒░▒▒▒▒▒╲             │
+  │             │▒▒▒▒▒▒░▒▒▒▒▒▒│            │
+  │             │▒▒▒▒▒▒░▒▒▒▒▒▒│            │
+  │             │▒▒▒▒▒▒░▒▒▒▒▒▒│            │
+  │      │      │▒▒▒▒▒▒░▒▒▒▒▒▒│      │     │  ▓ graphite heater, 310 kW
+  │ ▼ ▓  │         ╲▒▒▒░▒▒▒╱         │  ▓▼ │
+  │   ▓  │            ╲░╱            │  ▓  │
+  │   ▓  │~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  └─────────────┬─────────────┘  ▓  │    ~1414 C, quartz crucible
+  │   ▓                ║                ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓········]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== lifted clear to cool; the thin neck carries the whole crystal
+  ┌────────────────────┬───────────────────┐
+  │                    │                   │  ▲ pull shaft lifts + spins
+  │                   ▐█▌                  │    pull: lift
+  │                    █                   │    crystal  ◀ 5 rpm
+  │                    █                   │
+  │                 ╱▒░▒▒▒╲                │  ▼ argon sweeps down,
+  │ ▼            ╱▒▒▒▒░▒▒▒▒▒▒╲           ▼ │    carries SiO + CO out
+  │             │▒▒▒▒▒░▒▒▒▒▒▒░│            │
+  │             │▒▒▒▒▒░▒▒▒▒▒▒░│            │
+  │             │▒▒▒▒▒░▒▒▒▒▒▒░│            │
+  │             │▒▒▒▒▒░▒▒▒▒▒▒░│            │
+  │      │         ╲▒▒░▒▒▒▒╱         │     │  ▓ graphite heater, 310 kW
+  │   ▓  │            ╲▒╱            │  ▓  │
+  │ ▼ ▓  │                           │  ▓▼ │
+  │   ▓  │≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈│  ▓  │  ◀ solid-melt interface
+  │   ▓  └─────────────┬─────────────┘  ▓  │    ~1414 C, quartz crucible
+  │   ▓                ║                ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓········]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts
+== Dash necks hold ~100 kg; a 300 mm crystal is several hundred kg
+  ┌────────────────────┬───────────────────┐
+  │                   ▐█▌                  │  ▲ pull shaft lifts + spins
+  │                    █                   │    pull: lift
+  │                    █                   │    crystal  ◀ 5 rpm
+  │                 ╱░▒▒▒▒╲                │
+  │              ╱▒▒▒░▒▒▒▒▒▒░╲             │  ▼ argon sweeps down,
+  │             │▒▒▒▒░▒▒▒▒▒▒░▒│            │    carries SiO + CO out
+  │ ▼           │▒▒▒▒░▒▒▒▒▒▒░▒│          ▼ │
+  │             │▒▒▒▒░▒▒▒▒▒▒░▒│            │
+  │             │▒▒▒▒░▒▒▒▒▒▒░▒│            │
+  │                ╲▒░▒▒▒▒▒╱               │
+  │      │            ╲▒╱            │     │  ▓ graphite heater, 310 kW
+  │   ▓  │                           │  ▓  │
+  │   ▓  │                           │  ▓  │
+  │ ▼ ▓  │≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈≈≈≈~≈≈≈│  ▓▼ │  ◀ solid-melt interface
+  │   ▓  └─────────────┬─────────────┘  ▓  │    ~1414 C, quartz crucible
+  │   ▓                ║                ▓  │
+  │   ▓                ║                ▓  │    crucible ▶ -5 rpm
+  │   ▓                ║                ▓  │    melt [▓▓▓▓········]
+  │                    ║                   │
+  └────────────────────┴───────────────────┘
+              crucible shaft ▲ lifts

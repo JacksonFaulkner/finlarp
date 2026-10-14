@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Every 30 min; jobs.refresh exits at once outside weekdays 08:00-17:00 ET. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.finlarp.refresh.intraday</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__UV__</string><string>run</string><string>--env-file</string><string>.env</string>
+    <string>python</string><string>-m</string><string>jobs.refresh</string><string>intraday</string>
+  </array>
+  <key>WorkingDirectory</key><string>__ROOT__</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
+  <key>StartInterval</key><integer>1800</integer>
+  <key>StandardOutPath</key><string>__LOGS__/launchd-intraday.log</string>
+  <key>StandardErrorPath</key><string>__LOGS__/launchd-intraday.log</string>
+  <key>LowPriorityIO</key><true/>
+  <key>Nice</key><integer>5</integer>
+</dict>
+</plist>

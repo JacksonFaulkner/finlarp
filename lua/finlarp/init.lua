@@ -598,7 +598,10 @@ function M.onboard(tickers)
       end
       table.insert(lines, 1, ("onboard %s (%ss)"):format(table.concat(rep.tickers or {}, " "), rep.total_secs or "?"))
       for t, bad in pairs(rep.health or {}) do
-        table.insert(lines, ("%s: %s"):format(t, #bad == 0 and "all dossier sections populated" or table.concat(bad, ", ")))
+        table.insert(
+          lines,
+          ("%s: %s"):format(t, #bad == 0 and "all dossier sections populated" or table.concat(bad, ", "))
+        )
       end
       vim.notify(table.concat(lines, "\n"), vim.log.levels.INFO)
     end)
@@ -834,10 +837,34 @@ function M.show_diagrams(name)
   require("finlarp.ui.tui").open_screen("diagrams", name, { title = " diagrams " })
 end
 
---- Catalyst calendar TUI (month / week / day).
---- @param arg string|nil "month" | "week" | "day" and/or a YYYY-MM-DD start date
+--- Catalyst calendar TUI (month / week / day). Inside it, T shows the tweets that name a universe ticker (one line per
+--- day; the day view lists them) and f filters them by ticker.
+--- @param arg string|nil "month" | "week" | "day", a YYYY-MM-DD start date, "tweets" to open with the tweet layer on,
+---   and "t:MU,NVDA" to open filtered (e.g. "day 2026-10-09 t:MU")
 function M.show_events(arg)
   require("finlarp.ui.tui").open_screen("events", arg, { title = " events " })
+end
+
+--- Candlestick chart (mock bars for now). Opens for the focused tile's symbol, else the screen's default ticker.
+function M.show_candles_current()
+  local symbols = require("finlarp.ui.window").selected_symbols()
+  require("finlarp.ui.tui").open_screen("candles", symbols[1], { title = " candles " })
+end
+
+--- Intraday 2x2 grid of live horizontal candle tapes (py/sources/intraday_stream.py feeds it over Yahoo's
+--- websocket). Opens on up to four selected/focused symbols; missing slots default to SPY QQQ NVDA AAPL.
+--- @param arg string|nil "MKSI,WDC,WULF,APLD"
+function M.show_intraday(arg)
+  require("finlarp.ui.tui").open_screen("intraday", arg, { title = " intraday " })
+end
+
+function M.show_intraday_current()
+  local symbols = require("finlarp.ui.window").selected_symbols()
+  local first = {}
+  for i = 1, math.min(#symbols, 4) do
+    first[i] = symbols[i]
+  end
+  M.show_intraday(#first > 0 and table.concat(first, ",") or nil)
 end
 
 --- Ticker picker -> research dossier.

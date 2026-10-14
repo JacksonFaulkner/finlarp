@@ -1,6 +1,6 @@
 -- Launcher for the ratatui binary `fl` (tui/): one binary, several
 -- screens (home | chart | portfolio | canslim | dossier | earnings | search |
--- universe | diagrams | events), all opened through M.open_screen. All navigation lives in the
+-- universe | diagrams | events | menu | notes), all opened through M.open_screen. All navigation lives in the
 -- binary; this file only hosts it in a popup and carries colours in. Inside tmux the binary runs in a full-size
 -- `tmux display-popup` (a real terminal pane, no nested libvterm redraw
 -- lag); outside tmux it falls back to a floating :terminal.
@@ -126,6 +126,16 @@ function M.dispatch(a)
     end
   elseif a.action == "picker" then
     M.open_screen(a.screen) -- no argument = the screen's ticker picker
+  elseif a.action == "notechat" then
+    call(root .. ".ui.notes", "chat", a.id)
+  elseif a.action == "noteask" then
+    call(root .. ".ui.notes", "ask", a.id, a.question)
+  elseif a.action == "keys" then
+    -- <leader>v? menu: replay the chosen keymap so nvim's own mapping fires.
+    if a.keys then
+      local keys = vim.api.nvim_replace_termcodes(a.keys, true, false, true)
+      vim.api.nvim_feedkeys(keys, "m", false)
+    end
   elseif a.action == "claude" then
     -- <space>ac / <space>as inside the TUI: same as the nvim keys. Text is
     -- written to a file and added like any other file context.
@@ -326,6 +336,21 @@ function M.show_suite(range)
     env = { FINLARP_STATUS_FILE = status_file },
   })
   call(root, "refresh_portfolio", report)
+end
+
+--- The `<leader>vm` notes browser. `notes` are the mind CLI's index rows.
+function M.show_notes(notes)
+  local file = vim.fn.tempname()
+  vim.fn.writefile({ vim.json.encode(notes) }, file)
+  M.open_screen("notes", nil, { title = " notes ", env = { FINLARP_NOTES_FILE = file } })
+end
+
+--- The `<leader>v?` menu: a ratatui list of keymaps. nvim owns the list.
+--- @param items { lhs: string, name: string, desc: string, mode: string? }[]
+function M.show_menu(items)
+  local file = vim.fn.tempname()
+  vim.fn.writefile({ vim.json.encode(items) }, file)
+  M.open_screen("menu", nil, { title = " finlarp ", env = { FINLARP_MENU_FILE = file } })
 end
 
 --- The home menu (`fl` / `fl .`).

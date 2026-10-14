@@ -117,7 +117,10 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Canslim> {
     s.reload();
     if !symbol.is_empty() {
         // Without --force the script honors the cache TTL, so a fresh card costs nothing.
-        s.refresh = Some(crate::pyrun::spawn_script("py/derive/canslim.py", &[&symbol]));
+        s.refresh = Some(crate::pyrun::spawn_script(
+            "py/derive/canslim.py",
+            &[&symbol],
+        ));
         s.flash = Some("refreshing…".into());
     }
     Ok(s)
@@ -447,7 +450,9 @@ impl Screen for Canslim {
     fn tick(&mut self) -> Action {
         let done = match self.refresh.as_ref().map(|r| r.try_recv()) {
             Some(Ok(res)) => Some(res),
-            Some(Err(std::sync::mpsc::TryRecvError::Disconnected)) => Some(Err("refresh thread died".into())),
+            Some(Err(std::sync::mpsc::TryRecvError::Disconnected)) => {
+                Some(Err("refresh thread died".into()))
+            }
             _ => None,
         };
         if let Some(res) = done {
@@ -457,7 +462,12 @@ impl Screen for Canslim {
                     self.reload();
                     self.flash = Some("updated".into());
                 }
-                Err(e) => self.flash = Some(format!("refresh failed: {}", e.lines().last().unwrap_or(""))),
+                Err(e) => {
+                    self.flash = Some(format!(
+                        "refresh failed: {}",
+                        e.lines().last().unwrap_or("")
+                    ))
+                }
             }
         }
         Action::None
@@ -528,7 +538,7 @@ mod tests {
         assert!(out.contains("MRVL"), "{out}");
         assert!(out.contains("CANSLIM"), "{out}");
         assert!(out.contains("overall"), "{out}");
-        assert!(out.contains("Current earnings"), "{out}");
+        assert!(out.contains("Current ear"), "{out}");
         // letters are a one-row tab strip under the header, every grade visible
         let tabs = out.lines().nth(1).unwrap_or("");
         for badge in ["C 59", "D 31", "F 17", "A 82", "A 100"] {

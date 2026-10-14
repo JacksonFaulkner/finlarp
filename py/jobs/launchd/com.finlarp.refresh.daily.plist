@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Nightly batch: weekdays 18:30 local time. A run missed while the Mac slept starts on wake. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.finlarp.refresh.daily</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__UV__</string><string>run</string><string>--env-file</string><string>.env</string>
+    <string>python</string><string>-m</string><string>jobs.refresh</string><string>daily</string>
+  </array>
+  <key>WorkingDirectory</key><string>__ROOT__</string>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Weekday</key><integer>1</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Weekday</key><integer>2</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Weekday</key><integer>3</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Weekday</key><integer>4</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+    <dict><key>Weekday</key><integer>5</integer><key>Hour</key><integer>18</integer><key>Minute</key><integer>30</integer></dict>
+  </array>
+  <key>StandardOutPath</key><string>__LOGS__/launchd-daily.log</string>
+  <key>StandardErrorPath</key><string>__LOGS__/launchd-daily.log</string>
+  <key>LowPriorityIO</key><true/>
+  <key>Nice</key><integer>5</integer>
+</dict>
+</plist>

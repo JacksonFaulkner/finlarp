@@ -1,0 +1,122 @@
+# 1. What happens: a gate voltage opens an electron channel between two n+ islands
+
+ ┌────────────┐    ┌─────────────┐    ┌─────────────┐    ┌────────────┐    ┌─────────────┐    ┌─────────────┐
+ │ OFF STATE  │    │ DEPLETION   │    │ INVERSION   │    │ LINEAR     │    │ SATURATION  │    │ TURN-OFF    │
+ │ VG = 0, no │ ─▶ │ holes pushed│ ─▶ │ e- pool     │ ─▶ │ small VD,  │ ─▶ │ pinch-off,  │ ─▶ │ VG to 0,    │
+ │ channel    │    │ away        │    │ VG > Vt     │    │ resistor   │    │ current flat│    │ channel gone│
+ └────────────┘    └─────────────┘    └─────────────┘    └────────────┘    └─────────────┘    └─────────────┘
+
+  (an NMOS is a voltage-controlled switch: no gate current flows, only an electric field reaches the silicon)
+
+# 2. Cross-section of one planar-style NMOS (FinFET and GAA wrap the same pieces around the channel)
+
+    Vs = 0 V                      VG (switch input)                 VD (output node)
+
+ ┌────────────────────────┐    ┌────────────────────────┐    ┌────────────────────────┐
+ │ N+ SOURCE              │    │ GATE STACK             │    │ N+ DRAIN               │
+ │ As/P, ~1e20-1e21       │    │ metal gate             │    │ As/P, tied to          │
+ │ /cm3, grounded         │    │ high-k + SiO2          │    │ load / VDD             │
+ └────────────────────────┘    │ ~1 nm EOT class        │    └────────────────────────┘
+                               └────────────────────────┘                              
+          ▲ electrons flow source ──▶ drain through the inversion layer under the gate ▲
+ ┌────────────────────────────────────────────────────────────────────────────────────┐
+ │ P-WELL / P-SUBSTRATE  (boron, ~1e15-1e18 /cm3, textbook)                           │
+ │ body contact tied to 0 V or a small back-bias; holes are the majority carrier here │
+ └────────────────────────────────────────────────────────────────────────────────────┘
+   inside: halo pocket stops punch-through; spacers set extension spacing; STI isolates neighbours
+
+  (n+ = heavily doped n-type; well junctions are reverse-biased and block current when the gate is off)
+
+# 3. Turning on: drain current versus gate voltage (log scale)
+
+ ┌────────────────────────┐    ┌────────────────────────┐
+ │ SUBTHRESHOLD           │    │ THRESHOLD              │
+ │ Id ~ exp(VG), weak     │    │ VG = Vt, strong        │
+ │ inversion, leakage     │    │ inversion starts       │
+ └────────────────────────┘    └────────────────────────┘
+
+  log Id
+   1e-3 │                                          ╭─────────  ON: Ion ~ (VG-Vt)^a, velocity-saturated
+        │                                      ╭───╯
+   1e-6 │                              ╭──────╯          slope = subthreshold swing S
+        │                      ╭──────╯                  S = (kT/q) ln10 (1 + Cdep/Cox) >= 60 mV/dec at 300 K
+   1e-9 │              ╭──────╯
+        │       ╭─────╯              OFF: Ioff set by the S slope and by Vt
+  1e-12 │ ──────╯
+        └──────┬──────────┬──────────┬──────────┬────▶ VG
+             0 V        Vt-0.2      Vt        Vt+0.2    (log-linear sketch, not to scale)
+
+  (each 60-100 mV of Vt reduction gives ~10x more off-state leakage; Vt cannot be scaled freely)
+
+# 4. What shapes the device: dopants, strain, short-channel and body effects
+
+ ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐  ┌────────────────────┐
+ │ ARSENIC            │  │ Si:P               │  │ DIBL               │  │ BODY BIAS          │
+ │ slow diffuser,     │  │ epitaxial P-doped  │  │ drain lowers the   │  │ well voltage       │
+ │ shallow, abrupt    │  │ source/drain,      │  │ barrier; Vt        │  │ shifts Vt          │
+ │ n+ junctions       │  │ tensile strain     │  │ falls, Ioff up     │  │ (sqrt law)         │
+ └────────────────────┘  └────────────────────┘  └────────────────────┘  └────────────────────┘
+
+  arsenic:    low diffusivity gives abrupt, shallow extensions; poor activation limits sheet R [4]
+  phosphorus: activates better, diffuses faster, goes deeper; used in deep S/D and as Si:P epi [4][5]
+  Si:P:       in-situ P up to ~1.2e21 /cm3, 0.3 mOhm.cm, strain like ~0.55% carbon (patent example) [5]
+              contact resistivity down to 1.5e-9 Ohm.cm2 reported on 2e21 /cm3 Si:P with surface anneal [5]
+  DIBL:       Vt falls as drain voltage rises and as channel length shrinks (roll-off) [6]
+
+  (FinFET and nanosheet gates fight these by surrounding the channel so the gate owns the barrier)
+
+# 5. Transistor count per chip (company or press figures)
+
+ ┌───────────────────────────────────────────────────────┐
+ │ TRANSISTOR COUNT                                      │
+ │ each is one NMOS or PMOS; billions on one package     │
+ └───────────────────────────────────────────────────────┘
+
+  NVIDIA B200 (2 dies, 4NP)        █████████████████████████████████████████████ 208B
+  AMD MI300X (12 chiplets, 5/6nm)  █████████████████████████████████ 153B
+  NVIDIA H100/H200                 █████████████████ 80B
+  Apple M4 (N3E)                   ██████ 28B
+  Apple M3                         █████ 25B
+  Apple M2                         ████ 20B
+  Apple M1                         ███ 16B
+
+  (a modern GPU holds ~1e11 to 2e11 switches; count grows with die area, density gains and chiplet stacking)
+
+# 6. By the numbers
+
+  thermal limit S          60 mV/decade at 300 K, kT/q = ~26 mV (textbook)
+  typical body factor m    1.2-1.5, so real swing ~70-90 mV/dec [6]
+  Si:P doping              1.2e21 /cm3 in a patent example; active carriers saturate above ~1e21 [5]
+  Intel 18A Vt options     4 NMOS + 4 PMOS Vt flavours over a 180 mV range; 18A-P adds a fifth pair [7]
+  18A-P drive current      about +5% NMOS, +16% PMOS vs 18A; external resistance -20% / -12% [7]
+  TSMC 2025 revenue        NT$3,809B (~US$122.4B); 3nm 24%, 7nm and below 74% of wafer revenue [8]
+  NVIDIA FY2026            revenue $215.9B, data center $193.7B [9]
+  Synopsys / Cadence FY25  $7.054B / $5.297B revenue; both sell device and circuit simulators [10]
+
+# 7. Who makes it, structure, risks
+
+  TSM    builds the transistors for NVDA, AMD, Apple (N3/N4P); 2025 mix above
+  INTC   RibbonFET (GAA) NMOS and PMOS on 18A; 4 NMOS Vt options [7]
+  NVDA   B200 at 208B transistors on TSMC 4NP [1]; AMD MI300X 153B [3]
+  ARM    licenses CPU cores built from these NMOS/PMOS pairs (royalty model, textbook)
+  SNPS CDNS  TCAD (Sentaurus) and SPICE (Spectre) model the device equations in this page (textbook)
+  Risks: leakage and Vt variability at 2nm-class nodes, strain and contact-resistance limits (textbook).
+
+(notes)
+  Apple A18 Pro was reported at 20B by a single site (lowendmac); not used above.
+  Intel 18A absolute Ion/Ioff mA/um values were not found; only relative 18A-P changes are quoted.
+
+# Sources
+
+  [1] B200: anandtech.com/show/21310 ; tomshardware.com Blackwell B200 launch coverage
+  [2] H100 80B comparison: same launch coverage as [1]
+  [3] MI300X: tweaktown.com/news/94342 ; digitimes.com/news/a20230614VL200.html
+  [4] As vs P: patents.google.com/patent/US4851360 ; patents.google.com/patent/US8039375
+  [5] Si:P: image-ppubs.uspto.gov 7960236 ; ecs.confex.com/ecs/242/webprogram/Paper166416.html
+  [6] Swing/DIBL: courses.ece.ucsb.edu ECE225 Lecture_05 ; arxiv.org/pdf/1212.2684
+  [7] Intel 18A: semiengineering.com/extending-18a-with-significant-power-and-performance-gains
+  [8] TSMC: sec.gov/Archives/edgar/data/1046179 (6-K) ; telecomlead.com TSMC 2025 results
+  [9] NVIDIA Q4 FY26: sec.gov/Archives/edgar/data/1045810/000104581026000019/q4fy26pr.htm
+  [10] cimdata.com Synopsys FY2025 ; seekingalpha.com/pr/20402555 Cadence FY2025
+  [11] Apple M-series: en.wikipedia.org/wiki/Apple_M4 ;
+      heise.de/en/news/Neuer-Apple-Chip-M4-debuettiert-im-iPad-Pro-9711173.html

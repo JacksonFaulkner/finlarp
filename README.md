@@ -27,6 +27,7 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 | `chart` | Price history |
 | `portfolio` | Your account: equity vs benchmark, drawdown, positions (E*TRADE; some tabs are placeholders) |
 | `earnings` | Structured earnings report (proof of concept, MRVL only) |
+| `events` | AI-stock catalyst calendar (month / week / day). `T` adds the tweets that name a ticker, `f` filters them by ticker, Enter on a tweet opens it |
 
 ## Data
 
@@ -44,6 +45,9 @@ universe is about 430 AI-exposed stocks (DuckDB `ai_universe`, seeded once from 
 | Earnings releases and extracted guidance | 8-K item 2.02 exhibits |
 | Granted US patents matched to tickers | PatentsView, USPTO AI Patent Dataset |
 | Company profiles | Yahoo Finance |
+| Company news: headline, link and a ~200 character snippet (about 2 years on the free plan) | ROIC.ai |
+| Tweets from followed research accounts (about 50k, Sep-Oct 2026) | X, pulled with Apify |
+| A stance per ticker for each tweet that names one (three labelling passes, `core/schemas/sentiment.py`) | An OpenAI model |
 
 [`research/FINDINGS.md`](research/FINDINGS.md) has coverage and known problems per source.
 
@@ -55,7 +59,7 @@ lua/finlarp/         Lua: Neovim plugin (launches the TUI, treemap dashboards, p
 py/                  Python: everything that fetches or computes data
   core/                DuckDB cache (db.py) and pydantic schemas
   sources/             data pullers, one module per dataset
-  derive/              derived data: search index, CANSLIM scores, dossiers
+  derive/              derived data: search index, CANSLIM scores, dossiers, account tables (fills, round trips, equity)
   jobs/                batch scripts
   agent/               read-only MCP server over the same data
 data/                universe lists (local, gitignored)
@@ -123,10 +127,34 @@ uv run python py/sources/sec_filing_text.py build
 uv run python py/derive/dossier.py --all
 ```
 
+### Scheduled refresh
+
+`py/jobs/refresh.py` runs the pullers on a schedule (module docstring has the details):
+
+- **daily** (weekdays 18:30): every SEC puller in one lane (8-Ks, new 10-K/10-Q
+  XBRL, earnings, segments, filing text, insiders, 13F, FSDS), Databento bars
+  (only the days since the last pull, capped at $15), Yahoo profiles, new tweets
+  then sentiment, ROIC news for the universe, arXiv; then the search index and
+  every dossier.
+- **intraday** (every 30 min, weekdays 08:00-17:00 ET): new tweets then
+  sentiment, plus news and 8-Ks for the watchlist (E*TRADE positions plus
+  `data/watchlist.txt`).
+
+```sh
+just refresh daily --dry-run      # the plan; steps whose API key is unset are skipped
+just refresh intraday --force     # one run now, outside market hours
+just schedule                     # install the launchd agents (just unschedule removes them)
+```
+
+Logs: `~/.local/share/nvim/finlarp/logs/<mode>/`; reports: `.../debug/refresh_*.json`.
+Patents (`bulk_pull.py pv`, then `patents.py`) and `jobs/pull_following.py` change
+rarely and stay manual.
+
 ## MCP server
 
 `py/agent/server.py` gives an agent read access to the same data over stdio:
-full-text search, company briefings, financial time series and read-only SQL.
+full-text search, company briefings, financial time series and read-only SQL, plus tweet sentiment
+(`sentiment`, `sentiment_leaders`, `price_targets`) and company news (`news`).
 
 ```sh
 claude mcp add finlarp -- "$PWD/.venv/bin/python" -m agent.server

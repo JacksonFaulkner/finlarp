@@ -1,0 +1,199 @@
+== LITHO PITCH
+# What sets the pitch
+Thin levels are printed at the tightest pitch the node allows. Single-exposure 0.33 NA EUV is reported to reach about 26 nm pitch (13 nm half-pitch); below that the layer needs two exposures or a self-aligned spacer scheme. High-NA 0.55 is reported to reach roughly 16 nm pitch single exposure, and Intel says it uses High-NA on selected 18A layers.
+
+# Public pitch figures
+TSMC N3E minimum metal pitch is 23 nm (IEDM 2022 via Wikipedia/WikiChip). Intel claimed 32 nm M0 for 18A HD cells, while teardown-based reports say shipping Panther Lake HP cells are 36 nm. N2 and 14A pitches were not found publicly; do not trust unsourced numbers.
+
+# Failure modes and tickers
+Edge placement error, line-edge roughness and stochastic EUV defects short or open lines at this pitch. ASML (ASML) sells the scanners; TSM and INTC choose which layers get EUV. Each added mask raises wafer cost (textbook).
+
+# Sources
+https://hothardware.com/news/intel-foundry-asml-1-million-wafers-high-na-euv
+https://en.wikipedia.org/wiki/3nm
+https://fuse.wikichip.org/?p=7375
+https://technews.tw/2026/02/23/intel-18a-panther-lake-more-leaks/
+
+== TRENCH ETCH
+# What it does
+In damascene flow a trench is etched into the low-k dielectric through a hard mask, then lined and filled. The trench width sets the line width, and sidewall profile, bowing and low-k damage from plasma all feed into resistance and capacitance.
+
+# Constraints
+Porous SiOCH low-k is fragile, so etch and strip chemistry must avoid raising k (textbook). Trench depth to width ratio at 12-15 nm widths makes the later liner and fill hard. Etch leaders: Lam (LRCX), Tokyo Electron (8035.T), Applied Materials (AMAT).
+
+# Subtractive twist
+In a subtractive flow the metal itself is dry-etched instead, which works for Ru and Mo because they form volatile compounds. imec studied direct etch of Ru and Mo at 32 nm pitch and below.
+
+# Sources
+https://imec-publications.be/entities/publication/549e1c7f-e71c-404e-8e11-8fb758376a0a/full
+textbook
+
+== BARRIER+LINER
+# Why a barrier
+Copper diffuses fast through dielectric and into silicon, so each Cu line is wrapped by a diffusion barrier (TaN/Ta) and an adhesion/wetting liner such as cobalt or ruthenium (textbook).
+
+# The scaling problem
+Barrier thickness does not shrink with line width, so it takes a growing share of the cross-section. One source says even 1-2 nm may be too much below about 15 nm line width. A Samsung-linked study found the via-bottom barrier can be over 60% of via resistance.
+
+# Vendor fix
+Applied Materials says its Endura Copper Barrier Seed with Volta Ruthenium CVD (shipping at 3 nm) cuts the RuCo liner 33% to 2 nm and lowers line resistance by up to 25% (company claim, AMAT).
+
+# Sources
+https://semiengineering.com/the-end-of-copper-interconnects/
+https://investor.appliedmaterials.com/news-releases/news-release-details/applied-materials-unveils-chip-wiring-innovations-more-energy
+
+== FILL METAL
+# Cu fill
+Copper fills by seed layer then electroplating (ECP), or by reflow on the liner. Voids and seams in narrow trenches raise resistance and hurt electromigration life.
+
+# Beyond copper
+Ru is deposited by CVD/ALD and Mo by CVD/ALD (textbook); electroplating Ru is difficult, and ALD Ru has historically shown higher resistivity than PVD Ru per the sources. Cobalt was used as a fill at some nodes (textbook).
+
+# Who
+Applied Materials (AMAT) leads in barrier/seed and CVD metals; Lam (LRCX) in plating (textbook). Revenue by metal step is not public.
+
+# Sources
+https://semiengineering.com/ruthenium-interconnects-on-tap
+https://semiengineering.com/ruthenium-liners-give-way-to-ruthenium-lines
+
+== CMP
+# What it does
+After fill, chemical-mechanical polishing removes overburden and stops on the dielectric, leaving flat, isolated lines (textbook). Dishing and erosion change line height and thus resistance.
+
+# Hard metals
+Ru is noted as difficult to remove by CMP, one reason subtractive flows are attractive since the final polish is on dielectric rather than metal.
+
+# Companies
+Applied Materials (AMAT) is the CMP leader; Ebara (6361.T) is the other major supplier (textbook, ticker unsourced).
+
+# Sources
+https://semiengineering.com/ruthenium-interconnects-on-tap
+textbook
+
+== CAP + VIA
+# Cap layer
+A dielectric or selective metal cap seals each level, acts as etch stop and an electromigration barrier at the Cu top surface (textbook).
+
+# Via landing
+The via to the next level lands on the line below. Misalignment can short neighbors or land on low-k, hurting TDDB reliability.
+
+# Self-aligned
+Self-aligned and fully aligned via schemes are covered in the SELF-ALIGNED VIA card.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10297467
+textbook
+
+== COPPER LINE
+# Resistance wall
+Line resistance per length rises as width and height shrink: surface and grain-boundary scattering raise resistivity above bulk copper (textbook), and the barrier removes conducting area. RC delay in the local wiring now competes with gate delay.
+
+# Numbers
+Use the sourced facts only: barrier up to 60% of via resistance, RuCo liner cuts line R up to 25% (AMAT claim), Ru beats Cu below about 17 nm width in one analysis.
+
+# Exposure
+Cu remains in production at TSMC N3 and Intel 18A M0 per teardown reports; the lowest levels are first candidates to leave Cu, perhaps by 14 Angstrom. TSM, INTC are the adopters.
+
+# Sources
+https://semiengineering.com/the-end-of-copper-interconnects/
+https://semiengineering.com/ruthenium-interconnects-on-tap
+https://investor.appliedmaterials.com/news-releases/news-release-details/applied-materials-unveils-chip-wiring-innovations-more-energy
+https://technews.tw/2026/02/23/intel-18a-panther-lake-more-leaks/
+
+== LOW-K ILD
+# Role
+Dielectric between lines sets coupling capacitance. SiOCH with k about 2.5-3 is typical (textbook); air gaps lower it further.
+
+# Tradeoff
+Lower k means porous, weaker material that is damaged by etch and CMP and fails reliability tests more often (textbook).
+
+# Link to metal
+Subtractive Ru flows can form air gaps by omitting gap-fill, trading mechanical strength for capacitance (textbook concept).
+
+# Sources
+textbook
+
+== RUTHENIUM
+# Why Ru
+imec's Zsolt Tokei reported Ru resistivity depends less on line size than Cu, so narrow Ru lines can beat Cu once the barrier is counted. One analysis says the crossover is at 17 nm or narrower. Ru may need no liner in some cases.
+
+# Limits
+Hard to electroplate and hard to CMP; ALD-grown Ru has historically had higher resistivity than PVD. Cost of the metal itself is higher (textbook). Semiconductor Engineering says Ru is a likely Cu replacement at the tightest levels perhaps by 14 Angstrom.
+
+# Companies
+Applied Materials (AMAT) sells Volta Ru CVD. Adopters: INTC, TSM, Samsung. imec patterned 28 nm pitch Ru lines with single-exposure 0.33 NA EUV.
+
+# Sources
+https://semiengineering.com/ruthenium-interconnects-on-tap
+https://semiengineering.com/ruthenium-liners-give-way-to-ruthenium-lines
+https://www.imec-publications.be/entities/publication/dc425af8-bc97-4d3e-b645-ac4337522869/full
+
+== MOLYBDENUM
+# Why Mo
+Mo is a candidate with a short electron mean free path, so resistivity may scale better in tiny lines, and possibly barrier-less operation (textbook, not confirmed in the sources found).
+
+# Evidence gap
+A KAIST thesis abstract reports Mo has poorer electromigration behavior than Cu, while Ru does much better. No direct narrow-line Mo versus Cu resistivity figure was found in this search.
+
+# Patterning
+imec studied direct metal etch of Mo and Ru at 32 nm pitch and below. Mo oxide volatility is a process challenge (textbook).
+
+# Sources
+https://koasas.kaist.ac.kr/handle/10203/320409?mode=full
+https://imec-publications.be/entities/publication/549e1c7f-e71c-404e-8e11-8fb758376a0a/full
+
+== DAMASCENE
+# Flow
+Dielectric is deposited, trenches and vias are etched, liner and metal fill, then CMP removes excess (textbook). Used because copper has no volatile etch products and cannot be dry-patterned.
+
+# Dual damascene
+Via and trench are filled in one metal step, saving masks (textbook).
+
+# Limits
+Fill voids, barrier share and low-k damage worsen at sub-30 nm pitch; this pushes the subtractive alternative. An IBM paper compares 0.33 and 0.55 NA EUV for sub-30 nm Cu damascene at 21 nm and 18 nm pitch.
+
+# Sources
+https://researcher.ibm.com/publications/accelerating-high-na-euv-lithography-insertion-for-interconnect-scaling-and-beyond-performance-cost-and-future-prospects
+
+== SUBTRACTIVE
+# Flow
+Blanket metal is deposited, lines are dry-etched, dielectric is gap-filled and polished. It suits metals that form volatile etch products such as Ru and Mo.
+
+# Benefits
+No trench fill so no seams, possibly no liner, and a path to air gaps. Aspect ratio of the metal can be taller for lower resistance (textbook).
+
+# Risks
+Etch profile, line-edge roughness, and gap-fill of the dielectric between very tight lines. Etch vendors LRCX, 8035.T, AMAT benefit.
+
+# Sources
+https://imec-publications.be/entities/publication/549e1c7f-e71c-404e-8e11-8fb758376a0a/full
+https://semiengineering.com/ruthenium-liners-give-way-to-ruthenium-lines
+
+== SELF-ALIGNED VIA
+# Problem
+Via pitches can fall below EUV resolution, multiple masks raise cost, and overlay tolerance needs about a quarter of the via pitch, according to Intel-assigned patents.
+
+# Idea
+Use the existing metal lines or dielectric hard masks to define where the via may open, so the via lands only on its intended line regardless of litho overlay.
+
+# Impact
+Fewer shorts and lower via resistance, enabling denser routing. Process steps use selective deposition and etch, favoring AMAT, LRCX, 8035.T.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10297467
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/9793163
+
+== PIN ACCESS
+# Problem
+Cell pins sit on M1 or M2 inside each standard cell, and the router must reach them from above. As scaling reduces the number of tracks covering each pin shape, existing nets can block access.
+
+# Track height
+Shrinking from 7.5 to 6 tracks raises pin density and can add congestion, limiting utilization (SPIE paper on N5-class cells). Cell generators enforce a minimum number of accessible M1 tracks per pin; at 4-track nanosheet cells, local trench contact helps.
+
+# Tools and tickers
+Synopsys (SNPS) and Cadence (CDNS) place-and-route tools and cell-library flows manage this; fabless users NVDA, AMD and ARM depend on those libraries. Designers sometimes hand-place M2 pins.
+
+# Sources
+https://electronicimaging.spiedigitallibrary.org/conference-proceedings-of-spie/10148/1014803/Low-track-height-standard-cells-enable-high-placement-density-and/10.1117/12.2257961.full
+https://arxiv.org/pdf/2603.13665
+https://patents.justia.com/patent/9727685

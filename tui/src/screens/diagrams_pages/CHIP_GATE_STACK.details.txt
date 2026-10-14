@@ -1,0 +1,279 @@
+== IL GROWTH
+# What it is
+The interfacial layer (IL) is a sub-nanometre SiOx or SiON film (about 0.5 nm on this page, a typical figure, textbook) grown on clean silicon before the high-k. Hafnium oxide bonds poorly to bare silicon and leaves a rough, defect-rich interface, so a thin chemical oxide (ozone or wet chem) gives a good Si-O interface with low trap density and keeps carrier mobility up.
+
+# Why it limits EOT
+The IL has a low k (near 3.9, textbook) so it adds directly to equivalent oxide thickness. One MRS study found the IL contributes significantly to EOT and reduces the benefit of the high-k; another reached about 1.12 nm EOT with a Si-Hf-O interlayer. Scaling EOT below 1 nm means thinning or scavenging the IL, not just thinning HfO2.
+
+# Failure modes
+Too thin: mobility and bias-temperature stability worsen. Too thick: EOT budget wasted. Regrowth during later anneals thickens it unpredictably.
+
+# Who matters
+Clean/oxidation and ALD tool vendors: Applied Materials (AMAT) Centura, ASM International (ASM.AS), Tokyo Electron (8035.T, textbook).
+
+# Sources
+https://www.cambridge.org/core/journals/mrs-online-proceedings-library-archive/article/scalability-of-mocvddeposited-hafnium-oxide/E67698A1F0D53ECDB5D62E2A855D4D59
+https://technav.ieee.org/topic/high-k-gate-dielectrics/
+
+== HIGH-K ALD
+# What happens
+Hafnium oxide (HfO2) is deposited by atomic layer deposition: alternating pulses of a hafnium precursor (a chloride or amide, textbook) and an oxidant (water or ozone), each self-limiting, about one atomic layer per cycle. The film ends up roughly 1.5-2 nm thick (this page's typical figure) and pinhole-free over 300 mm wafers.
+
+# Why HfO2
+SiO2 gate oxide thinned below about 1.2 nm at the 90 nm node and tunneling leakage became unacceptable (IEEE overview). HfO2 has a higher dielectric constant: one source quotes k = 30 with a 5.68 eV gap, textbook films are often quoted 20-25. The same capacitance can use a physically thicker film, cutting gate leakage; Intel claimed more than 10x lower gate-oxide leakage at 45 nm in 2007.
+
+# Failure modes
+Crystallisation in hot anneals raises leakage along grain boundaries; oxygen vacancies and charge trapping shift Vt; poor ALD uniformity across a wafer is a Vt spread.
+
+# Companies
+ASM International (ASM.AS): record 2025 revenue about EUR 3.2B, gross margin 51.8%, leads single-wafer ALD by its own claim. Applied Materials (AMAT) and Lam (LRCX) compete in ALD; Lam FY2025 revenue $18.44B in total.
+
+# Sources
+https://technav.ieee.org/topic/high-k-gate-dielectrics/
+https://www.newelectronics.co.uk/content/news/intel-uses-high-k-and-metal-gates-in-45nm-process
+https://www.investegate.co.uk/announcement/gnw/asm-international-nv--0nx3/asm-reports-q4-and-full-year-2025-results/9456685
+
+== TiN CAP
+# What it is
+A thin TiN layer (about 1 nm class, typical; textbook) deposited right on top of the HfO2 before any hot step. It protects the high-k from the later polysilicon, poly removal etches and anneals, and acts as the first work-function and etch-stop layer. One patent describes a dummy stack of high-k, a TiN bottom barrier and polysilicon on top, with the poly removed later.
+
+# Why it matters
+Without the cap, poly pull-out and wet strips can damage or thin HfO2, shifting EOT and Vt. The cap also lets oxygen scavenging anneals pull the IL thinner (textbook mechanism) to gain EOT.
+
+# Failure modes
+Over-etch through the cap during poly pull, nitrogen or titanium diffusion into HfO2, and cap thickness changes that shift Vt directly.
+
+# Tools
+Applied Materials (AMAT) Endura iLB PVD/ALD deposits TiN with minimal plasma damage to the high-k per its product page; ASM (ASM.AS) and Lam (LRCX) offer ALD TiN.
+
+# Sources
+https://www.appliedmaterials.com/us/en/product-library/endura-ilb-pvd-ald.html
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10312345
+
+== DIPOLE
+# What it is
+Dipole engineering inserts a sub-nanometre cap of La2O3 or Al2O3 (or similar) at the high-k/IL interface and drives it in with an anneal. Interface dipoles shift the flatband voltage by tens to a couple hundred mV without changing the metal. Lanthanum caps are generally used to lower Vt on nFET, aluminium caps to raise it on pFET (general literature; no source retrieved here).
+
+# Why it matters in GAA
+Nanosheet gaps are only a few nm, so there is no room for several thick work-function metals. Dipoles give multi-Vt flavors (ultra-low, low, standard, high Vt) with almost no added thickness. Multiple foundries present this at IEDM/VLSI; exact recipes are proprietary and unverified here.
+
+# Failure modes
+Dipole diffusion into the channel, EOT growth from the cap, mobility loss and reliability (BTI) hits; variation between sheets in a stack.
+
+# Companies
+Foundries TSM, INTC, Samsung define flavors; ASM (ASM.AS), AMAT and LRCX supply ALD and anneal tools; SNPS and CDNS carry Vt flavors in cell libraries.
+
+# Sources
+https://www.investegate.co.uk/announcement/gnw/asm-international-nv--0nx3/asm-reports-q4-and-full-year-2025-results/9456685
+(general literature, textbook; search for "La2O3 dipole nanosheet threshold voltage" on IEEE Xplore)
+
+== WORK-FUNCTION
+# What it is
+The work-function metal (WFM) sets the gate's Fermi level and therefore the threshold voltage. Intel's 45 nm HKMG used dual band-edge metals: TiN for PMOS and TiAlN for NMOS with an HfO2 dielectric of about 1.0 nm EOT (EDN). Modern flows use ALD TiAlC(N), TaAlC(N) for NMOS and TiN or TaN for PMOS; a patent notes that TiN is deposited right on HfO2 for P-channel and adding aluminium (TiAl) tunes N-channel.
+
+# Why ALD
+TiAlC(N) is made by ALD from a titanium halide or TDMAT, a trialkylaluminium and NH3 or N2 (patent). ALD gives atomic-level thickness control, which maps to Vt control: a fraction of a nm of metal moves Vt by tens of mV. Conformality is needed to wrap fins and nanosheets.
+
+# Failure modes
+Aluminium diffusion into HfO2, thickness non-uniformity, layers merging in tight gaps (no room for NMOS and PMOS stacks), and metal grain texture variation.
+
+# Companies
+ASM International (ASM.AS), Applied Materials (AMAT) Endura, Lam (LRCX) ALD metals, Tokyo Electron (8035.T, textbook).
+
+# Sources
+https://www.edn.com/?p=4005680
+https://patents.google.com/patent/US8659077B1/en
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11508826
+
+== METAL FILL
+# What it is
+After the WFM layers, a TiN glue layer and a low-resistance fill metal, usually tungsten and sometimes cobalt, fill the rest of the trench. CMP then planarises down to the ILD so each gate is an isolated metal line (patents on metal fill in replacement gates).
+
+# Why it matters
+Gate resistance Rg scales as the gate gets narrower; voids in the fill raise Rg and hurt RF and speed. As gate lengths shrink the WFM stack leaves less room, so fill must be nearly void-free. Lam's ALD tungsten has been the predominant metallization technique for contacts and lines for over two decades; Lam launched ALTUS Halo in 2025 for molybdenum ALD, with advanced GAA logic among targets.
+
+# Failure modes
+Seams and voids in narrow trenches, fluorine attack on TiN (tungsten fluorine chemistry, textbook), WFM stack thickness crowding out fill.
+
+# Companies
+Lam Research (LRCX): FY2025 revenue $18.44B; Applied Materials (AMAT); Tokyo Electron (8035.T, textbook).
+
+# Sources
+https://siliconsemiconductor.net/article/121172/Lam_Research_ushers_in_new_era_of_semiconductor_metallisation_
+https://patents.google.com/patent/US8629007
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+
+== DUMMY POLY
+# What it is
+In a gate-last flow the real gate is not built first. A placeholder gate of polysilicon over a thin oxide is patterned with the usual litho and etch, so the transistor can be built around it with normal, proven poly-gate steps (textbook).
+
+# Why do this
+Poly tolerates the roughly 1000 C source/drain anneals (typical, textbook) that high-k and metal would not. Gate-last does all the high-temperature source/drain engineering before the high-k is deposited, and the dummy keeps the gate self-aligned to the junctions.
+
+# Failure modes
+Dummy height variation changes the later trench aspect ratio; poly pattern collapse in dense cells; line-edge roughness carries into the final gate length.
+
+# Companies
+Litho and etch: ASML (ASML), Lam (LRCX), Tokyo Electron (8035.T); the gate-last decision was made by Intel (INTC) at 45 nm and TSMC (TSM) at 28 nm.
+
+# Sources
+https://sst.semiconductor-digest.com/issue/?id=16720
+https://bit-tech.net/reviews/tech/global-foundries-gtc-2010/3/
+
+== SPACER + S/D
+# What it is
+Silicon nitride or low-k spacers are built on the dummy gate sidewalls, then source/drain implants or epitaxial SiGe (PMOS) and Si:P (NMOS) regions are formed and annealed. These are the highest temperature steps of the front end (about 1000 C class, textbook).
+
+# Why order matters
+Because the dummy gate stands in, the high-k and metals stay out of this thermal budget. In gate-first the stack sees the same anneals and Vt shifts. The spacer also fixes the final trench width the RMG stack must fill.
+
+# Failure modes
+Spacer erosion during poly pull; epi merging or facet issues; implant straggle shifting effective channel length.
+
+# Companies
+Epitaxy and implant: Applied Materials (AMAT), ASM (ASM.AS) epitaxy, Axcelis (ACLS, textbook).
+
+# Sources
+https://www.realworldtech.com/iedm-2010/5
+https://sst.semiconductor-digest.com/issue/?id=16720
+
+== ILD + CMP
+# What it is
+An interlayer dielectric (ILD0, oxide) is deposited over the dummy gates and polished back by CMP until the top of every poly gate is exposed and flat. The poly is then accessible for removal without a patterning step.
+
+# Why it matters
+CMP uniformity decides the final gate height: over-polish thins the gate and raises Rg, under-polish leaves poly caps. A second CMP at the end of RMG sets metal gate height to the same plane. Both are why CMP is a core RMG step.
+
+# Failure modes
+Dishing between dense and open areas, erosion of spacers, scratch defects, and gate height variation across the wafer.
+
+# Companies
+Applied Materials (AMAT) is the CMP leader (textbook); materials suppliers Entegris (ENTG) and CMC (now part of Entegris, textbook); ebara.
+
+# Sources
+https://patents.google.com/patent/US8629007
+https://sst.semiconductor-digest.com/issue/?id=16720
+
+== POLY PULL
+# What it is
+The exposed dummy poly and its oxide are etched or wet-stripped out, leaving an empty trench lined by spacers. The actual gate stack goes into the trench; patents call this the replacement gate process.
+
+# Why it matters
+The trench has an aspect ratio set by gate height and length, so every nm of WFM thickness reduces fill room. Selectivity to spacer and ILD is the key etch spec: the trench width is fixed forever by this step.
+
+# Failure modes
+Residual poly, spacer loss that widens the gate, etch damage to the substrate or to a TiN cap, and charge damage.
+
+# Companies
+Lam Research (LRCX), Tokyo Electron (8035.T) and Applied Materials (AMAT) dominate etch. Lam FY2025 revenue $18.44B, China 34% of revenue.
+
+# Sources
+https://patents.google.com/patent/US6033963A/en
+https://www.sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+
+== RMG STACK
+# What it is
+RMG STACK is the replacement-gate deposition sequence: IL growth, HfO2 ALD, TiN cap, dipole and anneal, ALD work-function metals (n and p variants), glue and metal fill, then CMP. Intel put this into production with the 45 nm process on Penryn processors, announced January 2007.
+
+# Why it matters
+Intel reported more than 10x lower gate-oxide leakage, about 5x lower source-drain leakage and about 20% more drive current than SiO2/poly in press coverage (reports differ on the 5x; treat as approximate). TSMC also settled on gate-last for 28 nm, announced February 2010.
+
+# Failure modes
+Multi-Vt patterning (selectively etching WFM on one polarity) hits stack-height and mask-count limits as gaps close; this is one reason dipoles are now used.
+
+# Companies
+INTC (45 nm 2007), TSM (28 nm), AMAT (Endura, Centura), ASM (ASM.AS) and LRCX (ALD).
+
+# Sources
+https://www.newelectronics.co.uk/content/news/intel-uses-high-k-and-metal-gates-in-45nm-process
+https://www.edn.com/?p=4005680
+https://www.eetasia.com/?p=45710
+
+== GATE-FIRST
+# What it is
+Gate-first deposits the high-k and metal, adds a poly cap, patterns it, and then runs the source/drain anneals through the finished stack. IBM's Common Platform alliance used gate-first at 32 nm (single metal for the gate electrodes) and its 28 nm low-power node derived from it; GlobalFoundries and Samsung followed that route in 2010 (reports).
+
+# Trade-offs
+One 2010 review says gate-first is more compatible with existing design rules and has higher density, but yields were claimed substantially lower than gate-last. The thermal budget exposes high-k to about 1000 C, which shifts Vt and needs cap layers to tune (textbook).
+
+# Outcome
+Foundries moved to gate-last by 28 nm / 20 nm for planar and by default for FinFET. Samsung and GlobalFoundries later adopted gate-last (textbook; not sourced here).
+
+# Companies
+IBM (IBM), GlobalFoundries (GFS), Samsung (005930.KS); equipment AMAT, LRCX, ASM (ASM.AS).
+
+# Sources
+https://bit-tech.net/reviews/tech/global-foundries-gtc-2010/3/
+https://www.realworldtech.com/iedm-2010/5
+https://www.design-reuse.com/news/24513/ibm-common-platform-high-k-problem.html
+
+== GATE-LAST
+# What it is
+Gate-last (replacement metal gate) builds a dummy poly gate, does all source/drain work, then removes the poly and fills the trench with the final HfO2 and metals. Intel introduced HKMG at 45 nm with this gate-last approach (EDN calls it high-k first, metal gate last); TSMC ran gate-first and gate-last projects for 28 nm and settled on gate-last in February 2010.
+
+# Trade-offs
+Pro: stack never sees ~1000 C; better Vt control and PMOS strain preserved. Con: extra process steps (CMP, poly pull, multi-layer ALD), restricted gate layouts, and fill challenges in narrow trenches.
+
+# Where it went
+It became the standard for FinFET and nanosheet logic, where the gate must wrap 3D channels, and replacement gates are used in all of TSM, INTC and Samsung leading-edge nodes (textbook; not individually sourced here).
+
+# Companies
+INTC, TSM; tools from AMAT, LRCX, ASM (ASM.AS), 8035.T.
+
+# Sources
+https://www.edn.com/?p=4005680
+https://www.eetasia.com/?p=45710
+https://bit-tech.net/reviews/tech/global-foundries-gtc-2010/3/
+
+== W FILL (low resistance)
+# What it is
+This is the bulk metal that fills the gate trench after the thin work-function layers, usually tungsten (cobalt in some flows, per patents). It carries current along the gate and connects to the contact via on top.
+
+# Why it matters
+Rg depends on the cross-section left after the WFM and glue layers. Lam describes tungsten ALD as the predominant metallisation technique for over two decades and says the industry is transitioning from tungsten toward molybdenum (a solid precursor, harder delivery). ALTUS Halo (Mo ALD) was in qualification and ramping at all leading chipmakers in early 2025.
+
+# Failure modes
+Voids and seams, resistivity rise in narrow lines, adhesion and fluorine attack on the TiN underneath.
+
+# Companies
+Lam (LRCX, FY2025 revenue $18.44B), Applied Materials (AMAT), ASM (ASM.AS); metal precursors from Entegris (ENTG, textbook).
+
+# Sources
+https://siliconsemiconductor.net/article/121172/Lam_Research_ushers_in_new_era_of_semiconductor_metallisation_
+https://www.storagenewsletter.com/2025/02/26/lam-research-altus-halo-for-molybdenum-atomic-layer-deposition-for-semiconductor-metallization/
+
+== NMOS WFM TiAlC(N)
+# What it is
+The n-type work-function metal: aluminium-rich TiAlC(N) or TaAlC(N), ALD deposited. Aluminium in the film shifts the effective work function toward the silicon conduction band, giving a low NMOS Vt. Intel's 45 nm used TiAlN for NMOS; patents describe TiAlC(N) made by ALD from a titanium halide or TDMAT, an alkyl aluminium and NH3 or N2.
+
+# Why it matters
+Vt is set mostly by the thickness and Al content; sub-nm thickness steps move Vt by tens of mV (general physics). In GAA the n and p metal stacks must both fit between the sheets.
+
+# Failure modes
+Al diffusion into the high-k raises EOT and shifts Vt; wet etches that selectively strip NWFM on the PMOS side attack the cap; wafer-level thickness variation maps directly to Vt spread.
+
+# Companies
+ASM (ASM.AS), Applied Materials (AMAT), Lam (LRCX); foundry users TSM, INTC, Samsung.
+
+# Sources
+https://www.edn.com/?p=4005680
+https://patents.google.com/patent/US8659077B1/en
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11508826
+
+== PMOS WFM TiN
+# What it is
+The p-type work-function metal is TiN deposited immediately on the HfO2 (patent), with a work function near the silicon valence band. Intel's 45 nm used TiN for PMOS. Thickness and nitrogen content move the work function a few hundred mV across the useful range.
+
+# Why it matters
+PMOS Vt and its strain engineering (embedded SiGe) interact with the gate; gate-last keeps the strain benefits that a hot gate-first anneal could relax (textbook). In nanosheet flows PMOS TiN thickness is traded against sheet gap.
+
+# Failure modes
+Oxygen or nitrogen drift altering work function, fluorine diffusion from the W fill, and non-uniform thickness in the gap between sheets.
+
+# Companies
+ASM (ASM.AS), Applied Materials (AMAT) Endura iLB PVD/ALD TiN, Lam (LRCX); users TSM, INTC.
+
+# Sources
+https://www.edn.com/?p=4005680
+https://www.appliedmaterials.com/us/en/product-library/endura-ilb-pvd-ald.html
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10312345

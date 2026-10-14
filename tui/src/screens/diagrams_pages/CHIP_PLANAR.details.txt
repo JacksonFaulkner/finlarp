@@ -1,0 +1,214 @@
+== DENNARD SCALING
+# The rule
+Dennard's 1974 recipe: shrink dimensions and voltage by 1/k together and per-gate power falls 1/k^2 while gate count per area rises k^2, so power density stays flat and clocks rise about k (textbook). It made every node a free speed and cost win for roughly three decades.
+
+# How it ended
+Dennard's model ignored leakage. Lower voltage needs lower Vt and thinner gate oxide, which raise subthreshold and tunnelling current. Sources date the breakdown to about 2005 (Vt flattening, power density rising) or the early 2000s (IEDM 2005 reports). Vdd stalled near 1 V and clocks plateaued around 3-5 GHz (textbook).
+
+# Consequences
+Multicore, dark silicon, power gating, DVFS, and the push to new device structures: strain, high-k metal gate, FinFET (Intel 22nm, 2011), GAA. Public names: INTC, TSM, AMD, ARM, NVDA all design around the power wall; SNPS and CDNS sell power-analysis tools.
+
+# Sources
+https://semiengineering.com/dennards-law-and-the-finfet
+https://www.allaboutcircuits.com/industry-articles/nanoscale-sce-electrostatic-challenges-and-finfet-gaa-mitigation-solutions/
+textbook
+
+== LEAKAGE WALL
+# Four paths
+Subthreshold current (drain to source below Vt), gate tunnelling through thin oxide, junction/GIDL, and punch-through deep in the body (textbook). By the 90-65nm nodes SiON gate oxide was only a few atomic layers thick, so tunnelling leakage rose steeply with each shrink.
+
+# The numbers rule
+At the ~60 mV/decade subthreshold floor at 300 K (textbook), every 60 mV of Vt you give up multiplies off-state current by 10. Chasing speed by lowering Vt therefore costs standby power exponentially; mobile chips split into high-Vt, standard-Vt and low-Vt libraries to manage it.
+
+# Failure modes and winners
+Chips that idle hot, battery drain in phones, and thermal throttling. The fixes (high-k, FinFET, FD-SOI) are why TSM and INTC process leads matter; ARM-based mobile designs live or die by leakage per core.
+
+# Sources
+https://semiengineering.com/dennards-law-and-the-finfet
+textbook (SS = 2.3 kT/q limit)
+
+== STRAINED SI
+# What it is
+Deliberately stretching or compressing the silicon lattice in the channel to raise carrier mobility. Intel's 90nm node grew SiGe selectively in the PMOS source/drain to compress the channel, with one extra mask. Reported: about 25% PMOS and 10% NMOS drive-current gain for roughly 2% added cost (secondary summary of Intel disclosure).
+
+# NMOS side
+A tensile silicon-nitride cap film stretches the NMOS channel; reported electron mobility gain about 20% (secondary). At 45nm Intel combined stress with high-k metal gate; a slide deck says replacement gate raised SiGe stress about 1.5x (single source, unverified).
+
+# Why it still matters
+Embedded SiGe S/D survives in FinFET and GAA PMOS; SiC or Si:P is used for NMOS (textbook). Epitaxy tools (AMAT, ASM) and process leaders TSM, INTC, Samsung depend on it. Failure modes: strain relaxation at small pitch, defects, and layout-dependent variability.
+
+# Sources
+https://www.intel.com/pressroom/kits/advancedtech/doodle/ref_strain/strain.htm
+https://www.edn.com/?p=4046419
+https://nccavs-usergroups.avs.org/wp-content/uploads/TFUG2008/2008_8moroz.pdf
+
+== HIGH-K METAL GATE
+# Problem solved
+SiON gate oxide below ~1.2 nm leaks too much (textbook). Hafnium-based high-k (HfO2) has a higher dielectric constant, so a physically thicker film gives the same gate capacitance with far less tunnelling. Poly-Si gates then clash with high-k (Fermi-level pinning), so metal gates replace them.
+
+# Gate-first vs gate-last
+Intel introduced HKMG with replacement (gate-last) at 45nm in 2007 (textbook). At 28nm the foundries split: TSMC used gate-last for HPM/HPC; some others (Samsung/GlobalFoundries/UMC variants) started gate-first (textbook; verify per foundry). Gate-last lets work-function metals be tuned separately for N and P.
+
+# Why it matters now
+This stack is the direct ancestor of FinFET and GAA gate stacks. Deposition suppliers AMAT and Lam (ALD) and the foundries TSM, INTC, GFS, UMC all ship it; 28nm HKMG remains a large revenue pool at UMC (22/28nm = 36% of Q4-2025 revenue).
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/1033767/000119312526025557/umc-ex99_1.htm
+textbook
+
+== FD-SOI
+# Mechanism
+Fully depleted SOI puts an ultra-thin undoped silicon film on a buried oxide (BOX). With no body doping and a film too thin to hold depletion charge, the gate keeps electrostatic control, short-channel effects drop, and random-dopant variation disappears (textbook). Substrates come from Soitec's Smart Cut process, with Shin-Etsu Handotai as a licensed second source.
+
+# Products
+GlobalFoundries 22FDX (announced 2015, after the Soitec supply agreement) and Samsung 28FDS target IoT, RF, automotive and low-power SoCs. Reported film and BOX values vary: research papers show 4 nm SOI / 15 nm BOX; no production 22FDX figure was verified here.
+
+# Trade-offs
+Wafers cost more than bulk; ecosystem and EDA IP are smaller; no path to leading-edge density, so it competes against 28nm bulk and 16/12nm FinFET on power and RF. Public: GFS, Soitec (SOI.PA), Samsung; SNPS and CDNS support the PDKs.
+
+# Sources
+https://soitec.com/home/group/newsroom/press-releases/2015/07/14/leading-semiconductor-foundry-boosts-fd-soi-ecosystem
+https://compoundsemiconductor.net/article/97528/First_fully_depleted_22nm_SOI_wafers_come_to_market
+https://doaj.org/article/edbba5752ee645b7974f97152c8b83f8
+
+== SOITEC
+# Smart Cut
+Soitec (Euronext: SOI) makes engineered substrates with Smart Cut: hydrogen implanted into a donor wafer, bonded to a handle wafer with oxide, then split at the implant depth to leave a thin crystal layer on insulator (textbook). It is the dominant SOI wafer source for FD-SOI and RF-SOI.
+
+# Customers and licensing
+GlobalFoundries 22FDX wafers come from Soitec, with Shin-Etsu Handotai (4063.T) as an additional licensed Smart Cut source. Soitec also supplies RF-SOI used in phone front-end switches (textbook).
+
+# Risks
+Revenue is concentrated in smartphone RF-SOI and cyclical; FD-SOI volume depends on a few foundry programs. Check Soitec's annual report for current sales; no figure was verified here.
+
+# Sources
+https://soitec.com/home/group/newsroom/press-releases/2015/07/14/leading-semiconductor-foundry-boosts-fd-soi-ecosystem
+https://www.soitec.com/media/pressreleasedocuments/46/file/follow_up_gf_announcement_press_release_june_2015_final6.pdf
+
+== BODY BIAS
+# Mechanism
+In FD-SOI the BOX acts as a back-gate dielectric, so a voltage applied to the substrate under it shifts Vt. Forward body bias lowers Vt for speed; reverse bias raises Vt to cut leakage in standby (textbook).
+
+# Use
+Adaptive body bias compensates process, voltage and temperature drift after fab and enables ultra-low-voltage operation, a selling point of 22FDX for IoT and automotive. Bulk silicon has a body bias too, but junction leakage and wells limit the range (textbook).
+
+# Cost
+Needs bias generators, extra routing and test of the bias loop. Relevant to GFS and Samsung FDSOI customers; EDA support from SNPS and CDNS.
+
+# Sources
+https://www.soitec.com/media/pressreleasedocuments/46/file/follow_up_gf_announcement_press_release_june_2015_final6.pdf
+textbook
+
+== SHORT CHANNEL
+# Definition
+A transistor is short-channel when Lg approaches the depletion widths of its source and drain junctions, so the drain field reaches into the channel and the gate no longer alone sets the barrier (textbook).
+
+# Effects
+Vt roll-off, DIBL, rising subthreshold swing, punch-through, velocity saturation, and hot-carrier damage. Collectively they raise static leakage and variability. The review literature groups these as short-channel effects that FinFET and GAA mitigate by wrapping the gate around the channel.
+
+# Mitigations in the planar era
+Halo and retrograde implants, shallow extensions, thinner oxide, strain, high-k metal gate. Each bought one or two nodes; the structural fix was changing the geometry (fin, nanosheet). Process-control suppliers (KLAC) and TCAD vendors (SNPS) earn on this complexity.
+
+# Sources
+https://www.allaboutcircuits.com/industry-articles/nanoscale-sce-electrostatic-challenges-and-finfet-gaa-mitigation-solutions/
+textbook
+
+== DIBL
+# What it is
+Drain-induced barrier lowering: a higher drain voltage lowers the source-side energy barrier, so Vt falls as Vd rises. It is quoted in mV/V and is a standard electrostatic figure of merit for a node (textbook).
+
+# Why it hurts
+Off-current becomes drain-voltage dependent and higher at operating Vdd, and a long-channel assumption in circuit design breaks. In an inverter the leaking device is in the subthreshold regime at full Vdd, so DIBL directly multiplies standby power.
+
+# How designs respond
+Better electrostatics (thin body, wrap-around gate), lower-Vdd operation, and longer-than-minimum channels in analog or SRAM cells. SRAM Vmin worsens with DIBL, one reason SRAM shrank slowly; relevant to TSM and INTC SRAM-area claims.
+
+# Sources
+https://www.allaboutcircuits.com/industry-articles/nanoscale-sce-electrostatic-challenges-and-finfet-gaa-mitigation-solutions/
+https://journal.iisc.ac.in/index.php/iisc/article/download/178/176
+
+== WHY PLANAR ENDED
+# Electrostatics
+In planar bulk the gate controls only the top surface; the drain field can still reach the source through the body below. By about 20-22nm, doping the body to fight this causes variation and mobility loss (textbook). Intel's 22nm Tri-Gate FinFET, in production late 2011, gave lower leakage and better low-voltage performance.
+
+# Alternatives tried
+FD-SOI kept planar by removing the body; it works at 28 to 22nm and further but not at leading-edge density. TSMC kept planar to 28nm and moved to 16nm FinFET (textbook). Even FinFET weakened at short gate length, driving GAA nanosheets.
+
+# Takeaway
+Planar did not die by cost: it died by electrostatics. It survives where dense logic is not needed, which is the mature-node business of UMC, GFS and SMIC.
+
+# Sources
+https://semiengineering.com/dennards-law-and-the-finfet
+https://www.allaboutcircuits.com/industry-articles/nanoscale-sce-electrostatic-challenges-and-finfet-gaa-mitigation-solutions/
+
+== NODE NAME
+# History
+Until the 1990s the node name tracked a real dimension (gate length or half-pitch). Intel's gate length matched its node name until about 1997, then drifted (secondary analysis).
+
+# Now
+A 2020 paper with MIT, Berkeley, Stanford and TSMC authors says the label has decoupled from, and can be several times smaller than, the real minimum gate length, and proposes transistor density as the metric. One analysis puts Intel 10nm at Lg about 18 nm (secondary). A forum comparison puts TSMC 7nm near 90 MT/mm2 versus Intel 10nm; treat as unverified.
+
+# Implication
+Compare nodes by density, pitches (gate, metal), performance per watt and SRAM cell size, not the name. Intel renamed its nodes (Intel 7, 4, 3, 18A) partly for this reason. Cross-foundry claims by TSM, INTC and Samsung need disclosed pitches.
+
+# Sources
+https://www.pcgamer.com/chipmaking-process-node-naming-lmc-paper
+https://eejournal.com/article/no-more-nanometers
+https://techovedas.com/what-does-7nm-even-mean-anymore-the-curious-case-of-nodes-naming-in-semiconductor/
+
+== MATURE NODES
+# Share
+Counterpoint projected mature nodes (28nm and above) falling to 36% of pure-play foundry revenue in 2025 from 54% in 2021, with 28nm the one bright spot at about 5% CAGR. Wafer-start share is higher than revenue share because mature wafers sell for less (textbook).
+
+# What runs here
+Power management ICs, display drivers, MCUs, automotive, RF, image sensor logic, and analog. Many need no density, only cost, voltage tolerance or reliability. Lithography is DUV; capex per wafer is far lower than leading edge.
+
+# Risks
+Chinese capacity additions compress pricing; geopolitics (export controls, localisation) shifts demand toward SMIC. Public: UMC, GFS, SMIC, TSM (28nm and 40nm lines), Tower. Report 2025 totals: UMC NT$237.5B, GFS about $6.79B.
+
+# Sources
+https://tomshardware.com/tech-industry/semiconductors/the-trailing-edge-foundry-roadmap-examined
+https://www.counterpointresearch.com/insights/post-insight-research-briefs-blogs-global-pureplay-semiconductor-foundry-revenues-to-grow-17-yoy-in-2025-driven-by-ai-highperformance-computing-chips
+
+== UMC
+# 2025 results
+UMC 2025 revenue NT$237.5B, +2.3% from NT$232.3B in 2024; net income NT$41.7B, EPS NT$3.34; wafer shipments +12.3%, USD revenue +5.3%. 40nm and below were 53% of Q4 wafer revenue.
+
+# 22/28nm
+22/28nm was 40% of Q2 2025 revenue, 35% in Q3 and 36% in Q4, with 22nm above 13% of Q4. UMC says full-year 22nm revenue rose 93% y/y to a record in Q4 2025.
+
+# Risks
+Price pressure from Chinese capacity, no leading-edge path, dependence on 28nm demand. Ticker UMC (NYSE ADR), 2303.TW.
+
+# Sources
+https://www.sec.gov/Archives/edgar/data/1033767/000119312526025557/umc-ex99_1.htm
+https://www.businesswire.com/news/home/20260128921163/en/umc-reports-fourth-quarter-2025-results/
+https://semiwiki.com/forum/threads/umc-reports-fourth-quarter-2025-results.24429/latest
+
+== GLOBALFOUNDRIES
+# Position
+GlobalFoundries (GFS) stopped at 14nm FinFET (textbook) and focuses on differentiated mature nodes: FDX (22FDX), RF-SOI, SiGe, auto and power. FY2025 revenue was about $6.79B, up 1% (secondary report, check the 10-K/20-F).
+
+# FD-SOI
+22FDX uses Soitec Smart Cut wafers with Shin-Etsu as a second source (2015 announcement). Main use cases: IoT, RF, automotive, low-power SoC.
+
+# Risks
+Smartphone and auto cycles; competition from UMC and Chinese foundries; capex needs funded by customers and government programs. GFS with Soitec (SOI.PA).
+
+# Sources
+https://www.soitec.com/media/pressreleasedocuments/46/file/follow_up_gf_announcement_press_release_june_2015_final6.pdf
+https://tomshardware.com/tech-industry/semiconductors/the-trailing-edge-foundry-roadmap-examined
+
+== SMIC
+# Position
+SMIC (0981.HK, 688981.SS) is China's largest foundry. A report estimates Mainland China foundry revenue is about 90% mature nodes (28nm and above) and puts SMIC 2025 capex over USD 7 billion (unverified methodology).
+
+# Combined view
+One analysis puts GlobalFoundries, UMC and SMIC at roughly $24B combined 2025 revenue and about 13.5% of global foundry revenue (secondary).
+
+# Risks
+US export controls limit EUV and advanced tools; SMIC's adding mature capacity pressures UMC, GFS and others. SMIC reports in China/HK filings, not SEC; check them for current figures.
+
+# Sources
+https://faxiangongchang.com/en/reports/china-wafer-foundry-2026
+https://tomshardware.com/tech-industry/semiconductors/the-trailing-edge-foundry-roadmap-examined

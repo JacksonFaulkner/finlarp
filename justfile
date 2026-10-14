@@ -40,3 +40,14 @@ check: lint test
 # git hooks from .pre-commit-config.yaml (prek is a fast pre-commit drop-in)
 hooks:
     uvx prek install
+
+# data refresh (py/jobs/refresh.py); add --dry-run to see the plan
+refresh mode="daily" *args="":
+    uv run --env-file .env python -m jobs.refresh {{mode}} {{args}}
+
+# launchd agents: daily 18:30 weekdays + intraday every 30 min in market hours
+schedule:
+    sh py/jobs/launchd/install.sh
+
+unschedule:
+    sh py/jobs/launchd/install.sh uninstall

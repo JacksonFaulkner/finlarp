@@ -1,0 +1,106 @@
+# 1. What happens: wire the transistor up to the first metal
+
+ ┌─────────────┐  ┌────────────────┐  ┌───────────────┐  ┌───────────┐  ┌─────────────┐  ┌───────────────┐
+ │ PRE-CLEAN   │  │ SILICIDE       │  │ LINER/BARRIER │  │ W FILL    │  │ CMP         │  │ VIA0 / M1     │
+ │ etch native │─▶│ Ni/Ti on S/D   │─▶│ Ti/TiN few nm │─▶│ WF6 + H2  │─▶│ polish flat │─▶│ first metal   │
+ │ oxide off   │  │ anneal to NiSi │  │ ALD / CVD     │  │ CVD / ALD │  │ stop on ILD │  │ lands on plug │
+ └─────────────┘  └────────────────┘  └───────────────┘  └───────────┘  └─────────────┘  └───────────────┘
+
+  (contacts: vertical plugs from silicon up to M1; "middle of line" = after the transistor, before the wiring)
+
+# 2. Cross-section: from M1 down to silicon (one NMOS, FinFET-style, not to scale)
+
+ ┌───────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │    ════════════════    ══════════════════    ════════════════      M1 wires, 30-40 nm pitch           │
+ │           ║                    ║                    ║              via0 lands on a plug               │
+ │           ║                    ║                    ║                                                 │
+ │ ░░░░░┌──────────┐░░░░░┌─────────────────┐░░░░░░┌──────────┐░░░░░                                      │
+ │ ░░░░░│ S/D CONT │░░░░░│ GATE CONTACT    │░░░░░░│ S/D CONT │░░░░░   ░ ILD: SiO2 / low-k                │
+ │ ░░░░░│ W plug   │░░░░░│ W plug          │░░░░░░│ W plug   │░░░░░                                      │
+ │ ░░░░░│ + liner  │░░░░░└─────────────────┘░░░░░░│ + liner  │░░░░░   gate contact on active gate = COAG │
+ │ ░░░░░│          │░░░░░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░░░░░│          │░░░░░   ▒ SiN gate cap (self-aligned)      │
+ │ ░░░░░│          │░░░░░┌─────────────────┐░░░░░░│          │░░░░░                                      │
+ │ ░░░░░│          │░░░░░│ metal gate      │░░░░░░│          │░░░░░                                      │
+ │ ░░░░░└──────────┘░░░░░└─────────────────┘░░░░░░└──────────┘░░░░░                                      │
+ │ ░░░▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░────high-k + IL────░░░░▓▓▓▓▓▓▓▓▓▓▓▓▓░░░░░░   ▓ silicide NiSi/TiSi, few nm       │
+ │   ┌─────────────────┐                    ┌─────────────────┐                                          │
+ │   │ n+ SOURCE epi   │   channel (fin)    │ n+ DRAIN epi    │       epi >1e20 /cm3 (textbook)          │
+ │   └─────────────────┘                    └─────────────────┘                                          │
+ │ ────────────────────────────────────────────────────────────────                                      │
+ │                 p-type fin / substrate                                                                │
+ └───────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (silicide sits between plug and doped epi; its barrier height to Si sets contact resistance)
+
+# 3. Contact types, and the tricks that let them shrink
+
+ ┌─────────────────────┐  ┌────────────────────────┐  ┌──────────────┐
+ │ TRENCH CONTACT (TS) │  │ GATE CONTACT           │  │ COAG         │
+ │ long bar over S/D   │─▶│ plug on gate metal     │─▶│ contact over │
+ │ strap on the epi    │  │ used to sit off-active │  │ active gate  │
+ └─────────────────────┘  └────────────────────────┘  └──────────────┘
+
+ ┌────────────────────┐  ┌───────────────────────┐  ┌───────────────────────┐
+ │ SAC CAP            │  │ SELECTIVE W           │  │ Co / Ru / Mo          │
+ │ SiN cap on gate    │─▶│ grows bottom-up       │─▶│ W alternatives        │
+ │ tolerates misalign │  │ no seam, less barrier │  │ thin-film resistivity │
+ └────────────────────┘  └───────────────────────┘  └───────────────────────┘
+
+  (older nodes: one etched hole per plug; now trench contacts with self-aligned etch stops)
+
+# 4. Why contact resistance became the bottleneck
+
+ ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │ Total R seen by a transistor ~ channel + S/D epi + CONTACT + local wire                         │
+ │ plug width    ~15-20 nm; electron mean free path in W is 19.1 nm [3], so surfaces scatter       │
+ │ liner + TiN   a few nm per side of a ~15 nm hole: much of the width is not conductor (textbook) │
+ │ interface     Schottky barrier to n-Si: NiSi 0.65-0.7 eV, TiSi2 0.58 eV (patents) [4]           │
+ │ area          contact area falls with pitch squared, so rho_c / A climbs fast                   │
+ └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ ┌─────────────────────┐  ┌─────────────────────┐  ┌────────────────────┐
+ │ CONTACT RESISTANCE  │  │ LINER SQUEEZE       │  │ BARRIER TUNING     │
+ │ R = rho_c / A       │─▶│ TiN does not shrink │─▶│ SBH 0.7 -> 0.34 eV │
+ │ + plug body + liner │  │ plug body R up      │  │ dopant segregation │
+ └─────────────────────┘  └─────────────────────┘  └────────────────────┘
+
+# 5. By the numbers
+
+  W mean free path        19.1 nm at 293 K (PRB 2012, DFT) [3]
+  Bulk resistivity        W ~5.6, Co ~6.2, Ru ~7.1, Mo ~5.3 uOhm-cm; Cu ~1.7 (textbook, approximate)
+  Contact rho_c           pFET ~3e-9, nFET ~1e-8 ohm-cm2 (older patent background) [4]
+  Schottky barrier        NiSi 0.65-0.7 eV; TiSi2 0.58 eV; N2+ pre-silicide implant 0.7 -> 0.34 eV [4]
+  Applied Volta W CVD     "up to 90%" lower contact resistance, CD dependent (vendor claim) [5]
+  Applied selective W     >40% contact-resistance drop vs conventional W in early via use (vendor) [8]
+  Intel 10nm (2017)       Co local interconnect: 2x via resistance, 5-10x electromigration [6]
+  Intel 10nm COAG         ~10% standard-cell height reduction (Intel claim, secondary) [7]
+  TSMC N2 (IEDM 2024)     better gate-contact R and up to 20% R+C cut in MoL, as reported [9]
+
+# 6. Applied Materials FY2025 revenue, $28.37B (contact metals are an AMAT specialty)
+
+  Semi Systems     ██████████████████████████████████████████████████ 73%
+  Global Services  ████████████████ 23%
+  Corp/other       ███ 4%
+  (Semi Systems $20.80B = 67% foundry/logic/other, 26% DRAM, 7% NAND) [1]
+
+# 7. Who makes it, structure, risks
+
+  Applied Materials (AMAT)  Endura PVD/CVD/ALD, Co and selective W; FY2025 $28.37B [1]
+  Lam Research (LRCX)       ALTUS CVD+ALD W and Mo for contacts, vias, wordlines; FY2025 $18.44B [2]
+  TSMC (TSM), Intel (INTC)  design the contact scheme; Intel first with Co + COAG on 10nm (2017) [6][7]
+  Samsung, SK hynix, Micron buy the tools; Tokyo Electron (8035.T) sells CVD/ALD (textbook)
+  SNPS, CDNS                extract contact/via RC in EDA; ARM, NVDA, AMD lose frequency to it (textbook)
+  Risks: new metals (Mo/Ru) need new tools and qualification; barrierless fill raises adhesion and
+  diffusion risk; contact RC erodes node-to-node gains (textbook).
+
+# Sources
+
+  [1] AMAT FY2025 10-K: sec.gov/Archives/edgar/data/6951/000162828025056742/amat-20251026.htm
+  [2] Lam FY2025 10-K: sec.gov/Archives/edgar/data/707549/000070754925000075/lrcx-20250629.htm
+  [3] W mean free path: doi.org/10.1103/PHYSREVB.86.045432
+  [4] Silicide/SBH patents: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10546856
+  [5] Applied Volta W: appliedmaterials.com/jp/ja/semiconductor/products/processes/cvd/endura-volta-w-cvd.html
+  [6] Intel 10nm Co: fuse.wikichip.org/news/525/iedm-2017-isscc-2018-intels-10nm-switching-to-cobalt-interconnects/
+  [7] COAG: en.wikichip.org/wiki/COAG ; community.cadence.com/cadence_blogs_8/b/breakfast-bytes/posts/intel-10nm
+  [8] Applied blog: appliedmaterials.com/us/en/newsroom/blogs/powering-the-next-era-of-contact-scaling-with-ald-molybdenum.html
+  [9] TSMC N2 IEDM 2024: semiconductor-digest.com/?p=30341

@@ -1,0 +1,289 @@
+ms 450
+== droplet arrives: 25 um molten tin, ~70 m/s, ~50,000 per second
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   (               ●               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  (                                │       │ illum ─╲                        │
+ │   (                               │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [                              ]
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== pre-pulse flattens it: ~30 um drop swells to a >100 um pancake
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   (                               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  ( pre-pulse ══▶◌◌◌◌◌             │       │ illum ─╲                        │
+ │   (                               │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [                              ]
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== CO2 main pulse, 10.6 um, 15-25 ns: ~100 um plasma at 20-50 eV
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   (             ≈ ▓ ≈             │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  ( CO2 ════════▶≈▓█▓≈             │       │ illum ─╲                        │
+ │   (             ≈ ▓ ≈             │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [                              ]
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== 13.5 nm (92 eV) out, but only ~5-6% of laser energy becomes EUV
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   (   ≈≈≈         ●               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │       │ illum ─╲                        │
+ │   (   ≈≈≈                         │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [                              ]
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== tin debris: collector loses 0.1-0.3% per billion pulses, swapped ~yearly
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   ▒ ▒  · ·  ·     ●               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ─╲                        │
+ │   ▒ ▒  ·  · ·    · · ·            │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si H2 sweeps ⇢ │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [                              ]
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== intermediate focus pinhole: ~250 W passes, tin and CO2 light blocked
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   (               ●               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ─╲                        │
+ │   (                               │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [██████████████████████████████] ~250 W at IF
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== illuminator + pellicle: each Mo/Si mirror reflects only ~67-70%
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲                        │
+ │   (                               │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [██████████████                ] pellicle 85-90%
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== reflective reticle: Ta absorber draws the pattern, light comes in off-axis
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█       │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█████████                     ] reticle
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== 6 projection mirrors, 4x shrink: ~10 mirrors at 0.67-0.70 leave ~2-3%
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█       │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] 0.67^10-0.7^10: 1.8-2.8%
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+
+== resist: a 20 nm film absorbs only ~10% of the EUV that reaches it
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ◀═   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ═▶   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ██ ░░ ░░ ░░                          photons ▼ into the spaces
+    ░░ ░░ ░░ ░░ ░░ ░░                         ▼ ▼  ▼   ▼   ▼▼   ▼  ▼
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░░░░░░░░░░░░░░░░░░░░░░░░░░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 0/20 done
+== shot noise: few photons, so a space can miss its dose (× = stochastic defect)
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ═▶   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ◀═   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ██ ░░ ░░ ░░                          30 mJ/cm2 = ~20 photons/nm2
+    ░░ ░░ ░░ ░░ ░░ ░░                         • •    •  •     ••    •
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░▒▒▒░░░▒×▒░░░░░░░░▒▒▒░░░▒░░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 0/20 done
+== scan field 2: reticle moves 4x faster than wafer, opposite way
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ◀═   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ═▶   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ██ ░░ ░░                          latent image: acid in ▒ only
+    ░░ ░░ ░░ ░░ ░░ ░░
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 1/20 done
+== step + scan, direction flips every field to save time
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (                               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ═▶   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ◀═   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ▓▓ ▓▓ ▓▓                          latent image: acid in ▒ only
+    ░░ ░░ ░░ ░░ ░░ ██
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 4/20 done
+== overlay: each field must land on the layer below (3800E: 13% better)
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ◀═   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ═▶   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ▓▓ ▓▓ ▓▓                          latent image: acid in ▒ only
+    ░░ ░░ ██ ▓▓ ▓▓ ▓▓
+    ░░ ░░ ░░ ░░ ░░ ░░                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 7/20 done
+== 220 wafers/h on NXE:3800E = ~16 s per wafer, 500 W source
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (                               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ═▶   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ◀═   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ▓▓ ▓▓ ▓▓                          latent image: acid in ▒ only
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓
+    ▓▓ ██ ░░ ░░ ░░ ░░                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 11/20 done
+== dose tradeoff: 20 mJ/cm2 gives 180 w/h, 30 mJ/cm2 gives 160 (3600D)
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (               ●               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ◀═   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ═▶   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ▓▓ ▓▓ ▓▓                          latent image: acid in ▒ only
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ██                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ░░ ░░ ░░ ░░                          ════════════════════════════ wafer
+    fields 15/20 done
+== High-NA halves the field (26x16.5 mm): 2x the shots per wafer
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ≈ ≈ ≈ ≈ ≈ ≈ ≈ ≈       │
+ │   (                               │       │ RETICLE   ▓▓██▓▓██▓▓██▓▓█  ═▶   │
+ │  ( CO2 ════════▶≈▓█▓≈  ≈≈≈≈≈▶ IF  │══════▶│ illum ═╲  ╲ ╱ pattern           │
+ │   (                               │       │ █1 █2 █3 █4 █5 █6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░▒▒░░▒▒░░▒▒░░▒  ◀═   │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [█                             ] ~1 W of 100 W
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ▓▓ ▓▓ ▓▓                          latent image: acid in ▒ only
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ██ ▓▓ ▓▓ ▓▓                          ════════════════════════════ wafer
+    fields 19/20 done
+== wafer done: 20/20 fields, off to PEB + DEVELOP; next wafer loads
+ ┌─ SOURCE: vacuum, H2 1-10 Pa ──────┐       ┌─ SCANNER: mirrors only ─────────┐
+ │     (            ▼ Sn  25 um      │       │ PELLICLE  ─ ─ ─ ─ ─ ─ ─ ─       │
+ │   (                               │       │ RETICLE   ▓▓░░▓▓░░▓▓░░▓▓░       │
+ │  (                                │       │ illum ─╲                        │
+ │   (                               │       │ M1 M2 M3 M4 M5 M6  4x shrink    │
+ │     ( collector Mo/Si             │       │ WAFER     ░░░░░░░░░░░░░░░       │
+ └───────────────────────────────────┘       └─────────────────────────────────┘
+  light  [                              ]
+
+  WAFER MAP (schematic fields)              RESIST ZOOM: 20 nm film
+       ▓▓ ▓▓ ▓▓ ▓▓                          latent image: acid in ▒ only
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓
+    ▓▓ ▓▓ ▓▓ ▓▓ ▓▓ ▓▓                       ░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒▒▒░░░▒░ resist
+       ▓▓ ▓▓ ▓▓ ▓▓                          ════════════════════════════ wafer
+    fields 20/20 done

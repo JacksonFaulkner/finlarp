@@ -1,0 +1,128 @@
+# 1. What happens: print and fill one thin local wiring level (M1-M4)
+
+ ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+ │ LITHO PITCH   │  │ TRENCH ETCH   │  │ BARRIER+LINER │  │ FILL METAL    │  │ CMP           │  │ CAP + VIA     │
+ │ EUV 26-30 nm  │─▶│ low-k ILD cut │─▶│ Ta/TaN, Co, Ru│─▶│ Cu plate/reflow│─▶│ polish flat   │─▶│ etch-stop cap │
+ │ or 193i multi │  │ hard-mask     │  │ 1-2 nm        │  │ or Ru, Mo     │  │ stop on ILD   │  │ via to next M │
+ └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘
+
+  (one thin level = this loop; M1-M4 repeat it ~4 times, each level pitched ~20-40 nm, textbook flow;
+  see notes)
+
+# 2. Cross-section of two thin levels (not to scale): where the copper volume goes
+
+ ┌──────────────────────┐   ┌──────────────────────┐   ┌──────────────────────┐
+ │ COPPER LINE          │   │ LOW-K ILD            │   │ BARRIER+LINER        │
+ │ core Cu only         │   │ SiOCH, k ~2.5-3      │   │ not scaling down     │
+ │ width ~12-15 nm      │   │ spacing = pitch/2    │   │ TaN/Ta or Co/Ru      │
+ │ after barrier        │   │ air gaps optional    │   │ fraction of line up  │
+ └──────────────────────┘   └──────────────────────┘   └──────────────────────┘
+
+ ┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+ │    M4  ═══▌Cu▐══════▌Cu▐══════▌Cu▐══════▌Cu▐══════    pitch p = line + space, e.g. 24 nm = 12 + 12     │
+ │           ││ via       │                 │ via                                                         │
+ │    M3  ═══▌Cu▐══════▌Cu▐══════▌Cu▐══════▌Cu▐══════    each ▌ ▐ edge is barrier + liner on 3 sides      │
+ │           ││           ││ via            ││                                                            │
+ │    M2  ═══▌Cu▐══════▌Cu▐══════▌Cu▐══════▌Cu▐══════    alternate levels run perpendicular (textbook)    │
+ │            │ via       │                 │ via                                                         │
+ │    M1  ═══▌Cu▐══════▌Cu▐══════▌Cu▐══════▌Cu▐══════    M1 pitch tied to standard-cell track pitch       │
+ │            ║ W contact (tungsten)   ║ W contact         contacts land on source/drain/gate             │
+ │    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓    transistors (FinFET or GAA) below         │
+ └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (barrier is a fixed ~1-2 nm skin; as width falls it eats a bigger share of the cross-section)
+
+# 3. Damascene versus subtractive patterning
+
+ ┌──────────────────────────────┐  ┌──────────────────────────────┐
+ │ DAMASCENE                    │  │ SUBTRACTIVE                  │
+ │ 1 deposit ILD                │  │ 1 deposit metal blanket      │
+ │ 2 etch trench                │─▶│ 2 etch metal lines           │
+ │ 3 liner+fill Cu              │  │ 3 gap-fill dielectric        │
+ │ 4 CMP excess                 │  │ 4 CMP dielectric             │
+ │ Cu cannot be dry-etched      │  │ Ru, Mo, W etch volatile      │
+ │ so cut the ILD instead       │  │ enables airgap, no liner     │
+ └──────────────────────────────┘  └──────────────────────────────┘
+
+  (Cu forms no volatile halide, so damascene; Ru/Mo can be direct-etched, opening a subtractive route)
+
+# 4. Metal options for the thinnest lines
+
+ ┌────────────────────────┐   ┌────────────────────────┐   ┌────────────────────────┐
+ │ COPPER LINE            │   │ RUTHENIUM              │   │ MOLYBDENUM             │
+ │ needs barrier          │   │ low size effect        │   │ low bulk mfp           │
+ │ grain+surface          │   │ liner optional         │   │ barrier-free hope      │
+ │ scatter raise rho      │   │ hard to CMP/plate      │   │ oxide volatile         │
+ └────────────────────────┘   └────────────────────────┘   └────────────────────────┘
+
+  metal      status (see sources)
+  Cu         every production node; RuCo liner cut liner to ~2 nm, line R down up to 25% (AMAT claim) [3]
+  Ru         line R less width-dependent than Cu; claimed to beat Cu at <=17 nm width in one analysis [1][2]
+  Mo         imec studied direct etch of Ru and Mo at 32 nm pitch and below [5]; EM data less clear [1]
+  Co         traditional liner/fill; its thickness hurts yield and R at 3 nm and below [3]
+
+# 5. Via alignment: self-aligned vias
+
+ ┌──────────────────────────┐      ┌──────────────────────────┐
+ │ SELF-ALIGNED VIA         │      │ OVERLAY                  │
+ │ hole bounded by metal    │      │ misplaced via can        │
+ │ line below, not by       │      │ short to neighbor        │
+ │ litho overlay alone      │      │ or hit low-k wall        │
+ │ EPE budget ~ p/4         │      │ TDDB / yield risk        │
+ └──────────────────────────┘      └──────────────────────────┘
+
+  Extremely small via pitches fall below EUV resolution; multiple masks raise cost; overlay needs ~1/4
+  of via pitch [4]
+  Fix: selectively grow dielectric over neighbors (or use metal-selective etch) so the via lands only
+  on its own line
+
+# 6. Standard-cell routing: pin access in M1-M2
+
+ ┌──────────────────────────┐      ┌──────────────────────────┐
+ │ PIN ACCESS               │      │ TRACK HEIGHT             │
+ │ pins on M1/M2 inside     │      │ 7.5T to 6T to 5T         │
+ │ cell; router must hit    │      │ raises pin density       │
+ │ each from above          │      │ more congestion          │
+ │ fewer tracks per pin     │      │ DTCO trades this         │
+ └──────────────────────────┘      └──────────────────────────┘
+
+  Scaling cuts the number of tracks covering each pin shape; blockages can leave pins unreachable [6]
+  Cell libraries enforce a minimum number of accessible M1 tracks per pin [6]; designers sometimes
+  hand-place M2 pins [6]
+  Tools: Synopsys (SNPS) and Cadence (CDNS) place-and-route, plus extraction, handle this
+
+# 7. Patterning limits (single exposure)
+
+  EUV 0.33 NA        practical single-exposure limit ~26 nm pitch (13 nm half-pitch) [7]
+  High-NA 0.55       ~16 nm pitch single exposure reported; Intel uses it on selected 18A layers [7]
+  Intel 18A M0       32 nm HD cells claimed; reports say Panther Lake HP cells 36 nm, M0 is Cu (teardown-based) [8]
+  TSMC N3E           minimum metal pitch 23 nm (TSMC IEDM 2022 via Wikipedia/WikiChip) [9]
+  imec research      28 nm pitch Ru lines patterned by single-exposure 0.33 NA EUV [10]
+
+# 8. Who matters
+
+  TSMC (TSM), Intel (INTC) and Samsung set the pitch/metal choices; Applied Materials (AMAT) sells Cu
+  barrier/seed + Ru CVD tools,
+  Lam (LRCX) and TEL (8035.T) etch and plate, ASML (ASML) the EUV scanners. NVDA, AMD, ARM design cells
+  that must route at these pitches;
+  SNPS and CDNS supply the routers. Risks: Ru/Mo cost and CMP/etch maturity, RC delay now dominating
+  gate delay (textbook).
+
+(notes)
+  thin levels: M1-M4 carry local signals; higher levels (M5-M9, M10-M14) get thicker and wider because
+  RC falls with cross-section
+  pitch figures are per-node and per-vendor; N2/14A metal pitches are not public in the sources found;
+  no numbers invented
+
+# Sources
+
+  [1] semiengineering.com/ruthenium-interconnects-on-tap ; semiengineering.com/the-end-of-copper-interconnects/
+  [2] semiengineering.com/ruthenium-liners-give-way-to-ruthenium-lines
+  [3] investor.appliedmaterials.com/news-releases/news-release-details/applied-materials-unveils-chip-wiring-innovations-more-energy
+  [4] patents: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/10297467 (self-aligned via and plug patterning)
+  [5] imec-publications.be/entities/publication/549e1c7f-e71c-404e-8e11-8fb758376a0a/full
+  [6] arxiv.org/pdf/2603.13665 ; electronicimaging.spiedigitallibrary.org/conference-proceedings-of-spie/10148/1014803
+  [7] hothardware.com/news/intel-foundry-asml-1-million-wafers-high-na-euv ; hwbusters.com (Panther Lake High-NA)
+  [8] technews.tw/2026/02/23/intel-18a-panther-lake-more-leaks/ (teardown-based, unconfirmed)
+  [9] en.wikipedia.org/wiki/3nm ; fuse.wikichip.org/?p=7375
+  [10] imec-publications.be/entities/publication/dc425af8-bc97-4d3e-b645-ac4337522869/full

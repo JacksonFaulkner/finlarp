@@ -11,6 +11,7 @@
 use std::io;
 use std::path::Path;
 use std::process::Command;
+use std::time::Instant;
 
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
@@ -20,6 +21,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 
+use super::diagrams_anim::anim_for;
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
@@ -28,6 +30,9 @@ use crate::app::{Action, Ctx, Screen};
 use crate::ui::help::{Key, key, render_footer, render_overlay};
 use crate::ui::text;
 use crate::ui::theme::Theme;
+
+/// How long the auto-tour rests on each visual spot / atom before moving on.
+const TOUR_MS: u128 = 2200;
 
 const KEYS: &[Key] = &[
     key("h/l", "previous / next node"),
@@ -60,6 +65,13 @@ pub struct Diagrams {
     sel: usize,
     popup: bool,
     popup_scroll: u16,
+    /// Active page section (pane) in the node popup.
+    pane: usize,
+    /// When the popup opened; drives the page animation's frame clock.
+    anim_start: Instant,
+    /// Clock for the detail card's auto-tour: visual spots and atoms cycle on
+    /// their own until the cursor moves into them, which freezes the tour.
+    tour_start: Instant,
     hots: Vec<Hot>,
     hsel: usize,
     hot_moved: bool,
@@ -225,6 +237,29 @@ fn sections(body: &'static str) -> Vec<(&'static str, &'static str)> {
     out
 }
 
+/// Line ranges (start, end, heading line) of each `# ` section of a page's art.
+/// Text before the first heading joins the first pane; no headings = one pane.
+fn pane_ranges(art: &str) -> Vec<(usize, usize, usize)> {
+    let n = art.lines().count();
+    let heads: Vec<usize> = art
+        .lines()
+        .enumerate()
+        .filter(|(_, l)| l.starts_with("# "))
+        .map(|(i, _)| i)
+        .collect();
+    if heads.is_empty() {
+        return vec![(0, n, 0)];
+    }
+    heads
+        .iter()
+        .enumerate()
+        .map(|(k, &h)| {
+            let start = if k == 0 { 0 } else { h };
+            (start, heads.get(k + 1).copied().unwrap_or(n), h)
+        })
+        .collect()
+}
+
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
     let tab = arg
         .as_deref()
@@ -245,6 +280,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         sel: 0,
         popup: false,
         popup_scroll: 0,
+        pane: 0,
+        anim_start: Instant::now(),
+        tour_start: Instant::now(),
         hots: Vec::new(),
         hsel: 0,
         hot_moved: false,
@@ -397,6 +435,23 @@ impl Diagrams {
         }
     }
 
+    fn step_pane(&mut self, delta: isize) {
+        let Some(n) = self.nodes[self.tab].get(self.sel) else {
+            return;
+        };
+        let panes = pane_ranges(visual(&n.label).unwrap_or(""));
+        self.pane = (self.pane as isize + delta).rem_euclid(panes.len() as isize) as usize;
+        self.popup_scroll = 0;
+        let (p0, p1, _) = panes[self.pane];
+        if let Some(i) = self
+            .hots
+            .iter()
+            .position(|h| (h.row as usize) >= p0 && (h.row as usize) < p1)
+        {
+            self.hsel = i;
+        }
+    }
+
     fn step_hot(&mut self, delta: isize) {
         let n = self.hots.len();
         if n > 0 {
@@ -438,42 +493,68 @@ impl Diagrams {
         };
         let text = describe(&n.label).unwrap_or("No description yet.");
         let art = visual(&n.label).unwrap_or("");
-        let art_w = art.lines().map(text::width).max().unwrap_or(0) as u16;
-        let w = (art_w + 6).max(70).min(area.width.saturating_sub(2));
-        let r = Rect::new(
-            area.x + area.width.saturating_sub(w) / 2,
-            area.y + 1,
-            w,
-            area.height.saturating_sub(2).max(3),
-        );
-        let wrap_w = w.saturating_sub(4).max(1) as usize;
+        let r = area;
+        let wrap_w = r.width.saturating_sub(4).max(1) as usize;
         let desc = wrap_words(text, wrap_w);
-        let art_start = desc.len() as u16 + 1;
         let mut lines: Vec<Line> = desc
             .into_iter()
             .map(|l| Line::from(Span::styled(l, t.base())))
             .collect();
         lines.push(Line::default());
-        lines.extend(styled_lines(art, t));
-        let total = lines.len() as u16;
+        if let Some(a) = page_key(&n.label).and_then(anim_for) {
+            let i = a.frame_at(self.anim_start);
+            let (cap, body) = &a.frames[i];
+            lines.push(Line::from(vec![
+                Span::styled(format!("\u{25B6} {cap}"), t.accent()),
+                Span::styled(format!("   {}/{}", i + 1, a.frames.len()), t.dim()),
+            ]));
+            let mut fl: Vec<Line> = body
+                .iter()
+                .map(|l| styled_lines(l, t).pop().unwrap_or_default())
+                .collect();
+            fl.resize(a.height, Line::default());
+            lines.extend(fl);
+            lines.push(Line::default());
+        }
+        let panes = pane_ranges(art);
+        self.pane = self.pane.min(panes.len() - 1);
+        let art_lines = styled_lines(art, t);
         let inner_h = r.height.saturating_sub(2);
         if self.hot_moved {
             if let Some(h) = self.hots.get(self.hsel) {
-                let y = art_start + h.row;
+                let row = h.row as usize;
+                if let Some(p) = panes.iter().position(|p| row >= p.0 && row < p.1) {
+                    if p != self.pane {
+                        self.pane = p;
+                        self.popup_scroll = 0;
+                    }
+                }
+            }
+        }
+        let hh = (lines.len() as u16).min(inner_h.saturating_sub(8));
+        let tabs_h = u16::from(panes.len() > 1);
+        let pane_h = inner_h.saturating_sub(hh + tabs_h);
+        let (p0, p1, _) = panes[self.pane];
+        let p1 = p1.min(art_lines.len());
+        let pane_lines: Vec<Line> = art_lines[p0.min(p1)..p1].to_vec();
+        let total = pane_lines.len() as u16;
+        if self.hot_moved {
+            if let Some(h) = self.hots.get(self.hsel) {
+                let y = (h.row as usize).saturating_sub(p0) as u16;
                 if y < self.popup_scroll {
                     self.popup_scroll = y.saturating_sub(2);
-                } else if y >= self.popup_scroll + inner_h {
-                    self.popup_scroll = (y + 3).saturating_sub(inner_h);
+                } else if y >= self.popup_scroll + pane_h {
+                    self.popup_scroll = (y + 3).saturating_sub(pane_h);
                 }
             }
             self.hot_moved = false;
         }
-        self.popup_scroll = self.popup_scroll.min(total.saturating_sub(inner_h));
+        self.popup_scroll = self.popup_scroll.min(total.saturating_sub(pane_h));
         frame.render_widget(Clear, r);
         let hint = if self.hots.is_empty() {
-            " j/k scroll  g/G top/bottom  q close "
+            " [/] pane  j/k scroll  g/G top/bottom  q close "
         } else {
-            " h/l/tab spot  j/k spot above/below  enter details  ctrl-d/u scroll  q close "
+            " [/] pane  h/l/tab spot  j/k spot above/below  enter details  ctrl-d/u scroll  q close "
         };
         let block = Block::new()
             .borders(Borders::ALL)
@@ -482,19 +563,53 @@ impl Diagrams {
             .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::horizontal(1));
         let inner = block.inner(r);
+        frame.render_widget(block, r);
+        let [head_r, tabs_r, pane_r] = Layout::vertical([
+            Constraint::Length(hh),
+            Constraint::Length(tabs_h),
+            Constraint::Min(0),
+        ])
+        .areas(inner);
+        frame.render_widget(Paragraph::new(lines).style(t.base()), head_r);
+        if tabs_h > 0 {
+            let mut spans = Vec::new();
+            for (i, p) in panes.iter().enumerate() {
+                let title = art.lines().nth(p.2).unwrap_or("");
+                let title = title.strip_prefix("# ").unwrap_or(title);
+                let num = title.split(['.', ' ']).next().unwrap_or("");
+                if i == self.pane {
+                    let name = title.split(':').next().unwrap_or(title);
+                    spans.push(Span::styled(
+                        format!(" {name} "),
+                        t.selected().add_modifier(Modifier::BOLD),
+                    ));
+                } else {
+                    let lab = if num.chars().all(|c| c.is_ascii_digit()) && !num.is_empty() {
+                        num.to_string()
+                    } else {
+                        (i + 1).to_string()
+                    };
+                    spans.push(Span::styled(format!(" {lab} "), t.dim()));
+                }
+            }
+            frame.render_widget(Paragraph::new(Line::from(spans)).style(t.base()), tabs_r);
+        }
         frame.render_widget(
-            Paragraph::new(lines)
+            Paragraph::new(pane_lines)
                 .style(t.base())
-                .scroll((self.popup_scroll, 0))
-                .block(block),
-            r,
+                .scroll((self.popup_scroll, 0)),
+            pane_r,
         );
         let buf = frame.buffer_mut();
         for (i, h) in self.hots.iter().enumerate() {
-            let Some(y) = (art_start + h.row).checked_sub(self.popup_scroll) else {
+            let row = h.row as usize;
+            if row < p0 || row >= p1 {
+                continue;
+            }
+            let Some(y) = ((row - p0) as u16).checked_sub(self.popup_scroll) else {
                 continue;
             };
-            if y >= inner.height {
+            if y >= pane_r.height {
                 continue;
             }
             let style = if i == self.hsel {
@@ -504,8 +619,8 @@ impl Diagrams {
             };
             for dx in 0..h.len {
                 let x = h.col + dx;
-                if x < inner.width {
-                    buf[(inner.x + x, inner.y + y)].set_style(style);
+                if x < pane_r.width {
+                    buf[(pane_r.x + x, pane_r.y + y)].set_style(style);
                 }
             }
         }
@@ -574,16 +689,14 @@ impl Diagrams {
                 );
             } else if let Some(mol) = &self.mol {
                 let mut head = vec![mol.formula_line(t), mol.mass_line(t), Line::default()];
-                head.extend(mol.lines(
-                    if self.focus == Focus::Grid {
-                        self.mol_cur
-                    } else {
-                        usize::MAX
-                    },
-                    t,
-                ));
+                let cur = if self.focus == Focus::Grid {
+                    self.mol_cur
+                } else {
+                    self.tour(mol.atoms.len())
+                };
+                head.extend(mol.lines(cur, t));
                 head.push(Line::default());
-                let info = wrap_words(mol.atoms[self.mol_cur].info, body.width.max(1) as usize);
+                let info = wrap_words(mol.atoms[cur].info, body.width.max(1) as usize);
                 for i in 0..4 {
                     head.push(Line::from(Span::styled(
                         info.get(i).cloned().unwrap_or_default(),
@@ -650,8 +763,15 @@ impl Diagrams {
             let spots = vis.placed();
             self.vcur = self.vcur.min(spots.len().saturating_sub(1));
             let art_h = vis.art.lines().count() as u16;
-            if self.focus == Focus::Visual {
-                if let Some(sp) = spots.get(self.vcur) {
+            let focused = self.focus == Focus::Visual;
+            let cur = if focused {
+                self.vcur
+            } else {
+                self.tour(spots.len())
+            };
+            // Keep the cursor (or the tour's current spot) on screen.
+            {
+                if let Some(sp) = spots.get(cur) {
                     if sp.row < self.vscroll {
                         self.vscroll = sp.row;
                     } else if sp.row >= self.vscroll + right.height {
@@ -669,10 +789,10 @@ impl Diagrams {
             );
             let info_y = right.y + art_h.saturating_sub(vs).min(right.height) + 1;
             let info_h = (right.y + right.height).saturating_sub(info_y);
-            if self.focus == Focus::Visual {
+            if !spots.is_empty() {
                 let buf = frame.buffer_mut();
                 for (i, sp) in spots.iter().enumerate() {
-                    let style = if i == self.vcur {
+                    let style = if i == cur {
                         t.selected().add_modifier(Modifier::BOLD)
                     } else {
                         t.accent().add_modifier(Modifier::UNDERLINED)
@@ -686,24 +806,33 @@ impl Diagrams {
                         }
                     }
                 }
-                if let Some(sp) = spots.get(self.vcur) {
-                    let lines: Vec<Line> = wrap_words(sp.info, right.width.max(1) as usize)
-                        .into_iter()
-                        .take(info_h as usize)
-                        .map(|l| Line::from(Span::styled(l, t.base())))
-                        .collect();
+                if let Some(sp) = spots.get(cur) {
+                    let mut lines: Vec<Line> = Vec::new();
+                    if !focused && spots.len() > 1 {
+                        lines.push(Line::from(Span::styled(
+                            format!("\u{25B6} {}/{}  l to stop here", cur + 1, spots.len()),
+                            t.dim(),
+                        )));
+                    }
+                    let room = (info_h as usize).saturating_sub(lines.len());
+                    lines.extend(
+                        wrap_words(sp.info, right.width.max(1) as usize)
+                            .into_iter()
+                            .take(room)
+                            .map(|l| Line::from(Span::styled(l, t.base()))),
+                    );
                     frame.render_widget(
                         Paragraph::new(lines),
                         Rect::new(right.x, info_y, right.width, info_h),
                     );
                 }
-            } else if !spots.is_empty() && info_h > 0 {
-                frame.render_widget(
-                    Paragraph::new(Span::styled("l to explore this visual", t.dim())),
-                    Rect::new(right.x, info_y, right.width, 1),
-                );
             }
         }
+    }
+
+    /// Auto-tour index into `n` items, from the tour clock.
+    fn tour(&self, n: usize) -> usize {
+        (self.tour_start.elapsed().as_millis() / TOUR_MS) as usize % n.max(1)
     }
 
     fn cur_visual(&self) -> Option<super::diagrams_vis::Visual> {
@@ -729,6 +858,7 @@ impl Diagrams {
             }
             s.vcur = 0;
             s.vscroll = 0;
+            s.tour_start = Instant::now();
             s.pcur = 0;
             s.pscroll = 0;
         };
@@ -771,6 +901,7 @@ impl Diagrams {
                         }
                     } else if k && self.mol.is_some() && self.ptab == 0 {
                         self.focus = Focus::Grid;
+                        self.mol_cur = self.tour(self.mol.as_ref().map_or(1, |m| m.atoms.len()));
                     }
                 }
                 Focus::Text => {
@@ -784,6 +915,7 @@ impl Diagrams {
                         }
                     } else if l && !spots.is_empty() {
                         self.focus = Focus::Visual;
+                        self.vcur = self.tour(spots.len());
                     }
                 }
                 Focus::Visual => {
@@ -894,15 +1026,16 @@ impl Screen for Diagrams {
                             mol_for(h.label)
                         };
                         self.mol_cur = 0;
-                        self.focus = if self.mol.is_some() {
-                            Focus::Grid
-                        } else if self.card.is_some() {
+                        self.tour_start = Instant::now();
+                        // Open on the tab strip so the atom grid auto-tours; k freezes it.
+                        self.focus = if self.mol.is_some() || self.card.is_some() {
                             Focus::Tabs
                         } else {
                             Focus::Text
                         };
                     }
                 }
+                KeyCode::Char(c @ ('[' | ']')) => self.step_pane(if c == ']' { 1 } else { -1 }),
                 KeyCode::Char('l') | KeyCode::Right | KeyCode::Tab => self.step_hot(1),
                 KeyCode::Char('h') | KeyCode::Left | KeyCode::BackTab => self.step_hot(-1),
                 KeyCode::Char('j') | KeyCode::Down => {
@@ -950,6 +1083,8 @@ impl Screen for Diagrams {
             KeyCode::Enter => {
                 self.popup = !self.nodes[self.tab].is_empty();
                 self.popup_scroll = 0;
+                self.pane = 0;
+                self.anim_start = Instant::now();
                 self.detail = false;
                 self.hsel = 0;
                 self.hots = self.nodes[self.tab]
@@ -1192,9 +1327,18 @@ mod tests {
 
     #[test]
     fn fab_nodes_all_described() {
-        let nodes = find_nodes(DIAGRAMS[0].art);
+        all_described(0, 20);
+    }
+
+    #[test]
+    fn chip_nodes_all_described() {
+        all_described(1, 10);
+    }
+
+    fn all_described(tab: usize, want: usize) {
+        let nodes = find_nodes(DIAGRAMS[tab].art);
         let labels: Vec<_> = nodes.iter().map(|n| n.label.as_str()).collect();
-        assert_eq!(nodes.len(), 20, "{labels:?}");
+        assert_eq!(nodes.len(), want, "{labels:?}");
         for n in &nodes {
             assert!(describe(&n.label).is_some(), "no desc: {}", n.label);
             assert!(visual(&n.label).is_some(), "no page: {}", n.label);

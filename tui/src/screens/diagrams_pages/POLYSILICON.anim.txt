@@ -1,0 +1,181 @@
+ms 550
+== slim rods 20 mm: cold Si barely conducts, start with high voltage / preheat
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │              █████████████████████                   │ ◀ U-bridge
+  │              █                   █                   │
+  │              █                   █                   │ rod Ø  20 mm
+  │              █                   █                   │ [············]
+  │              █ cold              █ cold              │ 20 mm ───▶ 180 mm
+  │              █                   █                   │
+  │              █                   █                   │ rod skin ~1100 C
+  │              █                   █                   │ wall cold: no Si
+  │              █                   █                   │
+  │              █                   █                   │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== current runs up one rod, over the bridge, down the other: rods ~1100 C
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │              █████████████████████                   │ ◀ U-bridge
+  │              █                   █                   │
+  │            ▲ █                   █ ▼       ·         │ rod Ø  20 mm
+  │              █         ·         █                ▾  │ [············]
+  │    ·         █                   █                   │ 20 mm ───▶ 180 mm
+  │              █                   █                   │
+  │              █                   █         ·         │ rod skin ~1100 C
+  │              █         ·         █                ▾  │ wall cold: no Si
+  │    ·         █                   █                   │
+  │              █                   █                   │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== TCS + H2 in through base nozzles: SiHCl3 + H2 ──▶ Si + 3HCl on the rods
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │             ▓█████████████████████▓                  │ ◀ U-bridge
+  │             ▓█▓                 ▓█▓                  │
+  │           ▲ ▓█▓        ·        ▓█▓ ▼                │ rod Ø  45 mm
+  │    ·        ▓█▓                 ▓█▓                  │ [▓▓··········]
+  │             ▓█▓◂               ▸▓█▓               ▾  │ 20 mm ───▶ 180 mm
+  │             ▓█▓                 ▓█▓        ·         │
+  │             ▓█▓        ·        ▓█▓                  │ rod skin ~1100 C
+  │    ·        ▓█▓                 ▓█▓                  │ wall cold: no Si
+  │             ▓█▓                 ▓█▓               ▾  │
+  │             ▓█▓                 ▓█▓        ·         │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== off-gas HCl, H2, STC + unused TCS out the exhaust port, recycled
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │            ▓▓█████████████████████▓▓                 │ ◀ U-bridge
+  │            ▓▓█▓▓               ▓▓█▓▓                 │
+  │    ·     ▲ ▓▓█▓▓               ▓▓█▓▓ ▼               │ rod Ø  70 mm
+  │            ▓▓█▓▓               ▓▓█▓▓                 │ [▓▓▓▓········]
+  │            ▓▓█▓▓               ▓▓█▓▓       ·         │ 20 mm ───▶ 180 mm
+  │            ▓▓█▓▓◂      ·      ▸▓▓█▓▓              ▾  │
+  │    ·       ▓▓█▓▓               ▓▓█▓▓                 │ rod skin ~1100 C
+  │            ▓▓█▓▓               ▓▓█▓▓                 │ wall cold: no Si
+  │            ▓▓█▓▓               ▓▓█▓▓       ·         │
+  │            ▓▓█▓▓       ·       ▓▓█▓▓              ▾  │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== cold steel wall: no Si plates there, but hot rods radiate heat into it
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │           ▓▓▓█████████████████████▓▓▓                │ ◀ U-bridge
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  │         ▲ ▓▓▓█▓▓▓             ▓▓▓█▓▓▓ ▼           ▾  │ rod Ø  85 mm
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓      ·         │ [▓▓▓▓▓·······]
+  │           ▓▓▓█▓▓▓      ·      ▓▓▓█▓▓▓                │ 20 mm ───▶ 180 mm
+  │    ·      ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  │           ▓▓▓█▓▓▓◂           ▸▓▓▓█▓▓▓             ▾  │ rod skin ~1100 C
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓      ·         │ wall cold: no Si
+  │           ▓▓▓█▓▓▓      ·      ▓▓▓█▓▓▓                │
+  │    ·      ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== diameter grows up to 1.9 mm/h; CVD alone takes 35-45 kWh per kg
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │           ▓▓▓█████████████████████▓▓▓                │ ◀ U-bridge
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  │         ▲ ▓▓▓█▓▓▓◂           ▸▓▓▓█▓▓▓ ▼    ·         │ rod Ø 100 mm
+  │           ▓▓▓█▓▓▓      ·      ▓▓▓█▓▓▓             ▾  │ [▓▓▓▓▓▓······]
+  │    ·      ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │ 20 mm ───▶ 180 mm
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓      ·         │ rod skin ~1100 C
+  │           ▓▓▓█▓▓▓      ·      ▓▓▓█▓▓▓             ▾  │ wall cold: no Si
+  │    ·      ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  │           ▓▓▓█▓▓▓             ▓▓▓█▓▓▓                │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== electronic grade: slow, even growth, steady H2:TCS, low HCl ──▶ dense rod
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │          ▓▓▓▓█████████████████████▓▓▓▓               │ ◀ U-bridge
+  │          ▓▓▓▓█▓▓▓▓           ▓▓▓▓█▓▓▓▓               │
+  │        ▲ ▓▓▓▓█▓▓▓▓     ·     ▓▓▓▓█▓▓▓▓ ▼             │ rod Ø 120 mm
+  │    ·     ▓▓▓▓█▓▓▓▓◂         ▸▓▓▓▓█▓▓▓▓               │ [▓▓▓▓▓▓▓▓····]
+  │          ▓▓▓▓█▓▓▓▓           ▓▓▓▓█▓▓▓▓            ▾  │ 20 mm ───▶ 180 mm
+  │          ▓▓▓▓█▓▓▓▓           ▓▓▓▓█▓▓▓▓     ·         │
+  │          ▓▓▓▓█▓▓▓▓     ·     ▓▓▓▓█▓▓▓▓               │ rod skin ~1100 C
+  │    ·     ▓▓▓▓█▓▓▓▓           ▓▓▓▓█▓▓▓▓               │ wall cold: no Si
+  │          ▓▓▓▓█▓▓▓▓           ▓▓▓▓█▓▓▓▓            ▾  │
+  │          ▓▓▓▓█▓▓▓▓           ▓▓▓▓█▓▓▓▓     ·         │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== past ~150 mm: vortices, gas backup, overheated gas ──▶ popcorn ░ skin
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │         ░▓▓▓▓█████████████████████▓▓▓▓░              │ ◀ U-bridge
+  │         ░▓▓▓▓█▓▓▓▓░         ░▓▓▓▓█▓▓▓▓░              │
+  │    ·  ▲ ░▓▓▓▓█▓▓▓▓░         ░▓▓▓▓█▓▓▓▓░ ▼            │ rod Ø 150 mm
+  │         ░▓▓▓▓█▓▓▓▓░         ░▓▓▓▓█▓▓▓▓░              │ [▓▓▓▓▓▓▓▓▓▓··]
+  │         ░▓▓▓▓█▓▓▓▓░◂       ▸░▓▓▓▓█▓▓▓▓░    ·         │ 20 mm ───▶ 180 mm
+  │         ░▓▓▓▓█▓▓▓▓░    ·    ░▓▓▓▓█▓▓▓▓░           ▾  │
+  │    ·    ░▓▓▓▓█▓▓▓▓░         ░▓▓▓▓█▓▓▓▓░              │ rod skin ~1100 C
+  │         ░▓▓▓▓█▓▓▓▓░         ░▓▓▓▓█▓▓▓▓░              │ wall cold: no Si
+  │         ░▓▓▓▓█▓▓▓▓░         ░▓▓▓▓█▓▓▓▓░    ·         │ ░ popcorn: porous
+  │         ░▓▓▓▓█▓▓▓▓░    ·    ░▓▓▓▓█▓▓▓▓░           ▾  │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== 180 mm: popcorn-deep pieces get downgraded; thick rods can fall at the bridge
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  water-cooled jar wall ≈≈
+  ┌──────────────────────────────────────────────────────┐
+  │        ░▓▓▓▓▓██████████╳██████████▓▓▓▓▓░             │ ◀ rods can fall here
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │
+  │      ▲ ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░ ▼        ▾  │ rod Ø 180 mm
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░   ·         │ [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │        ░▓▓▓▓▓█▓▓▓▓▓░   ·   ░▓▓▓▓▓█▓▓▓▓▓░             │ 20 mm ───▶ 180 mm
+  │    ·   ░▓▓▓▓▓█▓▓▓▓▓░◂     ▸░▓▓▓▓▓█▓▓▓▓▓░             │
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░          ▾  │ rod skin ~1100 C
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░   ·         │ wall cold: no Si
+  │        ░▓▓▓▓▓█▓▓▓▓▓░   ·   ░▓▓▓▓▓█▓▓▓▓▓░             │ ░ popcorn: porous
+  │    ·   ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼
+== batch done: cool, lift jar, cut graphite stubs, crush + acid etch
+  TCS + H2 in                   off-gas: HCl, H2, STC, TCS
+  ▲ jar lifted off, rods pulled
+  ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
+  │        ░▓▓▓▓▓█████████████████████▓▓▓▓▓░             │ ◀ U-bridge
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │ rod Ø 180 mm
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │ [▓▓▓▓▓▓▓▓▓▓▓▓]
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │ 20 mm ───▶ 180 mm
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │ rod skin ~1100 C
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │ wall cold: no Si
+  │        ░▓▓▓▓▓█▓▓▓▓▓░       ░▓▓▓▓▓█▓▓▓▓▓░             │ ░ popcorn: porous
+  │        ░▓▓▓▓╳╳╳▓▓▓▓░       ░▓▓▓▓╳╳╳▓▓▓▓░ ◀ cut stubs │
+  └────┴─────────╨─────────┴─────────╨─────────┴──────┬──┘ ◀ graphite chucks
+       ▲                   ▲                   ▲      ▼
+   gas in                gas in                  out ──▶ recover H2, HCl
+             power ▲             power ▼

@@ -99,11 +99,19 @@ fn renders_results_facets_preview_and_source() {
 }
 
 #[test]
-fn narrow_layout_stacks_preview_and_drops_facets() {
+fn narrow_layout_shows_one_pane_at_a_time() {
     let mut h = loaded();
+    // results focused: no facet sidebar
     let text = screen_text(&draw(&mut h.s, 80, 30));
-    assert!(!text.contains("TICKER"));
-    assert!(text.contains("preview"), "{text}");
+    assert!(!text.contains("TICKER"), "{text}");
+    // facets take the whole pane when focused
+    h.s.focus = Pane::Facets;
+    let text = screen_text(&draw(&mut h.s, 80, 30));
+    assert!(text.contains("TICKER"), "{text}");
+    // preview replaces the results list
+    h.s.focus = Pane::Preview;
+    let text = screen_text(&draw(&mut h.s, 80, 30));
+    assert!(!text.contains("TICKER"), "{text}");
 }
 
 #[test]
@@ -133,7 +141,7 @@ fn keys_emit_nvim_and_in_process_actions() {
     press(&mut h.s, KeyCode::Char('y'), KeyModifiers::NONE);
     assert_eq!(h.s.input.value(), "t:MRVL guidancey");
     press(&mut h.s, KeyCode::Backspace, KeyModifiers::NONE);
-    press(&mut h.s, KeyCode::Tab, KeyModifiers::NONE);
+    // wide layout shows facets as a sidebar, so Tab goes input -> results
     press(&mut h.s, KeyCode::Tab, KeyModifiers::NONE);
     assert_eq!(h.s.focus, Pane::Results);
     assert_eq!(
@@ -186,6 +194,8 @@ fn debounces_and_drops_stale_replies() {
 #[test]
 fn facet_toggle_rewrites_query_and_sends() {
     let mut h = loaded();
+    // facets are a Tab stop (and a full pane) only in the compact layout
+    h.s.last_width = 100;
     press(&mut h.s, KeyCode::Tab, KeyModifiers::NONE);
     assert_eq!(h.s.focus, Pane::Facets);
     // walk to the first "type" item (below the ticker items)

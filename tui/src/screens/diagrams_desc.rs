@@ -83,6 +83,41 @@ pub const DESCS: &[(&str, &str)] = &[
         "IMPLANT",
         "Ion implanters ionize dopant atoms like boron, phosphorus or arsenic and accelerate them with electric fields into silicon, changing its conductivity. Energies range from under 1 keV to MeV, and dose control is precise. Axcelis (ACLS) and Applied Materials (AMAT) are key suppliers.",
     ),
+    // Chip tab
+    (
+        "TOP METAL",
+        include_str!("diagrams_pages/CHIP_TOP_METAL.desc.txt"),
+    ),
+    (
+        "MID METAL",
+        include_str!("diagrams_pages/CHIP_MID_METAL.desc.txt"),
+    ),
+    (
+        "THIN METAL",
+        include_str!("diagrams_pages/CHIP_THIN_METAL.desc.txt"),
+    ),
+    (
+        "CONTACTS",
+        include_str!("diagrams_pages/CHIP_CONTACTS.desc.txt"),
+    ),
+    ("NMOS", include_str!("diagrams_pages/CHIP_NMOS.desc.txt")),
+    (
+        "GATE STACK",
+        include_str!("diagrams_pages/CHIP_GATE_STACK.desc.txt"),
+    ),
+    ("PMOS", include_str!("diagrams_pages/CHIP_PMOS.desc.txt")),
+    (
+        "PLANAR",
+        include_str!("diagrams_pages/CHIP_PLANAR.desc.txt"),
+    ),
+    (
+        "FINFET",
+        include_str!("diagrams_pages/CHIP_FINFET.desc.txt"),
+    ),
+    (
+        "GATE-ALL-AROUND",
+        include_str!("diagrams_pages/CHIP_GAA.desc.txt"),
+    ),
 ];
 
 /// Art shown above the description in the node popup (same conventions as
@@ -114,6 +149,32 @@ pub const VISUALS: &[(&str, &str)] = &[
     ("PACKAGE", include_str!("diagrams_pages/PACKAGE.txt")),
     ("FINAL TEST", include_str!("diagrams_pages/FINAL_TEST.txt")),
     ("SHIP", include_str!("diagrams_pages/SHIP.txt")),
+    // Chip tab
+    (
+        "TOP METAL",
+        include_str!("diagrams_pages/CHIP_TOP_METAL.txt"),
+    ),
+    (
+        "MID METAL",
+        include_str!("diagrams_pages/CHIP_MID_METAL.txt"),
+    ),
+    (
+        "THIN METAL",
+        include_str!("diagrams_pages/CHIP_THIN_METAL.txt"),
+    ),
+    ("CONTACTS", include_str!("diagrams_pages/CHIP_CONTACTS.txt")),
+    ("NMOS", include_str!("diagrams_pages/CHIP_NMOS.txt")),
+    (
+        "GATE STACK",
+        include_str!("diagrams_pages/CHIP_GATE_STACK.txt"),
+    ),
+    ("PMOS", include_str!("diagrams_pages/CHIP_PMOS.txt")),
+    ("PLANAR", include_str!("diagrams_pages/CHIP_PLANAR.txt")),
+    ("FINFET", include_str!("diagrams_pages/CHIP_FINFET.txt")),
+    (
+        "GATE-ALL-AROUND",
+        include_str!("diagrams_pages/CHIP_GAA.txt"),
+    ),
 ];
 
 fn lookup(table: &'static [(&str, &str)], label: &str) -> Option<&'static str> {
@@ -142,7 +203,7 @@ pub fn page_key(label: &str) -> Option<&'static str> {
 }
 
 pub fn describe(label: &str) -> Option<&'static str> {
-    lookup(DESCS, label)
+    lookup(DESCS, label).map(str::trim)
 }
 
 pub fn visual(label: &str) -> Option<&'static str> {
@@ -199,6 +260,41 @@ pub const DETAILS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/FINAL_TEST.details.txt"),
     ),
     ("SHIP", include_str!("diagrams_pages/SHIP.details.txt")),
+    // Chip tab
+    (
+        "TOP METAL",
+        include_str!("diagrams_pages/CHIP_TOP_METAL.details.txt"),
+    ),
+    (
+        "MID METAL",
+        include_str!("diagrams_pages/CHIP_MID_METAL.details.txt"),
+    ),
+    (
+        "THIN METAL",
+        include_str!("diagrams_pages/CHIP_THIN_METAL.details.txt"),
+    ),
+    (
+        "CONTACTS",
+        include_str!("diagrams_pages/CHIP_CONTACTS.details.txt"),
+    ),
+    ("NMOS", include_str!("diagrams_pages/CHIP_NMOS.details.txt")),
+    (
+        "GATE STACK",
+        include_str!("diagrams_pages/CHIP_GATE_STACK.details.txt"),
+    ),
+    ("PMOS", include_str!("diagrams_pages/CHIP_PMOS.details.txt")),
+    (
+        "PLANAR",
+        include_str!("diagrams_pages/CHIP_PLANAR.details.txt"),
+    ),
+    (
+        "FINFET",
+        include_str!("diagrams_pages/CHIP_FINFET.details.txt"),
+    ),
+    (
+        "GATE-ALL-AROUND",
+        include_str!("diagrams_pages/CHIP_GAA.details.txt"),
+    ),
 ];
 
 pub struct Card {

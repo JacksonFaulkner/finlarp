@@ -16,7 +16,9 @@ A ticker may span several registrants (cik_aliases.json): MRVL's
 FY2008–FY2021 history lives under the Bermuda parent. All CIKs for a
 ticker are merged into one Parquet file per ticker under
 financials/facts/, which is also the resume marker: a rerun skips tickers
-whose file exists and whose CIK set hasn't changed (status.json).
+whose file exists and whose CIK set hasn't changed (status.json), unless
+--new-filings finds a periodic report filed since the last fetch (the
+daily refresh) or --force refetches everything.
 
 Caveats of the source that the series helpers work around:
   * `fy`/`fp`/`form` describe the *filing* the kept copy came from, not
@@ -28,7 +30,7 @@ Caveats of the source that the series helpers work around:
     tagged year-to-date. `quarterly_series` derives the missing quarter
     as the difference of two cumulative periods sharing a start date.
 
-CLI: ingest [TICKER ...] [--force] | show TICKER | annual|quarterly TICKER [metric]
+CLI: ingest [TICKER ...] [--force | --new-filings] | show TICKER | annual|quarterly TICKER [metric]
      | candidates [MIN_FY] | stats
 """
 from __future__ import annotations
@@ -271,10 +273,26 @@ def _build_concepts() -> None:
         p.unlink()
 
 
-def ingest(tickers: list[str] | None = None, force: bool = False, workers: int = 3) -> dict:
+PERIODIC_FORMS = {"10-K", "10-K/A", "10-Q", "10-Q/A", "20-F", "20-F/A", "40-F", "40-F/A"}
+
+
+def filed_since(ciks: list[int], at: str | None) -> bool:
+    """True if the current registrant filed a periodic report on or after the
+    day of `at` (the status record's fetch time). Same-day filings count, so a
+    companyfacts update that lags the filing is picked up by the next run.
+    Uses the shared submissions cache (fetched at most once a day)."""
+    if not at or not ciks:
+        return True
+    rec = universe.submissions(ciks[0])["filings"]["recent"]
+    return any(f in PERIODIC_FORMS and d >= at[:10] for f, d in zip(rec["form"], rec["filingDate"]))
+
+
+def ingest(tickers: list[str] | None = None, force: bool = False, workers: int = 3,
+           new_filings: bool = False) -> dict:
     """Ingest the universe (or the given tickers). Skips tickers already on
-    disk with the same CIK set unless force. Throttling is in sec_get, so
-    the worker threads only overlap download/flatten time."""
+    disk with the same CIK set unless force, or unless new_filings and a
+    periodic report landed since the last fetch. Throttling is in sec_get,
+    so the worker threads only overlap download/flatten time."""
     st = _status()
     todo = []
     for s in universe.stocks():
@@ -286,7 +304,8 @@ def ingest(tickers: list[str] | None = None, force: bool = False, workers: int =
         prev = st.get(t, {})
         done = (FACTS_DIR / f"{t.replace('/', '_')}.parquet").exists() or prev.get("error") == "no companyfacts"
         if not force and done and prev.get("ciks") == s["ciks"]:
-            continue
+            if not new_filings or prev.get("error") or not filed_since(s["ciks"], prev.get("at")):
+                continue
         todo.append((t, s["ciks"]))
     print(f"{len(todo)} tickers to ingest", file=sys.stderr)
     t0 = time.time()
@@ -554,7 +573,8 @@ if __name__ == "__main__":
     cmd = args[0] if args else "stats"
     if cmd == "ingest":
         rest = [a for a in args[1:] if not a.startswith("--")]
-        print(json.dumps(ingest([t.upper() for t in rest] or None, force="--force" in args), indent=2))
+        print(json.dumps(ingest([t.upper() for t in rest] or None, force="--force" in args,
+                                new_filings="--new-filings" in args), indent=2))
     elif cmd == "show" and len(args) > 1:
         show(args[1])
     elif cmd == "candidates":

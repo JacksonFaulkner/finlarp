@@ -53,7 +53,7 @@ def main() -> None:
         except requests.HTTPError as e:
             print(f"{h}: {e}")
             if e.response is not None and e.response.status_code == 402:
-                raise SystemExit("402 payment required: stopping")
+                raise SystemExit("402 payment required: stopping") from e
 
 
 def save(handle: str, items: list[dict]) -> None:

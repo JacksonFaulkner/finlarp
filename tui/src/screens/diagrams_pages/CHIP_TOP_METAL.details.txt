@@ -1,0 +1,262 @@
+== TRENCH ETCH
+# Dual damascene starts with a hole
+Copper cannot be plasma-etched into lines, so the dielectric is etched instead: a via and a trench are cut into the inter-layer dielectric, then filled with copper (dual damascene, textbook). Doing line and via together halves the barrier and CMP steps per level, so it dominates production [source: UMD damascene slides]. For M10-M14 the trenches are far wider and deeper than in M1-M4, and the dielectric is thicker and often denser (less low-k) for strength (textbook).
+
+# Why top layers are easier and harder
+Wide features relax lithography: top levels use older, cheaper DUV scanners while M0-M2 at Intel 4 reach a 30 nm pitch with EUV and SAQP (WikiChip). But deep, wide trenches stress etch depth uniformity and stop-layer control, and every metal level adds a litho-etch pass, so the 16-layer Intel 4 stack means many etch steps per wafer.
+
+# Failure modes and tickers
+Etch-depth drift changes wire thickness and thus resistance. Sidewall damage lets copper poison the dielectric later. Tool vendors are Lam (LRCX), TEL (8035.T) and AMAT; fabs that own the process are TSMC (TSM, 2025 revenue NT$3.81T per secondary reports) and Intel (INTC, $52.9B in 2025, flat YoY).
+
+# Sources
+https://ece.umd.edu/class/enee416/GroupActivities/Damascene Presentation.pdf
+https://fuse.wikichip.org/news/6720/a-look-at-intel-4-process-technology/3
+Intel FY2025 results https://www.intc.com/news-events/press-releases/detail/1759
+TSMC 2025 revenue NT$3.81T (secondary) https://www.trendforce.com/news/?p=19205
+textbook
+
+== BARRIER + SEED
+# Barrier keeps copper out
+Copper diffuses fast through silicon and oxide and kills transistors, so each trench is lined with a conformal barrier before fill. Typical materials are Ta, TaN, TiN and TiW; reported thickness is about 2 to 10 nm [source: damascene explainers]. A 20 to 100 nm PVD or ALD copper seed then carries the plating current.
+
+# Scaling pain
+On thin lower layers the barrier eats a big share of the wire cross-section and raises resistance, which is why Intel 4 moved to copper with cobalt liner/cap on the lowest layers (Semiconductor Digest). On thick M10-M14 wires the barrier is a negligible fraction, which is one reason top metal stays low resistance.
+
+# Failure modes
+Poor step coverage causes copper poisoning and via voiding, named as the two most common damascene yield failures [source above]. Deposition tools come from AMAT and Lam (PVD/ALD); the process is run by TSMC (TSM) and Intel (INTC).
+
+# Sources
+https://rfessentials.com/resources/rf-glossary/damascene/
+https://semiconductor-digest.com/tag/cobalt
+textbook
+
+== CU PLATE
+# Electroplated superfill
+After the seed, wafers are electroplated in a copper sulfate bath with organic additives (accelerator, suppressor, leveler) that make the fill grow bottom-up without voids (textbook). For thick top layers the plated overburden is large, so plating time and bath control dominate cost. Plating is the fast step; deposition tools come from Lam and AMAT (LRCX, AMAT).
+
+# Why copper
+Copper has lower resistivity than aluminium and tolerates roughly 5x the current density at similar reliability (Synopsys glossary), which is why every foundry switched to copper damascene (textbook). Damascene copper limits are quoted around 1-3e6 A/cm2, about 10-30 mA/um2, in one secondary source.
+
+# Failure modes
+Voids at the via bottom, seams in wide trenches, and stress migration after anneal. Grain structure set by anneal affects electromigration lifetime. TSMC (TSM) and Intel (INTC) tune this per node; no public yield numbers exist.
+
+# Sources
+https://www.synopsys.com/glossary/what-is-electromigration.html
+https://rfessentials.com/rf-knowledge-base/what-is-the-electromigration-limit-of-a-gold-or-copper-interconnect-in-an-rf-mmi/
+textbook
+
+== CMP
+# Polish back to flat
+Chemical-mechanical polishing removes excess copper, seed and barrier so only metal inside the trenches remains and the surface is planar for the next level [source: patents and explainers]. Each of the 14-plus metal levels needs its own CMP, so CMP counts scale with stack height.
+
+# Dishing and erosion
+Wide copper lines polish faster than the surrounding dielectric and dish, thinning the wire. That makes thick top metal harder to planarize than narrow lines, so designers use metal slotting and dummy fill rules (textbook). Dishing directly cuts thickness T and raises resistance R = rho*L/(W*T).
+
+# Who and risks
+Slurry and pad suppliers plus AMAT dominate CMP tools (textbook). Planarity is also what makes later hybrid bonding possible: copper recess must be nanometers (see HYBRID BOND). Fabs: TSMC (TSM), Intel (INTC).
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6004188
+https://semiengineering.com/hybrid-bonding-basics-what-is-hybrid-bonding/
+textbook
+
+== PAD + PASSIV
+# Seal the top
+Above the last copper level sit bond pads, usually aluminium or aluminium-copper, covered by a passivation stack of silicon oxide, silicon nitride or oxynitride, topped by a polyimide layer, with openings over the pads [source: RDL patents]. Passivation blocks moisture and ions and cushions bump stress.
+
+# Pad finishes
+For wire bonding, nickel-palladium finishes on copper are preferred over aluminium, but electroless nickel can leave gaps that expose nickel to corrosion (same patent family). Flip-chip parts instead add under-bump metallization on the pad.
+
+# Failure modes and tickers
+Pinholes or cracks allow moisture corrosion; polyimide cure shrinkage can stress low-k layers below. Made by foundries and OSATs such as TSMC (TSM) and Intel (INTC) packaging; no public yield data.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11189538
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12040293
+textbook
+
+== BUMP
+# From pad to ball
+Under-bump metallization (UBM) is plated over the pad opening, then a solder bump or copper pillar with solder cap is built on it. The die is flipped and reflowed onto the package substrate. IBM called this controlled collapse chip connection, C4, reduced to practice in 1962 with copper-ball standoffs and high-lead solder (Totta, UCLA workshop abstract).
+
+# Why flip chip
+Bumps spread over the whole die area, so power and ground enter right above the logic that needs them, not only at the edge as with wire bonds (textbook). That is why big CPUs and GPUs (INTC, AMD, NVDA) all use flip chip.
+
+# Failure modes
+Thermal-cycle fatigue from the die/substrate expansion mismatch, electromigration at bumps, and lead-free transition issues flagged as a reliability risk in the Totta retrospective. Underfill improved life by more than an order of magnitude (see UNDERFILL).
+
+# Sources
+https://www.seas.ucla.edu/ethinfilm/Pb-freeWorkshop/abs/totta.html
+https://Www.wikipedia.org/wiki/Flip_chip
+textbook
+
+== POWER GRID
+# A mesh of thick wires
+Power is typically carried on two or more metal layers, with a very thick top layer distributing power to large sections of the chip; voltage drop and current-density limits are bounded by the top-layer thickness (EDA patent text). Vdd and Vss stripes alternate and meet bumps from above and thinner rails below. On Intel 18A the frontside stack is described as M0-M14 (SemiAnalysis).
+
+# Why thick
+A modern CPU or GPU pulls tens to hundreds of amps at about 1 V or less (textbook), so even milliohms of grid resistance cost tens of millivolts. Thin fine-pitch layers have high resistance, so lower layers get extra power stripes on every layer (PROBE3.0 paper).
+
+# Tools and tickers
+Grid design and IR sign-off are done in Synopsys (SNPS, FY2025 revenue $7.054B) and Cadence (CDNS, 2025 revenue $5.297B) tools. Big current users: NVDA, AMD, INTC; core IP from ARM. Foundry stacks are made by TSM and INTC.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11681854
+https://arxiv.org/pdf/2304.13215
+https://newsletter.semianalysis.com/p/intel-panther-lake-teardown
+https://news.synopsys.com/2025-12-10-Synopsys-Posts-Financial-Results-for-Fourth-Quarter-and-Fiscal-Year-2025
+https://www.businesswire.com/news/home/20260216202086/en
+
+== CLOCK TRUNK
+# Distribute one beat
+The clock must reach millions of flip-flops at nearly the same time. The top-level trunk is usually an H-tree or a mesh routed on low-resistance upper metal, with local trees below (textbook). H-trees are simple with low power and area; meshes tolerate variation but burn power because drivers switch a large capacitance [source: clock-network papers].
+
+# Skew and power
+One patent-derived source puts inherent H-tree skew from process variation at roughly 150-200 ps. Clock networks account for a significant share of total power, but the sources found give no percentage, so none is quoted here.
+
+# Failure modes and tickers
+Skew, jitter from supply noise (IR drop couples into clock delay), and electromigration on heavily switching wires. Clock tree synthesis is done in SNPS and CDNS tools; designs are by INTC, AMD, NVDA, ARM cores.
+
+# Sources
+https://semiconductor-digest.com/?p=6892
+https://people.engr.tamu.edu/sunilkhatri/projects-web/papers/jitterhtree.pdf
+https://patents.google.com/patent/US6037822
+https://hajim.rochester.edu/ece/sites/friedman/papers/jlpea-01-00219.pdf
+
+== LONG WIRES
+# RC delay grows with length
+Wire resistance R = rho*L/(W*T) and capacitance both grow with length, so delay grows roughly with length squared (textbook). Wide, thick upper-layer wires cut R, letting buses cross a large die with repeaters spaced far apart.
+
+# Why top layers
+Long cross-block and global signals are assigned to M10-M14-class layers, while thin lower layers handle short local nets. As lower pitches shrink (Intel 4 M0 30 nm vs 40 nm on Intel 7, AnandTech), thin-wire resistance worsens and more nets move up.
+
+# Failure modes and tickers
+Crosstalk on wide parallel buses, repeater power, and EM. Place-and-route and timing are by SNPS and CDNS; chips by AMD, NVDA, INTC, ARM-based designs, made at TSM and INTC.
+
+# Sources
+https://www.anandtech.com/show/17448
+https://fuse.wikichip.org/news/6720/a-look-at-intel-4-process-technology/3
+textbook
+
+== RDL
+# Re-route the pads
+A redistribution layer is extra wiring above the chip that moves pads to new bump positions. One patent describes copper RDLs made by damascene: etch openings, line with barrier, plate copper, planarize; another uses an aluminium-copper RDL on a tantalum barrier deposited above 300 C [source: RDL patents].
+
+# Where used
+Fan-in and fan-out wafer-level packages, and chiplet interposers, use RDL to fan signals from fine die pads to coarser package pitch (textbook). Thick RDL copper is also a low-resistance power path.
+
+# Failure modes and tickers
+Dielectric cracking, copper migration, warpage. TSMC (TSM) sells InFO/CoWoS-class packaging (textbook); NVDA and AMD are big users in AI accelerators.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11798904
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11469194
+textbook
+
+== UNDERFILL
+# Epoxy under the die
+After reflow the gap between die and substrate is filled with epoxy resin. Silicon and an organic substrate expand differently, so without underfill the solder joints crack in thermal cycling. Adopting underfill improved flip-chip fatigue life by more than an order of magnitude versus the earlier C4 connection (Semiconductor History Museum of Japan).
+
+# Trade-offs
+Underfill transfers stress to the die and the low-k layers beneath the top metal, a known source of chip-package interaction failures (textbook). Capillary flow slows as bump pitch tightens, one motive for no-flow and molded underfill.
+
+# Who
+Materials are from chemical suppliers (not in this tab's tickers); assembly is done by TSMC (TSM) packaging, Intel (INTC), and OSATs. No share figures found.
+
+# Sources
+https://www.shmj.or.jp/english/pdf/pkg/exhibi515E.pdf
+textbook
+
+== IR DROP
+# Ohm's law on the die
+Voltage drop V = I*R at every stage from regulator to transistor. SemiEngineering notes IR drop is becoming a problem for a growing share of designs as wires got thinner [source]. A typical design must tolerate roughly 10% voltage drop through the metal stack (a vendor blog citing a patent; secondary).
+
+# Static and dynamic
+Static drop comes from average current; dynamic droop comes from fast current steps (di/dt) hitting grid inductance and resistance. Decoupling capacitors, thick top-metal grids, and more bumps all reduce it. Top thick layers are treated as nearly zero resistance in simplified patent calculations.
+
+# Failure modes and tickers
+Low local Vdd slows gates and causes timing failure or data errors. Sign-off tools: Synopsys RedHawk and Cadence Voltus (product names, textbook; SNPS FY2025 revenue $7.054B, CDNS 2025 $5.297B). Chip users: NVDA, AMD, INTC, ARM designs.
+
+# Sources
+https://semiengineering.com/current-problems-grow-for-power-delivery/
+https://www.patsnap.com/resources/blog/articles/back-side-power-delivery-networks-cut-ir-drop-by-10/
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11681854
+https://news.synopsys.com/2025-12-10-Synopsys-Posts-Financial-Results-for-Fourth-Quarter-and-Fiscal-Year-2025
+
+== EM LIMIT
+# Atoms pushed by current
+Electromigration moves metal atoms along the electron flow, creating voids and hillocks over years. Black's law gives lifetime falling with current density to a power n (about 1 to 2, usually 2) and exponentially with temperature (textbook; sources disagree on the attribution year).
+
+# Numbers
+Copper tolerates roughly 5x the current density of aluminium (Synopsys glossary). A secondary source gives 1-3e6 A/cm2, about 10-30 mA/um2, for damascene copper. Thin low-pitch wires and vias are the weak points, so power flows through thick upper layers.
+
+# Failure modes and tickers
+Open circuits or resistance rise after years of use; sign-off is a DRC-style check in SNPS and CDNS flows. Bumps also suffer EM, so bump current limits cap how few bumps a power rail can use. Fabs TSM and INTC publish limits only to customers.
+
+# Sources
+https://www.synopsys.com/glossary/what-is-electromigration.html
+https://rfessentials.com/rf-knowledge-base/what-is-the-electromigration-limit-of-a-gold-or-copper-interconnect-in-an-rf-mmi/
+https://ifte.de/mitarbeiter/lienig/vlsi05.pdf
+
+== C4 BUMP
+# The classic bump
+C4 solder bumps connect die to package at a conventional pitch of about 150 um in one patent example, with copper pillar arrays at about 40 um. Early C4 used Cr-Cu-Au UBM and high-lead solder so the chip joint would not remelt during module attach (Totta).
+
+# Power and I/O
+Bumps alternate power, ground and signal across the whole die, so an AI accelerator may carry thousands, each limited by EM current capacity (textbook). Bump count and placement set how far current travels in M14 before reaching a load.
+
+# Failure modes and tickers
+Fatigue cracks, bump EM, bridging, and tin whiskers from lead-free solder (textbook). Substrate and assembly: TSMC (TSM), Intel (INTC), OSATs. End users: NVDA, AMD, INTC.
+
+# Sources
+https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/8896118
+https://www.seas.ucla.edu/ethinfilm/Pb-freeWorkshop/abs/totta.html
+textbook
+
+== MICROBUMP
+# Finer pitch for chiplets
+The most advanced microbumps today run at 40 um pitch, equal to 20-25 um bumps with 15 um spacing; one interview cites pitches as tight as 36 um, moving toward 20-25 um with solder-capped micropillars (SemiEngineering). Existing bump schemes extend from 40 um down to about 10 um, where they run out of steam.
+
+# Use and limits
+Used between stacked dies and between chiplets and interposers, e.g. HBM stacks and GPUs (textbook). At fine pitch the solder can bridge and cause shorts, and small height variations give bad joints (Onto Innovation yearbook). A conference abstract reports reliable bonding to 5 um pitch, not production qualified.
+
+# Tickers
+TSMC (TSM) CoWoS and Intel (INTC) Foveros-class packaging use microbumps (textbook); NVDA and AMD ship such parts. No volume or revenue split is public.
+
+# Sources
+https://semiengineering.com/scaling-bump-pitches-in-advanced-packaging
+https://ontoinnovation.com/writable/files/Resources/The-Age-of-Hybrid-Bonding_3DIC_Yearbook_2023.pdf
+https://www.mrs.org/meetings-events/annual-meetings/archive/meeting/presentations/view/2026-mrs-spring-meeting/2026-mrs-spring-meeting-4429238
+
+== HYBRID BOND
+# No solder at all
+Hybrid bonding joins dies with direct copper-to-copper bonds plus oxide-to-oxide bonding, targeted at 10 um pitch and below (SemiEngineering). One lower-quality source lists commercial pitches of 0.8-9 um. The surface must be extremely flat and clean, which links back to CMP quality.
+
+# Why it matters for the top metal
+The copper pads that bond are formed like top-metal damascene features, so the same CMP, barrier and plate steps feed 3D stacking (textbook). Higher connection density means more vertical power paths and lower IR drop through the stack.
+
+# Failure modes and tickers
+Particles cause voids, copper recess must be nanometers, and thermal anneal is needed. TSMC (TSM SoIC), Intel (INTC Foveros Direct) and AMD (3D V-Cache) use it (textbook, names not sourced this run). Sizes of volume not public.
+
+# Sources
+https://semiengineering.com/hybrid-bonding-basics-what-is-hybrid-bonding/
+https://semiengineering.com/bumps-vs-hybrid-bonding-for-advanced-packaging
+https://www.utmel.com/blog/categories/technology/why-hybrid-bonding-is-replacing-solder-bumps-in-advanced-3d-packaging
+
+== BSPDN
+# Power moves to the back
+Backside power delivery puts supply wires on the wafer back, leaving the front for signals. Intel PowerVia (18A) routes power through backside metals to nano-TSVs that reach local source/drain contacts; SemiAnalysis describes a M0-M14 frontside and BM0-BM5 backside, with counts illustrative. TSMC A16 Super Power Rail contacts source and drain directly, which Tom's Hardware calls more complex than PowerVia.
+
+# Numbers
+Intel test chip (Intel 4 base): more than 30% lower voltage droop, more than 6% performance, more than 90% cell utilization. Intel's 2026 18A brief claims about 10x lower worst-case dynamic droop and 8-10% routing closure improvement. PowerVia relaxed M0 pitch from 30 nm to 36 nm. TSMC A16 versus N2P: 8-10% faster or 15-20% less power, density 7-10%, mass production Q4 2026 (press). imec: nTSV 200 nm pitch, modeled IR drop 32.1% better with a backside 2.5D MIMCAP.
+
+# Failure modes and tickers
+Wafer must be thinned to a few hundred nm of silicon, heat removal gets harder with a carrier on the front, and nTSV overlay must be tight. Players: INTC, TSM; designs by NVDA, AMD, ARM; tools SNPS, CDNS. Intel FY2025 revenue $52.9B flat; TSMC NT$3.81T up 31.6%.
+
+# Sources
+https://www.intel.com/content/www/us/en/foundry/process/18a.html
+https://tomshardware.com/news/intel-details-powervia-backside-power-delivery-network
+https://tomshardware.com/tech-industry/tsmc-unveils-16nm-process-technology-with-backside-power-delivery-rivals-intels-competing-design
+https://www.trendforce.com/news/?p=19205
+https://www.imec-int.com/en/articles/how-power-chips-backside
+Intel FY2025 results https://www.intc.com/news-events/press-releases/detail/1759

@@ -1,0 +1,263 @@
+== SUPERLATTICE
+# What it is
+The nanosheet transistor starts as a blanket epitaxial stack of alternating silicon and silicon-germanium layers on a silicon wafer, typically 3 to 4 pairs (textbook). Silicon layers become the channels (sheets); SiGe layers are sacrificial spacers that hold the gap open until the gate metal replaces them. Layer thickness is set by deposition time, not by lithography, so it is controlled to roughly the nanometer.
+
+# Why it matters
+Sheet thickness and the gap between sheets decide threshold voltage, drive current and whether the high-k and work-function metal can fit later. TSMC's N2 paper (IEDM 2024, G. Yeap et al.) is the public reference for its stack; public sources do not give the exact sheet count or layer thicknesses, so none are quoted here.
+
+# Failure modes
+Strain relaxation and defects in the SiGe/Si interface, thickness drift across the 300 mm wafer, and Ge content that is too low (poor etch selectivity later) or too high (defects). Every nm of variation here becomes a Vt shift on millions of transistors.
+
+# Who profits
+Epitaxy reactors: Applied Materials (AMAT) and ASM International (ASM.AS, textbook); Applied guided about $2.5B of GAA-related revenue in FY2024, roughly doubling in 2025. Foundries using it: TSM (N2), INTC (18A), Samsung (005930.KS).
+
+# Sources
+https://marketbeat.com/earnings/transcripts/106538
+https://spectrum.ieee.org/amp/tsmc-n2-2670436570
+textbook
+
+== FIN PATTERN
+# What it is
+After the epi stack, litho and etch carve it into tall narrow fins (EUV or multi-patterned DUV), cutting through the alternating Si and SiGe layers and a little into the substrate. Shallow-trench isolation oxide then fills between fins and is recessed (textbook).
+
+# Why it matters
+Fin width here sets the sheet width W. In a nanosheet the width is a design variable rather than a fixed process constant, so patterning must hold several widths on one chip with tight critical-dimension control.
+
+# Failure modes
+Etching through mixed Si and SiGe layers with a smooth, vertical sidewall is hard; sidewall roughness becomes sheet roughness and scatters carriers. Tall, thin stacks can lean or collapse during cleaning. The sub-fin below the lowest sheet is a parasitic channel that needs isolation (punch-through stop).
+
+# Who profits
+Etch and litho: Lam Research (LRCX, FY2025 revenue $18.44B), Tokyo Electron (8035.T), Applied Materials (AMAT), ASML (ASML) for EUV patterning, KLA (KLAC) for CD and defect inspection.
+
+# Sources
+https://research.tsmc.com/page/logic/97.html
+textbook
+
+== DUMMY GATE
+# What it is
+A sacrificial polysilicon gate with sidewall spacers is formed across the fins as a placeholder. It defines the channel length and aligns the source and drain; it is later removed and replaced by the real high-k and metal gate (replacement-gate flow, textbook).
+
+# Why it matters
+Gate length and spacer thickness set both performance and the room left for contacts. In a GAA stack the dummy gate must also be removed and refilled between sheets, so the gate cavity is a three-dimensional volume rather than a surface to coat.
+
+# Failure modes
+Gate-length variation, spacer damage during later etches, and poly residue between fins at the tight pitches of N2-class nodes.
+
+# Who profits
+Deposition and etch vendors: AMAT, LRCX, 8035.T. Layout rules and variation models come from EDA: Synopsys (SNPS) and Cadence (CDNS).
+
+# Sources
+textbook
+https://research.tsmc.com/page/logic/97.html
+
+== INNER SPACER
+# What it is
+Source and drain trenches are cut at each end of the gate. Through them, the SiGe layers are etched sideways by a few nanometers (a recess), and the cavities are refilled with a low-k dielectric such as SiN or SiOCN, then trimmed back. This inner spacer sits between the gate metal and the source or drain at every level of the stack.
+
+# Why it matters
+Without it, gate-to-source/drain capacitance and leakage would be large, and later SiGe release would also attack the epitaxial source and drain. The step is new relative to FinFET. Academic reviews list inner spacer formation and channel release as the two new modules, both needing selective SiGe etching.
+
+# Failure modes
+Recess depth must be equal on all sheets and both sides; uneven recess leaves gate-length variation between sheets. Spacer fill voids, spacer erosion, and Si loss during the recess all hurt Vt and reliability. IBM reported a dry lateral SiGe etch with selectivity of about 150 (25 percent Ge versus Si) for this purpose.
+
+# Who profits
+Selective-etch and ALD tools: Lam Research (LRCX), Tokyo Electron (8035.T), Applied Materials (AMAT), which filed a patent on selective silicon etch for GAA.
+
+# Sources
+https://pmc.ncbi.nlm.nih.gov/articles/PMC11173960/
+https://research.ibm.com/publications/a-novel-dry-selective-etch-of-sige-for-the-enablement-of-high-performance-logic-stacked-gate-all-around-nanosheet-devices
+https://patents.google.com/patent/WO2022010664
+
+== S/D EPI
+# What it is
+Doped silicon (phosphorus for NMOS) or SiGe (boron for PMOS) is grown from the exposed sheet ends to form source and drain. The epi both lowers series resistance and applies strain to the channel (textbook).
+
+# Why it matters
+Contact resistance is a growing share of delay at advanced nodes. Epi growth must start only from the sheet edges (not the substrate or spacers), merge cleanly, and be doped heavily and uniformly.
+
+# Failure modes
+Epi merging between neighbouring devices, defects at the sheet seed edges, dopant diffusion into the channel, and a poor interface to the contact metal.
+
+# Who profits
+Epitaxy and anneal: Applied Materials (AMAT), ASM International (ASM.AS, textbook). Contacts are tungsten or similar metal in the chip stack shown on the Chip tab; backside power changes how the source and drain are contacted.
+
+# Sources
+textbook
+https://research.tsmc.com/page/logic/97.html
+
+== RELEASE
+# What it is
+With the dummy gate removed, the remaining SiGe sheets are etched away laterally (vapour HCl, NF3-based dry etch, or wet chemistries), leaving silicon ribbons floating in the gate cavity, held by the source and drain at their ends. Dry NF3 processes with cyclic oxidation and etch have shown very low Si loss, 0.44 nm per side in one study.
+
+# Why it matters
+This is the signature step of GAA. Selectivity of SiGe over Si sets the final sheet thickness; wet etchant rate falls as Ge content rises (patent example with NH4OH/TMAH).
+
+# Failure modes
+Si loss thins sheets and shifts Vt; sheet sagging or sticking from capillary forces if wet; etch not reaching the inner sheets in tight gaps; residue left in the gap blocks gate fill. Sheets only a few nm thick are fragile.
+
+# Who profits
+Isotropic selective etch and clean: Lam Research (LRCX), Tokyo Electron (8035.T), Applied Materials (AMAT); chemistry from Entegris (ENTG, textbook).
+
+# Sources
+https://pmc.ncbi.nlm.nih.gov/articles/PMC11173960/
+https://ecs.confex.com/ecs/236/webprogram/Paper127506.html
+
+== HK/METAL GATE
+# What it is
+After release, atomic layer deposition (ALD) wraps each sheet on all four sides with an interfacial oxide, a high-k dielectric (HfO2 based, textbook) and work-function metals that set Vt, then fills the remaining space with low-resistance metal.
+
+# Why it matters
+The gap between sheets is about 10 nm in the textbook picture and the stack must fit in it. Multi-Vt devices need different work-function metals on the same wafer, but there is little room to thicken a metal layer to tune Vt, so ALD thickness control and selective removal are decisive.
+
+# Failure modes
+Gate fill voids, non-uniform film between top and bottom sheets, metal diffusion, and dielectric breakdown at the sheet corners where field concentrates.
+
+# Who profits
+ALD is a share-gain area for Applied Materials (AMAT), Lam (LRCX), Tokyo Electron (8035.T), ASM International (ASM.AS, textbook). Applied said it expects over 50 percent of the transistor-module process equipment spend on GAA nodes.
+
+# Sources
+https://marketbeat.com/earnings/transcripts/106538
+textbook
+
+== SHEET WIDTH
+# What it is
+In a FinFET, drive current comes in discrete steps: 1, 2 or 3 fins. In a nanosheet, the width of the sheet is a drawn dimension, so a cell can use a wide sheet for speed or a narrow one for density and low leakage. TSMC says N2 supports different nanosheet widths in cells on the same chip.
+
+# Why it matters
+Designers get continuous tuning of drive versus area per cell (a standard-cell library tool known as nanosheet width flexibility). It lets one process cover both high-performance and low-power libraries. Total effective width scales with the number of sheets times each sheet's width plus twice its thickness (textbook).
+
+# Failure modes
+Narrow sheets suffer width-dependent mobility loss and variability; wide sheets are harder to release and fill and can sag. Cell layouts need new design rules and extraction models.
+
+# Who profits
+EDA: Synopsys (SNPS) and Cadence (CDNS) provide the library and extraction flows. Foundries: TSM, INTC, Samsung (005930.KS).
+
+# Sources
+https://spectrum.ieee.org/amp/tsmc-n2-2670436570
+https://research.tsmc.com/page/logic/97.html
+
+== FINFET
+# What it is
+The FinFET, a fin gated on three sides, was the workhorse from the 22 nm class (Intel, 2011, textbook) through TSMC N3. As gate length shrinks, three-sided control is not enough: leakage rises. Further, fin count is quantised, which limits cell scaling.
+
+# Why it matters
+TSMC's N3E remains the FinFET reference in the page comparison; its reported yield (~82-86 percent) is the benchmark GAA starts against. FinFET variants (N3P) remain in volume while GAA ramps.
+
+# Failure modes
+Short-channel effects, leakage, fin-count quantisation, and rising parasitic resistance and capacitance.
+
+# Who profits
+TSM remains the largest FinFET foundry; INTC (Intel 3 is FinFET), NVDA and AMD design on TSMC; ARM licenses cores for it.
+
+# Sources
+https://tomshardware.com/tech-industry/semiconductors/tsmc-begins-quietly-volume-production-of-2nm-class-chips-first-gaa-transistor-for-tsmc-claims-up-to-15-percent-improvement-at-iso-power
+https://notebookcheck.net (Samsung vs TSMC yield reports)
+
+== NANOSHEET
+# What it is
+Gate-all-around with stacked horizontal silicon ribbons: the gate surrounds each channel on four sides, giving better electrostatic control than a fin at the same footprint. Stacking sheets vertically raises drive current per footprint.
+
+# Why it matters
+It is the transistor of the 2nm class: Samsung (MBCFET, first 3GAA production June 2022), TSMC N2 (volume production 4Q25), Intel 18A (RibbonFET, 2025). Samsung claimed at launch -45 percent power, +23 percent performance, -16 percent area versus 5 nm.
+
+# Failure modes
+Extra modules (superlattice epi, inner spacer, release) add process steps and variation sources, yield learning is slow. Samsung's first-generation yields were reported at 50-60 percent and the second at about 20 percent.
+
+# Who profits
+TSM, INTC, Samsung (005930.KS) as makers; AMAT, LRCX, 8035.T, ASML (ASML), KLAC as tool vendors; SNPS and CDNS for design flows; NVDA, AMD and Apple as lead customers.
+
+# Sources
+https://news.samsung.com/global/samsung-begins-chip-production-using-3nm-process-technology-with-gaa-architecture
+https://research.tsmc.com/page/logic/97.html
+https://tomshardware.com/tech-industry/semiconductors/intel-details-18a-process-technology-boosts-performance-by-25-percent-or-lowers-power-consumption-by-36-percent
+
+== FORKSHEET
+# What it is
+A forksheet places a dielectric wall between the NMOS and PMOS sheets so n and p can sit closer together, saving cell area. imec's first design (2021) put the wall inside the cell; chipmakers worried about manufacturability, so imec presented a revised outer-wall version at VLSI 2025, with the wall at the standard-cell boundary (a p-p or n-n wall).
+
+# Why it matters
+imec positions the outer-wall forksheet as the way to extend nanosheet logic to the A10 node while CFET matures. It changes the cell, not the basic nanosheet stack, so tools carry over.
+
+# Failure modes
+Wall patterning between close sheets, wall-induced stress, and a design-technology co-optimization (DTCO) benefit that may not justify extra process steps.
+
+# Who profits
+No volume revenue yet; litho and etch vendors (ASML, LRCX, 8035.T, AMAT) benefit if adopted.
+
+# Sources
+https://bits-chips.com/article/imec-reworks-forksheet-to-ease-gaa-manufacturability/
+https://imec-int.com/en/articles/imec-puts-complementary-fet-cfet-logic-technology-roadmap
+
+== CFET
+# What it is
+A complementary FET stacks an NMOS directly over a PMOS (or vice versa) on the same footprint, cutting the logic cell area by roughly the n-p spacing that planar layouts waste. imec's roadmap puts the monolithic CFET at the A7 node, after 2030 (an estimate, not a commitment); its IEDM 2024 DTCO work favours a double-row CFET cell for A7.
+
+# Why it matters
+It is the next structural change after the nanosheet. Lam describes its Akara conductor etch tool as extendible to CFET, showing vendors already position tools for it.
+
+# Failure modes
+Aspect ratio doubles (two device stacks tall), hard to place separate n and p epi and metal gates, hard to contact the bottom device, and thermal budget limits for the second device.
+
+# Who profits
+Same leaders: ASML, AMAT, LRCX, 8035.T, KLAC; EDA for new cell models (SNPS, CDNS). No CFET revenue yet.
+
+# Sources
+https://imec-int.com/en/articles/imec-puts-complementary-fet-cfet-logic-technology-roadmap
+https://imec-int.com/en/articles/advancing-cfet-based-device-roadmap-novel-integration-modules-and-standard-cell
+https://storagenewsletter.com/2025/02/26/lam-research-unveils-akara-advanced-conductor-etch-technology-tool-for-chipmakers/
+
+== YIELD/COST
+# What it is
+Early GAA yields are low and expensive. Reported figures (press, not audited): Samsung first-generation 3 nm 50-60 percent, second-generation about 20 percent, SF2 test run about 30 percent in February 2025; TSMC N3E about 82-86 percent. TSMC says N2 defect density at the same stage is lower than N3's, N5's and N7's. A reported N2 wafer price above $30,000 compares with about $18,000 for N3 (unconfirmed).
+
+# Why it matters
+Cost per good die is wafer price divided by yield. A 66 percent wafer price rise is the cost of a more complex stack: more epi, selective etch, ALD, and metrology steps.
+
+# Failure modes
+Do not trust single-source numbers: a 60 percent trial yield for N2 and over 90 percent on 256 Mb SRAM test chips were both reported, but the die sizes differ. Read them as ranges.
+
+# Who profits
+TSM (pricing power), customers with large, high-margin dies (NVDA, AMD), Samsung (005930.KS) pressured by yield.
+
+# Sources
+https://techspot.com/community/topics/tsmc-could-charge-over-30-000-for-each-2nm-wafer.288503/
+https://tomshardware.com/tech-industry/semiconductors/tsmc-discloses-n2-defect-density-lower-than-n3-at-the-same-stage-of-development
+https://notebookcheck.net/Samsung-Foundry-s-second-gen-3-nm-node-yields-are-reportedly-stuck-at-20.914411.0.html
+https://sammobile.com/news/early-exynos-2600-production-test-goes-smoothly-30-percent-yield/
+
+== TOOLS
+# What it is
+GAA raises equipment intensity. Applied Materials said the FinFET to GAA shift raises its transistor-module available market from about $6B to about $7B per 100K wafer starts per month, and expects over 50 percent of process equipment spend for those steps. Including backside power it cited about $12B to $14B. GAA-related revenue was about $2.5B in fiscal 2024, possibly doubling in 2025.
+
+# Why it matters
+The new steps are epitaxy, ALD, selective isotropic etch and tight-control metrology. Lam launched Akara conductor etch (Feb 2025) for GAA, 6F2 DRAM and 3D NAND. ASML sells the EUV scanners; KLA the inspection.
+
+# Failure modes
+Concentration: one foundry (TSM) drives much of the demand; export controls cap China sales; WFE is cyclical (see the ETCH page: Lam's China share 34 percent of FY2025 sales).
+
+# Who profits
+AMAT, LRCX, 8035.T, ASML, KLAC, ASM International (ASM.AS, textbook).
+
+# Sources
+https://marketbeat.com/earnings/transcripts/106538
+https://storagenewsletter.com/2025/02/26/lam-research-unveils-akara-advanced-conductor-etch-technology-tool-for-chipmakers/
+
+== NODES
+# What it is
+Samsung 3GAA (June 2022): -45 percent power, +23 percent performance, -16 percent area versus 5 nm. TSMC N2 (volume production 4Q25): +10-15 percent speed or -25-30 percent power and about 15 percent mixed density over N3E (original claims: 15 percent speed or 30 percent power, over 1.15x density versus N3). Intel 18A (RibbonFET plus PowerVia): about 25 percent frequency or 36 percent lower power at 1.1 V and over 30 percent density versus Intel 3. TSMC A16 (Super Power Rail, targeted late 2026): +8-10 percent speed, -15-20 percent power versus N2P.
+
+# Why it matters
+Teardown analysis (SemiAnalysis, of Panther Lake) found Intel 18A density comparable to TSMC N3E-class and not ahead of N3P, N2 or Samsung SF2; SRAM bit cells: 18A 0.021 um2, about 31.8 Mb/mm2, versus N2 about 38 Mb/mm2. Baselines differ, so the vendor claims are not comparable.
+
+# Failure modes
+PowerVia test chip (Intel 4 plus PowerVia, 2023) showed a 6 percent frequency gain and over 90 percent cell utilization; the gain is modest and moves manufacturing complexity: wafer thinning, bonding, backside metal.
+
+# Who profits
+TSM (N2/A16), INTC (18A), Samsung (005930.KS), and fabless NVDA, AMD, ARM licensees.
+
+# Sources
+https://news.samsung.com/global/samsung-begins-chip-production-using-3nm-process-technology-with-gaa-architecture
+https://tomshardware.com/tech-industry/semiconductors/intel-details-18a-process-technology-boosts-performance-by-25-percent-or-lowers-power-consumption-by-36-percent
+https://anandtech.com/show/21369
+https://newsroom.intel.com/client-computing/powervia-test-shows-industry-leading-performance
+https://notebookcheck.net/Panther-Lake-teardown-reveals-Intel-18A-in-detail-TSMC-still-leads-in-density.1410032.0.html

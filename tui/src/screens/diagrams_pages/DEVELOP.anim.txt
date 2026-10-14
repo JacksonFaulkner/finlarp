@@ -1,0 +1,171 @@
+ms 450
+== wafer back from the scanner: acid in the spaces, no relief yet
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  latent image: acid • in exposed spaces
+ │                                   │  ▓▓▓▓ • · ▓▓▓▓ · • ▓▓▓▓ • · ▓▓▓▓
+ │                                   │  ▓▓▓▓ • · ▓▓▓▓ · • ▓▓▓▓ • · ▓▓▓▓
+ │                                   │  ▓▓▓▓ • · ▓▓▓▓ · • ▓▓▓▓ • · ▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓ • · ▓▓▓▓ · • ▓▓▓▓ • · ▓▓▓▓
+ │  ░░░░░ COOL PLATE ░░░░░           │  ═══════════════════════════════ Si
+ │                                   │
+ └───────────────────────────────────┘
+== PEB 90-150 C, 30-120 s: H+ + COO-tBu ──▶ COOH + H+ (acid survives)
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ░ = deprotected COOH, soluble
+ │                                   │  ▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓
+ │                                   │  ▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓
+ │                                   │  ▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓▒▒▒▒▒▓▓▓▓
+ │  ▓▓▓ HOT PLATE 90-150 C ▓▓▓       │  ═══════════════════════════════ Si
+ │  acid ≈≈▶ diffuses, cuts t-Bu     │
+ └───────────────────────────────────┘
+== catalytic: one acid cuts many groups, the dose gets amplified
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ░ = deprotected COOH, soluble
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │  ▓▓▓ HOT PLATE 90-150 C ▓▓▓       │  ═══════════════════════════════ Si
+ │  acid ≈≈▶ diffuses, cuts t-Bu     │
+ └───────────────────────────────────┘
+== too long a bake blurs edges: sigma = sqrt(2Dt) = 39 nm at 30 s (computed)
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ░ = deprotected COOH, soluble
+ │                                   │  ▓▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▓
+ │                                   │  ▓▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▓
+ │                                   │  ▓▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▒░░░░░▒▓▓▓
+ │  ▓▓▓ HOT PLATE 90-150 C ▓▓▓       │  ═══════════════════════════════ Si
+ │  acid ≈≈▶ diffuses, cuts t-Bu     │
+ └───────────────────────────────────┘
+== cool plate: a few tenths of a degree or seconds shifts the CD
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ░ = deprotected COOH, soluble
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │  ░░░░░ COOL PLATE ░░░░░           │  ═══════════════════════════════ Si
+ │  stops; quencher eats stray H+    │
+ └───────────────────────────────────┘
+== TMAH puddle dispensed on the slowly spinning wafer
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │      TMAH nozzle ▼                │  ≈ TMAH: COOH + OH- ──▶ COO- dissolves
+ │                  ≈ ≈              │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈         │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  TMAH 2.38 wt% = 0.26 mol/L       │
+ └───────────────────────────────────┘
+== develop front moves down: soluble resist dissolves (row 1)
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ≈ TMAH: COOH + OH- ──▶ COO- dissolves
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │                                   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈         │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  TMAH 2.38 wt% = 0.26 mol/L       │
+ └───────────────────────────────────┘
+== develop front moves down: soluble resist dissolves (row 2)
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ≈ TMAH: COOH + OH- ──▶ COO- dissolves
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈         │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  TMAH 2.38 wt% = 0.26 mol/L       │
+ └───────────────────────────────────┘
+== develop front moves down: soluble resist dissolves (row 3)
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ≈ TMAH: COOH + OH- ──▶ COO- dissolves
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈         │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓░░░░░▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  TMAH 2.38 wt% = 0.26 mol/L       │
+ └───────────────────────────────────┘
+== trenches clear to the substrate: the ░ spaces are gone
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  ≈ TMAH: COOH + OH- ──▶ COO- dissolves
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈         │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  TMAH 2.38 wt% = 0.26 mol/L       │
+ └───────────────────────────────────┘
+== swelling: TMA+ ions and water bulge the lines into the spaces
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  lines swell: key factor in collapse
+ │                                   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │                                   │  ▓▓▓▓▓≈≈≈▓▓▓▓▓▓≈≈≈▓▓▓▓▓▓≈≈≈▓▓▓▓▓
+ │    ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈         │  ▓▓▓▓▓≈≈≈▓▓▓▓▓▓≈≈≈▓▓▓▓▓▓≈≈≈▓▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓≈≈≈≈≈▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  TMA+ and water soak the lines    │
+ └───────────────────────────────────┘
+== DI water rinse replaces the developer, effluent to the drain
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │      DI water nozzle ▼            │  · = DI water rinse, swelling relaxes
+ │                  · ·              │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │                                   │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │    ······················         │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  dissolved resist ──▶ cup + drain │
+ └───────────────────────────────────┘
+== spin dry: the shrinking meniscus pulls lines together, P = 2γcosθ/S
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  meniscus pulls: P = 2 γ cosθ / S
+ │                                   │  ▓▓▓▓       ▓▓▓▓ ▓▓▓▓       ▓▓▓▓
+ │                                   │  ▓▓▓▓······▓▓▓▓···▓▓▓▓······▓▓▓▓
+ │    ·  ·    ·   ·  ·   ·           │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  spin fast to dry                 │
+ └───────────────────────────────────┘
+== pattern collapse: aspect ratio past ~2.5, tall thin lines, narrow space
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  COLLAPSE: lines 2 + 3 touch, die dead
+ │                                   │  ▓▓▓▓     ▓▓▓▓▓▓▓▓▓▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓       ▓▓▓▓ ▓▓▓▓       ▓▓▓▓
+ │                                   │  ▓▓▓▓      ▓▓▓▓   ▓▓▓▓      ▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓·····▓▓▓▓·····▓▓▓▓·····▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  spin fast to dry                 │
+ └───────────────────────────────────┘
+== fix (one study): fluorosurfactant rinse lifts critical AR 2.5 ──▶ 3.2
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  lower surface tension: critical AR 3.2
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  rinse + 0.01-0.1% fluoro-surf.   │
+ └───────────────────────────────────┘
+== stochastic defect: ~20 photons/nm2 can leave a bridge or missing space
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  stochastic bridge: too few photons here
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓     ▓▓▓▓▓▓▓▓▓▓▓▓▓     ▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓     ▓▓▓▓▓▓▓▓▓▓▓▓▓     ▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  inspect after develop + etch     │
+ └───────────────────────────────────┘
+== dry pattern on to ETCH (Lam dry resist skips wet develop: claim, no collapse)
+ ┌─ TRACK (TEL / SCREEN) ────────────┐  ZOOM: resist line/space, positive CAR
+ │                                   │  clean line/space ready for etch
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │                                   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │    ══════════════════════ wafer   │  ▓▓▓▓     ▓▓▓▓     ▓▓▓▓     ▓▓▓▓
+ │       ┌──CHUCK──┐   cup + drain   │  ═══════════════════════════════ Si
+ │  resist = stencil ──▶ ETCH        │
+ └───────────────────────────────────┘

@@ -57,6 +57,8 @@ pub struct Event {
     pub label: String,
     pub detail: Option<String>,
     pub tone: Tone,
+    /// Where Enter on this event in the day view should go (a URL), if anywhere.
+    pub link: Option<String>,
 }
 
 pub struct Calendar {
@@ -68,26 +70,46 @@ pub struct Calendar {
     /// Selected event in the day view.
     sel: usize,
     theme: Theme,
+    /// Dim text after the title: which layer or filter is on.
+    status: String,
+}
+
+/// Events grouped by day, each day ordered by time (all-day first) then label.
+fn group(events: Vec<Event>) -> BTreeMap<NaiveDate, Vec<Event>> {
+    let mut by_day: BTreeMap<NaiveDate, Vec<Event>> = BTreeMap::new();
+    for e in events {
+        by_day.entry(e.date).or_default().push(e);
+    }
+    for day in by_day.values_mut() {
+        day.sort_by(|a, b| a.time.cmp(&b.time).then_with(|| a.label.cmp(&b.label)));
+    }
+    by_day
 }
 
 impl Calendar {
     pub fn new(today: NaiveDate, events: Vec<Event>, theme: Theme) -> Self {
-        let mut by_day: BTreeMap<NaiveDate, Vec<Event>> = BTreeMap::new();
-        for e in events {
-            by_day.entry(e.date).or_default().push(e);
-        }
-        for day in by_day.values_mut() {
-            day.sort_by(|a, b| a.time.cmp(&b.time).then_with(|| a.label.cmp(&b.label)));
-        }
         Self {
             view: View::Month,
             cursor: today,
             today,
             weekends: true,
-            by_day,
+            by_day: group(events),
             sel: 0,
             theme,
+            status: String::new(),
         }
+    }
+
+    /// Replace the events, keeping the view, cursor and weekend setting. The day-view selection is clamped.
+    pub fn set_events(&mut self, events: Vec<Event>) {
+        self.by_day = group(events);
+        let n = self.events_on(self.cursor).len();
+        self.sel = self.sel.min(n.saturating_sub(1));
+    }
+
+    /// Short text shown after the title, e.g. which layer or filter is on.
+    pub fn set_status(&mut self, status: impl Into<String>) {
+        self.status = status.into();
     }
 
     pub fn with_view(mut self, view: View) -> Self {
@@ -256,10 +278,11 @@ impl Calendar {
             Constraint::Length((tabs_w as u16).min(area.width)),
         ])
         .areas(area);
-        frame.render_widget(
-            Paragraph::new(Line::styled(format!(" {}", self.title()), th.title())).style(th.base()),
-            left,
-        );
+        let mut head = vec![Span::styled(format!(" {}", self.title()), th.title())];
+        if !self.status.is_empty() {
+            head.push(Span::styled(format!("   {}", self.status), th.dim()));
+        }
+        frame.render_widget(Paragraph::new(Line::from(head)).style(th.base()), left);
         frame.render_widget(Paragraph::new(Line::from(tabs)).style(th.base()), right);
     }
 
@@ -466,9 +489,14 @@ impl Calendar {
             return;
         }
         let w = list.width as usize;
+        // keep the selected event on screen when the day has more events than rows
+        let rows = (list.height as usize).max(1);
+        let top = self.sel.saturating_sub(rows - 1);
         let lines: Vec<Line> = events
             .iter()
             .enumerate()
+            .skip(top)
+            .take(rows)
             .map(|(i, e)| {
                 let time = e.time.as_deref().unwrap_or("all day");
                 let row = format!("  {time:<7} {}", e.label);
@@ -547,6 +575,7 @@ mod tests {
             label: label.into(),
             detail: Some(format!("{label} detail")),
             tone: Tone::Accent,
+            link: None,
         }
     }
 
@@ -716,5 +745,59 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn set_events_keeps_view_cursor_and_clamps_selection() {
+        let mut c = cal().with_cursor(date(2026, 10, 6));
+        c.set_view(View::Day);
+        press(&mut c, 'j');
+        assert_eq!(
+            c.selected_event().map(|e| e.label.as_str()),
+            Some("MRVL earnings call")
+        );
+        c.set_events(vec![ev(date(2026, 10, 6), None, "only one")]);
+        assert_eq!((c.view(), c.cursor()), (View::Day, date(2026, 10, 6)));
+        assert_eq!(
+            c.selected_event().map(|e| e.label.as_str()),
+            Some("only one")
+        );
+        c.set_events(Vec::new());
+        assert!(c.selected_event().is_none());
+    }
+
+    #[test]
+    fn day_view_scrolls_so_the_selection_stays_visible() {
+        let many: Vec<Event> = (0..40)
+            .map(|i| {
+                ev(
+                    date(2026, 10, 6),
+                    Some(&format!("10:{i:02}")),
+                    &format!("row {i:02}"),
+                )
+            })
+            .collect();
+        let mut c =
+            Calendar::new(date(2026, 10, 6), many, Theme::default()).with_cursor(date(2026, 10, 6));
+        c.set_view(View::Day);
+        for _ in 0..30 {
+            press(&mut c, 'j');
+        }
+        let screen = render(&c, 60, 12);
+        assert!(
+            screen.contains("row 30"),
+            "selected row must be on screen:\n{screen}"
+        );
+        assert!(
+            !screen.contains("row 00"),
+            "the top rows have scrolled away:\n{screen}"
+        );
+    }
+
+    #[test]
+    fn status_text_shows_next_to_the_title() {
+        let mut c = cal();
+        c.set_status("tweets on · MU");
+        assert!(render(&c, 80, 10).contains("tweets on · MU"));
     }
 }

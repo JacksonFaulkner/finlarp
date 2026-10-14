@@ -48,7 +48,10 @@ pub fn run_script(script: &str, args: &[&str]) -> Result<String, String> {
 
 /// Runs `script` on a background thread; the result arrives on the receiver.
 /// Lets a screen open from cache immediately and swap in fresh data later.
-pub fn spawn_script(script: &str, args: &[&str]) -> std::sync::mpsc::Receiver<Result<String, String>> {
+pub fn spawn_script(
+    script: &str,
+    args: &[&str],
+) -> std::sync::mpsc::Receiver<Result<String, String>> {
     let (tx, rx) = std::sync::mpsc::channel();
     let script = script.to_string();
     let args: Vec<String> = args.iter().map(|a| a.to_string()).collect();

@@ -1,0 +1,153 @@
+# 1. What happens: stack the sheets, carve them, release them, wrap the gate
+
+ ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+ │ SUPERLATTICE │   │ FIN PATTERN  │   │ DUMMY GATE   │   │ INNER SPACER │   │ S/D EPI      │   │ RELEASE      │
+ │ epi Si/SiGe  │─▶ │ etch stack   │─▶ │ poly + wall  │─▶ │ recess SiGe  │─▶ │ grow source  │─▶ │ etch SiGe    │
+ │ alternating  │   │ into fins    │   │ placeholder  │   │ fill SiN     │   │ and drain    │   │ free sheets  │
+ └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+
+  (then HK/METAL GATE: ALD high-k + work-function metal wraps every sheet; dummy gate replaced last)
+
+# 2. Cross-section along the channel (current flows left to right through each sheet)
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   SOURCE epi (SiP n / SiGeB p)                                              DRAIN epi                  │
+│   ░░░░░░░░░░░░ ▓ ═══════════ sheet 3 (Si) ═══════════ ▓ ░░░░░░░░░░░░                                   │
+│   ░░░░░░░░░░░░ ▓ ▒▒▒▒▒▒▒▒▒ HK + work-function metal ▒▒▒▒▒▒▒▒▒ ▓ ░░░░░░░░░░░░                           │
+│   ░░░░░░░░░░░░ ▓ ═══════════ sheet 2 (Si) ═══════════ ▓ ░░░░░░░░░░░░                                   │
+│   ░░░░░░░░░░░░ ▓ ▒▒▒▒▒▒▒▒▒ HK + work-function metal ▒▒▒▒▒▒▒▒▒ ▓ ░░░░░░░░░░░░                           │
+│   ░░░░░░░░░░░░ ▓ ═══════════ sheet 1 (Si) ═══════════ ▓ ░░░░░░░░░░░░                                   │
+│   ▓ = inner spacer (SiN or SiOCN): isolates gate from S/D at every level;  ▒ = gate wraps all 4 sides  │
+│   ───────── bottom: sub-fin / punch-through stop (parasitic channel if not isolated) ──────            │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (SiGe layers were sacrificial: they set the gap, are etched away, and the gate metal takes their place)
+
+# 3. Epitaxial stack before and after release
+
+ ┌────────────────────┐      ┌────────────────────┐      ┌────────────────────┐
+ │ BEFORE RELEASE     │      │ AFTER INNER SPACER │      │ AFTER RELEASE      │
+ │ Si    sheet 3      │      │ Si ═════════       │      │ Si ═════════       │
+ │ SiGe  sacrificial  │      │ ▓ SiGe recessed    │      │ ▒ gate metal       │
+ │ Si    sheet 2      │      │ Si ═════════       │      │ Si ═════════       │
+ │ SiGe  sacrificial  │      │ ▓ SiGe recessed    │      │ ▒ gate metal       │
+ │ Si    sheet 1      │      │ Si ═════════       │      │ Si ═════════       │
+ │ SiGe  sacrificial  │      │ ▓ SiGe recessed    │      │ ▒ gate metal       │
+ └────────────────────┘      └────────────────────┘      └────────────────────┘
+
+  (key step: etch SiGe sideways with high selectivity to Si; any Si loss thins the sheet and shifts Vt)
+
+# 4. Process modules that are new versus FinFET
+
+ ┌─────────────────────────────┐   ┌─────────────────────────────┐   ┌─────────────────────────────┐
+ │ SUPERLATTICE                │   │ INNER SPACER                │   │ RELEASE                     │
+ │ 3-4 Si/SiGe pairs, epi      │   │ isotropic SiGe recess       │   │ SiGe removed laterally      │
+ │ thickness ctrl ~1 nm        │   │ then fill + etch back       │   │ needs Si:SiGe selectivity   │
+ └─────────────────────────────┘   └─────────────────────────────┘   └─────────────────────────────┘
+ ┌─────────────────────────────┐   ┌─────────────────────────────┐   ┌─────────────────────────────┐
+ │ HK/METAL GATE               │   │ S/D EPI                     │   │ SHEET WIDTH                 │
+ │ ALD into ~10 nm gaps        │   │ grow from sheet edges       │   │ drawn per device            │
+ │ stack must fit in gap       │   │ strain + low contact R      │   │ wide=drive narrow=area      │
+ └─────────────────────────────┘   └─────────────────────────────┘   └─────────────────────────────┘
+
+  (each module is a place for variation: gap uniformity, recess depth, spacer thickness, gate fill voids)
+
+# 5. Sheet width: a design knob FinFET did not have
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   FinFET: fin width is fixed; drive is set by an integer fin count (1, 2, 3 fins)                      │
+│      ▐▌  ▐▌  ▐▌                                   thin fins, discrete steps                            │
+│   Nanosheet: width W is drawn per device on the same stack height                                      │
+│      ▐█████▌   wide sheet: high drive, high speed (high-performance cells)                             │
+│      ▐██▌      narrow sheet: low leakage, small cell (dense or low-power cells)                        │
+│   Effective width per stack ~ N sheets x (W + 2T), T = sheet thickness (textbook)                      │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (TSMC says N2 allows cells built from different nanosheet widths on the same chip [3])
+
+# 6. Backside power: signal wires up front, power wires from behind
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   FRONTSIDE POWER (conventional)                BACKSIDE POWER (PowerVia / Super Power Rail)           │
+│   M10-M14  signal + power mixed, thick          M10-M14  signal only (less congestion)                 │
+│   M1-M4    power rails share tracks             M1-M4    signal only                                   │
+│   ─────────────── transistors ───────────       ─────────────── transistors ───────────                │
+│   substrate (bulk)                              thinned substrate, nano-TSV to rail                    │
+│                                                 ═══ BACKSIDE POWER RAILS ═══  to package               │
+│   IR droop from long, thin power paths          short power path; wafer thinned (textbook)             │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+  (Intel PowerVia debuts on 18A [2]; TSMC Super Power Rail on A16 contacts the source/drain directly [4])
+
+# 7. Node comparison (vendor claims, not equal conditions)
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   Samsung 3GAA (SF3E)  2022   vs 5nm: -45% power, +23% perf, -16% area [1]                             │
+│   TSMC N2              4Q25   vs N3E: +10-15% speed or -25-30% power, ~1.15x mixed density [3]         │
+│   Intel 18A            2025   vs Intel 3: ~25% freq or -36% power at 1.1V, >30% density [2]            │
+│   TSMC A16 (SPR)       2026+  vs N2P: +8-10% speed, -15-20% power, up to 8-10% density [4]             │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 8. Roadmap: FinFET to GAA to forksheet to CFET
+
+ ┌────────────────┐   ┌────────────────┐   ┌────────────────┐   ┌────────────────┐
+ │ FINFET         │   │ NANOSHEET      │   │ FORKSHEET      │   │ CFET           │
+ │ fin, 3 sides   │─▶ │ GAA stack      │─▶ │ wall between   │─▶ │ n stacked on p │
+ │ to ~3nm class  │   │ N2 18A SF2     │   │ n and p        │   │ monolithic     │
+ └────────────────┘   └────────────────┘   └────────────────┘   └────────────────┘
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   imec: outer-wall forksheet extends nanosheets to A10; monolithic CFET expected at A7, after 2030 [5] │
+│   CFET stacks NMOS over PMOS: cell area shrinks, but contacts and gates must be built in 3D (textbook) │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+# 9. Yield and cost: reported, not audited
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   Samsung SF3E yield   ████████████████████████████ 50-60% (Naver report, 2024)                        │
+│   Samsung SF3 (2nd)    ███████████ ~20% (press report, 2024)                                           │
+│   Samsung SF2 test     ████████████████ ~30% (Exynos 2600 test run, Feb 2025)                          │
+│   TSMC N3E (FinFET)    ██████████████████████████████████████████ ~82-86% (report)                     │
+│   (secondary reports; TSMC N2 wafer price reported >$30,000 vs ~$18,000 for N3, unconfirmed [6])       │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+ ┌──────────────────────────┐   ┌──────────────────────────┐   ┌──────────────────────────┐
+ │ YIELD/COST               │   │ TOOLS                    │   │ NODES                    │
+ │ defects vs wafer price   │   │ epi, ALD, selective etch │   │ SF3 N2 18A A16           │
+ │ cost per good die        │   │ AMAT LRCX TEL ASML       │   │ who ships what           │
+ └──────────────────────────┘   └──────────────────────────┘   └──────────────────────────┘
+
+# 10. Tool demand
+
+┌────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│   Applied transistor-module TAM per 100K wafer starts/month:  FinFET ~$6B  ->  GAA ~$7B   [7]          │
+│   with backside power included (later framing):               ~$12B  ->  ~$14B           [7]           │
+│   Applied GAA-related revenue: ~$2.5B in FY2024, guided to roughly double in 2025        [7]           │
+│   Lam Akara conductor etch (Feb 2025) aimed at GAA, 6F2 DRAM, 3D NAND, extendible to CFET [8]          │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+(notes)
+  Numbers are vendor claims and press reports; process conditions differ so compare nodes with care.
+  Sheet count (3-4), thickness and SiGe percentages are textbook or paper-level, not from one source.
+  Yield and wafer-price items are third-party reports; Samsung and TSMC do not publish wafer yields.
+
+# Sources
+
+  [1] Samsung 3GAA: news.samsung.com/global/samsung-begins-chip-production-using-3nm-process-technology-
+        with-gaa-architecture
+  [2] Intel 18A: tomshardware.com/tech-industry/semiconductors/intel-details-18a-process-technology-
+        boosts-performance-by-25-percent-or-lowers-power-consumption-by-36-percent ;
+        newsroom.intel.com/client-computing/powervia-test-shows-industry-leading-performance
+  [3] TSMC N2: research.tsmc.com/page/logic/97.html ; spectrum.ieee.org/amp/tsmc-n2-2670436570 ;
+        tomshardware.com (TSMC begins volume production of 2nm)
+  [4] TSMC A16: anandtech.com/show/21369 ; tomshardware.com/tech-industry/tsmc-unveils-16nm-process-
+        technology-with-backside-power-delivery-rivals-intels-competing-design
+  [5] imec: imec-int.com/en/articles/imec-puts-complementary-fet-cfet-logic-technology-roadmap ; bits-
+        chips.com/article/imec-reworks-forksheet-to-ease-gaa-manufacturability/
+  [6] techspot.com/community/topics/tsmc-could-charge-over-30-000-for-each-2nm-wafer.288503/ ;
+        notebookcheck.net Samsung 3 nm yield reports ; tomshardware.com TSMC N2 defect density
+  [7] marketbeat.com/earnings/transcripts/106538 (Applied Materials Q2 FY2024 call)
+  [8] storagenewsletter.com/2025/02/26/lam-research-unveils-akara-advanced-conductor-etch-technology-tool-
+        for-chipmakers/
+  [9] pmc.ncbi.nlm.nih.gov/articles/PMC11173960/ ; research.ibm.com (dry selective etch of SiGe for
+        stacked GAA nanosheets)
