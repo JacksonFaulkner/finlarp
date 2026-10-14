@@ -94,7 +94,11 @@ function M.open(visual)
     local text = table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n")
     close()
     vim.cmd("stopinsert")
-    M.submit(text, context)
+    if vim.trim(text):sub(1, 1) == ">" then
+      require("finlarp.ui.godel").submit(text)
+    else
+      M.submit(text, context)
+    end
   end
   vim.keymap.set({ "n", "i" }, "<CR>", send, { buffer = buf, silent = true })
   vim.keymap.set("i", "<S-CR>", "<CR>", { buffer = buf, silent = true })

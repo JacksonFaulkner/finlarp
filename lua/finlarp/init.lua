@@ -854,6 +854,11 @@ end
 
 --- fzf viewer over every note asked; <CR> reopens the answering Claude chat.
 function M.notes()
+  local godel = require("finlarp.ui.godel")
+  if godel.has_unseen() then
+    godel.open()
+    return
+  end
   require("finlarp.ui.notes").open()
 end
 
