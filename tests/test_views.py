@@ -10,7 +10,7 @@ BUCKETS_N = 6
 
 def test_no_drift(s, con):
     for view in VIEW_MODELS:
-        if (view.startswith("account_") or view in ("news", "tweet_sentiment", "tweet_meta")) and view not in s._view_desc:  # personal/optional pulls: absent on a fresh checkout
+        if (view.startswith("account_") or view in ("news", "tweet_sentiment", "tweet_meta", "short_volume", "short_interest")) and view not in s._view_desc:  # personal/optional pulls: absent on a fresh checkout
             continue
         cols = [c[0] for c in con.execute(f"DESCRIBE {view}").fetchall()]
         assert set(cols) == set(VIEW_MODELS[view].model_fields), (view, set(cols) ^ set(VIEW_MODELS[view].model_fields))

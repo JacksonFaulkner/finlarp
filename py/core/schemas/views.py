@@ -200,6 +200,29 @@ class NewsView(BaseModel):
     text_chars: int = Field(description="Length of text in characters; filter on it to drop stubs")
 
 
+class ShortVolumeView(BaseModel):
+    """FINRA Reg SHO daily short sale volume per ticker per day, from sources/short_interest.py (published the evening of the trade date)."""
+
+    ticker: str = Field(description="Universe ticker")
+    date: dt.date = Field(description="Trade date")
+    short_volume: float = Field(description="Shares sold short that day across FINRA-reported venues; includes market-maker hedging, so it is flow, not a position")
+    short_exempt_volume: float = Field(description="Part of short_volume that was short-exempt")
+    total_volume: float = Field(description="Total shares traded that day across the same venues (not the consolidated tape total)")
+    short_ratio: float | None = Field(description="short_volume / total_volume, 0-1; roughly 0.45-0.55 is normal, near 0.7 means heavy new shorting")
+
+
+class ShortInterestView(BaseModel):
+    """Short interest per ticker per FINRA settlement date (twice a month, published ~7 business days later), from sources/short_interest.py."""
+
+    ticker: str = Field(description="Universe ticker")
+    settlement_date: dt.date = Field(description="Settlement date the short position is as of; the data is public about 7 business days later")
+    short_interest: float = Field(description="Shares sold short and not yet covered at settlement")
+    avg_daily_volume: float | None = Field(description="Average daily share volume used for days_to_cover; null for the Yahoo fallback")
+    days_to_cover: float | None = Field(description="short_interest / avg_daily_volume: how many days of normal volume it takes shorts to cover")
+    source: str = Field(description="nasdaq = ~2 years of history for Nasdaq-listed names; yahoo = fallback, only the latest two settlements")
+    fetched_at: datetime = Field(description="When this ticker's history was last pulled, UTC")
+
+
 class TweetSentimentView(TweetLabel):
     """One labelled view on one ticker in one tweet, from sources/tweet_sentiment.py. Column docs are the labeller's own
     field descriptions (core.schemas.sentiment), so the rules the model followed are the rules documented here."""
@@ -257,6 +280,8 @@ VIEW_MODELS: dict[str, type[BaseModel]] = {
     "tweets": sv.TweetsView,
     "tweet_tickers": sv.TweetTickers,
     "news": NewsView,
+    "short_volume": ShortVolumeView,
+    "short_interest": ShortInterestView,
     "tweet_sentiment": TweetSentimentView,
     "tweet_meta": TweetMetaView,
     "account_fills": AccountFill,

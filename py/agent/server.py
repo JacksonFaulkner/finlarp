@@ -306,6 +306,12 @@ def _views(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
         "news": (f"'{D}/news/news.parquet'",
                  "company news per ticker (ROIC.ai; free plan covers ~2 years): published_at UTC, title, site, url and text, "
                  "which is a ~200 character snippet, not the full article; one row per (ticker, url). Includes press wires (globenewswire.com)"),
+        "short_volume": (f"'{D}/short/short_volume.parquet'",
+                         "FINRA Reg SHO daily short sale volume per ticker per day: short_volume, total_volume, short_ratio. "
+                         "Flow (includes market-maker hedging; ~45-55% is normal), published the evening of the trade date"),
+        "short_interest": (f"'{D}/short/short_interest.parquet'",
+                           "short interest per ticker per settlement date (twice a month, public ~7 business days later): "
+                           "short_interest, days_to_cover. source nasdaq = ~2y history, yahoo = latest two settlements only"),
         "tweet_sentiment": (f"'{D}/sentiment/tweet_sentiment.parquet'",
                             "LLM labels per (tweet, cashtag): stance -2..+2, focus, whose view (view_holder), claim type, horizon, "
                             "price_target, catalyst, evidence quote, confidence; join tweets on id. Weight by focus and view_holder"),
