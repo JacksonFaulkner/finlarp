@@ -40,6 +40,7 @@ from core.schemas.canslim import (
     TopHolder,
 )
 from derive.dossier import archive, derived, ixbrl, src
+from derive.short import short_blocks
 
 MODULES = ",".join([
     "assetProfile", "summaryDetail", "defaultKeyStatistics", "financialData",
@@ -776,17 +777,20 @@ def _fetch_scorecard(symbol: str) -> CanslimScorecard:
 
     # ---- S
     s_score, s_ssrc = _score("S", [(vol_surge, 0.5, 2.0, s_surge)])
+    s_shares_src = _yf(S, "key-statistics", "defaultKeyStatistics.sharesOutstanding")
+    short_extra = short_blocks(S, hist, s.shares_outstanding, s_shares_src, _close_src)
     sections.append(_section("S", "Supply / demand", s_score, s_ssrc, [
         {"type": "kv", "title": "Headline", "rows": [
-            _kv("shares outstanding", _big(s.shares_outstanding), _yf(S, "key-statistics", "defaultKeyStatistics.sharesOutstanding")),
+            _kv("shares outstanding", _big(s.shares_outstanding), s_shares_src),
             _kv("short % of float", _f(s.short_pct_of_float and s.short_pct_of_float * 100, "{:.1f}%"),
                 _yf(S, "key-statistics", "defaultKeyStatistics.shortPercentOfFloat (fraction × 100)")),
             _kv("avg volume 10d", _big(vol_10d), s_v10),
             _kv("avg volume 3mo", _big(vol_3mo), s_v3),
             _kv("volume surge (10d / 3mo)", _f(vol_surge, "{:.2f}x"), s_surge),
-        ]}],
+        ]}] + short_extra,
         "Demand shows up as volume: big-volume up days on breakouts, light volume on pullbacks. "
-        "Gauge: 10-day / 3-month average volume over 0.5..2.0x."))
+        "Gauge: 10-day / 3-month average volume over 0.5..2.0x. "
+        "The short-selling blocks (short interest and short-volume ratio against price) are context and are not scored."))
 
     # ---- L
     l_score, l_ssrc = _score("L", [(rs_score, -20, 20, s_rs)])

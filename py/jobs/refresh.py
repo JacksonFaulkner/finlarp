@@ -78,6 +78,8 @@ def daily_steps() -> list[dict]:
         step("market", "bars", "sources/databento_bars.py", "pull", "--max-cost", "15", needs="DATABENTO_API_KEY"),
         step("market", "bars_compact", "sources/databento_bars.py", "compact"),
         step("market", "profiles", "sources/yahoo_profile.py"),
+        step("market", "short_volume", "sources/short_interest.py", "volume"),
+        step("market", "short_interest", "sources/short_interest.py", "interest"),
         # tweets -> sentiment
         step("tweets", "tweets_pull", "jobs.pull_recent_tweets", "--max-cost", "1", needs="APIFY_TOKEN"),
         step("tweets", "tweets_ingest", "sources/tweets.py", "ingest"),
