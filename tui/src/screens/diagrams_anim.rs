@@ -11,14 +11,9 @@
 // means no animation. Frames are padded to one height so the page below
 // does not jump.
 
-use std::time::Instant;
+use crate::ui::anim::{Beat, Canvas, Scene, Time};
 
 const ANIMS: &[(&str, &str)] = &[
-    ("SAND", include_str!("diagrams_pages/SAND.anim.txt")),
-    (
-        "POLYSILICON",
-        include_str!("diagrams_pages/POLYSILICON.anim.txt"),
-    ),
     (
         "MELT + PULL",
         include_str!("diagrams_pages/MELT_PULL.anim.txt"),
@@ -86,10 +81,54 @@ pub fn anim_for(page: &str) -> Option<Anim> {
         .and_then(|(_, s)| parse(s))
 }
 
-impl Anim {
-    /// Frame index for the time since `start`.
-    pub fn frame_at(&self, start: Instant) -> usize {
-        (start.elapsed().as_millis() as u64 / self.ms) as usize % self.frames.len()
+/// Hand-drawn text frames played as a scene: one beat per frame.
+pub struct TextScene {
+    anim: Anim,
+    beats: Vec<Beat>,
+}
+
+impl TextScene {
+    pub fn new(anim: Anim) -> Self {
+        let beats = anim
+            .frames
+            .iter()
+            .map(|(caption, _)| Beat::new(caption, anim.ms))
+            .collect();
+        Self { anim, beats }
+    }
+}
+
+impl Scene for TextScene {
+    fn size(&self) -> (u16, u16) {
+        let w = self
+            .anim
+            .frames
+            .iter()
+            .flat_map(|(_, f)| f.iter())
+            .map(|l| l.chars().count())
+            .max()
+            .unwrap_or(0);
+        (w as u16, self.anim.height as u16)
+    }
+
+    fn beats(&self) -> &[Beat] {
+        &self.beats
+    }
+
+    fn draw(&self, c: &mut Canvas, t: &Time) {
+        if let Some((_, lines)) = self.anim.frames.get(t.beat) {
+            c.blit(0, 0, lines);
+        }
+    }
+}
+
+/// The scene for a node page (keyed like VISUALS), if it has one. Pages
+/// with a procedural scene use it; the rest fall back to their text frames.
+pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
+    match page {
+        "SAND" => Some(Box::new(super::diagrams_scene_sand::Sand)),
+        "POLYSILICON" => Some(Box::new(super::diagrams_scene_poly::Poly)),
+        _ => anim_for(page).map(|a| Box::new(TextScene::new(a)) as Box<dyn Scene>),
     }
 }
 
@@ -105,6 +144,28 @@ mod tests {
         assert_eq!(a.frames[0], ("one", vec!["ab"]));
         assert_eq!(a.height, 3);
         assert!(parse("").is_none());
+    }
+
+    #[test]
+    fn text_frames_play_as_a_scene() {
+        use crate::ui::anim::Player;
+        let a = parse("ms 200\n== one\nab\n\n== two\nx\ny\n").unwrap();
+        let mut p = Player::new(Box::new(TextScene::new(a)), std::time::Instant::now());
+        let s = p.shot_at(0);
+        assert_eq!(
+            (s.caption, s.lines.as_slice()),
+            ("one", &["ab".to_string(), String::new()][..])
+        );
+        let s = p.shot_at(250);
+        assert_eq!(s.caption, "two");
+        assert_eq!(s.lines, vec!["x", "y"]);
+    }
+
+    #[test]
+    fn sand_is_procedural_and_others_fall_back() {
+        assert!(scene_for("SAND").is_some());
+        assert!(scene_for("WAFER").is_some());
+        assert!(scene_for("NOPE").is_none());
     }
 
     #[test]

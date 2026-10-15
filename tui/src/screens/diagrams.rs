@@ -11,7 +11,7 @@
 use std::io;
 use std::path::Path;
 use std::process::Command;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
@@ -21,18 +21,21 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 
-use super::diagrams_anim::anim_for;
+use super::diagrams_anim::scene_for;
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
 use crate::app::{Action, Ctx, Screen};
+use crate::ui::anim::Player;
 use crate::ui::help::{Key, key, render_footer, render_overlay};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
 /// How long the auto-tour rests on each visual spot / atom before moving on.
 const TOUR_MS: u128 = 2200;
+/// Redraw interval while a page animation plays (~12 fps).
+const FRAME: Duration = Duration::from_millis(80);
 
 const KEYS: &[Key] = &[
     key("h/l", "previous / next node"),
@@ -55,6 +58,17 @@ enum Focus {
     Visual,
 }
 
+/// What the node popup is showing. Pages with an animation open on the
+/// full-size overview; the sections menu leads into the old pane view.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PopupView {
+    Overview,
+    /// A close-up scene opened from the overview.
+    Zoom,
+    Menu,
+    Pane,
+}
+
 pub struct Diagrams {
     theme: Theme,
     tab: usize,
@@ -65,10 +79,16 @@ pub struct Diagrams {
     sel: usize,
     popup: bool,
     popup_scroll: u16,
+    view: PopupView,
+    menu_sel: usize,
+    /// The open zoom-in: (index in the scene's zooms, its player).
+    zoom: Option<(usize, Player)>,
     /// Active page section (pane) in the node popup.
     pane: usize,
-    /// When the popup opened; drives the page animation's frame clock.
+    /// When the popup opened; drives the page animation's clock.
     anim_start: Instant,
+    /// The open page's animation, keyed by page; `None` inside = page has none.
+    player: Option<(&'static str, Option<Player>)>,
     /// Clock for the detail card's auto-tour: visual spots and atoms cycle on
     /// their own until the cursor moves into them, which freezes the tour.
     tour_start: Instant,
@@ -280,8 +300,12 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         sel: 0,
         popup: false,
         popup_scroll: 0,
+        view: PopupView::Pane,
+        menu_sel: 0,
+        zoom: None,
         pane: 0,
         anim_start: Instant::now(),
+        player: None,
         tour_start: Instant::now(),
         hots: Vec::new(),
         hsel: 0,
@@ -311,6 +335,15 @@ fn class_style(c: char, in_note: bool, t: &Theme) -> Style {
 }
 
 /// Art -> styled lines. `# ` lines are section headings; `(...)` is a note.
+fn own_line(l: Line<'_>) -> Line<'static> {
+    Line::from(
+        l.spans
+            .into_iter()
+            .map(|sp| Span::styled(sp.content.into_owned(), sp.style))
+            .collect::<Vec<_>>(),
+    )
+}
+
 fn styled_lines<'a>(art: &'a str, t: &Theme) -> Vec<Line<'a>> {
     art.lines()
         .map(|line| {
@@ -487,10 +520,317 @@ impl Diagrams {
         }
     }
 
+    /// A page animation is playing in the open popup.
+    fn animating(&self) -> bool {
+        self.popup
+            && matches!(self.view, PopupView::Overview | PopupView::Zoom)
+            && self.has_scene()
+            && !self.scene_player().is_some_and(|p| p.is_paused())
+    }
+
+    /// The player the overview or the zoom is showing.
+    fn scene_player(&self) -> Option<&Player> {
+        if self.view == PopupView::Zoom {
+            self.zoom.as_ref().map(|(_, p)| p)
+        } else {
+            self.player.as_ref().and_then(|(_, p)| p.as_ref())
+        }
+    }
+
+    fn scene_player_mut(&mut self) -> Option<&mut Player> {
+        if self.view == PopupView::Zoom {
+            self.zoom.as_mut().map(|(_, p)| p)
+        } else {
+            self.player.as_mut().and_then(|(_, p)| p.as_mut())
+        }
+    }
+
+    /// p pauses / resumes, h/l (or arrows) jump a beat back / forward.
+    fn playback_key(&mut self, code: KeyCode) -> bool {
+        let Some(p) = self.scene_player_mut() else {
+            return false;
+        };
+        match code {
+            KeyCode::Char('p') => p.toggle_pause(),
+            KeyCode::Char('l') | KeyCode::Right => p.step_beat(1),
+            KeyCode::Char('h') | KeyCode::Left => p.step_beat(-1),
+            _ => return false,
+        }
+        true
+    }
+
+    fn has_scene(&self) -> bool {
+        matches!(self.player, Some((_, Some(_))))
+    }
+
+    fn cur_label(&self) -> Option<String> {
+        Some(self.nodes.get(self.tab)?.get(self.sel)?.label.clone())
+    }
+
+    /// Section titles of the open page, in menu order.
+    fn pane_titles(&self) -> Vec<String> {
+        let art = self.cur_label().and_then(|l| visual(&l)).unwrap_or("");
+        pane_ranges(art)
+            .iter()
+            .enumerate()
+            .map(|(i, p)| {
+                let title = art.lines().nth(p.2).unwrap_or("");
+                let title = title.strip_prefix("# ").unwrap_or(title).trim();
+                if title.chars().next().is_some_and(|c| c.is_ascii_digit()) {
+                    title.to_string()
+                } else {
+                    format!("{}. {title}", i + 1)
+                }
+            })
+            .collect()
+    }
+
+    /// Menu -> section: show pane `i` with the usual spot cursor.
+    fn open_pane(&mut self, i: usize) {
+        let n = self.pane_titles().len();
+        if n == 0 {
+            return;
+        }
+        self.pane = i.min(n - 1);
+        self.popup_scroll = 0;
+        let art = self.cur_label().and_then(|l| visual(&l)).unwrap_or("");
+        let (p0, p1, _) = pane_ranges(art)[self.pane];
+        if let Some(h) = self
+            .hots
+            .iter()
+            .position(|h| (h.row as usize) >= p0 && (h.row as usize) < p1)
+        {
+            self.hsel = h;
+        }
+        self.view = PopupView::Pane;
+    }
+
+    /// (key, label) of the open page's zoom-ins.
+    fn zoom_list(&self) -> Vec<(char, &'static str)> {
+        match &self.player {
+            Some((_, Some(p))) => p.zooms().iter().map(|z| (z.key, z.label)).collect(),
+            _ => Vec::new(),
+        }
+    }
+
+    fn open_zoom(&mut self, i: usize) {
+        let Some((_, Some(p))) = &self.player else {
+            return;
+        };
+        let Some(z) = p.zooms().get(i).copied() else {
+            return;
+        };
+        self.zoom = Some((i, Player::new((z.build)(), Instant::now())));
+        self.view = PopupView::Zoom;
+    }
+
+    /// Menu index of the zoom bound to `key`.
+    fn zoom_for_key(&self, key: char) -> Option<usize> {
+        self.zoom_list().iter().position(|(k, _)| *k == key)
+    }
+
+    /// Full-size animation (the page's overview, or a zoom-in): caption on
+    /// top, the scene filling the popup, the beat's notes beside it (or under
+    /// it when narrow), zoom keys and beat dots at the foot.
+    fn draw_scene(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
+        let zooming = self.view == PopupView::Zoom;
+        let zooms = self.zoom_list();
+        let zoom_name = self
+            .zoom
+            .as_ref()
+            .and_then(|(i, _)| zooms.get(*i))
+            .map(|(_, l)| *l)
+            .unwrap_or("");
+        frame.render_widget(Clear, r);
+        let paused = self.scene_player().is_some_and(|p| p.is_paused());
+        let play = if paused {
+            "p resume  h/l step beat"
+        } else {
+            "p pause  h/l step beat"
+        };
+        let (title, hint) = if zooming {
+            (
+                format!(" {label} \u{00B7} {zoom_name} "),
+                format!(" esc back  m menu  a-d switch zoom  {play} "),
+            )
+        } else {
+            let keys = match (zooms.first(), zooms.last()) {
+                (Some((a, _)), Some((b, _))) if a != b => format!(" {a}-{b} zoom in "),
+                (Some((a, _)), _) => format!(" {a} zoom in "),
+                _ => String::new(),
+            };
+            (
+                format!(" {label} "),
+                format!("{keys} m menu  1-9 sections  {play}  q close "),
+            )
+        };
+        let block = Block::new()
+            .borders(Borders::ALL)
+            .border_style(t.accent())
+            .title(Span::styled(title, t.title()))
+            .title_bottom(Span::styled(hint, t.dim()))
+            .padding(ratatui::widgets::Padding::horizontal(1));
+        let inner = block.inner(r);
+        frame.render_widget(block, r);
+        let chips_h = u16::from(!zooming && !zooms.is_empty());
+        let player = if zooming {
+            self.zoom.as_mut().map(|(_, p)| p)
+        } else {
+            self.player.as_mut().and_then(|(_, p)| p.as_mut())
+        };
+        let Some(p) = player else {
+            return;
+        };
+        let [cap_r, body_r, chips_r, dots_r] = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Min(0),
+            Constraint::Length(chips_h),
+            Constraint::Length(1),
+        ])
+        .areas(inner);
+        let min_w = p.min_size().0;
+        let side_w = inner.width.saturating_sub(min_w + 2).min(46);
+        let side = side_w >= 28;
+        let (art_r, note_r) = if side {
+            let [a, _, n] = Layout::horizontal([
+                Constraint::Length(inner.width - side_w - 2),
+                Constraint::Length(2),
+                Constraint::Length(side_w),
+            ])
+            .areas(body_r);
+            (a, n)
+        } else {
+            let notes_h = 9.min(body_r.height / 3);
+            let [a, n] =
+                Layout::vertical([Constraint::Min(0), Constraint::Length(notes_h)]).areas(body_r);
+            (a, n)
+        };
+        p.fit(art_r.width, art_r.height);
+        let shot = p.shot();
+        frame.render_widget(
+            Paragraph::new(Line::from(vec![
+                Span::styled(format!("\u{25B6} {}", shot.caption), t.accent()),
+                Span::styled(format!("   {}/{}", shot.beat + 1, shot.beats), t.dim()),
+                Span::styled(if paused { "   PAUSED" } else { "" }, t.accent()),
+            ]))
+            .style(t.base()),
+            cap_r,
+        );
+        let art = shot.lines.join("\n");
+        let art_lines: Vec<Line> = styled_lines(&art, t).into_iter().map(own_line).collect();
+        frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
+        let mut notes: Vec<Line> = Vec::new();
+        for (head, body) in [("WHAT'S HAPPENING", shot.what), ("LOOK FOR", shot.look)] {
+            if body.is_empty() {
+                continue;
+            }
+            if !notes.is_empty() {
+                notes.push(Line::default());
+            }
+            notes.push(Line::from(Span::styled(head, t.accent())));
+            notes.push(Line::from(Span::styled(body, t.base())));
+        }
+        frame.render_widget(
+            Paragraph::new(notes)
+                .style(t.base())
+                .wrap(Wrap { trim: true }),
+            note_r,
+        );
+        if chips_h > 0 {
+            let mut chips = vec![Span::styled("zoom in  ", t.dim())];
+            for (k, l) in &zooms {
+                chips.push(Span::styled(format!("[{k}] "), t.accent()));
+                chips.push(Span::styled(format!("{l}   "), t.base()));
+            }
+            frame.render_widget(Paragraph::new(Line::from(chips)).style(t.base()), chips_r);
+        }
+        let dots: Vec<Span> = (0..shot.beats)
+            .map(|i| {
+                if i == shot.beat {
+                    Span::styled("\u{25CF} ", t.accent())
+                } else if i < shot.beat {
+                    Span::styled("\u{25CF} ", t.dim())
+                } else {
+                    Span::styled("\u{00B7} ", t.dim())
+                }
+            })
+            .collect();
+        frame.render_widget(Paragraph::new(Line::from(dots)).style(t.base()), dots_r);
+    }
+
+    /// Zoom-ins (animated) and the page's sections (text) as one list.
+    fn draw_menu(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
+        frame.render_widget(Clear, r);
+        let block = Block::new()
+            .borders(Borders::ALL)
+            .border_style(t.accent())
+            .title(Span::styled(format!(" {label} \u{00B7} menu "), t.title()))
+            .title_bottom(Span::styled(
+                " j/k move  enter open  a-d zoom  1-9 sections  esc back to the animation ",
+                t.dim(),
+            ))
+            .padding(ratatui::widgets::Padding::new(2, 2, 1, 0));
+        let inner = block.inner(r);
+        frame.render_widget(block, r);
+        let zooms = self.zoom_list();
+        let titles = self.pane_titles();
+        self.menu_sel = self
+            .menu_sel
+            .min((zooms.len() + titles.len()).saturating_sub(1));
+        let mut lines: Vec<Line> = Vec::new();
+        let mut sel_line = 0usize;
+        let item = |i: usize, text: String, sel: usize, t: &Theme| {
+            if i == sel {
+                Line::from(Span::styled(
+                    format!(" \u{25B6} {text} "),
+                    t.selected().add_modifier(Modifier::BOLD),
+                ))
+            } else {
+                Line::from(Span::styled(format!("   {text} "), t.base()))
+            }
+        };
+        if !zooms.is_empty() {
+            lines.push(Line::from(Span::styled(
+                "ZOOM IN \u{00B7} animated close-ups of one part",
+                t.accent(),
+            )));
+            for (i, (k, l)) in zooms.iter().enumerate() {
+                if i == self.menu_sel {
+                    sel_line = lines.len();
+                }
+                lines.push(item(i, format!("{k}  {l}"), self.menu_sel, t));
+            }
+            lines.push(Line::default());
+            lines.push(Line::from(Span::styled(
+                "SECTIONS \u{00B7} the full write-up",
+                t.accent(),
+            )));
+        }
+        for (i, title) in titles.iter().enumerate() {
+            if zooms.len() + i == self.menu_sel {
+                sel_line = lines.len();
+            }
+            lines.push(item(zooms.len() + i, title.clone(), self.menu_sel, t));
+        }
+        let off = (sel_line + 1).saturating_sub(inner.height as usize) as u16;
+        frame.render_widget(
+            Paragraph::new(lines).style(t.base()).scroll((off, 0)),
+            inner,
+        );
+    }
+
     fn draw_popup(&mut self, frame: &mut Frame, area: Rect, t: &Theme) {
         let Some(n) = self.nodes[self.tab].get(self.sel) else {
             return;
         };
+        let label = n.label.clone();
+        match self.view {
+            PopupView::Overview | PopupView::Zoom if self.has_scene() => {
+                return self.draw_scene(frame, area, &label, t);
+            }
+            PopupView::Menu => return self.draw_menu(frame, area, &label, t),
+            _ => {}
+        }
         let text = describe(&n.label).unwrap_or("No description yet.");
         let art = visual(&n.label).unwrap_or("");
         let r = area;
@@ -501,21 +841,6 @@ impl Diagrams {
             .map(|l| Line::from(Span::styled(l, t.base())))
             .collect();
         lines.push(Line::default());
-        if let Some(a) = page_key(&n.label).and_then(anim_for) {
-            let i = a.frame_at(self.anim_start);
-            let (cap, body) = &a.frames[i];
-            lines.push(Line::from(vec![
-                Span::styled(format!("\u{25B6} {cap}"), t.accent()),
-                Span::styled(format!("   {}/{}", i + 1, a.frames.len()), t.dim()),
-            ]));
-            let mut fl: Vec<Line> = body
-                .iter()
-                .map(|l| styled_lines(l, t).pop().unwrap_or_default())
-                .collect();
-            fl.resize(a.height, Line::default());
-            lines.extend(fl);
-            lines.push(Line::default());
-        }
         let panes = pane_ranges(art);
         self.pane = self.pane.min(panes.len() - 1);
         let art_lines = styled_lines(art, t);
@@ -992,11 +1317,99 @@ impl Screen for Diagrams {
             self.detail_key(key);
             return Action::None;
         }
+        if self.popup
+            && matches!(self.view, PopupView::Overview | PopupView::Zoom)
+            && self.has_scene()
+            && self.playback_key(key.code)
+        {
+            return Action::None;
+        }
+        if self.popup && self.view == PopupView::Overview && self.has_scene() {
+            match key.code {
+                KeyCode::Char('q') | KeyCode::Esc => self.popup = false,
+                KeyCode::Char('m') | KeyCode::Enter | KeyCode::Char(' ') => {
+                    self.menu_sel = 0;
+                    self.zoom = None;
+                    self.view = PopupView::Menu;
+                }
+                KeyCode::Char(c @ '1'..='9') => self.open_pane(c as usize - '1' as usize),
+                KeyCode::Char(c) => {
+                    if let Some(i) = self.zoom_for_key(c) {
+                        self.open_zoom(i);
+                    }
+                }
+                _ => {}
+            }
+            return Action::None;
+        }
+        if self.popup && self.view == PopupView::Zoom {
+            match key.code {
+                KeyCode::Char('q') | KeyCode::Esc => self.view = PopupView::Overview,
+                KeyCode::Char('m') => {
+                    self.menu_sel = self.zoom.as_ref().map_or(0, |(i, _)| *i);
+                    self.view = PopupView::Menu;
+                }
+                KeyCode::Char(c) => {
+                    if let Some(i) = self.zoom_for_key(c) {
+                        self.open_zoom(i);
+                    }
+                }
+                _ => {}
+            }
+            return Action::None;
+        }
+        if self.popup && self.view == PopupView::Menu {
+            let nz = self.zoom_list().len();
+            let last = (nz + self.pane_titles().len()).saturating_sub(1);
+            match key.code {
+                KeyCode::Char('q') | KeyCode::Esc | KeyCode::Char('m') => {
+                    self.view = if self.has_scene() {
+                        PopupView::Overview
+                    } else {
+                        PopupView::Pane
+                    };
+                }
+                KeyCode::Char('j') | KeyCode::Down | KeyCode::Tab => {
+                    self.menu_sel = (self.menu_sel + 1).min(last);
+                }
+                KeyCode::Char('k') | KeyCode::Up | KeyCode::BackTab => {
+                    self.menu_sel = self.menu_sel.saturating_sub(1);
+                }
+                KeyCode::Char('g') | KeyCode::Home => self.menu_sel = 0,
+                KeyCode::Char('G') | KeyCode::End => self.menu_sel = last,
+                KeyCode::Enter | KeyCode::Char(' ') => {
+                    if self.menu_sel < nz {
+                        self.open_zoom(self.menu_sel);
+                    } else {
+                        self.open_pane(self.menu_sel - nz);
+                    }
+                }
+                KeyCode::Char(c @ '1'..='9') => self.open_pane(c as usize - '1' as usize),
+                KeyCode::Char(c) => {
+                    if let Some(i) = self.zoom_for_key(c) {
+                        self.open_zoom(i);
+                    }
+                }
+                _ => {}
+            }
+            return Action::None;
+        }
         if self.popup {
             let half = (self.body_h / 2).max(1);
             let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
             match key.code {
-                KeyCode::Char('q') | KeyCode::Esc => self.popup = false,
+                KeyCode::Char('q') | KeyCode::Esc => {
+                    if self.has_scene() {
+                        self.menu_sel = self.zoom_list().len() + self.pane;
+                        self.view = PopupView::Menu;
+                    } else {
+                        self.popup = false;
+                    }
+                }
+                KeyCode::Char('m') if self.has_scene() => {
+                    self.menu_sel = self.zoom_list().len() + self.pane;
+                    self.view = PopupView::Menu;
+                }
                 KeyCode::Enter => {
                     if let Some(h) = self.hots.get(self.hsel) {
                         self.detail = true;
@@ -1085,6 +1498,18 @@ impl Screen for Diagrams {
                 self.popup_scroll = 0;
                 self.pane = 0;
                 self.anim_start = Instant::now();
+                self.player = self.cur_label().and_then(|l| page_key(&l)).map(|page| {
+                    (
+                        page,
+                        scene_for(page).map(|sc| Player::new(sc, self.anim_start)),
+                    )
+                });
+                self.view = if self.has_scene() {
+                    PopupView::Overview
+                } else {
+                    PopupView::Pane
+                };
+                self.menu_sel = 0;
                 self.detail = false;
                 self.hsel = 0;
                 self.hots = self.nodes[self.tab]
@@ -1116,7 +1541,15 @@ impl Screen for Diagrams {
     }
 
     fn needs_redraw(&self) -> bool {
-        false
+        self.animating()
+    }
+
+    fn poll_interval(&self) -> Duration {
+        if self.animating() {
+            FRAME
+        } else {
+            Duration::from_millis(100)
+        }
     }
 }
 
@@ -1312,6 +1745,182 @@ mod tests {
             let (w, h) = art_size(d);
             assert!(w <= 140, "{} is {w} cols wide", d.tab);
             assert!(h >= 10, "{} is only {h} rows", d.tab);
+        }
+    }
+
+    fn press(d: &mut Diagrams, code: KeyCode) {
+        d.on_key(KeyEvent::new(code, KeyModifiers::NONE));
+    }
+
+    fn screen_text(d: &mut Diagrams, w: u16, h: u16) -> String {
+        use ratatui::Terminal;
+        use ratatui::backend::TestBackend;
+        let mut term = Terminal::new(TestBackend::new(w, h)).expect("terminal");
+        term.draw(|f| d.draw(f)).expect("draw");
+        let buf = term.backend().buffer();
+        (0..h)
+            .map(|y| (0..w).map(|x| buf[(x, y)].symbol()).collect::<String>())
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    #[test]
+    fn sand_opens_on_the_animation_then_menu_then_section() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "SAND")
+            .expect("SAND node");
+        press(&mut d, KeyCode::Enter);
+        assert_eq!(d.view, PopupView::Overview);
+        let all = screen_text(&mut d, 170, 50);
+        assert!(
+            all.contains("WHAT'S HAPPENING") && all.contains("LOOK FOR"),
+            "{all}"
+        );
+        assert!(all.contains("E1") && all.contains("m menu"), "{all}");
+        assert!(d.animating() && d.needs_redraw());
+
+        // zoom in on the cavity, look at it, step back out
+        assert!(all.contains("zoom in") && all.contains("[a]"), "{all}");
+        press(&mut d, KeyCode::Char('a'));
+        assert_eq!(d.view, PopupView::Zoom);
+        assert!(d.animating() && d.needs_redraw());
+        let all = screen_text(&mut d, 170, 50);
+        assert!(
+            all.contains("gas cavity") && all.contains("WHAT'S HAPPENING"),
+            "{all}"
+        );
+        press(&mut d, KeyCode::Char('c')); // switch straight to the tapping zoom
+        assert_eq!(d.zoom.as_ref().map(|z| z.0), Some(2));
+        assert!(screen_text(&mut d, 170, 50).contains("tap hole"));
+        press(&mut d, KeyCode::Esc);
+        assert_eq!(d.view, PopupView::Overview);
+
+        press(&mut d, KeyCode::Char('m'));
+        assert_eq!(d.view, PopupView::Menu);
+        assert!(!d.animating());
+        let all = screen_text(&mut d, 170, 50);
+        assert!(all.contains("ZOOM IN") && all.contains("SECTIONS"), "{all}");
+        assert!(
+            all.contains("off-gas and the bag filter") && all.contains("1."),
+            "{all}"
+        );
+
+        for _ in 0..4 {
+            press(&mut d, KeyCode::Char('j')); // past the four zooms
+        }
+        press(&mut d, KeyCode::Enter);
+        assert_eq!((d.view, d.pane), (PopupView::Pane, 0));
+        screen_text(&mut d, 170, 50); // pane view draws
+
+        press(&mut d, KeyCode::Esc);
+        assert_eq!(d.view, PopupView::Menu);
+        press(&mut d, KeyCode::Esc);
+        assert_eq!(d.view, PopupView::Overview);
+        press(&mut d, KeyCode::Char('3'));
+        assert_eq!((d.view, d.pane), (PopupView::Pane, 2));
+        press(&mut d, KeyCode::Esc);
+        press(&mut d, KeyCode::Esc);
+        press(&mut d, KeyCode::Esc);
+        assert!(!d.popup);
+    }
+
+    #[test]
+    fn p_pauses_the_animation_and_h_l_step_beats() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "SAND")
+            .unwrap();
+        press(&mut d, KeyCode::Enter);
+        assert!(d.animating() && d.needs_redraw());
+        assert!(screen_text(&mut d, 170, 50).contains("p pause"));
+
+        press(&mut d, KeyCode::Char('p'));
+        assert!(
+            !d.animating() && !d.needs_redraw(),
+            "paused: no redraw ticks"
+        );
+        let a = screen_text(&mut d, 170, 50);
+        assert!(a.contains("PAUSED") && a.contains("p resume"), "{a}");
+        std::thread::sleep(std::time::Duration::from_millis(120));
+        assert_eq!(screen_text(&mut d, 170, 50), a, "frame is frozen");
+
+        // stepping while paused moves to the next beat and stays paused
+        press(&mut d, KeyCode::Char('l'));
+        let b = screen_text(&mut d, 170, 50);
+        assert!(b.contains("2/8") && b.contains("PAUSED"), "{b}");
+        press(&mut d, KeyCode::Char('h'));
+        assert!(screen_text(&mut d, 170, 50).contains("1/8"));
+
+        press(&mut d, KeyCode::Char('p'));
+        assert!(d.animating() && !screen_text(&mut d, 170, 50).contains("PAUSED"));
+
+        // zooms pause on their own player
+        press(&mut d, KeyCode::Char('c'));
+        assert_eq!(d.view, PopupView::Zoom);
+        press(&mut d, KeyCode::Char('p'));
+        assert!(!d.animating());
+        assert!(d.scene_player().is_some_and(|p| p.is_paused()));
+        press(&mut d, KeyCode::Esc);
+        assert!(d.animating(), "the overview was not paused");
+    }
+
+    #[test]
+    fn polysilicon_overview_and_zooms_open() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "POLYSILICON")
+            .expect("POLYSILICON node");
+        press(&mut d, KeyCode::Enter);
+        assert_eq!(d.view, PopupView::Overview);
+        let all = screen_text(&mut d, 175, 48);
+        assert!(
+            all.contains("fluid bed") && all.contains("[c] the Siemens bell jar"),
+            "{all}"
+        );
+        for (key, want) in [
+            ('a', "fluidized bed reactor"),
+            ('b', "reboiler"),
+            ('c', "bell jar"),
+            ('d', "growth rate"),
+        ] {
+            press(&mut d, KeyCode::Char(key));
+            assert_eq!(d.view, PopupView::Zoom);
+            let all = screen_text(&mut d, 175, 48);
+            assert!(all.contains(want), "{key}: {all}");
+            assert!(all.contains("WHAT'S HAPPENING"));
+        }
+    }
+
+    #[test]
+    fn overview_survives_tiny_and_huge_terminals() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "SAND")
+            .unwrap();
+        press(&mut d, KeyCode::Enter);
+        for (w, h) in [(40, 10), (90, 20), (130, 30), (260, 80)] {
+            screen_text(&mut d, w, h);
         }
     }
 

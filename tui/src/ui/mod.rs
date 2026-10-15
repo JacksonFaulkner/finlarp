@@ -16,11 +16,13 @@
 //   charts       grouped bars, sparklines with gaps, line chart helpers
 //   hcandles     horizontal candles (one row per bar) for the intraday tape
 //   help         `?` keymap overlay + footer key hints
+//   anim         procedural animation scenes: Canvas, motion/Particles, Scene + Player
 //   text         width-aware truncate / wrap, URL shortening, number formatting
 
 // A component library: not every screen uses every helper.
 #![allow(dead_code)]
 
+pub mod anim;
 pub mod block_grid;
 pub mod block_view;
 pub mod calendar;
