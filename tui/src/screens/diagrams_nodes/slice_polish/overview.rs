@@ -114,11 +114,6 @@ const ZOOMS: &[Zoom] = &[
         label: "the thickness budget",
         build: || -> Box<dyn Scene> { Box::new(zoom::Budget) },
     },
-    Zoom {
-        key: 'e',
-        label: "3D: the wire cutting the brick",
-        build: || -> Box<dyn Scene> { Box::new(zoom::Cut3d) },
-    },
 ];
 
 fn station_x(i: usize) -> i32 {
@@ -303,10 +298,10 @@ mod tests {
     }
 
     #[test]
-    fn zooms_are_keyed_a_to_e() {
+    fn zooms_are_keyed_a_to_d() {
         let s = build();
         let keys: String = s.zooms().iter().map(|z| z.key).collect();
-        assert_eq!(keys, "abcde");
+        assert_eq!(keys, "abcd");
     }
 
     #[test]
