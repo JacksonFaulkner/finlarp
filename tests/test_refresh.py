@@ -13,7 +13,7 @@ def test_daily_lanes_keep_sec_serial_and_build_last():
     steps = refresh.daily_steps()
     lanes = {s["name"]: s["lane"] for s in steps}
     assert all(lanes[n] == "sec" for n in ("events", "financials", "earnings", "filing_text", "13f", "13f_map"))
-    assert [s["name"] for s in steps if s["lane"] == "final"] == ["search", "dossier"]
+    assert [s["name"] for s in steps if s["lane"] == "final"] == ["search", "dossier", "squeeze"]
     tw = [s["name"] for s in steps if s["lane"] == "tweets"]
     assert tw == ["tweets_pull", "tweets_ingest", "sentiment"]
     fin = next(s for s in steps if s["name"] == "financials")

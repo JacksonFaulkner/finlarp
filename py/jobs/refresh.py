@@ -91,6 +91,7 @@ def daily_steps() -> list[dict]:
         # after everything above
         step("final", "search", "derive/search.py", "build"),
         step("final", "dossier", "derive/dossier.py", "--all"),
+        step("final", "squeeze", "jobs.squeeze_scan", "--json", str(D / "squeeze" / "latest.json")),
     ]
 
 

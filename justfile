@@ -45,6 +45,10 @@ hooks:
 refresh mode="daily" *args="":
     uv run --env-file .env python -m jobs.refresh {{mode}} {{args}}
 
+# squeeze screen: crowded shorts + price/volume trigger (extra args: --top 40, --min-si-pct 15, TICKER ...)
+squeeze *args="":
+    uv run python -m jobs.squeeze_scan {{args}}
+
 # launchd agents: daily 18:30 weekdays + intraday every 30 min in market hours
 schedule:
     sh py/jobs/launchd/install.sh
