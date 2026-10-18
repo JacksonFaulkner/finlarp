@@ -67,6 +67,13 @@ impl Canvas {
         self.text(x, y, s);
     }
 
+    /// Blank a rectangle (e.g. before drawing an inset over a busy scene).
+    pub fn clear_rect(&mut self, x: i32, y: i32, w: i32, h: i32) {
+        for dy in 0..h {
+            self.hline(x, y + dy, w, ' ');
+        }
+    }
+
     pub fn hline(&mut self, x: i32, y: i32, len: i32, ch: char) {
         for dx in 0..len {
             self.put(x + dx, y, ch);

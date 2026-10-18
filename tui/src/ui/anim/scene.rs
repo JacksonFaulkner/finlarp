@@ -14,6 +14,9 @@ pub struct Beat {
     /// Side-panel text: the mechanism at this moment, and what to watch.
     pub what: &'static str,
     pub look: &'static str,
+    /// Why this step matters, and the sourced numbers behind it.
+    pub why: &'static str,
+    pub facts: &'static [&'static str],
 }
 
 impl Beat {
@@ -23,7 +26,15 @@ impl Beat {
             ms,
             what: "",
             look: "",
+            why: "",
+            facts: &[],
         }
+    }
+
+    pub const fn detail(mut self, why: &'static str, facts: &'static [&'static str]) -> Self {
+        self.why = why;
+        self.facts = facts;
+        self
     }
 
     pub const fn note(mut self, what: &'static str, look: &'static str) -> Self {
@@ -75,6 +86,8 @@ pub struct Shot {
     pub caption: &'static str,
     pub what: &'static str,
     pub look: &'static str,
+    pub why: &'static str,
+    pub facts: &'static [&'static str],
     pub lines: Vec<String>,
 }
 
@@ -176,6 +189,8 @@ impl Player {
             caption: beats.get(t.beat).map_or("", |b| b.caption),
             what: beats.get(t.beat).map_or("", |b| b.what),
             look: beats.get(t.beat).map_or("", |b| b.look),
+            why: beats.get(t.beat).map_or("", |b| b.why),
+            facts: beats.get(t.beat).map_or(&[], |b| b.facts),
             lines: self.canvas.lines(),
         }
     }

@@ -23,6 +23,19 @@ pub fn fill_ellipse(c: &mut Canvas, cx: i32, cy: i32, rx: f32, ry: f32, ch: char
     }
 }
 
+/// Filled disc for small terminal shapes. `fill_ellipse` keeps only the exact-edge cells, so at
+/// small radii the four extreme points stick out as single-cell nubs; this widens the edge a
+/// little so the outline reads as round.
+pub fn fill_disc(c: &mut Canvas, cx: i32, cy: i32, rx: f32, ry: f32, ch: char) {
+    for y in cy - ry.ceil() as i32..=cy + ry.ceil() as i32 {
+        for x in cx - rx.ceil() as i32..=cx + rx.ceil() as i32 {
+            if ellipse_e(x, y, cx, cy, rx, ry) <= 1.25 {
+                c.put(x, y, ch);
+            }
+        }
+    }
+}
+
 /// Box with a title set into its top border.
 pub fn titled_box(c: &mut Canvas, x: i32, y: i32, w: i32, h: i32, title: &str) {
     c.boxed(x, y, w, h);
