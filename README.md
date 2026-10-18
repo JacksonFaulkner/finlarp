@@ -1,14 +1,10 @@
 # finlarp
 
-**Fin**ancial **L**earning **A**nd **R**esearch **P**latform.
+Terminal-native equity research desk. SEC EDGAR filings, 13F holdings, insider trades, earnings and
+tweets land in a local DuckDB file; a Rust/ratatui UI and a Neovim plugin read it, and an MCP server
+gives agents the same data.
 
-A terminal research desk for an amateur. I don't work in finance; this is
-where I practice the job: read filings, check the numbers, track a
-portfolio, pretend I have a Bloomberg. It runs on public SEC EDGAR data
-pulled to local files, with a terminal UI and a Neovim plugin on top.
-
-It's a personal project shared as-is. Expect rough edges and assumptions
-about my setup. Nothing here is investment advice.
+![dossier: press i on any value to see its formula and where it came from](docs/screens/dossier.gif)
 
 ## The rule
 
@@ -28,33 +24,36 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 | `portfolio` | Your account: equity vs benchmark, drawdown, positions (E*TRADE; some tabs are placeholders) |
 | `earnings` | Structured earnings report (proof of concept, MRVL only) |
 | `events` | AI-stock catalyst calendar (month / week / day). `T` adds the tweets that name a ticker, `f` filters them by ticker, Enter on a tweet opens it |
+| `universe` | AI universe heatmap: sectors and regions, weighted by price move over a chosen window |
+| `diagrams` | Animated process diagrams (chip fab flow, fiber optics, data center power) with a page per node |
 
-## Data
+### More screens
 
-Pulled once into `~/.local/share/nvim/finlarp/`, then read locally. The
-universe is about 430 AI-exposed stocks (DuckDB `ai_universe`, seeded once from `data/ai_stocks_reviewed.json`).
-
-| Data | Source |
+| | |
 |---|---|
-| Financial statements, 15+ years | XBRL companyfacts |
-| Segment and geographic revenue | XBRL instance documents |
-| Institutional holdings, 6 quarters | Form 13F data sets |
-| Insider buys and sells | Form 3/4/5 data sets |
-| Filing index and 8-K events | EDGAR submissions |
-| 10-K / 20-F text, year-over-year new risk factors | Annual reports |
-| Earnings releases and extracted guidance | 8-K item 2.02 exhibits |
-| Granted US patents matched to tickers | PatentsView, USPTO AI Patent Dataset |
-| Company profiles | Yahoo Finance |
-| Company news: headline, link and a ~200 character snippet (about 2 years on the free plan) | ROIC.ai |
-| Tweets from followed research accounts (about 50k, Sep-Oct 2026) | X, pulled with Apify |
-| A stance per ticker for each tweet that names one (three labelling passes, `core/schemas/sentiment.py`) | An OpenAI model |
+| ![canslim: each letter graded with its evidence](docs/screens/canslim.gif) | ![search: full-text search with a preview of the matching passage](docs/screens/search.gif) |
+| ![universe: AI universe heatmap](docs/screens/universe.gif) | ![events: catalyst calendar](docs/screens/events.gif) |
+| ![earnings: structured earnings report](docs/screens/earnings.gif) | ![diagrams: polysilicon overview, then the fluidized-bed close-up](docs/screens/diagrams.gif) |
 
-[`research/FINDINGS.md`](research/FINDINGS.md) has coverage and known problems per source.
+<details>
+<summary>All diagram tabs</summary>
+
+| | |
+|---|---|
+| ![chip: transistor and metal stack](docs/screens/diagrams_chip.gif) | ![packaging: GPU and HBM on an interposer](docs/screens/diagrams_packaging.gif) |
+| ![fiber: how light carries data](docs/screens/diagrams_fiber.gif) | ![power: grid to chip](docs/screens/diagrams_power.gif) |
+| ![network and cooling: data path and cooling loop](docs/screens/diagrams_network.gif) | |
+
+</details>
+
+These are recorded from the real binary by `just gifs` (see [Development](#development)). Not recorded:
+`portfolio`, `chat` and `notes` (personal data), and `chart` / `candles` (portfolio history and mock bars).
 
 ## Layout
 
 ```
 tui/                 Rust: terminal UI (ratatui); reads the DuckDB file
+docs/screens/        GIFs of the screens above, written by py/jobs/record_screens.py
 lua/finlarp/         Lua: Neovim plugin (launches the TUI, treemap dashboards, pickers, document viewer)
 py/                  Python: everything that fetches or computes data
   core/                DuckDB cache (db.py) and pydantic schemas
@@ -176,8 +175,9 @@ exposing it beyond localhost.
 ```sh
 just check   # stylua, selene, ruff, clippy, cargo test
 just hooks   # install pre-commit hooks
+just gifs    # re-record docs/screens/*.gif (needs tmux and a release build; `just gifs --only dossier` for one)
 ```
 
 ## License
 
-MIT
+MIT. Personal project shared as-is: expect rough edges and assumptions about my setup. Nothing here is investment advice.

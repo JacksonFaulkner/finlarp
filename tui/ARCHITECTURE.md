@@ -138,6 +138,10 @@ enum and the Lua dispatcher together.
   Include tiny sizes: a render must never panic.
 - **Event loop tests** (`app.rs`) drive `event_loop` with a scripted
   `Events` source: redraw skipping, resize, Ctrl-C, exit codes, key release.
+- **Screen GIFs:** `just gifs` drives each screen in a named tmux session,
+  captures the pane with colours and paints it to a GIF (`py/jobs/record_screens.py`).
+  Add a `Spec` there when a screen is ready to show; leave out screens that show
+  personal or mock data.
 - **Visual check:** release binary in a detached tmux session:
   ```
   tmux new-session -d -s c5 -x 160 -y 40 'cargo run --release -- "" "" "" chart'

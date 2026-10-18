@@ -45,6 +45,10 @@ hooks:
 refresh mode="daily" *args="":
     uv run --env-file .env python -m jobs.refresh {{mode}} {{args}}
 
+# re-record docs/screens/*.gif from the release binary (needs tmux; pillow is fetched by uv, not a project dep)
+gifs *args="":
+    cd py && uv run --with pillow python -m jobs.record_screens {{args}}
+
 # squeeze screen: crowded shorts + price/volume trigger (extra args: --top 40, --min-si-pct 15, TICKER ...)
 squeeze *args="":
     uv run python -m jobs.squeeze_scan {{args}}
