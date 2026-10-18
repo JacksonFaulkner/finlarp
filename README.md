@@ -160,6 +160,17 @@ full-text search, company briefings, financial time series and read-only SQL, pl
 claude mcp add finlarp -- "$PWD/.venv/bin/python" -m agent.server
 ```
 
+Remote access over streamable HTTP, every request must send `Authorization: Bearer $FINLARP_MCP_TOKEN`
+(refuses to start if the token is under 32 characters):
+
+```sh
+FINLARP_MCP_TOKEN=$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))') \
+  .venv/bin/python -m agent.server --http    # http://127.0.0.1:8765/mcp
+```
+
+Set `FINLARP_MCP_HOST` / `FINLARP_MCP_PORT` to change the bind address. Put TLS in front of it before
+exposing it beyond localhost.
+
 ## Development
 
 ```sh

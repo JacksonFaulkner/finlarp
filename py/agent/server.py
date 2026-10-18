@@ -22,10 +22,15 @@ every call is local and fast. Tools are all read-only:
 
 Register with Claude Code:
     claude mcp add finlarp -- <plugin_dir>/.venv/bin/python <plugin_dir>/mcp_server.py
+
+Remote (streamable HTTP, bearer-token auth):
+    FINLARP_MCP_TOKEN=<32+ chars> python -m agent.server --http
+    FINLARP_MCP_HOST (default 127.0.0.1), FINLARP_MCP_PORT (default 8765); endpoint /mcp
 """
 from __future__ import annotations
 
 import atexit
+import hmac
 import json
 import os
 import queue
@@ -48,6 +53,7 @@ from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insid
 from sources import roic_news
 from sources import tweets as tweets_src
 from sources import yahoo_live
+from sources import etrade_live
 from derive import account
 from derive import search as fts
 from derive import sentiment as sentiment_q
@@ -525,6 +531,56 @@ def live_news(ticker: str, count: int = 8) -> str:
         return _dump(yahoo_live.news(ticker.upper(), count))
     except Exception as e:  # noqa: BLE001
         return _dump({"error": f"yahoo live_news failed: {e}"})
+
+
+def _etrade(fn, *a, **kw) -> str:
+    """Run a read-only E*TRADE query; auth problems come back as a message, never a crash."""
+    try:
+        return _dump(fn(etrade_live.session(), *a, **kw))
+    except etrade_live.NotAuthed as e:
+        return _dump({"error": str(e), "auth_required": True})
+    except Exception as e:  # noqa: BLE001
+        return _dump({"error": f"etrade request failed: {type(e).__name__}: {str(e)[:300]}"})
+
+
+@mcp.tool(annotations=LIVE)
+def etrade_accounts() -> str:
+    """Live E*TRADE account list (read-only): masked account number, accountIdKey (pass it, or the last 4
+    digits, as `account` to the other etrade_* tools), type, mode, status. If authorization has lapsed the
+    result is an error saying how to re-authorize."""
+    return _etrade(etrade_live.list_accounts)
+
+
+@mcp.tool(annotations=LIVE)
+def etrade_balance(account: str = "") -> str:
+    """Live E*TRADE balances per account (empty `account` = all open accounts): total account value, cash
+    available for investment, cash/margin/day-trade buying power, net cash, margin balance and equity, plus
+    the raw Cash/Margin/Computed blocks. Read-only."""
+    return _etrade(etrade_live.balance, account)
+
+
+@mcp.tool(annotations=LIVE)
+def etrade_positions(account: str = "") -> str:
+    """Live E*TRADE positions (empty `account` = all): quantity, last, price paid, cost basis, market value,
+    unrealized P&L ($ and %), day P&L, % of portfolio, with totals. Live broker view; the cached history
+    is in the account_positions / account_fills tables via `sql`. Read-only."""
+    return _etrade(etrade_live.positions, account)
+
+
+@mcp.tool(annotations=LIVE)
+def etrade_orders(account: str = "", status: str = "OPEN", since: str = "", until: str = "", limit: int = 50) -> str:
+    """E*TRADE orders (read-only, no place/cancel). status: OPEN (default), EXECUTED, CANCELLED,
+    INDIVIDUAL_FILLS, CANCEL_REQUESTED, EXPIRED, REJECTED. since/until are YYYY-MM-DD. Returns symbol, action,
+    qty, filled qty, price type, limit/stop, status and epoch-ms times."""
+    return _etrade(etrade_live.orders, account, status, since, until, limit)
+
+
+@mcp.tool(annotations=LIVE)
+def etrade_transactions(account: str = "", since: str = "", until: str = "", limit: int = 50) -> str:
+    """Live E*TRADE transactions (read-only), newest first. since/until are YYYY-MM-DD (default last 30 days).
+    Returns type, symbol, quantity, price, amount, description, epoch-ms date. For long history use the
+    cached account_fills table via `sql`."""
+    return _etrade(etrade_live.transactions, account, since, until, limit)
 
 
 @mcp.tool(annotations=READ_ONLY)
@@ -1236,6 +1292,31 @@ def run_python(code: str, timeout_s: int = 300, session: str = "", reset_session
     return done(rc, text)
 
 
+class BearerAuth:
+    """ASGI guard for the HTTP transport: every HTTP request needs `Authorization: Bearer <token>`.
+
+    Lifespan and websocket scopes pass through so the MCP session manager still starts.
+    """
+
+    def __init__(self, app, token: str):
+        self.app = app
+        self.token = token.encode()
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        auth = dict(scope["headers"]).get(b"authorization", b"").decode("latin-1")
+        scheme, _, given = auth.partition(" ")
+        if scheme.lower() != "bearer" or not hmac.compare_digest(given.strip().encode(), self.token):
+            body = b'{"error":"unauthorized"}'
+            await send({"type": "http.response.start", "status": 401, "headers": [
+                (b"content-type", b"application/json"), (b"www-authenticate", b"Bearer"),
+                (b"content-length", str(len(body)).encode())]})
+            await send({"type": "http.response.body", "body": body})
+            return
+        await self.app(scope, receive, send)
+
+
 if __name__ == "__main__":
     if "--build-derived" in sys.argv:  # prebuild trading_days / bars_5m / bars_30m so the first start is fast
         for _name in _DERIVED:
@@ -1243,5 +1324,15 @@ if __name__ == "__main__":
                 _t0 = time.perf_counter()
                 _build_derived(_name)
                 print(f"built {_name} in {time.perf_counter() - _t0:.1f}s -> {_derived_path(_name)}", file=sys.stderr)
+    elif "--http" in sys.argv:
+        token = os.environ.get("FINLARP_MCP_TOKEN", "")
+        if len(token) < 32:
+            sys.exit("FINLARP_MCP_TOKEN must be set to at least 32 characters")
+        import uvicorn
+        for _name in [t.name for t in mcp._tool_manager.list_tools() if t.name.startswith("etrade_")]:
+            mcp.remove_tool(_name)  # brokerage data stays stdio-only; never served over the network
+        host = os.environ.get("FINLARP_MCP_HOST", "127.0.0.1")
+        port = int(os.environ.get("FINLARP_MCP_PORT", "8765"))
+        uvicorn.run(BearerAuth(mcp.streamable_http_app(host=host), token), host=host, port=port, log_level="info")
     else:
         mcp.run("stdio")
