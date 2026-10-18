@@ -14,10 +14,6 @@
 use crate::ui::anim::{Beat, Canvas, Scene, Time};
 
 const ANIMS: &[(&str, &str)] = &[
-    (
-        "MELT + PULL",
-        include_str!("diagrams_pages/MELT_PULL.anim.txt"),
-    ),
     ("INGOT", include_str!("diagrams_pages/INGOT.anim.txt")),
     (
         "SLICE + POLISH",
@@ -81,6 +77,26 @@ pub fn anim_for(page: &str) -> Option<Anim> {
         .and_then(|(_, s)| parse(s))
 }
 
+const MELT_SECTIONS: [fn() -> Box<dyn Scene>; 9] = [
+    super::diagrams_sec_melt_1::build,
+    super::diagrams_sec_melt_2::build,
+    super::diagrams_sec_melt_3::build,
+    super::diagrams_sec_melt_4::build,
+    super::diagrams_sec_melt_5::build,
+    super::diagrams_sec_melt_6::build,
+    super::diagrams_sec_melt_7::build,
+    super::diagrams_sec_melt_8::build,
+    super::diagrams_sec_melt_9::build,
+];
+
+/// Animated close-up for numbered section `i` of a node page, if the page has one.
+pub fn section_anim(page: &str, i: usize) -> Option<fn() -> Box<dyn Scene>> {
+    match page {
+        "MELT + PULL" => MELT_SECTIONS.get(i).copied(),
+        _ => super::diagrams_nodes::section(page, i),
+    }
+}
+
 /// Hand-drawn text frames played as a scene: one beat per frame.
 pub struct TextScene {
     anim: Anim,
@@ -125,9 +141,13 @@ impl Scene for TextScene {
 /// The scene for a node page (keyed like VISUALS), if it has one. Pages
 /// with a procedural scene use it; the rest fall back to their text frames.
 pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
+    if let Some(s) = super::diagrams_nodes::overview(page) {
+        return Some(s);
+    }
     match page {
         "SAND" => Some(Box::new(super::diagrams_scene_sand::Sand)),
         "POLYSILICON" => Some(Box::new(super::diagrams_scene_poly::Poly)),
+        "MELT + PULL" => Some(Box::new(super::diagrams_scene_melt::Melt)),
         _ => anim_for(page).map(|a| Box::new(TextScene::new(a)) as Box<dyn Scene>),
     }
 }
@@ -164,6 +184,7 @@ mod tests {
     #[test]
     fn sand_is_procedural_and_others_fall_back() {
         assert!(scene_for("SAND").is_some());
+        assert!(scene_for("MELT + PULL").is_some());
         assert!(scene_for("WAFER").is_some());
         assert!(scene_for("NOPE").is_none());
     }

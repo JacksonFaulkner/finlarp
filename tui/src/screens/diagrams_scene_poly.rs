@@ -7,6 +7,7 @@
 // Sources: Fraunhofer ISE (2025) flowchart + figures, Swetha Priya et al.
 // (2015) Siemens CVD reactor, Geng & Yu (UMD 2011) process scenarios.
 
+use super::diagrams_scene_column as col;
 use super::diagrams_scene_poly_zoom as zoom;
 use crate::ui::anim::shapes::{Path, flow, titled_box};
 use crate::ui::anim::{Beat, Canvas, Particles, Scene, Time, Zoom, ease_in_out, flicker, noise};
@@ -31,6 +32,14 @@ const BEATS: &[Beat] = &[
     .note(
         "The feed is the metallurgical-grade silicon from the furnace on the SAND page. It is too impure for chips, so the plan is to turn it into a gas, clean the gas, and grow pure silicon back out of it. First it is crushed so it reacts fast.",
         "Lumps dropping from the MG-Si hopper through the crusher and out as a stream of fine grains toward the first vessel.",
+    )
+    .detail(
+        "Grinding gives the HCl a large surface to work on, because the reactor can only convert what it touches.",
+        &[
+            "MG-Si is 98-99% pure",
+            "Chip grade (Special EG) allows at most 1.5e12 donor atoms per cm3 (Fraunhofer)",
+            "Silicon itself has about 5e22 atoms per cm3, so that is roughly one dopant atom in 30 billion",
+        ],
     ),
     Beat::new(
         "fluidized bed, about 300 C: Si + HCl ─▶ trichlorosilane (SiHCl3, 'TCS') + H2, with some SiCl4",
@@ -39,14 +48,30 @@ const BEATS: &[Beat] = &[
     .note(
         "HCl gas blown up from the bottom keeps the grains floating like a boiling liquid. Silicon reacts with it to make TCS, a liquid at room temperature that boils at 31.8 C. Many metal impurities form chlorides too, which is why the next step exists.",
         "Grains swirling and bubbling in the bed, HCl entering at the bottom, and product vapor leaving the top toward the columns.",
+    )
+    .detail(
+        "Turning silicon into a gas is what makes purification possible. You can distil a gas but not a solid metal.",
+        &[
+            "About 300 C (Fraunhofer)",
+            "TCS boils at 31.8 C, so it leaves as a vapor",
+            "Practical mix: roughly 3.1 HCl per Si, giving mostly TCS with a little SiCl4 plus H2 (Fraunhofer)",
+        ],
     ),
     Beat::new(
         "distillation: TCS boils at 31.8 C, SiCl4 at 56.8 C; boron, phosphorus and metal chlorides are split off",
         BEAT_MS,
     )
     .note(
-        "Three columns in a row separate the mixture by boiling point. Light stuff such as H2 and BCl3 leaves at the top, heavy SiCl4 and PCl5 leave at the bottom, and ultra-pure TCS goes on. This is how chip-grade purity is reached.",
-        "Vapor ° climbing and liquid · trickling down inside each column, with the side streams leaving at the labelled ports.",
+        "Three columns in a row separate the mixture by boiling point. Light stuff such as H2 and BCl3 (°) boils off at the top, the product TCS (●) is in the middle, and heavy SiCl4 (■) sinks. Each hop between trays is richer in the light species going up and in SiCl4 going down, so the columns sort the mixture.",
+        "Between trays: mostly ● and ° hopping near the top of each column, mostly ■ near the bottom of column 2. The pipes between columns carry less ■ each time as the TCS gets purer. Press b for one column up close.",
+    )
+    .detail(
+        "Distillation is where purity is made. It removes the boron and phosphorus that would otherwise dope the silicon and ruin chips.",
+        &[
+            "TCS 31.8 C, SiCl4 56.8 C, DCS 8.1 C, H2 -252.8 C (Fraunhofer)",
+            "Chip grade needs 1.66 times more distillation cycles than solar grade",
+            "NASA 1986: phosphorus in TCS fell from 3.2 to about 0.05 ppba as reflux rose from 1.2 to 12.5",
+        ],
     ),
     Beat::new(
         "bell jar at ~1100 C: SiHCl3 + H2 ─▶ Si + 3HCl; pure silicon grows on glowing rods from 20 mm to 150-180 mm",
@@ -55,6 +80,14 @@ const BEATS: &[Beat] = &[
     .note(
         "Thin silicon rods are heated by electric current. TCS and hydrogen flow over them and silicon deposits layer by layer. The rods grow at up to 1.9 mm an hour, so a batch takes days. This is the Siemens reactor.",
         "The ▓ rods glowing and visibly fattening during this beat, gas ° rising from the base nozzles, and HCl leaving through the off-gas port.",
+    )
+    .detail(
+        "Deposition is the slowest and most energy-hungry step, so it sets the cost. Growth rate trades off against how uniform the rods are.",
+        &[
+            "Rods grow from 20 mm to 150-180 mm at up to 1.9 mm an hour (Fraunhofer)",
+            "Batch: about 3.5 days solar grade, about 6.7 days chip grade",
+            "Rod temperature 1050-1100 C; supply 100-300 V at up to 5000 A (Swetha Priya et al.)",
+        ],
     ),
     Beat::new(
         "off-gas is recovered: H2 back to the reactor, HCl back to the fluidized bed, SiCl4 to silicones",
@@ -63,6 +96,14 @@ const BEATS: &[Beat] = &[
     .note(
         "The reactor exhaust is not wasted. A recovery unit separates hydrogen and HCl from the chlorosilanes. H2 returns to the bell jar, HCl returns to the first vessel, leftover chlorosilanes go back through distillation, and SiCl4 is sold on or converted back to TCS.",
         "Packets looping along the bottom lines: H2 ° back to the reactor, HCl * back to the bed, and SiCl4 · to its bin.",
+    )
+    .detail(
+        "Recycling cuts raw material and energy cost. HCl and hydrogen are reused instead of bought again, and the silicon in SiCl4 is recovered.",
+        &[
+            "H2 returns to the CVD feed; HCl returns to hydrochlorination (Fraunhofer)",
+            "SiCl4 goes to silicones and silica, or is converted back to TCS",
+            "Condensation units separate H2 and HCl from the chlorosilane liquid",
+        ],
     ),
     Beat::new(
         "finished rods are pulled, crushed, etched and packed as chunks or rods",
@@ -71,6 +112,14 @@ const BEATS: &[Beat] = &[
     .note(
         "After the batch the reactor is cooled and opened and the rods are pulled out. They are crushed to size, etched with acid to clean the surface, and packed. Chip makers buy this as chunks or whole rods.",
         "▓ pieces moving down through crush, etch and pack on the right.",
+    )
+    .detail(
+        "Handling can contaminate a surface that took days to grow, so the last steps are about cleaning and packing without recontaminating it.",
+        &[
+            "Sold as blocks (chunks of 6-150 mm) or as rods (Fraunhofer)",
+            "Etching with HNO3 and HF mixtures or alkaline etching removes surface metals",
+            "Surface should be dense and smooth",
+        ],
     ),
 ];
 
@@ -307,38 +356,44 @@ fn draw_fbr(c: &mut Canvas, p: &Plant, t: &Time) {
     } else {
         Particles::new(113, 1500, 2400)
     };
-    flow(c, &out, t.ms, stream, |q| {
-        if q.rand(1) > 0.5 { '°' } else { ':' }
-    });
+    flow(c, &out, t.ms, stream, |q| col::pick(col::FEED, q.rand(1)));
     c.put(x1, p.top + 2, '┤');
 }
 
 fn draw_columns(c: &mut Canvas, p: &Plant, t: &Time) {
     let cw = p.col_w();
-    let names = ["H2 flash", "col 2", "col 3"];
+    // how far the sorting has developed: idle until the distillation beat, complete by its end
+    let sep = match t.beat {
+        0 | 1 => 0.0,
+        DISTILL => ease_in_out(t.local),
+        _ => 1.0,
+    };
+    let roles = [col::LIGHTS, col::STC_CUT, col::POLISH];
     for (i, x) in p.dist.iter().enumerate() {
         titled_box(c, *x, p.top, cw, p.bot - p.top + 1, &(i + 1).to_string());
-        let _ = names;
-        // trays
-        let mut y = p.top + 3;
-        while y < p.bot - 1 {
-            c.hline(x + 1, y, cw - 3, '═');
-            y += 3;
+        let trays = col::tray_rows(p.top, p.bot);
+        for y in &trays {
+            c.hline(x + 1, *y, cw - 3, '═');
         }
-        // vapor rising, liquid falling through the trays
-        let active = t.beat >= DISTILL - 1;
-        let every = if active { 170 } else { 900 };
-        Particles::new(120 + i as u64, every, 2300).each(t.ms, |q| {
-            let x0 = x + 1 + (q.rand(1) * (cw - 3) as f32) as i32;
-            let up = p.bot - 1 - (q.age * (p.bot - p.top - 3) as f32) as i32;
-            c.put_if_blank(x0, up, '°');
-        });
-        Particles::new(130 + i as u64, every + 60, 2600).each(t.ms, |q| {
-            let x0 = x + 1 + (q.rand(1) * (cw - 3) as f32) as i32;
-            let down = p.top + 2 + (q.age * (p.bot - p.top - 3) as f32) as i32;
-            c.put_if_blank(x0, down, '·');
-        });
+        // vapor hops up a tray, liquid hops down; the species sort as the columns do their jobs
+        col::draw_hops(
+            c,
+            (*x, x + cw - 1),
+            &trays,
+            roles[i],
+            col::FEED,
+            sep,
+            t.ms,
+            120 + 20 * i as u64,
+            t.beat >= DISTILL - 1,
+        );
     }
+    // what travels between the columns: lighter ends first removed, then TCS getting purer
+    let between = [
+        col::Mix::new(0.0, 0.70, 0.30),
+        col::Mix::new(0.02, 0.98, 0.0),
+        col::Mix::new(0.0, 1.0, 0.0),
+    ];
     for (i, pipe) in p.pipes().iter().enumerate() {
         pipe.draw(c);
         let rate = if t.beat >= DISTILL {
@@ -346,14 +401,20 @@ fn draw_columns(c: &mut Canvas, p: &Plant, t: &Time) {
         } else {
             Particles::new(140 + i as u64, 1800, 1500)
         };
-        flow(c, pipe, t.ms, rate, |_| '·');
+        let mix = if t.beat >= DISTILL {
+            between[i]
+        } else {
+            col::FEED
+        };
+        flow(c, pipe, t.ms, rate, |q| col::pick(mix, q.rand(1)));
     }
-    // side streams
+    // side streams and what the symbols mean
     let [a, b, d] = p.dist;
     c.label(a, p.bot + 1, "H2 ▼");
     c.label(b, p.bot + 1, "SiCl4 ▼");
     c.label(d, p.bot + 1, "BCl3 ▼");
     c.label(d, p.top - 1, "TCS ▶");
+    c.label(a, 0, col::LEGEND);
 }
 
 fn draw_bell(c: &mut Canvas, p: &Plant, t: &Time) {
@@ -488,7 +549,13 @@ mod tests {
         assert_eq!(p.loop_ms(), BEAT_MS * 6);
         assert_eq!(p.zooms().iter().map(|z| z.key).collect::<String>(), "abcd");
         for (i, b) in BEATS.iter().enumerate() {
-            assert!(!b.what.is_empty() && !b.look.is_empty(), "beat {i}");
+            assert!(
+                !b.what.is_empty()
+                    && !b.look.is_empty()
+                    && !b.why.is_empty()
+                    && !b.facts.is_empty(),
+                "beat {i}"
+            );
         }
     }
 

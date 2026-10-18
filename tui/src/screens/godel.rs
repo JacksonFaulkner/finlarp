@@ -64,15 +64,20 @@ fn spark(vals: &[f64]) -> String {
     let hi = vals.iter().cloned().fold(f64::MIN, f64::max);
     vals.iter()
         .map(|v| {
-            let i = if hi > lo { ((v - lo) / (hi - lo) * 7.0).round() as usize } else { 3 };
+            let i = if hi > lo {
+                ((v - lo) / (hi - lo) * 7.0).round() as usize
+            } else {
+                3
+            };
             SPARK[i.min(7)]
         })
         .collect()
 }
 
 fn seed_of(s: &str) -> u64 {
-    s.bytes()
-        .fold(1469598103934665603u64, |h, b| (h ^ b as u64).wrapping_mul(1099511628211))
+    s.bytes().fold(1469598103934665603u64, |h, b| {
+        (h ^ b as u64).wrapping_mul(1099511628211)
+    })
 }
 
 /// Deterministic random-walk of `n` points starting near `base`.
@@ -117,14 +122,29 @@ fn fake_rows(cmd: &str, key: &str) -> Vec<Row> {
         "FA" => vec![
             money("Revenue", 80.0, "XBRL us-gaap:Revenues (10-K/10-Q)", 1),
             pct("Gross margin", 44.0, "GrossProfit / Revenues", 2),
-            money("Operating income", 24.0, "XBRL us-gaap:OperatingIncomeLoss", 3),
+            money(
+                "Operating income",
+                24.0,
+                "XBRL us-gaap:OperatingIncomeLoss",
+                3,
+            ),
             money("Net income", 20.0, "XBRL us-gaap:NetIncomeLoss", 4),
-            money("Free cash flow", 22.0, "OCF - capex, cash-flow statement", 5),
+            money(
+                "Free cash flow",
+                22.0,
+                "OCF - capex, cash-flow statement",
+                5,
+            ),
         ],
         "GR" => vec![
             pct("Net margin", 24.0, "NetIncomeLoss / Revenues", 1),
             pct("ROIC", 40.0, "NOPAT / (debt + equity - cash)", 2),
-            pct("Operating margin", 29.0, "OperatingIncomeLoss / Revenues", 3),
+            pct(
+                "Operating margin",
+                29.0,
+                "OperatingIncomeLoss / Revenues",
+                3,
+            ),
         ],
         "HP" => vec![
             money("Close", 150.0, "bars_1d close", 1),
@@ -136,23 +156,45 @@ fn fake_rows(cmd: &str, key: &str) -> Vec<Row> {
         ],
         "HDS" => vec![
             text("Top 13F holder", "Vanguard (fake)", "13F data sets"),
-            pct("Institutional ownership", 62.0, "13F sum / shares outstanding", 1),
+            pct(
+                "Institutional ownership",
+                62.0,
+                "13F sum / shares outstanding",
+                1,
+            ),
             text("Insider net (90d)", "-3 sells, 0 buys", "Form 4"),
         ],
         "EVT" => vec![
-            text("Latest 8-K", "item 2.02 earnings (fake)", "EDGAR submissions"),
+            text(
+                "Latest 8-K",
+                "item 2.02 earnings (fake)",
+                "EDGAR submissions",
+            ),
             text("Next earnings", "2026-10-29 (fake)", "events calendar"),
         ],
         "CF" => vec![
-            text("Latest 10-K", "filed 2025-11-03 (fake)", "EDGAR filing index"),
+            text(
+                "Latest 10-K",
+                "filed 2025-11-03 (fake)",
+                "EDGAR filing index",
+            ),
             text("New risk sentences", "4", "YoY-new risk diff"),
         ],
         "DES" => vec![
             text("Sector", "AI universe sub-sector (fake)", "universe table"),
             text("Business", "from 10-K item 1", "10-K business section"),
         ],
-        "HMS" => vec![pct("Spread vs peer (rebased)", 8.0, "bars_1d rebased to 100", 1)],
-        _ => vec![text("Matches", "17 in universe (fake)", "sql over universe + XBRL")],
+        "HMS" => vec![pct(
+            "Spread vs peer (rebased)",
+            8.0,
+            "bars_1d rebased to 100",
+            1,
+        )],
+        _ => vec![text(
+            "Matches",
+            "17 in universe (fake)",
+            "sql over universe + XBRL",
+        )],
     }
 }
 
@@ -307,7 +349,11 @@ impl GodelScreen {
 
     /// Enter on a command: build its (fake) structured answer and move the cursor into it.
     fn open_result(&mut self) {
-        let Some(c) = self.current().and_then(|i| commands(i).get(self.cmd)).cloned() else {
+        let Some(c) = self
+            .current()
+            .and_then(|i| commands(i).get(self.cmd))
+            .cloned()
+        else {
             return;
         };
         let key = str_of(&c, "key").to_string();
@@ -315,7 +361,11 @@ impl GodelScreen {
         let tickers = c
             .get("tickers")
             .and_then(Value::as_array)
-            .map(|a| a.iter().filter_map(|t| t.as_str().map(String::from)).collect())
+            .map(|a| {
+                a.iter()
+                    .filter_map(|t| t.as_str().map(String::from))
+                    .collect()
+            })
             .unwrap_or_default();
         self.result = Some(ResultView {
             rows: fake_rows(&cmd, &key),
@@ -340,7 +390,10 @@ impl GodelScreen {
             let shares = cs.iter().any(|c| {
                 c.get("tickers")
                     .and_then(Value::as_array)
-                    .is_some_and(|ts| ts.iter().any(|t| t.as_str().is_some_and(|t| r.tickers.iter().any(|x| x == t))))
+                    .is_some_and(|ts| {
+                        ts.iter()
+                            .any(|t| t.as_str().is_some_and(|t| r.tickers.iter().any(|x| x == t)))
+                    })
             });
             if shares {
                 let when = match it.get("date").and_then(Value::as_str) {
@@ -357,9 +410,10 @@ impl GodelScreen {
         let t = self.theme;
         let focused = self.focus == Focus::Result;
         let [left, right] =
-            Layout::horizontal([Constraint::Percentage(55), Constraint::Percentage(45)]).areas(area);
-        let [table, detail] = Layout::vertical([Constraint::Min(3), Constraint::Length(3)])
-            .areas(left);
+            Layout::horizontal([Constraint::Percentage(55), Constraint::Percentage(45)])
+                .areas(area);
+        let [table, detail] =
+            Layout::vertical([Constraint::Min(3), Constraint::Length(3)]).areas(left);
 
         let rows: Vec<ListItem> = r
             .rows
@@ -368,7 +422,10 @@ impl GodelScreen {
                 let (delta, style) = match (row.series.first(), row.series.last()) {
                     (Some(a), Some(b)) if row.series.len() > 1 && *a != 0.0 => {
                         let d = (b / row.series[row.series.len() - 2] - 1.0) * 100.0;
-                        (format!("{d:+.1}% vs prev"), if d >= 0.0 { t.up() } else { t.down() })
+                        (
+                            format!("{d:+.1}% vs prev"),
+                            if d >= 0.0 { t.up() } else { t.down() },
+                        )
                     }
                     _ => (String::new(), t.dim()),
                 };
@@ -383,7 +440,11 @@ impl GodelScreen {
         frame.render_stateful_widget(
             List::new(rows)
                 .block(self.pane(format!(" result · {} · fake data ", r.key), focused))
-                .highlight_style(if focused { t.selected() } else { t.base().fg(t.accent) }),
+                .highlight_style(if focused {
+                    t.selected()
+                } else {
+                    t.base().fg(t.accent)
+                }),
             table,
             &mut st,
         );
@@ -401,15 +462,24 @@ impl GodelScreen {
         match sel {
             Some(row) if !row.series.is_empty() => {
                 let (first, last) = (row.series[0], row.series[row.series.len() - 1]);
-                lines.push(Line::from(Span::styled(format!("TREND  {}  (last 8 periods)", row.label), t.title())));
+                lines.push(Line::from(Span::styled(
+                    format!("TREND  {}  (last 8 periods)", row.label),
+                    t.title(),
+                )));
                 lines.push(Line::from(Span::styled(spark(&row.series), t.accent())));
                 let d = (last / first - 1.0) * 100.0;
                 lines.push(Line::from(vec![
                     Span::styled(format!("{first:.1} → {last:.1}  "), t.dim()),
-                    Span::styled(format!("{d:+.1}%"), if d >= 0.0 { t.up() } else { t.down() }),
+                    Span::styled(
+                        format!("{d:+.1}%"),
+                        if d >= 0.0 { t.up() } else { t.down() },
+                    ),
                 ]));
             }
-            _ => lines.push(Line::from(Span::styled("TREND  none for this row", t.dim()))),
+            _ => lines.push(Line::from(Span::styled(
+                "TREND  none for this row",
+                t.dim(),
+            ))),
         }
         let (asked, same_key) = self.seen_before(r);
         lines.push(Line::raw(""));
@@ -419,10 +489,16 @@ impl GodelScreen {
             t.dim(),
         )));
         if asked.is_empty() {
-            lines.push(Line::from(Span::styled("no earlier question on these tickers", t.dim())));
+            lines.push(Line::from(Span::styled(
+                "no earlier question on these tickers",
+                t.dim(),
+            )));
         }
         for q in asked.iter().take(5) {
-            lines.push(Line::from(vec![Span::styled("• ", t.accent()), Span::raw(q.clone())]));
+            lines.push(Line::from(vec![
+                Span::styled("• ", t.accent()),
+                Span::raw(q.clone()),
+            ]));
         }
         frame.render_widget(
             Paragraph::new(lines)
@@ -440,7 +516,10 @@ impl GodelScreen {
         if self.focus == Focus::Result {
             let r = self.result.as_ref()?;
             let row = r.rows.get(r.sel)?;
-            return Some(format!("{}: {} ({}) [{}]", row.label, row.value, row.src, r.key));
+            return Some(format!(
+                "{}: {} ({}) [{}]",
+                row.label, row.value, row.src, r.key
+            ));
         }
         commands(self.current()?)
             .get(self.cmd)
@@ -745,17 +824,25 @@ mod tests {
             ]);
             v
         };
-        let mut s = screen_with(json!([mk("a", "aapl q4 2023"), mk("b", "aapl margins last year")]), "res");
+        let mut s = screen_with(
+            json!([mk("a", "aapl q4 2023"), mk("b", "aapl margins last year")]),
+            "res",
+        );
         press(&mut s, KeyCode::Enter); // questions -> commands
         press(&mut s, KeyCode::Enter); // run command
         assert!(s.focus == Focus::Result);
         let out = render(&mut s);
         assert!(out.contains("result · AAPL US EQ FA 2023Q4"), "{out}");
-        assert!(out.contains("Revenue") && out.contains("TREND") && out.contains("SEEN BEFORE"), "{out}");
+        assert!(
+            out.contains("Revenue") && out.contains("TREND") && out.contains("SEEN BEFORE"),
+            "{out}"
+        );
         assert!(out.contains("aapl margins last year"), "{out}");
         press(&mut s, KeyCode::Char('j'));
         assert_eq!(s.result.as_ref().unwrap().sel, 1);
-        assert!(matches!(press(&mut s, KeyCode::Char('y')), Action::Copy(t) if t.starts_with("Gross margin")));
+        assert!(
+            matches!(press(&mut s, KeyCode::Char('y')), Action::Copy(t) if t.starts_with("Gross margin"))
+        );
         assert_eq!(press(&mut s, KeyCode::Esc), Action::None);
         assert!(s.focus == Focus::Commands);
         press(&mut s, KeyCode::Tab);

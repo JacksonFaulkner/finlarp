@@ -19,9 +19,10 @@ use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
+use crate::ui::anim::Scene;
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 
-use super::diagrams_anim::scene_for;
+use super::diagrams_anim::{scene_for, section_anim};
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
@@ -81,8 +82,17 @@ pub struct Diagrams {
     popup_scroll: u16,
     view: PopupView,
     menu_sel: usize,
+    /// Scroll of the beat notes beside an animation (j/k), and the beat they were last scrolled on.
+    notes_scroll: u16,
+    notes_beat: Option<usize>,
     /// The open zoom-in: (index in the scene's zooms, its player).
     zoom: Option<(usize, Player)>,
+    /// The open animation is a numbered section, not a zoom-in.
+    zoom_section: bool,
+    /// The animation previewed beside the menu: (menu row, its player).
+    preview: Option<(usize, Player)>,
+    /// The menu's right-hand preview (on) or the plain list (off); m toggles it.
+    browse: bool,
     /// Active page section (pane) in the node popup.
     pane: usize,
     /// When the popup opened; drives the page animation's clock.
@@ -302,7 +312,12 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         popup_scroll: 0,
         view: PopupView::Pane,
         menu_sel: 0,
+        notes_scroll: 0,
+        notes_beat: None,
         zoom: None,
+        zoom_section: false,
+        preview: None,
+        browse: false,
         pane: 0,
         anim_start: Instant::now(),
         player: None,
@@ -335,13 +350,44 @@ fn class_style(c: char, in_note: bool, t: &Theme) -> Style {
 }
 
 /// Art -> styled lines. `# ` lines are section headings; `(...)` is a note.
-fn own_line(l: Line<'_>) -> Line<'static> {
-    Line::from(
-        l.spans
-            .into_iter()
-            .map(|sp| Span::styled(sp.content.into_owned(), sp.style))
-            .collect::<Vec<_>>(),
-    )
+/// Animation art -> lines: the usual character classes plus chemistry colours (Si yellow, Cl green) wherever
+/// the element symbols appear, so atoms in the close-ups and the labels around them read at a glance.
+fn scene_lines(art: &str, t: &Theme) -> Vec<Line<'static>> {
+    art.lines()
+        .map(|line| {
+            let cs: Vec<char> = line.chars().collect();
+            let mut spans: Vec<Span<'static>> = Vec::new();
+            let (mut run, mut run_style) = (String::new(), t.base());
+            let mut depth = 0u32;
+            let mut i = 0;
+            while i < cs.len() {
+                let c = cs[i];
+                let next = cs.get(i + 1).copied();
+                let (take, style) = match (c, next) {
+                    ('(', _) => {
+                        depth += 1;
+                        (1, class_style(c, true, t))
+                    }
+                    ('S', Some('i')) if depth == 0 => (2, t.accent()),
+                    ('C', Some('l')) if depth == 0 => (2, t.up()),
+                    _ => (1, class_style(c, depth > 0, t)),
+                };
+                if style != run_style && !run.is_empty() {
+                    spans.push(Span::styled(std::mem::take(&mut run), run_style));
+                }
+                run_style = style;
+                run.extend(&cs[i..i + take]);
+                if c == ')' {
+                    depth = depth.saturating_sub(1);
+                }
+                i += take;
+            }
+            if !run.is_empty() {
+                spans.push(Span::styled(run, run_style));
+            }
+            Line::from(spans)
+        })
+        .collect()
 }
 
 fn styled_lines<'a>(art: &'a str, t: &Theme) -> Vec<Line<'a>> {
@@ -522,10 +568,17 @@ impl Diagrams {
 
     /// A page animation is playing in the open popup.
     fn animating(&self) -> bool {
-        self.popup
-            && matches!(self.view, PopupView::Overview | PopupView::Zoom)
-            && self.has_scene()
-            && !self.scene_player().is_some_and(|p| p.is_paused())
+        if !self.popup || !self.has_scene() {
+            return false;
+        }
+        match self.view {
+            PopupView::Overview | PopupView::Zoom => {
+                !self.scene_player().is_some_and(|p| p.is_paused())
+            }
+            // the preview beside the menu plays while an animation row is highlighted
+            PopupView::Menu => self.browse && self.menu_has_anim(),
+            PopupView::Pane => false,
+        }
     }
 
     /// The player the overview or the zoom is showing.
@@ -554,7 +607,18 @@ impl Diagrams {
             KeyCode::Char('p') => p.toggle_pause(),
             KeyCode::Char('l') | KeyCode::Right => p.step_beat(1),
             KeyCode::Char('h') | KeyCode::Left => p.step_beat(-1),
+            KeyCode::Char('j') | KeyCode::Down => {
+                self.notes_scroll = self.notes_scroll.saturating_add(2);
+                return true;
+            }
+            KeyCode::Char('k') | KeyCode::Up => {
+                self.notes_scroll = self.notes_scroll.saturating_sub(2);
+                return true;
+            }
             _ => return false,
+        }
+        if code != KeyCode::Char('p') {
+            self.notes_scroll = 0;
         }
         true
     }
@@ -613,6 +677,11 @@ impl Diagrams {
         }
     }
 
+    /// Menu index of the first section: the overview and the zoom-ins come first.
+    fn menu_sections(&self) -> usize {
+        1 + self.zoom_list().len()
+    }
+
     fn open_zoom(&mut self, i: usize) {
         let Some((_, Some(p))) = &self.player else {
             return;
@@ -621,7 +690,51 @@ impl Diagrams {
             return;
         };
         self.zoom = Some((i, Player::new((z.build)(), Instant::now())));
+        self.zoom_section = false;
         self.view = PopupView::Zoom;
+    }
+
+    /// The animation for numbered section `i` of the open page, if it has one.
+    fn section_build(&self, i: usize) -> Option<fn() -> Box<dyn Scene>> {
+        let (page, _) = self.player.as_ref()?;
+        section_anim(page, i)
+    }
+
+    /// Menu -> numbered section with an animation: play it full size.
+    fn open_section(&mut self, i: usize) {
+        let Some(build) = self.section_build(i) else {
+            return;
+        };
+        self.zoom = Some((i, Player::new(build(), Instant::now())));
+        self.zoom_section = true;
+        self.view = PopupView::Zoom;
+    }
+
+    /// Section `i` opens its animation when it has one, else its text.
+    fn open_section_or_pane(&mut self, i: usize) {
+        if self.section_build(i).is_some() {
+            self.open_section(i);
+        } else {
+            self.open_pane(i);
+        }
+    }
+
+    /// Whether the menu's highlighted row has an animation to preview.
+    fn menu_has_anim(&self) -> bool {
+        let s0 = self.menu_sections();
+        self.menu_sel < s0 || self.section_build(self.menu_sel - s0).is_some()
+    }
+
+    /// The animation behind menu row `sel` (not the overview), if any.
+    fn preview_build(&self, sel: usize) -> Option<fn() -> Box<dyn Scene>> {
+        let s0 = self.menu_sections();
+        if sel < s0 {
+            let (_, p) = self.player.as_ref()?;
+            let z = p.as_ref()?.zooms().get(sel.checked_sub(1)?).copied()?;
+            Some(z.build)
+        } else {
+            self.section_build(sel - s0)
+        }
     }
 
     /// Menu index of the zoom bound to `key`.
@@ -635,23 +748,29 @@ impl Diagrams {
     fn draw_scene(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         let zooming = self.view == PopupView::Zoom;
         let zooms = self.zoom_list();
-        let zoom_name = self
-            .zoom
-            .as_ref()
-            .and_then(|(i, _)| zooms.get(*i))
-            .map(|(_, l)| *l)
-            .unwrap_or("");
+        let zoom_name = match &self.zoom {
+            Some((i, _)) if self.zoom_section => {
+                self.pane_titles().get(*i).cloned().unwrap_or_default()
+            }
+            Some((i, _)) => zooms.get(*i).map_or("", |(_, l)| *l).to_string(),
+            None => String::new(),
+        };
         frame.render_widget(Clear, r);
         let paused = self.scene_player().is_some_and(|p| p.is_paused());
         let play = if paused {
-            "p resume  h/l step beat"
+            "p resume  h/l beat  j/k notes"
         } else {
-            "p pause  h/l step beat"
+            "p pause  h/l beat  j/k notes"
+        };
+        let switch = if self.zoom_section {
+            "1-9 switch section"
+        } else {
+            "a-d switch zoom"
         };
         let (title, hint) = if zooming {
             (
                 format!(" {label} \u{00B7} {zoom_name} "),
-                format!(" esc back  m menu  a-d switch zoom  {play} "),
+                format!(" esc menu  {switch}  {play} "),
             )
         } else {
             let keys = match (zooms.first(), zooms.last()) {
@@ -661,7 +780,7 @@ impl Diagrams {
             };
             (
                 format!(" {label} "),
-                format!("{keys} m menu  1-9 sections  {play}  q close "),
+                format!("{keys} esc menu  1-9 sections  {play} "),
             )
         };
         let block = Block::new()
@@ -717,10 +836,13 @@ impl Diagrams {
             cap_r,
         );
         let art = shot.lines.join("\n");
-        let art_lines: Vec<Line> = styled_lines(&art, t).into_iter().map(own_line).collect();
+        let art_lines = scene_lines(&art, t);
         frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
         let mut notes: Vec<Line> = Vec::new();
-        for (head, body) in [("WHAT'S HAPPENING", shot.what), ("LOOK FOR", shot.look)] {
+        for (head, body) in [
+            ("WHAT'S HAPPENING", shot.what),
+            ("WHY IT MATTERS", shot.why),
+        ] {
             if body.is_empty() {
                 continue;
             }
@@ -730,12 +852,41 @@ impl Diagrams {
             notes.push(Line::from(Span::styled(head, t.accent())));
             notes.push(Line::from(Span::styled(body, t.base())));
         }
-        frame.render_widget(
-            Paragraph::new(notes)
-                .style(t.base())
-                .wrap(Wrap { trim: true }),
-            note_r,
-        );
+        if !shot.facts.is_empty() {
+            notes.push(Line::default());
+            notes.push(Line::from(Span::styled("KEY NUMBERS", t.accent())));
+            for f in shot.facts {
+                notes.push(Line::from(vec![
+                    Span::styled("\u{25B8} ", t.dim()),
+                    Span::styled(*f, t.base()),
+                ]));
+            }
+        }
+        if !shot.look.is_empty() {
+            notes.push(Line::default());
+            notes.push(Line::from(Span::styled("LOOK FOR", t.accent())));
+            notes.push(Line::from(Span::styled(shot.look, t.base())));
+        }
+        if self.notes_beat != Some(shot.beat) {
+            self.notes_beat = Some(shot.beat);
+            self.notes_scroll = 0;
+        }
+        let para = Paragraph::new(notes)
+            .style(t.base())
+            .wrap(Wrap { trim: true });
+        let overflow = (para.line_count(note_r.width) as u16).saturating_sub(note_r.height);
+        self.notes_scroll = self.notes_scroll.min(overflow);
+        frame.render_widget(para.scroll((self.notes_scroll, 0)), note_r);
+        if overflow > 0 && note_r.height > 1 {
+            let more = if self.notes_scroll < overflow {
+                "\u{25BC} j/k scrolls the notes"
+            } else {
+                "\u{25B2} j/k scrolls the notes"
+            };
+            let bar = Rect::new(note_r.x, note_r.y + note_r.height - 1, note_r.width, 1);
+            frame.render_widget(Clear, bar);
+            frame.render_widget(Paragraph::new(Span::styled(more, t.dim())), bar);
+        }
         if chips_h > 0 {
             let mut chips = vec![Span::styled("zoom in  ", t.dim())];
             for (k, l) in &zooms {
@@ -758,25 +909,28 @@ impl Diagrams {
         frame.render_widget(Paragraph::new(Line::from(dots)).style(t.base()), dots_r);
     }
 
-    /// Zoom-ins (animated) and the page's sections (text) as one list.
+    /// The page's main navigation: the overview, its zoom-ins and the write-up
+    /// sections as one list on the left, with a live preview of the highlighted
+    /// item on the right.
     fn draw_menu(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         frame.render_widget(Clear, r);
+        let hint = if self.browse {
+            " j/k move  enter open  a-d zoom  1-9 sections  m list  esc close "
+        } else {
+            " j/k move  enter open  a-d zoom  1-9 sections  m preview  esc close "
+        };
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(t.accent())
             .title(Span::styled(format!(" {label} \u{00B7} menu "), t.title()))
-            .title_bottom(Span::styled(
-                " j/k move  enter open  a-d zoom  1-9 sections  esc back to the animation ",
-                t.dim(),
-            ))
+            .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::new(2, 2, 1, 0));
         let inner = block.inner(r);
         frame.render_widget(block, r);
         let zooms = self.zoom_list();
         let titles = self.pane_titles();
-        self.menu_sel = self
-            .menu_sel
-            .min((zooms.len() + titles.len()).saturating_sub(1));
+        let s0 = self.menu_sections();
+        self.menu_sel = self.menu_sel.min((s0 + titles.len()).saturating_sub(1));
         let mut lines: Vec<Line> = Vec::new();
         let mut sel_line = 0usize;
         let item = |i: usize, text: String, sel: usize, t: &Theme| {
@@ -789,34 +943,111 @@ impl Diagrams {
                 Line::from(Span::styled(format!("   {text} "), t.base()))
             }
         };
-        if !zooms.is_empty() {
-            lines.push(Line::from(Span::styled(
-                "ZOOM IN \u{00B7} animated close-ups of one part",
-                t.accent(),
-            )));
-            for (i, (k, l)) in zooms.iter().enumerate() {
-                if i == self.menu_sel {
-                    sel_line = lines.len();
-                }
-                lines.push(item(i, format!("{k}  {l}"), self.menu_sel, t));
-            }
-            lines.push(Line::default());
-            lines.push(Line::from(Span::styled(
-                "SECTIONS \u{00B7} the full write-up",
-                t.accent(),
-            )));
+        lines.push(Line::from(Span::styled(
+            "WATCH \u{00B7} the whole process, or one close-up",
+            t.accent(),
+        )));
+        if self.menu_sel == 0 {
+            sel_line = lines.len();
         }
-        for (i, title) in titles.iter().enumerate() {
-            if zooms.len() + i == self.menu_sel {
+        lines.push(item(0, "overview".to_string(), self.menu_sel, t));
+        for (i, (k, l)) in zooms.iter().enumerate() {
+            if 1 + i == self.menu_sel {
                 sel_line = lines.len();
             }
-            lines.push(item(zooms.len() + i, title.clone(), self.menu_sel, t));
+            lines.push(item(1 + i, format!("{k}  {l}"), self.menu_sel, t));
         }
-        let off = (sel_line + 1).saturating_sub(inner.height as usize) as u16;
+        lines.push(Line::default());
+        lines.push(Line::from(Span::styled(
+            "SECTIONS \u{00B7} the full write-up",
+            t.accent(),
+        )));
+        for (i, title) in titles.iter().enumerate() {
+            if s0 + i == self.menu_sel {
+                sel_line = lines.len();
+            }
+            lines.push(item(s0 + i, title.clone(), self.menu_sel, t));
+        }
+
+        let side = self.browse && inner.width >= 80;
+        let list_w = if side {
+            (inner.width * 2 / 5).max(40)
+        } else {
+            inner.width
+        };
+        let [list_r, gap_r, prev_r] = Layout::horizontal([
+            Constraint::Length(list_w),
+            Constraint::Length(if side { 3 } else { 0 }),
+            Constraint::Min(0),
+        ])
+        .areas(inner);
+        let off = (sel_line + 1).saturating_sub(list_r.height as usize) as u16;
         frame.render_widget(
             Paragraph::new(lines).style(t.base()).scroll((off, 0)),
-            inner,
+            list_r,
         );
+        if !side || prev_r.width < 20 || prev_r.height < 4 {
+            return;
+        }
+        let rule = vec![Line::from(Span::styled(" \u{2502}", t.dim())); gap_r.height as usize];
+        frame.render_widget(Paragraph::new(rule), gap_r);
+
+        let name = match self.menu_sel {
+            0 => "overview".to_string(),
+            i if i < s0 => zooms.get(i - 1).map_or("", |z| z.1).to_string(),
+            i => titles.get(i - s0).cloned().unwrap_or_default(),
+        };
+        let [head_r, body_r] =
+            Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(prev_r);
+        frame.render_widget(
+            Paragraph::new(Span::styled(format!("preview \u{00B7} {name}"), t.dim())),
+            head_r,
+        );
+        if self.menu_has_anim() {
+            self.draw_preview_scene(frame, body_r, t);
+        } else {
+            let art = self.cur_label().and_then(|l| visual(&l)).unwrap_or("");
+            let panes = pane_ranges(art);
+            let Some(&(p0, p1, _)) = panes.get(self.menu_sel - s0) else {
+                return;
+            };
+            let art_lines = styled_lines(art, t);
+            let p1 = p1.min(art_lines.len());
+            let body: Vec<Line> = art_lines[p0.min(p1)..p1].to_vec();
+            frame.render_widget(Paragraph::new(body).style(t.base()), body_r);
+        }
+    }
+
+    /// The highlighted animation (the overview or a zoom-in) playing in the preview.
+    fn draw_preview_scene(&mut self, frame: &mut Frame, r: Rect, t: &Theme) {
+        let sel = self.menu_sel;
+        let p = if sel == 0 {
+            self.player.as_mut().and_then(|(_, p)| p.as_mut())
+        } else {
+            if self.preview.as_ref().map(|(j, _)| *j) != Some(sel) {
+                let Some(build) = self.preview_build(sel) else {
+                    return;
+                };
+                self.preview = Some((sel, Player::new(build(), Instant::now())));
+            }
+            self.preview.as_mut().map(|(_, p)| p)
+        };
+        let Some(p) = p else {
+            return;
+        };
+        let [cap_r, art_r] = Layout::vertical([Constraint::Length(1), Constraint::Min(0)]).areas(r);
+        p.fit(art_r.width, art_r.height);
+        let shot = p.shot();
+        frame.render_widget(
+            Paragraph::new(Line::from(vec![
+                Span::styled(format!("\u{25B6} {}", shot.caption), t.accent()),
+                Span::styled(format!("   {}/{}", shot.beat + 1, shot.beats), t.dim()),
+            ]))
+            .style(t.base()),
+            cap_r,
+        );
+        let art = shot.lines.join("\n");
+        frame.render_widget(Paragraph::new(scene_lines(&art, t)).style(t.base()), art_r);
     }
 
     fn draw_popup(&mut self, frame: &mut Frame, area: Rect, t: &Theme) {
@@ -1326,13 +1557,16 @@ impl Screen for Diagrams {
         }
         if self.popup && self.view == PopupView::Overview && self.has_scene() {
             match key.code {
-                KeyCode::Char('q') | KeyCode::Esc => self.popup = false,
-                KeyCode::Char('m') | KeyCode::Enter | KeyCode::Char(' ') => {
+                KeyCode::Char('q') => self.popup = false,
+                KeyCode::Char('m') | KeyCode::Esc | KeyCode::Enter | KeyCode::Char(' ') => {
+                    self.browse = key.code == KeyCode::Char('m');
                     self.menu_sel = 0;
                     self.zoom = None;
                     self.view = PopupView::Menu;
                 }
-                KeyCode::Char(c @ '1'..='9') => self.open_pane(c as usize - '1' as usize),
+                KeyCode::Char(c @ '1'..='9') => {
+                    self.open_section_or_pane(c as usize - '1' as usize)
+                }
                 KeyCode::Char(c) => {
                     if let Some(i) = self.zoom_for_key(c) {
                         self.open_zoom(i);
@@ -1344,10 +1578,18 @@ impl Screen for Diagrams {
         }
         if self.popup && self.view == PopupView::Zoom {
             match key.code {
-                KeyCode::Char('q') | KeyCode::Esc => self.view = PopupView::Overview,
-                KeyCode::Char('m') => {
-                    self.menu_sel = self.zoom.as_ref().map_or(0, |(i, _)| *i);
+                KeyCode::Char('q') | KeyCode::Esc | KeyCode::Char('m') => {
+                    self.browse |= key.code == KeyCode::Char('m');
+                    let i = self.zoom.as_ref().map_or(0, |(i, _)| *i);
+                    self.menu_sel = if self.zoom_section {
+                        self.menu_sections() + i
+                    } else {
+                        1 + i
+                    };
                     self.view = PopupView::Menu;
+                }
+                KeyCode::Char(c @ '1'..='9') if self.zoom_section => {
+                    self.open_section(c as usize - '1' as usize)
                 }
                 KeyCode::Char(c) => {
                     if let Some(i) = self.zoom_for_key(c) {
@@ -1359,16 +1601,10 @@ impl Screen for Diagrams {
             return Action::None;
         }
         if self.popup && self.view == PopupView::Menu {
-            let nz = self.zoom_list().len();
-            let last = (nz + self.pane_titles().len()).saturating_sub(1);
+            let s0 = self.menu_sections();
+            let last = (s0 + self.pane_titles().len()).saturating_sub(1);
             match key.code {
-                KeyCode::Char('q') | KeyCode::Esc | KeyCode::Char('m') => {
-                    self.view = if self.has_scene() {
-                        PopupView::Overview
-                    } else {
-                        PopupView::Pane
-                    };
-                }
+                KeyCode::Char('q') | KeyCode::Esc => self.popup = false,
                 KeyCode::Char('j') | KeyCode::Down | KeyCode::Tab => {
                     self.menu_sel = (self.menu_sel + 1).min(last);
                 }
@@ -1377,14 +1613,15 @@ impl Screen for Diagrams {
                 }
                 KeyCode::Char('g') | KeyCode::Home => self.menu_sel = 0,
                 KeyCode::Char('G') | KeyCode::End => self.menu_sel = last,
-                KeyCode::Enter | KeyCode::Char(' ') => {
-                    if self.menu_sel < nz {
-                        self.open_zoom(self.menu_sel);
-                    } else {
-                        self.open_pane(self.menu_sel - nz);
-                    }
+                KeyCode::Char('m') => self.browse = !self.browse,
+                KeyCode::Enter | KeyCode::Char(' ') => match self.menu_sel {
+                    0 => self.view = PopupView::Overview,
+                    i if i < s0 => self.open_zoom(i - 1),
+                    i => self.open_section_or_pane(i - s0),
+                },
+                KeyCode::Char(c @ '1'..='9') => {
+                    self.open_section_or_pane(c as usize - '1' as usize)
                 }
-                KeyCode::Char(c @ '1'..='9') => self.open_pane(c as usize - '1' as usize),
                 KeyCode::Char(c) => {
                     if let Some(i) = self.zoom_for_key(c) {
                         self.open_zoom(i);
@@ -1400,14 +1637,15 @@ impl Screen for Diagrams {
             match key.code {
                 KeyCode::Char('q') | KeyCode::Esc => {
                     if self.has_scene() {
-                        self.menu_sel = self.zoom_list().len() + self.pane;
+                        self.menu_sel = self.menu_sections() + self.pane;
                         self.view = PopupView::Menu;
                     } else {
                         self.popup = false;
                     }
                 }
                 KeyCode::Char('m') if self.has_scene() => {
-                    self.menu_sel = self.zoom_list().len() + self.pane;
+                    self.browse = true;
+                    self.menu_sel = self.menu_sections() + self.pane;
                     self.view = PopupView::Menu;
                 }
                 KeyCode::Enter => {
@@ -1505,11 +1743,14 @@ impl Screen for Diagrams {
                     )
                 });
                 self.view = if self.has_scene() {
-                    PopupView::Overview
+                    PopupView::Menu
                 } else {
                     PopupView::Pane
                 };
                 self.menu_sel = 0;
+                self.zoom = None;
+                self.preview = None;
+                self.browse = false;
                 self.detail = false;
                 self.hsel = 0;
                 self.hots = self.nodes[self.tab]
@@ -1765,7 +2006,7 @@ mod tests {
     }
 
     #[test]
-    fn sand_opens_on_the_animation_then_menu_then_section() {
+    fn sand_opens_on_the_menu_then_animation_then_section() {
         let ctx = Ctx {
             db_path: Default::default(),
             theme: Theme::default(),
@@ -1776,16 +2017,48 @@ mod tests {
             .position(|n| n.label == "SAND")
             .expect("SAND node");
         press(&mut d, KeyCode::Enter);
+        assert_eq!(d.view, PopupView::Menu);
+        let all = screen_text(&mut d, 170, 50);
+        assert!(all.contains("WATCH") && all.contains("SECTIONS"), "{all}");
+        assert!(
+            !all.contains("preview \u{00B7}"),
+            "the plain list has no preview: {all}"
+        );
+        press(&mut d, KeyCode::Char('m'));
+        assert!(d.browse);
+        let all = screen_text(&mut d, 170, 50);
+        assert!(
+            all.contains("off-gas and the bag filter") && all.contains("1."),
+            "{all}"
+        );
+        // the highlighted overview plays in the preview beside the list
+        assert!(
+            all.contains("preview \u{00B7} overview") && all.contains("E1"),
+            "{all}"
+        );
+        assert!(d.animating() && d.needs_redraw());
+
+        // the preview follows the cursor: a zoom-in, then a section's text
+        press(&mut d, KeyCode::Char('j'));
+        let all = screen_text(&mut d, 170, 50);
+        assert!(all.contains("gas cavity"), "{all}");
+        assert!(d.animating());
+        for _ in 0..4 {
+            press(&mut d, KeyCode::Char('j')); // past the four zooms
+        }
+        assert!(!d.animating(), "a section preview is static");
+        screen_text(&mut d, 170, 50);
+
+        press(&mut d, KeyCode::Char('g'));
+        press(&mut d, KeyCode::Enter);
         assert_eq!(d.view, PopupView::Overview);
         let all = screen_text(&mut d, 170, 50);
         assert!(
             all.contains("WHAT'S HAPPENING") && all.contains("LOOK FOR"),
             "{all}"
         );
-        assert!(all.contains("E1") && all.contains("m menu"), "{all}");
-        assert!(d.animating() && d.needs_redraw());
 
-        // zoom in on the cavity, look at it, step back out
+        // zoom in on the cavity, switch zoom, back to the menu on that row
         assert!(all.contains("zoom in") && all.contains("[a]"), "{all}");
         press(&mut d, KeyCode::Char('a'));
         assert_eq!(d.view, PopupView::Zoom);
@@ -1799,35 +2072,39 @@ mod tests {
         assert_eq!(d.zoom.as_ref().map(|z| z.0), Some(2));
         assert!(screen_text(&mut d, 170, 50).contains("tap hole"));
         press(&mut d, KeyCode::Esc);
-        assert_eq!(d.view, PopupView::Overview);
+        assert_eq!((d.view, d.menu_sel), (PopupView::Menu, 3));
 
-        press(&mut d, KeyCode::Char('m'));
-        assert_eq!(d.view, PopupView::Menu);
-        assert!(!d.animating());
-        let all = screen_text(&mut d, 170, 50);
-        assert!(all.contains("ZOOM IN") && all.contains("SECTIONS"), "{all}");
-        assert!(
-            all.contains("off-gas and the bag filter") && all.contains("1."),
-            "{all}"
-        );
-
-        for _ in 0..4 {
-            press(&mut d, KeyCode::Char('j')); // past the four zooms
-        }
-        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('1'));
         assert_eq!((d.view, d.pane), (PopupView::Pane, 0));
         screen_text(&mut d, 170, 50); // pane view draws
-
         press(&mut d, KeyCode::Esc);
-        assert_eq!(d.view, PopupView::Menu);
-        press(&mut d, KeyCode::Esc);
-        assert_eq!(d.view, PopupView::Overview);
+        assert_eq!((d.view, d.menu_sel), (PopupView::Menu, 5));
         press(&mut d, KeyCode::Char('3'));
         assert_eq!((d.view, d.pane), (PopupView::Pane, 2));
         press(&mut d, KeyCode::Esc);
         press(&mut d, KeyCode::Esc);
-        press(&mut d, KeyCode::Esc);
         assert!(!d.popup);
+    }
+
+    #[test]
+    fn melt_section_opens_its_animation() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "MELT + PULL")
+            .unwrap();
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('1'));
+        assert_eq!(d.view, PopupView::Zoom);
+        assert!(d.zoom_section);
+        let all = screen_text(&mut d, 170, 50);
+        assert!(all.contains("What happens"), "{all}");
+        press(&mut d, KeyCode::Esc);
+        assert_eq!((d.view, d.menu_sel), (PopupView::Menu, d.menu_sections()));
     }
 
     #[test]
@@ -1842,6 +2119,7 @@ mod tests {
             .position(|n| n.label == "SAND")
             .unwrap();
         press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter); // menu -> overview
         assert!(d.animating() && d.needs_redraw());
         assert!(screen_text(&mut d, 170, 50).contains("p pause"));
 
@@ -1872,7 +2150,50 @@ mod tests {
         assert!(!d.animating());
         assert!(d.scene_player().is_some_and(|p| p.is_paused()));
         press(&mut d, KeyCode::Esc);
+        press(&mut d, KeyCode::Char('g'));
+        press(&mut d, KeyCode::Char('m'));
         assert!(d.animating(), "the overview was not paused");
+    }
+
+    #[test]
+    fn long_notes_scroll_with_j_k_and_reset_on_a_new_beat() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "POLYSILICON")
+            .unwrap();
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('p'));
+        press(&mut d, KeyCode::Char('l')); // beat 2: the fluidized bed
+        let tall = screen_text(&mut d, 175, 60);
+        for head in [
+            "WHAT'S HAPPENING",
+            "WHY IT MATTERS",
+            "KEY NUMBERS",
+            "LOOK FOR",
+        ] {
+            assert!(tall.contains(head), "{head} missing on a tall screen");
+        }
+        let short = screen_text(&mut d, 175, 24);
+        assert!(
+            !short.contains("LOOK FOR") && short.contains("j/k scrolls the notes"),
+            "{short}"
+        );
+        for _ in 0..8 {
+            press(&mut d, KeyCode::Char('j'));
+        }
+        let scrolled = screen_text(&mut d, 175, 24);
+        assert!(
+            scrolled.contains("LOOK FOR") && !scrolled.contains("WHAT'S HAPPENING"),
+            "{scrolled}"
+        );
+        press(&mut d, KeyCode::Char('l')); // next beat starts from the top again
+        assert!(screen_text(&mut d, 175, 24).contains("WHAT'S HAPPENING"));
     }
 
     #[test]
@@ -1886,6 +2207,7 @@ mod tests {
             .iter()
             .position(|n| n.label == "POLYSILICON")
             .expect("POLYSILICON node");
+        press(&mut d, KeyCode::Enter);
         press(&mut d, KeyCode::Enter);
         assert_eq!(d.view, PopupView::Overview);
         let all = screen_text(&mut d, 175, 48);
@@ -1918,6 +2240,10 @@ mod tests {
             .iter()
             .position(|n| n.label == "SAND")
             .unwrap();
+        press(&mut d, KeyCode::Enter);
+        for (w, h) in [(40, 10), (90, 20), (130, 30), (260, 80)] {
+            screen_text(&mut d, w, h); // menu with its preview
+        }
         press(&mut d, KeyCode::Enter);
         for (w, h) in [(40, 10), (90, 20), (130, 30), (260, 80)] {
             screen_text(&mut d, w, h);

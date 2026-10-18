@@ -38,6 +38,14 @@ const BEATS: &[Beat] = &[
     .note(
         "Quartzite is the silicon source. Coke and wood chips are the reductant, and the chips keep the pile open for gas. They drop in continuously, so the whole burden slowly sinks.",
         "Packets sliding down both feed pipes and the charge creeping down a row at a time. Gas ° is already drifting up out of the lid.",
+    )
+    .detail(
+        "Everything downstream depends on a loose, evenly mixed burden. Chips and coke open gaps so hot gas can climb through, and lumps rather than dust keep those gaps from clogging.",
+        &[
+            "Textbook overall reaction: SiO2 + 2C gives Si + 2CO, which absorbs a lot of heat",
+            "Power: 11-13 MWh per tonne of silicon, the furnace's biggest cost",
+            "The charge sinks continuously as it is consumed and refilled from the top",
+        ],
     ),
     Beat::new(
         "in the cooler shaft, rising gas is recaptured: SiO + 2C ─▶ SiC + CO and 2SiO ─▶ SiO2 + Si",
@@ -46,6 +54,14 @@ const BEATS: &[Beat] = &[
     .note(
         "Gas made lower down climbs through the gaps in the charge. In the cooler shaft SiO meets carbon and turns into SiC (reaction 4), or condenses into SiO2 + Si (reaction 3). Both keep silicon in the furnace.",
         "° bubbles rising from the cavities toward the lid. The SiC shell ░ around each cavity is where recapture piles up.",
+    )
+    .detail(
+        "Recapturing SiO is what keeps the yield up. SiO that escapes is silicon lost, and what is recovered in the shaft does not have to be made again in the hot zone.",
+        &[
+            "Reaction 3: 2 SiO gives SiO2 + Si (condensation)",
+            "Reaction 4: SiO + 2C gives SiC + CO (recapture)",
+            "Shaft temperatures roughly 300-2200 K, hearth 2200-2400 K (Elkem and Oxford ESGI report)",
+        ],
     ),
     Beat::new(
         "at each electrode tip an arc holds a gas cavity above 1800 C: SiO2 + C ─▶ SiO + CO, then SiC + SiO ─▶ 2Si + CO",
@@ -54,6 +70,14 @@ const BEATS: &[Beat] = &[
     .note(
         "This is where silicon is made. The arc keeps a cavity of SiO and CO gas open under each electrode. SiC + SiO ─▶ 2Si + CO (reaction 1) yields liquid silicon that drains to the pool.",
         "The electrode glow flickering, ● drops falling from each cavity floor, and the ▓ pool rising under them.",
+    )
+    .detail(
+        "The cavity is the engine of the furnace. It has to stay open and hot enough for the two key reactions, which is why electrode position and power are controlled so carefully.",
+        &[
+            "Reaction 1: SiO + SiC gives 2 Si + CO, which makes the tappable silicon",
+            "Reaction 2: SiO2 + Si gives 2 SiO, which makes the SiO gas",
+            "Arc zone above 1800 C; silicon melts at 1414 C",
+        ],
     ),
     Beat::new(
         "SiO condenses on the cool charge and a crust builds around each cavity, choking charge flow",
@@ -62,6 +86,15 @@ const BEATS: &[Beat] = &[
     .note(
         "Over hours a hard crust (SiO2, SiC, Si) grows around each cavity. It thickens, rises, and swells the cavity. Charge can no longer fall into the hot zone, so reactions stall.",
         "The ▒ crust ring growing out from the ░ shell, cavities widening, and the charge pattern stopping its slide.",
+    )
+    .detail(
+        "Crust costs output and, if it gets too thick, can force the furnace to be emptied. Stoking is a trade-off between lost output and disturbing the furnace.",
+        &[
+            "Crust is mainly SiO2 with silicon and SiC mixed in (ESGI report)",
+            "It forms where SiO condenses at low temperature: 2 SiO gives SiO2 + Si",
+            "Crust thickens and rises, which increases the gas cavity volume (Sloman and Elkem)",
+            "After months or years the crust or hearth layer may need the furnace emptied, with a productivity penalty",
+        ],
     ),
     Beat::new(
         "about hourly, a stoking car breaks the crust with a bar so charge can fall again",
@@ -70,6 +103,14 @@ const BEATS: &[Beat] = &[
     .note(
         "Operators stoke: a stoking car on the lid pushes a bar down into the crust and breaks it up by hand. Charge drops into the cavity zone and the furnace recovers.",
         "The car sliding along the lid, the bar ┃ jabbing in, sparks * at the break, ▒ shrinking back, and the charge sliding again.",
+    )
+    .detail(
+        "The aim is to restore the downward flow of charge without disturbing the cavities that are actually making silicon.",
+        &[
+            "Typically about once an hour (Sloman and Elkem)",
+            "A bar is pushed down through the charge from a stoking car on the lid",
+            "Done by hand: the crust is broken up, not removed",
+        ],
     ),
     Beat::new(
         "pool full: the tap hole is lanced, Si runs to the ladle, and a hood pulls fume off the spout",
@@ -78,6 +119,14 @@ const BEATS: &[Beat] = &[
     .note(
         "Liquid silicon leaves from the base through the tap hole. Fume is worst during tapping, so a hood over the spout pulls it into the filter line.",
         "The ▓ stream dropping into the ladle while the pool level falls.",
+    )
+    .detail(
+        "A full pool leaves the cavities nowhere to drip, so the furnace is tapped on a regular schedule. Tapping is also the dirtiest moment for fume.",
+        &[
+            "Hood over the taphole and spout, called a doghouse, pulls fume into the duct (USPTO 11874064)",
+            "Fume is 40-80% of fugitive emissions from tapping, refining and casting at one Norwegian plant (Elkem Salten study)",
+            "Only 80-90% of the silicon charged is recovered as product",
+        ],
     ),
     Beat::new(
         "hot gas leaves the lid; bag filters catch silica fume and clean gas goes up the stack",
@@ -86,6 +135,14 @@ const BEATS: &[Beat] = &[
     .note(
         "SiO that escapes the burden burns in air to ~150 nm SiO2 fume. The off-gas duct carries it to bag filters. The fume is caught and sold as microsilica; only clean gas goes up the stack.",
         "· fume and ° gas flowing right along the duct, dust building on the bags, a jet cleaning pulse, and the silica bin filling.",
+    )
+    .detail(
+        "Catching the fume is both a legal need and a revenue stream. Microsilica is sold, and letting it escape means losing silicon and polluting.",
+        &[
+            "Fume particles are about 150 nm of SiO2",
+            "In one DC furnace 19.5% of the charged silicon was lost as fume",
+            "Briquetted microsilica plus carbon made up 0-50% of the charge in a 200 kVA test furnace (2024 preprint)",
+        ],
     ),
     Beat::new(
         "ladle metal is refined, cast, crushed and sized into the product",
@@ -94,6 +151,14 @@ const BEATS: &[Beat] = &[
     .note(
         "Tapped silicon is refined in the ladle, cast into a solid, crushed and screened to the grain size the customer wants. Only 80-90% of the charged silicon ends up as product.",
         "▓ packets moving ladle ─▶ cast ─▶ crush ─▶ Si bin along the bottom row.",
+    )
+    .detail(
+        "Customers buy by grade and grain size, so purity and sizing decide the price per tonne.",
+        &[
+            "Ladle refining with air and oxygen mainly removes Ca and Al into slag (Springer review)",
+            "The product is cast, crushed and screened",
+            "80-90% of the charged silicon ends up as product",
+        ],
     ),
 ];
 
@@ -519,7 +584,13 @@ mod tests {
         assert_eq!(p.zooms().len(), 4);
         assert_eq!(p.zooms().iter().map(|z| z.key).collect::<String>(), "abcd");
         for (i, b) in BEATS.iter().enumerate() {
-            assert!(!b.what.is_empty() && !b.look.is_empty(), "beat {i}");
+            assert!(
+                !b.what.is_empty()
+                    && !b.look.is_empty()
+                    && !b.why.is_empty()
+                    && !b.facts.is_empty(),
+                "beat {i}"
+            );
         }
     }
 

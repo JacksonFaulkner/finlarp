@@ -59,6 +59,14 @@ const CAV_BEATS: &[Beat] = &[
     .note(
         "The carbon electrode carries tens of kiloamps into the burden. The arc at its tip heats the charge until a pocket of gas, mostly SiO and CO, stays open around it. A hard, porous SiC shell lines the pocket.",
         "The arc ┃ flickering from the tip to the molten floor, sparks *, and gas ° moving around inside the cavity.",
+    )
+    .detail(
+        "The arc is the only place in the furnace hot enough to drive the main reactions. Everything depends on keeping it stable inside a cavity of gas instead of in contact with cooler charge.",
+        &[
+            "Arc zone above 1800 C",
+            "The electrode is carbon and is consumed as it burns",
+            "Three electrodes in a three-phase furnace",
+        ],
     ),
     Beat::new(
         "SiO2 + C ─▶ SiO + CO: quartz at the cavity wall is reduced and SiO gas fills the cavity",
@@ -67,6 +75,14 @@ const CAV_BEATS: &[Beat] = &[
     .note(
         "Quartz that reaches the hot wall melts and reacts with carbon. The products are gases: SiO and CO. This reaction is strongly endothermic, which is why the furnace needs so much power.",
         "° bubbles forming at the shell wall and moving in toward the center, with · sparkles where the charge breaks down.",
+    )
+    .detail(
+        "Making SiO gas first, not silicon directly, is how the process works. The gas carries silicon up out of the hottest zone to be reacted again where carbon and SiC are available.",
+        &[
+            "Quartz is reduced by carbon to SiO and CO gas",
+            "Strongly endothermic, which is why the furnace uses 11-13 MWh per tonne",
+            "The cavity gas is mostly SiO and CO (Sloman and Elkem)",
+        ],
     ),
     Beat::new(
         "SiC + SiO ─▶ 2Si + CO: liquid silicon forms and collects on the cavity floor",
@@ -75,6 +91,14 @@ const CAV_BEATS: &[Beat] = &[
     .note(
         "SiO gas meets SiC in the shell and the reaction yields liquid silicon, the product, plus CO. The silicon runs down the shell and pools on the floor of the cavity.",
         "● drops forming on the lower shell, sliding down, and the ≈ molten floor of the cavity thickening.",
+    )
+    .detail(
+        "SiC is the key intermediate. It forms in the cooler shaft from SiO and carbon and is consumed here to make silicon. Too much SiC on the hearth is a problem, too little means silicon is lost as SiO.",
+        &[
+            "Reaction 1: SiO + SiC gives 2 Si + CO",
+            "SiC is a hard, porous solid (ESGI report)",
+            "Silicon melts at 1414 C and runs down to the pool",
+        ],
     ),
     Beat::new(
         "Si drips to the pool; SiO that escapes upward is recaptured: SiO + 2C ─▶ SiC + CO",
@@ -83,6 +107,14 @@ const CAV_BEATS: &[Beat] = &[
     .note(
         "Liquid silicon drains through the bed into the pool below. Some SiO escapes up through the shell. In the cooler charge above it meets carbon and turns into SiC, which feeds the shell again.",
         "● drops falling out the bottom into the ▓ pool, and ° gas leaving the top of the shell and thinning out as it rises.",
+    )
+    .detail(
+        "How much SiO escapes sets the recovery. The more that is recaptured as SiC in the shaft, the less silicon is lost to fume.",
+        &[
+            "Reaction 4: SiO + 2C gives SiC + CO",
+            "Reaction 3: 2 SiO gives SiO2 + Si",
+            "Too little carbon lets SiO escape; too much grows SiC on the hearth",
+        ],
     ),
 ];
 
@@ -214,6 +246,14 @@ const CRUST_BEATS: &[Beat] = &[
     .note(
         "In the ideal furnace raw material falls slowly through the shaft and is used up as fast as it is fed in. The cavity is steady and the SiC shell thin.",
         "The charge sliding down past the thin ▒ crust, steady ° gas, and a small cavity.",
+    )
+    .detail(
+        "In the ideal furnace the charge falls as fast as it is consumed, so the cavities stay the same size and output is steady.",
+        &[
+            "Charge is fed continuously at the top",
+            "A gas cavity of SiO and CO sits around each electrode tip",
+            "A SiC layer forms in the hotter regions below the charge",
+        ],
     ),
     Beat::new(
         "SiO condenses on the cooler outside: 2SiO ─▶ SiO2 + Si builds crust",
@@ -222,6 +262,14 @@ const CRUST_BEATS: &[Beat] = &[
     .note(
         "Near the top of the furnace temperatures are low enough that SiO gas condenses to a sticky SiO2 + Si mix (reaction 3). That sets hard and becomes crust.",
         "· particles rising and sticking to the outer edge, the ▒ crust ring creeping outward.",
+    )
+    .detail(
+        "The same condensation that recaptures silicon in the shaft builds crust when too much of it happens in the wrong place.",
+        &[
+            "2 SiO gives SiO2 + Si where it is cool enough, near the top of the furnace",
+            "The condensate is sticky and sets hard",
+            "Crust consists mainly of SiO2 (ESGI report)",
+        ],
     ),
     Beat::new(
         "the crust thickens and rises, swelling the cavity and blocking charge from the hot zone",
@@ -230,6 +278,14 @@ const CRUST_BEATS: &[Beat] = &[
     .note(
         "As the crust gets thicker the gas cavity grows with it. Solid and liquid material can no longer reach the hot lower region, so less silicon is made and the furnace is losing output.",
         "The charge pattern freezing in place, the cavity visibly wider, and ▒ crust now far thicker than the ░ shell.",
+    )
+    .detail(
+        "Once charge cannot reach the hot zone the reactions stall, so output drops even though the same power is going in.",
+        &[
+            "Crust thickens and rises, increasing the cavity volume (Sloman and Elkem)",
+            "It stops solids and liquids reaching the lower furnace",
+            "Less charge reaches the heat, so less silicon is made",
+        ],
     ),
     Beat::new(
         "stoking: a stoking car on the lid pushes a bar down into the crust",
@@ -237,7 +293,15 @@ const CRUST_BEATS: &[Beat] = &[
     )
     .note(
         "About once an hour the operators send a stoking car along the lid. It pushes a long bar down through the charge onto the crust and starts breaking it.",
-        "The car ▐███▌ sliding in at the top, and the bar ┃ descending until it touches the crust.",
+        "The stoking car sliding in at the top, and the bar ┃ descending until it touches the crust.",
+    )
+    .detail(
+        "Stoking is a compromise. The crust has to be broken often enough to keep charge moving, but each stoking disturbs the furnace.",
+        &[
+            "Typically about once an hour (Sloman and Elkem)",
+            "Done with a long bar from a stoking car on the lid",
+            "The bar is pushed through the loose charge onto the crust",
+        ],
     ),
     Beat::new(
         "the crust breaks up and charge falls into the hot zone again",
@@ -246,6 +310,14 @@ const CRUST_BEATS: &[Beat] = &[
     .note(
         "With the crust broken, charge can fall back into the cavity zone. The cavity shrinks and silicon production recovers, until the crust builds up again.",
         "Sparks * at the break, the ▒ ring shrinking, the cavity narrowing, and the charge sliding down again.",
+    )
+    .detail(
+        "Stoking only treats the crust. A hard SiC layer on the hearth cannot be stoked away and builds slowly.",
+        &[
+            "After months or years crust or hearth layers may be thick enough that the furnace must be emptied (ESGI report)",
+            "That emptying carries a productivity penalty",
+            "Charge falling into the cavity zone restores production",
+        ],
     ),
 ];
 
@@ -301,15 +373,20 @@ impl Scene for CrustStoke {
             let y = cv.cy + ((noise(k + 7, t.ms / 200) * 2.0 - 1.0) * (ry - 0.5)) as i32;
             c.put_if_blank(x, y, '°');
         }
-        // condensing SiO settling onto the crust
+        // SiO leaves the cavity top, drifts out and condenses on the crust edge
         if t.beat == 1 || t.beat == 2 {
-            Particles::new(61, 110, 2000).each(t.ms, |p| {
+            Particles::new(61, 90, 1600).each(t.ms, |p| {
                 let theta = lerp(3.5, 6.0, p.rand(1));
+                let (sx, sy) = (
+                    cv.cx as f32 + rx * theta.cos(),
+                    cv.cy as f32 + ry * theta.sin(),
+                );
                 let (rx2, ry2) = (rx + 2.0 + 2.5 * ct, ry + 1.2 + 1.4 * ct);
                 let tx = cv.cx as f32 + rx2 * theta.cos();
                 let ty = cv.cy as f32 + ry2 * theta.sin();
-                let y = lerp(ty - 5.0, ty, p.age);
-                c.put_if_blank(tx.round() as i32, y.round() as i32, '·');
+                let x = lerp(sx, tx, p.age);
+                let y = lerp(sy, ty, p.age);
+                c.put_if_blank(x.round() as i32, y.round() as i32, '·');
             });
         }
         // stoking car and bar
@@ -363,6 +440,14 @@ const TAP_BEATS: &[Beat] = &[
     .note(
         "Silicon collects at the bottom of the furnace over hours. The tap hole sits low in the wall and is kept shut with a clay plug until the pool is deep enough.",
         "The ▓ pool at its highest and the ▪ plug sealing the hole in the right wall.",
+    )
+    .detail(
+        "A full pool leaves the cavity drips nowhere to go, so the furnace is tapped on a regular schedule to keep running.",
+        &[
+            "Silicon melts at 1414 C",
+            "The pool sits on the hearth at the base",
+            "The tap hole is low in the wall, sealed with clay",
+        ],
     ),
     Beat::new(
         "an oxygen lance burns through the plug",
@@ -371,6 +456,14 @@ const TAP_BEATS: &[Beat] = &[
     .note(
         "Operators open the hole with an oxygen lance, which burns through the clay in seconds. The lance is a steel pipe; the oxygen makes the flame at its tip.",
         "The lance ═══▷ sliding in from the right and the flame * at its tip eating the plug ▪.",
+    )
+    .detail(
+        "Opening the hole is quick but violent, so it is done by trained crew from a distance. It is also the start of the dirtiest minutes for fume.",
+        &[
+            "An oxygen lance burns through the clay plug",
+            "The lance is a steel pipe; the oxygen makes the flame",
+            "The hole opens in seconds",
+        ],
     ),
     Beat::new(
         "metal runs down the spout into the ladle; fume rises off the stream",
@@ -379,6 +472,14 @@ const TAP_BEATS: &[Beat] = &[
     .note(
         "Liquid silicon runs out through the hole and down a spout into the ladle. The pool falls as the ladle fills. Hot metal in air makes SiO and CO fume, which burns to microsilica.",
         "The ▓ stream pouring into the ladle, the pool level dropping, and · : fume rising off the metal.",
+    )
+    .detail(
+        "Hot silicon in air makes fume on the spot, so the metal cannot be left open to the air for long.",
+        &[
+            "Fume is 40-80% of fugitive emissions from tapping, refining and casting at one plant (Elkem Salten study)",
+            "Silicon runs along a spout into a ladle",
+            "SiO and CO from the hot metal burn to microsilica in the air",
+        ],
     ),
     Beat::new(
         "a hood over the spout pulls the fume into the filter line",
@@ -387,6 +488,14 @@ const TAP_BEATS: &[Beat] = &[
     .note(
         "A hood, sometimes called a doghouse, sits over the taphole and spout. Fan suction pulls the fume up a duct to the bag filter. How well it captures depends on the shape of the hood and duct.",
         "The fume · now curving up into the hood and away along the duct instead of drifting into the room.",
+    )
+    .detail(
+        "The best fix for tap fume is capture at the source. How well it works depends heavily on hood and duct geometry.",
+        &[
+            "The hood, called a doghouse, sits over the taphole and spout (USPTO 11874064)",
+            "Fan suction pulls fume through a duct to the filter",
+            "Ladle refining with air or oxygen creates SiO-bearing fume too",
+        ],
     ),
     Beat::new(
         "a mud gun packs clay back into the hole to close it",
@@ -394,7 +503,15 @@ const TAP_BEATS: &[Beat] = &[
     )
     .note(
         "When the ladle is full a mud gun presses fresh clay into the hole. The furnace builds a new pool until the next tap. Only 80-90% of the silicon charged is recovered this way.",
-        "The gun ▐▇▇═ pushing ▪ clay into the wall as the stream stops.",
+        "The mud gun pushing ▪ clay into the wall as the stream stops.",
+    )
+    .detail(
+        "Re-plugging quickly keeps the furnace sealed and stops metal and gas leaking out.",
+        &[
+            "A mud gun packs fresh clay into the hole",
+            "Only 80-90% of the silicon charged is recovered as product",
+            "The furnace builds a new pool until the next tap",
+        ],
     ),
 ];
 
@@ -542,6 +659,14 @@ const BAG_BEATS: &[Beat] = &[
     .note(
         "SiO that escapes the burden burns in air to SiO2 particles about 150 nm across. They ride out of the lid in the hot gas with CO, and the duct carries the mixture to a bag filter.",
         "· fume and ° gas arriving along the duct from the left and spreading through the dirty side.",
+    )
+    .detail(
+        "The off-gas carries silicon as fume, so collecting it is part of the economics and not just compliance.",
+        &[
+            "SiO leaving the burden burns in air to SiO2 particles about 150 nm across",
+            "A duct carries the gas from the furnace lid to the filter",
+            "In one DC furnace 19.5% of the charged silicon was lost as fume",
+        ],
     ),
     Beat::new(
         "gas passes through the bags; the fume stays behind as a cake on the cloth",
@@ -550,6 +675,14 @@ const BAG_BEATS: &[Beat] = &[
     .note(
         "The cloth bags let gas through and stop the particles. A cake of fine silica builds up on the outside of each bag, which makes the filtering even finer but slows the flow.",
         "° passing through the bags and up out of the top, while · stops at the cloth and the ▒ cake thickens on each bag.",
+    )
+    .detail(
+        "A bag filter balances trapping everything against letting gas through, which is why the cake on the cloth is cleaned regularly.",
+        &[
+            "Cloth bags let gas through and stop the particles",
+            "A cake of fine silica builds on the outside of each bag",
+            "The cake makes filtering finer but slows the flow",
+        ],
     ),
     Beat::new(
         "a pulse of compressed air from the top shakes the cake off the bags",
@@ -558,6 +691,14 @@ const BAG_BEATS: &[Beat] = &[
     .note(
         "When the cake is thick, a short blast of compressed air is fired down the inside of each bag in turn. The bag flexes and the cake drops off, so the filter can keep running.",
         "The ↓ jets at the top of each bag and ▒ cake falling off into the hopper below.",
+    )
+    .detail(
+        "Cleaning the bags in turns means the filter never has to stop.",
+        &[
+            "A short blast of compressed air is fired down the inside of each bag",
+            "The bag flexes and the cake drops into the hopper",
+            "Each bag is cleaned in turn while the others keep filtering",
+        ],
     ),
     Beat::new(
         "the fume is collected as microsilica; clean gas goes up the stack",
@@ -566,6 +707,14 @@ const BAG_BEATS: &[Beat] = &[
     .note(
         "The dust funnels into a bin. Microsilica is a valuable byproduct, used in concrete. Some producers also briquette it with carbon and feed it back to the furnace. The cleaned gas leaves through the stack.",
         "The silica bin ▒ rising and a thin stream of clean ° out of the stack at the top right.",
+    )
+    .detail(
+        "Microsilica is a valuable byproduct, so what the filter catches is sold or reused.",
+        &[
+            "Microsilica is used in concrete",
+            "It can be briquetted with carbon and fed back: 0-50% of the charge in a 200 kVA test (2024 preprint)",
+            "Only clean gas goes up the stack",
+        ],
     ),
 ];
 
@@ -695,7 +844,10 @@ mod tests {
             for (i, b) in s.beats().iter().enumerate() {
                 assert!(!b.caption.is_empty(), "{name} beat {i} caption");
                 assert!(
-                    !b.what.is_empty() && !b.look.is_empty(),
+                    !b.what.is_empty()
+                        && !b.look.is_empty()
+                        && !b.why.is_empty()
+                        && !b.facts.is_empty(),
                     "{name} beat {i} note"
                 );
             }
