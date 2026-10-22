@@ -131,7 +131,7 @@ fn build_screen(
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
         candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, godel, home,
-        intraday, menu, notes, pick, portfolio, search, universe,
+        intraday, menu, notes, pick, portfolio, search, universe, video,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -152,6 +152,7 @@ fn build_screen(
         ("universe", _) => Box::new(universe::open(ctx, arg)?),
         ("events", _) => Box::new(events::open(ctx, arg)?),
         ("diagrams", _) => Box::new(diagrams::open(ctx, arg)?),
+        ("video", _) => Box::new(video::open(ctx, arg)?),
         _ => Box::new(chart::open(ctx, arg)?),
     })
 }

@@ -48,3 +48,4 @@ pub mod pick;
 pub mod portfolio;
 pub mod search;
 pub mod universe;
+pub mod video;

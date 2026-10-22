@@ -18,3 +18,6 @@ arboard = "3.6.1"
 textwrap = "0.16.4"
 unicode-width = "0.2"
 tui-input = "0.15"
+throbber-widgets-tui = "0.11"
+ratatui-image = { version = "12.0.0-rc.3", default-features = false, features = ["crossterm"] }
+image = { version = "0.25", default-features = false, features = ["gif", "png"] }

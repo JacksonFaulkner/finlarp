@@ -18,6 +18,7 @@
 //   help         `?` keymap overlay + footer key hints
 //   anim         procedural animation scenes: Canvas, motion/Particles, Scene + Player
 //   text         width-aware truncate / wrap, URL shortening, number formatting
+//   throbber     spinner line for work in flight (throbber-widgets-tui)
 
 // A component library: not every screen uses every helper.
 #![allow(dead_code)]
@@ -38,3 +39,4 @@ pub mod source_bar;
 pub mod spacing;
 pub mod text;
 pub mod theme;
+pub mod throbber;
