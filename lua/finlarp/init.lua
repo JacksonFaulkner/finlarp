@@ -832,6 +832,28 @@ function M.pick_canslim()
   M.show_canslim()
 end
 
+--- Timestamped transcript of the Siltronic wafer-production video, in a scratch split.
+--- Each TSV row is start, end, text (seconds); rows show as [mm:ss] text.
+--- @param path string|nil defaults to docs/transcripts next to this plugin
+function M.show_transcript(path)
+  path = path or (vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h:h") .. "/docs/transcripts/siltronic-wafer-production.tsv")
+  local rows = {}
+  for line in io.lines(path) do
+    local start, _, text = line:match("^([%d%.]+)\t([%d%.]+)\t(.*)$")
+    if start then
+      local secs = math.floor(tonumber(start))
+      table.insert(rows, string.format("[%02d:%02d] %s", math.floor(secs / 60), secs % 60, text))
+    end
+  end
+  vim.cmd("botright new")
+  local buf = vim.api.nvim_get_current_buf()
+  vim.api.nvim_buf_set_lines(buf, 0, -1, false, rows)
+  vim.bo[buf].buftype = "nofile"
+  vim.bo[buf].bufhidden = "wipe"
+  vim.bo[buf].modifiable = false
+  vim.api.nvim_buf_set_name(buf, "video transcript")
+end
+
 --- Diagrams viewer TUI.
 function M.show_diagrams(name)
   require("finlarp.ui.tui").open_screen("diagrams", name, { title = " diagrams " })
