@@ -23,16 +23,16 @@ def test_daily_lanes_keep_sec_serial_and_build_last():
 def test_intraday_targets_the_watchlist(monkeypatch):
     monkeypatch.setattr(refresh, "watchlist", lambda: ["MU", "NVDA"])
     by = {s["name"]: s for s in refresh.intraday_steps()}
-    assert {"tweets_pull", "sentiment", "news", "events"} <= set(by)
-    assert {"MU", "NVDA"} <= set(by["events"]["cmd"]) and {"MU", "NVDA"} <= set(by["news"]["cmd"])
+    assert {"tweets_pull", "sentiment", "events"} <= set(by) and "news" not in by
+    assert {"MU", "NVDA"} <= set(by["events"]["cmd"])
     monkeypatch.setattr(refresh, "watchlist", lambda: [])
     assert {s["name"] for s in refresh.intraday_steps()} == {"tweets_pull", "tweets_ingest", "sentiment"}
 
 
 def test_step_without_its_key_is_skipped(monkeypatch, tmp_path):
     monkeypatch.setattr(keys, "get", lambda name: None)
-    r = refresh.run_step(refresh.step("x", "news", "sources/roic_news.py", needs="ROIC_TOKEN"), tmp_path)
-    assert r["status"] == "skipped" and "ROIC_TOKEN" in r["detail"]
+    r = refresh.run_step(refresh.step("x", "sentiment", "sources/tweet_sentiment.py", "run", needs="OPENAI_API_KEY"), tmp_path)
+    assert r["status"] == "skipped" and "OPENAI_API_KEY" in r["detail"]
 
 
 @pytest.mark.parametrize("ts,want", [

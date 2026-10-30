@@ -1538,7 +1538,7 @@ mod tests {
             sections: Vec<Section>,
         }
         let d: D = serde_json::from_str(raw).expect("dossier JSON parses into Vec<Section>");
-        assert_eq!(d.sections.len(), 8);
+        assert_eq!(d.sections.len(), 12);
         for sec in &d.sections {
             let mut v = BlockView::new();
             for audit in [false, true] {

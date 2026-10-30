@@ -39,14 +39,14 @@ import re
 import sys
 import time
 import traceback
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 from urllib.parse import quote
 
 import duckdb
 
 
 from core import db
-from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe, yahoo, yahoo_profile
+from sources import sec_13f, universe
 
 D = universe.DATA_ROOT
 SEC = "https://www.sec.gov"
@@ -184,214 +184,6 @@ class Filings:
 
 # ---- sections --------------------------------------------------------------
 
-def sec_events_(t: str, F: Filings) -> dict:
-    rows = []
-    for e in sec_events.recent_events(t, 180, "high")[:20]:
-        rows.append({"cells": [str(e["filed"]), e["item"], e["label"]], "new": _is_new(e["filed"]),
-                     "src": src(f"{e['form']} {e['filed']} item {e['item']}",
-                                F.doc_url(e["accn"]) or archive(F.cik, e["accn"], e.get("primary_doc")))})
-    return {"id": "events", "title": "Events", "blocks": [
-        {"type": "table", "title": "8-K high-signal items, 180 days", "cols": ["filed", "item", "what"], "rows": rows}]}
-
-
-def sec_earnings_(t: str, _F: Filings) -> dict | None:
-    r = sec_earnings.latest(t)
-    if not r:
-        return None
-    doc = archive(r["cik"], r["accn"], r.get("doc_name"))
-    base = f"{r['form']} {r['filed']} {r.get('doc_name') or ''}".strip()
-    new = _is_new(r["filed"])
-    h = r.get("headline")
-    h = json.loads(h) if isinstance(h, str) else (h or {})
-    kv = []
-    for key, label in (("revenue", "Revenue"), ("eps_gaap", "EPS GAAP"), ("eps_nongaap", "EPS non-GAAP")):
-        x = h.get(key)
-        if x and x.get("value") is not None:
-            val = f"{x.get('ccy') or ''}{x['value']:,}{(' ' + x['unit']) if x.get('unit') else ''}"
-            kv.append({"label": label, "value": val, "new": new,
-                       "src": src(f"{base} · \"{(x.get('snippet') or '')[:70]}\"", fragment(doc, x.get("snippet")))})
-    guid = [{"cells": [g.lstrip("•· ").strip()], "new": new, "src": src(base, fragment(doc, g))}
-            for g in (r.get("guidance") or [])[:14]]
-    blocks = [{"type": "kv", "rows": kv}] if kv else []
-    if guid:
-        blocks.append({"type": "table", "title": "Guidance (as written in the release)", "cols": ["line"], "rows": guid})
-    return {"id": "earnings", "title": "Earnings & guidance", "blocks": blocks}
-
-
-def sec_revenue_(t: str, F: Filings, con) -> dict:
-    def fact_src(r: dict, period: str) -> dict:
-        return src(f"{F.form(r['accn'])} filed {r['filed']} · {r['concept']} · {period}",
-                   F.doc_url(r["accn"], inline_xbrl=True))
-
-    annual = sec_financials.annual_series(t, "revenue")[-6:]
-    quarterly = sec_financials.quarterly_series(t, "revenue")[-9:]
-
-    def q_label(q: dict) -> str:
-        return f"Q{q['fq']} FY{q['fy']}" if q.get("fq") else f"quarter ending {q['end']}"
-
-    def q_short(q: dict) -> str:
-        return f"Q{q['fq']}'{str(q['fy'])[2:]}" if q.get("fq") else str(q["end"])[:7]
-
-    def q_src(q: dict) -> dict:
-        if not q.get("derived"):
-            return fact_src(q, q_label(q))
-        parts = q.get("derived_from") or []
-        inputs = [fact_src(p, f"{p['start']}..{p['end']}") for p in parts]
-        formula = " − ".join(f"[{p['start']}..{p['end']}] {p['val'] / 1e6:,.1f}" for p in parts) or "longer period − shorter period"
-        return derived(f"{q_label(q)} derived: no discrete quarterly fact filed", formula, inputs)
-
-    a_pts = [{"x": f"FY{a['fy']}", "y": round(a["val"] / 1e6, 1), "src": fact_src(a, f"FY{a['fy']}")} for a in annual[-5:]]
-    q_pts = [{"x": q_short(q), "y": round(q["val"] / 1e6, 1), "src": q_src(q)} for q in quarterly[-8:]]
-    kv = []
-    if quarterly:
-        q = quarterly[-1]
-        kv.append({"label": f"Latest {q_label(q)}", "value": _money(q["val"]), "src": q_src(q)})
-        prev = next((x for x in quarterly if q.get("fy") and x["fy"] == q["fy"] - 1 and x["fq"] == q["fq"]), None)
-        if prev and prev["val"]:
-            g = (q["val"] / prev["val"] - 1) * 100
-            kv.append({"label": "  YoY", "value": _pct(g), "src": derived(
-                "YoY growth", f"{q['val'] / 1e6:,.1f} / {prev['val'] / 1e6:,.1f} − 1", [q_src(q), q_src(prev)])})
-    if len(annual) >= 2 and annual[-2]["val"]:
-        a, b = annual[-1], annual[-2]
-        kv.append({"label": f"FY{a['fy']}", "value": _money(a["val"]), "src": fact_src(a, f"FY{a['fy']}")})
-        kv.append({"label": "  YoY", "value": _pct((a["val"] / b["val"] - 1) * 100), "src": derived(
-            "YoY growth", f"{a['val'] / 1e6:,.1f} / {b['val'] / 1e6:,.1f} − 1",
-            [fact_src(a, f"FY{a['fy']}"), fact_src(b, f"FY{b['fy']}")])})
-
-    blocks = [{"type": "kv", "rows": kv},
-              {"type": "series", "title": "Quarterly revenue", "unit": "$M", "points": q_pts},
-              {"type": "series", "title": "Annual revenue", "unit": "$M", "points": a_pts}]
-    seg = con.execute(f"""
-        WITH s AS (SELECT * FROM read_parquet('{sec_segments.facts_glob()}', union_by_name=true)
-                   WHERE ticker = ? AND axis <> '' AND period_start IS NOT NULL
-                     AND date_diff('day', period_start, period_end) > 300
-                     AND concept NOT ILIKE '%OperatingIncome%'),
-             latest AS (SELECT axis, max(period_end) pe FROM s GROUP BY 1)
-        SELECT s.axis, s.member, s.period_end, s.value, s.accn, s.concept FROM s JOIN latest l
-          ON s.axis = l.axis AND s.period_end = l.pe
-        QUALIFY row_number() OVER (PARTITION BY s.axis, s.member ORDER BY s.value DESC) = 1
-        ORDER BY s.axis, s.value DESC""", [t]).fetchall()
-    by_axis: dict[str, list] = {}
-    for axis, member, pe, val, accn, concept in seg:
-        by_axis.setdefault(axis, []).append((member, pe, val, accn, concept))
-    for axis, items in by_axis.items():
-        if len(items) < 2 or axis == "StatementBusinessSegmentsAxis":
-            continue
-        blocks.append({"type": "bars", "title": f"{_member(axis)} (FY ending {items[0][1]})",
-                       "unit": "$M", "items": [
-            {"label": _member(m, axis), "value": round(v / 1e6, 1),
-             "src": src(f"{F.form(a)} · {c} · {axis}={m}", F.doc_url(a, inline_xbrl=True))}
-            for m, _, v, a, c in items[:8]]})
-    return {"id": "revenue", "title": "Revenue & segments", "blocks": blocks}
-
-
-def sec_holders_(t: str, con) -> dict | None:
-    cmap = D.parent / "sec_13f" / "cusip_map.parquet"
-    cusips = [r[0] for r in con.execute(f"SELECT cusip FROM '{cmap}' WHERE ticker = ?", [t]).fetchall()]
-    if not cusips:
-        return None
-    con.execute(f"CREATE OR REPLACE TEMP TABLE h AS SELECT * FROM {sec_13f.holdings_sql()} WHERE list_contains($c, cusip)",
-                {"c": cusips})
-    periods = [r[0] for r in con.execute("SELECT DISTINCT period FROM h ORDER BY 1 DESC LIMIT 2").fetchall()]
-    if len(periods) < 2:
-        return None
-    cur, prev = periods
-    fdir = sec_13f.DATA_DIR / "filings"
-    rows = con.execute(f"""
-        WITH f AS (SELECT cik, period FROM read_parquet('{fdir}/*.parquet')
-                   WHERE subtype IN ('13F-HR', '13F-HR/A') AND period IN ($prev, $cur)),
-        panel AS (SELECT cik FROM f WHERE period = $prev INTERSECT SELECT cik FROM f WHERE period = $cur),
-        ranked AS (SELECT *, max(sh) FILTER (WHERE rn = 2) OVER (PARTITION BY cusip, period) runner_up
-                   FROM (SELECT *, row_number() OVER (PARTITION BY cusip, period ORDER BY sh DESC) rn FROM h)),
-        clean AS (SELECT * FROM ranked WHERE NOT coalesce(rn = 1 AND sh > {sec_13f.SUSPECT_MULTIPLE} * runner_up, false)
-                  AND period IN ($prev, $cur) AND cik IN (SELECT cik FROM panel))
-        SELECT cik, any_value(mgr), sum(sh) FILTER (WHERE period = $prev), sum(sh) FILTER (WHERE period = $cur),
-               min(acc) FILTER (WHERE period = $prev), min(acc) FILTER (WHERE period = $cur)
-        FROM clean GROUP BY cik""", {"prev": prev, "cur": cur}).fetchall()
-    # `is not None`, not truthiness: a reported 0-share line still counts as a holder (matches sec_13f.summary).
-    holders_prev = sum(1 for r in rows if r[2] is not None); holders = sum(1 for r in rows if r[3] is not None)
-    new_pos = sum(1 for r in rows if r[3] is not None and r[2] is None)
-    exited = sum(1 for r in rows if r[2] is not None and r[3] is None)
-    sh_prev = sum(r[2] or 0 for r in rows); sh_cur = sum(r[3] or 0 for r in rows)
-    method = (f"13F-HR filings for periods {prev} and {cur}; only managers that filed both periods; "
-              f"CUSIPs {', '.join(cusips)}; top holder dropped if >{sec_13f.SUSPECT_MULTIPLE}× runner-up (typo filter)")
-    ds = [src(f"SEC Form 13F data sets ({p})", F13_URL) for p in (prev, cur)]
-    kv = [
-        {"label": "Holders", "value": f"{holders_prev:,} → {holders:,} ({_pct((holders / holders_prev - 1) * 100 if holders_prev else None)})",
-         "src": derived("count of managers holding", method, ds)},
-        {"label": "New / exited positions", "value": f"{new_pos:,} / {exited:,}", "src": derived("new = held now not before", method, ds)},
-        {"label": "Shares held", "value": f"{sh_prev / 1e6:,.1f}M → {sh_cur / 1e6:,.1f}M ({_pct((sh_cur / sh_prev - 1) * 100 if sh_prev else None)})",
-         "src": derived("sum of reported shares", method, ds)},
-    ]
-
-    def mover(r):
-        cik, mgr, a, b, acc_a, acc_b = r
-        acc = acc_b or acc_a
-        return {"cells": [mgr or str(cik), "new" if a is None else f"{a / 1e6:,.2f}M", "exited" if b is None else f"{b / 1e6:,.2f}M", f"{((b or 0) - (a or 0)) / 1e6:+,.2f}M"],
-                "src": src(f"13F-HR {cur if acc_b else prev} · {mgr}", archive(cik, acc),
-                           **({"inputs": [src(f"13F-HR {prev}", archive(cik, acc_a))]} if acc_a and acc_b else {}))}
-    moves = sorted(rows, key=lambda r: (r[3] or 0) - (r[2] or 0))
-    top_in = [mover(r) for r in moves[::-1][:8] if (r[3] or 0) > (r[2] or 0)]
-    top_out = [mover(r) for r in moves[:8] if (r[3] or 0) < (r[2] or 0)]
-    cols = ["manager", str(prev), str(cur), "Δ shares"]
-    return {"id": "holders", "title": "Institutions (13F)", "blocks": [
-        {"type": "kv", "rows": kv},
-        {"type": "table", "title": "Biggest adds", "cols": cols, "rows": top_in},
-        {"type": "table", "title": "Biggest cuts", "cols": cols, "rows": top_out}]}
-
-
-def sec_insiders_(t: str, F: Filings) -> dict:
-    tx = sec_insiders.open_market(t, date.today() - timedelta(days=365))
-    rows, srcs = [], []
-    for x in tx[:25]:
-        s = src(f"Form {x['form']} filed {x['filed']} · {x['owner_name']}", archive(F.cik, x["accn"]))
-        srcs.append(s)
-        rows.append({"cells": [str(x["trans_date"]), x["owner_name"], x.get("officer_title") or x.get("relationship") or "",
-                               "BUY" if x["code"] == "P" else "sell", f"{x['shares'] or 0:,.0f}",
-                               f"${x['price']:,.2f}" if x.get("price") is not None else "—",
-                               _money(x["value"]), "10b5-1" if x.get("is_10b5_1") else ""],
-                     "new": _is_new(x["filed"]), "src": s})
-    buys = [x for x in tx if x["code"] == "P"]; sells = [x for x in tx if x["code"] == "S"]
-    disc = [x for x in sells if not x.get("is_10b5_1")]
-    all_src = [src(f"Form {x['form']} {x['filed']} · {x['owner_name']}", archive(F.cik, x["accn"])) for x in tx]
-    ins_ds = src(f"SEC insider transactions data sets, {t}, last 365 days", INSIDER_URL)
-    kv = [
-        {"label": "Open-market buys (365d)", "value": f"{len(buys)} · {_money(sum(x['value'] or 0 for x in buys))}",
-         "src": derived("sum of Form 4 code P", "Σ value of non-derivative code-P transactions", [s for s, x in zip(all_src, tx) if x["code"] == "P"], ins_ds)},
-        {"label": "Sales (365d)", "value": f"{len(sells)} · {_money(sum(x['value'] or 0 for x in sells))}",
-         "src": derived("sum of Form 4 code S", "Σ value of non-derivative code-S transactions", [s for s, x in zip(all_src, tx) if x["code"] == "S"], ins_ds)},
-        {"label": "  discretionary (not 10b5-1)", "value": _money(sum(x["value"] or 0 for x in disc)),
-         "src": derived("code S without a 10b5-1 plan flag", "Σ value where is_10b5_1 = false",
-                        [s for s, x in zip(all_src, tx) if x["code"] == "S" and not x.get("is_10b5_1")], ins_ds)},
-    ]
-    return {"id": "insiders", "title": "Insiders", "blocks": [
-        {"type": "kv", "rows": kv},
-        {"type": "table", "title": "Open-market transactions (bulk data lags 0–3 months)",
-         "cols": ["date", "who", "role", "", "shares", "price", "value", "plan"], "rows": rows}]}
-
-
-def sec_risks_(t: str, F: Filings, con) -> dict | None:
-    ar = con.execute(f"""
-        SELECT accn, form, filed, risk_added, risk_removed, risk_factor_count, ai_mentions
-        FROM '{D}/filing_text/filings.parquet' WHERE ticker = ? AND parse_ok ORDER BY filed DESC LIMIT 1""", [t]).fetchone()
-    if not ar:
-        return None
-    accn, form, filed, added, removed, _, ai = ar
-    doc = F.doc_url(accn)
-    s10k = src(f"{form} filed {filed}", doc)
-    kv = [{"label": "Risk sentences added / removed vs prior year", "value": f"{added} / {removed}",
-           "new": _is_new(filed, 60), "src": derived("sentence diff of Item 1A", "sentences in this 1A not in prior-year 1A",
-                                                       [s10k])},
-          {"label": "AI mentions in annual report", "value": f"{ai}", "src": s10k}]
-    sents = con.execute(f"""
-        SELECT sentence, novelty FROM '{D}/filing_text/risk_diff.parquet'
-        WHERE ticker = ? AND accn = ? AND kind = 'added' ORDER BY novelty DESC NULLS LAST LIMIT 12""", [t, accn]).fetchall()
-    rows = [{"cells": [s], "new": _is_new(filed, 60), "src": src(f"{form} {filed} · Item 1A", fragment(doc, s))} for s, _ in sents]
-    return {"id": "risks", "title": "New risk factors", "blocks": [
-        {"type": "kv", "rows": kv},
-        {"type": "table", "title": f"Most novel added sentences ({form} {filed})", "cols": ["sentence"], "rows": rows}]}
-
-
 def sec_patents_(t: str, con) -> dict | None:
     P = D / "patents"
     if not (P / "patent_ticker.parquet").exists():
@@ -438,41 +230,6 @@ def sec_patents_(t: str, con) -> dict | None:
     return {"id": "patents", "title": "Patents", "blocks": blocks}
 
 
-def sec_tweets_(t: str, con) -> dict | None:
-    """Tweets from the followed research accounts that cashtag this ticker (sources/tweets.py)."""
-    tw, tk = D / "tweets" / "tweets.parquet", D / "tweets" / "tweet_tickers.parquet"
-    if not (tw.exists() and tk.exists()):
-        return None
-    rows = con.execute(f"""
-        SELECT w.id, w.handle, w.created_at, w.text, w.likes, w.url, w.is_reply
-        FROM '{tw}' w JOIN '{tk}' k ON k.tweet_id = w.id
-        WHERE k.ticker = ? AND NOT w.is_retweet ORDER BY w.created_at DESC""", [t]).fetchall()
-    ds = src(f"X posts from followed research accounts, cashtag ${t}", "https://x.com/search?q=" + quote(f"${t}"))
-    if not rows:
-        return {"id": "tweets", "title": "Tweets", "blocks": [
-            {"type": "kv", "rows": [{"label": f"Cashtag ${t} mentions", "value": "0",
-                                     "src": derived("count of tweets", f"tweets with cashtag ${t}", [], ds)}]}]}
-    srcs = [src(f"@{h} · {c:%Y-%m-%d}", u) for _, h, c, _, _, u, _ in rows]
-    last = rows[0][2]
-    def window(days):
-        cut = datetime.now() - timedelta(days=days)
-        return [i for i, r in enumerate(rows) if r[2] >= cut]
-    d7, d30 = window(7), window(30)
-    kv = [
-        {"label": "Mentions (7d)", "value": f"{len(d7)} · {len({rows[i][1] for i in d7})} accounts", "new": bool(d7),
-         "src": derived("count of tweets", f"cashtag ${t} in the last 7 days", [srcs[i] for i in d7[:25]], ds)},
-        {"label": "Mentions (30d)", "value": f"{len(d30)} · {len({rows[i][1] for i in d30})} accounts",
-         "src": derived("count of tweets", f"cashtag ${t} in the last 30 days", [srcs[i] for i in d30[:25]], ds)},
-        {"label": "Latest", "value": f"{last:%Y-%m-%d %H:%M} UTC · @{rows[0][1]}", "src": srcs[0]},
-    ]
-    table = [{"cells": [f"{c:%Y-%m-%d}", f"@{h}", f"♥{l or 0}", " ".join(x.split())], "new": _is_new(c.date(), 7), "src": srcs[i]}
-             for i, (_, h, c, x, l, _, _) in enumerate(rows[:40])]
-    return {"id": "tweets", "title": "Tweets", "blocks": [
-        {"type": "kv", "rows": kv},
-        {"type": "table", "title": "Recent cashtag mentions (cashtags only, retweets excluded)",
-         "cols": ["date", "who", "likes", "tweet"], "rows": table}]}
-
-
 def profile_(t: str, prof: dict | None) -> dict | None:
     if not prof:
         return None
@@ -487,115 +244,6 @@ def profile_(t: str, prof: dict | None) -> dict | None:
         blocks.append({"type": "text", "text": prof["summary"], "src": y})
     return {"id": "profile", "title": "Profile", "blocks": blocks}
 
-
-EST_MODULES = "earningsTrend,earningsHistory,recommendationTrend,upgradeDowngradeHistory,financialData"
-EST_PERIODS = {"0q": "Current quarter", "+1q": "Next quarter", "0y": "Current year", "+1y": "Next year"}
-
-
-def _raw(f):
-    return f.get("raw") if isinstance(f, dict) else f
-
-
-def _n(v, fmt: str = "{:,.2f}") -> str:
-    return "—" if v is None else fmt.format(v)
-
-
-def estimates_(t: str) -> dict | None:
-    """Analyst consensus from Yahoo Finance (the Analysis page): EPS and
-    revenue estimates by period, how they have been revised, price targets,
-    the rating mix, and recent upgrades / downgrades."""
-    session = yahoo.new_session()
-    res = yahoo_profile.fetch(session, t, EST_MODULES)
-    if not res:
-        return None
-    url = f"https://finance.yahoo.com/quote/{quote(t)}/analysis/"
-    y = lambda what: src(f"Yahoo Finance analysis · {what}", url)  # noqa: E731
-    blocks = []
-
-    fd = res.get("financialData") or {}
-    price, mean_t = _raw(fd.get("currentPrice")), _raw(fd.get("targetMeanPrice"))
-    kv = []
-    if fd.get("recommendationKey"):
-        kv.append({"label": "Consensus rating", "value": f"{fd['recommendationKey']} "
-                   f"(mean {_n(_raw(fd.get('recommendationMean')), '{:.2f}')} of 5, "
-                   f"{_n(_raw(fd.get('numberOfAnalystOpinions')), '{:.0f}')} analysts)", "src": y("financialData.recommendationKey")})
-    for key, label in (("targetLowPrice", "Target low"), ("targetMeanPrice", "Target mean"),
-                       ("targetMedianPrice", "Target median"), ("targetHighPrice", "Target high")):
-        if _raw(fd.get(key)) is not None:
-            kv.append({"label": label, "value": f"${_raw(fd[key]):,.2f}", "src": y(f"financialData.{key}")})
-    if price and mean_t:
-        up = (mean_t / price - 1) * 100
-        kv.append({"label": "Upside to mean target", "value": _pct(up), "src": derived(
-            "Upside to mean analyst target", f"({mean_t:,.2f} / {price:,.2f} − 1) × 100 = {up:+.1f}%",
-            [y("financialData.targetMeanPrice"), y("financialData.currentPrice")])})
-    if kv:
-        blocks.append({"type": "kv", "title": "Consensus", "rows": kv})
-
-    trend = {p["period"]: p for p in (res.get("earningsTrend") or {}).get("trend", []) if p.get("period") in EST_PERIODS}
-    eps_rows, rev_rows, rev_trend_rows = [], [], []
-    for per, label in EST_PERIODS.items():
-        p = trend.get(per)
-        if not p:
-            continue
-        e, r, tr = p.get("earningsEstimate") or {}, p.get("revenueEstimate") or {}, p.get("epsTrend") or {}
-        name = f"{label} (ends {p.get('endDate') or '?'})"
-        if _raw(e.get("avg")) is not None:
-            eps_rows.append({"cells": [name, _n(_raw(e.get("avg"))), _n(_raw(e.get("low"))), _n(_raw(e.get("high"))),
-                                       _n(_raw(e.get("yearAgoEps"))), _pct(_raw(e.get("growth")) * 100 if _raw(e.get("growth")) is not None else None),
-                                       _n(_raw(e.get("numberOfAnalysts")), "{:.0f}")],
-                             "src": y(f"earningsTrend[{per}].earningsEstimate")})
-        if _raw(r.get("avg")) is not None:
-            rev_rows.append({"cells": [name, _money(_raw(r.get("avg"))), _money(_raw(r.get("low"))), _money(_raw(r.get("high"))),
-                                       _money(_raw(r.get("yearAgoRevenue"))), _pct(_raw(r.get("growth")) * 100 if _raw(r.get("growth")) is not None else None),
-                                       _n(_raw(r.get("numberOfAnalysts")), "{:.0f}")],
-                             "src": y(f"earningsTrend[{per}].revenueEstimate")})
-        cur = _raw(tr.get("current"))
-        if cur is not None:
-            cells, ago_srcs = [name, _n(cur)], []
-            for k, days in (("7daysAgo", 7), ("30daysAgo", 30), ("90daysAgo", 90)):
-                ago = _raw(tr.get(k))
-                if ago:
-                    ch = (cur - ago) / abs(ago) * 100
-                    cells.append(f"{_n(ago)} ({ch:+.1f}%)")
-                    ago_srcs.append(derived(f"{label} EPS estimate revision, {days}d",
-                                            f"({cur:,.2f} − {ago:,.2f}) / |{ago:,.2f}| × 100 = {ch:+.1f}%",
-                                            [y(f"earningsTrend[{per}].epsTrend.current"), y(f"earningsTrend[{per}].epsTrend.{k}")]))
-                else:
-                    cells.append("—")
-            rev_trend_rows.append({"cells": cells, "src": ago_srcs[0] if ago_srcs else y(f"earningsTrend[{per}].epsTrend")})
-    if eps_rows:
-        blocks.append({"type": "table", "title": "EPS estimates", "cols": ["period", "avg", "low", "high", "year ago", "growth", "analysts"], "rows": eps_rows})
-    if rev_rows:
-        blocks.append({"type": "table", "title": "Revenue estimates", "cols": ["period", "avg", "low", "high", "year ago", "growth", "analysts"], "rows": rev_rows})
-    if rev_trend_rows:
-        blocks.append({"type": "table", "title": "EPS estimate revisions (change since)",
-                       "cols": ["period", "now", "7d ago", "30d ago", "90d ago"], "rows": rev_trend_rows})
-
-    hist = [h for h in (res.get("earningsHistory") or {}).get("history", []) if _raw(h.get("epsActual")) is not None]
-    if hist:
-        blocks.append({"type": "table", "title": "EPS vs estimate, last quarters", "cols": ["quarter", "actual", "estimate", "surprise"],
-                       "rows": [{"cells": [(h.get("quarter") or {}).get("fmt") or "?", _n(_raw(h.get("epsActual"))), _n(_raw(h.get("epsEstimate"))),
-                                           _pct(_raw(h.get("surprisePercent")) * 100 if _raw(h.get("surprisePercent")) is not None else None)],
-                                 "src": y("earningsHistory")} for h in hist]})
-
-    rt = (res.get("recommendationTrend") or {}).get("trend", [])
-    if rt:
-        blocks.append({"type": "table", "title": "Rating mix by month", "cols": ["month", "strong buy", "buy", "hold", "sell", "strong sell"],
-                       "rows": [{"cells": [{"0m": "This month", "-1m": "Last month", "-2m": "2 months ago", "-3m": "3 months ago"}.get(r.get("period"), r.get("period") or "?"),
-                                           *(str(r.get(k, 0)) for k in ("strongBuy", "buy", "hold", "sell", "strongSell"))],
-                                 "src": y(f"recommendationTrend[{r.get('period')}]")} for r in rt]})
-
-    ud = sorted((res.get("upgradeDowngradeHistory") or {}).get("history", []), key=lambda h: h.get("epochGradeDate") or 0, reverse=True)[:12]
-    if ud:
-        blocks.append({"type": "table", "title": "Recent rating changes", "cols": ["date", "firm", "action", "from", "to"],
-                       "rows": [{"cells": [datetime.fromtimestamp(h["epochGradeDate"]).date().isoformat() if h.get("epochGradeDate") else "?",
-                                           h.get("firm") or "?", h.get("action") or "?", h.get("fromGrade") or "—", h.get("toGrade") or "—"],
-                                 "new": _is_new(datetime.fromtimestamp(h["epochGradeDate"]).date()) if h.get("epochGradeDate") else False,
-                                 "src": y("upgradeDowngradeHistory")} for h in ud]})
-    return {"id": "estimates", "title": "Analyst estimates", "blocks": blocks} if blocks else None
-
-
-# ---- assembly --------------------------------------------------------------
 
 FRESH = {  # source -> glob whose newest mtime is "last pulled"
     "events": "events/*.parquet", "earnings": "earnings/releases/*.parquet", "financials": "financials/facts/*.parquet",
@@ -616,10 +264,10 @@ def freshness() -> list[dict]:
     return out
 
 
-def _section(fn, *a, health: list | None = None):
+def _section(fn, *a, health: list | None = None, sid: str | None = None):
     """Run one section builder. Never raises; outcome goes to `health` as
     {section, status: ok|empty|error, rows, secs, error?, tb?}."""
-    sid = fn.__name__.strip("_")
+    sid = sid or fn.__name__.strip("_")
     t0 = time.time()
     try:
         out = fn(*a)
@@ -641,7 +289,8 @@ def validate(d: dict) -> list[str]:
     bad = []
 
     def ok(s):
-        return isinstance(s, dict) and (s.get("url") or s.get("error") or (s.get("formula") and s.get("inputs")))
+        return isinstance(s, dict) and (s.get("url") or s.get("error") or s.get("internal")
+                                        or (s.get("formula") and s.get("inputs")))
 
     for sec in d["sections"]:
         for bi, b in enumerate(sec["blocks"]):
@@ -652,9 +301,6 @@ def validate(d: dict) -> list[str]:
     return bad
 
 
-from concurrent.futures import ThreadPoolExecutor  # noqa: E402
-
-_POOL = ThreadPoolExecutor(max_workers=2)
 HEALTH_LOG = D / "debug" / "dossier_health.jsonl"
 
 
@@ -705,19 +351,10 @@ def build(ticker: str) -> dict:
         prof = dict(zip([c[0] for c in con.description], r)) if r else None
     name = (prof or {}).get("long_name") or next((s["name"] for s in universe.rows() if s["ticker"] == t), t)
     health: list[dict] = []
-    # estimates_ is the one live (Yahoo) section: start it now so it overlaps the local ones.
-    est_health: list[dict] = []
-    est_future = _POOL.submit(_section, estimates_, t, health=est_health)
+    from derive.dossier_tabs import TAB_BUILDERS  # lazy: tab modules import helpers from this file
     sections = [s for s in (
-        _section(sec_events_, t, F, health=health), _section(sec_earnings_, t, F, health=health),
-        _section(sec_revenue_, t, F, con, health=health), _section(sec_holders_, t, con, health=health),
-        _section(sec_insiders_, t, F, health=health), _section(sec_risks_, t, F, con, health=health),
-        _section(sec_patents_, t, con, health=health), _section(sec_tweets_, t, con, health=health),
-        _section(profile_, t, prof, health=health)) if s]
-    est = est_future.result()
-    health.extend(est_health)
-    if est:  # keep estimates before profile, the last section
-        sections.insert(max(len(sections) - 1, 0), est)
+        [_section(fn, t, con, F, prof, health=health, sid=sid) for sid, fn in TAB_BUILDERS]
+        + [_section(sec_patents_, t, con, health=health), _section(profile_, t, prof, health=health)]) if s]
     for s in sections:
         rows = [it for b in s["blocks"] for it in b.get("rows", [])]
         s["new"] = any(it.get("new") for it in rows)

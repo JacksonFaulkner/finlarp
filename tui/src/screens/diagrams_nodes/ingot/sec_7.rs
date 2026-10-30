@@ -173,7 +173,11 @@ impl Scene for Section {
                     let y = ROW0 + k as i32 * ROW_H;
                     bar_row(c, y, name, *pct, '█', SCALE, grow(t, k, 0.6));
                 }
-                c.text(2, h - 2, "estimate, low reliability: one aggregator, not a filing");
+                c.text(
+                    2,
+                    h - 2,
+                    "estimate, low reliability: one aggregator, not a filing",
+                );
             }
             1 => {
                 c.text(2, 1, "the whole large-wafer market, stacked by maker");
@@ -185,11 +189,23 @@ impl Scene for Section {
                     c.text(4, y, &format!("{name} {pct:.1}%"));
                 }
                 c.put(2, ROW0 + 9, REST);
-                c.text(4, ROW0 + 9, &format!("not on the list {:.1}%", 100.0 - FIVE_2024));
+                c.text(
+                    4,
+                    ROW0 + 9,
+                    &format!("not on the list {:.1}%", 100.0 - FIVE_2024),
+                );
                 if t.local > 0.6 {
-                    c.text(2, ROW0 + 11, &format!("five listed together: {FIVE_2024:.1}%"));
+                    c.text(
+                        2,
+                        ROW0 + 11,
+                        &format!("five listed together: {FIVE_2024:.1}%"),
+                    );
                 }
-                c.text(2, h - 2, "bar = whole market; the dotted rest is the remainder");
+                c.text(
+                    2,
+                    h - 2,
+                    "bar = whole market; the dotted rest is the remainder",
+                );
             }
             2 => {
                 c.text(2, 1, "Omdia 2020 shares, via KED Global");
@@ -199,16 +215,40 @@ impl Scene for Section {
                 }
                 c.text(2, 14, "Shin-Etsu + SUMCO together: more than 55%");
                 c.text(2, 16, "five players: 94% of an $11.2B market");
-                c.text(2, h - 2, "the article names only these three makers' shares");
+                c.text(
+                    2,
+                    h - 2,
+                    "the article names only these three makers' shares",
+                );
             }
             _ => {
                 c.text(2, 1, "five-firm totals, two sources");
-                bar_row(c, ROW0, "2020 Omdia", FIVE_2020, '▒', STACK, grow(t, 0, 0.6));
-                bar_row(c, ROW0 + ROW_H, "2024 est", FIVE_2024, '█', STACK, grow(t, 1, 0.6));
+                bar_row(
+                    c,
+                    ROW0,
+                    "2020 Omdia",
+                    FIVE_2020,
+                    '▒',
+                    STACK,
+                    grow(t, 0, 0.6),
+                );
+                bar_row(
+                    c,
+                    ROW0 + ROW_H,
+                    "2024 est",
+                    FIVE_2024,
+                    '█',
+                    STACK,
+                    grow(t, 1, 0.6),
+                );
                 c.text(2, 12, "2020: five firms in an $11.2B market (Omdia)");
                 c.text(2, 14, "2024: a Report Prime ranking estimate, not a filing");
                 c.text(2, 16, "its weights: 70% quantitative, 30% qualitative");
-                c.text(2, h - 2, "compare the totals only with their year and basis");
+                c.text(
+                    2,
+                    h - 2,
+                    "compare the totals only with their year and basis",
+                );
             }
         }
     }

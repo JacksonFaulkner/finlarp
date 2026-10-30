@@ -78,7 +78,11 @@ impl Scene for Sites {
         let (cx, cy) = (w / 2, h / 2);
         fill_disc(c, cx, cy, 16.0, 8.0, '░');
         // the site grid: lines every 6 cells across and every 3 down, drawn in during beat 0
-        let reach = if t.beat == 0 { (local(t) * 16.0) as i32 } else { 16 };
+        let reach = if t.beat == 0 {
+            (local(t) * 16.0) as i32
+        } else {
+            16
+        };
         for gx in (-16i32..=16).step_by(6) {
             if gx.abs() <= reach {
                 c.vline(cx + gx, cy - 8, 17, '┊');
@@ -149,7 +153,11 @@ impl Scene for Epi {
             c.hline(x0, y, x1 - x0 + 1, '▓');
         }
         // the epi layer grows on top: thin at beat 0, thicker as beat 1 runs
-        let thick = if t.beat == 0 { 0 } else { (1.0 + 2.0 * ease_in_out(local(t))).round() as i32 };
+        let thick = if t.beat == 0 {
+            0
+        } else {
+            (1.0 + 2.0 * ease_in_out(local(t))).round() as i32
+        };
         for y in cy - thick..cy + 1 {
             c.hline(x0, y, x1 - x0 + 1, '░');
         }
@@ -310,7 +318,12 @@ mod tests {
 
     #[test]
     fn each_zoom_draws_at_several_times() {
-        let scenes: [Box<dyn Scene>; 4] = [Box::new(Sites), Box::new(Epi), Box::new(Soi), Box::new(Spec)];
+        let scenes: [Box<dyn Scene>; 4] = [
+            Box::new(Sites),
+            Box::new(Epi),
+            Box::new(Soi),
+            Box::new(Spec),
+        ];
         for s in scenes {
             assert!(!s.beats().is_empty());
             let mut p = Player::new(s, Instant::now());

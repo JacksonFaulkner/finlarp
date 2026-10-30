@@ -18,3 +18,7 @@ __pycache__/
 # local datasets and scratch notes; not published
 data/
 research/
+# third-party video transcripts (same as video/, excluded locally)
+docs/transcripts/
+# per-machine Claude Code settings
+.claude/settings.local.json

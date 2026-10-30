@@ -1,11 +1,10 @@
-"""derive.sentiment and roic_news.query on tiny synthetic parquet, plus a smoke test of the MCP tools on the real data."""
+"""derive.sentiment on tiny synthetic parquet, plus a smoke test of the MCP tools on the real data."""
 import json
 
 import duckdb
 import pytest
 
 from derive import sentiment as q
-from sources import roic_news
 
 
 @pytest.fixture
@@ -103,25 +102,6 @@ def test_price_targets_against_last_close(store):
     assert q.price_targets("NVDA")["summary"]["targets"] == 0
 
 
-def test_news_query(tmp_path, monkeypatch):
-    con = duckdb.connect()
-    con.execute(f"""COPY (SELECT * FROM (VALUES
-        ('a', 'IREN', TIMESTAMP '2026-10-09 10:00:00', 'IREN signs Anthropic deal', 'globenewswire.com', 'u1', 'x', 1),
-        ('b', 'IREN', TIMESTAMP '2026-09-01 10:00:00', 'IREN drops',                'fool.com',          'u2', 'y', 1),
-        ('c', 'MU',   TIMESTAMP '2026-10-01 10:00:00', 'Micron earnings',           'zacks.com',         'u3', 'z', 1)
-      ) AS t(id, ticker, published_at, title, site, url, text, text_chars)) TO '{tmp_path / "news.parquet"}'""")
-    monkeypatch.setattr(roic_news, "NEWS", tmp_path / "news.parquet")
-    r = roic_news.query("iren")
-    assert [a["title"] for a in r["articles"]] == ["IREN signs Anthropic deal", "IREN drops"]
-    assert r["coverage"]["matched"] == 2 and r["coverage"]["store"]["tickers"] == 2
-    assert [a["site"] for a in roic_news.query("IREN", site="globenewswire")["articles"]] == ["globenewswire.com"]
-    assert [a["ticker"] for a in roic_news.query(text="micron")["articles"]] == ["MU"]
-    assert roic_news.query("IREN", since="2026-10-01")["coverage"]["matched"] == 1
-    r = roic_news.query("IREN", limit=1)
-    assert r["coverage"]["truncated"] and "truncated" in " ".join(r["coverage"]["notes"])
-    assert "may not have been pulled" in " ".join(roic_news.query("QUBT")["coverage"]["notes"])
-
-
 @pytest.mark.integration
 def test_mcp_tools_on_real_data(s, has_data):
     from sources import tweet_sentiment
@@ -132,5 +112,3 @@ def test_mcp_tools_on_real_data(s, has_data):
     assert r["summary"]["views"] > 0 and r["coverage"]["notes"]
     assert json.loads(s.sentiment_leaders("mentions", limit=3))["tickers"]
     assert "targets" in json.loads(s.price_targets("NBIS"))
-    n = json.loads(s.news("IREN", limit=3))
-    assert "coverage" in n and "snippet" in n["coverage"]["notes"][0]

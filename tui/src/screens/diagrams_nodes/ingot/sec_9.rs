@@ -9,7 +9,7 @@
 // The ranking that orders the rows (Shin-Etsu and SUMCO first) is page text (section 7).
 
 use crate::ui::anim::motion::lerp;
-use crate::ui::anim::{flicker, Beat, Canvas, Scene, Time};
+use crate::ui::anim::{Beat, Canvas, Scene, Time, flicker};
 
 const MIN_W: u16 = 80;
 const MIN_H: u16 = 26;

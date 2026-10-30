@@ -228,7 +228,11 @@ impl Scene for Section {
                 crop_line(c, cy, x0 - 1);
                 crop_line(c, cy, x1 + 1);
                 c.text(1, cy, "X◉═══════▶");
-                c.label(2, h - 4, "X-ray on the cut face: orientation, type, resistivity");
+                c.label(
+                    2,
+                    h - 4,
+                    "X-ray on the cut face: orientation, type, resistivity",
+                );
             }
             3 => {
                 let xw = lerp(x1 as f32, x0 as f32, ease_in_out(t.local)).round() as i32;
@@ -249,13 +253,21 @@ impl Scene for Section {
                 c.put(cx, cy - HB - 1, '▼');
                 c.label(cx - 2, cy - HB - 2, "notch");
                 c.label(cx - 4, cy + HB + 2, "end view");
-                c.label(2, h - 4, "V groove 90 deg, 1.0 mm deep (+0.25/-0.00), on <110>");
+                c.label(
+                    2,
+                    h - 4,
+                    "V groove 90 deg, 1.0 mm deep (+0.25/-0.00), on <110>",
+                );
             }
             _ => {
                 body(c, cy, x0, x1, &|_| false);
                 groove(c, cy, x0, x1, 1.0);
                 c.text(x1 + 2, cy, "──▶ wire saw");
-                c.label(2, h - 4, "300 mm, notch <110> +/- 1 deg; this node ends here");
+                c.label(
+                    2,
+                    h - 4,
+                    "300 mm, notch <110> +/- 1 deg; this node ends here",
+                );
             }
         }
     }

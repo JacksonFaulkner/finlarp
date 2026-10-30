@@ -84,9 +84,6 @@ def daily_steps() -> list[dict]:
         step("tweets", "tweets_pull", "jobs.pull_recent_tweets", "--max-cost", "1", needs="APIFY_TOKEN"),
         step("tweets", "tweets_ingest", "sources/tweets.py", "ingest"),
         step("tweets", "sentiment", "sources/tweet_sentiment.py", "run", "--all", needs="OPENAI_API_KEY"),
-        # rate-limited, slow: ~1.5h for the universe at 5 req/min
-        step("news", "news", "sources/roic_news.py", "pull", "--universe", "--max-pages", "2", needs="ROIC_TOKEN",
-             timeout_min=240),
         step("arxiv", "arxiv", "sources/arxiv.py", "pull", timeout_min=240),
         # after everything above
         step("final", "search", "derive/search.py", "build"),
@@ -104,7 +101,6 @@ def intraday_steps() -> list[dict]:
     ]
     if wl:
         out += [
-            step("news", "news", "sources/roic_news.py", "pull", *wl, "--max-pages", "1", needs="ROIC_TOKEN", timeout_min=20),
             step("sec", "events", "sources/sec_events.py", "ingest", *wl, "--refresh", "--max-age", "1200", timeout_min=20),
         ]
     return out

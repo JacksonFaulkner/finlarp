@@ -86,7 +86,11 @@ impl Scene for Grind {
         panels(c, w, h, 1, "SIDE: along the axis", "END-ON: cross section");
         grind_side(c, w / 4, cy, t);
         grind_end(c, 3 * w / 4, cy, t);
-        c.text(2, h - 2, "the wheel runs the length; the cross section goes round");
+        c.text(
+            2,
+            h - 2,
+            "the wheel runs the length; the cross section goes round",
+        );
     }
 }
 
@@ -189,7 +193,11 @@ impl Scene for Notch {
         panels(c, w, h, 1, "SIDE: the groove", "END-ON: the notch");
         notch_side(c, w / 4, cy, t);
         notch_end(c, 3 * w / 4, cy, t.beat);
-        c.text(2, h - 2, "the groove runs the full length; end-on it is the V on the rim");
+        c.text(
+            2,
+            h - 2,
+            "the groove runs the full length; end-on it is the V on the rim",
+        );
     }
 }
 
@@ -265,7 +273,6 @@ const TEST_BEATS: &[Beat] = &[
         ),
 ];
 
-
 /// Dotted line between two cells, one dot every other cell.
 fn dotted(c: &mut Canvas, (x0, y0): (i32, i32), (x1, y1): (i32, i32)) {
     let n = (x1 - x0).abs().max((y1 - y0).abs());
@@ -330,7 +337,14 @@ impl Scene for Test {
     fn draw(&self, c: &mut Canvas, t: &Time) {
         let (w, h) = dims(c);
         let cy = h / 2 + 1;
-        panels(c, w, h, 5, "SIDE: beam on the cut face", "DETECTOR: diffraction spots");
+        panels(
+            c,
+            w,
+            h,
+            5,
+            "SIDE: beam on the cut face",
+            "DETECTOR: diffraction spots",
+        );
         test_side(c, w / 4, cy, t);
         test_detector(c, 3 * w / 4 - 12, cy - 7, 24, 11, t);
     }
@@ -414,7 +428,11 @@ impl Scene for Saw {
                 }
             }
         }
-        c.text(2, h - 2, "wire web: one wire, many passes, one slice per pass");
+        c.text(
+            2,
+            h - 2,
+            "wire web: one wire, many passes, one slice per pass",
+        );
     }
 }
 

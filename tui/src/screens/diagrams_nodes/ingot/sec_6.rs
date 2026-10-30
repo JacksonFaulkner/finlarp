@@ -139,7 +139,9 @@ fn bar_len(value: i32, max: i32, frac: f32) -> i32 {
     if frac <= 0.0 || value <= 0 {
         return 0;
     }
-    ((value as f32 / max.max(1) as f32) * BAR_MAX as f32 * frac).round().max(1.0) as i32
+    ((value as f32 / max.max(1) as f32) * BAR_MAX as f32 * frac)
+        .round()
+        .max(1.0) as i32
 }
 
 /// One block: a title, then a row per diameter. `mass` picks grams or dies.

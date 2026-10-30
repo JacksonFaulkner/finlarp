@@ -205,10 +205,9 @@ impl Screen for Video {
         frame.render_widget(Paragraph::new(Line::styled(status, t.title())), head);
 
         match &self.error {
-            Some(msg) => frame.render_widget(
-                Paragraph::new(Line::styled(msg.clone(), t.dim())),
-                image,
-            ),
+            Some(msg) => {
+                frame.render_widget(Paragraph::new(Line::styled(msg.clone(), t.dim())), image)
+            }
             None => {
                 self.ensure_proto();
                 if let Some((_, proto)) = self.proto.as_mut() {
@@ -282,7 +281,10 @@ mod tests {
         let clips = list_clips(&screens_dir()).unwrap();
         let sel = clips
             .iter()
-            .position(|p| p.file_stem().is_some_and(|s| s.to_string_lossy().starts_with(arg)))
+            .position(|p| {
+                p.file_stem()
+                    .is_some_and(|s| s.to_string_lossy().starts_with(arg))
+            })
             .unwrap_or(0);
         let mut v = Video {
             theme: Theme::from_args(None, None, None),

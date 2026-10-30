@@ -100,7 +100,10 @@ fn sag(x: i32, cx: i32, dz: f32) -> f32 {
 fn loop_cells(cx: i32, cy: i32, dz: f32) -> Vec<(i32, i32, char)> {
     let top = cy - 4;
     let run = |dx: i32| (cx + dx, top + sag(cx + dx, cx, dz).round() as i32);
-    let mut corners: Vec<(i32, i32)> = [-20, -14, -7, 0, 7, 14, 20].iter().map(|&d| run(d)).collect();
+    let mut corners: Vec<(i32, i32)> = [-20, -14, -7, 0, 7, 14, 20]
+        .iter()
+        .map(|&d| run(d))
+        .collect();
     corners.extend([
         (cx + 25, cy - 2),
         (cx + 5, cy + 6),
@@ -169,7 +172,11 @@ fn web_side(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
         // near the end of the cut, the wafers not yet freed hang from the block as teeth;
         // the slots between them are the kerf, with the wire running through
         if t.beat == 3 {
-            let glyph = if (x - cx).rem_euclid(3) == 0 { '┊' } else { '▓' };
+            let glyph = if (x - cx).rem_euclid(3) == 0 {
+                '┊'
+            } else {
+                '▓'
+            };
             for y in b + 1..wy {
                 c.put(x, y, glyph);
             }
@@ -177,7 +184,11 @@ fn web_side(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
     }
     c.text(cx - 6, bottom - 2, "silicon brick");
     if t.beat == 3 {
-        c.text(cx - 17, bottom - 7, "teeth: wafers not yet freed; slots are kerf");
+        c.text(
+            cx - 17,
+            bottom - 7,
+            "teeth: wafers not yet freed; slots are kerf",
+        );
     }
     // the wire: horizontal along the top run, diagonal down to roller 3
     let cells = loop_cells(cx, cy, dz);
@@ -186,7 +197,13 @@ fn web_side(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
     }
     // flow particles run along the same cells, so they follow the wire exactly
     let pts: Vec<(i32, i32)> = cells.iter().map(|&(x, y, _)| (x, y)).collect();
-    flow(c, &Path::new(&pts), t.ms, Particles::new(41, 240, 2800), |_| '▸');
+    flow(
+        c,
+        &Path::new(&pts),
+        t.ms,
+        Particles::new(41, 240, 2800),
+        |_| '▸',
+    );
     if dz > 0.0 && t.beat < 3 {
         c.put(cx, bottom - 5, '▼');
         c.text(cx - 6, bottom - 6, "dzmax");
@@ -201,7 +218,13 @@ fn web_above(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
         let z = cy - 4 + 2 * k;
         c.hline(cx - half, z, 2 * half + 1, '─');
         let pass = Path::new(&[(cx - half, z), (cx + half, z)]);
-        flow(c, &pass, t.ms + k as u64 * 300, Particles::new(50 + k as u64, 220, 900), |_| '▸');
+        flow(
+            c,
+            &pass,
+            t.ms + k as u64 * 300,
+            Particles::new(50 + k as u64, 220, 900),
+            |_| '▸',
+        );
     }
     fill_disc_rect(c, cx - 7, cy - 5, 15, 11, '▓');
 }
@@ -339,7 +362,14 @@ impl Scene for Lap {
     fn draw(&self, c: &mut Canvas, t: &Time) {
         let (w, h) = dims(c);
         let cy = h / 2 + 1;
-        panels(c, w, h, 5, "SIDE: plates and wafer", "TOP-DOWN: wafers on the plate");
+        panels(
+            c,
+            w,
+            h,
+            5,
+            "SIDE: plates and wafer",
+            "TOP-DOWN: wafers on the plate",
+        );
         lap_side(c, w / 4, cy, t);
         lap_top(c, 3 * w / 4, cy, t);
     }
@@ -443,7 +473,14 @@ impl Scene for Preston {
     fn draw(&self, c: &mut Canvas, t: &Time) {
         let (w, h) = dims(c);
         let cy = h / 2 + 1;
-        panels(c, w, h, 5, "SIDE: pad, grains, wafer", "GRAPH: removal vs pressure");
+        panels(
+            c,
+            w,
+            h,
+            5,
+            "SIDE: pad, grains, wafer",
+            "GRAPH: removal vs pressure",
+        );
         preston_side(c, w / 4, cy, t);
         match t.beat {
             0 => preston_graph(c, 3 * w / 4 - 13, cy + 4, 0.0),
@@ -557,11 +594,22 @@ impl Scene for Budget {
     fn draw(&self, c: &mut Canvas, t: &Time) {
         let (w, h) = dims(c);
         let cy = h / 2 + 1;
-        panels(c, w, h, 5, "BARS: each removal", "STACK: the removed layers");
+        panels(
+            c,
+            w,
+            h,
+            5,
+            "BARS: each removal",
+            "STACK: the removed layers",
+        );
         budget_bars(c, 4, cy, t);
         budget_stack(c, 3 * w / 4 - 12, cy, t);
         if t.beat == 2 {
-            c.text(2, h - 3, "page example values; they do not close into one wafer's history");
+            c.text(
+                2,
+                h - 3,
+                "page example values; they do not close into one wafer's history",
+            );
         }
     }
 }

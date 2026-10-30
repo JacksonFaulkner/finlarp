@@ -151,7 +151,7 @@ fn fake_rows(cmd: &str, key: &str) -> Vec<Row> {
             pct("Return vs 8 periods ago", 12.0, "bars_1d", 2),
         ],
         "N" => vec![
-            text("Headlines (7d)", "3", "news() ROIC snippets"),
+            text("Headlines (7d)", "3", "live_news() headlines"),
             pct("Bullish tweet share", 58.0, "tweet_sentiment stance", 1),
         ],
         "HDS" => vec![

@@ -17,7 +17,6 @@ every call is local and fast. Tools are all read-only:
     sentiment   labelled views on one ticker from those tweets: stance, who holds it, trend, keywords, examples
     sentiment_leaders  tickers ranked by mentions / bullish / bearish / contested / momentum
     price_targets  price targets pulled out of tweets, against the last close
-    news        company news (ROIC.ai) by ticker/date/text/site, with article snippets
     schema      the views `sql` can see, with columns, bucket counts and query recipes
 
 Register with Claude Code:
@@ -50,7 +49,6 @@ from mcp.types import ToolAnnotations
 
 
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
-from sources import roic_news
 from sources import tweets as tweets_src
 from sources import yahoo_live
 from sources import etrade_live
@@ -309,9 +307,6 @@ def _views(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
                    "is_reply/is_quote/is_retweet); prefer the `tweets` tool for lookups"),
         "tweet_tickers": (f"'{D}/tweets/tweet_tickers.parquet'",
                           "cashtags per tweet (tweet_id -> ticker, in_universe flag); join tweets on tweet_id = tweets.id"),
-        "news": (f"'{D}/news/news.parquet'",
-                 "company news per ticker (ROIC.ai; free plan covers ~2 years): published_at UTC, title, site, url and text, "
-                 "which is a ~200 character snippet, not the full article; one row per (ticker, url). Includes press wires (globenewswire.com)"),
         "short_volume": (f"'{D}/short/short_volume.parquet'",
                          "FINRA Reg SHO daily short sale volume per ticker per day: short_volume, total_volume, short_ratio. "
                          "Flow (includes market-maker hedging; ~45-55% is normal), published the evening of the trade date"),
@@ -658,19 +653,6 @@ def price_targets(ticker: str, since: str = "", limit: int = 15) -> str:
         return _dump(sentiment_q.price_targets(ticker, since or None, limit))
     except (duckdb.Error, OSError) as e:
         return _dump({"error": f"sentiment unavailable (run sources/tweet_sentiment.py run --all): {e}"})
-
-
-@mcp.tool(annotations=READ_ONLY)
-def news(ticker: str = "", since: str = "", until: str = "", text: str = "", site: str = "", limit: int = 20) -> str:
-    """Company news pulled from ROIC.ai (about two years back on the free plan), newest first: date, ticker, site,
-    title, url and a ~200 character snippet (not the full article). Filters: ticker, since/until (YYYY-MM-DD, UTC;
-    until exclusive), text (title or snippet, case-insensitive), site (publisher substring, e.g. globenewswire for
-    company press releases, seekingalpha, fool). `coverage` says how much matched, the per-site split and what the store
-    holds; a ticker that was never pulled returns nothing. For the latest headlines use live_news."""
-    try:
-        return _dump(roic_news.query(ticker or None, since or None, until or None, text or None, site or None, limit))
-    except (duckdb.Error, OSError) as e:
-        return _dump({"error": f"news unavailable (run sources/roic_news.py pull TICKER): {e}"})
 
 
 @mcp.tool(annotations=READ_ONLY)

@@ -10,7 +10,7 @@
 use std::collections::{HashMap, HashSet};
 use std::path::Path;
 
-use chrono::{DateTime, NaiveDate};
+use chrono::{DateTime, NaiveDate, Utc};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Snapshot {
@@ -123,6 +123,8 @@ pub struct Data {
     pub bench: HashMap<&'static str, Vec<(NaiveDate, f64)>>,
     /// Daily closes per held or traded symbol (longest cached range), oldest first.
     pub closes: HashMap<String, Vec<(NaiveDate, f64)>>,
+    /// Minute closes (bars_1m) for symbols traded in the last `MINUTE_DAYS`, oldest first.
+    pub minutes: HashMap<String, Vec<(DateTime<Utc>, f64)>>,
     /// Cached E*TRADE transactions (all accounts), oldest first.
     pub txns: Vec<Txn>,
     /// Derived from the rows above; filled in by `load`.
@@ -136,6 +138,8 @@ pub struct Txn {
     /// E*TRADE `transaction_id`. The cache can hold the same record twice.
     pub id: String,
     pub date: NaiveDate,
+    /// The fill's time (UTC), so same-day fills sit at their own places on an intraday chart.
+    pub at: DateTime<Utc>,
     pub kind: String,
     pub symbol: String,
     pub qty: f64,
@@ -155,13 +159,15 @@ pub fn parse_txns(json: &str) -> Vec<Txn> {
         .iter()
         .filter_map(|t| {
             let ms = t.get("date")?.as_i64()?;
+            let at = DateTime::from_timestamp_millis(ms)?;
             Some(Txn {
                 id: t
                     .get("transaction_id")
                     .and_then(|v| v.as_str())
                     .unwrap_or_default()
                     .to_string(),
-                date: DateTime::from_timestamp_millis(ms)?.date_naive(),
+                date: at.date_naive(),
+                at,
                 kind: t.get("type")?.as_str()?.to_string(),
                 symbol: t.get("symbol")?.as_str()?.to_string(),
                 qty: num(t, "quantity"),
@@ -177,6 +183,107 @@ pub fn parse_txns(json: &str) -> Vec<Txn> {
 pub fn dedupe_txns(txns: &mut Vec<Txn>) {
     let mut seen = HashSet::new();
     txns.retain(|t| t.id.is_empty() || seen.insert(t.id.clone()));
+}
+
+/// Order within one day: buys, then everything else, then sells, so a round
+/// trip on the same day replays in the order it happened.
+fn same_day_rank(kind: &str) -> u8 {
+    match kind {
+        "Bought" => 0,
+        "Sold" => 2,
+        _ => 1,
+    }
+}
+
+/// How far back fills get minute bars. Older trades chart on daily closes.
+const MINUTE_DAYS: i64 = 60;
+
+/// Minute closes from the local bars_1m pull (Databento) since `since`, per symbol, oldest first.
+/// Empty on any read error: the chart then falls back to daily closes.
+fn bar_minutes(
+    conn: &duckdb::Connection,
+    db_path: &Path,
+    syms: &[String],
+    since: DateTime<Utc>,
+) -> HashMap<String, Vec<(DateTime<Utc>, f64)>> {
+    let mut out: HashMap<String, Vec<(DateTime<Utc>, f64)>> = HashMap::new();
+    if syms.is_empty() {
+        return out;
+    }
+    let list = syms
+        .iter()
+        .map(|s| format!("'{}'", s.replace('\'', "''")))
+        .collect::<Vec<_>>()
+        .join(",");
+    let glob = crate::screens::universe::bars_glob_for(db_path, "bars_1m").replace('\'', "''");
+    let sql = format!(
+        "SELECT symbol, epoch_ms(ts_event), close FROM read_parquet('{glob}', union_by_name=true) \
+         WHERE symbol IN ({list}) AND epoch_ms(ts_event) >= {} AND close > 0 ORDER BY ts_event",
+        since.timestamp_millis()
+    );
+    let Ok(mut stmt) = conn.prepare(&sql) else {
+        return out;
+    };
+    let Ok(rows) = stmt.query_map([], |r| {
+        Ok((
+            r.get::<_, String>(0)?,
+            r.get::<_, i64>(1)?,
+            r.get::<_, f64>(2)?,
+        ))
+    }) else {
+        return out;
+    };
+    for (sym, ms, close) in rows.flatten() {
+        if let Some(at) = DateTime::from_timestamp_millis(ms) {
+            out.entry(sym).or_default().push((at, close));
+        }
+    }
+    out
+}
+
+/// Daily closes from the local bars_1d pull (Databento) for `syms`, oldest first.
+/// Empty on any read error: the chart then says there is no history.
+fn bar_closes(
+    conn: &duckdb::Connection,
+    db_path: &Path,
+    syms: &[String],
+) -> HashMap<String, Vec<(NaiveDate, f64)>> {
+    let mut out: HashMap<String, Vec<(NaiveDate, f64)>> = HashMap::new();
+    if syms.is_empty() {
+        return out;
+    }
+    let list = syms
+        .iter()
+        .map(|s| format!("'{}'", s.replace('\'', "''")))
+        .collect::<Vec<_>>()
+        .join(",");
+    let glob = crate::screens::universe::bars_glob(db_path).replace('\'', "''");
+    let sql = format!(
+        "SELECT symbol, CAST((ts_event AT TIME ZONE 'America/New_York')::DATE AS VARCHAR), close \
+         FROM read_parquet('{glob}', union_by_name=true) WHERE symbol IN ({list}) ORDER BY ts_event"
+    );
+    let Ok(mut stmt) = conn.prepare(&sql) else {
+        return out;
+    };
+    let Ok(rows) = stmt.query_map([], |r| {
+        Ok((
+            r.get::<_, String>(0)?,
+            r.get::<_, String>(1)?,
+            r.get::<_, f64>(2)?,
+        ))
+    }) else {
+        return out;
+    };
+    for (sym, day, close) in rows.flatten() {
+        if let Ok(date) = NaiveDate::parse_from_str(&day, "%Y-%m-%d") {
+            out.entry(sym).or_default().push((date, close));
+        }
+    }
+    // bars_1d has a few duplicate symbol-date pairs: keep one bar per day
+    for v in out.values_mut() {
+        v.dedup_by_key(|(date, _)| *date);
+    }
+    out
 }
 
 /// Whole-history roll-up for one symbol from the transaction cache.
@@ -217,7 +324,7 @@ pub fn symbol_history(txns: &[Txn], symbol: &str) -> SymbolHistory {
             _ => {}
         }
     }
-    h.recent.sort_by(|a, b| b.date.cmp(&a.date));
+    h.recent.sort_by_key(|t| std::cmp::Reverse(t.at));
     h
 }
 
@@ -296,7 +403,7 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         for json in rows.flatten() {
             txns.extend(parse_txns(&json));
         }
-        txns.sort_by_key(|t| t.date);
+        txns.sort_by_key(|t| (t.date, same_day_rank(&t.kind)));
         dedupe_txns(&mut txns);
     }
 
@@ -322,10 +429,30 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
             }
         }
     }
+    // Held or traded names Yahoo has no history for (sold-out names, say) use the local bars_1d pull.
+    let mut names: Vec<String> = traded
+        .iter()
+        .map(|s| s.to_string())
+        .chain(positions.iter().map(|p| p.symbol.clone()))
+        .collect();
+    names.sort();
+    names.dedup();
+    for (sym, bars) in bar_closes(&conn, db_path, &names) {
+        closes.entry(sym).or_insert(bars);
+    }
     let bench = Bench::ALL
         .iter()
         .filter_map(|b| Some((b.symbol(), closes.get(b.symbol())?.clone())))
         .collect();
+    let since = Utc::now() - chrono::Duration::days(MINUTE_DAYS);
+    let mut recent: Vec<String> = txns
+        .iter()
+        .filter(|t| t.at >= since)
+        .map(|t| t.symbol.clone())
+        .collect();
+    recent.sort();
+    recent.dedup();
+    let minutes = bar_minutes(&conn, db_path, &recent, since);
     let exposure = build_exposure(&history, &positions, &txns, &closes, &industries);
     Ok(Data {
         history,
@@ -333,6 +460,7 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         positions_at,
         bench,
         closes,
+        minutes,
         txns,
         exposure,
     })
@@ -1112,6 +1240,7 @@ mod tests {
         Txn {
             id: String::new(),
             date: d(date),
+            at: d(date).and_hms_opt(16, 0, 0).unwrap().and_utc(),
             kind: "trade".into(),
             symbol: sym.into(),
             qty,

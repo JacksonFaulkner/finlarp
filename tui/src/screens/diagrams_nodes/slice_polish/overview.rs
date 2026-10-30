@@ -168,7 +168,11 @@ fn station(c: &mut Canvas, i: usize, t: &Time) {
         3 => {
             // the bath: liquid at the top, bubbles rising from the wafer
             c.boxed(x + 1, 6, SW - 2, 6);
-            let liquid = if (t.ms / 400).is_multiple_of(2) { '≈' } else { '~' };
+            let liquid = if (t.ms / 400).is_multiple_of(2) {
+                '≈'
+            } else {
+                '~'
+            };
             c.hline(x + 2, 7, SW - 4, liquid);
             let bubbles = Path::new(&[(cx, 11), (cx, 8)]);
             flow(c, &bubbles, t.ms, Particles::new(73, 300, 900), |_| '°');
@@ -203,7 +207,12 @@ fn wafer(c: &mut Canvas, t: &Time) {
     let cx = if t.beat == 0 {
         station_mid(0)
     } else {
-        lerp(station_mid(t.beat - 1) as f32, station_mid(t.beat) as f32, moved).round() as i32
+        lerp(
+            station_mid(t.beat - 1) as f32,
+            station_mid(t.beat) as f32,
+            moved,
+        )
+        .round() as i32
     };
     let (x0, x1) = (cx - 5, cx + 5);
     let rows = if t.beat <= 1 { 3 } else { 2 };
@@ -260,7 +269,11 @@ impl Scene for Polish {
         // swarf bin under the saw; a ship box under the clean
         titled_box(c, station_x(1), 20, SW, 3, "swarf");
         titled_box(c, station_x(6), 20, SW, 3, "ship");
-        c.text(X0, 25, "▓ wafer   ▒ wheel or saw   ═ track   ▼ station now   ▪ slices   ° bubbles");
+        c.text(
+            X0,
+            25,
+            "▓ wafer   ▒ wheel or saw   ═ track   ▼ station now   ▪ slices   ° bubbles",
+        );
         c.text(X0, 27, "next: WAFER (inspect and ship)");
     }
 
@@ -268,7 +281,6 @@ impl Scene for Polish {
         ZOOMS
     }
 }
-
 
 pub fn build() -> Box<dyn Scene> {
     Box::new(Polish)

@@ -94,6 +94,10 @@ impl Range {
         Self::ALL.iter().position(|r| *r == self).unwrap_or(0)
     }
 
+    fn next(self) -> Range {
+        Self::ALL[(self.index() + 1) % Self::ALL.len()]
+    }
+
     fn parse(s: &str) -> Option<Range> {
         Self::ALL
             .into_iter()
@@ -206,7 +210,7 @@ pub struct ChartScreen {
     theme: Theme,
     history: Vec<Snapshot>,
     load_err: Option<String>,
-    range: Range,
+    pub(crate) range: Range,
     /// Index into the current window; None = follow the latest point.
     cursor: Option<usize>,
     marker: Marker,
@@ -243,7 +247,7 @@ impl ChartScreen {
         }
     }
 
-    fn reload(&mut self) {
+    pub fn reload(&mut self) {
         match load_history(&self.db_path) {
             Ok(h) => {
                 self.history = h;
@@ -325,6 +329,41 @@ impl ChartScreen {
         };
         let r = area.centered_vertically(Constraint::Length(1));
         frame.render_widget(Paragraph::new(msg).style(t.dim()).centered(), r);
+    }
+}
+
+impl ChartScreen {
+    /// The chart without the screen chrome, for the portfolio suite's History tab.
+    pub fn draw_body(&mut self, frame: &mut Frame, area: Rect) {
+        let t = self.theme;
+        let [header, detail, source] = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Min(0),
+            Constraint::Length(1),
+        ])
+        .areas(area);
+        let points = self.points();
+        let Some(sel) = self.selected(points.len()) else {
+            self.render_empty(frame, detail);
+            return;
+        };
+        self.render_header(frame, header, &points, sel);
+        self.render_chart(frame, detail, &points, sel);
+        source_bar::render_source_bar(frame, source, points[sel].src.as_ref(), &t);
+        if self.inspector.is_open() {
+            self.inspector.render(frame, area, &t);
+        }
+    }
+
+    /// `r` on the History tab: next range, same as the overview.
+    pub fn cycle_range(&mut self) {
+        self.range = self.range.next();
+        self.cursor = None;
+    }
+
+    /// True while the source inspector is open: it takes every key until closed.
+    pub fn inspecting(&self) -> bool {
+        self.inspector.is_open()
     }
 }
 

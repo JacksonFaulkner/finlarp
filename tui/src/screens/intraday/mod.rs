@@ -8,6 +8,7 @@
 // the previous close (dotted line), session volume, and dims pre/post-market.
 
 mod data;
+mod picture;
 mod stream;
 
 use std::io;
@@ -18,6 +19,9 @@ use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph};
+use ratatui_image::picker::{Picker, ProtocolType};
+use ratatui_image::protocol::StatefulProtocol;
+use ratatui_image::{Resize, StatefulImage};
 
 use crate::app::{Action, Ctx, Screen};
 use crate::ui::hcandles::{HBar, HCandles};
@@ -38,6 +42,7 @@ const KEYS: &[Key] = &[
     key("G", "follow latest"),
     key("i", "interval 1m/5m/15m"),
     key("e", "pre/post-market"),
+    key("g", "pictures / ascii tapes"),
     key("↵/z", "full screen tile"),
     key("esc", "back to grid"),
     key("s", "set ticker"),
@@ -49,6 +54,8 @@ const KEYS: &[Key] = &[
 struct Tile {
     sym: String,
     series: Series,
+    /// The last picture drawn: its content hash and the terminal protocol that holds it.
+    pic: Option<(u64, StatefulProtocol)>,
     /// Index into the aggregated bars; None follows the latest bar.
     cursor: Option<usize>,
     /// Bars hidden past the newest edge of the window (0 = pinned to latest).
@@ -63,6 +70,7 @@ impl Tile {
         Self {
             sym,
             series: Series::default(),
+            pic: None,
             cursor: None,
             end_off: 0,
             rows: 20,
@@ -85,6 +93,10 @@ pub struct Intraday {
     /// Ticker being typed for the focused tile.
     prompt: Option<String>,
     flash: Option<String>,
+    /// The terminal's graphics protocol, when it has one (None: ASCII tapes only).
+    picker: Option<Picker>,
+    /// Draw tiles as pictures (only ever true with a picker). `g` flips it.
+    pictures: bool,
 }
 
 /// `A,B C` -> four uppercase symbols, deduped, padded from DEFAULTS.
@@ -104,11 +116,15 @@ fn parse_symbols(arg: Option<&str>) -> Vec<String> {
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Intraday> {
-    Ok(Intraday::new(
-        ctx.theme,
-        parse_symbols(arg.as_deref()),
-        Stream::spawn(),
-    ))
+    // Must run before the event loop reads stdin: the terminal answers the query on stdin.
+    // Halfblocks is no graphics protocol at all, so the ASCII tapes stay.
+    let picker = Picker::from_query_stdio()
+        .ok()
+        .filter(|p| p.protocol_type() != ProtocolType::Halfblocks);
+    let mut screen = Intraday::new(ctx.theme, parse_symbols(arg.as_deref()), Stream::spawn());
+    screen.pictures = picker.is_some();
+    screen.picker = picker;
+    Ok(screen)
 }
 
 impl Intraday {
@@ -127,6 +143,8 @@ impl Intraday {
             help: false,
             prompt: None,
             flash: None,
+            picker: None,
+            pictures: false,
         }
     }
 
@@ -308,24 +326,51 @@ impl Intraday {
             return;
         }
 
-        let rows = HCandles::capacity(chart.height);
+        // Pictures fit as many bars as the chart's pixels allow; tapes one per row.
+        let picker = if self.pictures {
+            self.picker.as_ref()
+        } else {
+            None
+        };
+        let rows = match picker {
+            Some(p) => picture::capacity(chart.width as u32 * u32::from(p.font_size().width)),
+            None => HCandles::capacity(chart.height),
+        };
         let (start, end) = Self::window(tile, bars.len(), rows);
         let visible = &bars[start..end];
         let sel_abs = tile.cursor.map(|c| c.min(bars.len() - 1));
         let sel = sel_abs
             .filter(|c| (start..end).contains(c))
             .map(|c| c - start);
+        let (vwap, prev_close) = (tile.series.vwap(), tile.series.prev_close);
         frame.render_widget(
-            Paragraph::new(self.readout(&bars, sel_abs, tile.series.prev_close)),
+            Paragraph::new(self.readout(&bars, sel_abs, prev_close)),
             head,
         );
-        frame.render_widget(
-            HCandles::new(visible, &t)
-                .vwap(tile.series.vwap())
-                .prev_close(tile.series.prev_close)
-                .selected(sel),
-            chart,
-        );
+        match picker {
+            Some(p) => {
+                let font = p.font_size();
+                let px = (
+                    chart.width as u32 * u32::from(font.width),
+                    chart.height as u32 * u32::from(font.height),
+                );
+                let pic = picture::Pic {
+                    bars: visible,
+                    vwap,
+                    prev_close,
+                    sel,
+                };
+                let pal = crate::ui::pixels::Palette::from_theme(&self.theme);
+                draw_picture(frame, chart, &mut self.tiles[idx].pic, p, &pic, &pal, px);
+            }
+            None => frame.render_widget(
+                HCandles::new(visible, &t)
+                    .vwap(vwap)
+                    .prev_close(prev_close)
+                    .selected(sel),
+                chart,
+            ),
+        }
         self.tiles[idx].rows = rows;
     }
 
@@ -380,6 +425,30 @@ impl Intraday {
             _ => {}
         }
         Action::None
+    }
+}
+
+/// Draws one tile's picture. The terminal protocol is rebuilt only when the picture's content changed.
+fn draw_picture(
+    frame: &mut Frame,
+    area: Rect,
+    slot: &mut Option<(u64, StatefulProtocol)>,
+    picker: &Picker,
+    pic: &picture::Pic,
+    pal: &crate::ui::pixels::Palette,
+    px: (u32, u32),
+) {
+    let key = picture::fingerprint(pic, px, pal);
+    if slot.as_ref().is_none_or(|(k, _)| *k != key) {
+        let img = picture::render(pic, px.0, px.1, pal);
+        *slot = Some((key, picker.new_resize_protocol(img)));
+    }
+    if let Some((_, proto)) = slot.as_mut() {
+        frame.render_stateful_widget(
+            StatefulImage::default().resize(Resize::Fit(None)),
+            area,
+            proto,
+        );
     }
 }
 
@@ -464,6 +533,14 @@ impl Screen for Intraday {
             KeyCode::Char('G') => self.follow_latest(),
             KeyCode::Char('i') => self.step = (self.step + 1) % STEPS.len(),
             KeyCode::Char('e') => self.ext = !self.ext,
+            KeyCode::Char('g') => {
+                if self.picker.is_some() {
+                    self.pictures = !self.pictures;
+                } else {
+                    self.flash =
+                        Some("this terminal has no graphics protocol: ASCII tapes only".into());
+                }
+            }
             KeyCode::Enter => self.zoom = true,
             KeyCode::Char('z') => self.zoom = !self.zoom,
             KeyCode::Char('s') => self.prompt = Some(String::new()),

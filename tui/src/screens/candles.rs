@@ -1,10 +1,10 @@
-// Candlestick screen (leader-vb): OHLC candles + volume for one ticker.
-// Bars are mock (src/mock.rs) until this reads bars_1d. h/l move a cursor,
-// the header shows the selected bar's O/H/L/C, change and volume.
+// Candlestick screen (leader-vb): OHLC candles + volume for one ticker, from
+// the local bars_1d pull (see universe::bars_glob). h/l move a cursor, the
+// header shows the selected bar's O/H/L/C, change and volume.
 
 use std::io;
+use std::path::Path;
 
-use chrono::Local;
 use ratatui::Frame;
 use ratatui::crossterm::event::{KeyCode, KeyEvent};
 use ratatui::layout::{Constraint, Layout};
@@ -13,16 +13,17 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Tabs};
 
 use crate::app::{Action, Ctx, Screen};
-use crate::mock;
 use crate::model::Candle;
+use crate::screens::universe::bars_glob;
 use crate::ui::candles::{CandleChart, fit};
 use crate::ui::help::{self, Key, key};
 use crate::ui::theme::Theme;
 
-const DEFAULT_TICKER: &str = "SPRB";
-const DAILY_VOL: f64 = 0.045;
+const DEFAULT_TICKER: &str = "MRVL";
 /// Trading days per range tab: 1M 3M 6M 1Y.
 const RANGES: [(&str, usize); 4] = [("1M", 21), ("3M", 63), ("6M", 126), ("1Y", 252)];
+/// Daily bars loaded per ticker: the longest range.
+const LOAD: usize = 252;
 
 const KEYS: &[Key] = &[
     key("1-4", "range 1M/3M/6M/1Y"),
@@ -40,6 +41,8 @@ pub struct CandlesScreen {
     /// Index into the drawn (merged) bars; None = follow the latest.
     cursor: Option<usize>,
     help: bool,
+    /// Why there are no bars (no pull yet, unknown ticker); drawn instead of the chart.
+    error: Option<String>,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<CandlesScreen> {
@@ -47,16 +50,52 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<CandlesScreen> {
         .map(|a| a.trim().to_uppercase())
         .filter(|a| !a.is_empty())
         .unwrap_or_else(|| DEFAULT_TICKER.into());
-    Ok(CandlesScreen::new(ctx.theme, ticker))
+    let (all, error) = match load_bars(&ctx.db_path, &ticker) {
+        Ok(bars) if bars.is_empty() => (bars, Some(format!("no daily bars for {ticker}"))),
+        Ok(bars) => (bars, None),
+        Err(e) => (Vec::new(), Some(e)),
+    };
+    Ok(CandlesScreen::new(ctx.theme, ticker, all, error))
+}
+
+/// The last LOAD daily bars for `ticker`, oldest first. Dates are New York
+/// session dates (the bars are stamped 20:00 ET).
+pub fn load_bars(db_path: &Path, ticker: &str) -> Result<Vec<Candle>, String> {
+    if !ticker
+        .chars()
+        .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '-')
+    {
+        return Err(format!("bad ticker {ticker:?}"));
+    }
+    let conn = crate::db::open_read_only(db_path)?;
+    let glob = bars_glob(db_path).replace('\'', "''");
+    let sql = format!(
+        "SELECT CAST((ts_event AT TIME ZONE 'America/New_York')::DATE AS VARCHAR), open, high, low, close, volume \
+         FROM read_parquet('{glob}', union_by_name=true) WHERE symbol = '{ticker}' \
+         ORDER BY ts_event DESC LIMIT {LOAD}"
+    );
+    let mut stmt = conn
+        .prepare(&sql)
+        .map_err(|e| format!("no daily bars ({e}). Run the databento bars_1d pull."))?;
+    let mut bars: Vec<Candle> = stmt
+        .query_map([], |r| {
+            Ok(Candle {
+                date: r.get(0)?,
+                open: r.get(1)?,
+                high: r.get(2)?,
+                low: r.get(3)?,
+                close: r.get(4)?,
+                volume: r.get(5)?,
+            })
+        })
+        .and_then(|rows| rows.collect())
+        .map_err(|e| e.to_string())?;
+    bars.reverse();
+    Ok(bars)
 }
 
 impl CandlesScreen {
-    pub fn new(theme: Theme, ticker: String) -> Self {
-        let seed = mock::seed_for(&ticker);
-        // Mock end price in 10..210, stable per ticker.
-        let end_price = 10.0 + (seed % 200_000) as f64 / 1000.0;
-        let n = RANGES[RANGES.len() - 1].1;
-        let all = mock::candles(seed, n, end_price, DAILY_VOL, Local::now().date_naive());
+    pub fn new(theme: Theme, ticker: String, all: Vec<Candle>, error: Option<String>) -> Self {
         Self {
             theme,
             ticker,
@@ -64,6 +103,7 @@ impl CandlesScreen {
             range: 1,
             cursor: None,
             help: false,
+            error,
         }
     }
 
@@ -97,7 +137,7 @@ impl CandlesScreen {
             )),
             Span::styled(format!("{chg:+.2}%  "), Style::new().fg(color)),
             Span::styled(format!("vol {}", c.volume), Style::new().fg(t.dim)),
-            Span::styled("  (mock)", Style::new().fg(t.dim)),
+            Span::styled("  bars_1d", Style::new().fg(t.dim)),
         ])
     }
 }
@@ -128,7 +168,13 @@ impl Screen for CandlesScreen {
         if let Some(sel) = sel {
             frame.render_widget(Paragraph::new(self.readout(&bars, sel)), header);
         }
-        frame.render_widget(CandleChart::new(&bars, &t).selected(sel), chart);
+        match &self.error {
+            Some(msg) => frame.render_widget(
+                Paragraph::new(msg.as_str()).style(Style::new().fg(t.dim)),
+                chart,
+            ),
+            None => frame.render_widget(CandleChart::new(&bars, &t).selected(sel), chart),
+        }
         help::render_footer(frame, footer, KEYS, None, &t);
         if self.help {
             help::render_overlay(frame, area, "candles", KEYS, &t);
@@ -167,12 +213,34 @@ impl Screen for CandlesScreen {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::{Duration, NaiveDate};
     use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::crossterm::event::KeyModifiers;
 
+    /// Deterministic bars, oldest first, one per calendar day from 2025-01-01.
+    fn bars(n: usize) -> Vec<Candle> {
+        let start = NaiveDate::from_ymd_opt(2025, 1, 1).unwrap();
+        let mut prev = 50.0;
+        (0..n)
+            .map(|i| {
+                let close = 50.0 + (i as f64 * 0.7).sin() * 5.0;
+                let c = Candle {
+                    date: (start + Duration::days(i as i64)).to_string(),
+                    open: prev,
+                    high: prev.max(close) + 1.0,
+                    low: prev.min(close) - 1.0,
+                    close,
+                    volume: 1000 + i as u64,
+                };
+                prev = close;
+                c
+            })
+            .collect()
+    }
+
     fn screen() -> CandlesScreen {
-        CandlesScreen::new(Theme::default(), "SPRB".into())
+        CandlesScreen::new(Theme::default(), "TEST".into(), bars(300), None)
     }
 
     fn render(s: &mut CandlesScreen, w: u16, h: u16) -> String {
@@ -197,7 +265,8 @@ mod tests {
     fn renders_tabs_readout_and_chart() {
         let out = render(&mut screen(), 100, 24);
         assert!(out.contains("1M") && out.contains("1Y"));
-        assert!(out.contains("SPRB") && out.contains("(mock)"));
+        assert!(out.contains("TEST") && out.contains("bars_1d"));
+        assert!(!out.contains("mock"));
         assert!(out.lines().any(|l| l.contains('█') || l.contains('▀')));
     }
 
@@ -227,6 +296,17 @@ mod tests {
         let first = s.window()[0].date.clone();
         // 3M at width 100 is merged, so the first drawn bar ends its group.
         assert!(render(&mut s, 100, 24).contains(&first[..4]));
+    }
+
+    #[test]
+    fn missing_bars_show_the_reason() {
+        let mut s = CandlesScreen::new(
+            Theme::default(),
+            "XYZ".into(),
+            Vec::new(),
+            Some("no daily bars for XYZ".into()),
+        );
+        assert!(render(&mut s, 100, 24).contains("no daily bars for XYZ"));
     }
 
     #[test]

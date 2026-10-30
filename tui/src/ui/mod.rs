@@ -33,6 +33,7 @@ pub mod command_palette;
 pub mod hcandles;
 pub mod help;
 pub mod layout;
+pub mod pixels;
 pub mod section_list;
 pub mod section_tabs;
 pub mod source_bar;

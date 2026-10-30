@@ -143,8 +143,16 @@ fn doping(c: &mut Canvas, w: i32, h: i32, t: &Time) {
     c.label(x0, bar_y + 1, "1e13");
     c.label(x1 - 4, bar_y + 1, "1e16");
     c.label(x0 + 12, bar_y - 1, "dopant atoms/cm3");
-    c.label(3, h - 4, "boron, phosphorus, arsenic, antimony added to the melt");
-    c.label(3, h - 3, "purity above 99.9999%; transition metals below ppb");
+    c.label(
+        3,
+        h - 4,
+        "boron, phosphorus, arsenic, antimony added to the melt",
+    );
+    c.label(
+        3,
+        h - 3,
+        "purity above 99.9999%; transition metals below ppb",
+    );
 }
 
 /// Plain lattice used as the backdrop of beat 2.
@@ -197,8 +205,12 @@ fn cut_and_slice(c: &mut Canvas, w: i32, h: i32, t: &Time) {
     let body_x1 = xr;
     let slicing = t.local > 0.7;
     let wire_x = if slicing {
-        lerp(body_x0 as f32, body_x1 as f32, ease(((t.local - 0.7) / 0.3).clamp(0.0, 1.0)))
-            .round() as i32
+        lerp(
+            body_x0 as f32,
+            body_x1 as f32,
+            ease(((t.local - 0.7) / 0.3).clamp(0.0, 1.0)),
+        )
+        .round() as i32
     } else {
         body_x0 - 1
     };
@@ -231,7 +243,11 @@ fn cut_and_slice(c: &mut Canvas, w: i32, h: i32, t: &Time) {
         c.label(wire_x - 3, cy + bh + 3, "wire saw");
     }
 
-    c.label(3, h - 5, "seed and tail cones cropped, then ground to 300 mm");
+    c.label(
+        3,
+        h - 5,
+        "seed and tail cones cropped, then ground to 300 mm",
+    );
     c.label(3, h - 4, "slices: schematic, not to scale");
 }
 

@@ -18,6 +18,7 @@
 
 mod app;
 mod db;
+#[cfg(test)]
 mod mock;
 mod model;
 mod pyrun;
@@ -56,6 +57,7 @@ const SCREENS: &[&str] = &[
     "godel",
     "menu",
     "notes",
+    "sources",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -107,7 +109,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events|chat|candles|intraday|godel|menu|notes] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events|chat|candles|intraday|godel|menu|notes|sources] [arg]";
 
 fn db_path() -> PathBuf {
     if let Some(p) = env::var_os("FINLARP_DB") {
@@ -131,7 +133,7 @@ fn build_screen(
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
         candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, godel, home,
-        intraday, menu, notes, pick, portfolio, search, universe, video,
+        intraday, menu, notes, pick, portfolio, search, sources, universe, video,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -153,6 +155,7 @@ fn build_screen(
         ("events", _) => Box::new(events::open(ctx, arg)?),
         ("diagrams", _) => Box::new(diagrams::open(ctx, arg)?),
         ("video", _) => Box::new(video::open(ctx, arg)?),
+        ("sources", _) => Box::new(sources::open(ctx, arg)?),
         _ => Box::new(chart::open(ctx, arg)?),
     })
 }

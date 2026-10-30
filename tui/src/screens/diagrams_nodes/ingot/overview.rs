@@ -26,7 +26,6 @@ const TRACK: i32 = 18;
 
 const STATIONS: [&str; 6] = ["PULLER", "CROP", "TEST", "GRIND OD", "NOTCH", "WIRE SAW"];
 
-
 const BEATS: &[Beat] = &[
     Beat::new("as-pulled: a rough rod with a cone on each end", BEAT_MS)
         .note(
@@ -188,7 +187,11 @@ fn wheel(c: &mut Canvas, cx: i32, cy: i32, rx: f32, ry: f32, t: &Time) {
 fn puller(c: &mut Canvas, x: i32, t: &Time) {
     let cx = x + SW / 2;
     c.boxed(x + 3, 9, 7, 4);
-    let melt = if (t.ms / 400).is_multiple_of(2) { '≈' } else { '~' };
+    let melt = if (t.ms / 400).is_multiple_of(2) {
+        '≈'
+    } else {
+        '~'
+    };
     c.hline(x + 4, 11, 5, melt);
     if t.beat == 0 {
         // the crystal grows up out of the melt as it is pulled
@@ -207,7 +210,12 @@ fn rod(c: &mut Canvas, t: &Time) {
         return;
     }
     let moved = ease_in_out((t.local / 0.25).clamp(0.0, 1.0));
-    let cx = lerp(station_mid(t.beat - 1) as f32, station_mid(t.beat) as f32, moved).round() as i32;
+    let cx = lerp(
+        station_mid(t.beat - 1) as f32,
+        station_mid(t.beat) as f32,
+        moved,
+    )
+    .round() as i32;
     let (x0, x1) = (cx - 5, cx + 5);
     for y in ROD_Y - 1..=ROD_Y + 1 {
         c.hline(x0, y, x1 - x0 + 1, '▓');
@@ -248,15 +256,22 @@ impl Scene for Ingot {
         // scrap bin under the crop station, slice tray under the saw
         titled_box(c, station_x(1), 20, SW, 3, "scrap");
         titled_box(c, station_x(5), 20, SW, 3, "slices");
-        c.text(X0, 25, "▓ ingot   ▒ wheel or saw   ═ track   ▼ station now   O scrap   ▪ slices");
-        c.text(X0, 27, "next: SLICE + POLISH (the slices go to lap, etch and polish)");
+        c.text(
+            X0,
+            25,
+            "▓ ingot   ▒ wheel or saw   ═ track   ▼ station now   O scrap   ▪ slices",
+        );
+        c.text(
+            X0,
+            27,
+            "next: SLICE + POLISH (the slices go to lap, etch and polish)",
+        );
     }
 
     fn zooms(&self) -> &[Zoom] {
         ZOOMS
     }
 }
-
 
 pub fn build() -> Box<dyn Scene> {
     Box::new(Ingot)

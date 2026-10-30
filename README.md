@@ -21,7 +21,7 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 | `canslim` | CANSLIM scorecard, each letter graded with its evidence |
 | `search` | Full-text search over 10-K/20-F text, earnings releases, guidance and patents |
 | `chart` | Price history |
-| `portfolio` | Your account: equity vs benchmark, drawdown, positions (E*TRADE; some tabs are placeholders) |
+| `portfolio` | Your account: equity vs benchmark, drawdown, positions, daily % change history (E*TRADE; some tabs are placeholders) |
 | `earnings` | Structured earnings report (proof of concept, MRVL only) |
 | `events` | AI-stock catalyst calendar (month / week / day). `T` adds the tweets that name a ticker, `f` filters them by ticker, Enter on a tweet opens it |
 | `universe` | AI universe heatmap: sectors and regions, weighted by price move over a chosen window |
@@ -96,9 +96,9 @@ Neovim, with lazy.nvim:
     { "<leader>vo", function() require("finlarp").switch() end, desc = "finlarp: switch open dashboards" },
     { "<leader>vc", function() require("finlarp").show_chart_current() end, desc = "finlarp: chart selected/focused symbol" },
     { "<leader>vt", function() require("finlarp").pick_transactions() end, desc = "finlarp: search transaction history" },
-    { "<leader>vh", function() require("finlarp").show_portfolio_history() end, desc = "finlarp: daily % change history chart" },
     { "<leader>vp", function() require("finlarp").show_portfolio_suite() end, desc = "finlarp: portfolio suite" },
     { "<leader>vD", function() require("finlarp").show_diagrams() end, desc = "finlarp: diagrams" },
+    { "<leader>vk", function() require("finlarp").show_sources() end, desc = "finlarp: data sources" },
     { "<leader>ve", function() require("finlarp").show_events() end, desc = "finlarp: catalyst calendar" },
     { "<leader>vC", function() require("finlarp").pick_canslim() end, desc = "finlarp: CANSLIM scorecard picker" },
   },
@@ -133,10 +133,10 @@ uv run python py/derive/dossier.py --all
 - **daily** (weekdays 18:30): every SEC puller in one lane (8-Ks, new 10-K/10-Q
   XBRL, earnings, segments, filing text, insiders, 13F, FSDS), Databento bars
   (only the days since the last pull, capped at $15), Yahoo profiles, new tweets
-  then sentiment, ROIC news for the universe, arXiv; then the search index and
+  then sentiment, arXiv; then the search index and
   every dossier.
 - **intraday** (every 30 min, weekdays 08:00-17:00 ET): new tweets then
-  sentiment, plus news and 8-Ks for the watchlist (E*TRADE positions plus
+  sentiment, plus 8-Ks for the watchlist (E*TRADE positions plus
   `data/watchlist.txt`).
 
 ```sh
@@ -153,7 +153,7 @@ rarely and stay manual.
 
 `py/agent/server.py` gives an agent read access to the same data over stdio:
 full-text search, company briefings, financial time series and read-only SQL, plus tweet sentiment
-(`sentiment`, `sentiment_leaders`, `price_targets`) and company news (`news`).
+(`sentiment`, `sentiment_leaders`, `price_targets`). Latest headlines come from Yahoo (`live_news`).
 
 ```sh
 claude mcp add finlarp -- "$PWD/.venv/bin/python" -m agent.server

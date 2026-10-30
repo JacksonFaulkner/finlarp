@@ -123,6 +123,38 @@ def cmd_history(symbol: str, range_: str, interval: str, max_age_hours: float | 
     return {"symbol": symbol, "points": points}
 
 
+def parse_top_holdings(payload: dict, fetched_on: str) -> list[dict]:
+    """quoteSummary topHoldings -> fund_holdings rows. Yahoo lists only the top 10, so these
+    weights are the fund's top-10 share, not the whole fund."""
+    result = (payload.get("quoteSummary") or {}).get("result") or []
+    if not result:
+        return []
+    holdings = (result[0].get("topHoldings") or {}).get("holdings") or []
+    rows = []
+    for h in holdings:
+        ticker = (h.get("symbol") or "").strip().upper()
+        weight = (h.get("holdingPercent") or {}).get("raw")
+        if not ticker or weight is None:
+            continue
+        rows.append({"ticker": ticker, "name": h.get("holdingName") or ticker, "weight": float(weight), "fetched_on": fetched_on})
+    return rows
+
+
+def cmd_holdings(fund: str) -> dict:
+    """Top holdings of one fund, stored in fund_holdings (replacing the last pull)."""
+    from datetime import date
+
+    session = new_session()
+    url = f"https://query2.finance.yahoo.com/v10/finance/quoteSummary/{fund}"
+    resp = session.get(url, params={"modules": "topHoldings", "crumb": get_crumb(session)}, timeout=15)
+    if resp.status_code == 401:
+        resp = session.get(url, params={"modules": "topHoldings", "crumb": get_crumb(session, refresh=True)}, timeout=15)
+    resp.raise_for_status()
+    rows = parse_top_holdings(resp.json(), date.today().isoformat())
+    stored = db.put_fund_holdings(fund, rows)
+    return {"fund": fund, "holdings": stored, "weight": round(sum(r["weight"] for r in rows), 4)}
+
+
 def _screen_request(session: requests.Session, crumb: str, body: dict) -> dict:
     resp = session.post(
         "https://query2.finance.yahoo.com/v1/finance/screener",
@@ -201,6 +233,8 @@ def main() -> None:
     members_p.add_argument("level", choices=["primary", "sub", "region"])
     members_p.add_argument("category")
     universe_sub.add_parser("reload")
+    holdings_p = universe_sub.add_parser("holdings", help="top holdings of each fund (default: every etf in the universe)")
+    holdings_p.add_argument("tickers", nargs="*")
 
     args = parser.parse_args()
 
@@ -217,6 +251,9 @@ def main() -> None:
             output = {"groups": db.universe_groups()}
         elif args.universe_cmd == "members":
             output = {"members": db.universe_members(args.level, args.category)}
+        elif args.universe_cmd == "holdings":
+            funds = args.tickers or db.etf_tickers()
+            output = {"funds": [cmd_holdings(f) for f in funds]}
         else:
             output = db.load_universe(force=True)
     else:

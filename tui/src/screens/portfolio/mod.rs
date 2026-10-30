@@ -1,20 +1,23 @@
-// Portfolio suite: one screen, six tabs (1-6).
+// Portfolio suite: one screen, seven tabs (1-7).
 //
 //   1 Overview   real: KPIs, equity vs benchmark, drawdown, movers, allocation, alerts
 //   2 Positions  real: weights pie + holdings table, linked by selection
-//   3 Exposure   mock skeleton
-//   4 Risk       mock skeleton
-//   5 Activity   mock skeleton
-//   6 Signals    mock skeleton
+//   3 Exposure   real: industry drift, concentration, correlation clusters
+//   4 Risk       real: volatility, beta, drawdown, concentration
+//   5 Activity   real: every cached transaction, newest first
+//   6 Signals    real: calendar of every cached trade (buys green, sells red)
+//   7 History    real: daily % change of the account, cursor and source bar (screens/chart.rs)
 //
 // Reads DuckDB only (see data.rs); the E*TRADE pull that fills it is the
 // `$` refresh in py/sources/etrade.py, so a stale cache is shown, not fetched.
 
-mod data;
+mod activity;
+pub(crate) mod data;
 mod holding;
 mod mock;
 mod overview;
 mod pie;
+mod risk;
 
 use std::io;
 use std::path::PathBuf;
@@ -28,30 +31,34 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Tabs};
 
 use crate::app::{Action, Ctx, Screen};
+use crate::screens::chart::ChartScreen;
+use crate::ui::calendar::{Calendar, Event, Tone};
 use crate::ui::help::{self, Key, key};
 use crate::ui::layout::{self, PaneOpts};
 use crate::ui::theme::Theme;
 use data::{Bench, Data, Range};
 
 const KEYS: &[Key] = &[
-    key("1-6", "tab"),
+    key("1-7", "tab"),
     key("?", "help"),
-    key("h/l", "cursor (overview) / holding (positions)"),
+    key("h/l", "cursor (overview, history) / holding (positions)"),
     key("j/k", "row (other tabs)"),
-    key("r", "range"),
+    key("r", "range (overview, history)"),
     key("b", "benchmark"),
+    key("[ ]", "activity: context either side of the trades"),
     key("m", "marker braille/octant"),
     key("R", "reload from DuckDB"),
     key("q", "close"),
 ];
 
-const TABS: [&str; 6] = [
+const TABS: [&str; 7] = [
     "1 Overview",
     "2 Positions",
     "3 Exposure",
     "4 Risk",
     "5 Activity",
     "6 Signals",
+    "7 History",
 ];
 
 const FLASH_FOR: Duration = Duration::from_millis(1500);
@@ -90,6 +97,8 @@ pub struct PortfolioScreen {
     range: Range,
     bench: Bench,
     marker: Marker,
+    /// Activity chart context per side, in twelfths of the width (see activity::MARGIN_DEFAULT).
+    margin: u8,
     /// Overview cursor: index into the range window; None = latest.
     cursor: Option<usize>,
     /// Row cursor for the table tabs.
@@ -106,6 +115,34 @@ pub struct PortfolioScreen {
     status_seen: String,
     sync: Sync,
     redraw: bool,
+    /// Signals tab: the calendar of every cached trade.
+    signals: Calendar,
+    /// History tab: the daily % change chart. Owns its own range and cursor.
+    history: ChartScreen,
+}
+
+/// Every cached trade as a calendar event: buys green, sells red, the rest plain.
+fn trade_events(txns: &[data::Txn]) -> Vec<Event> {
+    txns.iter()
+        .map(|x| {
+            let tone = match x.kind.as_str() {
+                "Bought" => Tone::Up,
+                "Sold" => Tone::Down,
+                _ => Tone::Plain,
+            };
+            Event {
+                date: x.date,
+                time: None,
+                label: format!("{} {} {:.0}", x.kind, x.symbol, x.qty),
+                detail: Some(format!(
+                    "{:.0} @ ${:.2}  cash {:+.0}",
+                    x.qty, x.price, x.amount
+                )),
+                tone,
+                link: None,
+            }
+        })
+        .collect()
 }
 
 /// `arg`: optional starting range ("1M".."ALL").
@@ -125,7 +162,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<PortfolioScreen> {
 
 impl PortfolioScreen {
     pub fn new(theme: Theme, db_path: PathBuf, data: Data) -> Self {
+        let history = ChartScreen::new(theme, db_path.clone(), Vec::new());
         Self {
+            history,
             db_path,
             theme,
             data,
@@ -134,6 +173,7 @@ impl PortfolioScreen {
             range: Range::ThreeM,
             bench: Bench::Spy,
             marker: Marker::Braille,
+            margin: activity::MARGIN_DEFAULT,
             cursor: None,
             row: 0,
             help: false,
@@ -145,13 +185,16 @@ impl PortfolioScreen {
             status_seen: String::new(),
             sync: Sync::Idle,
             redraw: false,
+            signals: Calendar::new(chrono::Local::now().date_naive(), Vec::new(), theme),
         }
     }
 
     /// Re-reads DuckDB, leaving the cursor where it is.
     fn refresh_data(&mut self) {
+        self.history.reload();
         match data::load(&self.db_path) {
             Ok(d) => {
+                self.signals.set_events(trade_events(&d.txns));
                 self.data = d;
                 self.load_err = None;
             }
@@ -203,9 +246,7 @@ impl PortfolioScreen {
                 let cash = data::totals(&self.data.history, &self.data.positions).cash;
                 pie::len(&self.data.positions, cash)
             }
-            3 => mock::RISK_LEN,
-            4 => mock::ACTIVITY_LEN,
-            5 => mock::SIGNALS_LEN,
+            4 => self.data.txns.len(),
             _ => 0,
         }
     }
@@ -258,9 +299,6 @@ impl PortfolioScreen {
             Sync::Idle => {}
             Sync::Refreshing(m) => spans.push(Span::styled(format!(" · ↻ {m}"), t.accent())),
             Sync::Failed(m) => spans.push(Span::styled(format!(" · ✗ {m}"), t.down())),
-        }
-        if self.tab > 1 {
-            spans.push(Span::styled(" · tabs 4-6 are mock data", t.accent()));
         }
         Line::from(spans)
     }
@@ -364,9 +402,18 @@ impl Screen for PortfolioScreen {
                     };
                     mock::exposure(frame, p.detail, &view);
                 }
-                3 => mock::risk(frame, p.detail, &t, self.row),
-                4 => mock::activity(frame, p.detail, &t, self.row),
-                _ => mock::signals(frame, p.detail, &t, self.row),
+                3 => risk::draw(frame, p.detail, &t, &self.data, self.range, self.bench),
+                4 => activity::draw(
+                    frame,
+                    p.detail,
+                    &t,
+                    &self.data,
+                    self.row,
+                    chrono::Utc::now(),
+                    self.margin,
+                ),
+                5 => self.signals.draw(frame, p.detail),
+                _ => self.history.draw_body(frame, p.detail),
             }
         }
         if self.help {
@@ -379,6 +426,26 @@ impl Screen for PortfolioScreen {
             self.help = false;
             return Action::None;
         }
+        // The Signals tab is a calendar: it takes its own keys, except the ones that leave the screen or switch tabs.
+        let tab_key = matches!(
+            key.code,
+            KeyCode::Char('q' | '?' | '1'..='7') | KeyCode::Tab | KeyCode::BackTab | KeyCode::Esc
+        );
+        if self.tab == 5 && !tab_key && self.signals.on_key(key) {
+            return Action::None;
+        }
+        // The History tab's source inspector takes every key until it closes.
+        if self.tab == 6 && self.history.inspecting() {
+            return self.history.on_key(key);
+        }
+        // `r` is the range here, as on the overview; `R` still reloads everything.
+        if self.tab == 6 && !tab_key && key.code != KeyCode::Char('R') {
+            if key.code == KeyCode::Char('r') {
+                self.history.cycle_range();
+                return Action::None;
+            }
+            return self.history.on_key(key);
+        }
         let switch = |s: &mut Self, tab: usize| {
             s.tab = tab;
             s.row = 0;
@@ -386,7 +453,7 @@ impl Screen for PortfolioScreen {
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
             KeyCode::Char('?') => self.help = true,
-            KeyCode::Char(c @ '1'..='6') => switch(self, (c as u8 - b'1') as usize),
+            KeyCode::Char(c @ '1'..='7') => switch(self, (c as u8 - b'1') as usize),
             KeyCode::Tab => switch(self, (self.tab + 1) % TABS.len()),
             KeyCode::BackTab => switch(self, (self.tab + TABS.len() - 1) % TABS.len()),
             KeyCode::Char('h') | KeyCode::Left if self.tab == 0 => self.move_cursor(-1),
@@ -404,6 +471,12 @@ impl Screen for PortfolioScreen {
                 self.cursor = None;
             }
             KeyCode::Char('b') if self.tab == 0 => self.bench = self.bench.next(),
+            KeyCode::Char(']') if self.tab == 4 => {
+                self.margin = (self.margin + 1).min(activity::MARGIN_MAX)
+            }
+            KeyCode::Char('[') if self.tab == 4 => {
+                self.margin = self.margin.saturating_sub(1).max(activity::MARGIN_MIN)
+            }
             KeyCode::Char('m') => {
                 self.marker = if self.marker == Marker::Braille {
                     Marker::Octant
@@ -467,6 +540,7 @@ impl Screen for PortfolioScreen {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::screens::chart;
     use chrono::NaiveDate;
     use data::{Position, Snapshot};
     use ratatui::Terminal;
@@ -521,7 +595,7 @@ mod tests {
     #[test]
     fn every_tab_renders_at_many_sizes_without_panicking() {
         for (w, h) in [(160, 50), (100, 30), (60, 20), (20, 6), (1, 1)] {
-            for tab in 0..6 {
+            for tab in 0..7 {
                 let mut s = screen(sample());
                 s.tab = tab;
                 render(&mut s, w, h);
@@ -548,10 +622,38 @@ mod tests {
     }
 
     #[test]
-    fn mock_tabs_are_labelled_mock() {
-        let mut s = screen(sample());
+    fn risk_activity_and_signals_render_real_data() {
+        let mut d = sample();
+        d.txns = vec![data::Txn {
+            id: "1".into(),
+            date: NaiveDate::from_ymd_opt(2026, 9, 12).unwrap(),
+            at: NaiveDate::from_ymd_opt(2026, 9, 12)
+                .unwrap()
+                .and_hms_opt(16, 0, 0)
+                .unwrap()
+                .and_utc(),
+            kind: "Sold".into(),
+            symbol: "AMD".into(),
+            qty: -50.0,
+            price: 162.0,
+            amount: 8100.0,
+        }];
+        let mut s = screen(d);
         s.tab = 3;
-        assert!(render(&mut s, 120, 30).contains("mock"));
+        let out = render(&mut s, 120, 30);
+        assert!(
+            out.contains("Volatility") && out.contains("Concentration"),
+            "{out}"
+        );
+        s.tab = 4;
+        let out = render(&mut s, 120, 30);
+        assert!(out.contains("Ledger") && out.contains("AMD"), "{out}");
+        s.tab = 5;
+        assert!(!render(&mut s, 120, 30).contains("mock"));
+        let events = trade_events(&s.data.txns);
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].tone, Tone::Down, "sells are red");
+        assert_eq!(events[0].label, "Sold AMD -50");
     }
 
     #[test]
@@ -561,6 +663,7 @@ mod tests {
         d.txns = vec![data::Txn {
             id: "1".into(),
             date: start,
+            at: start.and_hms_opt(16, 0, 0).unwrap().and_utc(),
             kind: "trade".into(),
             symbol: "NVDA".into(),
             qty: 10.0,
@@ -614,7 +717,27 @@ mod tests {
         assert_eq!(s.tab, 2);
         s.on_key(k('1'));
         s.on_key(KeyEvent::new(KeyCode::BackTab, KeyModifiers::SHIFT));
-        assert_eq!(s.tab, 5); // wraps
+        assert_eq!(s.tab, 6); // wraps
+    }
+
+    #[test]
+    fn history_tab_draws_the_chart_and_takes_its_keys() {
+        let start = NaiveDate::from_ymd_opt(2026, 1, 1).unwrap();
+        let history = (0..60)
+            .map(|i| chart::Snapshot {
+                date: (start + chrono::Duration::days(i)).to_string(),
+                total_value: 10_000.0 + i as f64 * 10.0,
+            })
+            .collect();
+        let mut s = screen(sample());
+        s.history = ChartScreen::new(Theme::default(), PathBuf::new(), history);
+        s.on_key(k('7'));
+        let out = render(&mut s, 120, 30);
+        assert!(!out.contains("no history yet"), "{out}");
+        assert!(out.contains("ALL"), "range tabs missing:\n{out}");
+        s.on_key(k('r'));
+        assert_eq!(s.history.range, chart::Range::SixM);
+        assert_eq!(s.range, Range::ThreeM, "overview range must not move");
     }
 
     #[test]

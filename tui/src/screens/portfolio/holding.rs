@@ -5,7 +5,7 @@
 
 use std::collections::HashMap;
 
-use chrono::NaiveDate;
+use chrono::{DateTime, Datelike, Local, NaiveDate, Utc};
 use ratatui::Frame;
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Color, Style};
@@ -342,8 +342,24 @@ pub fn spotlight(frame: &mut Frame, area: Rect, v: &TableView) {
     };
     frame.render_widget(Paragraph::new(lines), text);
     if chart.height >= 4 && chart.width >= 20 {
-        let s = series(v.closes, &p.symbol, p.price, v.today);
-        price_chart(frame, chart, t, e.color, p.price_paid, &h, &s, v.today);
+        let s: Vec<(DateTime<Utc>, f64)> = series(v.closes, &p.symbol, p.price, v.today)
+            .into_iter()
+            .map(|(d, c)| (close_utc(d), c))
+            .collect();
+        let (from, to) = default_window(&h, v.today);
+        price_chart(
+            frame,
+            chart,
+            t,
+            e.color,
+            p.price_paid,
+            &h,
+            &s,
+            (
+                from.and_hms_opt(0, 0, 0).unwrap_or_default().and_utc(),
+                close_utc(to),
+            ),
+        );
     }
 }
 
@@ -437,19 +453,9 @@ fn text_lines<'a>(
     lines
 }
 
-/// Price since CHART_DAYS ago (or the first buy, if earlier and within a
-/// year) with the average cost as a flat line and ▲/▼ at each trade.
-#[allow(clippy::too_many_arguments)]
-fn price_chart(
-    frame: &mut Frame,
-    area: Rect,
-    t: &Theme,
-    color: Color,
-    avg: f64,
-    h: &SymbolHistory,
-    s: &[(NaiveDate, f64)],
-    today: NaiveDate,
-) {
+/// The spotlight's window: CHART_DAYS back (or the first buy, if earlier and
+/// within a year), up to today. Returned as (from, to).
+pub(super) fn default_window(h: &SymbolHistory, today: NaiveDate) -> (NaiveDate, NaiveDate) {
     let mut from = today - chrono::Duration::days(CHART_DAYS);
     if let Some(f) = h
         .first
@@ -457,16 +463,57 @@ fn price_chart(
     {
         from = from.min(f - chrono::Duration::days(7));
     }
-    let s = since(s, from);
-    if s.len() < 2 {
+    (from, today)
+}
+
+/// A daily close as a time: 4pm New York (EDT in summer, EST otherwise; no tz database here).
+pub(super) fn close_utc(day: NaiveDate) -> DateTime<Utc> {
+    let offset = if (4..=10).contains(&day.month()) {
+        4
+    } else {
+        5
+    };
+    day.and_hms_opt(16 + offset, 0, 0)
+        .unwrap_or_default()
+        .and_utc()
+}
+
+/// Price over `window` (from, to) with the average cost as a flat line and
+/// ▲/▼ at each fill. The x axis is time, so fills sit where they happened:
+/// two fills minutes apart are minutes apart on the chart.
+#[allow(clippy::too_many_arguments)]
+pub(super) fn price_chart(
+    frame: &mut Frame,
+    area: Rect,
+    t: &Theme,
+    color: Color,
+    avg: f64,
+    h: &SymbolHistory,
+    s: &[(DateTime<Utc>, f64)],
+    window: (DateTime<Utc>, DateTime<Utc>),
+) {
+    let (from, to) = window;
+    let s: Vec<(DateTime<Utc>, f64)> = s
+        .iter()
+        .copied()
+        .filter(|(at, _)| (from..=to).contains(at))
+        .collect();
+    // Fills in the window, oldest first. A window with fills but no closes
+    // (a same-day round trip, say) still draws: the fills are the picture.
+    let trades: Vec<&Txn> = h
+        .recent
+        .iter()
+        .rev()
+        .filter(|tx| (from..=to).contains(&tx.at))
+        .collect();
+    if s.len() < 2 && trades.is_empty() {
         let msg = Paragraph::new("no price history cached").style(t.dim());
         frame.render_widget(msg, area.centered_vertically(Constraint::Length(1)));
         return;
     }
-    let x0 = s[0].0;
-    let x = |d: NaiveDate| (d - x0).num_days() as f64;
-    let xmax = x(s[s.len() - 1].0).max(1.0);
-    let trades: Vec<&Txn> = h.recent.iter().filter(|tx| tx.date >= x0).collect();
+    // Hours from the window's start.
+    let x = |at: DateTime<Utc>| (at - from).num_seconds() as f64 / 3600.0;
+    let xmax = x(to).max(1.0 / 60.0);
     let (mut lo, mut hi) = s
         .iter()
         .map(|(_, c)| *c)
@@ -494,9 +541,21 @@ fn price_chart(
         Constraint::Length(1),
     ]));
 
-    let line: Vec<(f64, f64)> = s.iter().map(|(d, c)| (x(*d), *c)).collect();
+    let line: Vec<(f64, f64)> = s.iter().map(|(at, c)| (x(*at), *c)).collect();
+    let fills: Vec<(f64, f64)> = trades.iter().map(|tx| (x(tx.at), tx.price)).collect();
     let cost = vec![(0.0, avg), (xmax, avg)];
     let mut datasets = Vec::new();
+    // Fill to fill, under the price: each entry joins its exit, so a round
+    // trip is one vertical move (a same-minute one is a straight line up or down).
+    if fills.len() >= 2 {
+        datasets.push(
+            Dataset::default()
+                .marker(Marker::Braille)
+                .graph_type(GraphType::Line)
+                .style(t.dim())
+                .data(&fills),
+        );
+    }
     if avg > 0.0 {
         datasets.push(
             Dataset::default()
@@ -506,13 +565,15 @@ fn price_chart(
                 .data(&cost),
         );
     }
-    datasets.push(
-        Dataset::default()
-            .marker(Marker::Braille)
-            .graph_type(GraphType::Line)
-            .style(Style::new().fg(color))
-            .data(&line),
-    );
+    if line.len() >= 2 {
+        datasets.push(
+            Dataset::default()
+                .marker(Marker::Braille)
+                .graph_type(GraphType::Line)
+                .style(Style::new().fg(color))
+                .data(&line),
+        );
+    }
     let chart = Chart::new(datasets)
         .style(t.base())
         .x_axis(Axis::default().bounds([0.0, xmax]))
@@ -520,18 +581,18 @@ fn price_chart(
         .legend_position(None);
     frame.render_widget(chart, plot);
 
-    // Trade markers drawn over the braille line, one cell each.
+    // Fill markers drawn over the braille line, one cell each.
     let buf = frame.buffer_mut();
     let to_cell = |xv: f64, yv: f64| {
         let cx = plot.x + ((xv / xmax) * f64::from(plot.width - 1)).round() as u16;
         let cy = plot.y + (((hi - yv) / (hi - lo)) * f64::from(plot.height - 1)).round() as u16;
         (cx.min(plot.right() - 1), cy.min(plot.bottom() - 1))
     };
-    // Trades landing in the same cell merge; glyph size is the cell's
+    // Fills landing in the same cell merge; glyph size is the cell's
     // dollar amount relative to the biggest one on the chart.
     let mut cells: Vec<((u16, u16, bool), f64)> = Vec::new();
     for tx in &trades {
-        let (cx, cy) = to_cell(x(tx.date), tx.price);
+        let (cx, cy) = to_cell(x(tx.at), tx.price);
         let key = (cx, cy, tx.qty >= 0.0);
         let amt = (tx.qty * tx.price).abs();
         match cells.iter_mut().find(|(k, _)| *k == key) {
@@ -560,8 +621,14 @@ fn price_chart(
     if plot.height > 1 {
         buf.set_string(ylab.x, plot.bottom() - 1, fmt(lo), t.dim());
     }
-    let first = s[0].0.format("%b %d").to_string();
-    let last = s[s.len() - 1].0.format("%b %d").to_string();
+    // Within a few days the labels carry the time: that's where the fills are.
+    let stamp = if to - from <= chrono::Duration::days(3) {
+        "%b %d %H:%M"
+    } else {
+        "%b %d"
+    };
+    let first = from.with_timezone(&Local).format(stamp).to_string();
+    let last = to.with_timezone(&Local).format(stamp).to_string();
     frame.render_widget(Paragraph::new(first).style(t.dim()), xlab);
     frame.render_widget(Paragraph::new(last).style(t.dim()).right_aligned(), xlab);
 }

@@ -56,6 +56,7 @@ TAXONOMY: dict[str, tuple[str, dict[str, tuple[str, str]]]] = {
         "hr_legal_vertical": ("HR, Legal & Info Services", "HR/payroll, legal, tax and professional information."),
         "it_services_consulting": ("IT Services & Consulting", "Systems integrators and IT outsourcers."),
         "defense_gov": ("Defense & Government", "Government/defense applications and services, including civilian public-sector software."),
+        "future_employer": ("Future Employer", "Personal watchlist of companies to work for; not an AI category."),
     }),
     "physical_ai": ("Physical AI & Industrial", {
         "robotics_automation": ("Robotics & Automation", "Industrial robots, machine vision and factory automation."),

@@ -13,13 +13,13 @@ use std::path::Path;
 use std::process::Command;
 use std::time::{Duration, Instant};
 
+use crate::ui::anim::Scene;
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
-use crate::ui::anim::Scene;
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 
 use super::diagrams_anim::{scene_for, section_anim};

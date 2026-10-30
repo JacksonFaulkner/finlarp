@@ -345,3 +345,46 @@ fn live_smoke() {
     }
     println!("{}", render(&mut s, 160, 48));
 }
+
+/// Forces a graphics protocol on the screen, the way `open` would after a terminal query.
+fn with_graphics(s: &mut Intraday) {
+    let mut picker =
+        ratatui_image::picker::Picker::from_fontsize(ratatui_image::FontSize::new(10, 20));
+    picker.set_protocol_type(ratatui_image::picker::ProtocolType::Kitty);
+    s.picker = Some(picker);
+    s.pictures = true;
+}
+
+#[test]
+fn tiles_draw_as_pictures_when_the_terminal_has_graphics() {
+    let (mut s, _tx) = loaded();
+    with_graphics(&mut s);
+    let out = render(&mut s, 160, 45);
+    assert!(out.contains("MKSI") && out.contains("APLD"));
+    assert!(
+        s.tiles.iter().all(|t| t.pic.is_some()),
+        "every tile sent a picture"
+    );
+    // a tick with no new bars keeps the last picture (same content, same key)
+    let before: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().0).collect();
+    render(&mut s, 160, 45);
+    let after: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().0).collect();
+    assert_eq!(before, after);
+    // g flips back to the ASCII tapes
+    press(&mut s, KeyCode::Char('g'));
+    assert!(!s.pictures);
+    assert!(render(&mut s, 160, 45).contains("MKSI"));
+}
+
+#[test]
+fn g_says_so_when_there_is_no_graphics_protocol() {
+    let (mut s, _tx) = loaded();
+    press(&mut s, KeyCode::Char('g'));
+    assert!(!s.pictures);
+    assert!(
+        s.flash
+            .as_deref()
+            .unwrap_or("")
+            .contains("no graphics protocol")
+    );
+}

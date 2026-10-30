@@ -120,7 +120,11 @@ fn station(c: &mut Canvas, i: usize, t: &Time) {
         2 => {
             // the scanner: a vertical bar sweeps back and forth across the station
             let span = (SW - 4) as f32;
-            let sweep = lerp(0.0, span, ease_in_out(0.5 + 0.5 * (t.ms as f32 / 1400.0).sin()));
+            let sweep = lerp(
+                0.0,
+                span,
+                ease_in_out(0.5 + 0.5 * (t.ms as f32 / 1400.0).sin()),
+            );
             c.vline(x + 2 + sweep.round() as i32, 4, 6, '│');
             c.text(x + 2, 11, "flatness, particles");
         }
@@ -142,7 +146,12 @@ fn disc(c: &mut Canvas, t: &Time) {
     let cx = if t.beat == 0 {
         station_mid(0)
     } else {
-        lerp(station_mid(t.beat - 1) as f32, station_mid(t.beat) as f32, moved).round() as i32
+        lerp(
+            station_mid(t.beat - 1) as f32,
+            station_mid(t.beat) as f32,
+            moved,
+        )
+        .round() as i32
     };
     let (x0, x1) = (cx - 6, cx + 6);
     for y in DISC_Y - 1..=DISC_Y + 1 {
@@ -152,7 +161,12 @@ fn disc(c: &mut Canvas, t: &Time) {
         // epi or SOI: the layer grows on the top face; SOI adds a buried oxide line
         1 => {
             let grow = (t.local.clamp(0.0, 1.0) * 3.0).ceil() as i32;
-            c.hline(x0, DISC_Y - 2, x1 - x0 + 1, if grow > 0 { '░' } else { ' ' });
+            c.hline(
+                x0,
+                DISC_Y - 2,
+                x1 - x0 + 1,
+                if grow > 0 { '░' } else { ' ' },
+            );
             c.hline(x0, DISC_Y, x1 - x0 + 1, '═');
         }
         // inspect: the sites the scan bar passes over light up
@@ -188,8 +202,16 @@ impl Scene for Blank {
         // a ship box under the pack station
         titled_box(c, station_x(3), 20, SW, 3, "ship");
         fill_disc(c, station_mid(0), 22, 2.0, 1.0, '▒');
-        c.text(X0, 25, "▓ disc   ░ sheen or layer   ═ track   ▼ station now   │ scan bar");
-        c.text(X0, 27, "next: WAFER SORT (the disc is inspected, then cut into dice)");
+        c.text(
+            X0,
+            25,
+            "▓ disc   ░ sheen or layer   ═ track   ▼ station now   │ scan bar",
+        );
+        c.text(
+            X0,
+            27,
+            "next: WAFER SORT (the disc is inspected, then cut into dice)",
+        );
     }
 
     fn zooms(&self) -> &[Zoom] {

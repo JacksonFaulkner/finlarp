@@ -659,15 +659,6 @@ function M.close(name)
   require("finlarp.ui.window").close(name)
 end
 
---- Opens the daily-% portfolio history line chart — a real ratatui TUI
---- binary (tui/), run inside a floating :terminal so it's
---- genuinely rendered by the terminal, not an image. It reads DuckDB
---- directly (no JSON handoff) for the day_change_pct/total_value series
---- that py/sources/etrade.py's cmd_positions upserts on every live `$` refresh.
-function M.show_portfolio_history()
-  require("finlarp.ui.tui").show()
-end
-
 -- Portfolio suite freshness: what is worth re-pulling on open.
 local POSITIONS_FRESH_S = 5 * 60
 local TRANSACTIONS_FRESH_S = 60 * 60
@@ -836,7 +827,11 @@ end
 --- Each TSV row is start, end, text (seconds); rows show as [mm:ss] text.
 --- @param path string|nil defaults to docs/transcripts next to this plugin
 function M.show_transcript(path)
-  path = path or (vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h:h") .. "/docs/transcripts/siltronic-wafer-production.tsv")
+  path = path
+    or (
+      vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h:h")
+      .. "/docs/transcripts/siltronic-wafer-production.tsv"
+    )
   local rows = {}
   for line in io.lines(path) do
     local start, _, text = line:match("^([%d%.]+)\t([%d%.]+)\t(.*)$")
@@ -859,6 +854,11 @@ function M.show_diagrams(name)
   require("finlarp.ui.tui").open_screen("diagrams", name, { title = " diagrams " })
 end
 
+--- Data sources TUI: every upstream the pullers read, with its endpoint, key and schedule.
+function M.show_sources()
+  require("finlarp.ui.tui").open_screen("sources", nil, { title = " sources " })
+end
+
 --- Catalyst calendar TUI (month / week / day). Inside it, T shows the tweets that name a universe ticker (one line per
 --- day; the day view lists them) and f filters them by ticker.
 --- @param arg string|nil "month" | "week" | "day", a YYYY-MM-DD start date, "tweets" to open with the tweet layer on,
@@ -867,7 +867,7 @@ function M.show_events(arg)
   require("finlarp.ui.tui").open_screen("events", arg, { title = " events " })
 end
 
---- Candlestick chart (mock bars for now). Opens for the focused tile's symbol, else the screen's default ticker.
+--- Candlestick chart (daily bars_1d). Opens for the focused tile's symbol, else the screen's default ticker.
 function M.show_candles_current()
   local symbols = require("finlarp.ui.window").selected_symbols()
   require("finlarp.ui.tui").open_screen("candles", symbols[1], { title = " candles " })

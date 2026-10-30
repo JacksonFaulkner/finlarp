@@ -143,7 +143,11 @@ impl Scene for Section {
 
     fn draw(&self, c: &mut Canvas, t: &Time) {
         let (_w, _h) = dims(c);
-        c.text(2, 1, "wafer thickness by diameter (um), Wikipedia standards table");
+        c.text(
+            2,
+            1,
+            "wafer thickness by diameter (um), Wikipedia standards table",
+        );
         // which rung is highlighted this beat: 300 mm in beat 1, 450 mm in beat 2
         let hot: Option<usize> = match t.beat {
             1 => Some(3),
@@ -164,7 +168,11 @@ impl Scene for Section {
             }
         }
         // legend under the ladder
-        c.text(2, TOP_Y + ROW_H * LADDER.len() as i32 + 1, "bar length: longest bar = 40 cells");
+        c.text(
+            2,
+            TOP_Y + ROW_H * LADDER.len() as i32 + 1,
+            "bar length: longest bar = 40 cells",
+        );
     }
 }
 

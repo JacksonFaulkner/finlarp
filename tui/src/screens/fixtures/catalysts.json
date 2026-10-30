@@ -128,6 +128,38 @@
     "est": false
   },
   {
+    "date": "2026-10-22",
+    "time": null,
+    "label": "HON Q3",
+    "detail": "Confirmed by 8-K (Oct 22, pre-market). FY26 sales guide raised to $20.0-20.1B, adj EPS $8.40-8.45. Already out.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-10-22",
+    "time": "16:05",
+    "label": "MXL Q3",
+    "detail": "Confirmed by company (Oct 1 notice): after close Oct 22, call 4:30pm ET. Q3 rev $218.1M (+72% y/y) in a search snippet, unverified.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-22",
+    "time": "17:00",
+    "label": "SSNC Q3",
+    "detail": "Confirmed by company release: after close, 5pm ET call. Guide adj EPS $1.73-1.79; EW consensus $1.59 (basis unclear).",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-22",
+    "time": "17:00",
+    "label": "APPF Q3",
+    "detail": "Confirmed by company (Oct 8): after close, 5pm ET call. FY26 rev guide raised to $1.122-1.127B in the Oct 22 8-K.",
+    "tone": "bull",
+    "est": false
+  },
+  {
     "date": "2026-10-27",
     "time": null,
     "label": "SK Hynix Q3",
@@ -158,6 +190,30 @@
     "detail": "TER: AI compute test demand. Samsung: HBM4 qualification at Nvidia, memory pricing.",
     "tone": "neutral",
     "est": true
+  },
+  {
+    "date": "2026-10-27",
+    "time": null,
+    "label": "AMT Q3 2026",
+    "detail": "Confirmed by company (Sep 29 release). Results 7:00am ET, call 8:30am ET. Consensus not retrieved.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-27",
+    "time": "16:30",
+    "label": "MANH Q3",
+    "detail": "Confirmed by company release: after close, 4:30pm ET call. No guide or consensus figures retrieved.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-27",
+    "time": "16:45",
+    "label": "UCTT Q3",
+    "detail": "Confirmed by company (Oct 5): after close, call 1:45pm PT. Q3 guide rev $700-750M, non-GAAP EPS $0.83-1.03.",
+    "tone": "neut",
+    "est": false
   },
   {
     "date": "2026-10-28",
@@ -200,6 +256,46 @@
     "est": false
   },
   {
+    "date": "2026-10-28",
+    "time": null,
+    "label": "PSN Q3",
+    "detail": "Confirmed by company (Oct 6 release): pre-market, call 8:00am ET. Some calendars show Nov 4-5 as estimates.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-28",
+    "time": "16:05",
+    "label": "FLS Q3",
+    "detail": "Company-announced Q3 release after close Oct 28. Call time and guide not retrieved. Earnings Whispers shows Oct 29.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "16:05",
+    "label": "FTNT Q3 2026",
+    "detail": "Confirmed by company (Oct 2 notice), call 4:30pm ET. Q3 guide rev $2.01-2.10B, non-GAAP EPS $0.83-0.87.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-28",
+    "time": null,
+    "label": "MOD FQ2 FY27",
+    "detail": "Aggregator only, no company notice. Sources conflict (Oct 26/27/28). Q1 reported Jul 29 after close. EPS est $1.50-1.77.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-10-28",
+    "time": "16:05",
+    "label": "TDOC Q3 2026",
+    "detail": "Confirmed by company (Oct 14 release), after close, call 5pm ET. Q3 guide adj EPS loss $0.20-0.30, rev $569-609M, below estimates.",
+    "tone": "bear",
+    "est": false
+  },
+  {
     "date": "2026-10-29",
     "time": null,
     "label": "CEG + VST + TLN Q3",
@@ -232,12 +328,76 @@
     "est": false
   },
   {
+    "date": "2026-10-29",
+    "time": null,
+    "label": "OMCL Q3",
+    "detail": "Company release (Oct 8): pre-market, call 8:30am ET. Earnings Whispers and AJ Bell show Oct 30 (conflict).",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-29",
+    "time": null,
+    "label": "CARR Q3",
+    "detail": "Confirmed by Carrier Oct 8 advisory: pre-market release, call 7:30am ET. Consensus not retrieved.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-10-29",
+    "time": "16:05",
+    "label": "DLR Q3 2026",
+    "detail": "Confirmed by company (Oct 1 release), after close, call 5pm ET. Consensus non-GAAP EPS $1.98, rev $1.75B (Benzinga).",
+    "tone": "neut",
+    "est": false
+  },
+  {
     "date": "2026-10-31",
     "time": null,
     "label": "Anthropic round >$900B",
     "detail": "Reports of a $30B+ round at a pre-money above $900B, passing OpenAI's $852B. Sources conflict.",
     "tone": "bull",
     "est": true
+  },
+  {
+    "date": "2026-11-02",
+    "time": "10:00",
+    "label": "TSEM Q3",
+    "detail": "Confirmed in Oct 13 6-K. Q3 guide rev $520M +/-5%; Q2 record $460M (+24%). Q4 guide due.",
+    "tone": "bull",
+    "est": false
+  },
+  {
+    "date": "2026-11-02",
+    "time": null,
+    "label": "CHKP Q3 2026",
+    "detail": "Aggregator date, not company-verified (Bullstory says pre-open; TipRanks shows Nov 3). Q3 EPS guide $2.43-2.53.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-02",
+    "time": null,
+    "label": "TEM Q3 2026",
+    "detail": "Confirmed by company (Oct 15 release), pre-market, call 8:45am ET. Consensus not retrieved.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-02",
+    "time": "17:00",
+    "label": "AEHR FQ1",
+    "detail": "Confirmed by company: fiscal Q1 FY27 (qtr ended Sep 25), after close, 5pm ET call. FY end moved from May to June.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-02",
+    "time": null,
+    "label": "ICHR Q3",
+    "detail": "Confirmed by company notice: release just after 1pm PT, same-day call; call time not retrieved. Q3 guide rev $315-345M.",
+    "tone": "neut",
+    "est": false
   },
   {
     "date": "2026-11-03",
@@ -272,12 +432,100 @@
     "est": false
   },
   {
+    "date": "2026-11-03",
+    "time": "14:00",
+    "label": "NVTS Q3",
+    "detail": "Confirmed by Oct 13 release; call 2pm PT. Q3 guide rev $13-14M (Jul 27). Earnings Whispers shows Nov 9.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-03",
+    "time": "16:30",
+    "label": "SPT Q3",
+    "detail": "Confirmed by company (Oct 5): after close, 4:30pm ET call. Earnings Whispers revenue estimate $123.8M.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-03",
+    "time": "16:30",
+    "label": "MQ Q3",
+    "detail": "Confirmed by company (Sep 25): after close, 4:30pm ET call. Aggregator consensus ~$0.07 EPS, ~$175M revenue.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-03",
+    "time": null,
+    "label": "PAY Q3",
+    "detail": "Calendar projection (AJ Bell), not company-confirmed. Q2 reported Aug 3 with a 5pm ET call; time unclear in source.",
+    "tone": "neut",
+    "est": true
+  },
+  {
     "date": "2026-11-04",
     "time": "16:05",
     "label": "QCOM + ARM + SMCI",
     "detail": "QCOM: AI200 data-center narrative. ARM: royalty growth. SMCI: rack-scale revenue and margin recovery.",
     "tone": "risk",
     "est": true
+  },
+  {
+    "date": "2026-11-04",
+    "time": null,
+    "label": "INVZ Q3",
+    "detail": "Aggregator only (Earnings Whispers: Nov 4 pre-mkt; Stocktwits: Nov 11). Consensus EPS -$0.07, rev $18-19M.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-04",
+    "time": "16:05",
+    "label": "WTS Q3",
+    "detail": "Confirmed by Business Wire Oct 7: release after close Nov 4, call Nov 5 9am ET. Consensus EPS ~$3.15.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-04",
+    "time": "16:05",
+    "label": "RPD Q3 2026",
+    "detail": "Confirmed by company (Oct 14 release), after close, call 4:30pm ET. Q3 non-GAAP EPS guide $0.44-0.47.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-04",
+    "time": null,
+    "label": "RXRX Q3 2026",
+    "detail": "Projection (Right Trader; GuruFocus shows Nov 5). Q3 consensus EPS -$0.23, rev $12.1-13.1M (sources differ).",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-04",
+    "time": null,
+    "label": "SDGR Q3 2026",
+    "detail": "Estimate, sources conflict (Nov 4 Unusual Whales, Nov 9 Earnings Whispers). Last year reported Nov 5 after close.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-04",
+    "time": "16:30",
+    "label": "GTM Q3",
+    "detail": "Confirmed by company (Oct 14): after close, 4:30pm ET call. Q3 guide rev $298-301M, adj EPS $0.28-0.29.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-04",
+    "time": null,
+    "label": "MKSI Q3",
+    "detail": "Confirmed by company (Oct 12): release after close Nov 4, call Nov 5 at 8:30am ET. No guide figures retrieved.",
+    "tone": "neut",
+    "est": false
   },
   {
     "date": "2026-11-05",
@@ -296,6 +544,62 @@
     "est": true
   },
   {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "XYZ Q3",
+    "detail": "Aggregator only (Benzinga, TipRanks); AJ Bell lists Nov 6. TipRanks says after close. No Block IR confirmation.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "ACLS Q3",
+    "detail": "Estimated by Earnings Whispers (pre-market); a tracker says Nov 3. Not company-confirmed. Q3 guide rev $230M, EPS $1.11.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "ITT Q3",
+    "detail": "Estimated by Earnings Whispers (pre-market 7:30am ET); Right Trader projects Nov 4. Not company-confirmed.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "NTRA Q3 2026",
+    "detail": "Projection (NextEarningsDate); Earnings Whispers shows Nov 5 or Nov 9. Q3 consensus EPS -$0.10. FY26 rev guide $2.85-2.91B.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-11-05",
+    "time": "17:00",
+    "label": "FROG Q3",
+    "detail": "Confirmed by company (Oct 14): after close, 5pm ET call. Q3 guide rev $164-166M, EPS $0.22-0.24.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "BSY Q3",
+    "detail": "Confirmed by company (Oct 7). Pre-market release, webcast 8:15am ET. No guide or consensus retrieved.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-11-05",
+    "time": null,
+    "label": "DT FQ2",
+    "detail": "Estimated from AJ Bell calendar, not company-confirmed. Q2 FY26 reported Nov 5, 2025, pre-market.",
+    "tone": "neut",
+    "est": true
+  },
+  {
     "date": "2026-11-10",
     "time": null,
     "label": "US-China truce",
@@ -310,6 +614,22 @@
     "detail": "Consensus EPS -$1.57. Capex and debt funding are the swing factors.",
     "tone": "risk",
     "est": true
+  },
+  {
+    "date": "2026-11-10",
+    "time": null,
+    "label": "China rare-earth pause",
+    "detail": "Suspended Oct-2025 rare-earth controls expire Nov 10 (MOFCOM Ann. 70/2025). No extension found. Overlaps the truce row.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2026-11-11",
+    "time": null,
+    "label": "MSCI Nov review ann.",
+    "detail": "MSCI IR dates: Nov 2026 semi-annual review announced Nov 11. Official MSCI notice.",
+    "tone": "neut",
+    "est": false
   },
   {
     "date": "2026-11-12",
@@ -336,11 +656,27 @@
     "est": false
   },
   {
+    "date": "2026-11-17",
+    "time": "16:05",
+    "label": "KLIC FQ4",
+    "detail": "Estimated: Earnings Whispers lists Nov 17 after close; other snapshots Nov 4 and Nov 18. Q4 guide rev $355-395M.",
+    "tone": "neut",
+    "est": true
+  },
+  {
     "date": "2026-11-18",
     "time": "16:05",
     "label": "NVDA FQ3",
     "detail": "Date estimated from last year. Vera Rubin supply and hyperscale re-acceleration; no China data center compute in guide.",
     "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-11-24",
+    "time": null,
+    "label": "ZS FQ1 FY27",
+    "detail": "Projected from past report dates, not confirmed. FQ1 guide rev $935-939M (~19% growth), non-GAAP EPS $1.15-1.16.",
+    "tone": "neut",
     "est": true
   },
   {
@@ -376,6 +712,22 @@
     "est": false
   },
   {
+    "date": "2026-12-01",
+    "time": null,
+    "label": "MSCI Nov review eff.",
+    "detail": "MSCI Nov 2026 semi-annual review changes take effect. Official MSCI IR dates notice.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2026-12-01",
+    "time": null,
+    "label": "CRWD FQ3 FY27",
+    "detail": "Countdown-site estimate, not company-confirmed. FQ2 FY27 reported Aug 26 after close. Date notice usually ~3 weeks ahead.",
+    "tone": "neut",
+    "est": true
+  },
+  {
     "date": "2026-12-02",
     "time": null,
     "label": "EU AI Act labelling + NCII ban",
@@ -408,6 +760,14 @@
     "est": false
   },
   {
+    "date": "2026-12-09",
+    "time": "14:00",
+    "label": "FOMC decision",
+    "detail": "Dec 8-9 meeting with SEP and dot plot. Fed calendar via Chicago Fed. Time from standard schedule.",
+    "tone": "risk",
+    "est": true
+  },
+  {
     "date": "2026-12-10",
     "time": "16:05",
     "label": "ORCL FQ2",
@@ -424,11 +784,35 @@
     "est": true
   },
   {
+    "date": "2026-12-11",
+    "time": null,
+    "label": "Gov't funding deadline",
+    "detail": "Stopgap signed Sep 2 funds agencies to Dec 11. Extension into early 2027 discussed, not enacted (Nextgov).",
+    "tone": "risk",
+    "est": true
+  },
+  {
     "date": "2026-12-17",
     "time": "16:05",
     "label": "MU FQ1",
     "detail": "HBM4 ramp and DRAM pricing.",
     "tone": "neutral",
+    "est": true
+  },
+  {
+    "date": "2026-12-18",
+    "time": null,
+    "label": "Quad witch",
+    "detail": "December quarterly index/options expiry. Date from Wikipedia list; not confirmed by CBOE.",
+    "tone": "neut",
+    "est": true
+  },
+  {
+    "date": "2026-12-18",
+    "time": null,
+    "label": "NDX recon",
+    "detail": "Nasdaq-100 annual reconstitution timed to Dec quad-witch expiry. 2026 effective date unconfirmed.",
+    "tone": "neut",
     "est": true
   },
   {
@@ -448,11 +832,51 @@
     "est": false
   },
   {
+    "date": "2027-01-27",
+    "time": "14:00",
+    "label": "FOMC decision",
+    "detail": "Jan 26-27 meeting per 2027 Fed schedule (MNI). One source lists Jan 27 only. Time from standard schedule.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2027-02-14",
+    "time": null,
+    "label": "ISSCC 2027",
+    "detail": "Feb 14-18, San Francisco. AI accelerator, HBM and memory circuit papers. Organizer site.",
+    "tone": "neut",
+    "est": false
+  },
+  {
+    "date": "2027-03-01",
+    "time": null,
+    "label": "MWC Barcelona 2027",
+    "detail": "Mar 1-4, Barcelona. Telco, edge AI and networking infrastructure news. GSMA organizer page.",
+    "tone": "neut",
+    "est": false
+  },
+  {
     "date": "2027-03-15",
     "time": null,
     "label": "Nvidia GTC 2027",
     "detail": "Mar 14-18, San Jose. Keynote day approximate.",
     "tone": "bull",
+    "est": true
+  },
+  {
+    "date": "2027-03-17",
+    "time": "14:00",
+    "label": "FOMC decision",
+    "detail": "Mar 16-17 meeting with SEP and dot plot, per 2027 Fed schedule (MNI). Tentative until confirmed.",
+    "tone": "risk",
+    "est": true
+  },
+  {
+    "date": "2027-03-19",
+    "time": null,
+    "label": "Quad witch",
+    "detail": "March quarterly index/options expiry. Date from Wikipedia list; not confirmed by CBOE.",
+    "tone": "neut",
     "est": true
   }
 ]

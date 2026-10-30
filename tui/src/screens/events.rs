@@ -1,10 +1,12 @@
 // Catalyst calendar (`fl events`): the calendar component (ui/calendar.rs)
-// over dated AI-stock catalysts from fixtures/catalysts.json. Dates marked
-// `est` in the file are unconfirmed (estimated from past cadence) and render
-// with a leading `~`.
+// over catalysts generated from the local filings (py/derive/catalyst_calendar.py):
+// earnings release dates, projected next reports (`est`, rendered with a
+// leading `~`) and high-signal 8-K items.
 //
 // Enter on a day opens its day view (the event list); Enter on an event that
 // has a page in fixtures/catalyst_pages.json opens it (screens/catalyst_page).
+// Generated events carry no pages yet, so that step only fires for a page
+// whose (date, label) still matches.
 //
 // Tweet layer (`T`): every tweet that names a universe ticker, from
 // py/derive/tweet_calendar.py. Month and week cells show one line per day
@@ -68,34 +70,40 @@ const EXTRA_KEYS: &[Key] = &[
 
 #[derive(Deserialize)]
 struct Catalyst {
-    date: String,
-    time: Option<String>,
-    label: String,
-    detail: Option<String>,
+    d: String,
+    t: Option<String>,
+    l: String,
+    x: Option<String>,
     tone: String,
+    #[serde(default)]
     est: bool,
+    u: Option<String>,
 }
 
-fn catalysts() -> Vec<Event> {
+/// Catalysts from py/derive/catalyst_calendar.py: earnings dates and high-signal 8-K items from the local filings.
+fn load_catalysts() -> Result<Vec<Event>, String> {
+    parse_catalysts(&pyrun::run_script("py/derive/catalyst_calendar.py", &[])?)
+}
+
+fn parse_catalysts(json: &str) -> Result<Vec<Event>, String> {
     let raw: Vec<Catalyst> =
-        serde_json::from_str(include_str!("fixtures/catalysts.json")).expect("catalysts.json");
+        serde_json::from_str(json).map_err(|e| format!("catalyst_calendar: {e}"))?;
     raw.into_iter()
-        .map(|c| Event {
-            date: NaiveDate::parse_from_str(&c.date, "%Y-%m-%d").expect("catalyst date"),
-            time: c.time,
-            label: if c.est {
-                format!("~{}", c.label)
-            } else {
-                c.label
-            },
-            detail: c.detail,
-            tone: match c.tone.as_str() {
-                "bull" => Tone::Up,
-                "bear" => Tone::Down,
-                "risk" => Tone::Accent,
-                _ => Tone::Plain,
-            },
-            link: None,
+        .map(|c| {
+            Ok(Event {
+                date: NaiveDate::parse_from_str(&c.d, "%Y-%m-%d")
+                    .map_err(|e| format!("catalyst date {}: {e}", c.d))?,
+                time: c.t,
+                label: if c.est { format!("~{}", c.l) } else { c.l },
+                detail: c.x,
+                tone: match c.tone.as_str() {
+                    "bull" => Tone::Up,
+                    "bear" => Tone::Down,
+                    "risk" => Tone::Accent,
+                    _ => Tone::Plain,
+                },
+                link: c.u,
+            })
         })
         .collect()
 }
@@ -309,7 +317,12 @@ pub struct Events {
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Events> {
     let today = chrono::Local::now().date_naive();
-    open_with(ctx, arg.as_deref(), today, catalysts())
+    open_with(
+        ctx,
+        arg.as_deref(),
+        today,
+        load_catalysts().map_err(io::Error::other)?,
+    )
 }
 
 fn open_with(
@@ -607,10 +620,24 @@ mod tests {
     }
 
     #[test]
-    fn catalysts_load_and_enter_walks_day_then_page() {
-        let ev = catalysts();
-        assert!(ev.len() >= 45);
-        assert!(ev.iter().any(|e| e.label.starts_with('~')));
+    fn catalysts_parse_and_enter_opens_the_day_view() {
+        let json = r#"[
+            {"d":"2026-11-03","t":null,"l":"MRVL earnings","x":"Marvell","tone":"neutral","est":false,"u":null},
+            {"d":"2026-11-03","t":"16:05","l":"NVDA 8-K 2.05: Costs","x":null,"tone":"risk","est":false,
+             "u":"https://example.com/8k"},
+            {"d":"2026-11-03","t":null,"l":"AMD earnings","x":"projected","tone":"neutral","est":true,"u":null}
+        ]"#;
+        let ev = parse_catalysts(json).unwrap();
+        assert_eq!(ev.len(), 3);
+        assert!(
+            ev.iter()
+                .any(|e| e.label == "~AMD earnings" && e.tone == Tone::Plain)
+        );
+        assert!(
+            ev.iter()
+                .any(|e| e.tone == Tone::Accent
+                    && e.link.as_deref() == Some("https://example.com/8k"))
+        );
         let mut s = open_with(&ctx(), Some("2026-11-03"), today(), ev).unwrap();
         let enter = |s: &mut Events| {
             s.on_key(KeyEvent {
@@ -620,27 +647,21 @@ mod tests {
                 state: KeyEventState::NONE,
             })
         };
-        // month view: Enter drops into the day view, no page yet
         enter(&mut s);
         assert_eq!(s.cal.view(), View::Day);
+        assert_eq!(s.cal.events_on(s.cal.cursor()).len(), 3);
+        // generated events have no catalyst page, so Enter never opens one
         assert!(s.page.is_none());
-        // day view lists AMD, ANET, PLTR, ...: select the first event with a page
-        let n = s.cal.events_on(s.cal.cursor()).len();
-        assert!(n >= 3);
-        let mut opened = false;
-        for _ in 0..n {
-            enter(&mut s);
-            if s.page.is_some() {
-                opened = true;
-                break;
-            }
-            press(&mut s, 'j');
-        }
-        assert!(opened);
-        // q closes the page, not the screen
-        assert_eq!(press(&mut s, 'q'), Action::None);
-        assert!(s.page.is_none());
-        assert_eq!(press(&mut s, 'q'), Action::Quit);
+    }
+
+    #[test]
+    fn catalyst_json_with_a_bad_date_is_an_error() {
+        assert!(
+            parse_catalysts(
+                r#"[{"d":"nope","t":null,"l":"x","x":null,"tone":"neutral","est":false,"u":null}]"#
+            )
+            .is_err()
+        );
     }
 
     #[test]

@@ -543,6 +543,16 @@ def _ensure_universe_tables(con: duckdb.DuckDBPyConnection) -> None:
         )
     """)
     con.execute("""
+        CREATE TABLE IF NOT EXISTS fund_holdings (
+            fund VARCHAR,
+            ticker VARCHAR,
+            name VARCHAR,
+            weight DOUBLE,
+            fetched_on VARCHAR,
+            PRIMARY KEY (fund, ticker)
+        )
+    """)
+    con.execute("""
         CREATE TABLE IF NOT EXISTS ai_taxonomy (
             sub_category VARCHAR PRIMARY KEY,
             primary_category VARCHAR,
@@ -643,7 +653,46 @@ def _write_stock(con: duckdb.DuckDBPyConnection, s: Stock) -> None:
     )
     rows = [[s.ticker, "primary", c, w] for c, w in s.primary.items()]
     rows += [[s.ticker, "sub", c, w] for c, w in s.subs.items()]
-    con.executemany("INSERT INTO ai_universe_category VALUES (?,?,?,?)", rows)
+    if rows:  # funds have no buckets; duckdb rejects an empty executemany
+        con.executemany("INSERT INTO ai_universe_category VALUES (?,?,?,?)", rows)
+
+
+def etf_tickers() -> list[str]:
+    """Funds in the universe (kind = etf) that are still eligible."""
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        return [r[0] for r in con.execute("SELECT ticker FROM ai_universe WHERE kind = 'etf' AND eligible IS DISTINCT FROM false ORDER BY ticker").fetchall()]
+    finally:
+        con.close()
+
+
+def fund_holding_tickers() -> list[str]:
+    """Every ticker any fund holds (for the bars pull)."""
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        return [r[0] for r in con.execute("SELECT DISTINCT ticker FROM fund_holdings ORDER BY ticker").fetchall()]
+    finally:
+        con.close()
+
+
+def put_fund_holdings(fund: str, rows: list[dict]) -> int:
+    """Replace one fund's holdings. Each row: ticker, name, weight (fraction of the fund), fetched_on."""
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        con.execute("BEGIN")
+        con.execute("DELETE FROM fund_holdings WHERE fund = ?", [fund])
+        if rows:
+            con.executemany(
+                "INSERT INTO fund_holdings VALUES (?,?,?,?,?)",
+                [(fund, r["ticker"], r["name"], r["weight"], r["fetched_on"]) for r in rows],
+            )
+        con.execute("COMMIT")
+        return len(rows)
+    finally:
+        con.close()
 
 
 def taxonomy() -> dict[str, list[str]]:

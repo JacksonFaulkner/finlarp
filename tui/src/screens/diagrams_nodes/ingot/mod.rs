@@ -4,6 +4,7 @@ use super::Node;
 
 mod overview;
 mod sec_1;
+mod sec_10;
 mod sec_2;
 mod sec_3;
 mod sec_4;
@@ -12,7 +13,6 @@ mod sec_6;
 mod sec_7;
 mod sec_8;
 mod sec_9;
-mod sec_10;
 mod zoom;
 
 pub const NODE: Node = Node {

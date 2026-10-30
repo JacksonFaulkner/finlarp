@@ -40,7 +40,7 @@ const NEW_DAYS: i64 = 30;
 const LATEST_MAX: usize = 40;
 /// Chart-heavy sections drawn as a grid (two blocks per row on a normal
 /// popup); list-like sections stay in the single-column BlockView.
-const GRID_SECTIONS: &[&str] = &["revenue", "patents"];
+const GRID_SECTIONS: &[&str] = &["price", "financials", "positioning", "patents"];
 
 const NAV_KEYS: &[Key] = &[
     key("^p", "command palette"),
@@ -972,8 +972,14 @@ mod tests {
     #[test]
     fn source_bar_follows_selection() {
         let mut s = screen();
-        press(&mut s, KeyCode::Char('J')); // Latest -> Events
-        assert_eq!(s.sections[s.selected()].id, "events");
+        // news opens with a table, so its first row carries a source
+        let news = s
+            .sections
+            .iter()
+            .position(|x| x.id == "news")
+            .expect("news section");
+        s.select_section(news);
+        assert_eq!(s.sections[s.selected()].id, "news");
         press(&mut s, KeyCode::Char('l'));
         press(&mut s, KeyCode::Char('j'));
         let want = s
@@ -982,7 +988,7 @@ mod tests {
             .expect("row has a source")
             .label
             .clone();
-        let Block::Table { rows, .. } = &s.sections[1].blocks[0] else {
+        let Block::Table { rows, .. } = &s.sections[news].blocks[0] else {
             panic!()
         };
         assert_eq!(
@@ -1029,24 +1035,25 @@ mod tests {
     }
 
     #[test]
-    fn revenue_is_a_two_column_grid() {
+    fn financials_is_a_two_column_grid() {
         let mut s = screen();
-        let revenue = s
+        let financials = s
             .sections
             .iter()
-            .position(|x| x.id == "revenue")
-            .expect("revenue section");
-        s.select_section(revenue);
+            .position(|x| x.id == "financials")
+            .expect("financials section");
+        s.select_section(financials);
         press(&mut s, KeyCode::Char('l'));
         assert!(s.uses_grid());
-        let term = render(&mut s, 140, 45);
+        // taller than the old 8-section screen: the financials grid runs past 45 rows
+        let term = render(&mut s, 140, 70);
         let detail = rows_text(&term, s.panes.detail);
         let first = detail.lines().next().unwrap_or("");
         assert!(
             first.contains("│") && s.grid.cursor.block == 0,
             "first two blocks share a row: {detail}"
         );
-        let all = rows_text(&term, Rect::new(0, 0, 140, 45));
+        let all = rows_text(&term, Rect::new(0, 0, 140, 70));
         assert!(
             all.contains("┬") && all.contains("┴"),
             "nav/source junctions kept: {all}"
@@ -1076,8 +1083,8 @@ mod tests {
         let revenue = s
             .sections
             .iter()
-            .position(|x| x.id == "revenue")
-            .expect("revenue section");
+            .position(|x| x.id == "financials")
+            .expect("financials section");
         s.select_section(revenue);
         press(&mut s, KeyCode::Char('a'));
         assert!(s.view.audit);

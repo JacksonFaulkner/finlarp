@@ -160,20 +160,6 @@ def s_sentiment(ts, ctx):
     return f"{len(todo)} tweets labelled; {json.dumps(tweet_sentiment.ingest())}"
 
 
-def s_news(ts, ctx):
-    """Pull ~2 years of ROIC.ai news snippets for these tickers (5 requests/min on the free plan), if ROIC_TOKEN is set."""
-    from datetime import date, timedelta
-
-    from sources import keys, roic_news
-    if not keys.get("ROIC_TOKEN"):
-        return "skipped: ROIC_TOKEN not set"
-    _quiet(roic_news.pull, ts, None, date.today() + timedelta(days=1), 2, ctx.get("news_pages", 8), 5.0)
-    roic_news.ingest()
-    n = duckdb.sql(f"SELECT ticker, count(*) FROM '{roic_news.NEWS}' WHERE ticker IN ({','.join(repr(t) for t in ts)}) "
-                   f"GROUP BY 1").fetchall()
-    return f"articles {dict(n) or 'none'}"
-
-
 def s_bars(ts, ctx):
     from sources import databento_bars
     tables = ["bars_1d"] + (["bars_1m", "quotes_1m"] if ctx.get("all_bars") else [])
@@ -197,7 +183,7 @@ STEPS = [
     ("universe", s_universe), ("profile", s_profile), ("financials", s_financials), ("events", s_events),
     ("filing_text", s_filing_text), ("segments", s_segments), ("earnings", s_earnings),
     ("insiders", s_insiders), ("13f", s_13f), ("patents", s_patents), ("tweets", s_tweets),
-    ("sentiment", s_sentiment), ("news", s_news), ("bars", s_bars), ("dossier", s_dossier),
+    ("sentiment", s_sentiment), ("bars", s_bars), ("dossier", s_dossier),
 ]
 
 

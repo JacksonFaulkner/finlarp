@@ -56,8 +56,13 @@ PLAIN_TICKER = re.compile(r"[A-Z]{1,5}")  # excludes options, free text and clas
 
 
 def symbols() -> list[str]:
-    """US tickers on Databento's raw_symbol scheme (class shares like BRK.B need a different form)."""
-    return sorted({s["ticker"] for s in universe.rows() if s["region"] == "US" and s["kind"] != "foreign"})
+    """US tickers on Databento's raw_symbol scheme (class shares like BRK.B need a different form).
+
+    Includes the top holdings of every fund, so the fund heatmap has prices for its names.
+    """
+    own = {s["ticker"] for s in universe.rows() if s["region"] == "US" and s["kind"] != "foreign"}
+    held = {t for t in cache_db.fund_holding_tickers() if PLAIN_TICKER.fullmatch(t)}
+    return sorted(own | held)
 
 
 def holdings() -> list[str]:

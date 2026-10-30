@@ -32,6 +32,8 @@ class Stock(BaseModel):
 
     @model_validator(mode="after")
     def _weights(self):
+        if self.kind == "etf" and not self.subs:  # funds sit outside the sector tree
+            return self
         if any(w <= 0 for w in self.subs.values()):
             raise ValueError(f"{self.ticker}: weights must be positive")
         total = sum(self.subs.values())

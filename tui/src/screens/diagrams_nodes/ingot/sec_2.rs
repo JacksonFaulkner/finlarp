@@ -124,7 +124,11 @@ fn draw_saw(c: &mut Canvas, ingot_top: i32, kerf: bool) {
     }
     c.label(52, 1, "guide rollers, one wire");
     c.label(SAW_X0, ingot_top - 2, "mounting beam");
-    c.label(SAW_X0 - 2, SAW_BOT + 1, "wire pitch sets wafer thickness + kerf");
+    c.label(
+        SAW_X0 - 2,
+        SAW_BOT + 1,
+        "wire pitch sets wafer thickness + kerf",
+    );
 }
 
 const BEATS: &[Beat] = &[
@@ -231,7 +235,8 @@ impl Scene for Section {
             2 => {
                 // a grinder runs along the top of the body, cutting the V groove behind it
                 draw_rod(c, cy, 0);
-                let head = lerp(BODY_X0 as f32, BODY_X1 as f32, ease_in_out(t.local)).round() as i32;
+                let head =
+                    lerp(BODY_X0 as f32, BODY_X1 as f32, ease_in_out(t.local)).round() as i32;
                 for x in BODY_X0..=head {
                     c.put(x, cy - BODY_HH, '∨');
                 }

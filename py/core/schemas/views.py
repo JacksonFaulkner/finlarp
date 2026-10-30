@@ -187,19 +187,6 @@ class AccountCash(BaseModel):
     description: str | None = Field(description="Broker description")
 
 
-class NewsView(BaseModel):
-    """One company news article (title, link and a ~200 character snippet), pulled from ROIC.ai by sources/roic_news.py."""
-
-    id: str = Field(description="Stable article id: sha1 of ticker|url, first 16 hex chars")
-    ticker: str = Field(description="Universe ticker the article was pulled for; one row per (ticker, url)")
-    published_at: datetime = Field(description="Publication time, naive UTC")
-    title: str | None = Field(description="Headline")
-    site: str | None = Field(description="Publisher domain as ROIC reports it, e.g. fool.com, globenewswire.com, seekingalpha.com")
-    url: str = Field(description="Link to the original article")
-    text: str = Field(description="Article snippet as ROIC returns it, about 200 characters (never the full article); use url for the rest")
-    text_chars: int = Field(description="Length of text in characters; filter on it to drop stubs")
-
-
 class ShortVolumeView(BaseModel):
     """FINRA Reg SHO daily short sale volume per ticker per day, from sources/short_interest.py (published the evening of the trade date)."""
 
@@ -279,7 +266,6 @@ VIEW_MODELS: dict[str, type[BaseModel]] = {
     "quotes_1m": sv.Quotes1m,
     "tweets": sv.TweetsView,
     "tweet_tickers": sv.TweetTickers,
-    "news": NewsView,
     "short_volume": ShortVolumeView,
     "short_interest": ShortInterestView,
     "tweet_sentiment": TweetSentimentView,
