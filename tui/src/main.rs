@@ -68,6 +68,7 @@ const SCREENS: &[&str] = &[
     "claude_history",
     "claude_log",
     "keys",
+    "video",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
