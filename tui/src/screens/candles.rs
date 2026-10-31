@@ -14,7 +14,6 @@ use ratatui::widgets::{Block, Paragraph, Tabs};
 
 use crate::app::{Action, Ctx, Screen};
 use crate::model::Candle;
-use crate::screens::universe::bars_glob;
 use crate::ui::candles::{CandleChart, fit};
 use crate::ui::help::{self, Key, key};
 use crate::ui::theme::Theme;
@@ -68,10 +67,9 @@ pub fn load_bars(db_path: &Path, ticker: &str) -> Result<Vec<Candle>, String> {
         return Err(format!("bad ticker {ticker:?}"));
     }
     let conn = crate::db::open_read_only(db_path)?;
-    let glob = bars_glob(db_path).replace('\'', "''");
     let sql = format!(
         "SELECT CAST((ts_event AT TIME ZONE 'America/New_York')::DATE AS VARCHAR), open, high, low, close, volume \
-         FROM read_parquet('{glob}', union_by_name=true) WHERE symbol = '{ticker}' \
+         FROM bars_1d_adj WHERE symbol = '{ticker}' \
          ORDER BY ts_event DESC LIMIT {LOAD}"
     );
     let mut stmt = conn

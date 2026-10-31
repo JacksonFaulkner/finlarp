@@ -2256,7 +2256,8 @@ mod tests {
             db_path: Default::default(),
             theme: Theme::default(),
         };
-        assert_eq!(open(&ctx, Some("fib".into())).unwrap().tab, 3);
+        assert_eq!(open(&ctx, Some("fib".into())).unwrap().tab, 4);
+        assert_eq!(open(&ctx, Some("mem".into())).unwrap().tab, 2);
         assert_eq!(open(&ctx, Some("zzz".into())).unwrap().tab, 0);
     }
 
@@ -2268,6 +2269,19 @@ mod tests {
     #[test]
     fn chip_nodes_all_described() {
         all_described(1, 10);
+    }
+
+    #[test]
+    fn memory_cell_node_is_complete() {
+        let hots = find_hots("CELL");
+        assert!(hots.len() >= 8, "CELL: only {} hotspots", hots.len());
+        assert_eq!(
+            hots.len(),
+            cards("CELL").len(),
+            "CELL: card label missing from page"
+        );
+        assert!(hots.iter().all(|h| h.body.len() > 150), "CELL: short card");
+        assert!(scene_for("CELL").is_some(), "CELL: no animation");
     }
 
     fn all_described(tab: usize, want: usize) {

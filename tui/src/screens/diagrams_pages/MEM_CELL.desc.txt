@@ -1,0 +1,1 @@
+A DRAM bit is charge on one tiny capacitor, switched by one transistor (1T1C). Charge leaks away, so each row has to be rewritten within a refresh window (64 ms in DDR4). A read drains the cell, so a sense amp must restore it. Tickers: MU, 000660.KS, 005930.KS.

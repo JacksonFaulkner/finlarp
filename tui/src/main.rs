@@ -17,12 +17,14 @@
 // Env: FINLARP_DB overrides the DuckDB path.
 
 mod app;
+mod claude_popup;
 mod db;
 #[cfg(test)]
 mod mock;
 mod model;
 mod pyrun;
 mod screens;
+mod tmux_title;
 mod ui;
 
 use std::env;
@@ -48,6 +50,7 @@ const SCREENS: &[&str] = &[
     "dossier",
     "earnings",
     "search",
+    "filings",
     "universe",
     "diagrams",
     "events",
@@ -58,6 +61,14 @@ const SCREENS: &[&str] = &[
     "menu",
     "notes",
     "sources",
+    "note",
+    "docview",
+    "transactions",
+    "watchlists",
+    "onboard",
+    "claude_history",
+    "claude_log",
+    "keys",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -109,7 +120,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|universe|diagrams|events|chat|candles|intraday|godel|menu|notes|sources] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|filings|universe|diagrams|events|chat|candles|intraday|godel|menu|notes|sources] [arg]";
 
 fn db_path() -> PathBuf {
     if let Some(p) = env::var_os("FINLARP_DB") {
@@ -132,8 +143,9 @@ fn build_screen(
     arg: Option<String>,
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
-        candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, godel, home,
-        intraday, menu, notes, pick, portfolio, search, sources, universe, video,
+        candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, filings, godel,
+        home, intraday, menu, notes, pick, portfolio, search, sources, universe, video,
+        claude_history, claude_log, docview, keys, note, onboard, transactions, watchlists,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -151,11 +163,20 @@ fn build_screen(
         ("portfolio", _) => Box::new(portfolio::open(ctx, arg)?),
         ("earnings", _) => Box::new(earnings_report::open(ctx, arg)?),
         ("search", _) => Box::new(search::open(ctx, arg)?),
+        ("filings", _) => Box::new(filings::open(ctx, arg)?),
         ("universe", _) => Box::new(universe::open(ctx, arg)?),
         ("events", _) => Box::new(events::open(ctx, arg)?),
         ("diagrams", _) => Box::new(diagrams::open(ctx, arg)?),
         ("video", _) => Box::new(video::open(ctx, arg)?),
         ("sources", _) => Box::new(sources::open(ctx, arg)?),
+        ("note", _) => Box::new(note::open(ctx, arg)?),
+        ("docview", _) => Box::new(docview::open(ctx, arg)?),
+        ("transactions", _) => Box::new(transactions::open(ctx, arg)?),
+        ("watchlists", _) => Box::new(watchlists::open(ctx, arg)?),
+        ("onboard", _) => Box::new(onboard::open(ctx, arg)?),
+        ("claude_history", _) => Box::new(claude_history::open(ctx, arg)?),
+        ("claude_log", _) => Box::new(claude_log::open(ctx, arg)?),
+        ("keys", _) => Box::new(keys::open(ctx, arg)?),
         _ => Box::new(chart::open(ctx, arg)?),
     })
 }
@@ -175,6 +196,14 @@ fn export_diagram_pdfs(ctx: &app::Ctx, arg: &str) -> std::io::Result<()> {
 /// on top (a picker is replaced by what it picks, so back skips it); q/esc in
 /// the top screen pops to the one beneath with its state intact. The session
 /// ends when the bottom screen quits, or on a nonzero exit code.
+/// Window label for a screen: "dossier MRVL", "home".
+fn label(screen: &str, arg: Option<&str>) -> String {
+    match arg.map(str::trim).filter(|a| !a.is_empty()) {
+        Some(a) => format!("{screen} {a}"),
+        None => screen.to_string(),
+    }
+}
+
 fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Result<i32> {
     use app::NvimAction;
     if start == "diagrams" {
@@ -183,13 +212,20 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
             return Ok(0);
         }
     }
-    // (screen, is_picker)
-    let mut stack: Vec<(Box<dyn app::Screen>, bool)> = vec![(
+    // Restores the tmux window name when this session ends (drop, not exit(),
+    // so it runs before main calls process::exit).
+    let title = tmux_title::WindowTitle::claim();
+    // (screen, is_picker, window label)
+    let mut stack: Vec<(Box<dyn app::Screen>, bool, String)> = vec![(
         build_screen(ctx, start, arg.clone())?,
-        upper(arg).is_none() && matches!(start, "canslim" | "dossier"),
+        upper(arg.clone()).is_none() && matches!(start, "canslim" | "dossier"),
+        label(start, arg.as_deref()),
     )];
     loop {
         let top = stack.last_mut().expect("stack never empty here");
+        if let Some(t) = &title {
+            t.set(&top.2);
+        }
         let exit = app::run(top.0.as_mut())?;
         let next = match exit.handoff {
             Some(NvimAction::Screen { screen, arg }) => Some((screen, arg)),
@@ -200,11 +236,12 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
             Some((screen, arg)) => {
                 let is_picker = upper(arg.clone()).is_none()
                     && matches!(screen.as_str(), "canslim" | "dossier");
+                let child_label = label(&screen, arg.as_deref());
                 let child = build_screen(ctx, &screen, arg)?;
                 if stack.last().is_some_and(|t| t.1) {
                     stack.pop(); // replace the picker with its pick
                 }
-                stack.push((child, is_picker));
+                stack.push((child, is_picker, child_label));
             }
             None => {
                 stack.pop();

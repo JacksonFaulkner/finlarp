@@ -1,0 +1,3 @@
+# 1. TODO: BANK, what happens in one line
+
+ TODO: box-drawing art, same style as CHIP_NMOS.txt. Keep lines under 100 cols.

@@ -304,8 +304,10 @@ pub(crate) fn event_loop<B: Backend>(
                     NvimAction::Chunk { .. } => {
                         screen.set_flash("opening a chunk needs the nvim plugin".into());
                     }
-                    NvimAction::Claude { .. } => {
-                        screen.set_flash("Claude needs the nvim plugin".into());
+                    NvimAction::Claude { text } => {
+                        if let Err(e) = crate::claude_popup::open(text.as_deref()) {
+                            screen.set_flash(format!("claude: {e}"));
+                        }
                     }
                     NvimAction::Keys { .. }
                     | NvimAction::NoteChat { .. }

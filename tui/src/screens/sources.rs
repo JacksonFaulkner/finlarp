@@ -17,15 +17,16 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
-use crate::app::{Action, Ctx, Screen};
-use crate::screens::universe::mix;
+use crate::app::{Action, Ctx, NvimAction, Screen};
 use crate::ui::help::{self, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
 const KEYS: &[Key] = &[
     key("hjkl", "move"),
-    key("enter", "open provider / dataset"),
+    key("enter", "open provider / search dataset"),
+    key("i", "dataset details"),
+    key("/", "search SEC EDGAR text"),
     key("esc", "back"),
     key("?", "help"),
     key("q", "close"),
@@ -33,6 +34,30 @@ const KEYS: &[Key] = &[
 
 const TILE_W: u16 = 36;
 const TILE_H: u16 = 6;
+/// The search filters for SEC EDGAR text: 10-K/20-F sections, risk-factor sentences,
+/// earnings releases and their guidance lines. Yahoo profiles and patents are left out.
+/// Where Enter on a searchable dataset goes: the search screen, scoped to it.
+fn search_action(s: &Source) -> Action {
+    match &s.search {
+        Search::Text(scope) => Action::Nvim(NvimAction::Screen {
+            screen: "search".into(),
+            arg: Some((*scope).into()),
+        }),
+        Search::Filings => Action::Nvim(NvimAction::Screen {
+            screen: "filings".into(),
+            arg: None,
+        }),
+        Search::Off => Action::None,
+    }
+}
+
+const EDGAR_SEARCH: &str = "type:10k type:new_risk type:earnings type:guidance ";
+
+/// Tile colours: dark backgrounds so the white title and line read clearly.
+const TILE_SELECTED: Color = Color::Rgb(0x2a, 0x4a, 0x73);
+const TILE_IDLE: Color = Color::Rgb(0x2b, 0x2d, 0x3a);
+const TILE_TEXT: Color = Color::Rgb(0xff, 0xff, 0xff);
+const TILE_NOTE: Color = Color::Rgb(0xa9, 0xb0, 0xc0);
 
 /// One dataset: where it comes from, what reads it, and how to pull it.
 pub struct Source {
@@ -45,6 +70,18 @@ pub struct Source {
     /// Env var the puller needs, or "none".
     pub key: &'static str,
     pub runs: &'static str,
+    /// How this dataset can be searched from its detail card.
+    pub search: Search,
+}
+
+/// What `/` searches on a dataset's detail card.
+pub enum Search {
+    /// Full-text search over a corpus in derive/search.py, scoped by these filters.
+    Text(&'static str),
+    /// Filing index and 8-K / 6-K events: the filing search screen (derive/filing_search.py).
+    Filings,
+    /// No search for this dataset yet (structured data, or not indexed).
+    Off,
 }
 
 /// SEC rows: the SEC asks for at most 10 requests per second and a
@@ -60,6 +97,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_events.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily; intraday for the watchlist",
+        search: Search::Filings,
     },
     Source {
         provider: "SEC EDGAR",
@@ -69,6 +107,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_financials.py, edgar.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily",
+        search: Search::Off,
     },
     Source {
         provider: "SEC EDGAR",
@@ -78,6 +117,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_segments.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily",
+        search: Search::Off,
     },
     Source {
         provider: "SEC EDGAR",
@@ -87,6 +127,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/edgar_fsds.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily check; new zip once per quarter",
+        search: Search::Off,
     },
     Source {
         provider: "SEC EDGAR",
@@ -96,6 +137,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_filing_text.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily",
+        search: Search::Text("type:10k type:new_risk "),
     },
     Source {
         provider: "SEC EDGAR",
@@ -105,6 +147,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_earnings.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily",
+        search: Search::Text("type:earnings type:guidance "),
     },
     Source {
         provider: "SEC EDGAR",
@@ -114,6 +157,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_insiders.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily check; new set once per quarter",
+        search: Search::Off,
     },
     Source {
         provider: "SEC EDGAR",
@@ -123,6 +167,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_form4_live.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "not scheduled",
+        search: Search::Off,
     },
     Source {
         provider: "SEC EDGAR",
@@ -132,6 +177,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_13f.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily check; new window each quarter",
+        search: Search::Off,
     },
     Source {
         provider: "Databento",
@@ -141,6 +187,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/databento_bars.py",
         key: "DATABENTO_API_KEY",
         runs: "daily, $15 cap",
+        search: Search::Off,
     },
     Source {
         provider: "Yahoo",
@@ -150,6 +197,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/yahoo.py, intraday.py, market.py",
         key: "none",
         runs: "on demand (breadth cached 6h)",
+        search: Search::Off,
     },
     Source {
         provider: "Yahoo",
@@ -159,6 +207,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/intraday_stream.py",
         key: "none",
         runs: "live while the grid is open",
+        search: Search::Off,
     },
     Source {
         provider: "Yahoo",
@@ -168,6 +217,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/yahoo_profile.py",
         key: "none",
         runs: "daily",
+        search: Search::Text("type:profile "),
     },
     Source {
         provider: "Yahoo",
@@ -177,6 +227,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/yahoo.py",
         key: "none",
         runs: "on demand",
+        search: Search::Off,
     },
     Source {
         provider: "Yahoo",
@@ -186,6 +237,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/yahoo_live.py",
         key: "none",
         runs: "on demand",
+        search: Search::Off,
     },
     Source {
         provider: "Nasdaq / FINRA",
@@ -195,6 +247,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/short_interest.py interest",
         key: "none",
         runs: "daily",
+        search: Search::Off,
     },
     Source {
         provider: "Nasdaq / FINRA",
@@ -204,6 +257,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/short_interest.py volume",
         key: "none",
         runs: "daily",
+        search: Search::Off,
     },
     Source {
         provider: "E*TRADE",
@@ -213,6 +267,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/etrade.py, etrade_live.py",
         key: "PROD_KEY, PROD_SECRET",
         runs: "$ refresh (positions 5 min, transactions 1 h)",
+        search: Search::Off,
     },
     Source {
         provider: "E*TRADE",
@@ -222,6 +277,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/etrade_options.py",
         key: "PROD_KEY, PROD_SECRET",
         runs: "manual snapshot",
+        search: Search::Off,
     },
     Source {
         provider: "X (Apify)",
@@ -231,6 +287,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "jobs/pull_recent_tweets.py, pull_tweets.py, fill_tweets.py",
         key: "APIFY_TOKEN",
         runs: "daily ($1 cap); intraday ($0.5 cap)",
+        search: Search::Off,
     },
     Source {
         provider: "X (Apify)",
@@ -240,6 +297,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "jobs/pull_cashtags.py",
         key: "APIFY_TOKEN",
         runs: "manual",
+        search: Search::Off,
     },
     Source {
         provider: "X (Apify)",
@@ -249,6 +307,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "jobs/pull_following.py",
         key: "APIFY_TOKEN",
         runs: "manual",
+        search: Search::Off,
     },
     Source {
         provider: "OpenAI",
@@ -258,6 +317,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/tweet_sentiment.py",
         key: "OPENAI_API_KEY",
         runs: "daily and intraday",
+        search: Search::Off,
     },
     Source {
         provider: "ROIC",
@@ -267,6 +327,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/roic_news.py",
         key: "ROIC_TOKEN",
         runs: "manual (not in refresh)",
+        search: Search::Off,
     },
     Source {
         provider: "USPTO",
@@ -276,6 +337,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/bulk_pull.py pv, patents.py",
         key: "USPTO_API_KEY",
         runs: "manual",
+        search: Search::Text("type:patent "),
     },
     Source {
         provider: "USPTO",
@@ -285,6 +347,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/patents_ai.py via bulk_pull.py",
         key: "USPTO_API_KEY",
         runs: "manual",
+        search: Search::Off,
     },
     Source {
         provider: "arXiv",
@@ -294,6 +357,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/arxiv.py",
         key: "none",
         runs: "daily",
+        search: Search::Off,
     },
     Source {
         provider: "DOL",
@@ -303,6 +367,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/bulk_pull.py",
         key: "none",
         runs: "manual",
+        search: Search::Off,
     },
     Source {
         provider: "OpenFIGI",
@@ -312,6 +377,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_13f.py",
         key: "none (keyless, cached)",
         runs: "with each 13F pull",
+        search: Search::Off,
     },
     Source {
         provider: "Exa + OpenAI",
@@ -321,6 +387,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "jobs/report_top50.py",
         key: "EXA_API_KEY, OPENAI_API_KEY",
         runs: "manual",
+        search: Search::Off,
     },
 ];
 
@@ -460,13 +527,11 @@ impl Sources {
         if tiles.is_empty() {
             return;
         }
-        let t = self.theme;
         let cols = (body.width / TILE_W).max(1) as usize;
         self.cols = cols;
         let tile_w = body.width / cols as u16;
         let rows_visible = (body.height / TILE_H).max(1) as usize;
         let first_row = (self.sel / cols).saturating_sub(rows_visible - 1);
-        let base = t.bg.unwrap_or(Color::Rgb(0x1e, 0x1e, 0x2e));
         for (i, tile) in tiles.iter().enumerate() {
             let (row, col) = (i / cols, i % cols);
             if row < first_row || row >= first_row + rows_visible {
@@ -479,12 +544,8 @@ impl Sources {
                 TILE_H - 1,
             );
             let selected = i == self.sel;
-            let bg = if selected {
-                mix(base, t.fg, 0.22)
-            } else {
-                mix(base, t.dim, 0.12)
-            };
-            let st = Style::new().fg(t.fg).bg(bg);
+            let bg = if selected { TILE_SELECTED } else { TILE_IDLE };
+            let st = Style::new().fg(TILE_TEXT).bg(bg);
             // Only the selected tile draws its border (as the universe does).
             let block = if selected {
                 Block::bordered().border_style(st)
@@ -501,7 +562,10 @@ impl Sources {
                     st.add_modifier(Modifier::BOLD),
                 ),
                 Line::styled(format!(" {}", text::truncate(&tile.line2, w)), st),
-                Line::styled(format!(" {}", text::truncate(&tile.line3, w)), st.fg(t.dim)),
+                Line::styled(
+                    format!(" {}", text::truncate(&tile.line3, w)),
+                    st.fg(TILE_NOTE),
+                ),
             ];
             frame.render_widget(Paragraph::new(lines).style(st), inner);
         }
@@ -516,6 +580,14 @@ impl Sources {
             ("pulled by", s.pulled_by),
             ("key", s.key),
             ("runs", s.runs),
+            (
+                "search",
+                match s.search {
+                    Search::Text(scope) => scope.trim(),
+                    Search::Filings => "8-K and 6-K filings (form:, item:, signal:, since:)",
+                    Search::Off => "not searchable yet",
+                },
+            ),
         ];
         let mut lines = vec![Line::styled(s.name, t.title()), Line::default()];
         for (label, value) in rows {
@@ -541,9 +613,14 @@ impl Screen for Sources {
         .areas(area);
         frame.render_widget(Paragraph::new(self.crumb()), head);
         let hint = match self.view {
-            View::Providers => " hjkl move · ↵ open provider · esc close",
-            View::Datasets(_) => " hjkl move · ↵ details · esc back",
-            View::Detail(_) => " esc back",
+            View::Providers => " hjkl move · ↵ open provider · / search SEC EDGAR · esc close",
+            View::Datasets(_) => {
+                " hjkl move · ↵ search (i details) · / search SEC EDGAR · esc back"
+            }
+            View::Detail(i) => match SOURCES[i].search {
+                Search::Off => " esc back · not searchable yet",
+                _ => " / search this dataset · esc back",
+            },
         };
         frame.render_widget(Paragraph::new(Line::styled(hint, t.dim())), foot);
         match self.view {
@@ -563,6 +640,27 @@ impl Screen for Sources {
         let last = self.tiles().len().saturating_sub(1);
         match key.code {
             KeyCode::Char('q') => return Action::Quit,
+            KeyCode::Char('/') => {
+                if let View::Detail(i) = self.view {
+                    return search_action(&SOURCES[i]);
+                }
+                let group = match self.view {
+                    View::Providers => Some(self.sel),
+                    View::Datasets(g) => Some(g),
+                    View::Detail(_) => None,
+                };
+                if group.is_some_and(|g| self.providers[g].name == "SEC EDGAR") {
+                    return Action::Nvim(NvimAction::Screen {
+                        screen: "search".into(),
+                        arg: Some(EDGAR_SEARCH.into()),
+                    });
+                }
+            }
+            KeyCode::Char('i') if matches!(self.view, View::Datasets(_)) => {
+                if let View::Datasets(g) = self.view {
+                    self.view = View::Detail(self.providers[g].items[self.sel]);
+                }
+            }
             KeyCode::Esc => match self.view {
                 View::Providers => return Action::Quit,
                 View::Datasets(g) => {
@@ -587,7 +685,13 @@ impl Screen for Sources {
                     self.view = View::Datasets(self.sel);
                     self.sel = 0;
                 }
-                View::Datasets(g) => self.view = View::Detail(self.providers[g].items[self.sel]),
+                View::Datasets(g) => {
+                    let i = self.providers[g].items[self.sel];
+                    match SOURCES[i].search {
+                        Search::Off => self.view = View::Detail(i),
+                        _ => return search_action(&SOURCES[i]),
+                    }
+                }
                 View::Detail(_) => {}
             },
             _ => {}
@@ -649,11 +753,24 @@ mod tests {
     }
 
     #[test]
-    fn enter_on_a_dataset_shows_details_and_esc_steps_back() {
+    fn enter_on_a_searchable_dataset_opens_its_search() {
         let mut s = screen();
         render(&mut s, 120, 40);
         press(&mut s, KeyCode::Enter);
+        // the first SEC EDGAR dataset is the filing index, which has a filings search
+        match press(&mut s, KeyCode::Enter) {
+            Action::Nvim(NvimAction::Screen { screen, .. }) => assert_eq!(screen, "filings"),
+            _ => panic!("expected the filings screen"),
+        }
+        assert!(matches!(s.view, View::Datasets(0)));
+    }
+
+    #[test]
+    fn i_on_a_dataset_shows_details_and_esc_steps_back() {
+        let mut s = screen();
+        render(&mut s, 120, 40);
         press(&mut s, KeyCode::Enter);
+        press(&mut s, KeyCode::Char('i'));
         assert!(matches!(s.view, View::Detail(0)));
         let out = render(&mut s, 120, 40);
         assert!(out.contains("sources/sec_events.py"), "{out}");
@@ -662,6 +779,63 @@ mod tests {
         press(&mut s, KeyCode::Esc);
         assert!(matches!(s.view, View::Providers));
         assert!(matches!(press(&mut s, KeyCode::Esc), Action::Quit));
+    }
+
+    #[test]
+    fn slash_on_sec_edgar_opens_search_scoped_to_its_text() {
+        let mut s = screen();
+        render(&mut s, 120, 40);
+        // on the provider tiles: SEC EDGAR is the first provider
+        match press(&mut s, KeyCode::Char('/')) {
+            Action::Nvim(NvimAction::Screen { screen, arg }) => {
+                assert_eq!(screen, "search");
+                let arg = arg.unwrap();
+                assert!(
+                    arg.contains("type:10k") && arg.contains("type:earnings"),
+                    "{arg}"
+                );
+                assert!(!arg.contains("profile") && !arg.contains("patent"), "{arg}");
+            }
+            other => panic!(
+                "expected a search action, got {:?}",
+                std::mem::discriminant(&other)
+            ),
+        }
+        // inside the SEC EDGAR datasets too
+        press(&mut s, KeyCode::Enter);
+        assert!(matches!(
+            press(&mut s, KeyCode::Char('/')),
+            Action::Nvim(NvimAction::Screen { .. })
+        ));
+        // on another provider, nothing happens
+        let mut other = screen();
+        render(&mut other, 120, 40);
+        press(&mut other, KeyCode::Char('l'));
+        assert!(matches!(
+            press(&mut other, KeyCode::Char('/')),
+            Action::None
+        ));
+    }
+
+    #[test]
+    fn slash_on_a_dataset_searches_its_own_corpus_or_says_it_cannot() {
+        let mut s = screen();
+        render(&mut s, 120, 40);
+        let index = |name: &str| SOURCES.iter().position(|x| x.name == name).unwrap();
+        // 10-K text searches the filings, scoped to the 10-K and new-risk sentences
+        s.view = View::Detail(index("10-K / 20-F / 40-F text, Exhibit 21"));
+        match press(&mut s, KeyCode::Char('/')) {
+            Action::Nvim(NvimAction::Screen { screen, arg }) => {
+                assert_eq!(screen, "search");
+                assert_eq!(arg.as_deref(), Some("type:10k type:new_risk "));
+            }
+            _ => panic!("expected the search screen"),
+        }
+        assert!(render(&mut s, 120, 40).contains("type:10k type:new_risk"));
+        // structured data has no search yet, and says so
+        s.view = View::Detail(index("Insider Forms 3/4/5 (bulk quarterly)"));
+        assert!(matches!(press(&mut s, KeyCode::Char('/')), Action::None));
+        assert!(render(&mut s, 120, 40).contains("not searchable yet"));
     }
 
     #[test]

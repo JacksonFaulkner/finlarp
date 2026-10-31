@@ -1,0 +1,98 @@
+# 1. What happens: a bit is charge on a capacitor
+
+  A DRAM bit is a packet of charge on one tiny capacitor. Full charge reads as 1,
+  empty reads as 0. The cell is one transistor and one capacitor, so it is 1T1C.
+
+      stored 1                              stored 0
+   ┌──────────────────┐                  ┌──────────────────┐
+   │  + + + + + + + + │                  │                  │
+   │   cap: FULL      │                  │   cap: EMPTY     │
+   └──────────────────┘                  └──────────────────┘
+   (schematic, not to scale)
+
+# 2. Inside one cell: an access transistor and a storage capacitor
+
+                       word line  (row select; high turns the switch on)
+   ─────────────────────────────┬────────────────────────────────────────
+                                │ gate
+   bit line                     │
+   ──────────┬─────────────┌────┴──────────────┐
+             │             │ access transistor │  a switch
+             │             └────────┬──────────┘
+             │                      │ storage node
+             │                    ──┴──
+             │             storage capacitor
+             │                    ──┬──
+             │                      │
+             │                  plate (VDD/2)
+             └──────────────────────┘
+
+# 3. Why charge leaks: the stored charge drains away
+
+  Charge leaks out of the storage node through several paths at once: the
+  capacitor dielectric, the junction at the storage node, and the cell
+  transistor when it is off. The bit fades over time, so an idle cell
+  cannot hold its value forever. The leakage gets worse in smaller cells.
+
+# 4. A read destroys the bit: charge sharing, then sense amp, then restore
+
+   1. precharge: the bit line is held at VDD/2
+   2. word line rises: the access transistor turns on
+   3. charge sharing: charge moves from the cell onto the bit line,
+      and the bit line moves a small amount up or down
+   4. sense amp: a cross-coupled latch on the bit line pair amplifies
+      the small difference to full VDD or full GND
+   5. restore: the still-connected cell is driven back to its full value
+      (the read drained it, so the write-back is required)
+
+# 5. Refresh: rewrite every row before the charge is gone
+
+  A row must be rewritten periodically. In DDR4 the refresh window is 64 ms.
+  The controller issues 8192 refresh commands in each window, one every 7.8 us,
+  and each command refreshes a slice of rows, so every row gets its turn.
+
+   row 0   row 1   row 2   ...   row 8191   -> refresh counter walks the array
+   [ok]    [ok]    [due]   ...   [ok]
+
+# 6. By the numbers
+
+   cell                 1 transistor + 1 capacitor (1T1C)
+   cell area            6F^2 with an open bit line, 8F^2 with a folded bit line
+   refresh window       tREFW = 64 ms (DDR4, Micron datasheet value)
+   refresh interval     tREFI = 7800 ns, 8192 REF commands per window
+   typical array        512 wordlines x 512 bitlines
+
+# 7. Shrinking the cell: less area means less signal
+
+  The cell area is set by F (the minimum feature size, see the LITHO node).
+  The signal on the bit line is Vc x Cc / (Cb + Cc). A smaller storage
+  capacitor Cc gives a smaller signal, so the sense amp has less to work with.
+  Designs need a taller capacitor or a better dielectric to keep Cc up.
+
+# 8. Who makes it
+
+  Commodity DRAM is made by Micron (MU), SK hynix (000660.KS) and
+  Samsung (005930.KS). Market share and the split between commodity and
+  HBM are covered on the market pages, not here.
+
+# 9. Chokepoints and risks
+
+  - Retention varies from cell to cell. The refresh window has to cover the
+    weakest cells, which costs refresh time and power.
+  - Refresh blocks memory access while it runs, so it slows the system.
+  - Rapid activation of one row can leak charge into its neighbours
+    (RowHammer), which is a reliability and security risk.
+
+# 10. Sources
+
+  - UMD ENEE 359a, DRAM Systems (Jacob), slide 3:
+    https://ece.umd.edu/class/enee359a.S2007/enee359a-DRAM-i.pdf
+  - UMD ENEE 359a, DRAM Circuits (Jacob), slides 4, 5, 9, 11, 13:
+    https://ece.umd.edu/class/enee359a.S2007/enee359a-DRAM-ii.pdf
+  - Mutlu, Retrospective: Data Retention Behavior in Modern DRAM (arXiv 2306.16037):
+    https://arxiv.org/pdf/2306.16037
+  - Yaglikci et al., HiRA (arXiv 2209.10198), pp. 1-2:
+    https://arxiv.org/pdf/2209.10198
+  - PROTEAS (arXiv 2404.16256), Table I (Micron DDR4 datasheet values), pp. 2-3:
+    https://arxiv.org/pdf/2404.16256
+  - Chip tab, NMOS page (access transistor): see the Chip tab.

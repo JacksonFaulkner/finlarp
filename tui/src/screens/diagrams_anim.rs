@@ -147,6 +147,7 @@ pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
     match page {
         "SAND" => Some(Box::new(super::diagrams_scene_sand::Sand)),
         "POLYSILICON" => Some(Box::new(super::diagrams_scene_poly::Poly)),
+        "CELL" => Some(Box::new(super::diagrams_scene_cell::MemCell)),
         "MELT + PULL" => Some(Box::new(super::diagrams_scene_melt::Melt)),
         _ => anim_for(page).map(|a| Box::new(TextScene::new(a)) as Box<dyn Scene>),
     }

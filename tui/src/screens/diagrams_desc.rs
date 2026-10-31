@@ -83,6 +83,19 @@ pub const DESCS: &[(&str, &str)] = &[
         "IMPLANT",
         "Ion implanters ionize dopant atoms like boron, phosphorus or arsenic and accelerate them with electric fields into silicon, changing its conductivity. Energies range from under 1 keV to MeV, and dose control is precise. Axcelis (ACLS) and Applied Materials (AMAT) are key suppliers.",
     ),
+    // Memory tab
+    ("CELL", include_str!("diagrams_pages/MEM_CELL.desc.txt")),
+    ("LITHO", include_str!("diagrams_pages/MEM_LITHO.desc.txt")),
+    ("ARRAY", include_str!("diagrams_pages/MEM_ARRAY.desc.txt")),
+    ("BANK", include_str!("diagrams_pages/MEM_BANK.desc.txt")),
+    (
+        "BANDWIDTH",
+        include_str!("diagrams_pages/MEM_BANDWIDTH.desc.txt"),
+    ),
+    (
+        "HBM STACK",
+        include_str!("diagrams_pages/MEM_HBM_STACK.desc.txt"),
+    ),
     // Chip tab
     (
         "TOP METAL",
@@ -149,6 +162,19 @@ pub const VISUALS: &[(&str, &str)] = &[
     ("PACKAGE", include_str!("diagrams_pages/PACKAGE.txt")),
     ("FINAL TEST", include_str!("diagrams_pages/FINAL_TEST.txt")),
     ("SHIP", include_str!("diagrams_pages/SHIP.txt")),
+    // Memory tab
+    ("CELL", include_str!("diagrams_pages/MEM_CELL.txt")),
+    ("LITHO", include_str!("diagrams_pages/MEM_LITHO.txt")),
+    ("ARRAY", include_str!("diagrams_pages/MEM_ARRAY.txt")),
+    ("BANK", include_str!("diagrams_pages/MEM_BANK.txt")),
+    (
+        "BANDWIDTH",
+        include_str!("diagrams_pages/MEM_BANDWIDTH.txt"),
+    ),
+    (
+        "HBM STACK",
+        include_str!("diagrams_pages/MEM_HBM_STACK.txt"),
+    ),
     // Chip tab
     (
         "TOP METAL",
@@ -260,6 +286,25 @@ pub const DETAILS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/FINAL_TEST.details.txt"),
     ),
     ("SHIP", include_str!("diagrams_pages/SHIP.details.txt")),
+    // Memory tab
+    ("CELL", include_str!("diagrams_pages/MEM_CELL.details.txt")),
+    (
+        "LITHO",
+        include_str!("diagrams_pages/MEM_LITHO.details.txt"),
+    ),
+    (
+        "ARRAY",
+        include_str!("diagrams_pages/MEM_ARRAY.details.txt"),
+    ),
+    ("BANK", include_str!("diagrams_pages/MEM_BANK.details.txt")),
+    (
+        "BANDWIDTH",
+        include_str!("diagrams_pages/MEM_BANDWIDTH.details.txt"),
+    ),
+    (
+        "HBM STACK",
+        include_str!("diagrams_pages/MEM_HBM_STACK.details.txt"),
+    ),
     // Chip tab
     (
         "TOP METAL",

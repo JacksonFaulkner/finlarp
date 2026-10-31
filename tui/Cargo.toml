@@ -7,6 +7,11 @@ edition = "2024"
 name = "fl"
 path = "src/main.rs"
 
+# std-only launcher: runs the staged `fl` and rebuilds it in the background
+[[bin]]
+name = "fl-loader"
+path = "src/bin/fl_loader.rs"
+
 [dependencies]
 ratatui = { version = "0.30", features = ["unstable-rendered-line-info"] }
 duckdb = { version = "1.1", features = ["bundled"] }

@@ -1,0 +1,63 @@
+== word line
+# What it does
+The word line runs across a row of the array and drives the gate of every access transistor in that row. Raising it turns those transistors on, which connects each cell in the row to its bit line at once.
+# Why it matters
+Only one word line is high at a time, so one row is selected per access. Row selection is what makes the array fast: the whole row is sensed in parallel.
+# Source
+Jacob, ENEE 359a DRAM Systems, slide 3; Jacob, DRAM Circuits, slide 5 (word line driver, 512x512 organization).
+
+== bit line
+# What it does
+The bit line is the column wire. Each cell in a column connects to it through its access transistor. Before a read, the bit line is precharged to VDD/2.
+# Why it matters
+The cell is tiny, so its charge moves a much bigger bit line only a little. The sense amp has to detect that small move.
+# Source
+Jacob, DRAM Circuits, slides 4 and 11 (charge sharing and precharge to Vcc/2); HiRA, arXiv 2209.10198, p. 2.
+
+== access transistor
+# What it does
+The access transistor is a switch between the bit line and the storage node. Its gate is the word line, so the row decides which cells are connected.
+# Why it matters
+It is the only transistor in the 1T1C cell, which is why the cell is small. Its leakage when off also sets how long the charge lasts.
+# Source
+Jacob, ENEE 359a DRAM Systems, slide 3 (switching element = transistor); HiRA, arXiv 2209.10198, p. 2.
+
+== storage capacitor
+# What it does
+The storage capacitor holds the bit as charge on its plate. Full charge reads as 1 and empty reads as 0. It is the only place the data lives.
+# Why it matters
+Charge leaks out of this capacitor, so the bit is not stable without refresh. The capacitance also sets the signal the sense amp sees.
+# Source
+Jacob, ENEE 359a DRAM Systems, slide 3 (storage element = capacitor); Mutlu, arXiv 2306.16037, p. 1 (charge loss over time).
+
+== leakage
+# What it does
+Leakage is charge that drains out of the storage node with no access. The main routes in a 1T1C cell are the capacitor dielectric, the junction at the storage node, and subthreshold conduction through the off transistor.
+# Why it matters
+Leakage is why every cell needs refresh. It gets worse as the cell shrinks, because the junction doping rises and the capacitor gets smaller.
+# Source
+Mutlu, arXiv 2306.16037 (retention time and data-pattern dependence). The route list comes from DRAM patent backgrounds found by search; verify against a device paper before release.
+
+== charge sharing
+# What it does
+Charge sharing is what happens when the access transistor opens: the cell capacitor and the precharged bit line exchange charge. The bit line moves by a small voltage, up for a 1 and down for a 0.
+# Why it matters
+The move is small because the bit line capacitance is much bigger than the cell capacitance. The sense amp must amplify this small change.
+# Source
+Jacob, DRAM Circuits, slides 4 and 11: Vx = (Vb Cb + Vc Cc) / (Cb + Cc); Vsignal = Vc Cc / (Cb + Cc).
+
+== sense amp
+# What it does
+The sense amp is a pair of cross-coupled inverters on each bit line pair. It latches the small difference in the two lines to full VDD or full GND, then drives the cell back to its full charge.
+# Why it matters
+This latch does two jobs: it reads the bit and it restores the destroyed charge. Without it, a read would lose the data.
+# Source
+Jacob, DRAM Circuits, slides 12-14 (sense amplifier circuit and timing); HiRA, arXiv 2209.10198, p. 2 (sense amplifiers).
+
+== refresh
+# What it does
+Refresh rewrites each row before its charge leaks away. Refresh is a read followed by a write-back, done by the controller for every row on a timer.
+# Why it matters
+Refresh is needed because the bit fades. In DDR4 the window is 64 ms; the controller issues 8192 refresh commands per window, one every 7.8 us.
+# Source
+PROTEAS, arXiv 2404.16256, Table I (Micron DDR4 datasheet: tREFW 64 ms, tREFI 7800 ns, 8192 REFs per window).

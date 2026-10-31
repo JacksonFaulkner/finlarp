@@ -24,6 +24,12 @@ pub const DIAGRAMS: &[Diagram] = &[
         art: CHIP,
     },
     Diagram {
+        title: "DRAM: how a bit is stored and why AI needs HBM",
+        tab: "Memory",
+        tickers: "MU 000660.KS 005930.KS",
+        art: MEMORY,
+    },
+    Diagram {
         title: "AI accelerator packaging: GPU + HBM on a silicon interposer",
         tab: "Packaging",
         tickers: "NVDA TSM MU AMKR ASX",
@@ -115,6 +121,18 @@ const CHIP: &str = r#"# Cross-section (not to scale): wiring on top, silicon at 
        ══════════                             ║▓║ ║▓║ ║▓║  fins                  ║ ▓▓▓▓▓▓▓▓▓ ║  stacked
        ▓▓▓▓▓▓▓▓▓▓ channel                     ║▓║ ║▓║ ║▓║                        ║ ▓▓▓▓▓▓▓▓▓ ║  nanosheets
        ░░░░░░░░░░ silicon                   ░░░░░░░░░░░░░░░░                     ╚═══════════╝
+"#;
+
+const MEMORY: &str = r#"# A bit is charge on a capacitor. Bandwidth is bus width x pin rate.
+
+ ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+ │     CELL    │────▶│    LITHO    │────▶│    ARRAY    │────▶│     BANK    │────▶│  BANDWIDTH  │────▶│  HBM STACK  │
+ │  1T1C cell  │     │  sets pitch │     │ rows x cols │     │  row buffer │     │ width x rate│     │  8-12 dies  │
+ └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
+
+ (enter opens a node's page; h/l moves between nodes)
+ (HBM STACK hands off to the Packaging tab)
+ (stub: node pages are placeholders until they are written)
 "#;
 
 const PACKAGE: &str = r#"# Top view: why AI chips are limited by packaging, not only by the die

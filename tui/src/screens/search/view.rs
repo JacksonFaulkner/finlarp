@@ -125,7 +125,7 @@ impl Search {
         let src = self.selected_source();
         let hints = [
             ("↵", "chunk"),
-            ("alt-v", "nvim"),
+            ("alt-v", "doc"),
             ("ctrl-o", "browser"),
             ("y", "copy"),
         ];

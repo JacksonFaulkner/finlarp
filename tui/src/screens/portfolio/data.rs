@@ -245,7 +245,6 @@ fn bar_minutes(
 /// Empty on any read error: the chart then says there is no history.
 fn bar_closes(
     conn: &duckdb::Connection,
-    db_path: &Path,
     syms: &[String],
 ) -> HashMap<String, Vec<(NaiveDate, f64)>> {
     let mut out: HashMap<String, Vec<(NaiveDate, f64)>> = HashMap::new();
@@ -257,10 +256,9 @@ fn bar_closes(
         .map(|s| format!("'{}'", s.replace('\'', "''")))
         .collect::<Vec<_>>()
         .join(",");
-    let glob = crate::screens::universe::bars_glob(db_path).replace('\'', "''");
     let sql = format!(
         "SELECT symbol, CAST((ts_event AT TIME ZONE 'America/New_York')::DATE AS VARCHAR), close \
-         FROM read_parquet('{glob}', union_by_name=true) WHERE symbol IN ({list}) ORDER BY ts_event"
+         FROM bars_1d_adj WHERE symbol IN ({list}) ORDER BY ts_event"
     );
     let Ok(mut stmt) = conn.prepare(&sql) else {
         return out;
@@ -437,7 +435,7 @@ pub fn load(db_path: &Path) -> Result<Data, String> {
         .collect();
     names.sort();
     names.dedup();
-    for (sym, bars) in bar_closes(&conn, db_path, &names) {
+    for (sym, bars) in bar_closes(&conn, &names) {
         closes.entry(sym).or_insert(bars);
     }
     let bench = Bench::ALL

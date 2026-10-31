@@ -114,7 +114,6 @@ pub struct Universe {
     fund_series: HashMap<String, Vec<(NaiveDate, f64)>>,
     /// Top holdings per fund, heaviest first.
     holdings: HashMap<String, Vec<Member>>,
-    bars: String,
     db_path: std::path::PathBuf,
     spec: String,
     from: NaiveDate,
@@ -137,7 +136,6 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         returns: HashMap::new(),
         fund_series: HashMap::new(),
         holdings: HashMap::new(),
-        bars: bars_glob(&ctx.db_path),
         db_path: ctx.db_path.clone(),
         spec: "1m".into(),
         from: NaiveDate::MIN,
@@ -162,7 +160,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         .filter(|g| g.level == "fund")
         .flat_map(|g| g.members.iter().map(|m| m.ticker.clone()))
         .collect();
-    match load_fund_series(&u.db_path, &u.bars, &funds) {
+    match load_fund_series(&u.db_path, &funds) {
         Ok(s) => u.fund_series = s,
         Err(e) => u.flash = e,
     }
@@ -170,7 +168,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         Ok(h) => u.holdings = h,
         Err(e) => u.flash = e,
     }
-    match latest_bar(&u.db_path, &u.bars) {
+    match latest_bar(&u.db_path) {
         Ok(d) => u.latest = d,
         Err(e) => u.flash = e,
     }
@@ -188,10 +186,6 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
     }
     u.rebuild();
     Ok(u)
-}
-
-pub fn bars_glob(db_path: &Path) -> String {
-    bars_glob_for(db_path, "bars_1d")
 }
 
 /// The Parquet glob of one Databento bar table (bars_1d, bars_1m, ...) beside the DuckDB.
@@ -263,15 +257,14 @@ fn load_groups(ctx: &Ctx) -> Result<Vec<Group>, String> {
     Ok(groups)
 }
 
-fn latest_bar(db_path: &Path, glob: &str) -> Result<NaiveDate, String> {
+fn latest_bar(db_path: &Path) -> Result<NaiveDate, String> {
     let conn = crate::db::open_read_only(db_path)?;
-    let sql = format!(
-        "SELECT CAST(max((ts_event AT TIME ZONE 'UTC')::DATE) AS VARCHAR) \
-         FROM read_parquet('{}', union_by_name=true)",
-        glob.replace('\'', "''")
-    );
     let s: Option<String> = conn
-        .query_row(&sql, [], |r| r.get(0))
+        .query_row(
+            "SELECT CAST(max((ts_event AT TIME ZONE 'UTC')::DATE) AS VARCHAR) FROM bars_1d_adj",
+            [],
+            |r| r.get(0),
+        )
         .map_err(|e| format!("no daily bars ({e}). Run the databento bars_1d pull."))?;
     s.and_then(|s| NaiveDate::parse_from_str(&s, "%Y-%m-%d").ok())
         .ok_or_else(|| "no daily bars. Run the databento bars_1d pull.".to_string())
@@ -314,7 +307,6 @@ fn load_holdings(db_path: &Path) -> Result<HashMap<String, Vec<Member>>, String>
 /// such as fund holdings.
 fn load_returns(
     db_path: &Path,
-    glob: &str,
     from: NaiveDate,
     to: NaiveDate,
     extra: &[String],
@@ -327,15 +319,14 @@ fn load_returns(
     let sql = format!(
         "WITH b AS (
             SELECT symbol, (ts_event AT TIME ZONE 'UTC')::DATE AS d, close
-            FROM read_parquet('{}', union_by_name=true)
+            FROM bars_1d_adj
             WHERE close > 0 AND (symbol IN (SELECT ticker FROM ai_universe){extra})
          )
          SELECT symbol,
                 arg_max(close, d) FILTER (WHERE d <= CAST(? AS DATE)) AS last,
                 coalesce(arg_max(close, d) FILTER (WHERE d <= CAST(? AS DATE)),
                          arg_min(close, d) FILTER (WHERE d > CAST(? AS DATE))) AS base
-         FROM b GROUP BY symbol",
-        glob.replace('\'', "''")
+         FROM b GROUP BY symbol"
     );
     let (f, t) = (from.to_string(), to.to_string());
     let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
@@ -369,7 +360,6 @@ fn sql_list(xs: &[String]) -> String {
 /// daily history when the bars have none (SOXX, say).
 fn load_fund_series(
     db_path: &Path,
-    glob: &str,
     tickers: &[String],
 ) -> Result<HashMap<String, Vec<(NaiveDate, f64)>>, String> {
     let mut out: HashMap<String, Vec<(NaiveDate, f64)>> = HashMap::new();
@@ -379,9 +369,8 @@ fn load_fund_series(
     let conn = crate::db::open_read_only(db_path)?;
     let sql = format!(
         "SELECT symbol, CAST((ts_event AT TIME ZONE 'UTC')::DATE AS VARCHAR), close \
-         FROM read_parquet('{}', union_by_name=true) \
+         FROM bars_1d_adj \
          WHERE close > 0 AND symbol IN ({}) ORDER BY symbol, ts_event",
-        glob.replace('\'', "''"),
         sql_list(tickers)
     );
     // No bars pull yet is not an error here: the Yahoo history below still covers the funds.
@@ -557,7 +546,7 @@ impl Universe {
                     .flatten()
                     .map(|m| m.ticker.clone())
                     .collect();
-                match load_returns(&self.db_path, &self.bars, from, to, &held) {
+                match load_returns(&self.db_path, from, to, &held) {
                     Ok(r) => {
                         self.returns = r;
                         self.flash.clear();
