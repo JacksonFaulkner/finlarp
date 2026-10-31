@@ -16,6 +16,17 @@ setup:
 build:
     cargo build --release --manifest-path {{crate}}
 
+# Claude Code in its own tmux window. Not a popup: closing a popup kills its
+# process, which would end the session. Reuses the window if it already exists.
+claude:
+    #!/usr/bin/env sh
+    set -eu
+    if tmux list-windows -F '#{window_name}' | grep -qx claude; then
+        tmux select-window -t claude
+    else
+        tmux new-window -n claude -c "{{justfile_directory()}}" claude
+    fi
+
 # put `fl` on PATH: symlink into ~/.local/bin so a rebuild updates it in place
 install: build
     mkdir -p {{env("HOME")}}/.local/bin

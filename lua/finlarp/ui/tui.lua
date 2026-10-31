@@ -17,6 +17,9 @@ local M = {}
 local plugin_dir = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":h:h:h:h")
 local crate_dir = plugin_dir .. "/tui"
 local binary_path = crate_dir .. "/target/release/fl"
+-- fl-loader runs the last good staged `fl` and rebuilds in the background,
+-- so opening a screen never waits on cargo. Without it, ensure_built below.
+local loader_path = crate_dir .. "/target/release/fl-loader"
 local root = "finlarp"
 
 --- Rebuilds the release binary if any Rust source is newer than it, so
@@ -231,6 +234,10 @@ end
 --- @param arg string|nil screen argument (symbol, query, range)
 --- @param opts table|nil { title = string, env = table<string,string>, on_exit = fun(code: integer, action: table|nil) }
 function M.open_screen(screen, arg, opts)
+  if vim.fn.executable(loader_path) == 1 then
+    M._open_built(screen, arg, opts)
+    return
+  end
   ensure_built(function()
     M._open_built(screen, arg, opts)
   end)
@@ -239,13 +246,14 @@ end
 function M._open_built(screen, arg, opts)
   opts = opts or {}
   screen = screen or "chart"
-  if vim.fn.executable(binary_path) ~= 1 then
+  local use_loader = vim.fn.executable(loader_path) == 1
+  if not use_loader and vim.fn.executable(binary_path) ~= 1 then
     vim.notify("finlarp: TUI binary not built — run `cargo build --release` in " .. crate_dir, vim.log.levels.ERROR)
     return
   end
 
   local cmd = {
-    binary_path,
+    use_loader and loader_path or binary_path,
     "--bg",
     hl_hex("Normal", "bg", ""),
     "--up",
