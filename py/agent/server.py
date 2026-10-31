@@ -56,6 +56,7 @@ from derive import account
 from derive import search as fts
 from derive import sentiment as sentiment_q
 from core.schemas import dictionary
+from core.db import adjusted_bars_sql
 
 D = universe.DATA_ROOT
 READ_ONLY = ToolAnnotations(readOnlyHint=True, openWorldHint=False)
@@ -118,8 +119,10 @@ ET = "America/New_York"
 BARS_1M = f"read_parquet('{D}/market/databento/bars_1m/*.parquet', union_by_name=true)"
 # Overlapping ingest files leave exact duplicate daily rows (~45%); dedupe here so joins don't fan out, and drop
 # the stray pandas index column the parquet files carry.
-BARS_1D = (f"(SELECT DISTINCT COLUMNS(c -> c != '__index_level_0__') FROM "
-           f"read_parquet('{D}/market/databento/bars_1d/*.parquet', union_by_name=true))")
+BARS_1D = (f"(SELECT DISTINCT COLUMNS(c -> c != '__index_level_0__') FROM ("
+           + adjusted_bars_sql(f"read_parquet('{D}/market/databento/bars_1d/*.parquet', union_by_name=true)",
+                               f"read_parquet('{D}/market/splits.parquet')")
+           + "))")
 _ET_TS = f"(ts_event AT TIME ZONE '{ET}')"
 BARS_1M_ET = (
     f"(SELECT symbol, ts_event, {_ET_TS} AS et_ts, CAST({_ET_TS} AS DATE) AS et_date, "

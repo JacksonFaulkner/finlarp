@@ -13,6 +13,7 @@ import math
 import os
 import re
 import time
+from datetime import date
 from pathlib import Path
 
 import duckdb
@@ -543,6 +544,14 @@ def _ensure_universe_tables(con: duckdb.DuckDBPyConnection) -> None:
         )
     """)
     con.execute("""
+        CREATE TABLE IF NOT EXISTS splits (
+            symbol VARCHAR,
+            split_date DATE,
+            ratio DOUBLE,
+            PRIMARY KEY (symbol, split_date)
+        )
+    """)
+    con.execute("""
         CREATE TABLE IF NOT EXISTS fund_holdings (
             fund VARCHAR,
             ticker VARCHAR,
@@ -655,6 +664,54 @@ def _write_stock(con: duckdb.DuckDBPyConnection, s: Stock) -> None:
     rows += [[s.ticker, "sub", c, w] for c, w in s.subs.items()]
     if rows:  # funds have no buckets; duckdb rejects an empty executemany
         con.executemany("INSERT INTO ai_universe_category VALUES (?,?,?,?)", rows)
+
+
+def adjusted_bars_sql(bars: str, splits: str) -> str:
+    """Daily bars on one price basis, from a bars source and a splits source (table or
+    read_parquet). A bar before a split is divided by the split's ratio and its volume is
+    multiplied, so a 10:1 split no longer reads as a 90% drop. Bars with no later split
+    pass through unchanged."""
+    return f"""SELECT b.* REPLACE (
+        b.open / f.factor AS open,
+        b.high / f.factor AS high,
+        b.low / f.factor AS low,
+        b.close / f.factor AS close,
+        b.volume * f.factor AS volume
+    )
+    FROM {bars} b
+    LEFT JOIN LATERAL (
+        SELECT coalesce(exp(sum(ln(s.ratio))), 1.0) AS factor
+        FROM {splits} s
+        WHERE s.symbol = b.symbol AND s.split_date > (b.ts_event AT TIME ZONE 'UTC')::DATE
+    ) f ON true"""
+
+
+def put_splits(symbols: list[str], rows: list[dict]) -> int:
+    """Replace the stored splits for `symbols` with `rows` (symbol, split_date, ratio)."""
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        con.execute("BEGIN")
+        con.executemany("DELETE FROM splits WHERE symbol = ?", [(s,) for s in symbols])
+        if rows:
+            con.executemany(
+                "INSERT INTO splits VALUES (?,?,?)",
+                [(r["symbol"], r["split_date"], r["ratio"]) for r in rows],
+            )
+        con.execute("COMMIT")
+        return len(rows)
+    finally:
+        con.close()
+
+
+def get_splits() -> list[tuple[str, date, float]]:
+    """Every stored split, (symbol, split_date, ratio), oldest first within a symbol."""
+    con = _conn()
+    try:
+        _ensure_universe_tables(con)
+        return con.execute("SELECT symbol, split_date, ratio FROM splits ORDER BY symbol, split_date").fetchall()
+    finally:
+        con.close()
 
 
 def etf_tickers() -> list[str]:

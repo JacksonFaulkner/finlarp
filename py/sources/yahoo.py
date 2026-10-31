@@ -67,35 +67,52 @@ def get_crumb(session: requests.Session, refresh: bool = False) -> str:
     return crumb
 
 
+# Yahoo marks each quote with the session it reflects; the session fields
+# say which price is live and what it is measured against.
+SESSIONS = {"PRE": "pre", "PREPRE": "pre", "REGULAR": "regular", "POST": "post", "POSTPOST": "post"}
+
+
+def parse_quotes(payload: dict) -> list[dict]:
+    """v7 quote -> one row per symbol. `last_trade`, `change_close` and `change_close_pct`
+    are the regular session (last close against the close before it). `session_price` and
+    `session_change_pct` are the live pre- or post-market print, measured against the last
+    regular close. In the regular session they repeat the regular fields. Yahoo prints
+    pre-market volume as 0 for most names, so a pre-market print can be a single trade."""
+    rows = []
+    for q in (payload.get("quoteResponse") or {}).get("result") or []:
+        session = SESSIONS.get(q.get("marketState"), "closed")
+        if session == "pre":
+            price, pct = q.get("preMarketPrice"), q.get("preMarketChangePercent")
+        elif session == "post":
+            price, pct = q.get("postMarketPrice"), q.get("postMarketChangePercent")
+        else:
+            price, pct = q.get("regularMarketPrice"), q.get("regularMarketChangePercent")
+        rows.append({
+            "symbol": q.get("symbol"),
+            "last_trade": q.get("regularMarketPrice"),
+            "change_close": q.get("regularMarketChange"),
+            "change_close_pct": q.get("regularMarketChangePercent"),
+            "previous_close": q.get("regularMarketPreviousClose"),
+            "session": session,
+            "session_price": price,
+            "session_change_pct": pct,
+        })
+    return rows
+
+
 def cmd_quote(symbols: str) -> dict:
     session = new_session()
-    # /v7/finance/spark batches all symbols into one request (no auth needed),
-    # unlike /v8/finance/chart which is one request per symbol — that serial
-    # loop was the main source of dashboard-open latency (~400ms/symbol).
-    # Yahoo returns 400 for more than 20 symbols per spark request, so chunk.
     syms = [s for s in symbols.split(",") if s]
-    data = []
-    for i in range(0, len(syms), 20):
-        resp = session.get(
-            "https://query1.finance.yahoo.com/v7/finance/spark",
-            params={"symbols": ",".join(syms[i:i + 20]), "range": "1d", "interval": "1d"},
-            timeout=10,
-        )
+    url = "https://query2.finance.yahoo.com/v7/finance/quote"
+    rows = []
+    for i in range(0, len(syms), 50):
+        chunk = ",".join(syms[i:i + 50])
+        resp = session.get(url, params={"symbols": chunk, "crumb": get_crumb(session)}, timeout=15)
+        if resp.status_code == 401:
+            resp = session.get(url, params={"symbols": chunk, "crumb": get_crumb(session, refresh=True)}, timeout=15)
         resp.raise_for_status()
-        data.extend(resp.json()["spark"]["result"])
-
-    result = []
-    for entry in data:
-        response = entry.get("response") or [{}]
-        meta = response[0].get("meta", {})
-        result.append({
-            "symbol": meta.get("symbol") or entry.get("symbol"),
-            "last_trade": meta.get("regularMarketPrice"),
-            "change_close": meta.get("fulldayChange"),
-            "change_close_pct": meta.get("fulldayChangePercent"),
-            "previous_close": meta.get("chartPreviousClose"),
-        })
-    return {"quotes": result}
+        rows.extend(parse_quotes(resp.json()))
+    return {"quotes": rows}
 
 
 def cmd_history(symbol: str, range_: str, interval: str, max_age_hours: float | None = None) -> dict:

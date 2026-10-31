@@ -340,8 +340,9 @@ def pull(tables: list[str], max_cost: float, plan_only: bool) -> None:
 
 
 def views() -> None:
-    """One view per table over its Parquet files. A missing table is skipped."""
+    """One view per table over its Parquet files, and bars_1d_adj over bars_1d. A missing table is skipped."""
     con = cache_db._open(False)  # retries while another process holds the write lock
+    cache_db._ensure_universe_tables(con)  # the splits table the adjusted view reads
     for table in TABLES:
         d = OUT_ROOT / table
         if not any(d.glob("*.parquet")):
@@ -351,6 +352,12 @@ def views() -> None:
             f"SELECT * FROM read_parquet('{d}/*.parquet', union_by_name = true)"
         )
         print(f"view {table} -> {d}")
+    if any((OUT_ROOT / "bars_1d").glob("*.parquet")):
+        con.execute(f"CREATE OR REPLACE VIEW bars_1d_adj AS {cache_db.adjusted_bars_sql('bars_1d', 'splits')}")
+        print("view bars_1d_adj (bars_1d on the split-adjusted basis)")
+    # the agent's sandbox can't open the DuckDB file, so it reads the splits from here
+    splits_pq = OUT_ROOT.parent / "splits.parquet"
+    con.execute(f"COPY (SELECT * FROM splits) TO '{splits_pq}' (FORMAT parquet)")
     con.close()
 
 
