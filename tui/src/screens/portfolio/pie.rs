@@ -2,19 +2,20 @@
 // holding.rs), weights pie on the right sized to the height, joined by an
 // arrow from the card to the selected slice. Each row carries its slice's
 // color, and the selected row lights up its slice while the rest dim. Real data (DuckDB, filled by the
-// E*TRADE pull), largest position first, cash last.
+// E*TRADE pull), largest position first, cash last. The pie itself lives in
+// ui/pie.rs; this file maps positions onto its slices.
 
 use chrono::NaiveDate;
 use ratatui::Frame;
-use ratatui::buffer::Buffer;
 use ratatui::layout::{Constraint, Layout, Rect};
-use ratatui::style::{Color, Style};
+use ratatui::style::Color;
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Widget};
+use ratatui::widgets::Block;
 
 use super::data::{Position, Totals, Txn};
 use super::holding::{self, Closes};
 use super::overview::money;
+use crate::ui::pie::{self as ring, Pie, Slice, slice_color};
 use crate::ui::theme::Theme;
 
 const CASH: Color = Color::Rgb(0x6b, 0x70, 0x89);
@@ -24,8 +25,6 @@ const PIE_MAX_PCT: u16 = 45;
 const GAP: u16 = 5;
 /// Card height (border + text + a readable chart) the table won't eat into.
 const CARD_MIN: u16 = holding::TEXT_ROWS + 2 + 6;
-/// Subpixels the selected slice sticks out past the others.
-const GROW: f64 = 2.0;
 /// How much of an unselected slice's color survives (1.0 = full).
 const DIM: f64 = 0.75;
 
@@ -35,46 +34,6 @@ pub struct Entry<'a> {
     pub color: Color,
     /// None for the cash row.
     pub pos: Option<&'a Position>,
-}
-
-/// Golden-angle hue steps keep neighbouring slices far apart on the wheel;
-/// alternating lightness separates the ones that still land close.
-fn slice_color(i: usize) -> Color {
-    let h = (i as f64 * 137.508) % 360.0;
-    let (s, l) = if i % 2 == 0 {
-        (0.65, 0.55)
-    } else {
-        (0.75, 0.68)
-    };
-    hsl(h, s, l)
-}
-
-fn hsl(h: f64, s: f64, l: f64) -> Color {
-    let c = (1.0 - (2.0 * l - 1.0).abs()) * s;
-    let x = c * (1.0 - ((h / 60.0) % 2.0 - 1.0).abs());
-    let m = l - c / 2.0;
-    let (r, g, b) = match h as u32 / 60 {
-        0 => (c, x, 0.0),
-        1 => (x, c, 0.0),
-        2 => (0.0, c, x),
-        3 => (0.0, x, c),
-        4 => (x, 0.0, c),
-        _ => (c, 0.0, x),
-    };
-    let ch = |v: f64| ((v + m) * 255.0).round() as u8;
-    Color::Rgb(ch(r), ch(g), ch(b))
-}
-
-/// Blend `c` toward `bg` by `keep` (1.0 = unchanged).
-fn fade(c: Color, bg: Color, keep: f64) -> Color {
-    match (c, bg) {
-        (Color::Rgb(r, g, b), Color::Rgb(br, bgc, bb)) => {
-            let mix =
-                |a: u8, b: u8| (f64::from(a) * keep + f64::from(b) * (1.0 - keep)).round() as u8;
-            Color::Rgb(mix(r, br), mix(g, bgc), mix(b, bb))
-        }
-        _ => c,
-    }
 }
 
 /// Holdings by value descending, then cash (if any).
@@ -111,134 +70,11 @@ pub fn len(positions: &[Position], cash: f64) -> usize {
     entries(positions, cash).len()
 }
 
-/// Filled circle made of half-block cells (two square subpixels per cell),
-/// sized to the whole area. Slices run clockwise from 12 o'clock.
-struct Pie<'a> {
-    entries: &'a [Entry<'a>],
-    sel: usize,
-    bg: Color,
-    /// Degrees the whole pie is turned clockwise.
-    rot: f64,
-}
-
-impl Widget for Pie<'_> {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let total: f64 = self.entries.iter().map(|e| e.value).sum();
-        if total <= 0.0 || area.width < 2 || area.height < 2 {
-            return;
-        }
-        let (w, h) = (f64::from(area.width), f64::from(area.height) * 2.0);
-        // The selected slice grows GROW subpixels past the base radius; the
-        // base is shrunk so the grown edge still fits the area.
-        let r_full = w.min(h) / 2.0;
-        let r = (r_full - GROW).max(1.0);
-        let r_sel = r + GROW.min(r_full - r);
-        let (cx, cy) = (w / 2.0, h / 2.0);
-        let sole = self.entries.len() == 1;
-        // Cumulative slice ends in degrees.
-        let mut acc = 0.0;
-        let ends: Vec<f64> = self
-            .entries
-            .iter()
-            .map(|e| {
-                acc += e.value / total * 360.0;
-                acc
-            })
-            .collect();
-        let at = |px: f64, py: f64| -> Option<Color> {
-            let (dx, dy) = (px + 0.5 - cx, py + 0.5 - cy);
-            let d = (dx * dx + dy * dy).sqrt();
-            if d > r_sel {
-                return None;
-            }
-            let ang = (dx.atan2(-dy).to_degrees() - self.rot).rem_euclid(360.0);
-            let i = ends.iter().position(|e| ang < *e).unwrap_or(ends.len() - 1);
-            let e = &self.entries[i];
-            if i != self.sel {
-                return (d <= r).then(|| fade(e.color, self.bg, DIM));
-            }
-            // Outline: outer rim plus the two radial edges, ~1 subpixel wide.
-            let start = if i == 0 { 0.0 } else { ends[i - 1] };
-            let edge = (ang - start).min(ends[i] - ang).to_radians() * d;
-            let rim = d > r_sel - 1.0;
-            Some(if rim || (!sole && edge < 1.0) {
-                fade(e.color, Color::Rgb(255, 255, 255), 0.55)
-            } else {
-                e.color
-            })
-        };
-        for row in 0..area.height {
-            for col in 0..area.width {
-                let (x, y) = (f64::from(col), f64::from(row) * 2.0);
-                let (top, bot) = (at(x, y), at(x, y + 1.0));
-                let (sym, style) = match (top, bot) {
-                    (None, None) => continue,
-                    (Some(t), Some(b)) => ("▀", Style::new().fg(t).bg(b)),
-                    (Some(t), None) => ("▀", Style::new().fg(t)),
-                    (None, Some(b)) => ("▄", Style::new().fg(b)),
-                };
-                buf[(area.x + col, area.y + row)]
-                    .set_symbol(sym)
-                    .set_style(style);
-            }
-        }
-    }
-}
-
-impl Pie<'_> {
-    /// Cell just outside the circle's 9 o'clock point, where the selected
-    /// slice's centre sits once the pie has turned.
-    fn left_edge(area: Rect) -> (u16, u16) {
-        let (w, h) = (f64::from(area.width), f64::from(area.height) * 2.0);
-        let r = w.min(h) / 2.0;
-        let col = (w / 2.0 - r - 0.5).ceil().max(0.0) as u16;
-        (area.x + col, area.y + area.height / 2)
-    }
-}
-
-/// Elbow connector from `from` (just right of the card) to `to` (the pie's
-/// left edge), ending in an arrowhead that points at the slice.
-fn arrow(buf: &mut Buffer, from: (u16, u16), to: (u16, u16), color: Color) {
-    let ((x0, y0), (x1, y1)) = (from, to);
-    if x1 < x0 + 3 || y0 >= buf.area.bottom() || y1 >= buf.area.bottom() || x1 >= buf.area.right() {
-        return;
-    }
-    let style = Style::new().fg(color);
-    let mut put = |x: u16, y: u16, s: &str| {
-        buf[(x, y)].set_symbol(s).set_style(style);
-    };
-    let xm = x0 + (x1 - x0) / 2;
-    for x in x0..xm {
-        put(x, y0, "─");
-    }
-    for x in xm + 1..x1 - 1 {
-        put(x, y1, "─");
-    }
-    if y0 == y1 {
-        put(xm, y0, "─");
-    } else {
-        let down = y1 > y0;
-        put(xm, y0, if down { "╮" } else { "╯" });
-        put(xm, y1, if down { "╰" } else { "╭" });
-        for y in y0.min(y1) + 1..y0.max(y1) {
-            put(xm, y, "│");
-        }
-    }
-    put(x1 - 1, y1, "▶");
-}
-
 /// Rotation (degrees clockwise) that puts entry `sel`'s slice centre at
 /// 9 o'clock, facing the side panel.
 pub fn facing_left(positions: &[Position], cash: f64, sel: usize) -> f64 {
-    let rows = entries(positions, cash);
-    let total: f64 = rows.iter().map(|e| e.value).sum();
-    if total <= 0.0 || rows.is_empty() {
-        return 0.0;
-    }
-    let sel = sel.min(rows.len() - 1);
-    let before: f64 = rows[..sel].iter().map(|e| e.value).sum();
-    let centre = (before + rows[sel].value / 2.0) / total * 360.0;
-    270.0 - centre
+    let values: Vec<f64> = entries(positions, cash).iter().map(|e| e.value).collect();
+    ring::facing_left(&values, sel)
 }
 
 pub struct View<'a> {
@@ -277,11 +113,19 @@ pub fn draw(frame: &mut Frame, area: Rect, v: &View) {
         Constraint::Length(pie_w),
     ]));
     let pie_area = pie_col.centered_vertically(Constraint::Length(pie_w.div_ceil(2)));
+    let slices: Vec<Slice> = rows
+        .iter()
+        .map(|e| Slice {
+            value: e.value,
+            color: e.color,
+        })
+        .collect();
     frame.render_widget(
         Pie {
-            entries: &rows,
+            slices: &slices,
             sel,
             bg: t.bg.unwrap_or(Color::Rgb(0x28, 0x2a, 0x36)),
+            dim: DIM,
             rot: v.rot,
         },
         pie_area,
@@ -310,8 +154,9 @@ pub fn draw(frame: &mut Frame, area: Rect, v: &View) {
     if spot.height > 2 {
         holding::spotlight(frame, spot, &tv);
         let from = (spot.right(), spot.y + spot.height / 2);
-        let to = Pie::left_edge(pie_area);
-        arrow(frame.buffer_mut(), from, to, rows[sel].color);
+        let to = ring::left_edge(pie_area);
+        // Elbow connector from the card to the pie's left edge.
+        ring::arrow(frame.buffer_mut(), from, to, rows[sel].color);
     }
     holding::table(frame, names, &tv);
 }
@@ -350,13 +195,5 @@ mod tests {
         assert!((facing_left(&ps, 0.0, 0) - 180.0).abs() < 1e-9);
         // B spans 180..270, centre 225: turn +45.
         assert!((facing_left(&ps, 0.0, 1) - 45.0).abs() < 1e-9);
-    }
-
-    #[test]
-    fn colors_are_distinct() {
-        let cs: Vec<Color> = (0..15).map(slice_color).collect();
-        for (i, a) in cs.iter().enumerate() {
-            assert!(!cs[i + 1..].contains(a));
-        }
     }
 }

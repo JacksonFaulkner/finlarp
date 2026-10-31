@@ -35,6 +35,7 @@ use crate::screens::chart::ChartScreen;
 use crate::ui::calendar::{Calendar, Event, Tone};
 use crate::ui::help::{self, Key, key};
 use crate::ui::layout::{self, PaneOpts};
+use crate::ui::spin::{self, Spin};
 use crate::ui::theme::Theme;
 use data::{Bench, Data, Range};
 
@@ -62,9 +63,6 @@ const TABS: [&str; 7] = [
 ];
 
 const FLASH_FOR: Duration = Duration::from_millis(1500);
-/// Redraw interval while the pie spins, and its ease-out time constant (s).
-const FRAME: Duration = Duration::from_millis(16);
-const SPIN_TAU: f64 = 0.09;
 /// Env var naming the JSON file the background refresh reports through.
 const STATUS_FILE_ENV: &str = "FINLARP_STATUS_FILE";
 /// Positions older than this get a stale warning in the header.
@@ -105,10 +103,8 @@ pub struct PortfolioScreen {
     row: usize,
     help: bool,
     flash: Option<(String, Instant)>,
-    /// Positions pie rotation (degrees) and whether it is still turning.
-    spin: f64,
-    spinning: bool,
-    spin_at: Instant,
+    /// Positions pie rotation.
+    spin: Spin,
     /// Status file written by the background refresh, its last raw contents, and what
     /// it said. The TUI only reads DuckDB, so this is how it learns to reload.
     status_file: Option<PathBuf>,
@@ -178,9 +174,7 @@ impl PortfolioScreen {
             row: 0,
             help: false,
             flash: None,
-            spin: 0.0,
-            spinning: false,
-            spin_at: Instant::now(),
+            spin: Spin::default(),
             status_file: None,
             status_seen: String::new(),
             sync: Sync::Idle,
@@ -387,7 +381,7 @@ impl Screen for PortfolioScreen {
                         txns: &self.data.txns,
                         closes: &self.data.closes,
                         sel: self.row,
-                        rot: self.spin,
+                        rot: self.spin.angle,
                         today: chrono::Local::now().date_naive(),
                     };
                     pie::draw(frame, p.detail, &view);
@@ -506,12 +500,12 @@ impl Screen for PortfolioScreen {
     }
 
     fn needs_redraw(&self) -> bool {
-        self.flash.is_some() || self.spinning || self.redraw
+        self.flash.is_some() || self.spin.turning || self.redraw
     }
 
     fn poll_interval(&self) -> Duration {
-        if self.spinning {
-            FRAME
+        if self.spin.turning {
+            spin::FRAME
         } else {
             Duration::from_millis(100)
         }
@@ -519,20 +513,9 @@ impl Screen for PortfolioScreen {
 
     fn tick(&mut self) -> Action {
         self.poll_status();
-        let now = Instant::now();
-        let dt = now.duration_since(self.spin_at).as_secs_f64().min(0.1);
-        self.spin_at = now;
         let cash = data::totals(&self.data.history, &self.data.positions).cash;
         let target = pie::facing_left(&self.data.positions, cash, self.row);
-        // Shortest way round, exponential ease-out.
-        let delta = (target - self.spin + 540.0).rem_euclid(360.0) - 180.0;
-        if self.tab != 1 || delta.abs() < 0.2 {
-            self.spin = target;
-            self.spinning = false;
-        } else {
-            self.spin += delta * (1.0 - (-dt / SPIN_TAU).exp());
-            self.spinning = true;
-        }
+        self.spin.tick(target, self.tab == 1, Instant::now());
         Action::None
     }
 }
@@ -793,17 +776,17 @@ mod tests {
         s.tick();
         s.on_key(k('j'));
         s.tick();
-        assert!(s.spinning, "should be turning after a selection change");
+        assert!(s.spin.turning, "should be turning after a selection change");
         for _ in 0..2000 {
             std::thread::sleep(Duration::from_millis(1));
             s.tick();
-            if !s.spinning {
+            if !s.spin.turning {
                 break;
             }
         }
-        assert!(!s.spinning);
+        assert!(!s.spin.turning);
         let cash = data::totals(&s.data.history, &s.data.positions).cash;
-        assert!((s.spin - pie::facing_left(&s.data.positions, cash, s.row)).abs() < 1e-6);
+        assert!((s.spin.angle - pie::facing_left(&s.data.positions, cash, s.row)).abs() < 1e-6);
     }
 
     #[test]
