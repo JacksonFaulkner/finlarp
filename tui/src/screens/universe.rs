@@ -16,6 +16,7 @@
 use std::collections::HashMap;
 use std::io;
 use std::path::Path;
+use std::time::{Duration, Instant};
 
 use chrono::{Datelike, Months, NaiveDate};
 use ratatui::Frame;
@@ -27,6 +28,8 @@ use ratatui::widgets::{Block, Paragraph};
 
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::screens::portfolio::data::parse_closes;
+use crate::ui::pie::{self, Pie, Slice};
+use crate::ui::spin::{self, Spin};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -67,8 +70,13 @@ const TILE_H: u16 = 5;
 const FUND_SUMMARY_H: u16 = 3 + PRESETS.len() as u16;
 const NO_HOLDINGS: &str = "No fund holdings loaded yet.\n\n  \
     uv run sources/yahoo.py universe holdings   (from py/)";
-/// How much of an unselected tile's colour survives (the pie dims the same way).
+/// How much of an unselected tile's colour survives.
 const DIM: f64 = 0.55;
+/// Pie view: most of the width the pie may take, gap before it, and how much
+/// of an unselected slice's colour survives.
+const PIE_MAX_PCT: u16 = 45;
+const PIE_GAP: u16 = 5;
+const PIE_DIM: f64 = 0.75;
 
 #[derive(Debug, Clone)]
 struct Member {
@@ -96,6 +104,37 @@ struct Tile {
     order: i32,
     ret: Option<f64>,
     value: String,
+    /// Share of the view for the pie: category weight, or 1 each when equal-weighted.
+    weight: f64,
+}
+
+/// How members weigh in a basket's return and in the pie. `w` cycles.
+#[derive(Clone, Copy, PartialEq, Debug)]
+enum Weighting {
+    /// Market cap in USD (the default): real size.
+    Cap,
+    /// Every name counts the same.
+    Equal,
+    /// The category weight from the taxonomy: how much of a name is in the bucket.
+    Exposure,
+}
+
+impl Weighting {
+    fn next(self) -> Self {
+        match self {
+            Weighting::Cap => Weighting::Equal,
+            Weighting::Equal => Weighting::Exposure,
+            Weighting::Exposure => Weighting::Cap,
+        }
+    }
+
+    fn label(self) -> &'static str {
+        match self {
+            Weighting::Cap => "cap-wt ",
+            Weighting::Equal => "equal-wt ",
+            Weighting::Exposure => "exposure-wt ",
+        }
+    }
 }
 
 #[derive(PartialEq)]
@@ -119,7 +158,9 @@ pub struct Universe {
     from: NaiveDate,
     to: NaiveDate,
     latest: NaiveDate,
-    equal_weight: bool,
+    weighting: Weighting,
+    /// Market cap in USD per universe name, from `ai_market_cap`.
+    caps: HashMap<String, f64>,
     level: usize,
     view: View,
     tiles: Vec<Tile>,
@@ -127,6 +168,10 @@ pub struct Universe {
     cols: usize,
     editing: Option<String>,
     flash: String,
+    /// Pie view instead of the heatmap (`p`).
+    pie: bool,
+    /// Pie rotation, chasing the selected slice.
+    spin: Spin,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
@@ -141,7 +186,8 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         from: NaiveDate::MIN,
         to: NaiveDate::MIN,
         latest: NaiveDate::MIN,
-        equal_weight: true,
+        weighting: Weighting::Cap,
+        caps: HashMap::new(),
         level: 0,
         view: View::Groups,
         tiles: Vec::new(),
@@ -149,6 +195,8 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         cols: 1,
         editing: None,
         flash: String::new(),
+        pie: false,
+        spin: Spin::default(),
     };
     match load_groups(ctx) {
         Ok(g) => u.groups = g,
@@ -168,11 +216,15 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         Ok(h) => u.holdings = h,
         Err(e) => u.flash = e,
     }
+    // Without the latest bar date there is no range to price against; keep
+    // its error on screen rather than letting the range step overwrite it.
     match latest_bar(&u.db_path) {
-        Ok(d) => u.latest = d,
+        Ok(d) => {
+            u.latest = d;
+            u.apply_spec("1m");
+        }
         Err(e) => u.flash = e,
     }
-    u.apply_spec("1m");
     // "level|category" opens that basket's members directly.
     if let Some((level, cat)) = arg.as_deref().and_then(|a| a.split_once('|')) {
         if let Some(i) = u
@@ -184,8 +236,29 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
             u.view = View::Members(i);
         }
     }
+    match load_caps(&u.db_path) {
+        Ok(c) => u.caps = c,
+        Err(e) => {
+            // No sizes yet: fall back to equal weights rather than a blank pie.
+            u.weighting = Weighting::Equal;
+            u.flash = e;
+        }
+    }
     u.rebuild();
     Ok(u)
+}
+
+/// Market cap in USD per name, from the `ai_market_cap` table that
+/// py/sources/market_caps.py writes.
+fn load_caps(db_path: &Path) -> Result<HashMap<String, f64>, String> {
+    let conn = crate::db::open_read_only(db_path)?;
+    let mut stmt = conn
+        .prepare("SELECT ticker, market_cap_usd FROM ai_market_cap WHERE market_cap_usd > 0")
+        .map_err(|e| format!("no market caps ({e}). Run py/sources/market_caps.py."))?;
+    let rows = stmt
+        .query_map([], |r| Ok((r.get::<_, String>(0)?, r.get::<_, f64>(1)?)))
+        .map_err(|e| e.to_string())?;
+    Ok(rows.flatten().collect())
 }
 
 /// The Parquet glob of one Databento bar table (bars_1d, bars_1m, ...) beside the DuckDB.
@@ -571,6 +644,16 @@ impl Universe {
         }
     }
 
+    /// A member's share in a basket under the current weighting. A name with
+    /// no market cap counts for nothing under cap weighting rather than a guess.
+    fn weight_of(&self, m: &Member) -> f64 {
+        match self.weighting {
+            Weighting::Cap => self.caps.get(&m.ticker).copied().unwrap_or(0.0),
+            Weighting::Equal => 1.0,
+            Weighting::Exposure => m.weight,
+        }
+    }
+
     fn member_tile(&self, m: &Member) -> Tile {
         Tile {
             title: m.ticker.clone(),
@@ -578,13 +661,20 @@ impl Universe {
             order: 0,
             ret: self.ret_of(&m.ticker),
             value: m.ticker.clone(),
+            weight: self.weight_of(m),
         }
     }
 
-    /// A holding's tile: its weight in the fund sits in the subline.
+    /// A holding's tile: its weight in the fund sits in the subline. The
+    /// pie uses the fund's own weights (already real) unless equal-weighted.
     fn holding_tile(&self, m: &Member) -> Tile {
         Tile {
             sub: format!("{:.1}% {}", m.weight * 100.0, m.name),
+            weight: if self.weighting == Weighting::Equal {
+                1.0
+            } else {
+                m.weight
+            },
             ..self.member_tile(m)
         }
     }
@@ -601,7 +691,7 @@ impl Universe {
         let (mut num, mut den, mut n) = (0.0, 0.0, 0);
         for m in &g.members {
             if let Some(r) = self.ret_of(&m.ticker) {
-                let w = if self.equal_weight { 1.0 } else { m.weight };
+                let w = self.weight_of(m);
                 num += w * r;
                 den += w;
                 n += 1;
@@ -643,6 +733,13 @@ impl Universe {
                         sub,
                         ret,
                         value: i.to_string(),
+                        // Priced members only, as the basket return is.
+                        weight: g
+                            .members
+                            .iter()
+                            .filter(|m| self.ret_of(&m.ticker).is_some())
+                            .map(|m| self.weight_of(m))
+                            .sum(),
                     }
                 })
                 .collect(),
@@ -661,6 +758,19 @@ impl Universe {
         });
         self.tiles = tiles;
         self.sel = self.sel.min(self.tiles.len().saturating_sub(1));
+    }
+
+    /// The selected slice's angle for the pie: its centre turned to 9 o'clock.
+    /// An unpriced selection has no slice, so the pie holds still.
+    fn pie_target(&self) -> f64 {
+        let priced = self.priced();
+        match priced.iter().position(|(i, _)| *i == self.sel) {
+            Some(k) => {
+                let weights: Vec<f64> = priced.iter().map(|(_, t)| t.weight).collect();
+                pie::facing_left(&weights, k)
+            }
+            None => self.spin.angle,
+        }
     }
 
     /// Selected tile keeps full colour; the rest fade toward the background.
@@ -744,15 +854,11 @@ impl Universe {
                 format!("{} → {}  ({}) ", self.from, self.to, self.spec),
                 t.accent(),
             ),
-            Span::styled(
-                if self.equal_weight {
-                    "equal-wt "
-                } else {
-                    "cat-wt "
-                },
-                t.dim(),
-            ),
+            Span::styled(self.weighting.label(), t.dim()),
         ];
+        if self.pie {
+            spans.push(Span::styled("pie ", t.dim()));
+        }
         match &self.view {
             View::Groups => {
                 for (i, (_, label)) in LEVELS.iter().enumerate() {
@@ -787,6 +893,129 @@ impl Universe {
             }
         }
         spans
+    }
+
+    /// The tiles as a heatmap, or as a pie with `p`.
+    fn draw_body(&mut self, frame: &mut Frame, body: Rect) {
+        if self.pie {
+            self.draw_pie(frame, body);
+        } else {
+            self.draw_tiles(frame, body);
+        }
+    }
+
+    /// The pie view: a legend of the tiles on the left, the pie on the right,
+    /// and an arrow from the selected row to its slice. Slices follow the
+    /// tile order, so the legend and the pie read the same top to bottom.
+    fn draw_pie(&self, frame: &mut Frame, body: Rect) {
+        let t = self.theme;
+        let priced = self.priced();
+        let total: f64 = priced.iter().map(|(_, x)| x.weight).sum();
+        let slices: Vec<Slice> = priced
+            .iter()
+            .map(|(i, x)| Slice {
+                value: x.weight,
+                color: pie::slice_color(*i),
+            })
+            .collect();
+        // Position of the selection among the priced tiles; usize::MAX (no
+        // slice outlined) when the selection is unpriced.
+        let sel = priced
+            .iter()
+            .position(|(i, _)| *i == self.sel)
+            .unwrap_or(usize::MAX);
+        // Cells are ~2:1, so a circle `h` rows tall is `2h` columns wide.
+        let pie_w = (body.height * 2).min(body.width * PIE_MAX_PCT / 100);
+        let [legend, _, pie_col] = Layout::horizontal([
+            Constraint::Fill(1),
+            Constraint::Length(PIE_GAP),
+            Constraint::Length(pie_w),
+        ])
+        .areas(body);
+        let pie_area = pie_col.centered_vertically(Constraint::Length(pie_w.div_ceil(2)));
+        frame.render_widget(
+            Pie {
+                slices: &slices,
+                sel,
+                bg: t.bg.unwrap_or(Color::Rgb(0x1e, 0x1e, 0x2e)),
+                dim: PIE_DIM,
+                rot: self.spin.angle,
+            },
+            pie_area,
+        );
+
+        // Legend: swatch, name, share of the priced view, return. Scrolled so
+        // the selection stays on screen.
+        let rows = legend.height as usize;
+        let at = if sel == usize::MAX { 0 } else { sel };
+        let first = at.saturating_sub(rows.saturating_sub(1));
+        // Swatch (3) + share (7) + return (9) columns around the name.
+        let name_w = legend.width.saturating_sub(3 + 7 + 9) as usize;
+        let mut sel_y = None;
+        for (k, (i, tile)) in priced.iter().enumerate().skip(first).take(rows) {
+            let y = legend.y + (k - first) as u16;
+            let selected = k == sel;
+            if selected {
+                sel_y = Some(y);
+            }
+            let row = Rect::new(legend.x, y, legend.width, 1);
+            let base = if selected { t.selected() } else { t.base() };
+            let share = if total > 0.0 {
+                tile.weight / total * 100.0
+            } else {
+                0.0
+            };
+            let ret = tile.ret.unwrap_or(0.0);
+            let ret_style = t.signed(ret);
+            let name = text::truncate(&tile.title, name_w);
+            frame.render_widget(
+                Paragraph::new(Line::from(vec![
+                    Span::styled(" ■ ", Style::new().fg(pie::slice_color(*i))),
+                    Span::styled(format!("{name:<name_w$}"), base),
+                    Span::styled(format!("{share:>6.1}%"), base),
+                    Span::styled(format!("{:>+8.1}% ", ret), ret_style),
+                ]))
+                .style(base),
+                row,
+            );
+        }
+        if let (Some(y), Some((i, _))) = (sel_y, priced.get(sel)) {
+            pie::arrow(
+                frame.buffer_mut(),
+                (legend.right(), y),
+                pie::left_edge(pie_area),
+                pie::slice_color(*i),
+            );
+        }
+    }
+
+    /// Move the selection `d` priced tiles along (clamped at both ends). From
+    /// an unpriced selection, the first priced tile in that direction.
+    fn step_pie(&mut self, d: isize) {
+        let idx: Vec<usize> = self.priced().iter().map(|(i, _)| *i).collect();
+        if idx.is_empty() {
+            return;
+        }
+        let last = idx.len() as isize - 1;
+        self.sel = match idx.iter().position(|i| *i == self.sel) {
+            Some(k) => idx[(k as isize + d).clamp(0, last) as usize],
+            None => {
+                // Not priced: partition_point is the first priced tile after sel.
+                let after = idx.partition_point(|i| *i < self.sel) as isize;
+                let k = if d > 0 { after } else { after - 1 };
+                idx[k.clamp(0, last) as usize]
+            }
+        };
+    }
+
+    /// Tiles with a return, with their index in `tiles`. The pie and its
+    /// legend show only these, the same members the basket return is over.
+    fn priced(&self) -> Vec<(usize, &Tile)> {
+        self.tiles
+            .iter()
+            .enumerate()
+            .filter(|(_, t)| t.ret.is_some())
+            .collect()
     }
 
     /// The heatmap: one tile per ticker or basket, filled left to right, top to bottom.
@@ -869,7 +1098,21 @@ impl Screen for Universe {
     }
 
     fn needs_redraw(&self) -> bool {
-        false
+        self.spin.turning
+    }
+
+    fn poll_interval(&self) -> Duration {
+        if self.spin.turning {
+            spin::FRAME
+        } else {
+            Duration::from_millis(100)
+        }
+    }
+
+    fn tick(&mut self) -> Action {
+        let target = self.pie_target();
+        self.spin.tick(target, self.pie, Instant::now());
+        Action::None
     }
 
     fn draw(&mut self, frame: &mut Frame) {
@@ -892,10 +1135,10 @@ impl Screen for Universe {
             ]),
             None if !self.flash.is_empty() => Line::styled(format!(" {}", self.flash), t.dim()),
             None if matches!(self.view, View::Fund(_)) => {
-                Line::styled(" hjkl move · ↵ dossier · esc back", t.dim())
+                Line::styled(" hjkl move · ↵ dossier · p pie · esc back", t.dim())
             }
             None => Line::styled(
-                " hjkl move · ↵ open · [ ] range · r edit · w weighting · H/L level · esc back",
+                " hjkl move · ↵ open · [ ] range · r edit · w weighting · p pie · H/L level · esc back",
                 t.dim(),
             ),
         };
@@ -915,7 +1158,7 @@ impl Screen for Universe {
                 };
                 frame.render_widget(Paragraph::new(msg).style(t.dim()), holdings);
             } else {
-                self.draw_tiles(frame, holdings);
+                self.draw_body(frame, holdings);
             }
             return;
         }
@@ -923,7 +1166,7 @@ impl Screen for Universe {
             frame.render_widget(Paragraph::new(NOT_LOADED).style(t.dim()), body);
             return;
         }
-        self.draw_tiles(frame, body);
+        self.draw_body(frame, body);
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -944,6 +1187,35 @@ impl Screen for Universe {
                 _ => {}
             }
             return Action::None;
+        }
+
+        // The pie is one column of priced tiles: step through those, not the
+        // heatmap grid (whose width `cols` is stale while the pie is up).
+        if self.pie {
+            let step = match key.code {
+                KeyCode::Char('j' | 'l') | KeyCode::Down | KeyCode::Right => Some(1),
+                KeyCode::Char('k' | 'h') | KeyCode::Up | KeyCode::Left => Some(-1),
+                _ => None,
+            };
+            if let Some(d) = step {
+                self.step_pie(d);
+                return Action::None;
+            }
+            match key.code {
+                KeyCode::Char('g') => {
+                    if let Some((i, _)) = self.priced().first() {
+                        self.sel = *i;
+                    }
+                    return Action::None;
+                }
+                KeyCode::Char('G') => {
+                    if let Some((i, _)) = self.priced().last() {
+                        self.sel = *i;
+                    }
+                    return Action::None;
+                }
+                _ => {}
+            }
         }
 
         let n = self.tiles.len();
@@ -979,9 +1251,10 @@ impl Screen for Universe {
             }
             KeyCode::Char('r') => self.editing = Some(String::new()),
             KeyCode::Char('w') => {
-                self.equal_weight = !self.equal_weight;
+                self.weighting = self.weighting.next();
                 self.rebuild();
             }
+            KeyCode::Char('p') => self.pie = !self.pie,
             KeyCode::Char(c @ ('[' | ']')) => {
                 let cur = PRESETS.iter().position(|p| *p == self.spec);
                 let next = match (cur, c) {
@@ -1096,5 +1369,154 @@ mod tests {
         assert_eq!(base, d(2026, 9, 30));
         // nothing on or before the end: no return
         assert_eq!(span_return(&s, d(2026, 1, 1), d(2026, 1, 2)), None);
+    }
+
+    fn bare(tiles: Vec<Tile>, pie: bool) -> Universe {
+        Universe {
+            theme: Theme::default(),
+            groups: Vec::new(),
+            returns: HashMap::new(),
+            fund_series: HashMap::new(),
+            holdings: HashMap::new(),
+            db_path: std::path::PathBuf::new(),
+            spec: "1m".into(),
+            from: NaiveDate::MIN,
+            to: NaiveDate::MIN,
+            latest: NaiveDate::MIN,
+            weighting: Weighting::Exposure,
+            caps: HashMap::new(),
+            level: 0,
+            view: View::Groups,
+            tiles,
+            sel: 0,
+            cols: 1,
+            editing: None,
+            flash: String::new(),
+            pie,
+            spin: Spin::default(),
+        }
+    }
+
+    fn tile(title: &str, weight: f64, ret: Option<f64>) -> Tile {
+        Tile {
+            title: title.into(),
+            sub: String::new(),
+            order: 0,
+            ret,
+            value: title.into(),
+            weight,
+        }
+    }
+
+    fn render(u: &mut Universe, w: u16, h: u16) -> String {
+        let mut term = ratatui::Terminal::new(ratatui::backend::TestBackend::new(w, h)).unwrap();
+        term.draw(|f| u.draw(f)).unwrap();
+        term.backend().to_string()
+    }
+
+    #[test]
+    fn pie_view_lists_each_priced_tile_with_its_share() {
+        let mut u = bare(
+            vec![
+                tile("NVDA", 3.0, Some(12.0)),
+                tile("AMD", 1.0, Some(-4.0)),
+                tile("XYZ", 2.0, None),
+            ],
+            true,
+        );
+        let out = render(&mut u, 100, 20);
+        assert!(out.contains("NVDA"), "{out}");
+        assert!(out.contains("75.0%"), "{out}");
+        assert!(out.contains("25.0%"), "{out}");
+        // Unpriced tiles drop out of the pie and its legend, not just the share.
+        assert!(!out.contains("XYZ"), "unpriced tile shown: {out}");
+        assert!(out.contains('▶'), "arrow to the selected slice: {out}");
+    }
+
+    #[test]
+    fn pie_target_faces_the_selected_tile() {
+        let mut u = bare(
+            vec![tile("A", 1.0, Some(1.0)), tile("B", 1.0, Some(-1.0))],
+            true,
+        );
+        // Slice A spans 0..180 (centre 90): turn 180 to reach 9 o'clock.
+        u.sel = 0;
+        assert!((u.pie_target() - 180.0).abs() < 1e-9);
+        // Slice B spans 180..360 (centre 270): no turn needed.
+        u.sel = 1;
+        assert!(u.pie_target().abs() < 1e-9);
+    }
+
+    #[test]
+    fn weighting_uses_market_cap_and_cycles_with_w() {
+        let mut u = bare(vec![], false);
+        u.caps = HashMap::from([("NVDA".to_string(), 3e12), ("AMD".to_string(), 1e12)]);
+        let m = |t: &str| Member {
+            ticker: t.into(),
+            name: t.into(),
+            weight: 0.5,
+        };
+        u.weighting = Weighting::Cap;
+        assert_eq!(u.weight_of(&m("NVDA")), 3e12);
+        // No market cap: counts for nothing, not a guessed size.
+        assert_eq!(u.weight_of(&m("XYZ")), 0.0);
+        u.weighting = Weighting::Exposure;
+        assert_eq!(u.weight_of(&m("NVDA")), 0.5);
+        u.weighting = Weighting::Equal;
+        assert_eq!(u.weight_of(&m("XYZ")), 1.0);
+        assert_eq!(Weighting::Cap.next(), Weighting::Equal);
+        assert_eq!(Weighting::Equal.next(), Weighting::Exposure);
+        assert_eq!(Weighting::Exposure.next(), Weighting::Cap);
+    }
+
+    #[test]
+    fn pie_steps_one_priced_tile_at_a_time() {
+        let mut u = bare(
+            vec![
+                tile("A", 1.0, Some(3.0)),
+                tile("X", 1.0, None),
+                tile("B", 1.0, Some(1.0)),
+            ],
+            true,
+        );
+        // A stale heatmap width must not move the pie selection.
+        u.cols = 6;
+        let key = |c| KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE);
+        u.on_key(key('j'));
+        assert_eq!(u.sel, 2, "skips the unpriced tile");
+        u.on_key(key('j'));
+        assert_eq!(u.sel, 2, "stops at the bottom");
+        u.on_key(key('k'));
+        assert_eq!(u.sel, 0);
+        u.on_key(key('k'));
+        assert_eq!(u.sel, 0, "stops at the top");
+        u.on_key(key('G'));
+        assert_eq!(u.sel, 2);
+        u.on_key(key('g'));
+        assert_eq!(u.sel, 0);
+    }
+
+    #[test]
+    fn unpriced_selection_holds_the_pie_still() {
+        let mut u = bare(vec![tile("A", 1.0, Some(1.0)), tile("X", 1.0, None)], true);
+        u.spin.angle = 42.0;
+        u.sel = 1;
+        assert_eq!(u.pie_target(), 42.0);
+    }
+
+    #[test]
+    fn p_toggles_the_pie_and_spins_while_it_turns() {
+        let mut u = bare(
+            vec![tile("A", 1.0, Some(1.0)), tile("B", 3.0, Some(2.0))],
+            false,
+        );
+        let key = |c| KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE);
+        u.on_key(key('p'));
+        assert!(u.pie);
+        u.on_key(key('j'));
+        u.tick();
+        assert!(u.needs_redraw(), "turning toward the new selection");
+        u.on_key(key('p'));
+        assert!(!u.pie);
     }
 }
