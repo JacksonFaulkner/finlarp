@@ -49,7 +49,19 @@ fn ensure_session() -> io::Result<()> {
     }
     let dir = env::current_dir()?;
     let dir = dir.to_string_lossy();
-    tmux(&["new-session", "-d", "-s", SESSION, "-c", &dir, "claude"])
+    // Keep Claude out of the alternate screen so its output lands in tmux's
+    // scrollback; otherwise there is no history to scroll with copy-mode.
+    tmux(&[
+        "new-session",
+        "-d",
+        "-s",
+        SESSION,
+        "-c",
+        &dir,
+        "-e",
+        "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1",
+        "claude",
+    ])
 }
 
 fn tmux(args: &[&str]) -> io::Result<()> {
