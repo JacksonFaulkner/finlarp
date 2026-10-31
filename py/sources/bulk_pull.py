@@ -1,8 +1,8 @@
 """Resumable bulk downloader for the big once-in-a-while datasets
 (see research/BULK_SOURCES.md). Nothing is parsed here — files land raw in
-~/.local/share/nvim/finlarp/bulk/<group>/ for loaders to read.
+<DATA_ROOT>/bulk/<group>/ (core.paths.BULK_DIR) for loaders to read.
 
-USPTO ODP files need USPTO_API_KEY (env or plugin .env): the API answers
+USPTO ODP files need USPTO_API_KEY (env or repo .env): the API answers
 with a 302 to a signed data.uspto.gov URL that supports Range, so an
 interrupted file resumes from its .part. A file is done when its size
 matches what the source reports; reruns skip finished files.

@@ -1,4 +1,4 @@
-// Standalone onboarding (nvim `va`). Adds new tickers to the universe, runs
+// Onboarding (`fl onboard`). Adds new tickers to the universe, runs
 // every puller for just those tickers, rebuilds their dossiers, then shows
 // the per-step report and which dossier sections each ticker still lacks
 // (py/jobs/onboard.py).
@@ -8,8 +8,7 @@
 //
 // The job runs on a background thread so the screen stays live: progress
 // comes from the job's `… <step>` lines on stderr, and esc cancels a run in
-// flight. A ticker that is not in the universe asks for its sub-sector first,
-// as the nvim flow does.
+// flight. A ticker that is not in the universe asks for its sub-sector first.
 
 use std::collections::BTreeMap;
 use std::io::{self, BufRead, BufReader, Read};
@@ -136,7 +135,7 @@ fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
     m.lock().unwrap_or_else(PoisonError::into_inner)
 }
 
-/// Tickers from the prompt: space or comma separated, uppercased (as the nvim flow does).
+/// Tickers from the prompt: space or comma separated, uppercased.
 fn parse_tickers(text: &str) -> Result<Vec<String>, String> {
     let mut out: Vec<String> = Vec::new();
     for tok in text
@@ -181,7 +180,11 @@ fn parse_report(out: &str) -> Report {
             // "onboard AAPL SKHY  (84.2s)"
             let (tickers, secs) = rest.split_once('(').unwrap_or((rest, ""));
             r.tickers = tickers.split_whitespace().map(str::to_string).collect();
-            r.total_secs = secs.trim_end_matches(')').trim_end_matches('s').parse().unwrap_or(0.0);
+            r.total_secs = secs
+                .trim_end_matches(')')
+                .trim_end_matches('s')
+                .parse()
+                .unwrap_or(0.0);
         } else if line.starts_with("  ") {
             // "  AAPL: all dossier sections populated" / "  SKHY: financials:empty, ..."
             if let Some((ticker, bad)) = t.split_once(": ") {
@@ -291,7 +294,10 @@ fn report_lines(r: &Report, raw: &str, t: Theme) -> Vec<Line<'static>> {
     } else {
         format!("onboard {}", r.tickers.join(" "))
     };
-    out.push(Line::styled(format!("{head}  ({:.1}s)", r.total_secs), t.title()));
+    out.push(Line::styled(
+        format!("{head}  ({:.1}s)", r.total_secs),
+        t.title(),
+    ));
     if r.steps.is_empty() {
         // Nothing recognisable: show what the job printed.
         out.push(Line::styled("no step report; raw output:", t.dim()));
@@ -318,7 +324,10 @@ fn report_lines(r: &Report, raw: &str, t: Theme) -> Vec<Line<'static>> {
             .take(3)
             .map(|s| format!("{} {:.0}s", s.name, s.secs))
             .collect();
-        out.push(Line::styled(format!("  slowest: {}", top.join(", ")), t.dim()));
+        out.push(Line::styled(
+            format!("  slowest: {}", top.join(", ")),
+            t.dim(),
+        ));
     }
     if !r.health.is_empty() {
         out.push(Line::raw(""));
@@ -397,7 +406,7 @@ impl Onboard {
             (Kind::Onboard, Ok(out)) => {
                 let report = parse_report(&out);
                 if self.sub.is_none() && needs_sub(&report) {
-                    // Same as nvim: ask for the sub-sector, then run again.
+                    // Ask for the sub-sector, then run again.
                     self.job = Some(spawn_job(Kind::SubSectors, vec!["--list-subs".into()]));
                     self.phase = Phase::Running;
                     return;
@@ -509,7 +518,9 @@ impl Onboard {
         let max = (lines.len() as u16).saturating_sub(body.height);
         self.scroll = self.scroll.min(max);
         frame.render_widget(
-            Paragraph::new(lines).style(t.base()).scroll((self.scroll, 0)),
+            Paragraph::new(lines)
+                .style(t.base())
+                .scroll((self.scroll, 0)),
             body,
         );
     }
@@ -568,7 +579,10 @@ impl Screen for Onboard {
                     "  A new ticker is added first and asks for its sub-sector.",
                     t.dim(),
                 ));
-                lines.push(Line::styled("  Space or comma separated. Expect minutes.", t.dim()));
+                lines.push(Line::styled(
+                    "  Space or comma separated. Expect minutes.",
+                    t.dim(),
+                ));
                 frame.render_widget(Paragraph::new(lines), inner);
             }
             Phase::Running => self.draw_running(frame, inner),
@@ -669,9 +683,9 @@ impl Screen for Onboard {
 
 #[cfg(test)]
 mod tests {
+    use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::crossterm::event::{KeyEventKind, KeyEventState};
-    use ratatui::Terminal;
 
     use super::*;
 
@@ -742,7 +756,10 @@ onboard AAPL SKHY  (84.2s)
         assert_eq!(r.steps[2].detail, "ValueError: no CIK");
         assert_eq!(r.steps[3].status, "skipped");
         assert_eq!(r.health["AAPL"], Vec::<String>::new());
-        assert_eq!(r.health["SKHY"], vec!["financials:empty", "segments:missing"]);
+        assert_eq!(
+            r.health["SKHY"],
+            vec!["financials:empty", "segments:missing"]
+        );
         assert!(!needs_sub(&r));
     }
 
@@ -766,7 +783,10 @@ onboard AAPL SKHY  (84.2s)
         // Never call submit() in tests: that starts the real onboarding job.
         let mut s = screen(Some("aapl skhy"));
         assert_eq!(s.input, "aapl skhy");
-        assert_eq!(parse_tickers(&s.input), Ok(vec!["AAPL".into(), "SKHY".into()]));
+        assert_eq!(
+            parse_tickers(&s.input),
+            Ok(vec!["AAPL".into(), "SKHY".into()])
+        );
         s.on_key(key(KeyCode::Char('x')));
         assert_eq!(s.input, "aapl skhyx");
         s.on_key(key(KeyCode::Backspace));
@@ -791,8 +811,14 @@ onboard AAPL SKHY  (84.2s)
         s.phase = Phase::Done;
         let out = rendered(&mut s, 90, 24);
         assert!(out.contains("financials"), "{out}");
-        assert!(out.contains("SKHY: financials:empty, segments:missing"), "{out}");
-        assert!(out.contains("AAPL: all dossier sections populated"), "{out}");
+        assert!(
+            out.contains("SKHY: financials:empty, segments:missing"),
+            "{out}"
+        );
+        assert!(
+            out.contains("AAPL: all dossier sections populated"),
+            "{out}"
+        );
         assert!(out.contains("slowest"), "{out}");
     }
 
@@ -800,7 +826,11 @@ onboard AAPL SKHY  (84.2s)
     fn unreadable_report_falls_back_to_raw_output() {
         let r = parse_report("hello\nworld\n");
         let lines = report_lines(&r, "hello\nworld\n", Theme::default());
-        let text: String = lines.iter().map(|l| l.to_string()).collect::<Vec<_>>().join("\n");
+        let text: String = lines
+            .iter()
+            .map(|l| l.to_string())
+            .collect::<Vec<_>>()
+            .join("\n");
         assert!(text.contains("raw output"), "{text}");
         assert!(text.contains("world"), "{text}");
     }

@@ -1,6 +1,6 @@
 """MCP server exposing the pulled SEC dataset to agents (stdio transport).
 
-Same data the nvim UI reads — nothing here fetches from the network, so
+Same data the fl TUI reads — nothing here fetches from the network, so
 every call is local and fast. Tools are all read-only:
 
     search      BM25 over filing text / new risks / earnings / guidance
@@ -48,6 +48,7 @@ from mcp.server.mcpserver import MCPServer
 from mcp.types import ToolAnnotations
 
 
+from core.paths import ETRADE_TOKEN_PATH
 from sources import sec_13f, sec_earnings, sec_events, sec_financials, sec_insiders, sec_segments, universe
 from sources import tweets as tweets_src
 from sources import yahoo_live
@@ -911,7 +912,7 @@ pd.set_option("display.max_rows", 200)
 
 
 def _sandbox_profile(run_dir: Path) -> str:
-    denied = [_REPO / ".env", _HOME / ".local/share/nvim/etrade_token.json",
+    denied = [_REPO / ".env", ETRADE_TOKEN_PATH,
               _HOME / ".ssh", _HOME / ".aws", _HOME / ".gnupg", _HOME / ".config", _HOME / ".claude"]
     lines = ["(version 1)", "(allow default)", "(deny network*)", "(deny file-write*)",
              f'(allow file-write* (subpath "{SCRATCH}") (subpath "/dev") (subpath "{run_dir}"))']

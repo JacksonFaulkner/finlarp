@@ -1,6 +1,6 @@
-// Colours come from nvim's colorscheme (passed as #rrggbb CLI args by
-// ui/tui.lua) so every screen blends with the editor. Screens
-// never hardcode colours: they ask the theme for a semantic style.
+// Colours come from the default palette, optionally overridden by #rrggbb
+// CLI args (bg, up, down) via `Theme::from_args`. Screens never hardcode
+// colours: they ask the theme for a semantic style.
 
 use ratatui::layout::Rect;
 use ratatui::style::{Color, Modifier, Style};

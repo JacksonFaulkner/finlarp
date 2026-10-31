@@ -1,4 +1,4 @@
-// Standalone watchlist (nvim `<leader>vww`). The writable list is
+// Standalone watchlist. The writable list is
 // data/watchlist.txt: one ticker per line, `#` starts a comment. That is the
 // file py/jobs/refresh.py and py/derive/dossier_tabs/mine.py read, so adding
 // or removing here is what they see. Each row shows the latest daily close
@@ -19,7 +19,7 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -292,7 +292,7 @@ impl Watchlists {
 
     fn open_selected(&self) -> Action {
         match self.selected() {
-            Some(r) => Action::Nvim(NvimAction::Screen {
+            Some(r) => Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some(r.symbol.clone()),
             }),
@@ -612,7 +612,7 @@ mod tests {
         w.on_key(key(KeyCode::Char('j')));
         assert_eq!(
             w.on_key(key(KeyCode::Enter)),
-            Action::Nvim(NvimAction::Screen {
+            Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some("NVDA".into()),
             })

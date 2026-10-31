@@ -10,15 +10,14 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
-from pathlib import Path
 
 import requests
 
+from core.paths import TWEETS_DIR
 from sources import apify
 
 ACTOR = "wAusCMrm284Voaw86"
-OUT_ROOT = Path(os.path.expanduser("~/.local/share/nvim/finlarp/tweets"))
+OUT_ROOT = TWEETS_DIR
 
 
 def pull(handle: str, since: str, until: str, max_items: int) -> list[dict]:

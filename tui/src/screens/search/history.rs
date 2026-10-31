@@ -1,7 +1,7 @@
 // Query history for the search input (↑ / ↓ while the input has focus),
 // shell-style: ↑ walks back from the newest, ↓ walks forward and finally
 // restores what was being typed. Persisted one query per line, newest last,
-// at ~/.local/share/nvim/finlarp/search_history. IO failures only
+// at <data dir>/search_history. IO failures only
 // cost persistence, never the screen.
 
 use std::path::PathBuf;
@@ -19,8 +19,7 @@ pub struct History {
 
 impl History {
     pub fn load() -> Self {
-        let path = std::env::var_os("HOME")
-            .map(|h| PathBuf::from(h).join(".local/share/nvim/finlarp/search_history"));
+        let path = Some(crate::data_dir().join("search_history"));
         let items = path
             .as_ref()
             .and_then(|p| std::fs::read_to_string(p).ok())

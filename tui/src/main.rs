@@ -3,17 +3,16 @@
 //
 //   fl                    home menu (same as `fl .`)
 //   fl <screen> [arg]     open a screen directly: fl dossier NVDA
-//   flags                 --bg/--up/--down #rrggbb: colours from nvim's
-//                         colorscheme (ui/tui.lua passes them); omitted =
-//                         terminal default background
+//   flags                 --bg/--up/--down #rrggbb: colours to use instead of
+//                         the terminal default background; omitted = terminal
+//                         default background
 //
 // Screens: home | chart | portfolio | canslim | dossier | earnings | search
 // | universe | diagrams | events | chat. canslim/dossier without a ticker open a ticker picker.
 //
-// Launched by ui/tui.lua in a tmux popup (or a floating nvim :terminal), or
-// by hand. Inside nvim a screen that wants another screen hands the request
-// back through $FINLARP_ACTION_FILE; standalone, `run_session` below opens it
-// in-process and returns to home when a screen quits (if you started there).
+// A screen that wants another screen returns a `Route`; `run_session` below
+// opens it in-process and returns to the previous screen when it quits (or to
+// home, if you started there).
 // Env: FINLARP_DB overrides the DuckDB path.
 
 mod app;
@@ -122,12 +121,21 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
 [home|chart|portfolio|canslim|dossier|earnings|search|filings|universe|diagrams|events|chat|candles|intraday|godel|menu|notes|sources] [arg]";
 
+/// Finlarp's data directory: the repo's `data/` folder, or `FINLARP_DATA`.
+/// The Python side resolves the same directory from its own location.
+pub fn data_dir() -> PathBuf {
+    if let Some(p) = env::var_os("FINLARP_DATA") {
+        return PathBuf::from(p);
+    }
+    let home = env::var_os("HOME").map(PathBuf::from).unwrap_or_default();
+    home.join(FINLARP_ROOT).join("data")
+}
+
 fn db_path() -> PathBuf {
     if let Some(p) = env::var_os("FINLARP_DB") {
         return PathBuf::from(p);
     }
-    let home = env::var_os("HOME").map(PathBuf::from).unwrap_or_default();
-    home.join(".local/share/nvim/finlarp.duckdb")
+    data_dir().join("finlarp.duckdb")
 }
 
 fn upper(arg: Option<String>) -> Option<String> {
@@ -205,7 +213,7 @@ fn label(screen: &str, arg: Option<&str>) -> String {
 }
 
 fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Result<i32> {
-    use app::NvimAction;
+    use app::Route;
     if start == "diagrams" {
         if let Some(rest) = arg.as_deref().and_then(|a| a.strip_prefix("pdf")) {
             export_diagram_pdfs(ctx, rest)?;
@@ -228,8 +236,8 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
         }
         let exit = app::run(top.0.as_mut())?;
         let next = match exit.handoff {
-            Some(NvimAction::Screen { screen, arg }) => Some((screen, arg)),
-            Some(NvimAction::Picker { screen }) => Some((screen, None)),
+            Some(Route::Screen { screen, arg }) => Some((screen, arg)),
+            Some(Route::Picker { screen }) => Some((screen, None)),
             _ => None,
         };
         match next {
@@ -253,7 +261,22 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
     }
 }
 
+/// Every launch of `fl` works from the finlarp checkout, whatever directory
+/// it was started from (shell, tmux popup, a split). Claude's session
+/// inherits this directory too, so it always opens in the repo.
+const FINLARP_ROOT: &str = "code/github_repos/finlarp";
+
+fn enter_finlarp_root() {
+    if let Some(home) = env::var_os("HOME") {
+        let root = PathBuf::from(home).join(FINLARP_ROOT);
+        if root.is_dir() {
+            let _ = env::set_current_dir(root);
+        }
+    }
+}
+
 fn main() {
+    enter_finlarp_root();
     let args: Vec<String> = env::args().skip(1).collect();
     let cli = match parse_args(&args) {
         Ok(c) => c,
@@ -274,13 +297,6 @@ fn main() {
         Ok(code) => std::process::exit(code),
         Err(e) => {
             eprintln!("finlarp: {e}");
-            // stderr dies with the popup/float; hand the message to nvim too
-            if let Ok(path) = env::var(app::ACTION_FILE_ENV) {
-                let _ = std::fs::write(
-                    path,
-                    serde_json::json!({ "error": e.to_string() }).to_string(),
-                );
-            }
             std::process::exit(1);
         }
     }

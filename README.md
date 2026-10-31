@@ -1,7 +1,7 @@
 # finlarp
 
 Terminal-native equity research desk. SEC EDGAR filings, 13F holdings, insider trades, earnings and
-tweets land in a local DuckDB file; a Rust/ratatui UI and a Neovim plugin read it, and an MCP server
+tweets land in a local DuckDB file; a Rust/ratatui terminal UI (`fl`) reads it, and an MCP server
 gives agents the same data.
 
 ![dossier: press i on any value to see its formula and where it came from](docs/screens/dossier.gif)
@@ -54,7 +54,6 @@ These are recorded from the real binary by `just gifs` (see [Development](#devel
 ```
 tui/                 Rust: terminal UI (ratatui); reads the DuckDB file
 docs/screens/        GIFs of the screens above, written by py/jobs/record_screens.py
-lua/finlarp/         Lua: Neovim plugin (launches the TUI, treemap dashboards, pickers, document viewer)
 py/                  Python: everything that fetches or computes data
   core/                DuckDB cache (db.py) and pydantic schemas
   sources/             data pullers, one module per dataset
@@ -68,8 +67,7 @@ data/                universe lists (local, gitignored)
 
 - [uv](https://docs.astral.sh/uv/) and Python 3.12+
 - Rust toolchain
-- Neovim 0.10+, for the plugin
-- tmux (optional; the TUI opens in a tmux popup, otherwise a floating terminal)
+- tmux (optional; needed for `just claude`, `just gifs`, and the Claude popup inside `fl`)
 - E*TRADE API keys, only for the portfolio screen
 
 ## Setup
@@ -81,43 +79,33 @@ cp .env.example .env    # fill in the keys you need
 just setup              # uv sync + cargo build --release
 ```
 
-Neovim, with lazy.nvim:
+## Running
 
-```lua
-{
-  "JacksonFaulkner/finlarp",
-  keys = {
-    { "$", function() require("finlarp").show() end, desc = "finlarp: portfolio treemap" },
-    { "<leader>vww", function() require("finlarp").pick() end, desc = "finlarp: pick watchlist (fullscreen)" },
-    { "<leader>vwl", function() require("finlarp").pick("left") end, desc = "finlarp: pick watchlist (left half)" },
-    { "<leader>vwr", function() require("finlarp").pick("right") end, desc = "finlarp: pick watchlist (right half)" },
-    { "<leader>vu", function() require("finlarp").pick_universe() end, desc = "finlarp: AI universe layer/sub-sector/region picker" },
-    { "<leader>vf", function() require("finlarp").pick_search() end, desc = "finlarp: search SEC filings / earnings text" },
-    { "<leader>vo", function() require("finlarp").switch() end, desc = "finlarp: switch open dashboards" },
-    { "<leader>vc", function() require("finlarp").show_chart_current() end, desc = "finlarp: chart selected/focused symbol" },
-    { "<leader>vt", function() require("finlarp").pick_transactions() end, desc = "finlarp: search transaction history" },
-    { "<leader>vp", function() require("finlarp").show_portfolio_suite() end, desc = "finlarp: portfolio suite" },
-    { "<leader>vD", function() require("finlarp").show_diagrams() end, desc = "finlarp: diagrams" },
-    { "<leader>vk", function() require("finlarp").show_sources() end, desc = "finlarp: data sources" },
-    { "<leader>ve", function() require("finlarp").show_events() end, desc = "finlarp: catalyst calendar" },
-    { "<leader>vC", function() require("finlarp").pick_canslim() end, desc = "finlarp: CANSLIM scorecard picker" },
-  },
-}
-```
-
-The binary also runs on its own:
+`just install` symlinks the release build to `~/.local/bin/fl`, so `fl` runs from any terminal.
+`just build` makes the binary without installing it, at `tui/target/release/fl`.
 
 ```sh
-tui/target/release/finlarp "" "" "" dossier MRVL
+fl                        # home menu
+fl dossier MRVL           # open a screen directly
+fl search t:MRVL guidance # the rest of the line is the screen argument
 ```
 
 Press `?` on any screen for its keys.
+
+## Data
+
+- **Data dir:** `<repo>/data/`. `FINLARP_DATA` moves the whole dir for both `fl` and the Python
+  scripts. The DuckDB file is `data/finlarp.duckdb`; `FINLARP_DB` points `fl` at another file.
+- **Universe and alias inputs:** `data/` in the repo (`ai_stocks_reviewed.json`, `cik_aliases.json`,
+  `patent_aliases.json`); gitignored.
+- **Pull caches:** `<repo>/data/<source>/`, one directory per puller.
 
 ## Pulling data
 
 Each puller in `py/sources/` runs on its own; its module docstring describes
 what it fetches. SEC allows 10 requests per second per client; each process
-defaults to 1.5 (`SEC_RPS` overrides it).
+defaults to 1.5 (`SEC_RPS` overrides it). Run the scripts from the repo root with
+`uv run`; `uv run --env-file .env` loads the API keys from `.env` (`just refresh` does this).
 
 ```sh
 uv run python py/sources/bulk_pull.py              # large bulk files (patents, SEC data sets)
@@ -145,7 +133,6 @@ just refresh intraday --force     # one run now, outside market hours
 just schedule                     # install the launchd agents (just unschedule removes them)
 ```
 
-Logs: `~/.local/share/nvim/finlarp/logs/<mode>/`; reports: `.../debug/refresh_*.json`.
 Patents (`bulk_pull.py pv`, then `patents.py`) and `jobs/pull_following.py` change
 rarely and stay manual.
 

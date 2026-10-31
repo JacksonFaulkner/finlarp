@@ -1,16 +1,13 @@
 // Window label for `fl` run standalone inside tmux. While a screen is up the
-// window reads "◆ fl · dossier MRVL", so the sessionx picker (prefix-w, nvim
-// `<leader>fw`) shows which window is finlarp and where in it, even with
-// several finlarp windows across sessions. Same mechanism nvim uses for its
-// own titles (rename-window + @title, see nvim lua/config/tmux.lua).
+// window reads "◆ fl · dossier MRVL", so the sessionx picker (prefix-w)
+// shows which window is finlarp and where in it, even with
+// several finlarp windows across sessions. Uses rename-window + @title; the
+// window is restored to its original name when the session ends.
 //
-// Off when fl runs inside nvim's popup (FINLARP_ACTION_FILE is set): that
-// window belongs to nvim, and nvim keeps its title.
+// Off outside tmux.
 
 use std::env;
 use std::process::Command;
-
-use crate::app::ACTION_FILE_ENV;
 
 /// Dracula purple, the accent sessionx uses for its pointer.
 const ICON_COLOR: &str = "\x1b[38;2;189;147;249m";
@@ -25,7 +22,7 @@ pub struct WindowTitle {
 impl WindowTitle {
     /// Claims the current window's title, or None when not standalone in tmux.
     pub fn claim() -> Option<Self> {
-        if env::var_os("TMUX").is_none() || env::var_os(ACTION_FILE_ENV).is_some() {
+        if env::var_os("TMUX").is_none() {
             return None;
         }
         let pane = env::var("TMUX_PANE").ok();

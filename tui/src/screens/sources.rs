@@ -17,7 +17,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::help::{self, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -39,11 +39,11 @@ const TILE_H: u16 = 6;
 /// Where Enter on a searchable dataset goes: the search screen, scoped to it.
 fn search_action(s: &Source) -> Action {
     match &s.search {
-        Search::Text(scope) => Action::Nvim(NvimAction::Screen {
+        Search::Text(scope) => Action::Route(Route::Screen {
             screen: "search".into(),
             arg: Some((*scope).into()),
         }),
-        Search::Filings => Action::Nvim(NvimAction::Screen {
+        Search::Filings => Action::Route(Route::Screen {
             screen: "filings".into(),
             arg: None,
         }),
@@ -650,7 +650,7 @@ impl Screen for Sources {
                     View::Detail(_) => None,
                 };
                 if group.is_some_and(|g| self.providers[g].name == "SEC EDGAR") {
-                    return Action::Nvim(NvimAction::Screen {
+                    return Action::Route(Route::Screen {
                         screen: "search".into(),
                         arg: Some(EDGAR_SEARCH.into()),
                     });
@@ -759,7 +759,7 @@ mod tests {
         press(&mut s, KeyCode::Enter);
         // the first SEC EDGAR dataset is the filing index, which has a filings search
         match press(&mut s, KeyCode::Enter) {
-            Action::Nvim(NvimAction::Screen { screen, .. }) => assert_eq!(screen, "filings"),
+            Action::Route(Route::Screen { screen, .. }) => assert_eq!(screen, "filings"),
             _ => panic!("expected the filings screen"),
         }
         assert!(matches!(s.view, View::Datasets(0)));
@@ -787,7 +787,7 @@ mod tests {
         render(&mut s, 120, 40);
         // on the provider tiles: SEC EDGAR is the first provider
         match press(&mut s, KeyCode::Char('/')) {
-            Action::Nvim(NvimAction::Screen { screen, arg }) => {
+            Action::Route(Route::Screen { screen, arg }) => {
                 assert_eq!(screen, "search");
                 let arg = arg.unwrap();
                 assert!(
@@ -805,7 +805,7 @@ mod tests {
         press(&mut s, KeyCode::Enter);
         assert!(matches!(
             press(&mut s, KeyCode::Char('/')),
-            Action::Nvim(NvimAction::Screen { .. })
+            Action::Route(Route::Screen { .. })
         ));
         // on another provider, nothing happens
         let mut other = screen();
@@ -825,7 +825,7 @@ mod tests {
         // 10-K text searches the filings, scoped to the 10-K and new-risk sentences
         s.view = View::Detail(index("10-K / 20-F / 40-F text, Exhibit 21"));
         match press(&mut s, KeyCode::Char('/')) {
-            Action::Nvim(NvimAction::Screen { screen, arg }) => {
+            Action::Route(Route::Screen { screen, arg }) => {
                 assert_eq!(screen, "search");
                 assert_eq!(arg.as_deref(), Some("type:10k type:new_risk "));
             }

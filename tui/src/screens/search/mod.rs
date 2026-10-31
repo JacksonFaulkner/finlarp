@@ -1,6 +1,5 @@
 // Full-text search over SEC filing chunks, patents and profiles
-// (py/derive/search.py BM25 index), as a live ratatui screen. The fzf picker
-// in ui/search.lua is the other front end over the same engine.
+// (py/derive/search.py BM25 index), as a live ratatui screen.
 //
 //   ┌ search › t:MRVL guidance▏                              searching… ┐
 //   │ facets    │ results                 │ preview (chunk ± 1 context) │
@@ -24,7 +23,6 @@ mod query;
 mod view;
 
 use std::collections::HashMap;
-use std::ffi::OsString;
 use std::io;
 use std::time::{Duration, Instant};
 
@@ -34,7 +32,7 @@ use ratatui::widgets::ListState;
 use tui_input::Input;
 use tui_input::backend::crossterm::EventHandler;
 
-use crate::app::{ACTION_FILE_ENV, Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::Source;
 use crate::screens::docview;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
@@ -105,9 +103,6 @@ pub enum FacetRow {
 
 pub struct Search {
     theme: Theme,
-    /// Launched from nvim: chunks and documents open there. Otherwise they
-    /// open in the standalone docview screen (hand_off).
-    nvim: bool,
     input: Input,
     focus: Pane,
     history: History,
@@ -156,15 +151,13 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Search> {
         ctx.theme,
         Client::spawn(),
         History::load(),
-        nvim_attached(std::env::var_os(ACTION_FILE_ENV)),
     ))
 }
 
 impl Search {
-    fn new(query: String, theme: Theme, client: Client, history: History, nvim: bool) -> Self {
+    fn new(query: String, theme: Theme, client: Client, history: History) -> Self {
         let mut s = Self {
             theme,
-            nvim,
             input: Input::new(query),
             focus: Pane::Input,
             history,
@@ -380,18 +373,18 @@ impl Search {
             return Action::None;
         };
         self.remember();
-        self.hand_off(NvimAction::Chunk { id: id.to_string() })
+        Action::Route(Route::Screen {
+            screen: "docview".into(),
+            arg: Some(docview::chunk_arg(id)),
+        })
     }
 
     fn open_docview(&mut self) -> Action {
         match self.selected_source() {
-            Some(src) if src.url.is_some() => {
+            // the url keeps its #:~:text= fragment, so the browser lands on the passage
+            Some(Source { url: Some(url), .. }) => {
                 self.remember();
-                let url = src.doc_url().unwrap_or_default().to_string();
-                self.hand_off(NvimAction::Docview {
-                    url,
-                    quote: src.quote(),
-                })
+                Action::OpenBrowser(url)
             }
             Some(_) => self.flash_msg("no source document for this hit"),
             None => Action::None,
@@ -418,12 +411,6 @@ impl Search {
             Some(u) => Action::Copy(u),
             None => self.flash_msg("no source url"),
         }
-    }
-
-    /// Opens a chunk or source document: nvim gets the action as before;
-    /// standalone `fl` pushes the docview screen, which fetches the text itself.
-    fn hand_off(&self, a: NvimAction) -> Action {
-        hand_off(self.nvim, a)
     }
 
     fn flash_msg(&mut self, m: &str) -> Action {
@@ -460,32 +447,6 @@ impl Search {
         }
         Action::None
     }
-}
-
-/// Whether an nvim session is listening: $FINLARP_ACTION_FILE is set (the same
-/// test app.rs uses). Only nvim can open a chunk or document in place.
-fn nvim_attached(action_file: Option<OsString>) -> bool {
-    action_file.is_some()
-}
-
-/// The action that opens a chunk or source document. Under nvim it is the
-/// NvimAction the nvim plugin dispatches. Standalone `fl` has no nvim, so it
-/// pushes the docview screen (screens/docview.rs) with the same target.
-fn hand_off(nvim: bool, a: NvimAction) -> Action {
-    if nvim {
-        return Action::Nvim(a);
-    }
-    Action::Nvim(match a {
-        NvimAction::Docview { url, quote } => NvimAction::Screen {
-            screen: "docview".into(),
-            arg: Some(docview::url_arg(&url, quote.as_deref())),
-        },
-        NvimAction::Chunk { id } => NvimAction::Screen {
-            screen: "docview".into(),
-            arg: Some(docview::chunk_arg(&id)),
-        },
-        other => other,
-    })
 }
 
 fn hit_source(h: &Hit) -> Source {
@@ -591,11 +552,11 @@ impl Screen for Search {
             return match command {
                 // the query is only an argument for search itself; chart and
                 // earnings take a range/ticker and reject free text
-                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                Some(Command::Screen(screen)) => Action::Route(Route::Screen {
                     screen: screen.into(),
                     arg: (screen == "search").then(|| self.input.value().to_string()),
                 }),
-                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                Some(Command::Picker(screen)) => Action::Route(Route::Picker {
                     screen: screen.into(),
                 }),
                 Some(Command::Pane(pane)) => {

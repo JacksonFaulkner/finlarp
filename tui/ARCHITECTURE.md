@@ -1,25 +1,38 @@
 # finlarp TUI architecture
 
-One ratatui binary, several screens, one DuckDB file, launched by
-`ui/tui.lua`. Python services write the data; this crate reads it.
+One ratatui binary (`fl`), several screens, one DuckDB file, run from a
+terminal. Python services write the data; this crate reads it and runs some
+of those Python scripts itself (`pyrun.rs`) when a screen needs them.
 
 ```
-finlarp <bg> <fg_up> <fg_down> [chart|portfolio|canslim|dossier|earnings|search] [arg]
+fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] [screen] [arg]
 ```
 
-Colours are `#rrggbb` from the colorscheme (`""` = terminal default).
-Env: `FINLARP_DB` (DuckDB path), `FINLARP_ACTION_FILE` (handoff).
+No screen (or `.`) opens the home menu. The rest of the command line after the
+screen name is its argument, so `fl search t:MRVL guidance` works unquoted.
+Colours are optional `#rrggbb`; unset or empty means the terminal default.
+
+Env:
+- `FINLARP_DB`: DuckDB path. Default `<repo>/data/finlarp.duckdb`.
+- `FINLARP_PLUGIN_DIR`: repo root for the Python calls. Default: the crate's parent directory.
+- `FINLARP_PYTHON`: interpreter for the Python calls. Default `<repo>/.venv/bin/python`, else `python3` on PATH.
+
+On start `fl` changes its working directory to `~/code/github_repos/finlarp`
+when that directory exists, so Claude and the Python calls run in the repo.
+
 ## Layout
 
 `main.rs` parses the CLI into `Ctx` and dispatches; `app.rs` holds the
 `Screen` trait, actions and event loop; `model.rs` the data; `ui/*` the
 screen-agnostic components; `screens/*` state, keys and composition only.
+
 ## Rule: every value carries a Source
 
 A number never reaches the screen without the place it came from.
 
 - **Document value:** `Source::url(label, url)`. The URL may end in
-  `#:~:text=<quote>`, which is what `v` jumps to in the nvim docview.
+  `#:~:text=<quote>`. `↵` opens the full URL, so a browser that supports text
+  fragments jumps to the quote; `v` opens it without the fragment.
 - **Computed value:** `Source::derived(label, formula, inputs)`. The formula
   is written out with its operands filled in, e.g.
   `($55,267.58 / $40,169.70 - 1) × 100 = +37.59%`. `inputs` holds the Source
@@ -37,7 +50,7 @@ Source ──► Block ──► Section ──► screen
             └─ BlockView (cursor over rows / points / bars)
                   └─ selected_source() ──► SourceBar (one line)
                                            SourceInspector (`i`: formula + inputs, drillable)
-                                           source_action (↵ browser, v nvim, y copy)
+                                           source_action (↵ browser, v browser without quote, y copy)
 ```
 
 - **`model::Block`**: `Table | Kv | Series | Bars | Text`; every row, point
@@ -72,44 +85,38 @@ hook restores the terminal). Each iteration:
    while a flash shows (chart).
 2. **Tick**, then **poll** up to 100 ms. Key presses go to `on_key`
    (Ctrl-C always quits), `Resize` forces a redraw, other events are ignored.
-3. **Handle the `Action`.** `Quit` / `Exit(code)` return the code.
-   `OpenBrowser` / `Copy` run in-process, then `set_flash`; the screen stays
-   open. `Nvim(..)` writes the handoff (next section) and exits 0.
+3. **Handle the `Action`** (table below).
 
-## nvim handoff protocol
-
-The binary runs outside nvim and can't call it. Instead it writes **one
-JSON line** to `$FINLARP_ACTION_FILE` and exits:
-
-```json
-{"action":"docview","url":"https://…","quote":"net revenue"}   // quote may be null
-{"action":"chunk","id":"123"}
-{"action":"screen","screen":"dossier","arg":"MRVL"}           // arg may be null
-{"action":"picker","screen":"canslim"}
-```
-
-`ui/tui.lua` `M.open_screen(screen, arg, {title, on_exit})`:
-
-1. Creates a temp action file and puts the env vars on the command line
-   (a tmux popup's shell gets the server's environment, not the job's).
-2. **In tmux:** `jobstart{"tmux","display-popup","-E",…}` without `detach`.
-   `display-popup -E` blocks until the popup closes and exits with the
-   binary's code (tested on tmux 3.6), so the job's `on_exit` fires then.
-   **Outside tmux:** a floating `jobstart(cmd, {term = true})`; `TermClose`
-   closes the window and reads `v:event.status`.
-3. On exit it calls `opts.on_exit(code, action)`, then exit code `90`
-   (legacy) runs `pick_<screen>()` and anything else runs `M.dispatch(action)`:
-
-| action | nvim side |
+| `Action` | What happens |
 |---|---|
-| `docview` | `ui.docview.open(url, quote)` |
-| `chunk` | `ui.search.open_chunk(id)` |
-| `screen` | `canslim` → `init.show_canslim`, `dossier` → `init.show_dossier`, `search` → `ui.search.pick_tui`, `chart` → `show` |
-| `picker` | `init.pick_<screen>()` |
+| `Quit` | the screen returns exit code 0 |
+| `OpenBrowser(url)` | opened with the OS handler in-process; the screen stays open |
+| `Copy(text)` | copied to the clipboard in-process; the screen stays open |
+| `Route(Screen \| Picker)` | the screen exits with a handoff; `main` opens the requested screen |
+| `Route(Claude { text })` | the Claude popup opens (below); the screen stays open |
 
-Targets are called through `pcall`; a missing one notifies instead of
-erroring. `app::tests::nvim_action_json_shape` pins the JSON: change the
-enum and the Lua dispatcher together.
+## Screen routing
+
+`main.rs` `run_session` keeps a stack of screens. A screen that exits with a
+`Screen` or `Picker` handoff pushes the requested screen, and a picker is
+replaced by its pick. A screen that quits with no handoff is popped, so `q` /
+`Esc` returns to the one beneath it. The process exits when the stack is empty
+or the exit code is non-zero. Errors go to stderr with exit code 1.
+
+While it runs inside tmux, `main` sets the window name to the current screen
+(`tmux_title.rs`) and restores the old name on exit.
+
+Routing is all in-process: nothing is written to a file for another program to read.
+
+## Claude popup
+
+`<space>ac` shows Claude; `<space>as` also types the screen's selected
+context (`claude_context`) into Claude's prompt without submitting it.
+`claude_popup.rs` keeps Claude in a detached tmux session named
+`finlarp-claude` and shows it with `tmux display-popup -E` over the pane `fl`
+runs in. Closing the popup (prefix-d) leaves Claude running, and the next
+`<space>ac` shows the same conversation. This needs `fl` to run inside tmux;
+otherwise the screen shows "claude: Claude popup needs fl run inside tmux".
 
 ## Adding a screen
 
@@ -119,8 +126,8 @@ enum and the Lua dispatcher together.
 2. Compose `layout::render_frame`, `SectionList`, `BlockView`,
    `render_source_bar`, `SourceInspector` and `help`; one `const KEYS`;
    `source_action` as the fallthrough for ↵ / v / y.
-3. Register in `screens/mod.rs`, `SCREENS` + `match` in `main.rs`, and the
-   `screens` table in `ui/tui.lua`. Add TestBackend tests.
+3. Register in `screens/mod.rs`, and add the name to `SCREENS` and the
+   `match` in `main.rs`. Add TestBackend tests.
 
 ## Adding a block type
 
@@ -144,10 +151,7 @@ enum and the Lua dispatcher together.
   personal or mock data.
 - **Visual check:** release binary in a detached tmux session:
   ```
-  tmux new-session -d -s c5 -x 160 -y 40 'cargo run --release -- "" "" "" chart'
+  tmux new-session -d -s c5 -x 160 -y 40 'cargo run --release -- chart'
   tmux capture-pane -p -t c5      # -e keeps colours
   tmux send-keys -t c5 h
   ```
-- **Lua launcher:** `nvim --headless` with `TMUX` pointed at a scratch tmux
-  server that has a client attached; swap `binary_path` for a fake script
-  that writes an action file or exits 90, and assert `on_exit` / `dispatch`.

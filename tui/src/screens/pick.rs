@@ -1,5 +1,4 @@
-// Type-to-filter list picker: the Rust replacement for the fzf-lua pickers.
-// Every item carries a `value`; Enter opens `target` (a screen name) with
+// Type-to-filter list picker. Every item carries a `value`; Enter opens `target` (a screen name) with
 // that value as its argument. With `free_entry`, text that matches nothing
 // can still be submitted (any ticker, not just the listed ones).
 //
@@ -16,7 +15,7 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -188,7 +187,7 @@ impl Screen for Pick {
         match key.code {
             KeyCode::Esc => Action::Quit,
             KeyCode::Enter => match self.submit() {
-                Some(value) => Action::Nvim(NvimAction::Screen {
+                Some(value) => Action::Route(Route::Screen {
                     screen: self.target.into(),
                     arg: Some(value),
                 }),
@@ -326,7 +325,7 @@ mod tests {
         press(&mut p, KeyCode::Down);
         assert_eq!(
             press(&mut p, KeyCode::Enter),
-            Action::Nvim(NvimAction::Screen {
+            Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some("AMD".into())
             })
@@ -340,7 +339,7 @@ mod tests {
         assert!(p.shown.is_empty());
         assert_eq!(
             press(&mut p, KeyCode::Enter),
-            Action::Nvim(NvimAction::Screen {
+            Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some("ZZZ".into())
             })

@@ -17,6 +17,8 @@ LOG="$HOME/.cache/finlarp/fl-build.log"
 CHANGED="$HOME/.cache/finlarp/fl-build.changed"
 
 input=$(cat)
+# Pause switch: `touch ~/.cache/finlarp/fl-build.paused` silences rebuilds during bulk edits.
+[ -e "$HOME/.cache/finlarp/fl-build.paused" ] && exit 0
 file=$(printf '%s' "$input" | jq -r '.tool_input.file_path // empty' 2>/dev/null)
 
 case "$file" in

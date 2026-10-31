@@ -1,6 +1,5 @@
-// `fl note [ticker | text]`: standalone twin of `<leader>vn` (lua/finlarp/ui/note.lua).
-// Type a note and press ↵: it is saved to mind.duckdb with `py/mind/cli.py add`,
-// then `py/mind/cli.py answer` runs detached (headless Claude with the finlarp
+// `fl note [ticker | text]`: type a note and press ↵. It is saved to mind.duckdb
+// with `py/mind/cli.py add`, then `py/mind/cli.py answer` runs detached (headless Claude with the finlarp
 // MCP tools). The saved id shows here; read the answer later with `fl notes`
 // (or `fl notes last`).
 //
@@ -30,11 +29,11 @@ use crate::ui::theme::Theme;
 
 /// The mind CLI, repo-relative.
 pub const CLI: &str = "py/mind/cli.py";
-/// anchor_screen for notes taken in `fl` (nvim stores the buffer's filetype).
+/// anchor_screen for notes taken in `fl`.
 const SCREEN: &str = "note";
 
 /// `TICKER` (all caps, 1-5 letters) or `$ticker` as an explicit `ticker:` anchor.
-/// Anything else is left to mind's entity extraction on the context, as nvim does.
+/// Anything else is left to mind's entity extraction on the context.
 pub fn ticker_anchor(text: &str) -> Option<String> {
     let t = text.trim();
     let dollar = t.starts_with('$');

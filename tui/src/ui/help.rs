@@ -27,7 +27,7 @@ pub const fn key(keys: &'static str, desc: &'static str) -> Key {
 /// Keys every sourced screen shares (see ui::source_bar::source_action).
 pub const SOURCE_KEYS: &[Key] = &[
     key("↵", "open source in browser"),
-    key("v", "open source in nvim"),
+    key("v", "open source document in browser"),
     key("y", "copy source URL"),
     key("i", "inspect formula inputs"),
     key("a", "audit overlay"),

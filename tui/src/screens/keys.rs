@@ -1,9 +1,5 @@
-// `fl keys`: every finlarp key, grouped by what it does, and whether it works in standalone
-// `fl` (no nvim). Source of truth: the `maps` table in the nvim config
-// (~/.config/nvim/lua/plugins/finlarp.lua, which also builds the <leader>v? menu), plus the
-// Claude chords routed in app.rs. Edit GROUPS below to keep it in step.
-//
-// Keys are written with the nvim leader shown as ␣ (space), so ␣vf is <leader>vf.
+// `fl keys`: every finlarp screen and the fl command that opens it, plus the chords that
+// work in any screen. Edit GROUPS below to keep it in step with main.rs and app.rs.
 
 use std::io;
 
@@ -24,123 +20,69 @@ const KEYS: &[Key] = &[
     key("q/esc", "back"),
 ];
 
-/// Whether a key works in standalone `fl`.
+/// Whether a key works in standalone `fl`. Every row here does.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Standalone {
-    /// Works in fl; the row's `cmd` says how.
     Yes,
-    /// Not in fl: nvim-only feature with no fl screen yet.
-    No,
-    /// Depends on nvim state: cursor word, visual selection, window splits, nvim's notes index or menu.
-    NeedsNvim,
-}
-
-impl Standalone {
-    fn label(self) -> &'static str {
-        match self {
-            Self::Yes => "yes",
-            Self::No => "no",
-            Self::NeedsNvim => "needs nvim",
-        }
-    }
 }
 
 pub struct Row {
-    pub keys: &'static str,
     pub what: &'static str,
-    pub standalone: Standalone,
-    /// The fl command that does the same thing, or "" when there is none.
+    /// The fl command that does the same thing.
     pub cmd: &'static str,
+    pub standalone: Standalone,
 }
+
+use Standalone::Yes;
 
 pub struct Group {
     pub title: &'static str,
     pub rows: &'static [Row],
 }
 
-use Standalone::{NeedsNvim, No, Yes};
-
 pub const GROUPS: &[Group] = &[
     Group {
         title: "Screens",
         rows: &[
             Row {
-                keys: "␣ww",
                 what: "watchlist, full screen",
                 standalone: Yes,
                 cmd: "fl watchlists",
             },
             Row {
-                keys: "␣wl",
-                what: "watchlist, left half",
-                standalone: NeedsNvim,
-                cmd: "",
-            },
-            Row {
-                keys: "␣wr",
-                what: "watchlist, right half",
-                standalone: NeedsNvim,
-                cmd: "",
-            },
-            Row {
-                keys: "␣ve",
                 what: "catalyst calendar",
                 standalone: Yes,
                 cmd: "fl events [month|week|day] [t:TICKERS]",
             },
             Row {
-                keys: "␣vD",
                 what: "diagrams",
                 standalone: Yes,
                 cmd: "fl diagrams",
             },
             Row {
-                keys: "␣vk",
                 what: "data sources",
                 standalone: Yes,
                 cmd: "fl sources",
             },
             Row {
-                keys: "␣vp",
                 what: "portfolio: equity, positions, activity",
                 standalone: Yes,
                 cmd: "fl portfolio",
             },
             Row {
-                keys: "␣vu",
                 what: "AI universe heatmap",
                 standalone: Yes,
                 cmd: "fl universe",
             },
             Row {
-                keys: "␣vr",
                 what: "intraday grid, live candle tapes",
                 standalone: Yes,
                 cmd: "fl intraday MKSI,WDC,WULF,APLD",
             },
             Row {
-                keys: "␣vb",
                 what: "candlestick chart",
                 standalone: Yes,
                 cmd: "fl candles TICKER",
-            },
-            Row {
-                keys: "␣vc",
-                what: "line chart of the focused symbol",
-                standalone: No,
-                cmd: "fl candles TICKER (candlesticks instead)",
-            },
-            Row {
-                keys: "␣vo",
-                what: "switch between open dashboards",
-                standalone: NeedsNvim,
-                cmd: "",
-            },
-            Row {
-                keys: "$",
-                what: "portfolio treemap",
-                standalone: No,
-                cmd: "",
             },
         ],
     },
@@ -148,22 +90,19 @@ pub const GROUPS: &[Group] = &[
         title: "Notes",
         rows: &[
             Row {
-                keys: "␣vn",
-                what: "ask about the word under cursor or the selection",
-                standalone: NeedsNvim,
-                cmd: "",
+                what: "take a note; ↵ saves it and answers in the background",
+                standalone: Yes,
+                cmd: "fl note [ticker | text]",
             },
             Row {
-                keys: "␣vm",
-                what: "browse notes; Enter reopens the answering chat",
-                standalone: NeedsNvim,
-                cmd: "",
+                what: "browse notes; ↵ reopens the answering chat in tmux",
+                standalone: Yes,
+                cmd: "fl notes",
             },
             Row {
-                keys: "␣vl",
-                what: "last answer, in a split",
-                standalone: No,
-                cmd: "",
+                what: "newest answered note only",
+                standalone: Yes,
+                cmd: "fl notes last",
             },
         ],
     },
@@ -171,19 +110,16 @@ pub const GROUPS: &[Group] = &[
         title: "Claude",
         rows: &[
             Row {
-                keys: "␣ac",
                 what: "toggle the Claude window",
                 standalone: Yes,
                 cmd: "space a c in any screen",
             },
             Row {
-                keys: "␣as",
                 what: "add the selected value to Claude's context",
                 standalone: Yes,
                 cmd: "space a s in a screen with a selection",
             },
             Row {
-                keys: "␣vi",
                 what: "chat with Claude Code; tickers in replies open dossier or CANSLIM",
                 standalone: Yes,
                 cmd: "fl chat",
@@ -194,25 +130,21 @@ pub const GROUPS: &[Group] = &[
         title: "Search",
         rows: &[
             Row {
-                keys: "␣vf",
                 what: "search 10-K/20-F text, releases, guidance, patents",
                 standalone: Yes,
                 cmd: "fl search QUERY",
             },
             Row {
-                keys: "␣vd",
                 what: "one-ticker dossier",
                 standalone: Yes,
                 cmd: "fl dossier TICKER",
             },
             Row {
-                keys: "␣vC",
                 what: "CANSLIM scorecard",
                 standalone: Yes,
                 cmd: "fl canslim TICKER",
             },
             Row {
-                keys: "␣vt",
                 what: "search E*TRADE transactions",
                 standalone: Yes,
                 cmd: "fl transactions",
@@ -221,32 +153,15 @@ pub const GROUPS: &[Group] = &[
     },
     Group {
         title: "Other",
-        rows: &[
-            Row {
-                keys: "␣va",
-                what: "onboard a ticker: add, pull every dataset, build its dossier",
-                standalone: Yes,
-                cmd: "fl onboard",
-            },
-            Row {
-                keys: "␣vT",
-                what: "timestamped video transcript (Siltronic), scratch split",
-                standalone: No,
-                cmd: "",
-            },
-            Row {
-                keys: "␣v?",
-                what: "menu of every nvim key; Enter runs one",
-                standalone: NeedsNvim,
-                cmd: "this page lists them",
-            },
-        ],
+        rows: &[Row {
+            what: "onboard a ticker: add, pull every dataset, build its dossier",
+            standalone: Yes,
+            cmd: "fl onboard",
+        }],
     },
 ];
 
-const KEY_W: usize = 6;
-const WHAT_W: usize = 52;
-const STATE_W: usize = 11;
+const WHAT_W: usize = 60;
 
 pub struct Keys {
     theme: Theme,
@@ -267,7 +182,7 @@ fn build(t: &Theme) -> Vec<Line<'static>> {
     let mut out: Vec<Line<'static>> = vec![
         Line::from(Span::styled("finlarp keys", t.title())),
         Line::from(Span::styled(
-            "yes: works in fl (command shown)   needs nvim: only inside nvim   no: no fl equivalent",
+            "each screen is an fl command; the chords work wherever the screen allows them",
             t.dim(),
         )),
         Line::from(""),
@@ -275,25 +190,13 @@ fn build(t: &Theme) -> Vec<Line<'static>> {
     for group in GROUPS {
         out.push(Line::from(Span::styled(group.title, t.accent())));
         out.push(Line::from(Span::styled(
-            format!(
-                "{}{}{}command",
-                text::fit("key", KEY_W, false),
-                text::fit("what", WHAT_W, false),
-                text::fit("standalone", STATE_W, false),
-            ),
+            format!("{}command", text::fit("what", WHAT_W, false)),
             t.dim(),
         )));
         for r in group.rows {
-            let state_style = match r.standalone {
-                Standalone::Yes => t.base(),
-                Standalone::NeedsNvim => t.accent(),
-                Standalone::No => t.dim(),
-            };
             out.push(Line::from(vec![
-                Span::styled(text::fit(r.keys, KEY_W, false), t.accent()),
                 Span::styled(text::fit(r.what, WHAT_W, false), t.base()),
-                Span::styled(text::fit(r.standalone.label(), STATE_W, false), state_style),
-                Span::styled(r.cmd, t.dim()),
+                Span::styled(r.cmd, t.accent()),
             ]));
         }
         out.push(Line::from(""));
@@ -345,17 +248,10 @@ mod tests {
             assert!(!g.rows.is_empty(), "{} has no rows", g.title);
             for r in g.rows {
                 assert!(
-                    !r.keys.is_empty() && !r.what.is_empty(),
+                    !r.cmd.is_empty() && !r.what.is_empty(),
                     "{}: empty row",
                     g.title
                 );
-                if r.standalone == Yes {
-                    assert!(
-                        !r.cmd.is_empty(),
-                        "{} works standalone but has no command",
-                        r.keys
-                    );
-                }
             }
         }
     }

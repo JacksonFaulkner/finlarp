@@ -29,13 +29,13 @@ from pathlib import Path
 import duckdb
 import requests
 
-from core import db
+from core.paths import SEC_13F_DIR
 from sources import sec_http, universe
 from sources import pq
 
 INDEX_URL = "https://www.sec.gov/data-research/sec-markets-data/form-13f-data-sets"
 OPENFIGI_URL = "https://api.openfigi.com/v3/mapping"
-DATA_DIR = db.DB_PATH.parent / "sec_13f"
+DATA_DIR = SEC_13F_DIR
 
 # A single filer reporting more than this multiple of the next-largest
 # holder's position is almost always a units typo (CalSTRS reported 386M

@@ -1,7 +1,4 @@
-// Standalone document viewer: the no-nvim counterpart of ui/docview.lua (and
-// of ui/search.lua open_chunk). Search pushes it for alt-v / Enter when `fl`
-// runs without nvim (search/mod.rs hand_off); inside nvim those keys still
-// open the nvim viewer.
+// Document viewer. Search pushes it for alt-v / Enter (search/mod.rs).
 //
 // Arg encodings (main's router passes the string through unchanged):
 //   <url>                    a source document
@@ -38,7 +35,7 @@ use crate::ui::theme::Theme;
 const FLASH_FOR: Duration = Duration::from_secs(2);
 const DOCVIEW_PY: &str = "py/derive/docview.py";
 const SEARCH_PY: &str = "py/derive/search.py";
-/// Marks the hit inside a chunk's neighbourhood (same text as ui/search.lua).
+/// Marks the hit inside a chunk's neighbourhood.
 const MATCH_MARK: &str = ">>> match";
 const HINT: &str = "j/k scroll  ^d/^u page  g/G top/end  n/N match  o browser  y copy  q back";
 
@@ -62,30 +59,9 @@ pub fn parse_arg(arg: &str) -> Option<Target> {
     Some(Target::Url { url, quote })
 }
 
-/// Arg for a source document, with the quote as a `#:~:text=` fragment.
-pub fn url_arg(url: &str, quote: Option<&str>) -> String {
-    match quote.map(str::trim).filter(|q| !q.is_empty()) {
-        Some(q) => format!("{url}#:~:text={}", encode(q)),
-        None => url.to_string(),
-    }
-}
-
 /// Arg for a search chunk by id.
 pub fn chunk_arg(id: impl std::fmt::Display) -> String {
     format!("chunk:{id}")
-}
-
-/// Percent-encodes everything but unreserved ASCII (Source::quote decodes it).
-fn encode(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for b in s.bytes() {
-        if b.is_ascii_alphanumeric() || matches!(b, b'.' | b'_' | b'~') {
-            out.push(b as char);
-        } else {
-            out.push_str(&format!("%{b:02X}"));
-        }
-    }
-    out
 }
 
 /// A loaded document: plain text lines plus where to look in them.
@@ -349,8 +325,8 @@ fn opt(s: &Option<String>) -> &str {
     s.as_deref().unwrap_or("")
 }
 
-/// The chunk with two neighbours either side, laid out like ui/search.lua
-/// open_chunk: a header, the source url, then each chunk with the hit marked.
+/// The chunk with two neighbours either side: a header, the source url, then
+/// each chunk with the hit marked.
 fn load_chunk(id: i64) -> Result<Doc, String> {
     let id_s = id.to_string();
     let out = pyrun::run_script(
@@ -713,19 +689,7 @@ mod tests {
     }
 
     #[test]
-    fn url_arg_round_trips_awkward_quotes() {
-        for q in ["Revenue, up 50% & $2,739", "café — “quoted” a+b", "x"] {
-            let arg = url_arg("https://a/b.htm", Some(q));
-            assert_eq!(
-                parse_arg(&arg),
-                Some(Target::Url {
-                    url: "https://a/b.htm".into(),
-                    quote: Some(q.into())
-                }),
-                "{arg}"
-            );
-        }
-        assert_eq!(url_arg("https://a", Some("  ")), "https://a");
+    fn chunk_arg_is_the_chunk_id() {
         assert_eq!(chunk_arg(42), "chunk:42");
     }
 

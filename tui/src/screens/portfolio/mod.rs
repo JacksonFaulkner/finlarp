@@ -65,12 +65,12 @@ const FLASH_FOR: Duration = Duration::from_millis(1500);
 /// Redraw interval while the pie spins, and its ease-out time constant (s).
 const FRAME: Duration = Duration::from_millis(16);
 const SPIN_TAU: f64 = 0.09;
-/// Env var naming the JSON file nvim's background refresh reports through.
+/// Env var naming the JSON file the background refresh reports through.
 const STATUS_FILE_ENV: &str = "FINLARP_STATUS_FILE";
 /// Positions older than this get a stale warning in the header.
 const STALE_AFTER_S: f64 = 10.0 * 60.0;
 
-/// Where nvim's background refresh (init.lua refresh_portfolio) has got to.
+/// Where the background refresh has got to.
 #[derive(Debug, Default, PartialEq)]
 enum Sync {
     #[default]
@@ -109,7 +109,7 @@ pub struct PortfolioScreen {
     spin: f64,
     spinning: bool,
     spin_at: Instant,
-    /// Status file written by nvim's refresh, its last raw contents, and what
+    /// Status file written by the background refresh, its last raw contents, and what
     /// it said. The TUI only reads DuckDB, so this is how it learns to reload.
     status_file: Option<PathBuf>,
     status_seen: String,
@@ -207,7 +207,7 @@ impl PortfolioScreen {
         self.cursor = None;
     }
 
-    /// Applies a new status message from nvim's background refresh.
+    /// Applies a new status message from the background refresh.
     fn poll_status(&mut self) {
         let Some(path) = &self.status_file else {
             return;

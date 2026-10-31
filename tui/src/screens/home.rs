@@ -14,7 +14,7 @@ use ratatui::layout::{Constraint, Layout};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::theme::Theme;
 
 /// (title, screen, description, key). Screens that need a ticker open the
@@ -83,7 +83,7 @@ impl Home {
     }
 
     fn open_at(&self, i: usize) -> Action {
-        Action::Nvim(NvimAction::Screen {
+        Action::Route(Route::Screen {
             screen: ENTRIES[i].1.into(),
             arg: None,
         })
@@ -190,7 +190,7 @@ mod tests {
     }
 
     fn opens(screen: &str) -> Action {
-        Action::Nvim(NvimAction::Screen {
+        Action::Route(Route::Screen {
             screen: screen.into(),
             arg: None,
         })

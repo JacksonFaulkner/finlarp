@@ -16,7 +16,7 @@ import requests
 from sources import keys
 
 # SEC 403s without contact info; set SEC_CONTACT (an email) in env or .env
-UA = f"finlarp (personal nvim tool) contact: {keys.require('SEC_CONTACT')}"
+UA = f"finlarp (personal nvim tool) contact:{keys.require('SEC_CONTACT')}"
 RPS = float(os.environ.get("SEC_RPS", "1.5"))
 
 _lock = threading.Lock()

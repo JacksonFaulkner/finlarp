@@ -5,7 +5,7 @@ use std::thread::sleep;
 use std::time::Duration;
 
 /// Opens `path` read-only. DuckDB allows one read-write process *or* any
-/// number of readers, and the Python jobs nvim fires (live positions,
+/// number of readers, and the Python jobs fl fires (live positions,
 /// canslim/dossier rebuilds) hold the write lock for a moment; retry for
 /// ~2s instead of failing the screen (dossier has no reload key).
 pub fn open_read_only(path: &Path) -> Result<duckdb::Connection, String> {

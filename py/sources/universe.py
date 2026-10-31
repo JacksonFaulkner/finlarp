@@ -12,18 +12,18 @@ import time
 from pathlib import Path
 
 from core import db
+from core.paths import DATA_ROOT
 from sources import sec_http
 
 ROOT = Path(__file__).resolve().parents[2]
 ALIASES_PATH = ROOT / "data" / "cik_aliases.json"
 TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
-DATA_ROOT = db.DB_PATH.parent / "finlarp"
 
 _cik_map: dict[str, int] | None = None
 
 
 def data_dir(source: str) -> Path:
-    """~/.local/share/nvim/finlarp/<source>/ — one dir per puller."""
+    """<DATA_ROOT>/<source>/ — one dir per puller."""
     d = DATA_ROOT / source
     d.mkdir(parents=True, exist_ok=True)
     return d

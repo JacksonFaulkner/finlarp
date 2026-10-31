@@ -6,7 +6,7 @@ Usage:
     uv run sources/etrade.py quote AAPL,MSFT
 
 Requires PROD_KEY / PROD_SECRET in the environment (see .env at repo root).
-Access token is cached at ~/.local/share/nvim/etrade_token.json. Every run
+Access token is cached at core.paths.ETRADE_TOKEN_PATH (data/etrade_token.json). Every run
 tries to renew it first; if renew fails, or any API call returns 401, the
 cache is dropped and a fresh OAuth login is requested.
 """
@@ -19,16 +19,16 @@ import stat
 import sys
 import time
 import webbrowser
-from pathlib import Path
 from urllib.parse import quote
 
 import requests
 from rauth import OAuth1Service
 
 from core import db
+from core.paths import ETRADE_TOKEN_PATH
 
 BASE_URL = "https://api.etrade.com"
-TOKEN_PATH = Path(os.path.expanduser("~/.local/share/nvim/etrade_token.json"))
+TOKEN_PATH = ETRADE_TOKEN_PATH
 
 
 def _service() -> OAuth1Service:
@@ -67,7 +67,7 @@ def _touch_renewed_at() -> None:
 
 
 class AuthRequired(Exception):
-    """Raised instead of blocking on input() — the caller (nvim) isn't an
+    """Raised instead of blocking on input() — the caller (the TUI) isn't an
     interactive terminal, so login has to happen as two separate async
     steps: auth_start (get a URL) and auth_finish (submit the code the user
     pasted after actually looking at the browser page themselves)."""
@@ -83,7 +83,7 @@ def _interactive_login(etrade: OAuth1Service, interactive: bool):
         params={"oauth_callback": "oob", "format": "json"})
     # request_token is base64-ish (can contain +, /, =) — must be
     # percent-encoded as a query value or the URL is malformed (macOS
-    # `open`/vim.ui.open reject it outright as a "bad URL").
+    # `open` rejects it outright as a "bad URL").
     authorize_url = etrade.authorize_url.format(etrade.consumer_key, quote(request_token, safe=""))
 
     if not interactive:
@@ -406,7 +406,7 @@ def main() -> None:
         return
 
     try:
-        # nvim isn't a TTY input() can block on — get_session never falls
+        # The caller isn't a TTY input() can block on — get_session never falls
         # back to the blocking browser/input() flow here. A stale token
         # comes back as a normal auth_required payload instead of an error,
         # so the caller can drive the two-step login itself.

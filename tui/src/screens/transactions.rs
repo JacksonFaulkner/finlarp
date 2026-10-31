@@ -1,7 +1,6 @@
 // Standalone transaction history: the E*TRADE records cached in
-// `transactions_cache` (py/core/db.py) in the finlarp DuckDB. Same rows and
-// columns as the fzf-lua picker in lua/finlarp/ui/transactions.lua, newest
-// first, plus a filter and a jump to the ticker's dossier.
+// `transactions_cache` (py/core/db.py) in the finlarp DuckDB, newest first,
+// with a filter and a jump to the ticker's dossier.
 //
 //   Transactions  /mrv█
 //   date                 sym     type           qty       price      amount  description
@@ -23,7 +22,7 @@ use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Cell, Paragraph, Row, Table, TableState, Wrap};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -144,7 +143,7 @@ impl Transactions {
                 self.flash = Some("no ticker on this row".into());
                 Action::None
             }
-            Some(s) => Action::Nvim(NvimAction::Screen {
+            Some(s) => Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some(s),
             }),
@@ -181,9 +180,9 @@ impl Transactions {
         if self.rows.is_empty() {
             Some(match &self.error {
                 Some(e) => format!(
-                    "no transactions cached\n\n{e}\n\nRefresh them from nvim (<leader>vt) to fill the cache."
+                    "no transactions cached\n\n{e}\n\nRefresh the cache to fill it."
                 ),
-                None => "no transactions cached yet. Refresh them from nvim (<leader>vt).".into(),
+                None => "no transactions cached yet. Refresh the cache to fill it.".into(),
             })
         } else if self.shown.is_empty() {
             Some(format!("no transactions match \"{}\"  (esc clears)", self.query))
@@ -411,7 +410,7 @@ fn cell(s: impl Into<String>, style: Style, right: bool) -> Cell<'static> {
     Cell::from(if right { line.right_aligned() } else { line })
 }
 
-/// Local time to the second, like the nvim picker.
+/// Local time to the second.
 fn fmt_date(at: Option<DateTime<Local>>) -> String {
     at.map(|d| d.format("%Y-%m-%d %H:%M:%S").to_string())
         .unwrap_or_else(|| "?".into())
@@ -646,7 +645,7 @@ mod tests {
         let mut s = sample();
         assert_eq!(
             press(&mut s, key(KeyCode::Enter)),
-            Action::Nvim(NvimAction::Screen {
+            Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some("MRVL".into()),
             })
@@ -732,7 +731,7 @@ mod tests {
     }
 
     #[test]
-    fn formats_like_the_nvim_picker() {
+    fn formats_quantities_prices_and_amounts() {
         assert_eq!(fmt_qty(Some(-10.0)), "-10");
         assert_eq!(fmt_qty(Some(0.123456)), "0.1235");
         assert_eq!(fmt_qty(Some(1234.5)), "1234");

@@ -10,7 +10,7 @@ from sources import keys
 BASE = "https://api.etrade.com"
 REAUTH = ("E*TRADE authorization is missing or expired. Re-authorize in a terminal: from the repo's py/ dir run "
           "`uv run --env-file ../.env python -c \"from sources import etrade; etrade.get_session()\"`, open the "
-          "URL it prints, and paste the verification code. (Or use the nvim portfolio login.) Then retry.")
+          "URL it prints, and paste the verification code. Then retry.")
 
 
 class NotAuthed(Exception):

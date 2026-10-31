@@ -5,7 +5,7 @@
 //   │ Events      3 │ 2-per-row BlockGrid for GRID_SECTIONS)                 │
 //   │ ...           │                                                        │
 //   ├───────────────┴────────────────────────────────────────────────────────┤
-//   │ source of the cursor item (↵ browser · v nvim · y copy · i inputs)     │
+//   │ source of the cursor item (↵ browser · y copy · i inputs)              │
 //   └ key hints ─────────────────────────────────────────────────────────────┘
 //
 // The first nav entry is synthesized here: "Latest" collects every dated item
@@ -24,7 +24,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Wrap};
 use serde::Deserialize;
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::{Block, Row, Section, Source};
 use crate::ui::block_grid::BlockGrid;
 use crate::ui::block_view::BlockView;
@@ -55,7 +55,6 @@ const NAV_KEYS: &[Key] = &[
 const FOOTER_KEYS: &[Key] = &[
     key("J/K", "section"),
     key("↵", "browser"),
-    key("v", "nvim"),
     key("y", "copy"),
     key("i", "inputs"),
     key("a", "audit"),
@@ -474,11 +473,11 @@ impl Screen for Dossier {
             && let Some(command) = self.palette.handle(key)
         {
             return match command {
-                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                Some(Command::Screen(screen)) => Action::Route(Route::Screen {
                     screen: screen.into(),
                     arg: Some(self.symbol.clone()),
                 }),
-                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                Some(Command::Picker(screen)) => Action::Route(Route::Picker {
                     screen: screen.into(),
                 }),
                 Some(Command::Section(i)) => {
@@ -545,7 +544,7 @@ impl Screen for Dossier {
                 }
             }
             KeyCode::Char('c') => {
-                return Action::Nvim(NvimAction::Screen {
+                return Action::Route(Route::Screen {
                     screen: "canslim".into(),
                     arg: Some(self.symbol.clone()),
                 });
@@ -1026,7 +1025,7 @@ mod tests {
         assert_eq!(s.selected(), s.sections.len() - 1, "esc restores");
         assert_eq!(
             press(&mut s, KeyCode::Char('c')),
-            Action::Nvim(NvimAction::Screen {
+            Action::Route(Route::Screen {
                 screen: "canslim".into(),
                 arg: Some("MRVL".into())
             })

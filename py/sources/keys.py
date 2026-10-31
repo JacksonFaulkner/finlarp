@@ -1,5 +1,5 @@
-"""API keys: the process env first, then the plugin's gitignored .env
-(nvim's `run` passes it via `uv run --env-file`; scripts run by hand
+"""API keys: the process env first, then the repo's gitignored .env
+(callers can pass it via `uv run --env-file`; scripts run by hand
 fall back to reading it here)."""
 from __future__ import annotations
 

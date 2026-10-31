@@ -1,7 +1,7 @@
 // EDGAR filing search: the 8-K / 6-K family by default (the "Filing index and
 // 8-K / 6-K events" dataset), over py/derive/filing_search.py. Type a query and
 // press Enter to run it; Tab moves into the results, and Enter on a row opens
-// the filing's index page in the document viewer.
+// the filing's index page in the browser.
 //
 //   ┌ filings › t:INTC item:5.02▏                              38 filings ┐
 //   │ date        ticker  form   items         what                       │
@@ -22,7 +22,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 use serde::Deserialize;
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Screen};
 use crate::pyrun;
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -243,10 +243,7 @@ impl Screen for Filings {
                 KeyCode::Char('G') => self.sel = self.rows.len().saturating_sub(1),
                 KeyCode::Enter => {
                     if let Some(f) = self.selected() {
-                        return Action::Nvim(NvimAction::Docview {
-                            url: f.url.clone(),
-                            quote: None,
-                        });
+                        return Action::OpenBrowser(f.url.clone());
                     }
                 }
                 _ => {}

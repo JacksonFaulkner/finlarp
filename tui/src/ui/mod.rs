@@ -3,7 +3,7 @@
 // types and always expose the Source of whatever is selected, so any
 // screen gets the source bar / inspector / audit overlay for free.
 //
-//   theme        colours + semantic styles (from nvim's colorscheme args)
+//   theme        colours + semantic styles (default palette, bg/up/down overrides)
 //   layout       standard screen frames (header / nav / detail / source bar)
 //   block_grid   blocks as a grid of bordered containers, spatial hjkl (dashboards)
 //   calendar     month / week / day views over dated events (weekends can be hidden)

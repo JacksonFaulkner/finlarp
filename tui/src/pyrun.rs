@@ -1,6 +1,5 @@
 // Running the Python side (py/derive/*.py, py/sources/*.py) from the binary, so
-// `fl` can build a CANSLIM scorecard or dossier itself instead of leaning on
-// nvim to do it first.
+// `fl` can build a CANSLIM scorecard or dossier itself.
 
 use std::path::{Path, PathBuf};
 use std::process::Command;

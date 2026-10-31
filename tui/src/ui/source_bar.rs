@@ -5,7 +5,7 @@
 // SourceInspector: popup (key `i`) for a derived value: the formula and a
 //   selectable list of its inputs (recursively), each openable.
 // Standard keys every screen binds to the selected Source (see
-//   `source_action`): ↵ browser, v nvim docview, y copy URL, i inspect.
+//   `source_action`): ↵ browser, v doc, y copy URL, i inspect.
 
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
@@ -17,7 +17,7 @@ use ratatui::widgets::{
     Block, Clear, HighlightSpacing, List, ListItem, ListState, Paragraph, StatefulWidget, Widget,
 };
 
-use crate::app::{Action, NvimAction};
+use crate::app::Action;
 use crate::model::Source;
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -56,7 +56,7 @@ pub fn render_source_bar_with(
 /// One or two lines describing a Source:
 ///
 ///   ◆ 10-Q filed 2026-08-28 · Revenue · Q2 FY2027   sec.gov/…/mrvl-20260801.htm
-///   ↵ browser  v nvim  y copy                      (second line if there's room)
+///   ↵ browser  v doc  y copy                       (second line if there's room)
 ///
 ///   ƒ 2,739.3 / 2,006.1 − 1 · 2 inputs · YoY growth
 ///   ↵ …  i inputs
@@ -190,7 +190,7 @@ fn hint_spans<'a>(src: &Source, th: &Theme) -> Vec<Span<'a>> {
     let mut keys: Vec<(&str, &str)> = Vec::new();
     if src.url.is_some() {
         keys.push(("↵", "browser"));
-        keys.push(("v", "nvim"));
+        keys.push(("v", "doc"));
     }
     if src.url.is_some() || src.formula.is_some() {
         keys.push(("y", "copy"));
@@ -219,12 +219,7 @@ pub fn source_action(key: KeyEvent, src: Option<&Source>) -> Option<Action> {
     let src = src?;
     match key.code {
         KeyCode::Enter => src.url.clone().map(Action::OpenBrowser),
-        KeyCode::Char('v') => src.doc_url().map(|u| {
-            Action::Nvim(NvimAction::Docview {
-                url: u.to_string(),
-                quote: src.quote(),
-            })
-        }),
+        KeyCode::Char('v') => src.doc_url().map(|u| Action::OpenBrowser(u.to_string())),
         KeyCode::Char('y') => src
             .url
             .clone()
@@ -451,7 +446,7 @@ fn input_item<'a>(s: &Source, w: usize, th: &Theme) -> ListItem<'a> {
 }
 
 fn footer_hints<'a>(nested: bool, th: &Theme) -> Vec<Span<'a>> {
-    let mut keys = vec![("↵", "open/drill"), ("v", "nvim"), ("y", "copy")];
+    let mut keys = vec![("↵", "open/drill"), ("v", "doc"), ("y", "copy")];
     if nested {
         keys.push(("⌫", "up"));
     }
@@ -520,7 +515,7 @@ mod tests {
             out.contains("◆ 10-Q filed 2026-08-28 · sec.gov/…/mrvl-20260801.htm"),
             "{out}"
         );
-        assert!(out.contains("↵ browser  v nvim  y copy"), "{out}");
+        assert!(out.contains("↵ browser  v doc  y copy"), "{out}");
     }
 
     #[test]
@@ -546,14 +541,14 @@ mod tests {
         let mut ins = SourceInspector::default();
         ins.open(&derived());
         assert_eq!(ins.selected().unwrap().label, "10-Q Q2 FY2027");
-        // leaf: enter opens in browser, v sends to nvim docview
+        // leaf: enter opens in browser, v opens the bare document URL
         assert!(matches!(
             ins.on_key(key(KeyCode::Enter)),
             Action::OpenBrowser(_)
         ));
         assert!(matches!(
             ins.on_key(key(KeyCode::Char('v'))),
-            Action::Nvim(NvimAction::Docview { .. })
+            Action::OpenBrowser(_)
         ));
         // move to the derived input and drill in
         ins.on_key(key(KeyCode::Char('j')));

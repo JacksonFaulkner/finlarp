@@ -40,7 +40,7 @@ pub fn destinations(symbol: &str, picker: &'static str) -> Vec<Entry> {
         .into_iter()
         .map(|screen| Entry::new(format!("Open {screen}"), symbol, Command::Screen(screen)))
         .collect();
-    // the chart is the portfolio, not a ticker: nvim has no chart picker
+    // the chart is the portfolio, not a ticker: it has no symbol picker
     if picker != "chart" {
         entries.push(Entry::new(
             "Choose another ticker",

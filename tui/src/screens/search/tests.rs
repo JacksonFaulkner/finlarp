@@ -36,7 +36,6 @@ fn harness() -> Harness {
         Theme::default(),
         Client { tx, rx },
         History::in_memory(&[]),
-        true,
     );
     Harness { s, req, reply }
 }
@@ -116,24 +115,22 @@ fn narrow_layout_shows_one_pane_at_a_time() {
 }
 
 #[test]
-fn keys_emit_nvim_and_in_process_actions() {
+fn keys_emit_routes_and_browser_actions() {
     let mut h = loaded();
-    let a = press(&mut h.s, KeyCode::Enter, KeyModifiers::NONE);
     assert_eq!(
-        a,
-        Action::Nvim(NvimAction::Chunk {
-            id: "149731".into()
+        press(&mut h.s, KeyCode::Enter, KeyModifiers::NONE),
+        Action::Route(Route::Screen {
+            screen: "docview".into(),
+            arg: Some("chunk:149731".into()),
         })
     );
+    // the browser URL keeps the #:~:text= fragment so it lands on the passage
     let a = press(&mut h.s, KeyCode::Char('v'), KeyModifiers::ALT);
-    let Action::Nvim(NvimAction::Docview { url, quote }) = a else {
+    let Action::OpenBrowser(url) = a else {
         panic!("{a:?}")
     };
-    assert_eq!(url, INDEX_URL);
-    assert_eq!(
-        quote.as_deref(),
-        Some("On January 5, 2026, the OECD released a comprehensive package")
-    );
+    assert!(url.starts_with(INDEX_URL), "{url}");
+    assert!(url.contains("#:~:text="), "{url}");
     assert_eq!(
         press(&mut h.s, KeyCode::Char('o'), KeyModifiers::CONTROL),
         Action::OpenBrowser(INDEX_URL.into())
@@ -255,7 +252,6 @@ fn history_on_up_down_in_input() {
         Theme::default(),
         Client { tx, rx },
         History::in_memory(&["t:NVDA hbm"]),
-        true,
     );
     press(&mut s, KeyCode::Up, KeyModifiers::NONE);
     assert_eq!(s.input.value(), "t:NVDA hbm");
@@ -276,46 +272,4 @@ fn server_failure_shows_error() {
     h.s.tick();
     let text = screen_text(&draw(&mut h.s, 120, 20));
     assert!(text.contains("search.py exited"), "{text}");
-}
-
-#[test]
-fn standalone_pushes_the_docview_screen() {
-    let mut h = loaded();
-    h.s.nvim = false;
-    let a = press(&mut h.s, KeyCode::Enter, KeyModifiers::NONE);
-    assert_eq!(
-        a,
-        Action::Nvim(NvimAction::Screen {
-            screen: "docview".into(),
-            arg: Some("chunk:149731".into()),
-        })
-    );
-    let a = press(&mut h.s, KeyCode::Char('v'), KeyModifiers::ALT);
-    let Action::Nvim(NvimAction::Screen { screen, arg }) = a else {
-        panic!("{a:?}")
-    };
-    assert_eq!(screen, "docview");
-    assert_eq!(
-        docview::parse_arg(&arg.expect("arg")),
-        Some(docview::Target::Url {
-            url: INDEX_URL.into(),
-            quote: Some("On January 5, 2026, the OECD released a comprehensive package".into()),
-        })
-    );
-}
-
-#[test]
-fn nvim_attached_follows_the_action_file_variable() {
-    assert!(!nvim_attached(None));
-    assert!(nvim_attached(Some("action.json".into())));
-    // nvim keeps its own actions: hand_off passes them through untouched
-    let chunk = NvimAction::Chunk { id: "7".into() };
-    assert_eq!(hand_off(true, chunk.clone()), Action::Nvim(chunk.clone()));
-    assert_eq!(
-        hand_off(false, chunk),
-        Action::Nvim(NvimAction::Screen {
-            screen: "docview".into(),
-            arg: Some("chunk:7".into()),
-        })
-    );
 }

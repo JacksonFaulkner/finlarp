@@ -5,7 +5,7 @@ those tickers, build the dossier, and report what is missing and what was slow.
     uv run python py/jobs/onboard.py NEWCO --sub cybersecurity   # add first, then onboard
     uv run python py/jobs/onboard.py AAPL --skip patents,bars    # skip steps
     uv run python py/jobs/onboard.py AAPL --force         # redo steps that skip when already done
-    uv run python py/jobs/onboard.py AAPL --json          # machine-readable report (nvim)
+    uv run python py/jobs/onboard.py AAPL --json          # machine-readable report
 
 Steps run in dependency order; one failing step never stops the rest. The report
 (also written to <DATA_ROOT>/debug/onboard_<ts>.json) lists, per step, seconds,
@@ -232,7 +232,7 @@ def main(argv: list[str]) -> None:
     def opt(name):
         return next((argv[i + 1] for i, a in enumerate(argv[:-1]) if a == name), None)
 
-    if "--list-subs" in argv:  # for the nvim sub-sector picker
+    if "--list-subs" in argv:  # for the sub-sector picker
         print(json.dumps([sub for subs in db.taxonomy().values() for sub in subs]))
         return
     values = {opt("--sub"), opt("--skip"), opt("--max-cost")}

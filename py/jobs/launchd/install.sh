@@ -8,7 +8,7 @@ set -eu
 here=$(cd "$(dirname "$0")" && pwd)
 root=$(cd "$here/../../.." && pwd)
 agents="$HOME/Library/LaunchAgents"
-logs="$HOME/.local/share/nvim/finlarp/logs"
+logs="${FINLARP_DATA:-$root/data}/logs"
 uv=$(command -v uv)
 dom="gui/$(id -u)"
 

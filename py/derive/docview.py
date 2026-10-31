@@ -1,4 +1,4 @@
-"""Fetch a source document once and turn it into something nvim can show,
+"""Fetch a source document once and turn it into something the TUI can show,
 for the "where did this number come from" jump (dossier `v`, search hits).
 
     SEC HTML (10-K/Q, 8-K, EX-99.1, index pages) -> markdown: tables rebuilt

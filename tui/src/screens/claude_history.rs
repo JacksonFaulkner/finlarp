@@ -1,4 +1,4 @@
-// `<leader>fa` standalone: browser over Claude Code sessions on this machine
+// `fl claude_history`: browser over Claude Code sessions on this machine
 // (~/.claude/projects/<encoded-cwd>/<session>.jsonl), newest first.
 //
 //   Claude history  12 of 300
@@ -575,7 +575,7 @@ mod tests {
         assert!(s.matches(""));
         assert!(s.matches("finlarp"));
         assert!(s.matches("chart"));
-        assert!(!s.matches("nvim"));
+        assert!(!s.matches("godel"));
         let mut unparsed = sess("b", "", "");
         unparsed.parsed = false;
         assert!(unparsed.matches(""));

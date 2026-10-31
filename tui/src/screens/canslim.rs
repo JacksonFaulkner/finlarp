@@ -7,7 +7,7 @@
 //   ├ EPS actual vs est ───┼ Revenue ───────────────┤  BlockGrid: hjkl between
 //   │ …                    │ …                      │  containers, j/k through items
 //   ├──────────────────────┴────────────────────────┤
-//   │ source of the cursor item (↵ browser · v nvim · y copy · i inputs) │
+//   │ source of the cursor item (↵ browser · y copy · i inputs)          │
 //   └ key hints ─────────────────────────────────────┘
 //
 // Python builds one model::Section per letter with every value sourced
@@ -24,7 +24,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Paragraph, Wrap};
 use serde::Deserialize;
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::{Block, Section, Source};
 use crate::ui::block_grid::BlockGrid;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
@@ -57,7 +57,6 @@ const FOOTER_KEYS: &[Key] = &[
     key("H/L", "letter"),
     key("hjkl", "move"),
     key("↵", "browser"),
-    key("v", "nvim"),
     key("y", "copy"),
     key("i", "inputs"),
     key("a", "audit"),
@@ -127,7 +126,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Canslim> {
 }
 
 fn load_json(db_path: &Path, symbol: &str) -> Result<Option<String>, String> {
-    // Read-only: nvim / canslim.py may hold the write lock.
+    // Read-only: canslim.py may hold the write lock.
     let conn = crate::db::open_read_only(db_path)?;
     let Ok(mut stmt) = conn.prepare("SELECT scorecard_json FROM canslim_cache WHERE symbol = ?")
     else {
@@ -360,11 +359,11 @@ impl Screen for Canslim {
             && let Some(command) = self.palette.handle(key)
         {
             return match command {
-                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                Some(Command::Screen(screen)) => Action::Route(Route::Screen {
                     screen: screen.into(),
                     arg: Some(self.symbol.clone()),
                 }),
-                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                Some(Command::Picker(screen)) => Action::Route(Route::Picker {
                     screen: screen.into(),
                 }),
                 Some(Command::Section(i)) => {
@@ -476,7 +475,7 @@ impl Screen for Canslim {
 
 /// `s`: back to the symbol picker.
 fn back_to_picker() -> Action {
-    Action::Nvim(NvimAction::Picker {
+    Action::Route(Route::Picker {
         screen: "canslim".into(),
     })
 }

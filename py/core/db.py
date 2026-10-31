@@ -1,8 +1,8 @@
 """Local DuckDB cache for historical price data.
 
-Keeps a small on-disk store at ~/.local/share/nvim/finlarp.duckdb so
+Keeps a small on-disk store at DB_PATH (data/finlarp.duckdb, see core.paths) so
 repeat chart opens (same symbol/range/interval within TTL) skip the network
-round-trip entirely, and gives the plugin a real place to grow into (joins,
+round-trip entirely, and gives the TUI and scripts a real place to grow into (joins,
 backtests, screener snapshots) instead of everything being fetch-and-discard.
 """
 
@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import json
 import math
-import os
 import re
 import time
 from datetime import date
@@ -18,9 +17,8 @@ from pathlib import Path
 
 import duckdb
 
+from core.paths import DB_PATH
 from core.schemas.universe import Stock, infer_kind
-
-DB_PATH = Path(os.path.expanduser("~/.local/share/nvim/finlarp.duckdb"))
 
 # History doesn't change intraday for the bar we already have except the
 # still-forming last bar, so a modest TTL is safe and saves a network round
@@ -149,7 +147,7 @@ def _dumps(obj) -> str:
 
 def _open(read_only: bool) -> duckdb.DuckDBPyConnection:
     """DuckDB allows one read-write process *or* many readers per file, and
-    nvim fires several of these scripts at once (cached + live positions,
+    the TUI fires several of these scripts at once (cached + live positions,
     canslim, dossier) while the Rust screens read. Opens are short, so a
     lock conflict just means waiting a moment: retry for ~5s."""
     for attempt in range(25):
@@ -199,7 +197,7 @@ def get_cached_positions() -> list[dict] | None:
 
 def cache_ages() -> dict:
     """Seconds since each portfolio cache was last written (None if never).
-    Local-only; lets the nvim side decide what is worth re-pulling."""
+    Local-only; lets the caller decide what is worth re-pulling."""
     con = _conn(read_only=True)
     try:
         pos = con.execute("SELECT max(fetched_at) FROM positions_cache").fetchone()[0]

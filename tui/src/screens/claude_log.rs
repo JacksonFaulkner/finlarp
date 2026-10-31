@@ -1,9 +1,9 @@
-// `<leader>af` standalone: tail of the Claude background log.
+// `fl claude_log`: tail of the Claude background log.
 //
-// nvim tails every *.log under ~/.cache/claude-logs/<project>/ in a terminal
-// pane. Standalone, this follows the newest .log in the current project's
-// dir (or the file given as the screen argument). The file is re-checked
-// about once a second; new bytes are appended, truncation restarts the view.
+// This follows the newest .log in the current project's dir under
+// ~/.cache/claude-logs/<project>/ (or the file given as the screen argument).
+// The file is re-checked about once a second; new bytes are appended, truncation
+// restarts the view.
 //
 //   Claude log  ~/.cache/claude-logs/finlarp/x.log  ·  following
 //
@@ -67,7 +67,7 @@ fn home() -> PathBuf {
     std::env::var_os("HOME").map(PathBuf::from).unwrap_or_default()
 }
 
-/// Same directory nvim's `<leader>af` tails, keyed by the current project name.
+/// Directory of the Claude background logs, keyed by the current project name.
 fn log_dir() -> PathBuf {
     let project = std::env::current_dir()
         .ok()
@@ -252,10 +252,7 @@ impl ClaudeLog {
     fn missing_message(&self) -> String {
         match &self.explicit {
             Some(p) => format!("no log at {}", tilde(p)),
-            None if !self.dir.is_dir() => format!(
-                "no logs yet: {} (nvim's <leader>af tails the logs in this directory)",
-                tilde(&self.dir)
-            ),
+            None if !self.dir.is_dir() => format!("no logs yet: {}", tilde(&self.dir)),
             None => format!("no .log files in {}", tilde(&self.dir)),
         }
     }

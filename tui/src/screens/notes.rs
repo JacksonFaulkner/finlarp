@@ -1,7 +1,5 @@
-// `<leader>vm`: browser over every note you've asked. nvim fetches them from
-// mind.duckdb (ui/notes.lua) and passes JSON in $FINLARP_NOTES_FILE. Standalone
-// (`fl notes`) it reads mind.duckdb itself through py/mind/cli.py index, and
-// reloads every few seconds while an answer is still pending.
+// `fl notes`: browser over every note you've asked. It reads mind.duckdb through
+// py/mind/cli.py index, and reloads every few seconds while an answer is still pending.
 // Rows are grouped by ticker (A-Z, untagged last), newest first within a group.
 //
 //   Notes ›  mrvl█
@@ -14,8 +12,8 @@
 // ^d/^u scroll card · ↵ reopen the Claude chat · ^f follow-up chips (1-9) ·
 // ^o dossier · ^g godel · esc back.
 //
-// Standalone, ↵ reopens the chat in a new tmux window (`claude --resume`, run
-// from the note's cwd) and a follow-up chip saves the follow-up as a new note.
+// ↵ reopens the chat in a new tmux window (`claude --resume`, run from the note's
+// cwd) and a follow-up chip saves the follow-up as a new note.
 
 use std::io;
 use std::process::Command;
@@ -30,14 +28,12 @@ use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph, Wrap};
 use serde::{Deserialize, Deserializer};
 
 use super::note::{CLI, Save};
-use crate::app::{ACTION_FILE_ENV, Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::pyrun;
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
-pub const NOTES_FILE_ENV: &str = "FINLARP_NOTES_FILE";
-
-/// Standalone: how often pending answers are re-read from mind.duckdb...
+/// How often pending answers are re-read from mind.duckdb...
 const RELOAD_EVERY: Duration = Duration::from_secs(5);
 /// ...and for how long after the screen opens or a save lands.
 const RELOAD_FOR: Duration = Duration::from_secs(15 * 60);
@@ -280,18 +276,14 @@ pub struct Notes {
     follow_mode: bool,
     flash: Option<String>,
     theme: Theme,
-    /// Running under nvim (FINLARP_ACTION_FILE set): actions go back to nvim.
-    nvim: bool,
     /// `fl notes last`: only the newest answered note.
     last_only: bool,
-    /// Notes come from mind.duckdb (standalone), not from nvim's snapshot file.
-    live: bool,
     loading: bool,
     /// A `py/mind/cli.py index` run in flight.
     refresh: Option<Receiver<Result<String, String>>>,
     next_reload: Instant,
     reload_until: Instant,
-    /// Follow-ups being saved (standalone ^f).
+    /// Follow-ups being saved (^f).
     saves: Vec<Save>,
     /// Set when the screen changed outside a key press, so the next frame draws.
     redraw: bool,
@@ -299,23 +291,11 @@ pub struct Notes {
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Notes> {
     let last = arg.as_deref().is_some_and(|a| a.trim().eq_ignore_ascii_case("last"));
-    match std::env::var_os(NOTES_FILE_ENV) {
-        Some(p) => {
-            let notes: Vec<Note> =
-                serde_json::from_str(&std::fs::read_to_string(p)?).map_err(io::Error::other)?;
-            let mut s = Notes::empty(ctx.theme, last);
-            s.set_notes(notes);
-            Ok(s)
-        }
-        None => {
-            let mut s = Notes::empty(ctx.theme, last);
-            s.live = true;
-            s.loading = true;
-            s.refresh = Some(pyrun::spawn_script(CLI, &["index"]));
-            s.reload_until = Instant::now() + RELOAD_FOR;
-            Ok(s)
-        }
-    }
+    let mut s = Notes::empty(ctx.theme, last);
+    s.loading = true;
+    s.refresh = Some(pyrun::spawn_script(CLI, &["index"]));
+    s.reload_until = Instant::now() + RELOAD_FOR;
+    Ok(s)
 }
 
 /// Newest answered note (or newest note) from a `mind index` result.
@@ -336,9 +316,7 @@ impl Notes {
             follow_mode: false,
             flash: None,
             theme,
-            nvim: std::env::var_os(ACTION_FILE_ENV).is_some(),
             last_only,
-            live: false,
             loading: false,
             refresh: None,
             next_reload: Instant::now(),
@@ -418,7 +396,7 @@ impl Notes {
 
     fn open_dossier(&mut self) -> Action {
         match self.current().and_then(Note::ticker) {
-            Some(tk) => Action::Nvim(NvimAction::Screen {
+            Some(tk) => Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some(tk),
             }),
@@ -434,9 +412,6 @@ impl Notes {
         let Some(n) = self.current() else {
             return Action::None;
         };
-        if self.nvim {
-            return Action::Nvim(NvimAction::NoteChat { id: n.id.clone() });
-        }
         let in_tmux = std::env::var_os("TMUX").is_some();
         let msg = match resume_args(n, in_tmux) {
             Ok(args) => match Command::new("tmux").args(&args).output() {
@@ -452,9 +427,6 @@ impl Notes {
 
     /// Follow-up `question` as a new note anchored like note `id`.
     fn ask(&mut self, id: String, question: String) -> Action {
-        if self.nvim {
-            return Action::Nvim(NvimAction::NoteAsk { id, question });
-        }
         let Some(n) = self.notes.iter().find(|n| n.id == id) else {
             return Action::None;
         };
@@ -612,8 +584,7 @@ impl Screen for Notes {
 
         // while any answer is pending, re-read the list every few seconds
         let now = Instant::now();
-        if self.live
-            && self.refresh.is_none()
+        if self.refresh.is_none()
             && now < self.reload_until
             && now >= self.next_reload
             && self.notes.iter().any(|n| n.status == "pending")
@@ -656,11 +627,7 @@ impl Screen for Notes {
             let msg = if self.loading {
                 "  loading notes…"
             } else if self.notes.is_empty() {
-                if self.nvim {
-                    "  no notes yet (<leader>vn)"
-                } else {
-                    "  no notes yet (fl note)"
-                }
+                "  no notes yet (fl note)"
             } else {
                 "  no match"
             };
@@ -808,7 +775,7 @@ impl Screen for Notes {
                 Action::None
             }
             KeyCode::Char('o') if ctrl => self.open_dossier(),
-            KeyCode::Char('g') if ctrl => Action::Nvim(NvimAction::Screen {
+            KeyCode::Char('g') if ctrl => Action::Route(Route::Screen {
                 screen: "godel".into(),
                 arg: None,
             }),
@@ -852,7 +819,6 @@ mod tests {
     fn notes() -> Notes {
         let mut n = Notes::empty(Theme::default(), false);
         n.set_notes(parsed());
-        n.nvim = true; // the nvim actions (NoteChat, NoteAsk) are what these tests check
         n
     }
 
@@ -886,31 +852,22 @@ mod tests {
     }
 
     #[test]
-    fn enter_reopens_chat_and_filter_narrows() {
+    fn filter_narrows_to_one_note() {
         let mut n = notes();
         for c in "capex".chars() {
             press(&mut n, KeyCode::Char(c), KeyModifiers::NONE);
         }
         assert_eq!(id_of(&n), "a1");
-        assert_eq!(
-            press(&mut n, KeyCode::Enter, KeyModifiers::NONE),
-            Action::Nvim(NvimAction::NoteChat { id: "a1".into() })
-        );
     }
 
     #[test]
-    fn follow_up_chips_pick_by_digit() {
+    fn follow_up_chips_open_and_cancel() {
         let mut n = notes();
         press(&mut n, KeyCode::Down, KeyModifiers::NONE); // a1
         press(&mut n, KeyCode::Char('f'), KeyModifiers::CONTROL);
         assert!(n.follow_mode);
-        assert_eq!(
-            press(&mut n, KeyCode::Char('2'), KeyModifiers::NONE),
-            Action::Nvim(NvimAction::NoteAsk {
-                id: "a1".into(),
-                question: "how much?".into()
-            })
-        );
+        press(&mut n, KeyCode::Esc, KeyModifiers::NONE);
+        assert!(!n.follow_mode);
     }
 
     #[test]
@@ -918,7 +875,7 @@ mod tests {
         let mut n = notes();
         assert_eq!(
             press(&mut n, KeyCode::Char('o'), KeyModifiers::CONTROL),
-            Action::Nvim(NvimAction::Screen {
+            Action::Route(Route::Screen {
                 screen: "dossier".into(),
                 arg: Some("AVGO".into())
             })
@@ -984,7 +941,6 @@ mod tests {
     #[test]
     fn last_mode_keeps_only_that_note() {
         let mut n = Notes::empty(Theme::default(), true);
-        n.nvim = true;
         n.set_notes(parsed());
         assert_eq!(n.notes.len(), 1);
         assert_eq!(id_of(&n), "a1");

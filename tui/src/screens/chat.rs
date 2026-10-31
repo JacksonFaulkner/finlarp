@@ -1,8 +1,7 @@
 // Chat with Claude Code, inside `fl`. Each turn spawns headless
 // `claude -p --output-format stream-json --resume <session>` and streams the
-// reply into a plain transcript; the finlarp MCP tools run through it exactly
-// as in the nvim terminal. What the terminal pane can't do: tickers in the
-// reply are selectable, `d` opens the dossier and `c` the CANSLIM card, and
+// reply into a plain transcript; the finlarp MCP tools run through it. Tickers in
+// the reply are selectable, `d` opens the dossier and `c` the CANSLIM card, and
 // q/esc there comes back here.
 //
 //   you › what is moving in memory?
@@ -27,7 +26,7 @@ use ratatui::widgets::{Block, Paragraph};
 use tui_input::Input;
 use tui_input::backend::crossterm::EventHandler;
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::db;
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -288,7 +287,7 @@ impl Chat {
 
     fn open_selected(&self, screen: &str) -> Action {
         match self.tickers.get(self.sel) {
-            Some(t) => Action::Nvim(NvimAction::Screen {
+            Some(t) => Action::Route(Route::Screen {
                 screen: screen.into(),
                 arg: Some(t.clone()),
             }),

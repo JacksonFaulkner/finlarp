@@ -30,7 +30,7 @@ JSON shape (what tui/src/screens/dossier.rs reads):
     python py/derive/dossier.py MRVL NVDA --debug [-v]   # section health grid, no cache write
     python py/derive/dossier.py --all --debug            # health sweep over the universe
     python py/derive/dossier.py --all         # every ticker in the universe
-    python py/derive/dossier.py MRVL --if-stale 12   # rebuild only if stale; JSON status (nvim)
+    python py/derive/dossier.py MRVL --if-stale 12   # rebuild only if stale; JSON status for callers
 """
 from __future__ import annotations
 

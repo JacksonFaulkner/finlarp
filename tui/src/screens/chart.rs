@@ -20,7 +20,7 @@ use ratatui::symbols::Marker;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Tabs};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::{Point, Source};
 use crate::ui::charts::LineChart;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
@@ -441,11 +441,11 @@ impl Screen for ChartScreen {
             && let Some(command) = self.palette.handle(key)
         {
             return match command {
-                Some(Command::Screen(screen)) => Action::Nvim(NvimAction::Screen {
+                Some(Command::Screen(screen)) => Action::Route(Route::Screen {
                     screen: screen.into(),
                     arg: None,
                 }),
-                Some(Command::Picker(screen)) => Action::Nvim(NvimAction::Picker {
+                Some(Command::Picker(screen)) => Action::Route(Route::Picker {
                     screen: screen.into(),
                 }),
                 Some(Command::Range(i)) => {

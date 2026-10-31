@@ -13,14 +13,13 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 import time
-from pathlib import Path
 
 import requests
 
 from core import db
+from core.paths import YAHOO_CRUMB_PATH
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
@@ -29,7 +28,7 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 # of screener latency. Cache it; crumbs are long-lived (cookie expiry, not a
 # short TTL), so a generous cache window is safe and a stale one just gets a
 # 401 that triggers one fresh handshake.
-CRUMB_CACHE_PATH = Path(os.path.expanduser("~/.local/share/nvim/yahoo_crumb.json"))
+CRUMB_CACHE_PATH = YAHOO_CRUMB_PATH
 CRUMB_CACHE_TTL_SECONDS = 12 * 60 * 60
 
 

@@ -1,12 +1,10 @@
-// `<leader>v?` menu: every nvim finlarp keymap with what it does. Type to
-// filter, Enter runs the highlighted map. nvim owns the list (its `maps`
-// table) and passes it as JSON in $FINLARP_MENU_FILE:
-//   [{"lhs": "<leader>vf", "name": "search filings", "desc": "...", "mode": "n"}]
-// Enter hands the lhs back as `NvimAction::Keys`, so the real keymap fires.
+// `fl menu`: every standalone `fl` command from the keys table (keys.rs), with
+// what it does. Type to filter; Enter shows the highlighted command so it can
+// be typed at the prompt.
 //
 //   finlarp › sea█
-//   > ␣vf   search filings
-//   Full-text search over 10-K/20-F text ...
+//   > fl search QUERY   search 10-K/20-F text, releases, guidance, patents
+//   Search
 
 use std::io;
 
@@ -15,34 +13,37 @@ use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph, Wrap};
-use serde::Deserialize;
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Screen};
+use crate::screens::keys::{self, Standalone};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
-pub const MENU_FILE_ENV: &str = "FINLARP_MENU_FILE";
-
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Entry {
-    pub lhs: String,
+    /// The fl command (or key chord) that does it.
+    pub cmd: String,
+    /// What it does.
     pub name: String,
-    #[serde(default)]
-    pub desc: String,
-    /// "n" (default) or "x" (needs a visual selection first).
-    #[serde(default)]
-    pub mode: String,
+    /// The keys-table group it sits in.
+    pub group: String,
 }
 
-impl Entry {
-    fn visual(&self) -> bool {
-        self.mode == "x"
-    }
-
-    /// `<leader>vf` shown as `␣vf`.
-    fn keys_label(&self) -> String {
-        self.lhs.replace("<leader>", "␣")
-    }
+/// Every row of the keys table that works in standalone `fl`.
+fn entries() -> Vec<Entry> {
+    keys::GROUPS
+        .iter()
+        .flat_map(|g| {
+            g.rows
+                .iter()
+                .filter(|r| r.standalone == Standalone::Yes)
+                .map(move |r| Entry {
+                    cmd: r.cmd.into(),
+                    name: r.what.into(),
+                    group: g.title.into(),
+                })
+        })
+        .collect()
 }
 
 pub struct Menu {
@@ -55,14 +56,7 @@ pub struct Menu {
 }
 
 pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Menu> {
-    let entries = match std::env::var_os(MENU_FILE_ENV) {
-        Some(p) => {
-            let s = std::fs::read_to_string(p)?;
-            serde_json::from_str(&s).map_err(io::Error::other)?
-        }
-        None => Vec::new(),
-    };
-    Ok(Menu::new(entries, ctx.theme))
+    Ok(Menu::new(entries(), ctx.theme))
 }
 
 impl Menu {
@@ -80,7 +74,7 @@ impl Menu {
     }
 
     /// Entries matching every whitespace-separated query term
-    /// (case-insensitive over keys + name + description), in original order.
+    /// (case-insensitive over command + name + group), in original order.
     fn refilter(&mut self) {
         let q = self.query.to_lowercase();
         let terms: Vec<&str> = q.split_whitespace().collect();
@@ -89,7 +83,7 @@ impl Menu {
             .iter()
             .enumerate()
             .filter(|(_, e)| {
-                let hay = format!("{} {} {}", e.keys_label(), e.name, e.desc).to_lowercase();
+                let hay = format!("{} {} {}", e.cmd, e.name, e.group).to_lowercase();
                 terms.iter().all(|t| hay.contains(t))
             })
             .map(|(i, _)| i)
@@ -114,17 +108,11 @@ impl Menu {
             .map(|&i| &self.entries[i])
     }
 
-    fn run(&mut self) -> Action {
-        let Some(e) = self.current() else {
-            return Action::None;
-        };
-        if e.visual() {
-            self.flash = Some(format!("select text first, then press {}", e.keys_label()));
-            return Action::None;
+    fn show_command(&mut self) -> Action {
+        if let Some(e) = self.current() {
+            self.flash = Some(format!("type: {}", e.cmd));
         }
-        Action::Nvim(NvimAction::Keys {
-            keys: e.lhs.clone(),
-        })
+        Action::None
     }
 }
 
@@ -163,17 +151,12 @@ impl Screen for Menu {
         ));
 
         if self.shown.is_empty() {
-            let msg = if self.entries.is_empty() {
-                "  no keymaps passed in (run from nvim: <leader>v?)"
-            } else {
-                "  no match"
-            };
-            frame.render_widget(Paragraph::new(msg).style(t.dim()), list);
+            frame.render_widget(Paragraph::new("  no match").style(t.dim()), list);
         } else {
-            let key_w = self
+            let cmd_w = self
                 .shown
                 .iter()
-                .map(|&i| text::width(&self.entries[i].keys_label()))
+                .map(|&i| text::width(&self.entries[i].cmd))
                 .max()
                 .unwrap_or(0);
             let rows: Vec<ListItem> = self
@@ -181,12 +164,10 @@ impl Screen for Menu {
                 .iter()
                 .map(|&i| {
                     let e = &self.entries[i];
-                    let keys = e.keys_label();
-                    let pad = " ".repeat(key_w.saturating_sub(text::width(&keys)));
-                    let tag = if e.visual() { " (visual)" } else { "" };
+                    let pad = " ".repeat(cmd_w.saturating_sub(text::width(&e.cmd)));
                     ListItem::new(Line::from(vec![
-                        Span::styled(format!("  {keys}{pad}  "), t.accent()),
-                        Span::styled(format!("{}{tag}", e.name), t.base()),
+                        Span::styled(format!("  {}{pad}  ", e.cmd), t.accent()),
+                        Span::styled(e.name.clone(), t.base()),
                     ]))
                 })
                 .collect();
@@ -201,7 +182,7 @@ impl Screen for Menu {
 
         if let Some(e) = self.current() {
             frame.render_widget(
-                Paragraph::new(format!(" {}", e.desc))
+                Paragraph::new(format!(" {}", e.group))
                     .style(t.dim())
                     .wrap(Wrap { trim: false }),
                 detail,
@@ -210,7 +191,7 @@ impl Screen for Menu {
         let foot_text = self
             .flash
             .clone()
-            .unwrap_or_else(|| " ^n/^p move · ↵ run · esc close".to_string());
+            .unwrap_or_else(|| " ^n/^p move · ↵ show command · esc close".to_string());
         frame.render_widget(Paragraph::new(foot_text).style(t.dim()), foot);
     }
 
@@ -219,7 +200,7 @@ impl Screen for Menu {
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
         match key.code {
             KeyCode::Esc => Action::Quit,
-            KeyCode::Enter => self.run(),
+            KeyCode::Enter => self.show_command(),
             KeyCode::Down | KeyCode::Tab => {
                 self.step(1);
                 Action::None
@@ -263,21 +244,20 @@ mod tests {
 
     use super::*;
 
-    fn entry(lhs: &str, name: &str, desc: &str, mode: &str) -> Entry {
+    fn entry(cmd: &str, name: &str, group: &str) -> Entry {
         Entry {
-            lhs: lhs.into(),
+            cmd: cmd.into(),
             name: name.into(),
-            desc: desc.into(),
-            mode: mode.into(),
+            group: group.into(),
         }
     }
 
     fn menu() -> Menu {
         Menu::new(
             vec![
-                entry("<leader>vf", "search filings", "full-text", "n"),
-                entry("<leader>vd", "dossier", "one ticker", "n"),
-                entry("<leader>vn", "new note (selection)", "visual", "x"),
+                entry("fl search QUERY", "search 10-K text", "Search"),
+                entry("fl dossier TICKER", "one-ticker dossier", "Search"),
+                entry("fl onboard", "onboard a ticker", "Other"),
             ],
             Theme::default(),
         )
@@ -299,40 +279,41 @@ mod tests {
     }
 
     #[test]
-    fn enter_sends_the_keymap() {
-        let mut m = menu();
-        assert_eq!(
-            press(&mut m, KeyCode::Enter),
-            Action::Nvim(NvimAction::Keys {
-                keys: "<leader>vf".into()
-            })
+    fn entries_come_from_the_standalone_keys() {
+        let all = entries();
+        assert!(!all.is_empty());
+        assert!(
+            all.iter()
+                .all(|e| e.cmd.starts_with("fl ") || e.cmd.starts_with("space"))
         );
+        assert!(all.iter().any(|e| e.cmd == "fl onboard"));
     }
 
     #[test]
-    fn typing_filters_over_keys_name_and_desc() {
+    fn enter_shows_the_command() {
         let mut m = menu();
-        type_str(&mut m, "ticker");
-        assert_eq!(m.shown, vec![1]);
-        press(&mut m, KeyCode::Backspace);
-        type_str(&mut m, "r"); // "ticker" again after pop+push
-        assert_eq!(m.shown, vec![1]);
-        m.query.clear();
-        m.refilter();
-        type_str(&mut m, "␣vf");
-        assert_eq!(m.shown, vec![0]);
-    }
-
-    #[test]
-    fn visual_entry_flashes_instead_of_running() {
-        let mut m = menu();
-        type_str(&mut m, "note");
         assert_eq!(press(&mut m, KeyCode::Enter), Action::None);
         assert!(
             m.flash
                 .as_deref()
-                .is_some_and(|f| f.contains("select text"))
+                .is_some_and(|f| f.contains("fl search QUERY"))
         );
+    }
+
+    #[test]
+    fn typing_filters_over_command_name_and_group() {
+        let mut m = menu();
+        type_str(&mut m, "ticker");
+        assert_eq!(m.shown, vec![1, 2]);
+        press(&mut m, KeyCode::Backspace);
+        press(&mut m, KeyCode::Backspace);
+        press(&mut m, KeyCode::Backspace);
+        press(&mut m, KeyCode::Backspace);
+        press(&mut m, KeyCode::Backspace);
+        press(&mut m, KeyCode::Backspace);
+        assert_eq!(m.shown, vec![0, 1, 2]);
+        type_str(&mut m, "other");
+        assert_eq!(m.shown, vec![2]);
     }
 
     #[test]
@@ -340,6 +321,7 @@ mod tests {
         let mut m = menu();
         type_str(&mut m, "zzzz");
         assert_eq!(press(&mut m, KeyCode::Enter), Action::None);
+        assert!(m.flash.is_none());
         assert_eq!(press(&mut m, KeyCode::Esc), Action::Quit);
     }
 }

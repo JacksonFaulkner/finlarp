@@ -3,15 +3,11 @@
 // A screen implements `Screen` (draw + key handling) and returns `Action`s;
 // `run` owns the terminal (ratatui::run: init + restore, and the panic hook
 // ratatui::init installs restores raw mode / the alternate screen before the
-// panic message prints) and the event loop. Anything that must happen in nvim
-// (open a document in the docview, open a search chunk, jump to another
-// screen's picker) is an `NvimAction`: it is written as one JSON line to
-// $FINLARP_ACTION_FILE and the process exits; ui/tui.lua
-// reads the file after the popup closes and dispatches it. Browser opens and
-// clipboard copies happen in-process and the screen stays up.
-//
-// Outside nvim (`fl`) there is no action file: documents open in the browser
-// and screen/picker requests come back to main's router as `Exit::handoff`.
+// panic message prints) and the event loop. Browser opens and clipboard copies
+// happen in-process and the screen stays up. Opening another screen or picker
+// is a `Route`: the screen exits with it as `Exit::handoff`, and main's router
+// (`run_session`) pushes the new screen on a stack and returns here on q/esc.
+// The Claude popup is also a `Route`, handled in the loop by claude_popup.
 //
 // Drawing is two-phase: the loop only calls `Screen::draw` when something
 // could have changed (a key, a resize, a non-None action, a flash) or when
@@ -26,12 +22,8 @@ use std::time::Duration;
 use ratatui::backend::Backend;
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::{Frame, Terminal};
-use serde::Serialize;
 
 use crate::ui::theme::Theme;
-
-/// Env var naming the file an `NvimAction` is written to.
-pub const ACTION_FILE_ENV: &str = "FINLARP_ACTION_FILE";
 
 /// How long the loop waits for input before calling `tick` again.
 const POLL: Duration = Duration::from_millis(100);
@@ -42,30 +34,17 @@ pub struct Ctx {
     pub theme: Theme,
 }
 
-/// Work to hand back to nvim (or, outside nvim, to main's screen router).
-/// Serialized as {"action": "...", ...}.
-#[derive(Debug, Clone, Serialize, PartialEq)]
-#[serde(tag = "action", rename_all = "lowercase")]
-pub enum NvimAction {
-    /// Open `url` in the nvim document viewer (ui/docview.lua), jumping to `quote`.
-    Docview { url: String, quote: Option<String> },
-    /// Open a search chunk by id (ui/search.lua open_chunk).
-    Chunk { id: String },
+/// Work the router handles: open another screen, reopen a picker, or open
+/// the Claude popup.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Route {
     /// Open another screen: "canslim" | "dossier" | "search", with its argument.
     Screen { screen: String, arg: Option<String> },
     /// Reopen the symbol picker for `screen`.
     Picker { screen: String },
-    /// `<space>ac` / `<space>as`: toggle the Claude Code window, or with
-    /// `text` add it to Claude's context (ui/tui.lua writes it to a file and
-    /// runs ClaudeCodeAdd).
+    /// `<space>ac` / `<space>as`: show the Claude popup, or with `text`
+    /// type it into Claude's prompt first.
     Claude { text: Option<String> },
-    /// Feed a keymap (e.g. `<leader>vf`) to nvim so its real mapping fires
-    /// (the `<leader>v?` menu).
-    Keys { keys: String },
-    /// `<leader>vm`: reopen the Claude chat that answered note `id`.
-    NoteChat { id: String },
-    /// `<leader>vm` follow-up chip: save `question` as a new note anchored like `id`.
-    NoteAsk { id: String, question: String },
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -76,8 +55,8 @@ pub enum Action {
     OpenBrowser(String),
     /// Copy text to the clipboard; screen stays open.
     Copy(String),
-    /// Hand work to nvim and exit.
-    Nvim(NvimAction),
+    /// Screen, picker, or Claude request; see `Route`.
+    Route(Route),
 }
 
 pub trait Screen {
@@ -116,7 +95,7 @@ pub trait Screen {
     }
 }
 
-/// Progress through the nvim-style `<space>a{c,s}` leader chord.
+/// Progress through the `<space>a{c,s}` leader chord.
 #[derive(Clone, Copy, PartialEq)]
 enum Chord {
     Idle,
@@ -131,8 +110,8 @@ fn is_plain(key: &KeyEvent, c: char) -> bool {
             .intersects(KeyModifiers::CONTROL | KeyModifiers::ALT)
 }
 
-/// Feeds one key through the leader chord, then to the screen. Matches the
-/// nvim bindings: `<space>ac` toggles Claude, `<space>as` adds context. A
+/// Feeds one key through the leader chord, then to the screen. `<space>ac`
+/// opens Claude, `<space>as` adds the selected context to it. A
 /// space not followed by `a` is replayed to the screen, so it still works
 /// (one key late).
 fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Action {
@@ -160,10 +139,10 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
         Chord::SpaceA => {
             *chord = Chord::Idle;
             if is_plain(&key, 'c') {
-                Action::Nvim(NvimAction::Claude { text: None })
+                Action::Route(Route::Claude { text: None })
             } else if is_plain(&key, 's') {
                 match screen.claude_context() {
-                    Some(text) => Action::Nvim(NvimAction::Claude { text: Some(text) }),
+                    Some(text) => Action::Route(Route::Claude { text: Some(text) }),
                     None => {
                         screen.set_flash("nothing selected to add".into());
                         Action::None
@@ -195,20 +174,12 @@ impl Events for CrosstermEvents {
     }
 }
 
-fn write_nvim_action(a: &NvimAction) -> io::Result<()> {
-    let Ok(path) = std::env::var(ACTION_FILE_ENV) else {
-        return Ok(()); // launched outside nvim: nothing to hand back to
-    };
-    let line = serde_json::to_string(a).map_err(io::Error::other)?;
-    std::fs::write(path, line + "\n")
-}
-
 /// How a screen ended: the process exit code, plus a screen/picker request
-/// the caller (main's router) should open next when running outside nvim.
+/// the caller (main's router) should open next.
 #[derive(Debug, PartialEq)]
 pub struct Exit {
     pub code: i32,
-    pub handoff: Option<NvimAction>,
+    pub handoff: Option<Route>,
 }
 
 impl Exit {
@@ -278,43 +249,17 @@ pub(crate) fn event_loop<B: Backend>(
                 };
                 screen.set_flash(msg);
             }
-            // Screen/picker requests always go to main's session stack (so q/esc
-            // in the child returns here), in nvim or not.
-            Action::Nvim(a @ (NvimAction::Screen { .. } | NvimAction::Picker { .. })) => {
+            // Screen/picker requests always go to main's session stack, so q/esc
+            // in the child returns here.
+            Action::Route(r @ (Route::Screen { .. } | Route::Picker { .. })) => {
                 return Ok(Exit {
                     code: 0,
-                    handoff: Some(a),
+                    handoff: Some(r),
                 });
             }
-            Action::Nvim(a) => {
-                if std::env::var_os(ACTION_FILE_ENV).is_some() {
-                    write_nvim_action(&a)?;
-                    return Ok(Exit::code(0));
-                }
-                // Standalone (`fl`): nothing to hand back to. Documents open in
-                // the browser; screen/picker requests go to main's router.
-                match a {
-                    NvimAction::Docview { url, .. } => {
-                        let msg = match open::that_detached(&url) {
-                            Ok(()) => "opened in browser".to_string(),
-                            Err(e) => format!("open failed: {e}"),
-                        };
-                        screen.set_flash(msg);
-                    }
-                    NvimAction::Chunk { .. } => {
-                        screen.set_flash("opening a chunk needs the nvim plugin".into());
-                    }
-                    NvimAction::Claude { text } => {
-                        if let Err(e) = crate::claude_popup::open(text.as_deref()) {
-                            screen.set_flash(format!("claude: {e}"));
-                        }
-                    }
-                    NvimAction::Keys { .. }
-                    | NvimAction::NoteChat { .. }
-                    | NvimAction::NoteAsk { .. } => {
-                        screen.set_flash("this needs the nvim plugin".into());
-                    }
-                    NvimAction::Screen { .. } | NvimAction::Picker { .. } => unreachable!(),
+            Action::Route(Route::Claude { text }) => {
+                if let Err(e) = crate::claude_popup::open(text.as_deref()) {
+                    screen.set_flash(format!("claude: {e}"));
                 }
             }
         }
@@ -327,65 +272,8 @@ mod tests {
 
     use ratatui::backend::TestBackend;
     use ratatui::crossterm::event::{KeyEventState, KeyModifiers};
-    use serde_json::json;
 
     use super::*;
-
-    fn to_json(a: &NvimAction) -> serde_json::Value {
-        serde_json::to_value(a).expect("serialize")
-    }
-
-    #[test]
-    fn nvim_action_json_shape() {
-        // ui/tui.lua dispatches on exactly these keys.
-        let d = NvimAction::Docview {
-            url: "https://x/y".into(),
-            quote: Some("net revenue".into()),
-        };
-        assert_eq!(
-            to_json(&d),
-            json!({"action": "docview", "url": "https://x/y", "quote": "net revenue"})
-        );
-        let d = NvimAction::Docview {
-            url: "u".into(),
-            quote: None,
-        };
-        assert_eq!(
-            to_json(&d),
-            json!({"action": "docview", "url": "u", "quote": null})
-        );
-        assert_eq!(
-            to_json(&NvimAction::Chunk { id: "42".into() }),
-            json!({"action": "chunk", "id": "42"})
-        );
-        let s = NvimAction::Screen {
-            screen: "dossier".into(),
-            arg: Some("MRVL".into()),
-        };
-        assert_eq!(
-            to_json(&s),
-            json!({"action": "screen", "screen": "dossier", "arg": "MRVL"})
-        );
-        let p = NvimAction::Picker {
-            screen: "canslim".into(),
-        };
-        assert_eq!(
-            to_json(&p),
-            json!({"action": "picker", "screen": "canslim"})
-        );
-        assert_eq!(
-            to_json(&NvimAction::Claude { text: None }),
-            json!({"action": "claude", "text": null})
-        );
-        assert_eq!(
-            to_json(&NvimAction::Claude {
-                text: Some("x".into())
-            }),
-            json!({"action": "claude", "text": "x"})
-        );
-        // One line, so the Lua side can read the file whole and decode it.
-        assert!(!serde_json::to_string(&s).expect("serialize").contains('\n'));
-    }
 
     /// Replays a fixed event list; errors when it runs dry so a test that
     /// forgets to quit fails instead of hanging.
@@ -452,7 +340,7 @@ mod tests {
         assert_eq!(route_key(&mut s, &mut c, k('a')), Action::None);
         assert_eq!(
             route_key(&mut s, &mut c, k('s')),
-            Action::Nvim(NvimAction::Claude {
+            Action::Route(Route::Claude {
                 text: Some("ctx".into())
             })
         );
@@ -461,7 +349,7 @@ mod tests {
         }
         assert_eq!(
             route_key(&mut s, &mut c, k('c')),
-            Action::Nvim(NvimAction::Claude { text: None })
+            Action::Route(Route::Claude { text: None })
         );
         // space then a non-chord key replays both to the screen
         route_key(&mut s, &mut c, k(' '));

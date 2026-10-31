@@ -9,13 +9,12 @@ from __future__ import annotations
 import json
 import time
 import uuid
-from pathlib import Path
 
 import duckdb
 
-from core import db
+from core.paths import MIND_DB_PATH
 
-MIND_PATH = Path(db.DB_PATH.parent / "finlarp" / "mind.duckdb")
+MIND_PATH = MIND_DB_PATH
 
 _SCHEMA = [
     """
@@ -139,7 +138,7 @@ def save_answer(
 
 
 def index_rows() -> list[dict]:
-    """Every note with its answer, links and themes, newest first (feeds the nvim picker)."""
+    """Every note with its answer, links and themes, newest first (feeds the TUI picker)."""
     with connect(read_only=True) as con:
         rows = con.execute(
             """

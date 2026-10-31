@@ -1,9 +1,8 @@
-// `<space>ac` / `<space>as` outside nvim: a floating Claude Code session over
-// the current screen, the standalone twin of the nvim Claude float. Claude
-// runs in its own detached tmux session, so closing the popup (prefix-d)
-// leaves it running and the next `<space>ac` shows the same conversation.
+// `<space>ac` / `<space>as`: a floating Claude Code session over the current
+// screen. Claude runs in its own detached tmux session, so closing the popup
+// (prefix-d) leaves it running and the next `<space>ac` shows the same conversation.
 // Needs fl to run inside tmux; the popup is a `tmux display-popup -E`, which
-// blocks fl until it closes, the same way ui/tui.lua runs the screens.
+// blocks fl until it closes.
 
 use std::env;
 use std::io;

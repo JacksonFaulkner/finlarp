@@ -25,7 +25,7 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
-use crate::app::{Action, Ctx, NvimAction, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::screens::portfolio::data::parse_closes;
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -1009,7 +1009,7 @@ impl Screen for Universe {
                     }
                     View::Members(i) if self.groups[i].level == "fund" => self.open_fund(value),
                     View::Members(_) | View::Fund(_) => {
-                        return Action::Nvim(NvimAction::Screen {
+                        return Action::Route(Route::Screen {
                             screen: "dossier".into(),
                             arg: Some(value),
                         });
