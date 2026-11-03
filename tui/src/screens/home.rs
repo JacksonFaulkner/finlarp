@@ -10,6 +10,7 @@ use std::io;
 use ratatui::Frame;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Alignment, Constraint, Layout, Rect};
+use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
@@ -94,6 +95,19 @@ const KEY_H: u16 = 5;
 /// ten keys of the top row in about 58 columns. Narrower panes drop the far right.
 const KEY_W_MIN: u16 = 5;
 const KEY_W_MAX: u16 = 14;
+
+/// The wordmark: Pits font, one row per line, every row padded to the same
+/// width so the block centres as a whole.
+const WORDMARK: &str = r"▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄▄      ▄▄▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▄▄▄▄▄ 
+██▀┼┼┼┼┼┼┼█ █┼┼┼▀██ ██▀┼┼┼┼┼┼┼▀██ ██▀┼┼█      ██▀┼┼┼┼┼┼┼▀██ █┼┼┼┼┼┼┼┼▀▀▄▀ ██▀┼┼┼┼┼┼▀▀▄
+█▌┼┼┼▄▀▀▀▀▀ █┼┼┼┼▐█ █▌┼┼┼▄▀▄┼┼┼▐█ █▌┼┼┼█      █▌┼┼┼▄▀▄┼┼┼▐█ █┼┼┼┼▄▀▄┼┼┼░█ █▌┼┼┼▄▀▄┼┼┼█
+█┼┼┼┼█▄▄▄▄  █┼┼┼┼┼█ █┼┼┼┼▓ ▓┼┼┼┼█ █┼┼┼┼█      █┼┼┼┼▀▄▀┼┼┼┼█ █┼┼┼┼▀▀▀┼┼▄▀▀ █┼┼┼┼▀▀▀┼┼┼█
+▓┼┼┼┼█▀▀▀▀  ▓┼┼┼┼┼▓ ▓┼┼┼┼▒ ▒┼┼┼┼▓ ▓┼┼┼┼█      ▓┼┼┼┼┼┼┼┼┼┼┼▓ ▓┼┼┼┼▓▄┼┼┼▀▀▀ ▓┼┼┼┼┼┼┼┼┼▄▀
+▒▌┼┼┼█      ▒▌┼┼┼┼▒ ▒▌┼┼┼░ ░┼┼┼▐▒ ▒▌┼┼┼▀▄▄▄▄▄ ▒▌┼┼┼▄▀▄┼┼┼▐▒ ▒┼┼┼┼▒ ▓┼┼┼▓▓ ▒▌┼┼┼▓▀▀▀▀▀ 
+░█▄┼┼▒      ░█▄┼┼┼░ ░█▄┼┼░ ░┼┼▄█░ ░█▄┼┼┼┼┼┼┼▒ ░█▄┼┼▒ ▒┼┼▄█░ ░┼┼┼┼░ ▒┼┼▄█▒ ░█▄┼▐▒      
+▀▀▀▀▀▀      ▀▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀      ";
+const WORDMARK_H: u16 = 8;
+
 
 /// The shifted character a key produces on this board.
 fn shifted(c: char) -> char {
@@ -193,6 +207,25 @@ pub fn open(ctx: &Ctx) -> io::Result<Home> {
     })
 }
 
+/// Home's palette, from the theme like every other screen: borders and idle
+/// keys in the border grey, keys and labels in the accent, legends in dim,
+/// the selected key on the cursor background.
+fn edge(t: &Theme) -> Style {
+    t.border()
+}
+fn lit(t: &Theme) -> Style {
+    t.accent()
+}
+fn grey(t: &Theme) -> Style {
+    t.dim()
+}
+fn idle(t: &Theme) -> Style {
+    t.border()
+}
+fn picked(t: &Theme) -> Style {
+    t.selected().add_modifier(Modifier::BOLD)
+}
+
 impl Home {
     /// The base character under the cursor, None on the space bar.
     fn cursor_char(&self) -> Option<char> {
@@ -235,33 +268,39 @@ impl Home {
         let top = shifted(base);
         let primary = entry_for(base);
         let secondary = entry_for(top);
-        let style = if selected { t.selected() } else { t.base() };
-        let dim = if selected { style } else { t.dim() };
+        let face = if selected {
+            picked(&t)
+        } else if primary.is_some() {
+            lit(&t)
+        } else {
+            idle(&t)
+        };
+        let legend = if selected { picked(&t) } else { grey(&t) };
         let block = Block::bordered()
-            .border_style(if selected { t.accent() } else { t.dim() })
-            .style(style)
+            .border_style(if selected { lit(&t) } else { edge(&t) })
+            .style(face)
             .title_top(Line::styled(
                 format!(" {base} "),
-                if selected { style } else { t.accent() },
+                if selected { picked(&t) } else { t.base() },
             ));
         let inner = block.inner(r);
         let w = inner.width as usize;
 
         // The top line is the shifted key's legend: its screen, its reserved
-        // action, or just its letter (dim) when nothing is bound to it yet.
+        // action, or just its letter when nothing is bound to it yet.
         let shift_line = match (secondary, reserved(top)) {
             (Some(j), _) => format!("{top} {}", ENTRIES[j].0),
             (None, Some(label)) => format!("{top} {label}"),
             _ => top.to_string(),
         };
-        let mut lines = vec![Line::styled(text::truncate(&shift_line, w), dim)];
+        let mut lines = vec![Line::styled(text::truncate(&shift_line, w), legend)];
         match (primary, reserved(base)) {
             (Some(i), _) => {
                 for l in title_lines(ENTRIES[i].0, w) {
-                    lines.push(Line::styled(l, style));
+                    lines.push(Line::styled(l, face));
                 }
             }
-            (None, Some(label)) => lines.push(Line::styled(label.to_string(), dim)),
+            (None, Some(label)) => lines.push(Line::styled(label.to_string(), legend)),
             _ => {}
         }
 
@@ -269,7 +308,7 @@ impl Home {
         frame.render_widget(
             Paragraph::new(lines)
                 .alignment(Alignment::Center)
-                .style(style),
+                .style(face),
             inner,
         );
     }
@@ -280,28 +319,34 @@ impl Screen for Home {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        // Letter rows plus the space bar row.
+        // The logo and the keyboard are one group, centred in the screen.
         let board_h = (BOARD.len() as u16 + 1) * KEY_H;
-        let [head, board, _, detail, _, foot] = Layout::vertical([
-            Constraint::Length(2),
-            Constraint::Length(board_h),
-            Constraint::Length(1),
-            Constraint::Length(1),
+        let [_, head, _, board, _] = Layout::vertical([
             Constraint::Min(0),
+            Constraint::Length(WORDMARK_H),
             Constraint::Length(1),
+            Constraint::Length(board_h),
+            Constraint::Min(0),
         ])
         .areas(area);
-        frame.render_widget(
-            Paragraph::new(Line::from(Span::styled(" finlarp", t.title()))),
-            head,
-        );
 
-        // Key width from the board's width: the longest row (the zxcv row) is
-        // 11.25 keys wide with its indent.
-        let inner = board.width.saturating_sub(2);
-        let w = (inner * 4 / 45).clamp(KEY_W_MIN, KEY_W_MAX);
+        // The wordmark, centred as one block.
+        let (lines, width) = wordmark(&t);
+        let w = width.min(head.width);
+        let logo = Rect {
+            x: head.x + head.width.saturating_sub(width) / 2,
+            width: w,
+            ..head
+        };
+        frame.render_widget(Paragraph::new(lines), logo);
+
+        // Key width from the board's width; the zxcv row is 11.25 keys wide.
+        // The board is centred in the space below the header.
+        let w = (board.width.saturating_sub(2) * 4 / 45).clamp(KEY_W_MIN, KEY_W_MAX);
+        let board_w = w * 45 / 4;
+        let origin = board.x + board.width.saturating_sub(board_w) / 2;
         for (r, row) in BOARD.iter().enumerate() {
-            let x0 = board.x + 1 + w * INDENT[r] / 4;
+            let x0 = origin + w * INDENT[r] / 4;
             let y = board.y + r as u16 * KEY_H;
             for (k, base) in row.chars().enumerate() {
                 let key = Rect::new(x0 + k as u16 * w, y, w, KEY_H);
@@ -313,47 +358,30 @@ impl Screen for Home {
         }
         // Space bar, below the letters: the leader key (space, then a chord).
         let space = Rect::new(
-            board.x + 1 + w * SPACE_INDENT / 4,
+            origin + w * SPACE_INDENT / 4,
             board.y + SPACE_ROW as u16 * KEY_H,
             w * SPACE_KEYS,
             KEY_H,
         );
         if space.right() <= board.right() && space.bottom() <= board.bottom() {
             let on = self.cursor.0 == SPACE_ROW;
-            let style = if on { t.selected() } else { t.base() };
+            let style = if on { picked(&t) } else { Style::new() };
             let block = Block::bordered()
-                .border_style(if on { t.accent() } else { t.dim() })
+                .border_style(if on { lit(&t) } else { edge(&t) })
                 .style(style)
-                .title_top(Line::styled(" space ", t.accent()));
+                .title_top(Line::styled(" space ", edge(&t)));
             let inner = block.inner(space);
             frame.render_widget(block, space);
             frame.render_widget(
                 Paragraph::new(vec![
                     Line::styled("leader", style),
-                    Line::styled("ac chat", if on { style } else { t.dim() }),
+                    Line::styled("ac chat", if on { style } else { grey(&t) }),
                 ])
                 .alignment(Alignment::Center),
                 inner,
             );
         }
 
-        let line = match (self.cursor_char(), self.entry_at()) {
-            (_, Some(i)) => {
-                let e = &ENTRIES[i];
-                Line::from(vec![
-                    Span::styled(format!(" {}", e.0), t.title()),
-                    Span::styled(format!("  {}", e.2), t.dim()),
-                    Span::styled(format!("  ↵ open · key {}", e.3), t.dim()),
-                ])
-            }
-            (Some(c), None) => Line::styled(format!(" key {c}: no screen bound"), t.dim()),
-            (None, None) => Line::styled(" space: leader key", t.dim()),
-        };
-        frame.render_widget(Paragraph::new(line), detail);
-        frame.render_widget(
-            Paragraph::new(" hjkl move · ↵ open · press a key · q quit").style(t.dim()),
-            foot,
-        );
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -412,6 +440,33 @@ impl Screen for Home {
     fn needs_redraw(&self) -> bool {
         false
     }
+}
+
+/// Colour for one wordmark character: the grid lines inside the letters in
+/// white, the shading in light grey, the blocks in the theme accent.
+fn wordmark_style(c: char, t: &Theme) -> Style {
+    match c {
+        '┼' => Style::new().fg(Color::White),
+        '░' | '▒' | '▓' => Style::new().fg(Color::Gray),
+        '▀' | '▄' | '█' | '▌' | '▐' => t.accent(),
+        _ => t.base(),
+    }
+}
+
+/// The logo's lines, coloured per character, and the width of the widest one.
+fn wordmark(t: &Theme) -> (Vec<Line<'static>>, u16) {
+    let lines: Vec<Line<'static>> = WORDMARK
+        .lines()
+        .map(|l| {
+            Line::from(
+                l.chars()
+                    .map(|c| Span::styled(c.to_string(), wordmark_style(c, t)))
+                    .collect::<Vec<_>>(),
+            )
+        })
+        .collect();
+    let width = lines.iter().map(Line::width).max().unwrap_or(0) as u16;
+    (lines, width)
 }
 
 #[cfg(test)]
@@ -532,7 +587,7 @@ mod tests {
         use ratatui::backend::TestBackend;
 
         let mut h = home();
-        let mut term = Terminal::new(TestBackend::new(60, 26)).unwrap();
+        let mut term = Terminal::new(TestBackend::new(60, 50)).unwrap();
         term.draw(|f| h.draw(f)).unwrap();
         let out = term.backend().to_string();
         // The last key of the top row (p) must not be cut off.
@@ -545,7 +600,7 @@ mod tests {
         use ratatui::backend::TestBackend;
 
         let mut h = home();
-        let mut term = Terminal::new(TestBackend::new(120, 40)).unwrap();
+        let mut term = Terminal::new(TestBackend::new(120, 50)).unwrap();
         term.draw(|f| h.draw(f)).unwrap();
         let out = term.backend().to_string();
         assert!(out.contains("┌ 1 "), "number row missing: {out}");
