@@ -16,8 +16,11 @@ Cache: docs/<key>/ keyed by accession (SEC) or URL hash, so a second open
 is instant and works offline. The `#:~:text=` fragment that dossier links
 carry doubles as the quote to jump to.
 
-    python py/derive/docview.py URL [--quote TEXT] [--json]
+    python py/derive/docview.py URL [--quote TEXT] [--json] [--blocks]
     -> {"path", "kind": md|pdf|image|text, "text_path", "line", "title", "url"}
+    --blocks adds, for HTML: {"blocks_path", "block"}: the typed block list
+    from sources/filing_blocks.py (tables, headings, XBRL) and the index of
+    the block holding the quote, for the TUI's rich reader.
 """
 from __future__ import annotations
 
@@ -404,7 +407,7 @@ def find_line(path: Path, quote: str | None) -> int | None:
 
 # ---- main --------------------------------------------------------------------
 
-def open_doc(url: str, quote: str | None = None) -> dict:
+def open_doc(url: str, quote: str | None = None, blocks: bool = False) -> dict:
     url, frag_quote = split_fragment(url)
     quote = quote or frag_quote
     url = canonical(url)
@@ -456,7 +459,7 @@ def open_doc(url: str, quote: str | None = None) -> dict:
         # earnings quote lives in EX-99.1, not the 8-K cover); else the filing itself.
         for u in docs[:8] if quote else docs[:1]:
             try:
-                res = open_doc(u, quote) | {"index_url": url}
+                res = open_doc(u, quote, blocks) | {"index_url": url}
             except Exception:
                 continue
             first = first or res
@@ -482,7 +485,56 @@ def open_doc(url: str, quote: str | None = None) -> dict:
     pdfs = list(d.glob("US*.pdf"))
     if pdfs:
         out["pdf_path"] = str(pdfs[0])
-    return out | {"path": str(md_path), "kind": "md", "line": find_line(md_path, quote)}
+    out |= {"path": str(md_path), "kind": "md", "line": find_line(md_path, quote)}
+    if blocks:
+        out |= blocks_for(raw, url, quote)
+    return out
+
+
+def _block_text(b: dict) -> str:
+    if b["t"] == "h":
+        return b["text"]
+    if b["t"] in ("p", "li"):
+        return "".join(s["s"] for s in b["spans"])
+    if b["t"] == "table" and b.get("kind") == "num":
+        return " ".join(r["label"] + " " + " ".join(v["s"] for v in r["v"]) for r in b["rows"])
+    if b["t"] == "table":
+        return " ".join(" ".join(r) for r in b["rows"])
+    return ""
+
+
+def find_block(blocks: list[dict], quote: str | None) -> int | None:
+    """Index of the first block containing the quote's opening words (same
+    8/6/4/3-word fallback as find_line)."""
+    if not quote:
+        return None
+    texts = [_norm(_block_text(b)) for b in blocks]
+    words = _norm(quote).split()
+    for n in (8, 6, 4, 3):
+        needle = " ".join(words[:n])
+        if len(needle) < 8:
+            break
+        for i, t in enumerate(texts):
+            if needle in t:
+                return i
+    return None
+
+
+def blocks_for(raw: Path, url: str, quote: str | None) -> dict:
+    """Parse the cached HTML into blocks once (re-parsed when the parser
+    version changes) and locate the quote."""
+    from sources import filing_blocks
+
+    path = raw.with_name(raw.name + ".blocks.json")
+    doc = None
+    if path.exists():
+        doc = json.loads(path.read_text())
+        if doc.get("v") != filing_blocks.PARSER_VERSION:
+            doc = None
+    if doc is None:
+        doc = filing_blocks.document(raw.read_text(errors="ignore"), {"url": url})
+        path.write_text(json.dumps(doc, separators=(",", ":")))
+    return {"blocks_path": str(path), "block": find_block(doc["blocks"], quote)}
 
 
 if __name__ == "__main__":
@@ -493,6 +545,7 @@ if __name__ == "__main__":
         q = args[i + 1]
         del args[i:i + 2]
     as_json = "--json" in args
-    args = [a for a in args if a != "--json"]
-    res = open_doc(args[0], q)
+    want_blocks = "--blocks" in args
+    args = [a for a in args if a not in ("--json", "--blocks")]
+    res = open_doc(args[0], q, want_blocks)
     print(json.dumps(res) if as_json else f"{res['kind']} {res['path']} line={res['line']}")
