@@ -35,6 +35,12 @@ dev = [
     "pytest>=9.1.1",
     "ruff>=0.12",
 ]
+ml = [
+    "datasets>=5.1.0",
+    "scikit-learn>=1.9.1",
+    "torch>=2.15.0",
+    "transformers>=5.22.1",
+]
 
 [tool.ruff]
 line-length = 120
