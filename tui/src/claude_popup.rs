@@ -11,15 +11,23 @@ use std::process::Command;
 /// Detached tmux session that holds the Claude Code process.
 pub const SESSION: &str = "finlarp-claude";
 
-/// Shows Claude in a popup. `text` is typed into Claude's prompt first
-/// (not submitted), for `<space>as`.
+/// Shows Claude in a popup. `text` goes into Claude's prompt first (not
+/// submitted), for `<space>as` / `<space>ac` with a selection. One line is
+/// typed; several lines are pasted (bracketed paste) so line breaks and table
+/// layout survive and Enter isn't sent.
 pub fn open(text: Option<&str>) -> io::Result<()> {
     if env::var_os("TMUX").is_none() {
         return Err(io::Error::other("Claude popup needs fl run inside tmux"));
     }
     ensure_session()?;
-    if let Some(t) = text.map(|t| t.replace(['\n', '\r'], " ")).filter(|t| !t.trim().is_empty()) {
-        tmux(&["send-keys", "-t", SESSION, "-l", &t])?;
+    match text.filter(|t| !t.trim().is_empty()) {
+        Some(t) if t.contains('\n') => {
+            let t = t.replace('\r', "");
+            tmux(&["set-buffer", "-b", "fl-claude", "--", &t])?;
+            tmux(&["paste-buffer", "-p", "-d", "-b", "fl-claude", "-t", SESSION])?;
+        }
+        Some(t) => tmux(&["send-keys", "-t", SESSION, "-l", t])?,
+        None => {}
     }
     // Popup targets the pane fl runs in, so it lands on the right client.
     let mut args = vec!["display-popup", "-E", "-w", "90%", "-h", "90%", "-b", "rounded"];

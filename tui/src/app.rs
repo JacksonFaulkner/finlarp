@@ -17,12 +17,14 @@
 
 use std::io;
 use std::path::PathBuf;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
-use ratatui::backend::Backend;
+use ratatui::backend::{Backend, TestBackend};
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
+use ratatui::layout::Rect;
 use ratatui::{Frame, Terminal};
 
+use crate::ui::tape::Tape;
 use crate::ui::theme::Theme;
 
 /// How long the loop waits for input before calling `tick` again.
@@ -55,6 +57,9 @@ pub enum Action {
     OpenBrowser(String),
     /// Copy text to the clipboard; screen stays open.
     Copy(String),
+    /// Run `cmd` in a new tmux window named `name`, in fl's working
+    /// directory (`<space>to` opens lazygit, like the nvim mapping).
+    TmuxWindow { name: String, cmd: String },
     /// Screen, picker, or Claude request; see `Route`.
     Route(Route),
 }
@@ -88,19 +93,36 @@ pub trait Screen {
     fn leader_ok(&self) -> bool {
         true
     }
+    /// Whether the ticker tape shows on the bottom row. Screens that use the
+    /// whole screen turn it off.
+    fn shows_tape(&self) -> bool {
+        true
+    }
     /// Text for `<space>as`: the selected value with its source, or None if
     /// nothing is selected.
     fn claude_context(&self) -> Option<String> {
         None
     }
+    /// Text selected in a visual mode (ui::text_cursor), ending the
+    /// selection. `<space>y` copies it to the clipboard.
+    fn take_selection(&mut self) -> Option<String> {
+        None
+    }
+    /// The visual selection as Claude context, ending the selection.
+    /// `<space>ac` opens Claude with it in the prompt. Screens can add where
+    /// it came from; the default is the bare selection.
+    fn take_claude_selection(&mut self) -> Option<String> {
+        self.take_selection()
+    }
 }
 
-/// Progress through the `<space>a{c,s}` leader chord.
+/// Progress through the `<space>a{c,s}` / `<space>y` / `<space>to` leader chords.
 #[derive(Clone, Copy, PartialEq)]
 enum Chord {
     Idle,
     Space,
     SpaceA,
+    SpaceT,
 }
 
 fn is_plain(key: &KeyEvent, c: char) -> bool {
@@ -111,7 +133,10 @@ fn is_plain(key: &KeyEvent, c: char) -> bool {
 }
 
 /// Feeds one key through the leader chord, then to the screen. `<space>ac`
-/// opens Claude, `<space>as` adds the selected context to it. A
+/// opens Claude (with the visual selection, if any, in the prompt),
+/// `<space>as` adds the selected context to it, `<space>y`
+/// copies the screen's visual selection to the clipboard, `<space>to` opens
+/// lazygit in a new tmux window. A
 /// space not followed by `a` is replayed to the screen, so it still works
 /// (one key late).
 fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Action {
@@ -130,16 +155,42 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
                 *chord = Chord::SpaceA;
                 return Action::None;
             }
+            if is_plain(&key, 't') {
+                *chord = Chord::SpaceT;
+                return Action::None;
+            }
+            if is_plain(&key, 'y') {
+                return match screen.take_selection() {
+                    Some(text) => Action::Copy(text),
+                    None => {
+                        screen.set_flash("nothing selected (v / V to select)".into());
+                        Action::None
+                    }
+                };
+            }
             let space = KeyEvent::new(KeyCode::Char(' '), KeyModifiers::NONE);
             match screen.on_key(space) {
                 Action::None => screen.on_key(key),
                 a => a,
             }
         }
+        Chord::SpaceT => {
+            *chord = Chord::Idle;
+            if is_plain(&key, 'o') {
+                Action::TmuxWindow {
+                    name: "lazygit".into(),
+                    cmd: "lazygit".into(),
+                }
+            } else {
+                Action::None
+            }
+        }
         Chord::SpaceA => {
             *chord = Chord::Idle;
             if is_plain(&key, 'c') {
-                Action::Route(Route::Claude { text: None })
+                Action::Route(Route::Claude {
+                    text: screen.take_claude_selection(),
+                })
             } else if is_plain(&key, 's') {
                 match screen.claude_context() {
                     Some(text) => Action::Route(Route::Claude { text: Some(text) }),
@@ -192,21 +243,64 @@ impl Exit {
 }
 
 /// Runs a screen to completion.
-pub fn run(screen: &mut dyn Screen) -> io::Result<Exit> {
-    ratatui::run(|terminal| event_loop(terminal, screen, &mut CrosstermEvents))
+pub fn run(screen: &mut dyn Screen, tape: &mut Tape, theme: Theme) -> io::Result<Exit> {
+    ratatui::run(|terminal| event_loop(terminal, screen, &mut CrosstermEvents, tape, theme))
+}
+
+/// Draws the screen above the tape's bottom row. The screen draws into a
+/// frame one row shorter: it renders offscreen, then its cells and cursor are
+/// copied up, so screens never see the tape. With the tape off, they get the
+/// whole frame.
+fn draw_with_tape(
+    frame: &mut Frame,
+    screen: &mut dyn Screen,
+    body: &mut Terminal<TestBackend>,
+    tape: &Tape,
+    show: bool,
+    theme: Theme,
+) {
+    let area = frame.area();
+    if !show || !tape.enabled() || area.height < 2 {
+        screen.draw(frame);
+        return;
+    }
+    let rows = area.height - 1;
+    body.backend_mut().resize(area.width, rows);
+    // A TestBackend never fails to draw.
+    let _ = body.draw(|f| screen.draw(f));
+    let cells = body.backend().buffer();
+    let out = frame.buffer_mut();
+    for y in 0..rows {
+        for x in 0..area.width {
+            out[(area.x + x, area.y + y)] = cells[(x, y)].clone();
+        }
+    }
+    if body.backend().cursor_visible() {
+        let p = body.backend().cursor_position();
+        frame.set_cursor_position((area.x + p.x, area.y + p.y));
+    }
+    tape.draw(frame, Rect { y: area.y + rows, height: 1, ..area }, theme);
 }
 
 pub(crate) fn event_loop<B: Backend>(
     terminal: &mut Terminal<B>,
     screen: &mut dyn Screen,
     events: &mut dyn Events,
+    tape: &mut Tape,
+    theme: Theme,
 ) -> io::Result<Exit> {
     let mut dirty = true;
     let mut chord = Chord::Idle;
+    // The offscreen buffer a screen draws into while the tape holds the bottom row.
+    let mut body =
+        Terminal::new(TestBackend::new(1, 1)).map_err(|e| io::Error::other(e.to_string()))?;
     loop {
-        if dirty || screen.needs_redraw() {
+        tape.tick(Instant::now());
+        // The tape scrolls, so it redraws every poll while it is on.
+        let show = screen.shows_tape();
+        if dirty || screen.needs_redraw() || (show && tape.enabled()) {
             terminal
-                .draw(|f| screen.draw(f))
+                .draw(|f| draw_with_tape(f, screen, &mut body, tape, show, theme))
                 .map_err(|e| io::Error::other(e.to_string()))?;
             dirty = false;
         }
@@ -241,6 +335,19 @@ pub(crate) fn event_loop<B: Backend>(
                     Err(e) => format!("open failed: {e}"),
                 };
                 screen.set_flash(msg);
+            }
+            Action::TmuxWindow { name, cmd } => {
+                let dir = std::env::current_dir().unwrap_or_default();
+                let res = std::process::Command::new("tmux")
+                    .args(["new-window", "-n", &name, "-c"])
+                    .arg(&dir)
+                    .arg(&cmd)
+                    .status();
+                match res {
+                    Ok(s) if s.success() => {}
+                    Ok(_) => screen.set_flash(format!("{name}: tmux new-window failed (inside tmux?)")),
+                    Err(e) => screen.set_flash(format!("{name}: {e}")),
+                }
             }
             Action::Copy(text) => {
                 let msg = match arboard::Clipboard::new().and_then(|mut c| c.set_text(text)) {
@@ -318,7 +425,14 @@ mod tests {
 
     fn run_script(screen: &mut Probe, evs: Vec<Option<Event>>) -> io::Result<i32> {
         let mut term = Terminal::new(TestBackend::new(20, 3)).expect("terminal");
-        event_loop(&mut term, screen, &mut Script(evs.into())).map(|e| e.code)
+        event_loop(
+            &mut term,
+            screen,
+            &mut Script(evs.into()),
+            &mut Tape::off(),
+            Theme::default(),
+        )
+        .map(|e| e.code)
     }
 
     #[test]
@@ -351,6 +465,46 @@ mod tests {
             route_key(&mut s, &mut c, k('c')),
             Action::Route(Route::Claude { text: None })
         );
+        // <space>y copies the selection; without one it only flashes
+        struct Sel(Option<String>);
+        impl Screen for Sel {
+            fn draw(&mut self, _: &mut Frame) {}
+            fn on_key(&mut self, _: KeyEvent) -> Action {
+                Action::Quit
+            }
+            fn take_selection(&mut self) -> Option<String> {
+                self.0.take()
+            }
+        }
+        let mut sel = Sel(Some("picked".into()));
+        route_key(&mut sel, &mut c, k(' '));
+        assert_eq!(route_key(&mut sel, &mut c, k('y')), Action::Copy("picked".into()));
+        route_key(&mut sel, &mut c, k(' '));
+        assert_eq!(route_key(&mut sel, &mut c, k('y')), Action::None);
+        // <space>ac takes the selection into the prompt; without one, plain Claude
+        let mut sel = Sel(Some("excerpt".into()));
+        for ch in [' ', 'a'] {
+            route_key(&mut sel, &mut c, k(ch));
+        }
+        assert_eq!(
+            route_key(&mut sel, &mut c, k('c')),
+            Action::Route(Route::Claude { text: Some("excerpt".into()) })
+        );
+        for ch in [' ', 'a'] {
+            route_key(&mut sel, &mut c, k(ch));
+        }
+        assert_eq!(route_key(&mut sel, &mut c, k('c')), Action::Route(Route::Claude { text: None }));
+        // <space>to opens lazygit in a tmux window; <space>t + other is a no-op
+        route_key(&mut s, &mut c, k(' '));
+        route_key(&mut s, &mut c, k('t'));
+        assert_eq!(
+            route_key(&mut s, &mut c, k('o')),
+            Action::TmuxWindow { name: "lazygit".into(), cmd: "lazygit".into() }
+        );
+        route_key(&mut s, &mut c, k(' '));
+        route_key(&mut s, &mut c, k('t'));
+        assert_eq!(route_key(&mut s, &mut c, k('x')), Action::None);
+        assert!(c == Chord::Idle);
         // space then a non-chord key replays both to the screen
         route_key(&mut s, &mut c, k(' '));
         assert_eq!(route_key(&mut s, &mut c, k('x')), Action::Quit);

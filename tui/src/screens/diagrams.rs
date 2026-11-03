@@ -1781,6 +1781,10 @@ impl Screen for Diagrams {
         Action::None
     }
 
+    fn shows_tape(&self) -> bool {
+        false
+    }
+
     fn needs_redraw(&self) -> bool {
         self.animating()
     }

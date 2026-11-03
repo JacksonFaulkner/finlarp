@@ -11,8 +11,18 @@
 // shows its extracted text; an image has no text view. `o` opens the original
 // in the browser from any state.
 //
-// Keys: j/k scroll, ^d/^u (space, PgDn/PgUp) page, g/G top/bottom, n/N next/
-// previous match of the quote, o open in browser, y copy url, q/esc back.
+// SEC HTML also comes back as typed blocks (docview.py --blocks, parser in
+// py/sources/filing_blocks.py); when present the reader lays those out with
+// ui::doc_blocks (prose column, headings, financial tables) instead of the
+// markdown text. A search chunk with an SEC url opens its real document at
+// the hit; other chunks keep the plain neighbourhood view.
+//
+// Keys: a Neovim-style cursor (ui::text_cursor): hjkl, w/b/e, 0/^/$, gh/gl,
+// f/t/F/T ; ,, gg/G, vip/viw text objects,
+// {/} paragraphs, ^d/^u, counts; v / V visual mode, y or <space>y copies the
+// selection. Here: n/N next/previous match of the quote, ]]/[[ next/previous
+// Item, ]h/[h next/previous heading, o open in browser, y copy url (normal
+// mode), q/esc back.
 
 use std::io;
 use std::sync::mpsc::{self, Receiver, TryRecvError};
@@ -20,7 +30,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use ratatui::Frame;
-use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+use ratatui::crossterm::event::{KeyCode, KeyEvent};
 use ratatui::layout::{Constraint, Layout};
 use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
@@ -30,6 +40,9 @@ use serde::Deserialize;
 use crate::app::{Action, Ctx, Screen};
 use crate::model::Source;
 use crate::pyrun;
+use crate::ui::doc_blocks::{self, Block};
+use crate::ui::help::{self, Key, key, section};
+use crate::ui::text_cursor::{Outcome, TextCursor};
 use crate::ui::theme::Theme;
 
 const FLASH_FOR: Duration = Duration::from_secs(2);
@@ -37,7 +50,21 @@ const DOCVIEW_PY: &str = "py/derive/docview.py";
 const SEARCH_PY: &str = "py/derive/search.py";
 /// Marks the hit inside a chunk's neighbourhood.
 const MATCH_MARK: &str = ">>> match";
-const HINT: &str = "j/k scroll  ^d/^u page  g/G top/end  n/N match  o browser  y copy  q back";
+const HINT: &str = "? keys  hjkl wbe  v/V select  ␣y copy  n/N match  o browser  y url  q back";
+const BLOCK_HINT: &str = "? keys  hjkl wbe  v/V select  ␣y copy  ]]/[[ item  ]h/[h heading  n/N match  q back";
+
+/// Docview's own keys; the `?` overlay shows these after the cursor's.
+const DOC_KEYS: &[Key] = &[
+    section("document"),
+    key("]] [[", "next / previous Item"),
+    key("]h [h", "next / previous heading"),
+    key("n N", "next / previous quote match"),
+    key("o", "open the source in the browser"),
+    key("y", "copy the source URL (normal mode)"),
+    key("spc t o", "lazygit in a new tmux window"),
+    key("?", "this help"),
+    key("q esc", "back"),
+];
 
 /// What an arg asks for.
 #[derive(Debug, Clone, PartialEq)]
@@ -64,7 +91,8 @@ pub fn chunk_arg(id: impl std::fmt::Display) -> String {
     format!("chunk:{id}")
 }
 
-/// A loaded document: plain text lines plus where to look in them.
+/// A loaded document: plain text lines (or typed blocks) plus where to look
+/// in them. With blocks, "logical line" below means block index.
 #[derive(Debug, Clone, Default)]
 struct Doc {
     title: String,
@@ -72,6 +100,7 @@ struct Doc {
     /// Browser target for `o` and `y`.
     url: Option<String>,
     lines: Vec<String>,
+    blocks: Option<Vec<Block>>,
     /// Logical lines that hold the quote (or a chunk's hit), ascending.
     matches: Vec<usize>,
     /// Logical line to centre on when first shown.
@@ -92,12 +121,14 @@ pub struct Docview {
     source: Option<String>,
     rx: Option<Receiver<Result<Doc, String>>>,
     state: State,
-    /// Top visual row.
-    scroll: usize,
-    /// Body height from the last draw.
-    height: usize,
-    /// Word-wrapped rows for `wrapped_at` columns: (logical line, text).
-    rows: Vec<(usize, String)>,
+    /// Cursor, visual selection and scroll position over `rows`.
+    cur: TextCursor,
+    /// First key of a `]]` / `[[` / `]h` / `[h` jump.
+    bracket: Option<char>,
+    /// `?` key overlay showing.
+    help: bool,
+    /// Laid-out rows for `wrapped_at` columns: (logical line, styled line).
+    rows: Vec<(usize, Line<'static>)>,
     /// First visual row of each logical line.
     starts: Vec<usize>,
     wrapped_at: usize,
@@ -142,8 +173,9 @@ impl Docview {
             source,
             rx,
             state,
-            scroll: 0,
-            height: 1,
+            cur: TextCursor::skipping_blanks().centered(),
+            bracket: None,
+            help: false,
             rows: Vec::new(),
             starts: Vec::new(),
             wrapped_at: 0,
@@ -154,15 +186,6 @@ impl Docview {
 
     fn is_ready(&self) -> bool {
         matches!(self.state, State::Ready(_))
-    }
-
-    fn max_scroll(&self) -> usize {
-        self.rows.len().saturating_sub(self.height)
-    }
-
-    fn scroll_by(&mut self, delta: isize) {
-        let max = self.max_scroll() as isize;
-        self.scroll = (self.scroll as isize + delta).clamp(0, max) as usize;
     }
 
     fn open_url(&self) -> Option<String> {
@@ -192,37 +215,97 @@ impl Docview {
         }
     }
 
-    /// Next (or previous) match whose first row lies past the view's centre,
-    /// wrapping at the ends.
+    /// Moves the cursor to the next (or previous) match, wrapping at the ends.
     fn jump_match(&mut self, forward: bool) {
         let State::Ready(doc) = &self.state else {
             return;
         };
-        let anchor = self.scroll + self.height / 3;
         let rows: Vec<usize> = doc
             .matches
             .iter()
             .filter_map(|m| self.starts.get(*m).copied())
             .collect();
+        let at = self.cur.pos.row;
         let target = if forward {
-            rows.iter()
-                .copied()
-                .find(|r| *r > anchor)
-                .or(rows.first().copied())
+            rows.iter().copied().find(|r| *r > at).or(rows.first().copied())
         } else {
-            rows.iter()
-                .copied()
-                .rev()
-                .find(|r| *r < anchor)
-                .or(rows.last().copied())
+            rows.iter().copied().rev().find(|r| *r < at).or(rows.last().copied())
         };
         if let Some(row) = target {
-            self.scroll = row.saturating_sub(self.height / 3).min(self.max_scroll());
+            self.cur.goto_row(row);
         }
     }
 
     fn flash_msg(&mut self, msg: String) {
         self.flash = Some((msg, Instant::now()));
+    }
+
+    /// Moves the cursor to the next (or previous) heading at `max_level` or above.
+    fn jump_heading(&mut self, forward: bool, max_level: u8) {
+        let State::Ready(doc) = &self.state else {
+            return;
+        };
+        let Some(blocks) = &doc.blocks else {
+            return;
+        };
+        let rows: Vec<usize> = blocks
+            .iter()
+            .enumerate()
+            .filter(|(_, b)| doc_blocks::is_heading(b, max_level))
+            .filter_map(|(i, _)| self.starts.get(i).copied())
+            .collect();
+        let at = self.cur.pos.row;
+        let target = if forward {
+            rows.iter().copied().find(|r| *r > at)
+        } else {
+            rows.iter().copied().rev().find(|r| *r < at)
+        };
+        if let Some(row) = target {
+            self.cur.goto_row(row);
+        }
+    }
+
+    /// The visual selection framed for a Claude prompt: document, section
+    /// and source URL, then the excerpt in a fence. None without a selection.
+    fn claude_excerpt(&self) -> Option<String> {
+        let text = self.cur.selected_text()?;
+        let State::Ready(doc) = &self.state else {
+            return Some(text);
+        };
+        let mut head = format!("From {}", doc.title);
+        if let Some(sec) = self.section() {
+            head.push_str(&format!(" § {sec}"));
+        }
+        if let Some(url) = &doc.url {
+            head.push_str(&format!(" ({url})"));
+        }
+        Some(format!("{head}:\n```\n{text}\n```\n"))
+    }
+
+    /// The Item and nearest heading above the cursor, for the footer.
+    fn section(&self) -> Option<String> {
+        let State::Ready(doc) = &self.state else {
+            return None;
+        };
+        let blocks = doc.blocks.as_ref()?;
+        let (block, _) = self.rows.get(self.cur.pos.row)?;
+        let mut item = None;
+        let mut sub = None;
+        for b in blocks[..=(*block).min(blocks.len() - 1)].iter().rev() {
+            if let Block::H { level, text, .. } = b {
+                if *level <= 1 {
+                    item = Some(text.clone());
+                    break;
+                }
+                if sub.is_none() && *level <= 3 {
+                    sub = Some(text.clone());
+                }
+            }
+        }
+        match (item, sub) {
+            (Some(i), Some(s)) => Some(format!("{i} › {s}")),
+            (i, s) => i.or(s),
+        }
     }
 }
 
@@ -244,6 +327,9 @@ struct Located {
     title: Option<String>,
     url: Option<String>,
     index_url: Option<String>,
+    blocks_path: Option<String>,
+    /// Index of the block holding the quote.
+    block: Option<usize>,
 }
 
 fn load_url(url: &str, quote: Option<&str>) -> Result<Doc, String> {
@@ -251,9 +337,29 @@ fn load_url(url: &str, quote: Option<&str>) -> Result<Doc, String> {
     if let Some(q) = quote {
         args.extend(["--quote", q]);
     }
-    args.push("--json");
+    args.extend(["--json", "--blocks"]);
     let out = pyrun::run_script(DOCVIEW_PY, &args)?;
     let loc: Located = serde_json::from_str(&out).map_err(|e| format!("docview.py output: {e}"))?;
+    let open_url = loc.index_url.clone().or(loc.url.clone()).or_else(|| Some(url.to_string()));
+    let title = loc
+        .title
+        .clone()
+        .filter(|t| !t.is_empty())
+        .unwrap_or_else(|| url.to_string());
+    if let Some(blocks) = loc.blocks_path.as_deref().and_then(|p| doc_blocks::load(p).ok()) {
+        if !blocks.is_empty() {
+            let matches: Vec<usize> = loc.block.into_iter().collect();
+            return Ok(Doc {
+                title,
+                subtitle: loc.url.clone().unwrap_or_else(|| url.to_string()),
+                url: open_url,
+                lines: Vec::new(),
+                jump: matches.first().copied(),
+                matches,
+                blocks: Some(blocks),
+            });
+        }
+    }
 
     let text = match loc.kind.as_str() {
         "md" | "text" => read_text(&loc.path),
@@ -261,11 +367,6 @@ fn load_url(url: &str, quote: Option<&str>) -> Result<Doc, String> {
         "image" => None,
         other => return Err(format!("no text viewer for {other} documents")),
     };
-    let title = loc
-        .title
-        .filter(|t| !t.is_empty())
-        .unwrap_or_else(|| url.to_string());
-    let open_url = loc.index_url.or(loc.url).or_else(|| Some(url.to_string()));
     let subtitle = if loc.kind == "pdf" {
         format!("pdf text · {url}")
     } else {
@@ -287,6 +388,7 @@ fn load_url(url: &str, quote: Option<&str>) -> Result<Doc, String> {
                 lines,
                 matches,
                 jump,
+                blocks: None,
             }
         }
         None => Doc {
@@ -340,6 +442,28 @@ fn load_chunk(id: i64) -> Result<Doc, String> {
         .find(|r| r.id == id)
         .or(rows.first())
         .ok_or_else(|| format!("chunk {id} not found"))?;
+    if let Some(url) = hit.url.as_deref().filter(|u| u.contains("sec.gov")) {
+        // The hit's opening words locate it in the real document.
+        // Chunk text joins table cells and bullets with "·" / "|": not in the doc.
+        let quote: String = opt(&hit.text)
+            .split_whitespace()
+            .filter(|w| !matches!(*w, "·" | "|" | "•"))
+            .take(12)
+            .collect::<Vec<_>>()
+            .join(" ");
+        if let Ok(mut doc) = load_url(url, Some(&quote)) {
+            if doc.blocks.is_some() {
+                doc.title = format!(
+                    "{} · {} {} · {}",
+                    opt(&hit.ticker),
+                    opt(&hit.form),
+                    opt(&hit.date),
+                    opt(&hit.section)
+                );
+                return Ok(doc);
+            }
+        }
+    }
     let head = format!(
         "{} — {} / {} ({}, {})",
         opt(&hit.ticker),
@@ -365,6 +489,7 @@ fn load_chunk(id: i64) -> Result<Doc, String> {
         jump: matches.first().copied(),
         lines,
         matches,
+        blocks: None,
     })
 }
 
@@ -461,14 +586,32 @@ fn wrap(line: &str, width: usize) -> Vec<String> {
     rows
 }
 
-fn wrap_all(lines: &[String], width: usize) -> (Vec<(usize, String)>, Vec<usize>) {
+fn wrap_all(lines: &[String], width: usize) -> (Vec<(usize, Line<'static>)>, Vec<usize>) {
     let mut rows = Vec::new();
     let mut starts = Vec::with_capacity(lines.len());
     for (i, line) in lines.iter().enumerate() {
         starts.push(rows.len());
-        rows.extend(wrap(line, width).into_iter().map(|r| (i, r)));
+        rows.extend(wrap(line, width).into_iter().map(|r| (i, Line::from(r))));
     }
     (rows, starts)
+}
+
+/// A matched block's rows get an accent bar in the left margin.
+fn gutter(line: &Line<'static>, style: Style) -> Line<'static> {
+    let mut spans = line.spans.clone();
+    match spans.first_mut() {
+        Some(first) if first.content.starts_with(' ') => {
+            first.content = first.content[1..].to_string().into();
+        }
+        _ => {}
+    }
+    let mut out = vec![Span::styled("▌", style)];
+    out.extend(spans);
+    Line::from(out)
+}
+
+fn doc_has_blocks(state: &State) -> bool {
+    matches!(state, State::Ready(Doc { blocks: Some(_), .. }))
 }
 
 impl Screen for Docview {
@@ -480,19 +623,36 @@ impl Screen for Docview {
         ])
         .areas(frame.area());
         let width = body.width.max(1) as usize;
-        self.height = body.height.max(1) as usize;
 
         if let State::Ready(doc) = &self.state {
             if self.wrapped_at != width {
-                (self.rows, self.starts) = wrap_all(&doc.lines, width);
+                let (rows, starts) = match &doc.blocks {
+                    Some(blocks) => doc_blocks::layout(blocks, width, &self.theme),
+                    None => wrap_all(&doc.lines, width),
+                };
+                // Keep the cursor on the same logical line across a reflow.
+                let (old_rows, old_starts) = (&self.rows, &self.starts);
+                let remap = |r: usize| match old_rows.get(r) {
+                    Some((line, _)) => {
+                        let off = r - old_starts.get(*line).copied().unwrap_or(r);
+                        let start = starts.get(*line).copied().unwrap_or(0);
+                        let end = starts.get(line + 1).copied().unwrap_or(rows.len());
+                        (start + off).min(end.saturating_sub(1).max(start))
+                    }
+                    None => 0,
+                };
+                self.cur.remap(remap);
+                let texts: Vec<String> = rows.iter().map(|(_, l)| TextCursor::line_text(l)).collect();
+                (self.rows, self.starts) = (rows, starts);
+                self.cur.set_rows(&texts);
                 self.wrapped_at = width;
             }
-            if let Some(line) = self.pending.take() {
-                let row = self.starts.get(line).copied().unwrap_or(0);
-                self.scroll = row.saturating_sub(self.height / 3);
-            }
         }
-        self.scroll = self.scroll.min(self.max_scroll());
+        self.cur.set_height(body.height.max(1) as usize);
+        if let Some(line) = self.pending.take() {
+            let row = self.starts.get(line).copied().unwrap_or(0);
+            self.cur.goto_row(row);
+        }
 
         let dim = Style::default().fg(self.theme.dim);
         let accent = Style::default()
@@ -525,15 +685,19 @@ impl Screen for Docview {
                 );
             }
             State::Ready(doc) => {
-                let end = (self.scroll + self.height).min(self.rows.len());
-                let visible: Vec<Line> = self.rows[self.scroll.min(end)..end]
-                    .iter()
-                    .map(|(line, text)| {
-                        if doc.matches.binary_search(line).is_ok() {
-                            Line::from(Span::styled(text.clone(), accent))
-                        } else {
-                            Line::from(text.clone())
-                        }
+                let blocks = doc.blocks.is_some();
+                let visible: Vec<Line> = self
+                    .cur
+                    .visible()
+                    .map(|r| {
+                        let (line, text) = &self.rows[r];
+                        let hit = doc.matches.binary_search(line).is_ok() && text.width() > 0;
+                        let drawn = match (hit, blocks) {
+                            (true, true) => gutter(text, accent),
+                            (true, false) => text.clone().style(accent),
+                            _ => text.clone(),
+                        };
+                        self.cur.decorate(r, drawn, &self.theme)
                     })
                     .collect();
                 frame.render_widget(Paragraph::new(visible), body);
@@ -543,40 +707,95 @@ impl Screen for Docview {
         let footer = match &self.flash {
             Some((msg, _)) => msg.clone(),
             None if self.is_ready() => {
-                let total = self.rows.len();
-                let pos = if total <= self.height {
-                    "all".to_string()
-                } else {
-                    format!("{}%", self.scroll * 100 / (total - self.height).max(1))
+                let total = self.rows.len().max(1);
+                let pos = format!("{}%", (self.cur.pos.row + 1) * 100 / total);
+                let lead = match self.cur.status() {
+                    Some(st) => st,
+                    None if doc_has_blocks(&self.state) => BLOCK_HINT.to_string(),
+                    None => HINT.to_string(),
                 };
-                format!("{HINT}  {pos}")
+                match self.section() {
+                    Some(sec) => format!("{lead}  {pos}  § {sec}"),
+                    None => format!("{lead}  {pos}"),
+                }
             }
             None => HINT.to_string(),
         };
         frame.render_widget(Paragraph::new(Span::styled(footer, dim)), foot);
+        if self.help {
+            let keys: Vec<Key> = [crate::ui::text_cursor::KEYS, DOC_KEYS].concat();
+            help::render_overlay(frame, frame.area(), "reader keys", &keys, &self.theme);
+        }
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
-        let page = (self.height / 2).max(1) as isize;
-        match key.code {
-            KeyCode::Esc | KeyCode::Char('q') => return Action::Quit,
-            KeyCode::Char('o') => return self.open_browser(),
-            KeyCode::Char('y') => return self.copy_url(),
-            _ if !self.is_ready() => {}
-            KeyCode::Char('j') | KeyCode::Down => self.scroll_by(1),
-            KeyCode::Char('k') | KeyCode::Up => self.scroll_by(-1),
-            KeyCode::Char('d') if ctrl => self.scroll_by(page),
-            KeyCode::Char('u') if ctrl => self.scroll_by(-page),
-            KeyCode::Char(' ') | KeyCode::PageDown => self.scroll_by(page * 2),
-            KeyCode::PageUp => self.scroll_by(-page * 2),
-            KeyCode::Char('g') | KeyCode::Home => self.scroll = 0,
-            KeyCode::Char('G') | KeyCode::End => self.scroll = self.max_scroll(),
-            KeyCode::Char('n') => self.jump_match(true),
-            KeyCode::Char('N') => self.jump_match(false),
-            _ => {}
+        // ? opens the key overlay; any key closes it
+        if self.help {
+            self.help = false;
+            return Action::None;
         }
-        Action::None
+        if key.code == KeyCode::Char('?') {
+            self.help = true;
+            return Action::None;
+        }
+        if !self.is_ready() {
+            return match key.code {
+                KeyCode::Esc | KeyCode::Char('q') => Action::Quit,
+                KeyCode::Char('o') => self.open_browser(),
+                KeyCode::Char('y') => self.copy_url(),
+                _ => Action::None,
+            };
+        }
+        if let Some(first) = self.bracket.take() {
+            let forward = first == ']';
+            match key.code {
+                KeyCode::Char(c) if c == first => self.jump_heading(forward, 1),
+                KeyCode::Char('h') => self.jump_heading(forward, 3),
+                _ => {}
+            }
+            return Action::None;
+        }
+        if matches!(key.code, KeyCode::Char('[' | ']')) && key.modifiers.is_empty() {
+            if let KeyCode::Char(c) = key.code {
+                self.bracket = Some(c);
+            }
+            return Action::None;
+        }
+        match self.cur.on_key(key) {
+            Outcome::Handled => return Action::None,
+            Outcome::Yank(text) => return Action::Copy(text),
+            Outcome::Unhandled => {}
+        }
+        match key.code {
+            KeyCode::Esc | KeyCode::Char('q') => Action::Quit,
+            KeyCode::Char('o') => self.open_browser(),
+            KeyCode::Char('y') => self.copy_url(),
+            KeyCode::Char('n') => {
+                self.jump_match(true);
+                Action::None
+            }
+            KeyCode::Char('N') => {
+                self.jump_match(false);
+                Action::None
+            }
+            _ => Action::None,
+        }
+    }
+
+    fn take_selection(&mut self) -> Option<String> {
+        self.cur.take_selection()
+    }
+
+    /// `<space>ac` with a selection: the excerpt plus where it came from.
+    fn take_claude_selection(&mut self) -> Option<String> {
+        let text = self.claude_excerpt();
+        self.cur.take_selection();
+        text
+    }
+
+    /// `<space>as` sends the visual selection (with its source) to Claude.
+    fn claude_context(&self) -> Option<String> {
+        self.claude_excerpt()
     }
 
     fn tick(&mut self) -> Action {
@@ -653,6 +872,7 @@ mod tests {
                 lines,
                 matches,
                 jump,
+                blocks: None,
             }),
             None,
             None,
@@ -730,38 +950,38 @@ mod tests {
         let (rows, starts) = wrap_all(&["aa bb".into(), "cc".into()], 3);
         assert_eq!(starts, vec![0, 2]);
         assert_eq!(rows.len(), 3);
-        assert_eq!(rows[2], (1, "cc".to_string()));
+        assert_eq!(rows[2], (1, Line::from("cc")));
     }
 
     #[test]
-    fn centres_first_match_and_steps_through_matches() {
+    fn cursor_jumps_to_matches_and_moves_like_vim() {
         let lines: Vec<String> = (0..200).map(|i| format!("line {i}")).collect();
         let mut v = doc(lines, vec![50, 120], Some("https://a/b.htm"));
         let text = screen_text(&mut v, 40, 13);
         assert!(text.contains("Title"), "{text}");
-        // first draw applied the jump: the match row is within the view
         v.pending = Some(50);
         screen_text(&mut v, 40, 13);
-        assert_eq!(v.scroll, 50 - 10 / 3);
+        assert_eq!(v.cur.pos.row, 50, "first draw lands the cursor on the match");
+        assert!(v.cur.visible().contains(&50));
         press(&mut v, KeyCode::Char('n'));
-        assert_eq!(v.scroll, 120 - 10 / 3);
+        assert_eq!(v.cur.pos.row, 120);
         press(&mut v, KeyCode::Char('n'));
-        assert_eq!(v.scroll, 50 - 10 / 3, "wraps to the first match");
+        assert_eq!(v.cur.pos.row, 50, "wraps to the first match");
         press(&mut v, KeyCode::Char('N'));
-        assert_eq!(v.scroll, 120 - 10 / 3, "previous wraps to the last");
+        assert_eq!(v.cur.pos.row, 120, "previous wraps to the last");
         press(&mut v, KeyCode::Char('G'));
-        assert_eq!(v.scroll, v.max_scroll());
+        assert_eq!((v.cur.pos.row, v.cur.top), (199, v.cur.max_top()));
         press(&mut v, KeyCode::Char('g'));
-        assert_eq!(v.scroll, 0);
+        press(&mut v, KeyCode::Char('g'));
+        assert_eq!((v.cur.pos.row, v.cur.top), (0, 0));
         press(&mut v, KeyCode::Char('j'));
         press(&mut v, KeyCode::Char('j'));
-        assert_eq!(v.scroll, 2);
         press(&mut v, KeyCode::Char('k'));
-        assert_eq!(v.scroll, 1);
+        assert_eq!(v.cur.pos.row, 1);
         v.on_key(KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL));
-        assert_eq!(v.scroll, 6);
+        assert_eq!((v.cur.pos.row, v.cur.top), (6, 1), "half page down, view centred on the cursor");
         v.on_key(KeyEvent::new(KeyCode::Char('u'), KeyModifiers::CONTROL));
-        assert_eq!(v.scroll, 1);
+        assert_eq!((v.cur.pos.row, v.cur.top), (1, 0));
     }
 
     #[test]
@@ -769,9 +989,37 @@ mod tests {
         let mut v = doc(vec!["a".into(), "b".into()], vec![], None);
         screen_text(&mut v, 20, 10);
         press(&mut v, KeyCode::Char('k'));
-        assert_eq!(v.scroll, 0);
+        assert_eq!((v.cur.pos.row, v.cur.top), (0, 0));
         press(&mut v, KeyCode::Char('G'));
-        assert_eq!(v.scroll, 0, "short doc fits, nothing to scroll");
+        assert_eq!((v.cur.pos.row, v.cur.top), (1, 0), "short doc fits, nothing to scroll");
+    }
+
+    #[test]
+    fn visual_selection_yanks_and_feeds_leader_y() {
+        let lines: Vec<String> = vec!["alpha beta".into(), "gamma delta".into()];
+        let mut v = doc(lines, vec![], Some("https://a/b.htm"));
+        screen_text(&mut v, 40, 10);
+        press(&mut v, KeyCode::Char('V'));
+        press(&mut v, KeyCode::Char('j'));
+        let text = screen_text(&mut v, 40, 10);
+        assert!(text.contains("-- VISUAL LINE --"), "{text}");
+        assert_eq!(
+            v.claude_context().as_deref(),
+            Some("From Title (https://a/b.htm):\n```\nalpha beta\ngamma delta\n```\n")
+        );
+        assert_eq!(v.take_selection().as_deref(), Some("alpha beta\ngamma delta"));
+        assert!(!v.cur.is_visual(), "<space>y ends visual mode");
+        // y in visual yanks; y in normal still copies the url
+        press(&mut v, KeyCode::Char('g'));
+        press(&mut v, KeyCode::Char('g'));
+        press(&mut v, KeyCode::Char('v'));
+        press(&mut v, KeyCode::Char('e'));
+        assert_eq!(press(&mut v, KeyCode::Char('y')), Action::Copy("alpha".into()));
+        assert_eq!(press(&mut v, KeyCode::Char('y')), Action::Copy("https://a/b.htm".into()));
+        // esc leaves visual mode instead of quitting
+        press(&mut v, KeyCode::Char('v'));
+        assert_eq!(press(&mut v, KeyCode::Esc), Action::None);
+        assert_eq!(press(&mut v, KeyCode::Esc), Action::Quit);
     }
 
     #[test]
@@ -838,5 +1086,66 @@ mod tests {
         let text = screen_text(&mut v, 60, 8);
         assert!(text.contains(MATCH_MARK), "{text}");
         assert!(text.contains("the hit text"), "{text}");
+    }
+
+    #[test]
+    fn block_docs_lay_out_and_jump_between_headings() {
+        let json = r#"{"blocks":[
+            {"t":"h","level":1,"text":"Item 1. Business"},
+            {"t":"p","spans":[{"s":"We make chips."}]},
+            {"t":"h","level":3,"text":"Products"},
+            {"t":"p","spans":[{"s":"GPUs and more."}]},
+            {"t":"h","level":1,"text":"Item 1A. Risk Factors"},
+            {"t":"li","marker":"•","spans":[{"s":"Supply is concentrated."}]}]}"#;
+        let path = std::env::temp_dir().join(format!("fl_blocks_{}.json", std::process::id()));
+        std::fs::write(&path, json).expect("write");
+        let blocks = doc_blocks::load(path.to_str().expect("utf8")).expect("load");
+        let _ = std::fs::remove_file(&path);
+        let mut v = Docview::with(
+            "label".into(),
+            State::Ready(Doc {
+                title: "NVDA 10-K".into(),
+                matches: vec![3],
+                jump: Some(3),
+                blocks: Some(blocks),
+                ..Doc::default()
+            }),
+            None,
+            None,
+        );
+        v.pending = Some(3);
+        let text = screen_text(&mut v, 60, 20);
+        assert!(text.contains("We make chips."), "{text}");
+        assert!(text.contains("▌"), "matched block gets the gutter bar: {text}");
+        assert!(text.contains("• Supply is concentrated."), "{text}");
+        screen_text(&mut v, 60, 5); // short view so there is room to scroll
+        press(&mut v, KeyCode::Char('g'));
+        press(&mut v, KeyCode::Char('g'));
+        press(&mut v, KeyCode::Char(']'));
+        press(&mut v, KeyCode::Char(']'));
+        assert_eq!(v.cur.pos.row, v.starts[4], "]] jumps to the next Item");
+        press(&mut v, KeyCode::Char('['));
+        press(&mut v, KeyCode::Char('['));
+        assert_eq!(v.cur.pos.row, v.starts[0]);
+        press(&mut v, KeyCode::Char(']'));
+        press(&mut v, KeyCode::Char('h'));
+        assert_eq!(v.cur.pos.row, v.starts[2], "]h stops at the level-3 heading");
+    }
+
+    #[test]
+    fn question_mark_shows_every_binding() {
+        let mut v = doc(vec!["a".into()], vec![], None);
+        press(&mut v, KeyCode::Char('?'));
+        let text = screen_text(&mut v, 120, 40);
+        for k in ["reader keys", "gh gl", "ip ap", "spc a c", "]] [[", "half page down"] {
+            assert!(text.contains(k), "{k} missing:\n{text}");
+        }
+        // any key closes it without acting
+        assert_eq!(press(&mut v, KeyCode::Char('q')), Action::None);
+        assert!(!v.help);
+        // short window: two columns, still everything
+        press(&mut v, KeyCode::Char('?'));
+        let text = screen_text(&mut v, 120, 24);
+        assert!(text.contains("move") && text.contains("document"), "{text}");
     }
 }

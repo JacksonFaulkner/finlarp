@@ -16,6 +16,8 @@ pub struct Theme {
     pub fg: Color,
     pub dim: Color,
     pub accent: Color,
+    /// Amounts in prose (Tufte: colour is for data).
+    pub num: Color,
     pub border: Color,
     pub spacing: Spacing,
     cursor_bg: Option<Color>,
@@ -30,6 +32,7 @@ impl Default for Theme {
             fg: Color::White,
             dim: Color::DarkGray,
             accent: Color::Rgb(0xd7, 0xa6, 0x5f),
+            num: Color::Rgb(0x8f, 0xbc, 0xdb),
             border: Color::DarkGray,
             spacing: Spacing::default(),
             cursor_bg: Some(Color::Rgb(0x3d, 0x3f, 0x50)),

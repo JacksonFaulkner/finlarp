@@ -230,12 +230,14 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
         upper(arg.clone()).is_none() && matches!(start, "canslim" | "dossier"),
         label(start, arg.as_deref()),
     )];
+    // One tape for the whole session: handing off to another screen keeps its data.
+    let mut tape = ui::tape::Tape::new();
     loop {
         let top = stack.last_mut().expect("stack never empty here");
         if let Some(t) = &title {
             t.set(&top.2);
         }
-        let exit = app::run(top.0.as_mut())?;
+        let exit = app::run(top.0.as_mut(), &mut tape, ctx.theme)?;
         let next = match exit.handoff {
             Some(Route::Screen { screen, arg }) => Some((screen, arg)),
             Some(Route::Picker { screen }) => Some((screen, None)),

@@ -24,6 +24,12 @@ pub const fn key(keys: &'static str, desc: &'static str) -> Key {
     Key { keys, desc }
 }
 
+/// A section title inside a key list (the overlay draws it as a heading;
+/// the footer skips it).
+pub const fn section(title: &'static str) -> Key {
+    Key { keys: "", desc: title }
+}
+
 /// Keys every sourced screen shares (see ui::source_bar::source_action).
 pub const SOURCE_KEYS: &[Key] = &[
     key("↵", "open source in browser"),
@@ -33,6 +39,7 @@ pub const SOURCE_KEYS: &[Key] = &[
     key("a", "audit overlay"),
     key("spc a s", "add selection to Claude"),
     key("spc a c", "toggle Claude window"),
+    key("spc t o", "lazygit in a new tmux window"),
 ];
 
 /// Movement keys understood by `block_view::BlockView::on_key`.
@@ -88,7 +95,7 @@ impl Widget for &Footer<'_> {
         // most important keys first, and put "? help" early to keep it visible)
         let mut spans: Vec<Span> = Vec::new();
         let mut used = 0;
-        for k in self.keys {
+        for k in self.keys.iter().filter(|k| !k.keys.is_empty()) {
             let hw = text::width(k.keys) + 1 + text::width(k.desc) + 2;
             if used + hw > w {
                 break;
@@ -129,19 +136,31 @@ impl Widget for &KeyOverlay<'_> {
             .max()
             .unwrap_or(0) as u16;
         let tw = text::width(self.title) as u16 + 4;
-        let width = (kw + dw + 2 + 4).max(tw).max(24);
-        let height = self.keys.len() as u16 + 2;
+        let col_w = kw + dw + 2;
+        // Two columns when one would be taller than the screen.
+        let n = self.keys.len() as u16;
+        let cols: u16 = if n + 2 > area.height && area.width >= 2 * col_w + 7 { 2 } else { 1 };
+        let per = n.div_ceil(cols);
+        let width = (cols * col_w + (cols - 1) * 3 + 4).max(tw).max(24);
+        let height = per + 2;
         let r = crate::ui::layout::popup(area, width, height);
         if r.is_empty() {
             return;
         }
         Clear.render(r, buf);
-        let rows = self.keys.iter().map(|k| {
-            Row::new([
-                Cell::from(Span::styled(k.keys, th.accent())),
-                Cell::from(Span::styled(k.desc, th.base())),
-            ])
-        });
+        let row = |k: &Key| {
+            if k.keys.is_empty() {
+                Row::new([
+                    Cell::from(Span::styled("──", th.dim())),
+                    Cell::from(Span::styled(k.desc, th.title())),
+                ])
+            } else {
+                Row::new([
+                    Cell::from(Span::styled(k.keys, th.accent())),
+                    Cell::from(Span::styled(k.desc, th.base())),
+                ])
+            }
+        };
         let block = Block::bordered()
             .border_style(th.accent())
             .style(th.base())
@@ -153,10 +172,17 @@ impl Widget for &KeyOverlay<'_> {
                 ])
                 .right_aligned(),
             );
-        Table::new(rows, [Constraint::Length(kw), Constraint::Fill(1)])
-            .column_spacing(2)
-            .block(block)
-            .render(r, buf);
+        let inner = block.inner(r);
+        block.render(r, buf);
+        let parts = ratatui::layout::Layout::horizontal(vec![Constraint::Fill(1); cols as usize])
+            .spacing(3)
+            .split(inner);
+        for (i, part) in parts.iter().enumerate() {
+            let chunk = self.keys.iter().skip(i * per as usize).take(per as usize).map(row);
+            Table::new(chunk, [Constraint::Length(kw), Constraint::Fill(1)])
+                .column_spacing(2)
+                .render(*part, buf);
+        }
     }
 }
 

@@ -7,6 +7,7 @@
 //   layout       standard screen frames (header / nav / detail / source bar)
 //   block_grid   blocks as a grid of bordered containers, spatial hjkl (dashboards)
 //   calendar     month / week / day views over dated events (weekends can be hidden)
+//   doc_blocks   filing blocks (filing_blocks.py) laid out for reading: prose column, headings, fin tables
 //   block_view   renders model::Block lists with a row/cell cursor (Table, Kv, Series, Bars, Text)
 //   section_list left nav: List + ListState over model::Section (long lists)
 //   section_tabs top nav: one row of tabs over model::Section (few, short sections)
@@ -17,6 +18,7 @@
 //   hcandles     horizontal candles (one row per bar) for the intraday tape
 //   help         `?` keymap overlay + footer key hints
 //   anim         procedural animation scenes: Canvas, motion/Particles, Scene + Player
+//   text_cursor  nvim-style cursor + v/V visual mode over rendered rows (yank via <space>y)
 //   text         width-aware truncate / wrap, URL shortening, number formatting
 //   throbber     spinner line for work in flight (throbber-widgets-tui)
 
@@ -30,6 +32,7 @@ pub mod calendar;
 pub mod candles;
 pub mod charts;
 pub mod command_palette;
+pub mod doc_blocks;
 pub mod hcandles;
 pub mod help;
 pub mod layout;
@@ -40,6 +43,8 @@ pub mod section_tabs;
 pub mod source_bar;
 pub mod spin;
 pub mod spacing;
+pub mod tape;
 pub mod text;
+pub mod text_cursor;
 pub mod theme;
 pub mod throbber;

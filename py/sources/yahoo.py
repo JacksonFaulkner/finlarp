@@ -76,7 +76,10 @@ def parse_quotes(payload: dict) -> list[dict]:
     are the regular session (last close against the close before it). `session_price` and
     `session_change_pct` are the live pre- or post-market print, measured against the last
     regular close. In the regular session they repeat the regular fields. Yahoo prints
-    pre-market volume as 0 for most names, so a pre-market print can be a single trade."""
+    pre-market volume as 0 for most names, so a pre-market print can be a single trade.
+    `pre_*` and `post_*` are Yahoo's raw extended-hours fields whatever the session (the
+    last after-hours print stays there overnight and over the weekend), against the last
+    regular close; `market_state` is Yahoo's raw marketState."""
     rows = []
     for q in (payload.get("quoteResponse") or {}).get("result") or []:
         session = SESSIONS.get(q.get("marketState"), "closed")
@@ -92,9 +95,19 @@ def parse_quotes(payload: dict) -> list[dict]:
             "change_close": q.get("regularMarketChange"),
             "change_close_pct": q.get("regularMarketChangePercent"),
             "previous_close": q.get("regularMarketPreviousClose"),
+            "volume": q.get("regularMarketVolume"),
+            "avg_volume_10d": q.get("averageDailyVolume10Day"),
             "session": session,
             "session_price": price,
             "session_change_pct": pct,
+            "market_state": q.get("marketState"),
+            "regular_time": q.get("regularMarketTime"),
+            "pre_time": q.get("preMarketTime"),
+            "post_time": q.get("postMarketTime"),
+            "pre_price": q.get("preMarketPrice"),
+            "pre_change_pct": q.get("preMarketChangePercent"),
+            "post_price": q.get("postMarketPrice"),
+            "post_change_pct": q.get("postMarketChangePercent"),
         })
     return rows
 
