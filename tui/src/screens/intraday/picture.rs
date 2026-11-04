@@ -7,7 +7,7 @@
 use image::{DynamicImage, Rgba, RgbaImage};
 
 use crate::ui::hcandles::HBar;
-use crate::ui::pixels::{Palette, blend, fill, hline, vline};
+use crate::ui::pixels::{Palette, blend};
 
 /// Share of the picture height given to the volume strip at the bottom.
 const VOLUME_SHARE: f64 = 0.2;
@@ -23,26 +23,6 @@ pub struct Pic<'a> {
     pub sel: Option<usize>,
 }
 
-/// Content hash of one picture. When it changes the picture is redrawn and
-/// re-encoded; when it does not, the terminal keeps the last one.
-pub fn fingerprint(pic: &Pic, px: (u32, u32), pal: &Palette) -> u64 {
-    use std::hash::{Hash, Hasher};
-    let mut h = std::collections::hash_map::DefaultHasher::new();
-    px.hash(&mut h);
-    pal.hash(&mut h);
-    pic.sel.hash(&mut h);
-    pic.vwap.map(f64::to_bits).hash(&mut h);
-    pic.prev_close.map(f64::to_bits).hash(&mut h);
-    pic.bars.len().hash(&mut h);
-    for b in pic.bars {
-        for v in [b.open, b.high, b.low, b.close] {
-            v.to_bits().hash(&mut h);
-        }
-        (b.volume, b.ext).hash(&mut h);
-    }
-    h.finish()
-}
-
 /// Bars that fit `px_w` pixels at the narrowest readable slot.
 pub fn capacity(px_w: u32) -> usize {
     (px_w / SLOT_PX).max(1) as usize
@@ -50,11 +30,27 @@ pub fn capacity(px_w: u32) -> usize {
 
 /// Draws the picture at `w` x `h` pixels. Only the last `capacity(w)` bars are drawn.
 pub fn render(pic: &Pic, w: u32, h: u32, pal: &Palette) -> DynamicImage {
-    let (w, h) = (w.max(1), h.max(1));
-    let mut img = RgbaImage::from_pixel(w, h, Rgba(pal.bg));
+    let mut img = RgbaImage::new(w.max(1), h.max(1));
+    render_into(&mut img, pic, pal);
+    DynamicImage::ImageRgba8(img)
+}
+
+/// `render` into a buffer the caller keeps (its size is the picture's size). Every
+/// pixel is overwritten, so a buffer from an earlier draw can be reused as it is.
+pub fn render_into(img: &mut RgbaImage, pic: &Pic, pal: &Palette) {
+    let (w, h) = img.dimensions();
+    let stride = w as usize * 4;
+    let raw: &mut [u8] = img;
+    // Clear: one background row, then copy it down.
+    for px in raw[..stride].chunks_exact_mut(4) {
+        px.copy_from_slice(&pal.bg);
+    }
+    for y in 1..h as usize {
+        raw.copy_within(0..stride, y * stride);
+    }
     let n = pic.bars.len().min(capacity(w));
     if n == 0 {
-        return DynamicImage::ImageRgba8(img);
+        return;
     }
     let bars = &pic.bars[pic.bars.len() - n..];
     let price_h = ((h as f64) * (1.0 - VOLUME_SHARE)).floor().max(1.0) as u32;
@@ -69,22 +65,22 @@ pub fn render(pic: &Pic, w: u32, h: u32, pal: &Palette) -> DynamicImage {
     }
     let pad = ((hi - lo) * 0.05).max(0.01);
     let (lo, hi) = (lo - pad, hi + pad);
-    let y = |p: f64| -> u32 {
-        let f = (hi - p) / (hi - lo);
-        (f * (price_h - 1) as f64)
-            .round()
-            .clamp(0.0, (price_h - 1) as f64) as u32
-    };
+    // Price -> row. The constants are hoisted out of the per-bar loop; the arithmetic is the
+    // same as the reference renderer's, so every row rounds the same way.
+    let span = hi - lo;
+    let top = (price_h - 1) as f64;
+    let y = |p: f64| -> u32 { (((hi - p) / span) * top).round().clamp(0.0, top) as u32 };
 
     // Four faint price gridlines.
     let grid = blend(pal.dim, pal.bg, 0.5);
     for k in 1..4 {
-        let p = lo + (hi - lo) * k as f64 / 4.0;
-        hline(&mut img, y(p), 0, w, grid);
+        let p = lo + span * k as f64 / 4.0;
+        fill_rect(raw, w, h, 0, y(p), w - 1, y(p), grid);
     }
 
     let slot = w as f64 / n as f64;
     let body = (slot * 0.6).max(1.0);
+    let half = (body / 2.0).floor() as u32;
     let vmax = bars.iter().map(|b| b.volume).max().unwrap_or(0).max(1) as f64;
     let vol_h = (h - vol_top) as f64;
     for (i, b) in bars.iter().enumerate() {
@@ -97,11 +93,13 @@ pub fn render(pic: &Pic, w: u32, h: u32, pal: &Palette) -> DynamicImage {
             pal.down
         };
         // wick, then body (at least one pixel tall, so a flat bar still shows)
-        vline(&mut img, cx, y(b.high), y(b.low), base);
+        let (wick_hi, wick_lo) = (y(b.high), y(b.low));
+        fill_rect(raw, w, h, cx, wick_hi.min(wick_lo), cx, wick_hi.max(wick_lo), base);
         let (top, bot) = (y(b.open.max(b.close)), y(b.open.min(b.close)));
-        let half = (body / 2.0).floor() as u32;
-        fill(
-            &mut img,
+        fill_rect(
+            raw,
+            w,
+            h,
             cx.saturating_sub(half),
             top,
             cx + half,
@@ -111,8 +109,10 @@ pub fn render(pic: &Pic, w: u32, h: u32, pal: &Palette) -> DynamicImage {
         // volume, from the bottom of the picture up
         let vh = ((b.volume as f64 / vmax) * vol_h).round() as u32;
         if vh > 0 {
-            fill(
-                &mut img,
+            fill_rect(
+                raw,
+                w,
+                h,
                 cx.saturating_sub(half),
                 h - vh,
                 cx + half,
@@ -124,25 +124,42 @@ pub fn render(pic: &Pic, w: u32, h: u32, pal: &Palette) -> DynamicImage {
 
     // Session VWAP across the picture, previous close dotted.
     if let Some(v) = pic.vwap {
-        hline(&mut img, y(v), 0, w, pal.accent);
+        fill_rect(raw, w, h, 0, y(v), w - 1, y(v), pal.accent);
     }
     if let Some(p) = pic.prev_close {
         let row = y(p);
         for x in (0..w).step_by(6) {
-            fill(&mut img, x, row, (x + 3).min(w - 1), row, pal.fg);
+            fill_rect(raw, w, h, x, row, (x + 3).min(w - 1), row, pal.fg);
         }
     }
     // Cursor: a full-height line through the selected bar.
     if let Some(sel) = pic.sel.filter(|s| *s < n) {
         let cx = ((sel as f64 + 0.5) * slot) as u32;
-        vline(&mut img, cx, 0, h - 1, blend(pal.fg, pal.bg, 0.4));
+        fill_rect(raw, w, h, cx, 0, cx, h - 1, blend(pal.fg, pal.bg, 0.4));
     }
-    DynamicImage::ImageRgba8(img)
+}
+
+/// Writes `c` over the inclusive rectangle (x0,y0)-(x1,y1), clipped to a `w` x `h` buffer.
+#[allow(clippy::too_many_arguments)]
+fn fill_rect(raw: &mut [u8], w: u32, h: u32, x0: u32, y0: u32, x1: u32, y1: u32, c: [u8; 4]) {
+    if x0 > x1 || y0 > y1 || x0 >= w || y0 >= h {
+        return;
+    }
+    let (x1, y1) = (x1.min(w - 1), y1.min(h - 1));
+    let stride = w as usize * 4;
+    let span = (x0 as usize * 4)..((x1 as usize + 1) * 4);
+    for y in y0..=y1 {
+        let row = y as usize * stride;
+        for px in raw[row + span.start..row + span.end].chunks_exact_mut(4) {
+            px.copy_from_slice(&c);
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ui::pixels::{fill, hline, vline};
     use crate::ui::theme::Theme;
     use ratatui::style::Color;
 
@@ -171,6 +188,155 @@ mod tests {
 
     fn px(img: &DynamicImage, x: u32, y: u32) -> [u8; 4] {
         img.to_rgba8().get_pixel(x, y).0
+    }
+
+    /// The renderer as it was before `render_into`: the oracle the optimised one must match.
+    /// The original renderer, kept verbatim as the oracle for `render_into`.
+    fn render_reference(pic: &Pic, w: u32, h: u32, pal: &Palette) -> DynamicImage {
+        let (w, h) = (w.max(1), h.max(1));
+        let mut img = RgbaImage::from_pixel(w, h, Rgba(pal.bg));
+        let n = pic.bars.len().min(capacity(w));
+        if n == 0 {
+            return DynamicImage::ImageRgba8(img);
+        }
+        let bars = &pic.bars[pic.bars.len() - n..];
+        let price_h = ((h as f64) * (1.0 - VOLUME_SHARE)).floor().max(1.0) as u32;
+        let vol_top = (price_h + 2).min(h - 1);
+
+        // Price range over the drawn bars, plus the reference lines, padded 5%.
+        let mut lo = bars.iter().map(|b| b.low).fold(f64::MAX, f64::min);
+        let mut hi = bars.iter().map(|b| b.high).fold(f64::MIN, f64::max);
+        for extra in [pic.vwap, pic.prev_close].into_iter().flatten() {
+            lo = lo.min(extra);
+            hi = hi.max(extra);
+        }
+        let pad = ((hi - lo) * 0.05).max(0.01);
+        let (lo, hi) = (lo - pad, hi + pad);
+        let y = |p: f64| -> u32 {
+            let f = (hi - p) / (hi - lo);
+            (f * (price_h - 1) as f64)
+                .round()
+                .clamp(0.0, (price_h - 1) as f64) as u32
+        };
+
+        // Four faint price gridlines.
+        let grid = blend(pal.dim, pal.bg, 0.5);
+        for k in 1..4 {
+            let p = lo + (hi - lo) * k as f64 / 4.0;
+            hline(&mut img, y(p), 0, w, grid);
+        }
+
+        let slot = w as f64 / n as f64;
+        let body = (slot * 0.6).max(1.0);
+        let vmax = bars.iter().map(|b| b.volume).max().unwrap_or(0).max(1) as f64;
+        let vol_h = (h - vol_top) as f64;
+        for (i, b) in bars.iter().enumerate() {
+            let cx = ((i as f64 + 0.5) * slot) as u32;
+            let base = if b.ext {
+                blend(if b.is_up() { pal.up } else { pal.down }, pal.bg, 0.5)
+            } else if b.is_up() {
+                pal.up
+            } else {
+                pal.down
+            };
+            // wick, then body (at least one pixel tall, so a flat bar still shows)
+            vline(&mut img, cx, y(b.high), y(b.low), base);
+            let (top, bot) = (y(b.open.max(b.close)), y(b.open.min(b.close)));
+            let half = (body / 2.0).floor() as u32;
+            fill(
+                &mut img,
+                cx.saturating_sub(half),
+                top,
+                cx + half,
+                bot.max(top),
+                base,
+            );
+            // volume, from the bottom of the picture up
+            let vh = ((b.volume as f64 / vmax) * vol_h).round() as u32;
+            if vh > 0 {
+                fill(
+                    &mut img,
+                    cx.saturating_sub(half),
+                    h - vh,
+                    cx + half,
+                    h - 1,
+                    blend(base, pal.bg, 0.6),
+                );
+            }
+        }
+
+        // Session VWAP across the picture, previous close dotted.
+        if let Some(v) = pic.vwap {
+            hline(&mut img, y(v), 0, w, pal.accent);
+        }
+        if let Some(p) = pic.prev_close {
+            let row = y(p);
+            for x in (0..w).step_by(6) {
+                fill(&mut img, x, row, (x + 3).min(w - 1), row, pal.fg);
+            }
+        }
+        // Cursor: a full-height line through the selected bar.
+        if let Some(sel) = pic.sel.filter(|s| *s < n) {
+            let cx = ((sel as f64 + 0.5) * slot) as u32;
+            vline(&mut img, cx, 0, h - 1, blend(pal.fg, pal.bg, 0.4));
+        }
+        DynamicImage::ImageRgba8(img)
+    }
+
+    fn varied_bars(n: usize, seed: u64) -> Vec<HBar> {
+        let mut x = seed;
+        let mut rnd = move || {
+            x ^= x << 13;
+            x ^= x >> 7;
+            x ^= x << 17;
+            (x % 10_000) as f64 / 10_000.0
+        };
+        let mut c = 100.0;
+        (0..n)
+            .map(|i| {
+                let o = c;
+                c += (rnd() - 0.5) * 2.0;
+                let mut b = bar(
+                    o,
+                    o.max(c) + rnd(),
+                    o.min(c) - rnd(),
+                    c,
+                    if i % 17 == 0 { 0 } else { 1 + (rnd() * 5000.0) as u64 },
+                );
+                b.ext = i % 5 == 0;
+                b
+            })
+            .collect()
+    }
+
+    #[test]
+    fn render_into_matches_the_reference_byte_for_byte() {
+        let p = pal();
+        for (seed, n) in [(1u64, 0usize), (2, 1), (3, 7), (4, 90), (5, 400)] {
+            let bars = varied_bars(n, seed * 977);
+            for (w, h) in [(1u32, 1u32), (3, 2), (30, 30), (101, 37), (480, 260), (9, 200)] {
+                for (vwap, prev_close, sel) in [
+                    (None, None, None),
+                    (Some(101.0), Some(99.0), Some(n / 2)),
+                    (Some(90.0), None, Some(0)),
+                    (None, Some(140.0), Some(usize::MAX)),
+                ] {
+                    let pic = Pic {
+                        bars: &bars,
+                        vwap,
+                        prev_close,
+                        sel: sel.filter(|s| *s < n.max(1)),
+                    };
+                    let want = render_reference(&pic, w, h, &p).to_rgba8();
+                    let got = render(&pic, w, h, &p).to_rgba8();
+                    assert_eq!(got.as_raw(), want.as_raw(), "n={n} {w}x{h} vwap={vwap:?}");
+                    // a reused buffer, left over from a different picture, gives the same bytes
+                    let mut buf = RgbaImage::from_pixel(w, h, Rgba([9, 9, 9, 9]));
+                    render_into(&mut buf, &pic, &p);
+                    assert_eq!(buf.as_raw(), want.as_raw(), "reused n={n} {w}x{h}");
+                }
+            }
+        }
     }
 
     #[test]

@@ -47,6 +47,10 @@ fn search_action(s: &Source) -> Action {
             screen: "filings".into(),
             arg: None,
         }),
+        Search::Rows(ds) => Action::Route(Route::Screen {
+            screen: "rows".into(),
+            arg: Some((*ds).into()),
+        }),
         Search::Off => Action::None,
     }
 }
@@ -80,6 +84,9 @@ pub enum Search {
     Text(&'static str),
     /// Filing index and 8-K / 6-K events: the filing search screen (derive/filing_search.py).
     Filings,
+    /// A structured dataset as a searchable table: the rows screen
+    /// (derive/row_search.py), by its dataset key.
+    Rows(&'static str),
     /// No search for this dataset yet (structured data, or not indexed).
     Off,
 }
@@ -107,7 +114,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_financials.py, edgar.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily",
-        search: Search::Off,
+        search: Search::Rows("facts"),
     },
     Source {
         provider: "SEC EDGAR",
@@ -117,17 +124,17 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_segments.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily",
-        search: Search::Off,
+        search: Search::Rows("segments"),
     },
     Source {
         provider: "SEC EDGAR",
         name: "Financial Statement Data Sets",
-        feeds: "DuckDB only (no direct reader found)",
+        feeds: "row search (segment revenue, universe tickers)",
         endpoint: "sec.gov/dera quarterly zips",
         pulled_by: "sources/edgar_fsds.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily check; new zip once per quarter",
-        search: Search::Off,
+        search: Search::Rows("fsds"),
     },
     Source {
         provider: "SEC EDGAR",
@@ -157,7 +164,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_insiders.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily check; new set once per quarter",
-        search: Search::Off,
+        search: Search::Rows("insiders"),
     },
     Source {
         provider: "SEC EDGAR",
@@ -167,7 +174,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_form4_live.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "not scheduled",
-        search: Search::Off,
+        search: Search::Rows("form4_live"),
     },
     Source {
         provider: "SEC EDGAR",
@@ -177,7 +184,7 @@ const SOURCES: &[Source] = &[
         pulled_by: "sources/sec_13f.py",
         key: "none (User-Agent needs SEC_CONTACT)",
         runs: "daily check; new window each quarter",
-        search: Search::Off,
+        search: Search::Rows("13f"),
     },
     Source {
         provider: "Databento",
@@ -585,6 +592,7 @@ impl Sources {
                 match s.search {
                     Search::Text(scope) => scope.trim(),
                     Search::Filings => "8-K and 6-K filings (form:, item:, signal:, since:)",
+                    Search::Rows(_) => "row search (t:, since:, until:, field filters, words)",
                     Search::Off => "not searchable yet",
                 },
             ),
@@ -832,10 +840,26 @@ mod tests {
             _ => panic!("expected the search screen"),
         }
         assert!(render(&mut s, 120, 40).contains("type:10k type:new_risk"));
-        // structured data has no search yet, and says so
+        // structured SEC data opens the row search on its dataset
         s.view = View::Detail(index("Insider Forms 3/4/5 (bulk quarterly)"));
+        match press(&mut s, KeyCode::Char('/')) {
+            Action::Route(Route::Screen { screen, arg }) => {
+                assert_eq!(screen, "rows");
+                assert_eq!(arg.as_deref(), Some("insiders"));
+            }
+            _ => panic!("expected the rows screen"),
+        }
+        // datasets with no search yet say so
+        s.view = View::Detail(index("Option chain snapshots"));
         assert!(matches!(press(&mut s, KeyCode::Char('/')), Action::None));
         assert!(render(&mut s, 120, 40).contains("not searchable yet"));
+    }
+
+    #[test]
+    fn every_sec_edgar_dataset_is_searchable() {
+        for src in SOURCES.iter().filter(|x| x.provider == "SEC EDGAR") {
+            assert!(!matches!(src.search, Search::Off), "{} has no search", src.name);
+        }
     }
 
     #[test]

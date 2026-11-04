@@ -231,6 +231,7 @@ fn hjkl_move_between_tiles_spatially_and_stop_at_edges() {
     assert_eq!(s.focus, 3);
     render(&mut s, 100, 24);
     press(&mut s, KeyCode::Up);
+    s.apply_pending_cursor(); // keys queue cursor steps; a draw applies them
     assert!(s.tiles[3].cursor.is_some());
     assert_eq!(s.focus, 3);
 }
@@ -247,6 +248,7 @@ fn cursor_scrolls_through_history_and_g_returns_to_live() {
     for _ in 0..rows + 5 {
         press(&mut s, KeyCode::Char('K'));
     }
+    s.apply_pending_cursor();
     let t = &s.tiles[0];
     assert_eq!(t.cursor, Some(90 - 1 - (rows + 5)));
     assert!(t.end_off > 0, "window scrolled to keep the cursor visible");
@@ -257,6 +259,7 @@ fn cursor_scrolls_through_history_and_g_returns_to_live() {
     // j past the newest bar re-follows live
     press(&mut s, KeyCode::Char('K'));
     press(&mut s, KeyCode::Char('J'));
+    s.apply_pending_cursor();
     assert_eq!(s.tiles[0].cursor, None);
 }
 
@@ -366,9 +369,9 @@ fn tiles_draw_as_pictures_when_the_terminal_has_graphics() {
         "every tile sent a picture"
     );
     // a tick with no new bars keeps the last picture (same content, same key)
-    let before: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().0).collect();
+    let before: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().key).collect();
     render(&mut s, 160, 45);
-    let after: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().0).collect();
+    let after: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().key).collect();
     assert_eq!(before, after);
     // g flips back to the ASCII tapes
     press(&mut s, KeyCode::Char('g'));
@@ -386,5 +389,173 @@ fn g_says_so_when_there_is_no_graphics_protocol() {
             .as_deref()
             .unwrap_or("")
             .contains("no graphics protocol")
+    );
+}
+
+/// Cost of one cursor move with pictures on: `cargo test --release move_cost -- --ignored --nocapture`.
+#[test]
+#[ignore]
+fn move_cost() {
+    let (mut s, _tx) = loaded();
+    with_graphics(&mut s);
+    // Ghostty-ish cells at 200x60: tiles near 1000x560 px
+    render(&mut s, 200, 60);
+    let n = 30;
+    let t0 = std::time::Instant::now();
+    let mut bytes = 0usize;
+    for _ in 0..n {
+        press(&mut s, KeyCode::Char('K'));
+        let mut t = Terminal::new(TestBackend::new(200, 60)).unwrap();
+        t.draw(|f| s.draw(f)).unwrap();
+        bytes += t.backend().buffer().content.iter().map(|c| c.symbol().len()).sum::<usize>();
+    }
+    println!("per move: {:?}, {} KB written", t0.elapsed() / n, bytes / n as usize / 1024);
+}
+
+#[test]
+fn h_and_l_move_the_cursor_along_the_picture() {
+    let (mut s, _tx) = loaded();
+    render(&mut s, 160, 45);
+    press(&mut s, KeyCode::Char('H'));
+    press(&mut s, KeyCode::Char('H'));
+    s.apply_pending_cursor();
+    let len = s.bars(&s.tiles[0]).len();
+    assert_eq!(s.tiles[0].cursor, Some(len - 3));
+    press(&mut s, KeyCode::Char('L'));
+    s.apply_pending_cursor();
+    assert_eq!(s.tiles[0].cursor, Some(len - 2));
+    // back at the newest bar the cursor follows latest again
+    press(&mut s, KeyCode::Char('L'));
+    s.apply_pending_cursor();
+    assert_eq!(s.tiles[0].cursor, None);
+}
+
+#[test]
+fn cursor_moves_never_resend_the_picture() {
+    let (mut s, _tx) = loaded();
+    with_graphics(&mut s);
+    render(&mut s, 160, 45);
+    let sent = s.tiles[0].pic.as_ref().unwrap().sent;
+    for _ in 0..5 {
+        press(&mut s, KeyCode::Char('H'));
+        let out = render(&mut s, 160, 45);
+        assert!(out.contains('▲'), "cursor marker under the picture");
+    }
+    assert_eq!(s.tiles[0].pic.as_ref().unwrap().sent, sent);
+}
+
+/// Deterministic 1-minute random walk over one regular session (390 bars).
+fn walk(base: f64, seed: u64) -> Vec<Bar1> {
+    let mut x = seed;
+    let mut rnd = move || {
+        x ^= x << 13;
+        x ^= x >> 7;
+        x ^= x << 17;
+        (x % 1_000_000) as f64 / 1_000_000.0
+    };
+    let mut c = base;
+    (0..390)
+        .map(|i| {
+            let o = c;
+            c = (c + (rnd() - 0.5) * 0.6).max(1.0);
+            Bar1 {
+                t: OPEN + i * 60,
+                o,
+                h: o.max(c) + rnd() * 0.3,
+                l: o.min(c) - rnd() * 0.3,
+                c,
+                v: 500 + (rnd() * 4000.0) as u64,
+            }
+        })
+        .collect()
+}
+
+/// A `Vec<u8>` the test keeps a handle to, so it can count what the terminal was sent.
+struct SharedVec(std::rc::Rc<std::cell::RefCell<Vec<u8>>>);
+
+impl std::io::Write for SharedVec {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.0.borrow_mut().extend_from_slice(buf);
+        Ok(buf.len())
+    }
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
+    }
+}
+
+/// Combo benchmark, no terminal needed: `cargo test --release bench_combo -- --ignored --nocapture`.
+/// Four tiles, pictures on, a 200x60 terminal whose output bytes are counted per draw.
+#[test]
+#[ignore]
+fn bench_combo() {
+    let (mut s, tx) = screen();
+    for (i, (sym, base)) in [("MKSI", 240.0), ("WDC", 370.0), ("WULF", 12.0), ("APLD", 22.0)]
+        .into_iter()
+        .enumerate()
+    {
+        tx.send(Event::Seed {
+            sym: sym.into(),
+            prev_close: Some(base - 1.0),
+            reg: Some((OPEN, OPEN + 390 * 60)),
+            bars: walk(base, 7 + i as u64),
+        })
+        .unwrap();
+    }
+    s.tick();
+    let mut picker =
+        ratatui_image::picker::Picker::from_fontsize(ratatui_image::FontSize::new(8, 16));
+    picker.set_protocol_type(ratatui_image::picker::ProtocolType::Kitty);
+    s.picker = Some(picker);
+    s.pictures = true;
+    s.step = 0; // 1-minute bars: 390 of them, so the sweep crosses window edges
+
+    // Output goes to a Vec the bench can read (CrosstermBackend's writer accessor is unstable).
+    let sink = std::rc::Rc::new(std::cell::RefCell::new(Vec::<u8>::new()));
+    let mut term = Terminal::with_options(
+        ratatui::backend::CrosstermBackend::new(SharedVec(sink.clone())),
+        ratatui::TerminalOptions {
+            viewport: ratatui::Viewport::Fixed(ratatui::layout::Rect::new(0, 0, 200, 60)),
+        },
+    )
+    .unwrap();
+    let written = |_: &Terminal<ratatui::backend::CrosstermBackend<SharedVec>>| sink.borrow().len();
+    term.draw(|f| s.draw(f)).unwrap(); // first frame: sends the four pictures, not measured
+
+    // Idle: 200 polls with no input or feed events.
+    let mut idle = 0;
+    for _ in 0..200 {
+        s.tick();
+        if s.needs_redraw() {
+            idle += 1;
+        }
+    }
+
+    // Sweep: H across the window edges, one key and one draw at a time.
+    let (mut times, mut sweep_bytes, mut big) = (Vec::new(), 0usize, 0usize);
+    for _ in 0..400 {
+        let before = written(&term);
+        let t0 = std::time::Instant::now();
+        press(&mut s, KeyCode::Char('H'));
+        term.draw(|f| s.draw(f)).unwrap();
+        times.push(t0.elapsed().as_micros());
+        let d = written(&term) - before;
+        sweep_bytes += d;
+        big += usize::from(d > 10_000);
+    }
+    times.sort_unstable();
+    let pct = |p: f64| times[((times.len() as f64 * p) as usize).min(times.len() - 1)];
+
+    // Hold: L back to the newest bar.
+    let before = written(&term);
+    for _ in 0..400 {
+        press(&mut s, KeyCode::Char('L'));
+        term.draw(|f| s.draw(f)).unwrap();
+    }
+    let hold_bytes = written(&term) - before;
+
+    println!(
+        "RESULT idle_redraws_per_200_polls={idle} sweep_median_us={} sweep_p95_us={} sweep_total_bytes={sweep_bytes} sweep_big_sends(>10KB)={big} hold_total_bytes={hold_bytes}",
+        pct(0.5),
+        pct(0.95),
     );
 }

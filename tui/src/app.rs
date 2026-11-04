@@ -316,6 +316,25 @@ pub(crate) fn event_loop<B: Backend>(
                     } else {
                         route_key(screen, &mut chord, key)
                     };
+                    // Keys that queued up while the last frame drew (held J/K
+                    // repeating) are handled now, before one draw, so a slow
+                    // frame never builds a backlog the screen lags behind.
+                    while action == Action::None {
+                        match events.next(Duration::ZERO)? {
+                            Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
+                                action = if key.code == KeyCode::Char('c')
+                                    && key.modifiers.contains(KeyModifiers::CONTROL)
+                                {
+                                    Action::Quit
+                                } else {
+                                    route_key(screen, &mut chord, key)
+                                };
+                            }
+                            Some(Event::Resize(..)) => {}
+                            Some(_) => {}
+                            None => break,
+                        }
+                    }
                 }
                 // Terminal::draw autoresizes; the flag just forces the redraw
                 // now rather than on the next key.

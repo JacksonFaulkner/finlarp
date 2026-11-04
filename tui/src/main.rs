@@ -60,6 +60,7 @@ const SCREENS: &[&str] = &[
     "menu",
     "notes",
     "sources",
+    "rows",
     "note",
     "docview",
     "transactions",
@@ -153,7 +154,7 @@ fn build_screen(
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
         candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, filings, godel,
-        home, intraday, menu, notes, pick, portfolio, search, sources, universe, video,
+        home, intraday, menu, notes, pick, portfolio, rows, search, sources, universe, video,
         claude_history, claude_log, docview, keys, note, onboard, transactions, watchlists,
     };
     Ok(match (screen, upper(arg.clone())) {
@@ -178,6 +179,7 @@ fn build_screen(
         ("diagrams", _) => Box::new(diagrams::open(ctx, arg)?),
         ("video", _) => Box::new(video::open(ctx, arg)?),
         ("sources", _) => Box::new(sources::open(ctx, arg)?),
+        ("rows", _) => Box::new(rows::open(ctx, arg)?),
         ("note", _) => Box::new(note::open(ctx, arg)?),
         ("docview", _) => Box::new(docview::open(ctx, arg)?),
         ("transactions", _) => Box::new(transactions::open(ctx, arg)?),

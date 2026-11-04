@@ -2,7 +2,9 @@
 // 5m / 15m, plus VWAP and the ET clock labels. Pure data, no I/O: the feed
 // (stream.rs) pushes events in, the screen reads aggregated bars out.
 
-use std::collections::BTreeMap;
+use std::cell::RefCell;
+use std::collections::{BTreeMap, HashMap};
+use std::rc::Rc;
 
 use crate::ui::hcandles::HBar;
 
@@ -30,16 +32,28 @@ pub struct Series {
     pub prev_close: Option<f64>,
     /// Regular session [open, close), epoch seconds.
     pub reg: Option<(i64, i64)>,
+    /// Bumped whenever what `aggregate` and `vwap` read changes. Never reused, so a
+    /// cleared series can't match a cache entry from before the clear.
+    version: u64,
+    /// `aggregate` results for `.0` (the version they were built at), by (step, ext).
+    cache: RefCell<(u64, HashMap<(i64, bool), Rc<Vec<HBar>>>)>,
 }
 
 impl Series {
-    #[cfg(test)]
     pub fn is_empty(&self) -> bool {
         self.bars.is_empty()
     }
 
     pub fn clear(&mut self) {
-        *self = Self::default();
+        *self = Self {
+            version: self.version + 1,
+            ..Self::default()
+        };
+    }
+
+    /// Changes whenever the bars, the session, or the previous close change.
+    pub fn version(&self) -> u64 {
+        self.version
     }
 
     /// Replace bars with a fresh day from REST. The forming minute may already
@@ -47,6 +61,7 @@ impl Series {
     pub fn seed(&mut self, prev_close: Option<f64>, reg: Option<(i64, i64)>, bars: &[Bar1]) {
         self.prev_close = prev_close.or(self.prev_close);
         self.reg = reg.or(self.reg);
+        self.version += 1;
         for b in bars {
             self.apply(*b);
         }
@@ -55,6 +70,7 @@ impl Series {
     /// Insert or update one minute. The latest event wins on close; the range
     /// only widens and volume only grows, so a lagging row can't shrink a live bar.
     pub fn apply(&mut self, b: Bar1) {
+        let before = self.bars.get(&b.t).copied();
         self.bars
             .entry(b.t)
             .and_modify(|old| {
@@ -64,6 +80,10 @@ impl Series {
                 old.c = b.c;
             })
             .or_insert(b);
+        // A stale row that changes nothing keeps the cached aggregates (and pictures) valid.
+        if self.bars.get(&b.t).copied() != before {
+            self.version += 1;
+        }
     }
 
     pub fn last_close(&self) -> Option<f64> {
@@ -93,8 +113,23 @@ impl Series {
         self.reg.is_none_or(|(o, c)| (o..c).contains(&t))
     }
 
-    /// Bars at `step` minutes. Without `ext`, only the regular session.
-    pub fn aggregate(&self, step: i64, ext: bool) -> Vec<HBar> {
+    /// Bars at `step` minutes. Without `ext`, only the regular session. Memoized per
+    /// version: a redraw or cursor move gets the same `Rc` back until the data changes.
+    pub fn aggregate(&self, step: i64, ext: bool) -> Rc<Vec<HBar>> {
+        let mut cache = self.cache.borrow_mut();
+        if cache.0 != self.version {
+            cache.1.clear();
+            cache.0 = self.version;
+        }
+        if let Some(hit) = cache.1.get(&(step, ext)) {
+            return Rc::clone(hit);
+        }
+        let built = Rc::new(self.build(step, ext));
+        cache.1.insert((step, ext), Rc::clone(&built));
+        built
+    }
+
+    fn build(&self, step: i64, ext: bool) -> Vec<HBar> {
         let width = step * 60;
         let mut out: Vec<(i64, Bar1)> = Vec::new();
         for b in self.bars.values() {
@@ -217,7 +252,7 @@ mod tests {
     fn apply_keeps_the_wider_range_and_larger_volume() {
         let mut s = series();
         s.apply(b(5, 12.0, 12.2, 12.1, 12.1, 40)); // stale REST row for the last minute
-        let last = s.aggregate(1, false).pop().unwrap();
+        let last = s.aggregate(1, false).last().cloned().unwrap();
         assert_eq!(last.high, 13.5);
         assert_eq!(last.low, 11.5);
         assert_eq!(last.volume, 100);

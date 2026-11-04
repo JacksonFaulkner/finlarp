@@ -40,9 +40,10 @@ use crate::ui::theme::Theme;
 use data::{Bench, Data, Range};
 
 const KEYS: &[Key] = &[
-    key("1-7", "tab"),
+    key("1-7 H/L", "tab / previous, next tab"),
     key("?", "help"),
     key("h/l", "cursor (overview, history) / holding (positions)"),
+    key("home/end", "cursor to first / latest point"),
     key("j/k", "row (other tabs)"),
     key("r", "range (overview, history)"),
     key("b", "benchmark"),
@@ -423,7 +424,7 @@ impl Screen for PortfolioScreen {
         // The Signals tab is a calendar: it takes its own keys, except the ones that leave the screen or switch tabs.
         let tab_key = matches!(
             key.code,
-            KeyCode::Char('q' | '?' | '1'..='7') | KeyCode::Tab | KeyCode::BackTab | KeyCode::Esc
+            KeyCode::Char('q' | '?' | '1'..='7' | 'H' | 'L') | KeyCode::Tab | KeyCode::BackTab | KeyCode::Esc
         );
         if self.tab == 5 && !tab_key && self.signals.on_key(key) {
             return Action::None;
@@ -448,14 +449,16 @@ impl Screen for PortfolioScreen {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
             KeyCode::Char('?') => self.help = true,
             KeyCode::Char(c @ '1'..='7') => switch(self, (c as u8 - b'1') as usize),
-            KeyCode::Tab => switch(self, (self.tab + 1) % TABS.len()),
-            KeyCode::BackTab => switch(self, (self.tab + TABS.len() - 1) % TABS.len()),
+            KeyCode::Tab | KeyCode::Char('L') => switch(self, (self.tab + 1) % TABS.len()),
+            KeyCode::BackTab | KeyCode::Char('H') => {
+                switch(self, (self.tab + TABS.len() - 1) % TABS.len())
+            }
             KeyCode::Char('h') | KeyCode::Left if self.tab == 0 => self.move_cursor(-1),
             KeyCode::Char('l') | KeyCode::Right if self.tab == 0 => self.move_cursor(1),
             KeyCode::Char('h') | KeyCode::Left if self.tab == 1 => self.move_row(-1),
             KeyCode::Char('l') | KeyCode::Right if self.tab == 1 => self.move_row(1),
-            KeyCode::Char('H') | KeyCode::Home if self.tab == 0 => self.cursor = Some(0),
-            KeyCode::Char('L') | KeyCode::End if self.tab == 0 => self.cursor = None,
+            KeyCode::Home if self.tab == 0 => self.cursor = Some(0),
+            KeyCode::End if self.tab == 0 => self.cursor = None,
             KeyCode::Char('j') | KeyCode::Down => self.move_row(1),
             KeyCode::Char('k') | KeyCode::Up => self.move_row(-1),
             KeyCode::Char('g') => self.row = 0,
@@ -724,15 +727,31 @@ mod tests {
     }
 
     #[test]
+    fn shift_h_l_step_through_tabs_and_wrap() {
+        let mut s = screen(sample());
+        s.on_key(k('L'));
+        assert_eq!(s.tab, 1);
+        s.on_key(k('H'));
+        s.on_key(k('H'));
+        assert_eq!(s.tab, TABS.len() - 1, "wraps to History");
+        // Signals (calendar) and History (chart) take most keys, but not these
+        s.on_key(k('H'));
+        assert_eq!(s.tab, 5);
+        s.on_key(k('L'));
+        s.on_key(k('L'));
+        assert_eq!(s.tab, 0, "wraps to Overview");
+    }
+
+    #[test]
     fn overview_cursor_follows_latest_and_clamps() {
         let mut s = screen(sample());
         s.on_key(k('h'));
         assert!(s.cursor.is_some());
-        s.on_key(k('H'));
+        s.on_key(KeyEvent::new(KeyCode::Home, KeyModifiers::NONE));
         assert_eq!(s.cursor, Some(0));
         s.on_key(k('h')); // clamps at the first point
         assert_eq!(s.cursor, Some(0));
-        s.on_key(k('L'));
+        s.on_key(KeyEvent::new(KeyCode::End, KeyModifiers::NONE));
         assert_eq!(s.cursor, None);
         s.on_key(k('l')); // already at the end
         assert_eq!(s.cursor, None);

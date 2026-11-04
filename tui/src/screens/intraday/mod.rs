@@ -11,21 +11,28 @@ mod data;
 mod picture;
 mod stream;
 
+use std::hash::{Hash, Hasher};
 use std::io;
+use std::rc::Rc;
+use std::time::{Duration, Instant};
 
+use image::{DynamicImage, RgbaImage};
 use ratatui::Frame;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
 use ratatui::style::Style;
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Paragraph};
-use ratatui_image::picker::{Picker, ProtocolType};
-use ratatui_image::protocol::StatefulProtocol;
+use ratatui_image::picker::cap_parser::QueryStdioOptions;
+use ratatui_image::picker::{Capability, Picker, ProtocolType};
+use ratatui_image::protocol::kitty::StatefulKitty;
+use ratatui_image::protocol::{StatefulProtocol, StatefulProtocolType};
 use ratatui_image::{Resize, StatefulImage};
 
 use crate::app::{Action, Ctx, Screen};
 use crate::ui::hcandles::{HBar, HCandles};
 use crate::ui::help::{self, Key, key};
+use crate::ui::pixels::Palette;
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -37,7 +44,8 @@ const DEFAULTS: [&str; TILES] = ["SPY", "QQQ", "NVDA", "AAPL"];
 
 const KEYS: &[Key] = &[
     key("hjkl", "move between tiles"),
-    key("J/K", "move cursor down / up"),
+    key("H/L", "cursor back / forward"),
+    key("J/K", "cursor down / up (tapes)"),
     key("tab/1-4", "focus tile"),
     key("G", "follow latest"),
     key("i", "interval 1m/5m/15m"),
@@ -51,11 +59,24 @@ const KEYS: &[Key] = &[
     key("q", "close"),
 ];
 
+/// A tile's picture as last sent. Resending one costs ~1.5 MB of escapes through tmux, so
+/// the cursor is drawn as a text row under it (never in it) and live ticks resend at most
+/// once per `LIVE_REFRESH`; a change of shape (size, window, interval) resends at once.
+/// `key` is the raster's identity (see `raster_key`): same key, same pixels, same protocol.
+struct PicSlot {
+    key: u64,
+    shape: u64,
+    sent: Instant,
+    proto: StatefulProtocol,
+}
+
+const LIVE_REFRESH: Duration = Duration::from_secs(1);
+
 struct Tile {
     sym: String,
     series: Series,
-    /// The last picture drawn: its content hash and the terminal protocol that holds it.
-    pic: Option<(u64, StatefulProtocol)>,
+    /// The last picture sent to the terminal.
+    pic: Option<PicSlot>,
     /// Index into the aggregated bars; None follows the latest bar.
     cursor: Option<usize>,
     /// Bars hidden past the newest edge of the window (0 = pinned to latest).
@@ -63,6 +84,8 @@ struct Tile {
     /// Rows the last draw could show, so cursor moves know the window size.
     rows: usize,
     err: Option<String>,
+    /// The buffer pictures are rendered into; reused across redraws of this tile.
+    scratch: RgbaImage,
 }
 
 impl Tile {
@@ -75,6 +98,7 @@ impl Tile {
             end_off: 0,
             rows: 20,
             err: None,
+            scratch: RgbaImage::new(1, 1),
         }
     }
 }
@@ -97,6 +121,12 @@ pub struct Intraday {
     picker: Option<Picker>,
     /// Draw tiles as pictures (only ever true with a picker). `g` flips it.
     pictures: bool,
+    /// Something changed since the last draw (feed event, key, flash): see `needs_redraw`.
+    changed: bool,
+    /// A picture changed but is waiting out its `LIVE_REFRESH`, so it needs another draw.
+    deferred: bool,
+    /// Cursor steps from keys since the last draw; applied once, in `draw`.
+    pending_cursor: isize,
 }
 
 /// `A,B C` -> four uppercase symbols, deduped, padded from DEFAULTS.
@@ -118,7 +148,19 @@ fn parse_symbols(arg: Option<&str>) -> Vec<String> {
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Intraday> {
     // Must run before the event loop reads stdin: the terminal answers the query on stdin.
     // Halfblocks is no graphics protocol at all, so the ASCII tapes stay.
-    let picker = Picker::from_query_stdio()
+    // A picture re-sent through tmux is ~1.5 MB of raw RGBA as base64, but these flat-colour
+    // charts deflate ~50x, so zlib is the default (ratatui-image deflates at level 1). Shared
+    // memory sends only a name. The picker uses whichever the terminal answers OK to.
+    // FL_KITTY=raw|shm opts out (raw: no compression, shm: shared memory).
+    let mode = std::env::var("FL_KITTY").unwrap_or_default();
+    let options = QueryStdioOptions {
+        kitty_compression: !matches!(mode.as_str(), "raw" | "shm"),
+        kitty_shared_memory_object: (mode == "shm")
+            .then(QueryStdioOptions::probe_kitty_smo)
+            .flatten(),
+        ..Default::default()
+    };
+    let picker = Picker::from_query_stdio_with_options(options)
         .ok()
         .filter(|p| p.protocol_type() != ProtocolType::Halfblocks);
     let mut screen = Intraday::new(ctx.theme, parse_symbols(arg.as_deref()), Stream::spawn());
@@ -145,6 +187,9 @@ impl Intraday {
             flash: None,
             picker: None,
             pictures: false,
+            changed: true,
+            deferred: false,
+            pending_cursor: 0,
         }
     }
 
@@ -153,6 +198,7 @@ impl Intraday {
     }
 
     fn handle(&mut self, ev: Event) {
+        self.changed = true;
         match ev {
             Event::Seed {
                 sym,
@@ -182,7 +228,7 @@ impl Intraday {
         }
     }
 
-    fn bars(&self, tile: &Tile) -> Vec<HBar> {
+    fn bars(&self, tile: &Tile) -> Rc<Vec<HBar>> {
         tile.series.aggregate(STEPS[self.step], self.ext)
     }
 
@@ -202,17 +248,33 @@ impl Intraday {
         }
         let cur = tile.cursor.unwrap_or(len - 1).min(len - 1);
         let new = cur.saturating_add_signed(delta).min(len - 1);
+        // Crossing an edge jumps the view half a screen (or as far as the cursor needs), so
+        // the cursor is not on the edge again after the next step.
+        let page = (tile.rows / 2).max(1);
         let (start, end) = Self::window(tile, len, tile.rows);
         if new < start {
-            tile.end_off += start - new;
+            tile.end_off += (start - new).max(page);
         } else if new >= end {
-            tile.end_off = tile.end_off.saturating_sub(new + 1 - end);
+            tile.end_off = tile.end_off.saturating_sub((new + 1 - end).max(page));
+        }
+        // A jump bigger than a screen can still leave the cursor out of view: show it as the newest bar.
+        let (start, end) = Self::window(tile, len, tile.rows);
+        if !(start..end).contains(&new) {
+            tile.end_off = len - (new + 1);
         }
         if new == len - 1 {
             tile.cursor = None;
             tile.end_off = 0;
         } else {
             tile.cursor = Some(new);
+        }
+    }
+
+    /// Applies the cursor steps keys accumulated since the last draw, as one move.
+    fn apply_pending_cursor(&mut self) {
+        let d = std::mem::take(&mut self.pending_cursor);
+        if d != 0 {
+            self.move_cursor(d);
         }
     }
 
@@ -320,6 +382,11 @@ impl Intraday {
                     text::truncate(e, inner.width as usize),
                     Style::new().fg(t.down),
                 ),
+                // Data arrived but none of it is in the regular session yet (pre-market).
+                None if !tile.series.is_empty() => Line::styled(
+                    "no regular-session bars yet · e shows pre/post-market",
+                    Style::new().fg(t.dim),
+                ),
                 None => Line::styled("loading…", Style::new().fg(t.dim)),
             };
             frame.render_widget(Paragraph::new(msg), head);
@@ -343,6 +410,7 @@ impl Intraday {
             .filter(|c| (start..end).contains(c))
             .map(|c| c - start);
         let (vwap, prev_close) = (tile.series.vwap(), tile.series.prev_close);
+        let version = tile.series.version();
         frame.render_widget(
             Paragraph::new(self.readout(&bars, sel_abs, prev_close)),
             head,
@@ -350,18 +418,41 @@ impl Intraday {
         match picker {
             Some(p) => {
                 let font = p.font_size();
+                let [img, marks] =
+                    Layout::vertical([Constraint::Min(1), Constraint::Length(1)]).areas(chart);
                 let px = (
-                    chart.width as u32 * u32::from(font.width),
-                    chart.height as u32 * u32::from(font.height),
+                    img.width as u32 * u32::from(font.width),
+                    img.height as u32 * u32::from(font.height),
                 );
                 let pic = picture::Pic {
                     bars: visible,
                     vwap,
                     prev_close,
-                    sel,
+                    sel: None,
                 };
-                let pal = crate::ui::pixels::Palette::from_theme(&self.theme);
-                draw_picture(frame, chart, &mut self.tiles[idx].pic, p, &pic, &pal, px);
+                let pal = Palette::from_theme(&self.theme);
+                let key = raster_key(version, STEPS[self.step], self.ext, (start, end), px, &pal);
+                let shape = shape_key(px, visible);
+                let id = tile_image_id(idx);
+                let deferred = draw_picture(
+                    frame,
+                    img,
+                    &mut self.tiles[idx],
+                    p,
+                    id,
+                    &pic,
+                    &pal,
+                    px,
+                    key,
+                    shape,
+                );
+                self.deferred |= deferred;
+                if let Some(s) = sel {
+                    frame.render_widget(
+                        cursor_row(s, visible.len(), px.0, font.width, &t),
+                        marks,
+                    );
+                }
             }
             None => frame.render_widget(
                 HCandles::new(visible, &t)
@@ -428,32 +519,122 @@ impl Intraday {
     }
 }
 
-/// Draws one tile's picture. The terminal protocol is rebuilt only when the picture's content changed.
+/// What the picture is laid out over: its pixel size and which bars it spans. A change here
+/// resends at once; a change in the bars' values alone (live ticks) waits for `LIVE_REFRESH`.
+fn shape_key(px: (u32, u32), bars: &[HBar]) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    px.hash(&mut h);
+    bars.len().hash(&mut h);
+    bars.first().map(|b| &b.label).hash(&mut h);
+    bars.last().map(|b| &b.label).hash(&mut h);
+    h.finish()
+}
+
+/// `▲` under the cursor bar, in the cell column its candle is drawn in.
+fn cursor_row(sel: usize, n: usize, px_w: u32, font_w: u16, t: &Theme) -> Paragraph<'static> {
+    let slot = px_w as f64 / n.max(1) as f64;
+    let col = (((sel as f64 + 0.5) * slot) / f64::from(font_w.max(1))) as usize;
+    Paragraph::new(Line::from(vec![
+        Span::raw(" ".repeat(col)),
+        Span::styled("▲", Style::new().fg(t.accent).bold()),
+    ]))
+}
+
+/// Identity of one tile's raster: the data version, the bars it spans, its pixel size and
+/// the palette. Equal keys mean equal pixels, so the picture already sent still stands; the
+/// cursor is not in it (it is a text row), so cursor moves never change the key.
+fn raster_key(
+    version: u64,
+    step: i64,
+    ext: bool,
+    span: (usize, usize),
+    px: (u32, u32),
+    pal: &Palette,
+) -> u64 {
+    let mut h = std::collections::hash_map::DefaultHasher::new();
+    (version, step, ext, span, px, pal).hash(&mut h);
+    h.finish()
+}
+
+/// Kitty image id for a tile. Stable, so re-sending a tile's picture replaces the image the
+/// terminal holds for it instead of adding another one (ratatui-image's own protocols take a
+/// random id per send, and expose no way to delete the old image).
+fn tile_image_id(idx: usize) -> u32 {
+    u32::from_be_bytes([0, 0xF1, 0xDA, idx as u8 + 1])
+}
+
+/// One protocol per picture. Kitty gets the tile's stable id; other protocols use ratatui-image's.
+fn picture_protocol(picker: &Picker, img: DynamicImage, id: u32) -> StatefulProtocol {
+    if picker.protocol_type() != ProtocolType::Kitty {
+        return picker.new_resize_protocol(img);
+    }
+    let caps = picker.capabilities();
+    StatefulProtocol::new(
+        img,
+        picker.font_size(),
+        None,
+        StatefulProtocolType::Kitty(StatefulKitty::new(
+            id,
+            picker.tmux_detected(),
+            caps.contains(&Capability::KittyCompression),
+            caps.contains(&Capability::KittySharedMemory),
+        )),
+    )
+}
+
+/// Draws one tile's picture. The protocol is rebuilt only when the raster key changes, and
+/// then at most once per `LIVE_REFRESH` unless the shape changed (see `PicSlot`). Returns true
+/// when a changed picture is waiting out that interval, so the screen must draw again.
+#[allow(clippy::too_many_arguments)]
 fn draw_picture(
     frame: &mut Frame,
     area: Rect,
-    slot: &mut Option<(u64, StatefulProtocol)>,
+    tile: &mut Tile,
     picker: &Picker,
+    id: u32,
     pic: &picture::Pic,
-    pal: &crate::ui::pixels::Palette,
+    pal: &Palette,
     px: (u32, u32),
-) {
-    let key = picture::fingerprint(pic, px, pal);
-    if slot.as_ref().is_none_or(|(k, _)| *k != key) {
-        let img = picture::render(pic, px.0, px.1, pal);
-        *slot = Some((key, picker.new_resize_protocol(img)));
+    key: u64,
+    shape: u64,
+) -> bool {
+    let stale = tile.pic.as_ref().is_none_or(|s| s.key != key);
+    let resend = stale
+        && tile
+            .pic
+            .as_ref()
+            .is_none_or(|s| s.shape != shape || s.sent.elapsed() >= LIVE_REFRESH);
+    let deferred = stale && !resend;
+    if resend {
+        let (w, h) = (px.0.max(1), px.1.max(1));
+        if tile.scratch.dimensions() != (w, h) {
+            tile.scratch = RgbaImage::new(w, h);
+        }
+        picture::render_into(&mut tile.scratch, pic, pal);
+        let img = DynamicImage::ImageRgba8(tile.scratch.clone());
+        tile.pic = Some(PicSlot {
+            key,
+            shape,
+            sent: Instant::now(),
+            proto: picture_protocol(picker, img, id),
+        });
     }
-    if let Some((_, proto)) = slot.as_mut() {
+    if let Some(s) = tile.pic.as_mut() {
         frame.render_stateful_widget(
             StatefulImage::default().resize(Resize::Fit(None)),
             area,
-            proto,
+            &mut s.proto,
         );
     }
+    deferred
 }
 
 impl Screen for Intraday {
     fn draw(&mut self, frame: &mut Frame) {
+        self.apply_pending_cursor();
+        self.changed = false;
+        self.deferred = false;
         let area = frame.area();
         let t = self.theme;
         frame.render_widget(Block::new().style(t.base()), area);
@@ -504,9 +685,27 @@ impl Screen for Intraday {
         }
         if self.help {
             self.help = false;
+            self.changed = true;
             return Action::None;
         }
+        self.changed = true;
         self.flash = None;
+        // Cursor steps only accumulate here; `draw` applies them as one move. Held J/K
+        // queue up while a frame draws, so a backlog costs one draw, not one per key.
+        let half = (self.tiles[self.focus].rows / 2).max(1) as isize;
+        let step = match key.code {
+            KeyCode::Char('L') | KeyCode::Char('J') | KeyCode::Down => Some(1),
+            KeyCode::Char('H') | KeyCode::Char('K') | KeyCode::Up => Some(-1),
+            KeyCode::Char('d') if key.modifiers.contains(KeyModifiers::CONTROL) => Some(half),
+            KeyCode::Char('u') if key.modifiers.contains(KeyModifiers::CONTROL) => Some(-half),
+            _ => None,
+        };
+        if let Some(d) = step {
+            self.pending_cursor += d;
+            return Action::None;
+        }
+        // Any other key sees the cursor as the keys before it left it.
+        self.apply_pending_cursor();
         let n = self.tiles.len();
         match key.code {
             KeyCode::Char('q') => return Action::Quit,
@@ -520,16 +719,6 @@ impl Screen for Intraday {
             KeyCode::Char('l') | KeyCode::Right => self.move_focus(0, 1),
             KeyCode::Char('k') => self.move_focus(-1, 0),
             KeyCode::Char('j') => self.move_focus(1, 0),
-            KeyCode::Char('J') | KeyCode::Down => self.move_cursor(1),
-            KeyCode::Char('K') | KeyCode::Up => self.move_cursor(-1),
-            KeyCode::Char('d') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                let half = (self.tiles[self.focus].rows / 2).max(1) as isize;
-                self.move_cursor(half);
-            }
-            KeyCode::Char('u') if key.modifiers.contains(KeyModifiers::CONTROL) => {
-                let half = (self.tiles[self.focus].rows / 2).max(1) as isize;
-                self.move_cursor(-half);
-            }
             KeyCode::Char('G') => self.follow_latest(),
             KeyCode::Char('i') => self.step = (self.step + 1) % STEPS.len(),
             KeyCode::Char('e') => self.ext = !self.ext,
@@ -563,7 +752,14 @@ impl Screen for Intraday {
     }
 
     fn set_flash(&mut self, msg: String) {
+        self.changed = true;
         self.flash = Some(msg);
+    }
+
+    /// Redraws only after something changed: a feed event, a key, a flash, or a picture
+    /// waiting out its live-refresh interval. (The tape still redraws every poll; see app.)
+    fn needs_redraw(&self) -> bool {
+        self.changed || self.deferred
     }
 
     fn leader_ok(&self) -> bool {

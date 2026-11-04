@@ -48,6 +48,7 @@ pub mod menu;
 pub mod notes;
 pub mod pick;
 pub mod portfolio;
+pub mod rows;
 pub mod search;
 pub mod sources;
 pub mod universe;
