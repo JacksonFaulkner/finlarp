@@ -858,6 +858,7 @@ dependencies = [
  "duckdb",
  "image",
  "open",
+ "poly3d",
  "ratatui",
  "ratatui-image",
  "serde",
@@ -1932,6 +1933,13 @@ dependencies = [
  "fdeflate",
  "flate2",
  "miniz_oxide 0.8.9",
+]
+
+[[package]]
+name = "poly3d"
+version = "0.1.0"
+dependencies = [
+ "image",
 ]
 
 [[package]]

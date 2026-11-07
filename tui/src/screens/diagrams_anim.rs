@@ -69,6 +69,14 @@ pub fn parse(src: &'static str) -> Option<Anim> {
     (height > 0).then_some(Anim { ms, frames, height })
 }
 
+/// Zoom-ins that open in the full-screen 3D view (`F`), by page and zoom key.
+const ORBIT: &[(&str, char)] = &[("POLYSILICON", 'c')];
+
+/// Whether zoom `key` of `page` has a 3D model the full-screen view can orbit.
+pub fn orbitable(page: &str, key: char) -> bool {
+    ORBIT.iter().any(|(p, k)| *p == page && *k == key)
+}
+
 /// The animation for a node page (keyed like VISUALS), if it has one.
 pub fn anim_for(page: &str) -> Option<Anim> {
     ANIMS

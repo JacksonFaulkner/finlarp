@@ -22,16 +22,23 @@ use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 
-use super::diagrams_anim::{scene_for, section_anim};
+use super::diagrams_anim::{orbitable, scene_for, section_anim};
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
+use super::diagrams_scene_poly_zoom::bell_jar_anim;
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
 use crate::app::{Action, Ctx, Screen};
 use crate::ui::anim::Player;
 use crate::ui::help::{Key, key, render_footer, render_overlay};
 use crate::ui::text;
 use crate::ui::theme::Theme;
+use image::{DynamicImage, RgbaImage};
+use ratatui_image::picker::cap_parser::QueryStdioOptions;
+use ratatui_image::picker::{Picker, ProtocolType};
+use ratatui_image::protocol::kitty::StatefulKitty;
+use ratatui_image::protocol::{StatefulProtocol, StatefulProtocolType};
+use ratatui_image::{FontSize, Resize, StatefulImage};
 
 /// How long the auto-tour rests on each visual spot / atom before moving on.
 const TOUR_MS: u128 = 2200;
@@ -66,6 +73,8 @@ enum PopupView {
     Overview,
     /// A close-up scene opened from the overview.
     Zoom,
+    /// A zoom's 3D model, full screen; hjkl orbit it.
+    Full,
     Menu,
     Pane,
 }
@@ -121,7 +130,213 @@ pub struct Diagrams {
     /// New-template card (big top visual + sub sections), when one exists.
     card: Option<&'static super::diagrams_cards::Card>,
     mol_cur: usize,
+    /// Terminal graphics: kitty when the terminal has it, else half-blocks.
+    picker: Picker,
+    /// Full-screen 3D camera (kept between opens; `0` resets it) and its last render.
+    orbit: poly3d::View,
+    full: Option<FullFrame>,
+    /// Which of the two kitty image ids the next frame uses (see FULL_IMAGE_ID).
+    full_turn: bool,
+    /// Camera key held: its canonical key and last press. `live_until` is set while
+    /// key repeat drives motion; `last_tick` is when the camera last advanced.
+    held: Option<(char, Instant)>,
+    live_until: Option<Instant>,
+    last_tick: Instant,
 }
+
+/// What one rendered 3D frame depends on: camera, scene state (quantised), and pixel size.
+type SceneKey = (poly3d::View, [i64; 7], u32, u32);
+
+/// The scene's state, quantised, so a frame re-renders only when something visible changed.
+fn scene_key(a: poly3d::Anim) -> [i64; 7] {
+    let q = |x: f64, scale: f64| (x * scale).round() as i64;
+    [
+        q(a.heat, 100.0),
+        q(a.rod_d, 2.0),
+        q(a.flow.pump, 100.0),
+        q(a.flow.feed, 100.0),
+        q(a.flow.exhaust, 100.0),
+        q(a.flow.power, 100.0),
+        q(a.phase, 40.0),
+    ]
+}
+
+/// The full-screen view's last render: the camera and rod state it was drawn
+/// for (and the size), plus its terminal encoding.
+struct FullFrame {
+    key: SceneKey,
+    shown: Shown,
+}
+
+/// How a full-screen frame reaches the terminal.
+enum Shown {
+    /// Kitty / iTerm2 / sixel: the terminal scales the encoded image.
+    Graphics(StatefulProtocol),
+    /// No graphics protocol: sampled into half-block cells by `blit_halfblocks`.
+    Blocks(RgbaImage),
+}
+
+/// The terminal's graphics protocol, queried the way the intraday screen does: kitty
+/// compression on, shared memory with FL_KITTY=shm. Halfblocks when there is none.
+///
+/// Inside tmux the kitty reply never reaches us (tmux drops it), so the query alone falls back
+/// to halfblocks even under Ghostty. Ghostty leaves its env vars in the tmux pane, so use kitty
+/// directly when the outer terminal is Ghostty; the kitty frames go out through tmux passthrough.
+fn query_picker() -> Picker {
+    let mode = std::env::var("FL_KITTY").unwrap_or_default();
+    let options = QueryStdioOptions {
+        kitty_compression: !matches!(mode.as_str(), "raw" | "shm"),
+        kitty_shared_memory_object: (mode == "shm")
+            .then(QueryStdioOptions::probe_kitty_smo)
+            .flatten(),
+        ..Default::default()
+    };
+    let queried = Picker::from_query_stdio_with_options(options)
+        .ok()
+        .filter(|p| p.protocol_type() != ProtocolType::Halfblocks);
+    if let Some(picker) = queried {
+        return picker;
+    }
+    let ghostty = ["GHOSTTY_RESOURCES_DIR", "GHOSTTY_BIN_DIR"]
+        .iter()
+        .any(|v| std::env::var_os(v).is_some_and(|x| !x.is_empty()));
+    let mut picker = Picker::halfblocks();
+    if ghostty {
+        picker.set_protocol_type(ProtocolType::Kitty);
+    }
+    picker
+}
+
+/// Kitty image ids for the full-screen view, used in turn. A frame uploads under the id the
+/// screen is not showing, so the old picture stays up until the new one has fully arrived.
+/// Reusing one id blanked the screen for the length of each upload.
+const FULL_IMAGE_IDS: [u32; 2] = [
+    u32::from_be_bytes([0, 0xF3, 0xD1, 0x01]),
+    u32::from_be_bytes([0, 0xF3, 0xD1, 0x02]),
+];
+
+/// Kitty protocol for one frame, with the stable id. ratatui-image's own kitty protocol takes
+/// a random id per send and never deletes the old image.
+fn kitty_protocol(picker: &Picker, img: DynamicImage, font: FontSize, id: u32) -> StatefulProtocol {
+    // zlib (o=z) is on: the query checks it, and Ghostty and kitty both support it. Without a
+    // query (see query_picker) the capability list is empty, so it is not read here.
+    StatefulProtocol::new(
+        img,
+        font,
+        None,
+        StatefulProtocolType::Kitty(StatefulKitty::new(id, picker.tmux_detected(), true, false)),
+    )
+}
+
+/// Half-block fallback: each cell is `▀` with the top sample as its foreground
+/// and the bottom sample as its background, so one cell holds two rows of pixels.
+fn blit_halfblocks(img: &RgbaImage, area: Rect, buf: &mut Buffer) {
+    let (iw, ih) = (img.width() as f64, img.height() as f64);
+    let (cw, sub_h) = (area.width as f64, area.height as f64 * 2.0);
+    let sample = |x: u32, sy: f64| {
+        let y = ((sy * ih / sub_h) as u32).min(img.height() - 1);
+        let p = img.get_pixel(x, y).0;
+        Color::Rgb(p[0], p[1], p[2])
+    };
+    for cy in 0..area.height {
+        for cx in 0..area.width {
+            let x = (((cx as f64 + 0.5) * iw / cw) as u32).min(img.width() - 1);
+            let top = sample(x, 2.0 * cy as f64 + 0.5);
+            let bottom = sample(x, 2.0 * cy as f64 + 1.5);
+            if let Some(cell) = buf.cell_mut((area.x + cx, area.y + cy)) {
+                cell.set_symbol("\u{2580}").set_fg(top).set_bg(bottom);
+            }
+        }
+    }
+}
+
+/// What a camera key moves. A tap moves one `step`. Holding the key moves at
+/// `rate` per second, which is the speed cap, so a held key never lurches.
+#[derive(Clone, Copy)]
+enum Axis {
+    Yaw,
+    Pitch,
+    Zoom,
+    PanX,
+    PanY,
+}
+
+impl Axis {
+    /// One tap: radians, ln(zoom), or pixels.
+    fn step(self) -> f64 {
+        match self {
+            Axis::Yaw | Axis::Pitch => 0.08,
+            Axis::Zoom => 1.15f64.ln(),
+            Axis::PanX | Axis::PanY => 40.0,
+        }
+    }
+    /// The speed cap while held: radians/s, ln(zoom)/s, or pixels/s.
+    fn rate(self) -> f64 {
+        match self {
+            Axis::Yaw => 1.2,
+            Axis::Pitch => 0.8,
+            Axis::Zoom => 0.7,
+            Axis::PanX | Axis::PanY => 240.0,
+        }
+    }
+}
+
+/// Camera keys as (canonical key, axis, direction). Arrows act as hjkl.
+fn camera_key(code: KeyCode) -> Option<(char, Axis, f64)> {
+    let c = match code {
+        KeyCode::Left => 'h',
+        KeyCode::Right => 'l',
+        KeyCode::Up => 'k',
+        KeyCode::Down => 'j',
+        KeyCode::Char('=') => '+',
+        KeyCode::Char('_') => '-',
+        KeyCode::Char(c) => c,
+        _ => return None,
+    };
+    let (axis, dir) = match c {
+        'h' => (Axis::Yaw, -1.0),
+        'l' => (Axis::Yaw, 1.0),
+        'k' => (Axis::Pitch, 1.0),
+        'j' => (Axis::Pitch, -1.0),
+        '+' => (Axis::Zoom, 1.0),
+        '-' => (Axis::Zoom, -1.0),
+        'H' => (Axis::PanX, -1.0),
+        'L' => (Axis::PanX, 1.0),
+        'K' => (Axis::PanY, -1.0),
+        'J' => (Axis::PanY, 1.0),
+        _ => return None,
+    };
+    Some((c, axis, dir))
+}
+
+/// Zoom turn keys: HJKL turn the model (lowercase stay the beats and notes), +/- zoom.
+/// Returns the same canonical key, axis and direction as `camera_key`.
+fn turn_key(c: char) -> Option<(char, Axis, f64)> {
+    match c {
+        'H' => Some(('h', Axis::Yaw, -1.0)),
+        'L' => Some(('l', Axis::Yaw, 1.0)),
+        'K' => Some(('k', Axis::Pitch, 1.0)),
+        'J' => Some(('j', Axis::Pitch, -1.0)),
+        '+' | '=' => Some(('+', Axis::Zoom, 1.0)),
+        '-' | '_' => Some(('-', Axis::Zoom, -1.0)),
+        _ => None,
+    }
+}
+
+/// A press of the same key this soon after the last one is key repeat (held).
+const REPEAT_GAP: Duration = Duration::from_millis(90);
+/// Held motion carries on this long after the last repeat, bridging gaps between repeats.
+const HOLD_ON: Duration = Duration::from_millis(120);
+/// Longest time step applied in one tick, so a stalled frame never jumps the camera.
+const MAX_DT: f64 = 0.1;
+/// Redraw interval while the camera moves (FRAME otherwise).
+const MOTION_FRAME: Duration = Duration::from_millis(30);
+/// Terminal background the 3D render is drawn on (Ghostty's Dracula).
+const FULL_BG: [u8; 3] = [0x28, 0x2a, 0x36];
+/// Largest 3D render, in pixels, for half-blocks. The terminal scales it to fit.
+const FULL_MAX: (f64, f64) = (1280.0, 720.0);
+/// Largest kitty render, in pixels (about 240 x 67 cells at 10 x 20). Bigger popups crop to this.
+const FULL_MAX_KITTY: (f64, f64) = (2400.0, 1350.0);
 
 /// A selectable spot on a node's page; (row, col) index the page art.
 struct Hot {
@@ -300,8 +515,17 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
                 .position(|d| d.tab.to_lowercase().starts_with(&a))
         })
         .unwrap_or(0);
+    // Must run before the event loop reads stdin: the terminal answers the query on stdin.
+    let picker = query_picker();
     Ok(Diagrams {
         theme: ctx.theme,
+        picker,
+        orbit: poly3d::View::default(),
+        full: None,
+        full_turn: false,
+        held: None,
+        live_until: None,
+        last_tick: Instant::now(),
         tab,
         scroll: 0,
         body_h: 0,
@@ -572,7 +796,7 @@ impl Diagrams {
             return false;
         }
         match self.view {
-            PopupView::Overview | PopupView::Zoom => {
+            PopupView::Overview | PopupView::Zoom | PopupView::Full => {
                 !self.scene_player().is_some_and(|p| p.is_paused())
             }
             // the preview beside the menu plays while an animation row is highlighted
@@ -583,7 +807,7 @@ impl Diagrams {
 
     /// The player the overview or the zoom is showing.
     fn scene_player(&self) -> Option<&Player> {
-        if self.view == PopupView::Zoom {
+        if matches!(self.view, PopupView::Zoom | PopupView::Full) {
             self.zoom.as_ref().map(|(_, p)| p)
         } else {
             self.player.as_ref().and_then(|(_, p)| p.as_ref())
@@ -591,7 +815,7 @@ impl Diagrams {
     }
 
     fn scene_player_mut(&mut self) -> Option<&mut Player> {
-        if self.view == PopupView::Zoom {
+        if matches!(self.view, PopupView::Zoom | PopupView::Full) {
             self.zoom.as_mut().map(|(_, p)| p)
         } else {
             self.player.as_mut().and_then(|(_, p)| p.as_mut())
@@ -694,6 +918,207 @@ impl Diagrams {
         self.view = PopupView::Zoom;
     }
 
+    /// The open zoom-in has a 3D model the full-screen view can orbit.
+    fn can_orbit(&self) -> bool {
+        let Some((i, _)) = &self.zoom else {
+            return false;
+        };
+        let Some((page, _)) = &self.player else {
+            return false;
+        };
+        !self.zoom_section
+            && self
+                .zoom_list()
+                .get(*i)
+                .is_some_and(|(k, _)| orbitable(page, *k))
+    }
+
+    /// Keys in the full-screen 3D view: hjkl orbit, +/- zoom, HJKL pan, 0
+    /// reset, p pause, q/Esc/F back to the zoom. These take priority over the
+    /// zoom's beat keys.
+    /// One camera key: a tap moves one step, a repeat starts held motion (full_tick).
+    fn camera_step(&mut self, hit: (char, Axis, f64), now: Instant) {
+        let (key, axis, dir) = hit;
+        let repeat = matches!(
+            self.held,
+            Some((k, at)) if k == key && now.duration_since(at) < REPEAT_GAP
+        );
+        self.held = Some((key, now));
+        if repeat {
+            // motion runs in full_tick at the speed cap, not once per event
+            self.live_until = Some(now + HOLD_ON);
+        } else {
+            self.apply(axis, dir * axis.step());
+        }
+    }
+
+    fn full_key(&mut self, code: KeyCode, now: Instant) {
+        if let Some(hit) = camera_key(code) {
+            self.camera_step(hit, now);
+            return;
+        }
+        match code {
+            KeyCode::Char('q') | KeyCode::Esc | KeyCode::Char('F') => self.view = PopupView::Zoom,
+            KeyCode::Char('0') => self.orbit = poly3d::View::default(),
+            KeyCode::Char('p') => {
+                if let Some((_, p)) = self.zoom.as_mut() {
+                    p.toggle_pause();
+                }
+            }
+            _ => {}
+        }
+    }
+
+    /// Moves the camera along one axis by `amount` (radians, ln(zoom), or pixels).
+    fn apply(&mut self, axis: Axis, amount: f64) {
+        match axis {
+            Axis::Yaw => self.orbit.orbit(amount, 0.0),
+            Axis::Pitch => self.orbit.orbit(0.0, amount),
+            Axis::Zoom => self.orbit.zoom_by(amount.exp()),
+            Axis::PanX => self.orbit.pan_by(amount, 0.0),
+            Axis::PanY => self.orbit.pan_by(0.0, amount),
+        }
+    }
+
+    /// Whether held-key motion is running at `now`.
+    fn moving(&self, now: Instant) -> bool {
+        self.live_until.is_some_and(|until| now < until)
+    }
+
+    /// Advances held-key motion by the time since the last tick, at the speed cap.
+    fn full_tick(&mut self, now: Instant) {
+        let dt = now.duration_since(self.last_tick).as_secs_f64().min(MAX_DT);
+        self.last_tick = now;
+        if !matches!(self.view, PopupView::Full | PopupView::Zoom) || !self.moving(now) {
+            return;
+        }
+        if let Some((key, _)) = self.held
+            && let Some((_, axis, dir)) = camera_key(KeyCode::Char(key))
+        {
+            self.apply(axis, dir * axis.rate() * dt);
+        }
+    }
+
+    /// Full-screen 3D view of the open zoom. The zoom's clock drives the rods
+    /// and hjkl move the camera. The frame is re-rendered only when the camera,
+    /// the rods' state, or the size changes.
+    fn draw_full(&mut self, frame: &mut Frame, r: Rect, t: &Theme) {
+        let Some((i, p)) = self.zoom.as_ref() else {
+            return;
+        };
+        let time = p.time_at(p.now_ms());
+        let paused = p.is_paused();
+        let name = self.zoom_list().get(*i).map_or("", |(_, l)| *l);
+        let block = Block::new()
+            .borders(Borders::ALL)
+            .border_style(t.accent())
+            .title(Span::styled(
+                format!(" {name} \u{00B7} full view "),
+                t.title(),
+            ))
+            .title_bottom(Span::styled(
+                format!(
+                    " hjkl orbit  +/- zoom  HJKL pan  0 reset  {}  esc back ",
+                    if paused { "p resume" } else { "p pause" }
+                ),
+                t.dim(),
+            ));
+        let inner = block.inner(r);
+        frame.render_widget(Clear, r);
+        frame.render_widget(block, r);
+        let anim = bell_jar_anim(&time);
+        let half = self.moving(Instant::now());
+        self.paint_3d(frame, inner, anim, self.orbit, half);
+    }
+
+    /// Paints a 3D scene into `inner`. Kitty gets a frame sized to whole cells, at the
+    /// terminal's pixels (half while `half`, for motion: the same cells at a quarter of the
+    /// bytes). Half-blocks fill the area. The frame re-renders only when the scene changes.
+    fn paint_3d(
+        &mut self,
+        frame: &mut Frame,
+        inner: Rect,
+        anim: poly3d::Anim,
+        view: poly3d::View,
+        half: bool,
+    ) {
+        let font = self.picker.font_size();
+        let kitty = self.picker.protocol_type() == ProtocolType::Kitty;
+        let max = if kitty { FULL_MAX_KITTY } else { FULL_MAX };
+        let mut px_font = font;
+        let (area, w, h) = if kitty {
+            if half {
+                px_font = FontSize::new((font.width / 2).max(1), (font.height / 2).max(1));
+            }
+            let cols = inner.width.min((max.0 / font.width as f64) as u16);
+            let rows = inner.height.min((max.1 / font.height as f64) as u16);
+            let area = Rect::new(
+                inner.x + (inner.width - cols) / 2,
+                inner.y + (inner.height - rows) / 2,
+                cols,
+                rows,
+            );
+            (
+                area,
+                cols as u32 * px_font.width as u32,
+                rows as u32 * px_font.height as u32,
+            )
+        } else {
+            let (fw, fh) = (
+                inner.width as f64 * font.width as f64,
+                inner.height as f64 * font.height as f64,
+            );
+            let scale = (max.0 / fw.max(1.0)).min(max.1 / fh.max(1.0)).min(1.0);
+            let scale = if half { scale * 0.5 } else { scale };
+            let (w, h) = ((fw * scale).floor(), (fh * scale).floor());
+            if w < 1.0 || h < 1.0 {
+                return;
+            }
+            (inner, w as u32, h as u32)
+        };
+        if w == 0 || h == 0 {
+            return;
+        }
+        let key: SceneKey = (view, scene_key(anim), w, h);
+        if self.full.as_ref().is_none_or(|f| f.key != key) {
+            let img = poly3d::render(
+                &poly3d::Params::default(),
+                anim,
+                &view,
+                w as usize,
+                h as usize,
+                FULL_BG,
+            );
+            let shown = match self.picker.protocol_type() {
+                ProtocolType::Halfblocks => Shown::Blocks(img),
+                ProtocolType::Kitty => {
+                    self.full_turn = !self.full_turn;
+                    let id = FULL_IMAGE_IDS[self.full_turn as usize];
+                    Shown::Graphics(kitty_protocol(
+                        &self.picker,
+                        DynamicImage::ImageRgba8(img),
+                        px_font,
+                        id,
+                    ))
+                }
+                _ => Shown::Graphics(
+                    self.picker
+                        .new_resize_protocol(DynamicImage::ImageRgba8(img)),
+                ),
+            };
+            self.full = Some(FullFrame { key, shown });
+        }
+        match self.full.as_mut().map(|f| &mut f.shown) {
+            Some(Shown::Graphics(proto)) => frame.render_stateful_widget(
+                StatefulImage::default().resize(Resize::Fit(None)),
+                area,
+                proto,
+            ),
+            Some(Shown::Blocks(img)) => blit_halfblocks(img, area, frame.buffer_mut()),
+            None => {}
+        }
+    }
+
     /// The animation for numbered section `i` of the open page, if it has one.
     fn section_build(&self, i: usize) -> Option<fn() -> Box<dyn Scene>> {
         let (page, _) = self.player.as_ref()?;
@@ -747,6 +1172,8 @@ impl Diagrams {
     /// it when narrow), zoom keys and beat dots at the foot.
     fn draw_scene(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         let zooming = self.view == PopupView::Zoom;
+        // the zoom's art is its 3D scene, drawn beside the beat's caption and notes
+        let orbit3d = zooming && self.can_orbit();
         let zooms = self.zoom_list();
         let zoom_name = match &self.zoom {
             Some((i, _)) if self.zoom_section => {
@@ -754,6 +1181,11 @@ impl Diagrams {
             }
             Some((i, _)) => zooms.get(*i).map_or("", |(_, l)| *l).to_string(),
             None => String::new(),
+        };
+        let orbit_key = if zooming && self.can_orbit() {
+            "HJKL turn  F full view  "
+        } else {
+            ""
         };
         frame.render_widget(Clear, r);
         let paused = self.scene_player().is_some_and(|p| p.is_paused());
@@ -770,7 +1202,7 @@ impl Diagrams {
         let (title, hint) = if zooming {
             (
                 format!(" {label} \u{00B7} {zoom_name} "),
-                format!(" esc menu  {switch}  {play} "),
+                format!(" {orbit_key}esc menu  {switch}  {play} "),
             )
         } else {
             let keys = match (zooms.first(), zooms.last()) {
@@ -826,6 +1258,7 @@ impl Diagrams {
         };
         p.fit(art_r.width, art_r.height);
         let shot = p.shot();
+        let time = p.time_at(p.now_ms());
         frame.render_widget(
             Paragraph::new(Line::from(vec![
                 Span::styled(format!("\u{25B6} {}", shot.caption), t.accent()),
@@ -835,9 +1268,14 @@ impl Diagrams {
             .style(t.base()),
             cap_r,
         );
-        let art = shot.lines.join("\n");
-        let art_lines = scene_lines(&art, t);
-        frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
+        if orbit3d {
+            let anim = bell_jar_anim(&time);
+            self.paint_3d(frame, art_r, anim, self.orbit, true);
+        } else {
+            let art = shot.lines.join("\n");
+            let art_lines = scene_lines(&art, t);
+            frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
+        }
         let mut notes: Vec<Line> = Vec::new();
         for (head, body) in [
             ("WHAT'S HAPPENING", shot.what),
@@ -1059,6 +1497,7 @@ impl Diagrams {
             PopupView::Overview | PopupView::Zoom if self.has_scene() => {
                 return self.draw_scene(frame, area, &label, t);
             }
+            PopupView::Full if self.has_scene() => return self.draw_full(frame, area, t),
             PopupView::Menu => return self.draw_menu(frame, area, &label, t),
             _ => {}
         }
@@ -1548,6 +1987,10 @@ impl Screen for Diagrams {
             self.detail_key(key);
             return Action::None;
         }
+        if self.popup && self.view == PopupView::Full {
+            self.full_key(key.code, Instant::now());
+            return Action::None;
+        }
         if self.popup
             && matches!(self.view, PopupView::Overview | PopupView::Zoom)
             && self.has_scene()
@@ -1590,6 +2033,14 @@ impl Screen for Diagrams {
                 }
                 KeyCode::Char(c @ '1'..='9') if self.zoom_section => {
                     self.open_section(c as usize - '1' as usize)
+                }
+                KeyCode::Char('F') if self.can_orbit() => self.view = PopupView::Full,
+                // HJKL turn the 3D model on the left; lowercase keep the beats and notes
+                KeyCode::Char('0') if self.can_orbit() => self.orbit = poly3d::View::default(),
+                KeyCode::Char(c) if self.can_orbit() && turn_key(c).is_some() => {
+                    if let Some(hit) = turn_key(c) {
+                        self.camera_step(hit, Instant::now());
+                    }
                 }
                 KeyCode::Char(c) => {
                     if let Some(i) = self.zoom_for_key(c) {
@@ -1785,12 +2236,19 @@ impl Screen for Diagrams {
         false
     }
 
+    fn tick(&mut self) -> Action {
+        self.full_tick(Instant::now());
+        Action::None
+    }
+
     fn needs_redraw(&self) -> bool {
         self.animating()
     }
 
     fn poll_interval(&self) -> Duration {
-        if self.animating() {
+        if matches!(self.view, PopupView::Full | PopupView::Zoom) && self.moving(Instant::now()) {
+            MOTION_FRAME
+        } else if self.animating() {
             FRAME
         } else {
             Duration::from_millis(100)
@@ -2231,6 +2689,188 @@ mod tests {
             assert!(all.contains(want), "{key}: {all}");
             assert!(all.contains("WHAT'S HAPPENING"));
         }
+    }
+
+    #[test]
+    fn held_keys_move_at_the_speed_cap() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "POLYSILICON")
+            .expect("POLYSILICON node");
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('c'));
+        press(&mut d, KeyCode::Char('F'));
+
+        let ms = Duration::from_millis;
+        let t0 = Instant::now();
+        d.last_tick = t0;
+        d.full_key(KeyCode::Char('j'), t0); // a tap: one step
+        let tapped = d.orbit.pitch;
+        d.full_key(KeyCode::Char('j'), t0 + ms(40)); // a repeat: motion starts, no jump
+        assert_eq!(d.orbit.pitch, tapped, "a repeat press does not jump");
+        d.full_tick(t0 + ms(40));
+        d.full_tick(t0 + ms(100));
+        let moved = tapped - d.orbit.pitch;
+        assert!(
+            (moved - 0.8 * 0.10).abs() < 1e-9,
+            "held j moves at 0.8 rad/s, moved {moved}"
+        );
+        // the hold ends 120 ms after the last repeat: no drift once released
+        d.full_tick(t0 + ms(400));
+        assert!(
+            (tapped - d.orbit.pitch - moved).abs() < 1e-9,
+            "no drift after release"
+        );
+
+        // a stalled frame applies at most one capped step, never a lurch
+        d.full_key(KeyCode::Char('j'), t0 + ms(500));
+        d.full_key(KeyCode::Char('j'), t0 + ms(540)); // repeat: motion until t0+660
+        d.last_tick = t0 + ms(540);
+        let before = d.orbit.pitch;
+        d.full_tick(t0 + ms(650)); // 110 ms since the last tick, clamped to 100 ms
+        assert!(
+            (before - d.orbit.pitch - 0.8 * 0.1).abs() < 1e-9,
+            "a stall is capped at 0.8 rad/s"
+        );
+    }
+
+    #[test]
+    fn full_view_draws_kitty_frames_and_rebuilds_on_camera_moves() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "POLYSILICON")
+            .expect("POLYSILICON node");
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('c'));
+        press(&mut d, KeyCode::Char('F'));
+        let mut picker = Picker::halfblocks();
+        picker.set_protocol_type(ProtocolType::Kitty);
+        d.picker = picker;
+        let _ = screen_text(&mut d, 175, 48);
+        assert!(matches!(
+            d.full.as_ref().map(|f| &f.shown),
+            Some(Shown::Graphics(_))
+        ));
+        let before = d.full.as_ref().map(|f| f.key);
+        d.full_key(KeyCode::Char('L'), Instant::now());
+        let _ = screen_text(&mut d, 175, 48);
+        assert_ne!(
+            d.full.as_ref().map(|f| f.key),
+            before,
+            "a pan redraws the frame"
+        );
+        assert!(matches!(
+            d.full.as_ref().map(|f| &f.shown),
+            Some(Shown::Graphics(_))
+        ));
+    }
+
+    #[test]
+    fn zoom_hjkl_turn_the_model_and_lowercase_keep_the_beats() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "POLYSILICON")
+            .expect("POLYSILICON node");
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('c'));
+        assert_eq!(d.view, PopupView::Zoom);
+        let start = d.orbit;
+        press(&mut d, KeyCode::Char('L'));
+        assert!(d.orbit.yaw > start.yaw, "L turns right");
+        press(&mut d, KeyCode::Char('K'));
+        assert!(d.orbit.pitch > start.pitch, "K tilts up");
+        press(&mut d, KeyCode::Char('0'));
+        assert_eq!(d.orbit, poly3d::View::default(), "0 resets the turn");
+
+        // lowercase still steps the beat, and does not turn the model
+        let beat = |d: &mut Diagrams| d.zoom.as_mut().unwrap().1.shot().beat;
+        let before = beat(&mut d);
+        press(&mut d, KeyCode::Char('l'));
+        assert_eq!(beat(&mut d), before + 1, "l steps the beat");
+        assert_eq!(d.orbit, poly3d::View::default(), "l leaves the model alone");
+    }
+
+    #[test]
+    fn halfblocks_sample_top_and_bottom_pixels_per_cell() {
+        // top sub-row red, the rest black: cell row 0 is red over black
+        let mut img = RgbaImage::from_pixel(4, 4, image::Rgba([0, 0, 0, 255]));
+        for x in 0..4 {
+            img.put_pixel(x, 0, image::Rgba([255, 0, 0, 255]));
+        }
+        let area = Rect::new(0, 0, 4, 2);
+        let mut buf = Buffer::empty(area);
+        blit_halfblocks(&img, area, &mut buf);
+        assert_eq!(buf[(0, 0)].fg, Color::Rgb(255, 0, 0));
+        assert_eq!(buf[(0, 0)].bg, Color::Rgb(0, 0, 0));
+        assert_eq!(buf[(0, 1)].fg, Color::Rgb(0, 0, 0));
+    }
+
+    #[test]
+    fn bell_jar_full_view_orbits_with_hjkl() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "POLYSILICON")
+            .expect("POLYSILICON node");
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('c'));
+        press(&mut d, KeyCode::Char('F'));
+        assert_eq!(d.view, PopupView::Full);
+        let all = screen_text(&mut d, 175, 48);
+        assert!(
+            all.contains("full view") && all.contains("hjkl orbit"),
+            "{all}"
+        );
+        assert!(d.animating(), "the 3D view keeps its clock running");
+
+        let start = d.orbit;
+        press(&mut d, KeyCode::Char('l'));
+        assert!(d.orbit.yaw > start.yaw, "l orbits right");
+        press(&mut d, KeyCode::Char('h'));
+        press(&mut d, KeyCode::Char('h'));
+        assert!(d.orbit.yaw < start.yaw, "h orbits left");
+        press(&mut d, KeyCode::Char('k'));
+        assert!(d.orbit.pitch > start.pitch, "k tilts up");
+        press(&mut d, KeyCode::Char('L'));
+        assert!(d.orbit.pan[0] > 0.0, "L pans right");
+        press(&mut d, KeyCode::Char('+'));
+        assert!(d.orbit.zoom > 1.0, "+ zooms in");
+        let _ = screen_text(&mut d, 175, 48);
+        assert!(d.full.is_some(), "the frame rendered");
+
+        press(&mut d, KeyCode::Char('0'));
+        assert_eq!(d.orbit, poly3d::View::default(), "0 resets the camera");
+
+        press(&mut d, KeyCode::Char('q'));
+        assert_eq!(d.view, PopupView::Zoom, "q returns to the zoom");
+
+        // a zoom without a 3D model ignores F
+        press(&mut d, KeyCode::Char('a'));
+        press(&mut d, KeyCode::Char('F'));
+        assert_eq!(d.view, PopupView::Zoom);
     }
 
     #[test]
