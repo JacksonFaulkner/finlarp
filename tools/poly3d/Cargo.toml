@@ -1,0 +1,11 @@
+[package]
+name = "poly3d"
+version = "0.1.0"
+edition = "2021"
+description = "Software rasterizer for the polysilicon Siemens bell-jar scene: library for the TUI, binary for offline GIF frames"
+
+[dependencies]
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[profile.release]
+opt-level = 3
