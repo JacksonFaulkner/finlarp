@@ -26,7 +26,9 @@ import struct
 import sys
 import threading
 import time
+from datetime import datetime, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 import certifi
 import websocket
@@ -37,6 +39,70 @@ WS_URL = "wss://streamer.finance.yahoo.com/?version=2"
 EMIT_S = 0.25
 RESYNC_S = 60
 PING_S = 20
+# The seed's minute bars come from Databento (XNAS.BASIC, Nasdaq venues) up to this far behind
+# the wall clock; Yahoo's REST chart covers the last few minutes Databento hasn't published yet.
+DB_DATASET = "XNAS.BASIC"
+DB_SCHEMA = "ohlcv-1m"
+DB_LAG_S = 10 * 60
+_db_client: Any = None
+
+
+def session_start_epoch() -> int:
+    """04:00 ET today (pre-market open), epoch seconds."""
+    now_et = datetime.now(ZoneInfo("America/New_York"))
+    return int(now_et.replace(hour=4, minute=0, second=0, microsecond=0).timestamp())
+
+
+_avail: tuple[float, int] = (0.0, 0)  # (fetched at, last epoch second Databento serves)
+
+
+def db_available_end() -> int:
+    """Last epoch second this key may read for DB_DATASET/DB_SCHEMA. Free metadata call, cached 10 min."""
+    global _db_client, _avail
+    if time.time() - _avail[0] < 600:
+        return _avail[1]
+    import databento as db
+
+    from sources import keys
+
+    if _db_client is None:
+        _db_client = db.Historical(keys.require("DATABENTO_API_KEY"))
+    end = _db_client.metadata.get_dataset_range(dataset=DB_DATASET)["schema"][DB_SCHEMA]["end"]
+    # e.g. "2026-11-04T05:00:00.000000000Z"; minute precision is all the bars need
+    value = int(datetime.strptime(end[:19], "%Y-%m-%dT%H:%M:%S").replace(tzinfo=timezone.utc).timestamp())
+    _avail = (time.time(), value)
+    return value
+
+
+def databento_minutes(sym: str, start: int, end: int) -> dict[int, list]:
+    """Minute bars [t, o, h, l, c, v] for `sym` over [start, end), keyed by minute start (epoch s).
+
+    Volume is Nasdaq-only here (Yahoo's is consolidated), so it runs lower than the Yahoo bars.
+    """
+    global _db_client
+    if end <= start:
+        return {}
+    import databento as db
+
+    from sources import keys
+
+    if _db_client is None:
+        _db_client = db.Historical(keys.require("DATABENTO_API_KEY"))
+    df = _db_client.timeseries.get_range(
+        dataset=DB_DATASET,
+        schema=DB_SCHEMA,
+        symbols=[sym],
+        start=datetime.fromtimestamp(start, timezone.utc),
+        end=datetime.fromtimestamp(end, timezone.utc),
+    ).to_df()
+    out: dict[int, list] = {}
+    for ts, row in df.iterrows():
+        t = minute_of(ts.timestamp())
+        vals = [float(row["open"]), float(row["high"]), float(row["low"]), float(row["close"])]
+        if any(v != v for v in vals):  # NaN
+            continue
+        out[t] = [t, *vals, int(row["volume"])]
+    return out
 
 
 def _varint(b: bytes, i: int) -> tuple[int, int]:
@@ -105,6 +171,8 @@ class Feed:
         self.bars: dict[str, dict[int, list]] = {}  # sym -> minute -> [t, o, h, l, c, v]
         self.meta: dict[str, dict] = {}  # sym -> {prev_close, reg}
         self.day_vol: dict[str, int | None] = {}
+        self.db_bars: dict[str, dict[int, list]] = {}  # sym -> Databento minutes fetched so far
+        self.db_until: dict[str, int] = {}  # sym -> epoch second the Databento cache runs to
         self.dirty: set[str] = set()
         self.symbols: list[str] = []
         self.ws: websocket.WebSocketApp | None = None
@@ -117,18 +185,40 @@ class Feed:
             sys.stdout.flush()
 
     # ---- REST seed / resync --------------------------------------------------
+    def _databento_fill(self, sym: str) -> None:
+        """Extend the Databento minute cache for `sym` up to DB_LAG_S ago; fetches only new minutes."""
+        start = self.db_until.get(sym, session_start_epoch())
+        try:
+            # never ask past what the license covers: an out-of-range request is rejected every resync
+            end = min(minute_of(time.time() - DB_LAG_S), minute_of(db_available_end()))
+            if end <= start:
+                return
+            rows = databento_minutes(sym, start, end)
+        except Exception as e:  # no key, network, or Databento error: the seed falls back to Yahoo
+            print(f"databento backfill {sym} failed: {e}", file=sys.stderr, flush=True)
+            return
+        with self.lock:
+            self.db_bars.setdefault(sym, {}).update(rows)
+            self.db_until[sym] = end
+
     def seed(self, sym: str) -> None:
         try:
             res = yahoo_live._chart(yahoo.new_session(), sym, "1d", "1m", pre_post=True)
         except Exception as e:  # network / unknown symbol
             self.emit({"ev": "error", "sym": sym, "msg": f"seed failed: {e}"})
             return
+        self._databento_fill(sym)
         meta = res["meta"]
         reg = meta.get("currentTradingPeriod", {}).get("regular", {})
         now_min = minute_of(time.time())
         with self.lock:
             cur = self.bars.setdefault(sym, {})
+            # Databento is the base for every minute it covers; Yahoo fills the tail and the forming minute
+            for t, row in self.db_bars.get(sym, {}).items():
+                cur[t] = row
             for b in res["bars"]:
+                if minute_of(b["t"]) in self.db_bars.get(sym, {}):
+                    continue  # Databento already has this minute
                 # Yahoo stamps the still-forming bar with the request time, not the minute start
                 t = minute_of(b["t"])
                 row = [t, b["open"], b["high"], b["low"], b["close"], b["volume"] or 0]
@@ -209,6 +299,8 @@ class Feed:
                 self.bars.pop(s, None)
                 self.meta.pop(s, None)
                 self.day_vol.pop(s, None)
+                self.db_bars.pop(s, None)
+                self.db_until.pop(s, None)
         added = [s for s in symbols if s not in old]
         removed = [s for s in old if s not in symbols]
         ws = self.ws

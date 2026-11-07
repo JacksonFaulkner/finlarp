@@ -72,3 +72,70 @@ def test_ignores_symbols_that_are_not_watched_and_negative_volume_steps():
     f.on_tick({"sym": "WDC", "price": 10.0, "t": 1_791_994_380, "day_vol": 500})
     f.on_tick({"sym": "WDC", "price": 10.5, "t": 1_791_994_385, "day_vol": 400})  # counter went backwards
     assert f.bars["WDC"][1_791_994_380][5] == 0
+
+
+def test_seed_takes_minutes_from_databento_and_fills_the_tail_from_yahoo(monkeypatch, capsys):
+    import json
+
+    import sources.intraday_stream as mod
+
+    now = 1_791_994_380 + 30  # a fixed clock; the Databento cutoff is DB_LAG_S before it
+    session_start = now - 3600
+    yahoo_minute = mod.minute_of(now - 3600)  # Databento has this minute too: it must win
+    tail_minute = mod.minute_of(now - 120)  # newer than Databento's cutoff: Yahoo fills it
+    fetched = []
+
+    def fake_databento(sym, start, end):
+        fetched.append((sym, start, end))
+        return {yahoo_minute: [yahoo_minute, 10.0, 11.0, 9.0, 10.5, 500]}
+
+    chart = {
+        "meta": {"previousClose": 9.5, "currentTradingPeriod": {"regular": {"start": 1, "end": 2}}},
+        "bars": [
+            {"t": yahoo_minute, "open": 1.0, "high": 1.0, "low": 1.0, "close": 1.0, "volume": 1},
+            {"t": tail_minute, "open": 20.0, "high": 21.0, "low": 19.0, "close": 20.5, "volume": 7},
+        ],
+    }
+    monkeypatch.setattr(mod.time, "time", lambda: now)
+    monkeypatch.setattr(mod, "session_start_epoch", lambda: session_start)
+    monkeypatch.setattr(mod, "databento_minutes", fake_databento)
+    monkeypatch.setattr(mod, "db_available_end", lambda: now + 10**9)
+    monkeypatch.setattr(mod.yahoo_live, "_chart", lambda *a, **k: chart)
+    monkeypatch.setattr(mod.yahoo, "new_session", lambda: None)
+
+    f = Feed()
+    f.seed("MKSI")
+    seed = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+    bars = {b[0]: b for b in seed["bars"]}
+    assert bars[yahoo_minute][1] == 10.0  # Databento's open, not Yahoo's
+    assert bars[tail_minute][1] == 20.0  # Yahoo's tail
+    assert fetched == [("MKSI", session_start, mod.minute_of(now - mod.DB_LAG_S))]
+    assert seed["prev_close"] == 9.5
+
+    f.seed("MKSI")  # a resync fetches only what is new since the last cutoff: nothing here
+    assert len(fetched) == 1
+
+
+def test_seed_does_not_ask_databento_past_its_license_and_falls_back_to_yahoo(monkeypatch, capsys):
+    import json
+
+    import sources.intraday_stream as mod
+
+    now = 1_791_994_380 + 30
+    yahoo_minute = mod.minute_of(now - 3600)
+    fetched = []
+    monkeypatch.setattr(mod.time, "time", lambda: now)
+    monkeypatch.setattr(mod, "session_start_epoch", lambda: now - 3600)
+    monkeypatch.setattr(mod, "db_available_end", lambda: now - 7200)  # license ends before the session
+    monkeypatch.setattr(mod, "databento_minutes", lambda *a: fetched.append(a) or {})
+    chart = {
+        "meta": {"previousClose": 9.5, "currentTradingPeriod": {"regular": {"start": 1, "end": 2}}},
+        "bars": [{"t": yahoo_minute, "open": 1.0, "high": 1.0, "low": 1.0, "close": 1.0, "volume": 1}],
+    }
+    monkeypatch.setattr(mod.yahoo_live, "_chart", lambda *a, **k: chart)
+    monkeypatch.setattr(mod.yahoo, "new_session", lambda: None)
+
+    Feed().seed("MKSI")
+    seed = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
+    assert fetched == []  # no request the license would reject
+    assert {b[0]: b for b in seed["bars"]}[yahoo_minute][1] == 1.0  # Yahoo alone

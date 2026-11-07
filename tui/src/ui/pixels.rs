@@ -21,6 +21,9 @@ pub struct Palette {
     pub fg: [u8; 4],
     pub dim: [u8; 4],
     pub accent: [u8; 4],
+    /// Pre-market / after-hours hues (see `Theme::pre` / `Theme::post`).
+    pub pre: [u8; 4],
+    pub post: [u8; 4],
 }
 
 impl Palette {
@@ -35,6 +38,8 @@ impl Palette {
             fg: rgba(t.fg, [0xc0, 0xca, 0xf5]),
             dim: rgba(t.dim, [0x56, 0x5f, 0x89]),
             accent: rgba(t.accent, [0xd7, 0xa6, 0x5f]),
+            pre: rgba(t.pre, [0x7a, 0xa2, 0xf7]),
+            post: rgba(t.post, [0xbb, 0x9a, 0xf7]),
         }
     }
 }

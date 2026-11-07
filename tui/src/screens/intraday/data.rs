@@ -6,7 +6,7 @@ use std::cell::RefCell;
 use std::collections::{BTreeMap, HashMap};
 use std::rc::Rc;
 
-use crate::ui::hcandles::HBar;
+use crate::ui::hcandles::{HBar, Session};
 
 /// One 1-minute bar; `t` is the minute start, epoch seconds.
 #[derive(Debug, Clone, Copy, PartialEq)]
@@ -113,6 +113,15 @@ impl Series {
         self.reg.is_none_or(|(o, c)| (o..c).contains(&t))
     }
 
+    /// Regular, pre-market (before the open) or post-market (at or after the close).
+    fn session(&self, t: i64) -> Session {
+        match self.reg {
+            _ if self.in_session(t) => Session::Regular,
+            Some((open, _)) if t < open => Session::Pre,
+            _ => Session::Post,
+        }
+    }
+
     /// Bars at `step` minutes. Without `ext`, only the regular session. Memoized per
     /// version: a redraw or cursor move gets the same `Rc` back until the data changes.
     pub fn aggregate(&self, step: i64, ext: bool) -> Rc<Vec<HBar>> {
@@ -155,7 +164,7 @@ impl Series {
                 low: b.l,
                 close: b.c,
                 volume: b.v,
-                ext: !self.in_session(t),
+                session: self.session(t),
             })
             .collect()
     }
@@ -245,7 +254,7 @@ mod tests {
         assert_eq!(s.aggregate(1, false).len(), 6);
         let all = s.aggregate(1, true);
         assert_eq!(all.len(), 7);
-        assert!(all[0].ext && !all[1].ext);
+        assert_eq!((all[0].session, all[1].session), (Session::Pre, Session::Regular));
     }
 
     #[test]

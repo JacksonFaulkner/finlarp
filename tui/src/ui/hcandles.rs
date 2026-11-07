@@ -29,6 +29,14 @@ const SUB_X: usize = 2;
 const SUB_Y: usize = 3;
 const EIGHTHS: [char; 9] = [' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'];
 
+/// Which part of the trading day a bar is in. Pre- and post-market bars get their own hue.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Session {
+    Regular,
+    Pre,
+    Post,
+}
+
 /// One drawn bar (already aggregated to the chosen interval).
 #[derive(Debug, Clone, PartialEq)]
 pub struct HBar {
@@ -38,13 +46,17 @@ pub struct HBar {
     pub low: f64,
     pub close: f64,
     pub volume: u64,
-    /// Pre- or post-market.
-    pub ext: bool,
+    pub session: Session,
 }
 
 impl HBar {
     pub fn is_up(&self) -> bool {
         self.close >= self.open
+    }
+
+    /// Pre- or post-market.
+    pub fn ext(&self) -> bool {
+        self.session != Session::Regular
     }
 }
 
@@ -141,14 +153,17 @@ impl Widget for HCandles<'_> {
             let y = area.y + 1 + r as u16;
             let cursor = self.selected == Some(first_idx + r);
             let color = if b.is_up() { t.up } else { t.down };
-            let mut style = Style::new().fg(color);
-            if b.ext {
-                style = style.add_modifier(Modifier::DIM);
-            }
+            let style = Style::new().fg(color);
+            // Session shows on the label: its hue, so pre/post rows read at a glance.
+            let session_fg = match b.session {
+                Session::Regular => None,
+                Session::Pre => Some(t.pre),
+                Session::Post => Some(t.post),
+            };
             let label_style = if cursor {
                 Style::new().fg(t.accent)
             } else {
-                dim
+                Style::new().fg(session_fg.unwrap_or(t.dim))
             };
             buf.set_string(area.x, y, if cursor { "▸" } else { " " }, label_style);
             buf.set_string(area.x + 1, y, &b.label, label_style);
@@ -237,7 +252,7 @@ mod tests {
             low: l,
             close: c,
             volume: v,
-            ext: false,
+            session: Session::Regular,
         }
     }
 
@@ -313,20 +328,19 @@ mod tests {
     }
 
     #[test]
-    fn extended_hours_rows_are_dimmed() {
+    fn extended_hours_rows_take_their_session_hue() {
         let theme = Theme::default();
         let mut b = bars();
-        b[0].ext = true;
+        b[0].session = Session::Pre;
+        b[1].session = Session::Post;
         let mut term = Terminal::new(TestBackend::new(70, 6)).unwrap();
         term.draw(|f| f.render_widget(HCandles::new(&b, &theme), f.area()))
             .unwrap();
         let buf = term.backend().buffer();
-        let dimmed = |y: u16| {
-            (0..70).any(|x| {
-                buf[(x, y)].modifier.contains(Modifier::DIM) && buf[(x, y)].symbol() != " "
-            })
-        };
-        assert!(dimmed(1) && dimmed(2), "ext row and its volume are dim");
+        // label column starts at x = 1; rows start at y = 1
+        assert_eq!(buf[(1, 1)].fg, theme.pre, "pre-market label");
+        assert_eq!(buf[(1, 2)].fg, theme.post, "post-market label");
+        assert_eq!(buf[(1, 3)].fg, theme.dim, "regular label");
     }
 
     #[test]

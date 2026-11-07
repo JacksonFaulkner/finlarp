@@ -19,6 +19,9 @@ pub struct Theme {
     /// Amounts in prose (Tufte: colour is for data).
     pub num: Color,
     pub border: Color,
+    /// Pre-market and after-hours bars (intraday charts): their own hue, not a dimmed up/down.
+    pub pre: Color,
+    pub post: Color,
     pub spacing: Spacing,
     cursor_bg: Option<Color>,
 }
@@ -34,6 +37,8 @@ impl Default for Theme {
             accent: Color::Rgb(0xd7, 0xa6, 0x5f),
             num: Color::Rgb(0x8f, 0xbc, 0xdb),
             border: Color::DarkGray,
+            pre: Color::Rgb(0x7a, 0xa2, 0xf7),
+            post: Color::Rgb(0xbb, 0x9a, 0xf7),
             spacing: Spacing::default(),
             cursor_bg: Some(Color::Rgb(0x3d, 0x3f, 0x50)),
         }

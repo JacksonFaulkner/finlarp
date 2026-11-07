@@ -4,9 +4,9 @@
 // `fl video` draws frames. Pure pixel code with no terminal in it, so the
 // tests can check the image itself.
 
-use image::{DynamicImage, Rgba, RgbaImage};
+use image::{DynamicImage, RgbaImage};
 
-use crate::ui::hcandles::HBar;
+use crate::ui::hcandles::{HBar, Session};
 use crate::ui::pixels::{Palette, blend};
 
 /// Share of the picture height given to the volume strip at the bottom.
@@ -21,6 +21,15 @@ pub struct Pic<'a> {
     pub prev_close: Option<f64>,
     /// Index into `bars` of the cursor bar, if any.
     pub sel: Option<usize>,
+}
+
+/// Faint column behind a pre- or post-market bar; candles keep their up/down colours.
+fn session_tint(s: Session, pal: &Palette) -> Option<[u8; 4]> {
+    match s {
+        Session::Regular => None,
+        Session::Pre => Some(blend(pal.pre, pal.bg, 0.16)),
+        Session::Post => Some(blend(pal.post, pal.bg, 0.16)),
+    }
 }
 
 /// Bars that fit `px_w` pixels at the narrowest readable slot.
@@ -85,13 +94,12 @@ pub fn render_into(img: &mut RgbaImage, pic: &Pic, pal: &Palette) {
     let vol_h = (h - vol_top) as f64;
     for (i, b) in bars.iter().enumerate() {
         let cx = ((i as f64 + 0.5) * slot) as u32;
-        let base = if b.ext {
-            blend(if b.is_up() { pal.up } else { pal.down }, pal.bg, 0.5)
-        } else if b.is_up() {
-            pal.up
-        } else {
-            pal.down
-        };
+        if let Some(tint) = session_tint(b.session, pal) {
+            let x0 = (i as f64 * slot) as u32;
+            let x1 = (((i + 1) as f64 * slot) as u32).saturating_sub(1).max(x0);
+            fill_rect(raw, w, h, x0, 0, x1, price_h - 1, tint);
+        }
+        let base = if b.is_up() { pal.up } else { pal.down };
         // wick, then body (at least one pixel tall, so a flat bar still shows)
         let (wick_hi, wick_lo) = (y(b.high), y(b.low));
         fill_rect(raw, w, h, cx, wick_hi.min(wick_lo), cx, wick_hi.max(wick_lo), base);
@@ -160,6 +168,7 @@ fn fill_rect(raw: &mut [u8], w: u32, h: u32, x0: u32, y0: u32, x1: u32, y1: u32,
 mod tests {
     use super::*;
     use crate::ui::pixels::{fill, hline, vline};
+    use image::Rgba;
     use crate::ui::theme::Theme;
     use ratatui::style::Color;
 
@@ -171,7 +180,7 @@ mod tests {
             low,
             close,
             volume,
-            ext: false,
+            session: Session::Regular,
         }
     }
 
@@ -183,6 +192,8 @@ mod tests {
             fg: [255, 255, 255, 255],
             dim: [90, 90, 90, 255],
             accent: [0, 0, 255, 255],
+            pre: [0, 0, 255, 255],
+            post: [255, 0, 255, 255],
         }
     }
 
@@ -232,13 +243,12 @@ mod tests {
         let vol_h = (h - vol_top) as f64;
         for (i, b) in bars.iter().enumerate() {
             let cx = ((i as f64 + 0.5) * slot) as u32;
-            let base = if b.ext {
-                blend(if b.is_up() { pal.up } else { pal.down }, pal.bg, 0.5)
-            } else if b.is_up() {
-                pal.up
-            } else {
-                pal.down
-            };
+            if let Some(tint) = session_tint(b.session, pal) {
+                let x0 = (i as f64 * slot) as u32;
+                let x1 = (((i + 1) as f64 * slot) as u32).saturating_sub(1).max(x0);
+                fill(&mut img, x0, 0, x1, price_h - 1, tint);
+            }
+            let base = if b.is_up() { pal.up } else { pal.down };
             // wick, then body (at least one pixel tall, so a flat bar still shows)
             vline(&mut img, cx, y(b.high), y(b.low), base);
             let (top, bot) = (y(b.open.max(b.close)), y(b.open.min(b.close)));
@@ -303,7 +313,7 @@ mod tests {
                     c,
                     if i % 17 == 0 { 0 } else { 1 + (rnd() * 5000.0) as u64 },
                 );
-                b.ext = i % 5 == 0;
+                b.session = if i % 5 == 0 { Session::Pre } else { Session::Regular };
                 b
             })
             .collect()
