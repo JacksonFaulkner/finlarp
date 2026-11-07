@@ -92,6 +92,7 @@ hook restores the terminal). Each iteration:
 | `Quit` | the screen returns exit code 0 |
 | `OpenBrowser(url)` | opened with the OS handler in-process; the screen stays open |
 | `Copy(text)` | copied to the clipboard in-process; the screen stays open |
+| `TmuxWindow { name, cmd }` | runs `cmd` in a new tmux window named `name`, in fl's working directory; the screen stays open |
 | `Route(Screen \| Picker)` | the screen exits with a handoff; `main` opens the requested screen |
 | `Route(Claude { text })` | the Claude popup opens (below); the screen stays open |
 
@@ -148,7 +149,11 @@ otherwise the screen shows "claude: Claude popup needs fl run inside tmux".
 - **Screen GIFs:** `just gifs` drives each screen in a named tmux session,
   captures the pane with colours and paints it to a GIF (`py/jobs/record_screens.py`).
   Add a `Spec` there when a screen is ready to show; leave out screens that show
-  personal or mock data.
+  personal or mock data. Specs open tabs by number, so update them when the tab
+  order changes. tmux captures text only: anything drawn with the kitty graphics
+  protocol (the 3D bell jar, intraday pictures) comes out as placeholder boxes.
+  The bell-jar clip is rendered offline by `tools/poly3d/run.sh`, which uses the
+  same rasterizer as the full-screen 3D view (`tools/poly3d/src/lib.rs`).
 - **Visual check:** release binary in a detached tmux session:
   ```
   tmux new-session -d -s c5 -x 160 -y 40 'cargo run --release -- chart'

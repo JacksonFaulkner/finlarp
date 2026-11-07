@@ -21,5 +21,13 @@ ffmpeg -y -loglevel error -framerate "$fps" -i "$out/frames/%04d.png" \
   -vf "fps=15,scale=960:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=256[p];[b][p]paletteuse=dither=none" \
   "$out/poly_bell_jar.gif"
 
+# The README copy: 640 px wide at 12 fps, about 2 MB, to stay light in the repo. The TUI cannot be
+# recorded for this scene (`just gifs` only captures text), so this clip is the doc GIF.
+docs_gif="$here/../../docs/screens/diagrams_bell_jar.gif"
+ffmpeg -y -loglevel error -framerate "$fps" -i "$out/frames/%04d.png" \
+  -vf "fps=12,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=128[p];[b][p]paletteuse=dither=bayer:bayer_scale=4" \
+  "$docs_gif"
+
 echo "mp4: $out/poly_bell_jar.mp4"
 echo "gif: $out/poly_bell_jar.gif"
+echo "docs: $docs_gif"

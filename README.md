@@ -17,49 +17,62 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 
 | Screen | What it shows |
 |---|---|
+| `home` | The launcher: the keyboard is the menu, and each key opens its screen |
 | `dossier` | One-ticker briefing: revenue and segments, guidance, 13F flows, insider trades, new risk factors |
 | `canslim` | CANSLIM scorecard, each letter graded with its evidence |
 | `search` | Full-text search over 10-K/20-F text, earnings releases, guidance and patents |
-| `chart` | Price history |
-| `portfolio` | Your account: equity vs benchmark, drawdown, positions, daily % change history (E*TRADE; some tabs are placeholders) |
+| `filings` | EDGAR 8-K / 6-K index, filtered with `t:`, `item:` and `form:`. Enter opens the filing in the browser |
 | `earnings` | Structured earnings report (proof of concept, MRVL only) |
 | `events` | AI-stock catalyst calendar (month / week / day). `T` adds the tweets that name a ticker, `f` filters them by ticker, Enter on a tweet opens it |
-| `universe` | AI universe heatmap: sectors and regions, weighted by price move over a chosen window |
-| `diagrams` | Animated process diagrams (chip fab flow, fiber optics, data center power) with a page per node |
+| `universe` | AI universe heatmap: sectors, sub-sectors, regions and funds, tiles coloured by price move over a chosen window. `p` switches to a pie |
+| `diagrams` | Animated process diagrams: chip fab flow, memory, packaging, fiber, power, network and cooling. A page per node, zoom-ins per page, and a 3D bell jar in the polysilicon zoom |
+| `sources` | The providers and datasets behind the screens. Enter searches a dataset |
+| `portfolio` | Your account: equity vs benchmark, drawdown, positions, daily % change history (E*TRADE; some tabs are placeholders) |
+| `chart` | Daily portfolio value over time, from the E*TRADE snapshots |
+
+Screens that show your account, watchlists, notes or a live feed (`portfolio`, `chart`, `transactions`,
+`intraday`, `watchlists`, `notes`, `chat`, `godel`) are not in the gallery below.
 
 ### More screens
 
 | | |
 |---|---|
+| ![home: the keyboard is the menu](docs/screens/home.gif) | ![filings: EDGAR 8-K index, filtered by ticker](docs/screens/filings.gif) |
 | ![canslim: each letter graded with its evidence](docs/screens/canslim.gif) | ![search: full-text search with a preview of the matching passage](docs/screens/search.gif) |
 | ![universe: AI universe heatmap](docs/screens/universe.gif) | ![events: catalyst calendar](docs/screens/events.gif) |
 | ![earnings: structured earnings report](docs/screens/earnings.gif) | ![diagrams: polysilicon overview, then the fluidized-bed close-up](docs/screens/diagrams.gif) |
+
+The Siemens bell jar from the polysilicon diagram (zoom `c`), in 3D:
+
+![bell jar: the rods heat up and silicon grows on them](docs/screens/diagrams_bell_jar.gif)
 
 <details>
 <summary>All diagram tabs</summary>
 
 | | |
 |---|---|
-| ![chip: transistor and metal stack](docs/screens/diagrams_chip.gif) | ![packaging: GPU and HBM on an interposer](docs/screens/diagrams_packaging.gif) |
-| ![fiber: how light carries data](docs/screens/diagrams_fiber.gif) | ![power: grid to chip](docs/screens/diagrams_power.gif) |
-| ![network and cooling: data path and cooling loop](docs/screens/diagrams_network.gif) | |
+| ![chip: transistor and metal stack](docs/screens/diagrams_chip.gif) | ![memory: how a DRAM bit is stored, and why AI needs HBM](docs/screens/diagrams_memory.gif) |
+| ![packaging: GPU and HBM on an interposer](docs/screens/diagrams_packaging.gif) | ![fiber: how light carries data](docs/screens/diagrams_fiber.gif) |
+| ![power: grid to chip](docs/screens/diagrams_power.gif) | ![network and cooling: data path and cooling loop](docs/screens/diagrams_network.gif) |
 
 </details>
 
-These are recorded from the real binary by `just gifs` (see [Development](#development)). Not recorded:
-`portfolio`, `chat` and `notes` (personal data), and `chart` / `candles` (portfolio history and mock bars).
+These are recorded from the real binary by `just gifs` (see [Development](#development)). The bell jar is the
+exception: tmux cannot capture the 3D view, so `tools/poly3d` renders that clip offline with the same rasterizer.
 
 ## Layout
 
 ```
 tui/                 Rust: terminal UI (ratatui); reads the DuckDB file
-docs/screens/        GIFs of the screens above, written by py/jobs/record_screens.py
+tools/poly3d/        Rust: 3D bell-jar rasterizer (shared with the TUI) and the offline clip for the docs
+docs/screens/        GIFs of the screens above: py/jobs/record_screens.py, plus tools/poly3d for the bell jar
 py/                  Python: everything that fetches or computes data
   core/                DuckDB cache (db.py) and pydantic schemas
   sources/             data pullers, one module per dataset
   derive/              derived data: search index, CANSLIM scores, dossiers, account tables (fills, round trips, equity)
   jobs/                batch scripts
   agent/               read-only MCP server over the same data
+video/               Remotion promo cut from the docs/screens GIFs
 data/                universe lists (local, gitignored)
 ```
 
@@ -68,6 +81,7 @@ data/                universe lists (local, gitignored)
 - [uv](https://docs.astral.sh/uv/) and Python 3.12+
 - Rust toolchain
 - tmux (optional; needed for `just claude`, `just gifs`, and the Claude popup inside `fl`)
+- ffmpeg (optional; only for `tools/poly3d/run.sh`)
 - E*TRADE API keys, only for the portfolio screen
 
 ## Setup
@@ -88,6 +102,7 @@ just setup              # uv sync + cargo build --release
 fl                        # home menu
 fl dossier MRVL           # open a screen directly
 fl search t:MRVL guidance # the rest of the line is the screen argument
+fl video                  # play the recordings in docs/screens inside the terminal
 ```
 
 Press `?` on any screen for its keys.
@@ -163,6 +178,7 @@ exposing it beyond localhost.
 just check   # stylua, selene, ruff, clippy, cargo test
 just hooks   # install pre-commit hooks
 just gifs    # re-record docs/screens/*.gif (needs tmux and a release build; `just gifs --only dossier` for one)
+tools/poly3d/run.sh   # re-render the bell-jar clip into docs/screens/diagrams_bell_jar.gif (needs ffmpeg)
 ```
 
 ## License

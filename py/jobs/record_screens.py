@@ -4,8 +4,12 @@ Each screen runs in a detached tmux session at a fixed size. After every key in 
 colours (`capture-pane -e`), the ANSI is painted into a PNG with a monospace font, and the frames are written as a GIF.
 A single character is typed literally and gets a short frame; a named key (Enter, Down) or a bare `J`-style jump gets
 a longer one, so typing a query reads as typing.
-Only screens that read public data are listed. The portfolio, notes, chat and godel screens show personal data;
-chart and candles show portfolio history and mock bars, so none of those are recorded.
+Only screens that read public data are listed. The portfolio, notes, chat, godel and watchlists screens show personal
+data; chart and candles show portfolio history and mock bars; intraday is a live feed that starts empty. None of those
+are recorded.
+
+Text only: tmux captures characters, so anything drawn through the kitty graphics protocol (the 3D bell jar, pictures)
+comes out as placeholder boxes. The bell-jar clip is rendered offline by tools/poly3d/run.sh instead.
 
     uv run --with pillow python -m jobs.record_screens [--only dossier] [--out docs/screens]
 
@@ -65,22 +69,26 @@ class Spec:
 
 
 SPECS = [
+    # The launcher: the keys are the menu, and the cursor walks them.
+    Spec("home", [], keys=["h", "h", "j", "l", "l"]),
     # The provenance demo: Revenue & segments, then `i` on a row to see the formula and its source.
     # Starts past "Latest", which lists tweets; the GIF stays on filings and SEC data.
     Spec("dossier", ["dossier", "NVDA"], setup=["J", "J"], keys=["j", "i", "i", "j", "j", "i"]),
     Spec("canslim", ["canslim", "NVDA"], keys=["j", "j", "j", "j"]),
     Spec("search", ["search"], keys=list("NVDA guidance") + ["Enter"]),
+    Spec("filings", ["filings"], keys=list("t:NVDA") + ["Enter", "wait:2", "Tab", "j", "j"]),
     Spec("universe", ["universe"], keys=["j", "j", "j", "Enter"]),
     Spec("events", ["events"], keys=["l", "l", "j", "l"]),
     Spec("earnings", ["earnings"], keys=["j", "j", "j", "j"]),
     # Polysilicon: its overview plays on its own, then zoom "a" plays the close-up.
     Spec("diagrams", ["diagrams"], keys=["l", "Enter", "Enter", "wait:6", "a", "wait:6"]),
-    # The other diagram tabs, opened by their number and left to play.
-    Spec("diagrams_chip", ["diagrams"], keys=["2", "wait:6"]),
-    Spec("diagrams_packaging", ["diagrams"], keys=["3", "wait:6"]),
-    Spec("diagrams_fiber", ["diagrams"], keys=["4", "wait:6"]),
-    Spec("diagrams_power", ["diagrams"], keys=["5", "wait:6"]),
-    Spec("diagrams_network", ["diagrams"], keys=["6", "wait:6"]),
+    # The other diagram tabs, opened by their number (1 Fab flow ... 7 Network+Cool) and left to play.
+    Spec("diagrams_chip", ["diagrams"], setup=["2"], keys=["wait:6"]),
+    Spec("diagrams_memory", ["diagrams"], setup=["3"], keys=["wait:6"]),
+    Spec("diagrams_packaging", ["diagrams"], setup=["4"], keys=["wait:6"]),
+    Spec("diagrams_fiber", ["diagrams"], setup=["5"], keys=["wait:6"]),
+    Spec("diagrams_power", ["diagrams"], setup=["6"], keys=["wait:6"]),
+    Spec("diagrams_network", ["diagrams"], setup=["7"], keys=["wait:6"]),
 ]
 
 
