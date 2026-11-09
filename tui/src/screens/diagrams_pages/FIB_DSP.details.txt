@@ -1,0 +1,63 @@
+== SERDES
+# What it does
+A SerDes (serializer/deserializer) turns a chip's wide, slow internal data into a few very fast serial lanes and back. A host chip and an optical module talk over eight such lanes.
+# Why it matters
+SerDes lane speed sets how fast every link in the cluster can run; the jump from 100G to 200G per lane is what makes 1.6T modules possible.
+# Source
+IEEE 802.3ck / 802.3dj.
+
+== PAM4
+# What it does
+PAM4 (four-level pulse amplitude modulation) sends one of four signal levels per symbol, so each symbol carries two bits instead of NRZ's one.
+# Why it matters
+It doubles the data at the same symbol rate, but the levels sit a third as far apart, so the signal needs about 9.5 dB more signal-to-noise.
+# Source
+Textbook; IEEE 802.3.
+
+== BAUD RATE
+# What it does
+The baud rate is the number of symbols sent per second. A 100G Ethernet lane runs PAM4 at 53.125 GBd and a 200G lane at 106.25 GBd.
+# Why it matters
+Doubling the baud rate is hard: every part of the path (traces, lasers, photodiodes) needs twice the bandwidth.
+# Source
+IEEE 802.3ck / 802.3dj.
+
+== EQUALIZATION
+# What it does
+Equalization filters reshape the received signal to undo the blur that copper traces, connectors and lasers add, so symbols separate cleanly again.
+# Why it matters
+Without it the eye closes and the receiver can't tell PAM4's four levels apart; it is a big part of the DSP's work and power.
+# Source
+Textbook.
+
+== FEC
+# What it does
+Forward error correction adds redundant bits so the receiver can correct errors on its own. 100G-per-lane Ethernet uses Reed-Solomon RS(544,514), called KP4.
+# Why it matters
+It lets a link run at a raw error rate of about 2 in 10,000 and still deliver near error-free data, at about 5% overhead and some extra latency.
+# Source
+IEEE 802.3 (RS-FEC).
+
+== RETIMER
+# What it does
+A retimer recovers the clock from a degraded signal and transmits a fresh, clean copy. The DSP in a retimed (FRO) module is a retimer on both the transmit and receive side.
+# Why it matters
+Retiming lets any host talk to any module reliably; removing it (LPO) saves power but puts the burden on the host's SerDes.
+# Source
+100gmodules.com (FRO, LRO, LPO).
+
+== LPO
+# What it does
+Linear pluggable optics remove the DSP, so the host chip's SerDes drives the laser driver directly and the receiver's TIA feeds the host directly. LRO keeps the DSP only on transmit.
+# Why it matters
+Nokia lists a 1.6T DR8 LPO module under 10 W, 75% less than fully retimed; the catch is interoperability, still validated mostly in hyperscaler programs.
+# Source
+Nokia 1.6T DR8 LPO datasheet; 100gmodules.com.
+
+== POWER PER BIT
+# What it does
+Power per bit is the energy to move one bit through the link, in picojoules. OCP figures: about 18.75 pJ/bit with a 5 nm DSP, 16.25 with 3 nm, 6.25 for LPO.
+# Why it matters
+At cluster scale tens of thousands of modules run nonstop, so a few picojoules per bit is megawatts.
+# Source
+100gmodules.com, citing OCP EMEA 2025.

@@ -23,6 +23,8 @@ mod glass;
 mod hbm;
 mod litho;
 mod pkg;
+mod link;
+mod power;
 mod sec_bit;
 mod sec_makers;
 mod sec_numbers;
@@ -47,6 +49,8 @@ pub use bandwidth::{render_bw_overview, render_bw_zoom, BwZoom, BW_OVERVIEW_BEAT
 pub use bank::{render_bank_overview, render_bank_zoom, BankZoom, BANK_OVERVIEW_BEATS};
 pub use chip::{part_at, render_chip, ChipKey, ChipPart, ChipState};
 pub use pkg::{pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState};
+pub use power::{pwr_part_at, render_power, PwrKey, PwrPart, PwrState, PWR_BACKUP_Z, PWR_BOARD_Z, PWR_RACK_Z, PWR_XFMR_Z};
+pub use link::{link_part_at, render_link, LinkKey, LinkPart, LinkState, LINK_CPO_Z, LINK_GLASS_Z, LINK_LASER_Z, LINK_PD_Z};
 pub use hbm::{render_hbm_overview, render_hbm_zoom, HbmZoom, HBM_OVERVIEW_BEATS};
 pub use array::{render_array_overview, render_array_zoom, ArrayZoom, ARRAY_OVERVIEW_BEATS};
 pub use litho::{render_litho_overview, render_litho_zoom, LithoZoom, LITHO_OVERVIEW_BEATS};
@@ -360,27 +364,7 @@ pub fn render_zoom(
     to_image(&cv)
 }
 
-/// Opaque solids, depth-tested, back to front.
-fn rasterize(cv: &mut Canvas, cam: &Cam, mut tris: Vec<Tri>) {
-    tris.sort_by(|x, y| {
-        let dx: f64 = x.p.iter().map(|q| cam.view(*q)[2]).sum();
-        let dy: f64 = y.p.iter().map(|q| cam.view(*q)[2]).sum();
-        dy.partial_cmp(&dx).unwrap_or(std::cmp::Ordering::Equal)
-    });
-    for tri in &tris {
-        cv.fill_tri(cam, tri.p, crate::shade(tri));
-    }
-}
-
-fn to_image(cv: &Canvas) -> RgbaImage {
-    let mut img = RgbaImage::new(cv.w as u32, cv.h as u32);
-    for (i, px) in cv.rgb.iter().enumerate() {
-        let c = px.map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8);
-        let (x, y) = ((i % cv.w) as u32, (i / cv.w) as u32);
-        img.put_pixel(x, y, image::Rgba([c[0], c[1], c[2], 255]));
-    }
-    img
-}
+use crate::{rasterize, to_image};
 
 /// Render one frame at `w` x `h` pixels on a flat `bg` (RGB).
 pub fn render_cell(

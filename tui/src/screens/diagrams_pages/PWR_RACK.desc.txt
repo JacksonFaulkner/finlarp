@@ -1,0 +1,1 @@
+An AI rack takes 415/480 V AC into power shelves that convert it to about 50 V DC on a copper busbar down the back, feeding every compute and switch tray. A GB200 NVL72 rack draws about 120 kW from shelves of six 5.5 kW supplies; at 50 V that is thousands of amps. NVIDIA plans 800 V DC for 1 MW racks from 2027. Tickers: VRT, DELTA, NVDA.

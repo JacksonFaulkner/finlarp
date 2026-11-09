@@ -1,0 +1,1 @@
+The laser turns electrical symbols into light. Data-center links use three kinds: EMLs (a laser and a modulator on one indium phosphide chip) for single-mode links, VCSELs for short multimode links, and silicon photonics, where a steady laser feeds a modulator built in silicon. 200G-per-lane EMLs have been in short supply. Tickers: LITE, COHR, AVGO.

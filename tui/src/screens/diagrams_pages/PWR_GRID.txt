@@ -1,0 +1,55 @@
+# 1. What happens: power arrives on high-voltage lines
+
+Power plants feed the grid; TRANSMISSION lines carry it across the country on steel towers at 115 to 345 kV. At the campus edge the lines drop into a substation, which steps the voltage down. Everything after that (switchgear, UPS, racks, chips) depends on this one connection, which is why a data center's size is set by how much power the UTILITY can deliver to it.
+
+# 2. The parts
+
+TRANSMISSION           high-voltage lines on towers, 115 to 345 kV and up
+THREE-PHASE            three conductors whose voltages peak in turn; the grid's standard
+UTILITY                the company that owns the wires and sells the power
+INTERCONNECTION QUEUE  the line of projects waiting for permission to connect
+DATA CENTER LOAD       US data centers: about 176 TWh in 2023, 4.4% of the country's electricity
+PUE                    power usage effectiveness: total site power / IT power
+BEHIND THE METER       power made on site, not bought from the grid
+GAS TURBINE            the usual on-site generator for very large campuses
+
+# 3. From power plant to campus, in order
+
+1. a power plant generates at about 10-25 kV
+2. a step-up transformer raises it to transmission voltage
+3. THREE-PHASE lines carry it, tower to tower
+4. it reaches the campus substation's gantry
+5. the substation steps it down for the site
+
+# 4. Why high voltage
+
+Power is voltage times current, and wire loss goes with current squared. Raising the voltage ten times cuts the current ten times and the loss a hundred times. That's why TRANSMISSION runs at hundreds of kV and only steps down near the load.
+
+# 5. How much power AI needs
+
+Berkeley Lab found US data centers used about 176 TWh in 2023, 4.4% of US electricity, up from 58 TWh in 2014, and projected 325-580 TWh by 2028: 6.7% to 12% of the total. One GB200 NVL72 rack draws about 120 kW; a large campus is hundreds of megawatts to over a gigawatt.
+
+# 6. The interconnection queue
+
+Every new plant or large load has to be studied before it connects. Berkeley Lab counted about 1,400 GW of generation and 890 GW of storage waiting in US queues at the end of 2024, and the typical project built in 2024 took 55 months from request to operation. The INTERCONNECTION QUEUE, not chips, often sets when a campus can open.
+
+# 7. PUE and making power on site
+
+PUE compares total site power to the power reaching IT equipment; the rest goes to cooling and conversion losses. Efficient hyperscale sites run near 1.1-1.2. Where the grid can't connect fast enough, campuses go BEHIND THE METER with on-site GAS TURBINE plants or deals with nearby nuclear plants.
+
+# 8. Who makes it
+
+Utilities and power producers: NextEra (NEE), Vistra (VST), Constellation (CEG), Dominion (D), Southern (SO). Turbines and grid equipment: GE Vernova (GEV), Siemens Energy, Mitsubishi Heavy. Transmission is built by utilities and contractors such as Quanta (PWR).
+
+# 9. Chokepoints and risks
+
+- Interconnection queues take years.
+- New transmission lines take a decade to permit and build.
+- Large loads raise prices for other customers, drawing regulators in.
+
+# 10. Sources
+
+  [1] Data center electricity: energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers (LBNL, Dec 2024)
+  [2] Interconnection queues: emp.lbl.gov/publications/queued-2025-edition-characteristics (LBNL Queued Up 2025)
+  [3] NVL72 rack power: docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+  [4] Transmission voltages, I squared R loss, PUE: textbook

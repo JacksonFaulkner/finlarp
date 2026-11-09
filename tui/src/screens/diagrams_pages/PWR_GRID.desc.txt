@@ -1,0 +1,1 @@
+The grid brings power to the campus on high-voltage transmission lines, at 115 to 345 kV, so the current (and the loss) stays small. Getting connected is the bottleneck: generation projects wait years in interconnection queues, while US data centers went from 4.4% of national electricity in 2023 to a projected 6.7-12% by 2028. Tickers: GEV, NEE, VST, CEG.

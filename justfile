@@ -33,6 +33,11 @@ install: build
 test:
     cargo test --release --manifest-path {{crate}}
 
+# frame cost of every orbitable 3D diagram scene, slowest first (see tools/poly3d/CLAUDE.md)
+# e.g. just bench-3d FL_BENCH_FILTER="TOP METAL" FL_BENCH_SIZE=2400x1320
+bench-3d *env:
+    env {{env}} cargo test --release --manifest-path {{crate}} bench_3d -- --ignored --nocapture
+
 fmt:
     cargo fmt --manifest-path {{crate}}
 

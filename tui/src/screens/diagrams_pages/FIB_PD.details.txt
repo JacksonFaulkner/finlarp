@@ -1,0 +1,63 @@
+== PIN PHOTODIODE
+# What it does
+A PIN photodiode stacks p-type, intrinsic and n-type layers under reverse bias; light absorbed in the intrinsic layer frees carriers that the field sweeps out as current.
+# Why it matters
+It is the receiving half of every optical link, turning light back into an electrical signal at the same symbol rate it was sent.
+# Source
+Textbook (Agrawal).
+
+== INGAAS
+# What it does
+Indium gallium arsenide, grown on an InP substrate, absorbs light from about 0.9 to 1.7 um, covering the 1310 and 1550 nm bands silicon can't see.
+# Why it matters
+It is the standard absorber for single-mode receivers, made in the same small InP fabs as the lasers.
+# Source
+Textbook.
+
+== RESPONSIVITY
+# What it does
+Responsivity is the current a photodiode produces per watt of light; InGaAs photodiodes give close to 1 A/W at 1310 and 1550 nm.
+# Why it matters
+It sets how much signal current the TIA has to work with, and so how weak the light can get before noise wins.
+# Source
+Textbook.
+
+== TIA
+# What it does
+A transimpedance amplifier converts the photodiode's microamp current into a voltage of tens to hundreds of millivolts the DSP can sample.
+# Why it matters
+Its noise and bandwidth set the receiver's sensitivity; in LPO modules it drives the host's SerDes directly with no DSP between.
+# Source
+Textbook; Nokia LPO datasheet.
+
+== GERMANIUM
+# What it does
+Germanium grown on silicon absorbs 1310 nm light, giving silicon-photonics chips a photodiode made in the same fab as their modulators.
+# Why it matters
+It lets a whole transceiver (modulators, waveguides and detectors) be one silicon chip, which co-packaged optics rely on.
+# Source
+Textbook.
+
+== BANDWIDTH
+# What it does
+Bandwidth is how fast the photodiode and TIA can follow changes in the light, limited by the photodiode's capacitance and carrier transit time.
+# Why it matters
+200G lanes run at 106.25 GBd, so receivers need roughly twice the bandwidth of 100G parts, forcing smaller photodiodes.
+# Source
+IEEE 802.3dj; textbook.
+
+== NOISE
+# What it does
+Thermal noise in the TIA and shot noise from the photocurrent add random variation to the received signal, blurring the PAM4 levels.
+# Why it matters
+Noise sets the receiver's sensitivity, the weakest light it can decode; PAM4's closer levels make it more sensitive to noise than NRZ.
+# Source
+Textbook.
+
+== LINK BUDGET
+# What it does
+A link budget adds up laser power, fiber loss (0.32 dB/km at 1310 nm), connector and splice losses, and checks the result stays above receiver sensitivity.
+# Why it matters
+Inside data centers connectors use most of the budget, so dirty end faces and extra patch panels cause failures.
+# Source
+Corning SMF-28 Ultra datasheet; textbook.

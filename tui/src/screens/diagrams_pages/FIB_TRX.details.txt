@@ -1,0 +1,63 @@
+== OSFP
+# What it does
+OSFP (octal small form-factor pluggable) is a module shell with eight electrical lanes and a finned top, sized to dissipate around 25 W.
+# Why it matters
+It is NVIDIA's choice for 800G and 1.6T AI networking, where module power keeps rising.
+# Source
+OSFP MSA; 1.6T module datasheets.
+
+== QSFP-DD
+# What it does
+QSFP-DD (double density) doubles the classic QSFP's lanes to eight in a smaller shell that stays compatible with older QSFP modules.
+# Why it matters
+Many cloud switches use it; its smaller size fits more ports but leaves less room for heat than OSFP.
+# Source
+QSFP-DD MSA.
+
+== DR8
+# What it does
+DR8 sends eight lanes over eight single-mode fibers each way (16 total) through an MPO connector, one lane per fiber, at 1310 nm, to about 500 m.
+# Why it matters
+It can split into eight separate lower-speed links (breakout), which suits spine-leaf AI fabrics.
+# Source
+IEEE 802.3 PMD definitions.
+
+== 2xFR4
+# What it does
+2xFR4 combines four wavelengths onto one fiber with coarse wavelength multiplexing (CWDM), two such groups per module, reaching 2 km.
+# Why it matters
+It needs only four fibers instead of sixteen, saving cabling across a building, at the cost of multiplexers and four laser wavelengths.
+# Source
+IEEE 802.3; 1.6T 2xFR4 datasheets.
+
+== SR8
+# What it does
+SR8 uses eight 850 nm VCSELs over multimode fiber, one lane per fiber, for short links up to about 100 m.
+# Why it matters
+VCSEL modules are cheaper and use less power, so they serve in-row links where reach allows.
+# Source
+IEEE 802.3.
+
+== DAC
+# What it does
+A direct-attach copper cable joins two ports with copper pairs and no optics at all, for runs of a few metres.
+# Why it matters
+It is the cheapest, lowest-power link, used inside racks (NVLink spines use copper), but reach shrinks as lane speeds rise.
+# Source
+Textbook; IEEE 802.3.
+
+== AOC
+# What it does
+An active optical cable has transceivers permanently attached at both ends of a fiber, sold as one cable.
+# Why it matters
+It is simpler to deploy than separate modules and fiber for row-scale links, but can't be re-cabled or reused.
+# Source
+Textbook.
+
+== MPO
+# What it does
+An MPO (multi-fiber push-on) connector holds 12 or 16 fibers in one ferrule, aligned by guide pins.
+# Why it matters
+Parallel modules like DR8 need many fibers at once; every MPO mating is a loss in the link budget and a place for dirt.
+# Source
+Textbook.

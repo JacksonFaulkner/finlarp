@@ -136,6 +136,8 @@ pub(super) fn dot(cv: &mut Canvas, cam: &Cam, p: V3, r: f64, col: Col, alpha: f6
     let depth = (1.0 / inv) as f32;
     let (x0, x1) = ((x - pr - 1.0).floor().max(0.0), (x + pr + 1.0).ceil());
     let (y0, y1) = ((y - pr - 1.0).floor().max(0.0), (y + pr + 1.0).ceil());
+    let vis = (x1.min(cv.w as f64) - x0).max(0.0) * (y1.min(cv.h as f64) - y0).max(0.0);
+    crate::prof::with(|s| s.dot_px += vis as u64);
     for py in y0 as usize..(y1 as usize).min(cv.h) {
         for px in x0 as usize..(x1 as usize).min(cv.w) {
             let d = ((px as f64 + 0.5 - x).powi(2) + (py as f64 + 0.5 - y).powi(2)).sqrt();

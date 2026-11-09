@@ -1,0 +1,55 @@
+# 1. What happens: the optics move onto the switch package
+
+In a normal switch, the switch chip drives electrical signals across the board to pluggable modules at the FRONT PANEL, tens of centimetres away, and each module needs a DSP to clean them up. CO-PACKAGED OPTICS put an OPTICAL ENGINE (a silicon-photonics chip with its driver chip on top) on the switch package, millimetres from the chip. Light leaves the package in fiber. An EXTERNAL LASER in a pluggable box at the panel supplies the steady light.
+
+# 2. The parts
+
+CO-PACKAGED OPTICS   optical engines on the same package as the switch chip
+OPTICAL ENGINE       a photonic chip (modulators, photodiodes) with an electronic chip stacked on it
+MICRO-RING           a ring-shaped modulator a few microns across, tuned to one wavelength
+EXTERNAL LASER       a pluggable laser source at the panel that feeds the engines through fiber
+FRONT PANEL          where pluggables sit today and the external lasers sit with CPO
+POWER PER PORT       watts per 1.6T port; the main reason for CPO
+SERVICEABILITY       swapping a failed part: easy for a pluggable, hard for a package
+COUPE                TSMC's process that stacks the electronic chip on the photonic chip
+
+# 3. A bit's path with CPO, in order
+
+1. the switch chip's SerDes drives a few millimetres of package wiring
+2. the engine's electronic chip drives a MICRO-RING modulator
+3. the ring imprints the data onto light from the EXTERNAL LASER
+4. the light leaves the package in fiber to the FRONT PANEL
+5. on receive, germanium photodiodes and TIAs in the engine turn light back into lanes
+
+# 4. Why: the copper is the problem
+
+At 200G per lane, a long trace from the switch chip to the FRONT PANEL loses so much signal that every module needs a DSP to recover it. Shortening the electrical path to millimetres lets the engine drive the optics directly. NVIDIA says its photonics switches cut power 3.5x versus pluggable transceivers; one report puts a 1.6T port at about 9 W instead of 25 W.
+
+# 5. Inside the optical engine
+
+NVIDIA's engines use 200 Gb/s MICRO-RING modulators made on TSMC's COUPE process, which stacks an electronic chip on a photonic one. A ring a few microns across couples light only at its resonant wavelength; a voltage shifts that resonance, turning the light up or down. Rings are tiny and efficient but sensitive to temperature, so each needs heater control.
+
+# 6. Lasers stay pluggable
+
+Lasers fail more often than silicon and run best cool, so CPO keeps them out at the panel in EXTERNAL LASER modules. Coverage of NVIDIA's Hot Chips 2025 talk says a 1.6 Tb/s link needs two lasers instead of eight, a 4x reduction.
+
+# 7. The switches
+
+NVIDIA's Spectrum-X and Quantum-X Photonics switches are scheduled from the second half of 2026, in configurations such as 128 ports of 800 Gb/s or 512 ports of 200 Gb/s, about 100 Tb/s in total. Broadcom also builds CPO versions of its Tomahawk switch chips.
+
+# 8. Who makes it
+
+NVIDIA (NVDA) and Broadcom (AVGO) design CPO switches; TSMC (TSM) makes the photonic and electronic chips and packages them; laser makers such as Lumentum (LITE) and Coherent (COHR) supply the external lasers; Corning (GLW) and others supply fiber and connectors.
+
+# 9. Chokepoints and risks
+
+- SERVICEABILITY: a failed engine means replacing the whole switch board, not one module.
+- Attaching fibers to a package at scale, with low loss, is a new manufacturing step.
+- It ties optics to one switch vendor's package instead of an open module market.
+
+# 10. Sources
+
+  [1] 3.5x power, ship date, configurations: optics.org/news/16/3/26
+  [2] 200G MRM on TSMC COUPE: wccftech.com/nvidia-spectrum-x-ethernet-photonics-debuts-as-the-world-first-200g-co-packaged-optics
+  [3] Two lasers instead of eight (Hot Chips 2025): naddod.com/blog/nvidia-s-silicon-photonics-cpo-the-beginning-of-a-transformative-journey-in-ai
+  [4] 25 W to 9 W per 1.6T port (report): stocks.observer-reporter.com (TokenRing, 2026-01-20)

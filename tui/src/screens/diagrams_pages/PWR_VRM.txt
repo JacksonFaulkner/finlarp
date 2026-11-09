@@ -1,0 +1,56 @@
+# 1. What happens: 50 V becomes 0.8 V at over a thousand amps
+
+DC from the rack busbar enters the GPU board at about 50 V. An INTERMEDIATE BUS converter brick steps it to 12 V. Around the GPU, a VOLTAGE REGULATOR built from many identical phases (MULTIPHASE) turns 12 V into the chip's CORE VOLTAGE of about 0.8 V. Each phase is a POWER STAGE switching hundreds of thousands of times a second into an INDUCTOR, and together they feed well over a thousand amps into the package.
+
+# 2. The parts
+
+INTERMEDIATE BUS    the 50 V to 12 V converter brick on the board
+VOLTAGE REGULATOR   the circuit that holds the GPU's supply at its set voltage
+MULTIPHASE          many phases sharing the current, switching in turn
+POWER STAGE         the transistors and driver of one phase
+INDUCTOR            smooths each phase's pulses into steady current
+CORE VOLTAGE        about 0.75 to 0.85 V for current GPUs
+VERTICAL POWER      regulators placed under the GPU instead of beside it
+I2R LOSS            power lost as current squared times resistance
+
+# 3. Down to the chip, in order
+
+1. about 50 V DC arrives from the busbar
+2. the INTERMEDIATE BUS converter makes 12 V
+3. a controller tells each phase when to switch
+4. each POWER STAGE chops 12 V into pulses
+5. its INDUCTOR smooths them into current at about 0.8 V
+6. all the phases' current flows through the board and package into the GPU
+
+# 4. Why so much current
+
+A Blackwell GPU draws 1,000-1,200 W. At a CORE VOLTAGE near 0.8 V that is 1,250-1,500 A, more than the whole rack's busbar carries per tray at 50 V. No single regulator can switch that, so MULTIPHASE designs split it: Infineon's 16-phase controller and power stages were the first to deliver over 1,000 A, back in 2019.
+
+# 5. Phases, inductors and capacitors
+
+Each phase handles tens of amps; the controller staggers their switching so the ripples cancel. The INDUCTOR stores energy between pulses. Capacitors near the GPU supply the instant current when the chip's load jumps, faster than any regulator can react.
+
+# 6. I2R loss: the last centimetres
+
+At over a thousand amps, even micro-ohms of copper waste watts: I2R LOSS goes with current squared. Every millimetre between the regulator and the chip costs power and voltage drop, which is why designers push the regulators as close to the GPU as they can.
+
+# 7. Vertical power
+
+VERTICAL POWER moves the regulators under the GPU, on the back of the board, so current goes straight up through the board instead of across it. Infineon introduced vertical modules in 2026, and a startup, Crescendo, showed 16 stacked regulators delivering close to 1,000 A at 0.75 V.
+
+# 8. Who makes it
+
+Infineon, Renesas, Monolithic Power Systems (MPWR), Vicor (VICR) and Texas Instruments make controllers, power stages and modules; Delta and others build vertical modules. Market shares are not sourced here.
+
+# 9. Chokepoints and risks
+
+- Current keeps rising faster than voltage falls.
+- Board area around the GPU is crowded with memory and I/O.
+- Regulator heat adds to the GPU's own in a liquid-cooled tray.
+
+# 10. Sources
+
+  [1] 1000 A multiphase (Infineon, 2019): embeddedcomputing.com/technology/processing/chips-and-socs/infineon-claims-first-1000a-voltage-regulator-solution-for-next-gen-ai-and-5g-networking
+  [2] Vertical power modules (Infineon 2026; Crescendo): electronicdesign.com (Infineon vertical power modules; integrated voltage regulators)
+  [3] Blackwell power and core voltage: electronicdesign.com (modular voltage regulator for AI chips)
+  [4] Busbar voltage: docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html

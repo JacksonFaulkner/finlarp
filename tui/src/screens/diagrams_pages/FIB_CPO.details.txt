@@ -1,0 +1,63 @@
+== CO-PACKAGED OPTICS
+# What it does
+Co-packaged optics place optical engines on the switch chip's package, so electrical signals travel millimetres instead of across the board to front-panel modules.
+# Why it matters
+It removes most of the DSPs and their power; NVIDIA says its photonics switches use 3.5x less power than with pluggable transceivers.
+# Source
+optics.org, March 2025.
+
+== OPTICAL ENGINE
+# What it does
+An optical engine is a silicon-photonics chip (modulators, waveguides, photodiodes) with an electronic driver and TIA chip stacked on top, sitting beside the switch chip.
+# Why it matters
+It does a pluggable module's job in a fraction of the space and power, but is soldered in, not swappable.
+# Source
+wccftech; TSMC COUPE coverage.
+
+== MICRO-RING
+# What it does
+A micro-ring modulator is a ring waveguide a few microns across that couples light at one resonant wavelength; a voltage shifts the resonance to modulate the light.
+# Why it matters
+Rings are tiny and need little drive power, which suits dense CPO engines, but drift with temperature and need active tuning; NVIDIA's run at 200 Gb/s.
+# Source
+wccftech (NVIDIA 200G MRM).
+
+== EXTERNAL LASER
+# What it does
+An external laser source is a pluggable module at the front panel holding CW lasers that feed light to the optical engines through fiber.
+# Why it matters
+It keeps the most failure-prone part swappable and cool; reports from Hot Chips 2025 say a 1.6 Tb/s link needs two lasers instead of eight.
+# Source
+NADDOD summary of NVIDIA Hot Chips 2025.
+
+== FRONT PANEL
+# What it does
+The front panel is the faceplate of a switch where pluggable modules sit in cages, connected to the switch chip by board traces.
+# Why it matters
+At 200G per lane those traces lose so much signal each module needs a DSP; with CPO the panel holds only fiber and external lasers.
+# Source
+Textbook; optics.org.
+
+== POWER PER PORT
+# What it does
+Power per port is the watts used to move one port's data on and off the switch, counting the module, its DSP and the host SerDes.
+# Why it matters
+One report puts a 1.6T pluggable port at about 25 W and a CPO port at about 9 W; across a 512-port switch that is kilowatts.
+# Source
+TokenRing report, January 2026; NVIDIA via optics.org.
+
+== SERVICEABILITY
+# What it does
+Serviceability is how easily a failed part can be replaced: a pluggable module is pulled and swapped in seconds, an optical engine is soldered to the switch package.
+# Why it matters
+It is the main objection to CPO; keeping lasers external and improving engine reliability are the answers so far.
+# Source
+Textbook; NVIDIA claims of 13x laser reliability (secondary coverage).
+
+== COUPE
+# What it does
+COUPE (Compact Universal Photonic Engine) is TSMC's process that stacks an electronic chip directly on a photonic chip with short vertical connections.
+# Why it matters
+It is how NVIDIA's CPO engines are made, tying co-packaged optics to TSMC's advanced packaging capacity.
+# Source
+wccftech, NVIDIA Spectrum-X Photonics.

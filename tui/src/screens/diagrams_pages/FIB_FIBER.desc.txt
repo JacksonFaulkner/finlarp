@@ -1,0 +1,1 @@
+An optical fiber is a hair of glass: a core a few microns wide inside a 125 um cladding, with a protective coating. The core's slightly higher refractive index traps light by total internal reflection, so it travels kilometres losing only about 0.32 dB per km at 1310 nm. Single-mode fiber links buildings; multimode fiber serves short runs. Tickers: GLW.

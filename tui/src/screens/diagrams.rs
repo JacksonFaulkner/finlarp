@@ -148,6 +148,12 @@ pub struct Diagrams {
     held: Option<(char, Instant)>,
     live_until: Option<Instant>,
     last_tick: Instant,
+    /// Until then the 3D view renders at motion resolution: set by every camera key, so
+    /// taps and the gap before key repeat starts are as quick as held motion. One sharp
+    /// frame follows once it passes.
+    settle_until: Option<Instant>,
+    /// SETTLE just passed: draw once more so the sharp frame shows even when paused.
+    sharpen: bool,
 }
 
 /// What a 3D zoom draws: the bell jar, or one of the CELL page's focused scenes at a
@@ -186,6 +192,14 @@ enum Model {
     Pkg(&'static [poly3d::PkgKey], usize, f64),
     /// a Packaging-tab overview: its beats (for the notes), keyframes, and time
     PkgOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::PkgKey], crate::ui::anim::Time),
+    /// a Fiber-tab scene: its keyframes at a beat and a position through it
+    Link(&'static [poly3d::LinkKey], usize, f64),
+    /// a Fiber-tab overview: its beats (for the notes), keyframes, and time
+    LinkOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::LinkKey], crate::ui::anim::Time),
+    /// a Power-tab scene: its keyframes at a beat and a position through it
+    Pwr(&'static [poly3d::PwrKey], usize, f64),
+    /// a Power-tab overview: its beats (for the notes), keyframes, and time
+    PwrOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::PwrKey], crate::ui::anim::Time),
 }
 
 /// The 3D model of zoom `key` on `page`, at the zoom's clock.
@@ -221,6 +235,14 @@ fn model_at(page: &str, key: char, t: &crate::ui::anim::Time) -> Model {
         },
         _ if super::diagrams_scene_pkg::node(page).is_some() => match super::diagrams_scene_pkg::keys_for(page, key) {
             Some(k) => Model::Pkg(k, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        _ if super::diagrams_scene_link::node(page).is_some() => match super::diagrams_scene_link::keys_for(page, key) {
+            Some(k) => Model::Link(k, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        _ if super::diagrams_scene_pwr::node(page).is_some() => match super::diagrams_scene_pwr::keys_for(page, key) {
+            Some(k) => Model::Pwr(k, t.beat, f64::from(t.local)),
             None => Model::Jar(bell_jar_anim(t)),
         },
         _ => Model::Jar(bell_jar_anim(t)),
@@ -293,6 +315,20 @@ fn model_key(m: Model) -> ModelKey {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 16]
         }
+        Model::Link(k, beat, local) => {
+            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 17]
+        }
+        Model::LinkOverview(_, k, t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 18]
+        }
+        Model::Pwr(k, beat, local) => {
+            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 19]
+        }
+        Model::PwrOverview(_, k, t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 20]
+        }
     }
 }
 
@@ -346,6 +382,18 @@ fn render_model(m: Model, view: &poly3d::View, w: usize, h: usize) -> RgbaImage 
         }
         Model::PkgOverview(b, k, t) => {
             super::diagrams_scene_pkg::frame(b, k, true, &t, view, w as u32, h as u32)
+        }
+        Model::Link(k, beat, local) => {
+            poly3d::render_link(k, beat, local, view, None, w, h, FULL_BG)
+        }
+        Model::LinkOverview(b, k, t) => {
+            super::diagrams_scene_link::frame(b, k, true, &t, view, w as u32, h as u32)
+        }
+        Model::Pwr(k, beat, local) => {
+            poly3d::render_power(k, beat, local, view, None, w, h, FULL_BG)
+        }
+        Model::PwrOverview(b, k, t) => {
+            super::diagrams_scene_pwr::frame(b, k, true, &t, view, w as u32, h as u32)
         }
     }
 }
@@ -535,6 +583,9 @@ const REPEAT_GAP: Duration = Duration::from_millis(90);
 const HOLD_ON: Duration = Duration::from_millis(120);
 /// Longest time step applied in one tick, so a stalled frame never jumps the camera.
 const MAX_DT: f64 = 0.1;
+/// After the last camera key, how long frames stay at motion resolution before one sharp
+/// frame. Longer than the OS key-repeat delay would be ideal, but taps should sharpen fast.
+const SETTLE: Duration = Duration::from_millis(250);
 /// Redraw interval while the camera moves (FRAME otherwise).
 const MOTION_FRAME: Duration = Duration::from_millis(30);
 /// Terminal background the 3D render is drawn on (Ghostty's Dracula).
@@ -731,6 +782,8 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         full_turn: false,
         held: None,
         live_until: None,
+        settle_until: None,
+        sharpen: false,
         last_tick: Instant::now(),
         tab,
         scroll: 0,
@@ -1143,7 +1196,7 @@ impl Diagrams {
     /// The page's overview is a 3D model HJKL can turn in place (CELL, LITHO, ARRAY, BANK, BANDWIDTH, HBM STACK).
     fn overview_orbits(&self) -> bool {
         matches!(&self.player, Some(("CELL" | "LITHO" | "ARRAY" | "BANK" | "BANDWIDTH" | "HBM STACK", Some(_))))
-            || matches!(&self.player, Some((p, Some(_))) if super::diagrams_scene_chip::node(p).is_some() || super::diagrams_scene_pkg::node(p).is_some())
+            || matches!(&self.player, Some((p, Some(_))) if super::diagrams_scene_chip::node(p).is_some() || super::diagrams_scene_pkg::node(p).is_some() || super::diagrams_scene_link::node(p).is_some() || super::diagrams_scene_pwr::node(p).is_some())
     }
 
     /// The open scene has a 3D model the full-screen view can orbit.
@@ -1165,6 +1218,7 @@ impl Diagrams {
             Some((k, at)) if k == key && now.duration_since(at) < REPEAT_GAP
         );
         self.held = Some((key, now));
+        self.settle_until = Some(now + SETTLE);
         if repeat {
             // motion runs in full_tick at the speed cap, not once per event
             self.live_until = Some(now + HOLD_ON);
@@ -1199,6 +1253,12 @@ impl Diagrams {
             Axis::PanX => self.orbit.pan_by(amount, 0.0),
             Axis::PanY => self.orbit.pan_by(0.0, amount),
         }
+    }
+
+    /// Whether the 3D view should render at motion resolution: the camera is moving, or
+    /// a camera key went down within SETTLE.
+    fn coarse(&self, now: Instant) -> bool {
+        self.moving(now) || self.settle_until.is_some_and(|until| now < until)
     }
 
     /// Whether held-key motion is running at `now`.
@@ -1248,7 +1308,7 @@ impl Diagrams {
         frame.render_widget(Clear, r);
         frame.render_widget(block, r);
         let model = self.open_model(&time);
-        let half = self.moving(Instant::now());
+        let half = self.coarse(Instant::now());
         self.paint_3d(frame, inner, model, self.orbit, half);
     }
 
@@ -1539,10 +1599,14 @@ impl Diagrams {
                 Model::ChipOverview(n.beats, n.keys, time)
             } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_pkg::node(p)) {
                 Model::PkgOverview(n.beats, n.keys, time)
+            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_link::node(p)) {
+                Model::LinkOverview(n.beats, n.keys, time)
+            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_pwr::node(p)) {
+                Model::PwrOverview(n.beats, n.keys, time)
             } else {
                 Model::CellOverview(time)
             };
-            let half = !zooming && self.moving(Instant::now());
+            let half = !zooming && self.coarse(Instant::now());
             self.paint_3d(frame, art_r, model, self.orbit, zooming || half);
         } else if let Some(img) = {
             let font = self.picker.font_size();
@@ -2527,16 +2591,23 @@ impl Screen for Diagrams {
     }
 
     fn tick(&mut self) -> Action {
-        self.full_tick(Instant::now());
+        let now = Instant::now();
+        self.full_tick(now);
+        // the loop draws before each tick, so `sharpen` lives for exactly one draw
+        self.sharpen = false;
+        if self.settle_until.is_some_and(|until| now >= until) {
+            self.settle_until = None;
+            self.sharpen = true;
+        }
         Action::None
     }
 
     fn needs_redraw(&self) -> bool {
-        self.animating()
+        self.animating() || self.settle_until.is_some() || self.sharpen
     }
 
     fn poll_interval(&self) -> Duration {
-        if matches!(self.view, PopupView::Full | PopupView::Zoom | PopupView::Overview) && self.moving(Instant::now()) {
+        if matches!(self.view, PopupView::Full | PopupView::Zoom | PopupView::Overview) && self.coarse(Instant::now()) {
             MOTION_FRAME
         } else if self.animating() {
             FRAME
@@ -2981,6 +3052,22 @@ mod tests {
         }
     }
 
+    /// A tap renders at motion resolution like held motion does, then sharpens after SETTLE.
+    #[test]
+    fn taps_render_coarse_until_the_camera_settles() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("fab".into())).unwrap();
+        let t0 = Instant::now();
+        assert!(!d.coarse(t0));
+        d.full_key(KeyCode::Char('h'), t0);
+        assert!(!d.moving(t0), "a tap does not start held motion");
+        assert!(d.coarse(t0 + Duration::from_millis(10)), "but it renders coarse");
+        assert!(!d.coarse(t0 + SETTLE + Duration::from_millis(1)), "then sharp");
+    }
+
     #[test]
     fn held_keys_move_at_the_speed_cap() {
         let ctx = Ctx {
@@ -3277,6 +3364,16 @@ mod tests {
     }
 
     #[test]
+    fn fiber_nodes_all_described() {
+        all_described(4, 6);
+    }
+
+    #[test]
+    fn power_nodes_all_described() {
+        all_described(5, 6);
+    }
+
+    #[test]
     fn memory_hbm_stack_node_is_complete() {
         let hots = find_hots("HBM STACK");
         assert!(hots.len() >= 8, "HBM STACK: only {} hotspots", hots.len());
@@ -3365,6 +3462,10 @@ mod tests {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "diagrams_bench.rs"]
+mod bench;
 
 #[cfg(test)]
 mod section_tests {

@@ -1,0 +1,63 @@
+== TRANSMISSION
+# What it does
+Transmission lines carry power long distances at 115 to 345 kV (and higher), strung from steel towers between power plants and substations.
+# Why it matters
+High voltage keeps current and losses low; a campus is limited by the capacity of the lines that reach it.
+# Source
+Textbook.
+
+== THREE-PHASE
+# What it does
+Three-phase power uses three conductors whose voltages peak one third of a cycle apart, so the total power delivered is steady.
+# Why it matters
+It moves more power per conductor than single-phase and runs motors smoothly; every stage down to the rack's power shelves is three-phase AC.
+# Source
+Textbook.
+
+== UTILITY
+# What it does
+The utility owns the transmission and distribution wires to a site and sells it power, under rates set by regulators.
+# Why it matters
+It decides how fast a campus can connect and how much power it gets, so data center builders now negotiate directly for capacity years ahead.
+# Source
+Textbook.
+
+== INTERCONNECTION QUEUE
+# What it does
+The interconnection queue is the list of generation and storage projects waiting for grid operators to study and approve their connection.
+# Why it matters
+Berkeley Lab counted about 1,400 GW of generation and 890 GW of storage queued at the end of 2024; projects built in 2024 took 55 months on average.
+# Source
+LBNL, Queued Up 2025 Edition.
+
+== DATA CENTER LOAD
+# What it does
+US data centers used about 176 TWh in 2023, 4.4% of US electricity, up from 58 TWh in 2014.
+# Why it matters
+Berkeley Lab projects 325-580 TWh by 2028, 6.7% to 12% of US electricity, driven mostly by AI servers.
+# Source
+LBNL / DOE, December 2024.
+
+== PUE
+# What it does
+Power usage effectiveness is total site power divided by the power reaching IT equipment; 1.0 would mean no cooling or conversion overhead.
+# Why it matters
+At 1.2, a 100 MW IT load needs 120 MW from the grid; cooling and losses take the rest, so PUE sets how many chips a grid connection can feed.
+# Source
+Textbook (The Green Grid definition).
+
+== BEHIND THE METER
+# What it does
+Behind-the-meter power is generated on the site itself (gas turbines, engines, fuel cells) or delivered by a dedicated line from a nearby plant.
+# Why it matters
+It lets a campus open without waiting years for grid upgrades, at the cost of running its own plant and its own fuel supply.
+# Source
+Textbook.
+
+== GAS TURBINE
+# What it does
+A gas turbine burns natural gas to spin a generator; aeroderivative and heavy-duty units range from tens to hundreds of megawatts.
+# Why it matters
+They are the usual way to power a large campus on site; turbine order books have grown long as AI demand rises.
+# Source
+Textbook.

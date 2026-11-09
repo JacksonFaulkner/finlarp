@@ -1,0 +1,55 @@
+# 1. What happens: light stays trapped in a glass core for kilometres
+
+Light from the laser enters the CORE, a glass channel about 8 um across. Around it the CLADDING, 125 um of glass with a slightly lower refractive index, acts as a mirror: light hitting the boundary at a shallow angle reflects back in (TOTAL INTERNAL REFLECTION). A plastic COATING, 242 um across, protects the glass. In SINGLE-MODE fiber the core is so narrow light travels as one beam straight down it; in MULTIMODE fiber a wider core lets many paths bounce along.
+
+# 2. The parts
+
+CORE                       glass about 8.2 um across (single-mode), 50 um (multimode); slightly higher index
+CLADDING                   glass 125 um across; lower index keeps light in the core
+COATING                    acrylate, 242 um (or 200 um); protects the glass from scratches and bends
+TOTAL INTERNAL REFLECTION  light meeting a lower-index boundary at a shallow angle reflects completely
+SINGLE-MODE                one path; 9.2 um mode field at 1310 nm; buildings and beyond
+MULTIMODE                  many paths; cheap VCSEL light; up to about 100 m
+ATTENUATION                loss along the fiber: at most 0.32 dB/km at 1310 nm, 0.18 dB/km at 1550 nm
+LATENCY                    light in glass covers about 1 km every 5 microseconds
+
+# 3. Light down the fiber, in order
+
+1. a lens focuses the laser's light onto the core's end
+2. light that enters within the acceptance angle stays in the core
+3. it reflects (multimode) or guides (single-mode) along the core
+4. a little is scattered and absorbed each kilometre
+5. it leaves the far end into the receiver's lens
+
+# 4. Why the light stays in
+
+The core's index is only about a third of a percent above the cladding's, but that's enough: light travelling nearly along the fiber meets the boundary at a grazing angle and reflects completely. This is TOTAL INTERNAL REFLECTION. In single-mode fiber the core is only a few wavelengths across, so the light travels as one guided mode, partly in the cladding (the mode field is 9.2 um wide at 1310 nm).
+
+# 5. Single-mode vs multimode
+
+MULTIMODE fiber's 50 um core accepts light easily from cheap 850 nm VCSELs, but its many paths have different lengths, so pulses smear after about 100 m. SINGLE-MODE fiber's narrow core needs precise alignment and InP lasers, but pulses stay sharp over kilometres. AI clusters increasingly use single-mode even inside the building.
+
+# 6. Attenuation: how little light is lost
+
+Corning's SMF-28 Ultra loses at most 0.32 dB per km at 1310 nm and 0.18 dB at 1550 nm. 0.32 dB is about 7% of the light; a 2 km data-center link loses under 1 dB in the glass, less than its connectors. ATTENUATION comes from scattering in the glass itself and residual absorption.
+
+# 7. Latency: the speed of light in glass
+
+Light in glass travels at about two thirds of its speed in vacuum: roughly 5 microseconds per kilometre. Across a building that's negligible next to the electronics, but across a campus or between data centers it adds up. Hollow-core fiber, which guides light in air, cuts that by about a third.
+
+# 8. Who makes it
+
+Corning (GLW) is the largest maker of optical fiber, with Prysmian, Fujikura, Sumitomo Electric, Furukawa (OFS) and YOFC. Fiber is drawn from a glass preform in a tower, coated on the fly, and wound onto spools many kilometres long.
+
+# 9. Chokepoints and risks
+
+- AI data centers use many times more fiber per rack than cloud ones, straining cable and connector capacity.
+- Tight bends leak light; dense cabling needs bend-insensitive fiber.
+- Dirty connector end faces are a leading cause of link failures.
+
+# 10. Sources
+
+  [1] SMF-28 Ultra attenuation and mode field: corning.com/content/dam/corning/media/worldwide/coc/documents/Fiber/PI1450_3-2015.pdf
+  [2] Coating 242 or 200 um: corning.com/worldwide/en/products/communication-networks/products/fiber/smf-28-ultra.html
+  [3] Core 8.2 um, cladding 125 um: ecatalog.corning.com (SST-Drop cable listing)
+  [4] Index step, total internal reflection, latency, multimode reach: textbook (Agrawal)

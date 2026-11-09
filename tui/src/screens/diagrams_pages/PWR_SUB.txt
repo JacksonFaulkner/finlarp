@@ -1,0 +1,54 @@
+# 1. What happens: a transformer steps the voltage down
+
+Transmission lines land on a steel gantry in the substation yard. From there they connect to the tall BUSHING insulators on top of a POWER TRANSFORMER. Inside its oil-filled tank, alternating current in the high-voltage WINDINGS drives a changing magnetic field around a laminated steel CORE. That field induces a lower voltage in the low-voltage windings. A 230 kV line comes out at, say, 34.5 kV for the campus.
+
+# 2. The parts
+
+POWER TRANSFORMER   core and windings in an oil-filled tank, tens to hundreds of MVA
+CORE                stacked sheets of grain-oriented ELECTRICAL STEEL that carry the magnetic field
+WINDINGS            copper coils: many turns on the high-voltage side, few on the low-voltage side
+TURNS RATIO         turns in / turns out = voltage in / voltage out
+BUSHING             a porcelain or polymer insulator that brings each conductor through the tank lid
+RADIATOR            finned panels that cool the oil
+LEAD TIME           order to delivery: about 128 weeks for large power transformers in 2025
+ELECTRICAL STEEL    grain-oriented silicon steel, made by few mills
+
+# 3. Stepping down, in order
+
+1. high-voltage current enters through the tall bushings
+2. it flows through the many-turn high-voltage winding
+3. the core carries the alternating magnetic field to the other winding
+4. the few-turn low-voltage winding gives a lower voltage at higher current
+5. the oil carries away the heat to the radiators
+
+# 4. Why the turns ratio works
+
+A changing magnetic field induces a voltage in every turn of wire it passes through. Both windings share the same field in the same CORE, so each turn gets the same voltage: ten times fewer turns gives ten times less voltage and ten times more current. The power, voltage times current, is unchanged apart from small losses.
+
+# 5. Losses and cooling
+
+A large transformer passes over 99% of its power. The rest heats the core (magnetic losses in the steel) and the windings (resistance). Mineral oil fills the tank to insulate and to carry heat to the RADIATOR panels, sometimes with fans and pumps.
+
+# 6. The lead time problem
+
+Wood Mackenzie found average transformer lead times rose from about 50 weeks in 2021 to 120 weeks in 2024. In its Q2 2025 survey large power transformers averaged about 128 weeks (about 2.5 years) and generator step-up units about 144. Each is custom-built to its site's voltages, and makers cite labor shortages as the limit on output.
+
+# 7. Electrical steel
+
+The CORE needs grain-oriented ELECTRICAL STEEL, rolled so its crystals line up with the field to cut losses. Few mills make it, and in the US one company, Cleveland-Cliffs, is the domestic producer, so steel supply is part of the transformer bottleneck.
+
+# 8. Who makes it
+
+Hitachi Energy, Siemens Energy, GE Vernova (GEV, including Prolec GE), HD Hyundai Electric, Hyosung Heavy Industries, Eaton (ETN) and others. Most large units for the US are imported.
+
+# 9. Chokepoints and risks
+
+- LEAD TIME of two to three years for large units.
+- Custom designs mean little interchangeability or spare stock.
+- Tariffs on imports, which Wood Mackenzie expects to worsen lead times.
+
+# 10. Sources
+
+  [1] Lead times: woodmac.com/news/opinion/supply-shortages-and-an-inflexible-market-give-rise-to-high-power-transformer-lead-times/
+  [2] Q2 2025 survey: powermag.com (Making the Connection, September 2025)
+  [3] Transformer physics, losses, oil cooling: textbook

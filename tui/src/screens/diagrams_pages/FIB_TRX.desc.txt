@@ -1,0 +1,1 @@
+A transceiver is the pluggable module that holds the whole optical link's end: DSP, drivers, lasers, photodiodes, TIAs and a fiber connector, in a metal shell that plugs into a switch or server. 800G modules run eight 100G lanes and 1.6T modules eight 200G lanes. Copper (DAC) covers the shortest runs. Tickers: COHR, LITE, FN; Innolight and Eoptolink (China).

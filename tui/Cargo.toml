@@ -23,3 +23,8 @@ ratatui-image = { version = "12.0.0-rc.3", default-features = false, features = 
 image = { version = "0.25", default-features = false, features = ["gif", "png"] }
 # The bell-jar rasterizer: shared with the offline GIF tool (tools/poly3d).
 poly3d = { path = "../tools/poly3d" }
+
+# The 3D renderer is per-pixel hot loops: optimise it even in debug builds, so `cargo run`
+# and `cargo test` orbit smoothly and the frame-budget test runs in seconds.
+[profile.dev.package.poly3d]
+opt-level = 3

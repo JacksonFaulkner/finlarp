@@ -1,0 +1,1 @@
+Switchgear is the building of breakers between the substation and the data hall: medium-voltage cabinets that switch and protect each feed, unit-substation transformers that step 13.8-34.5 kV down to 480 V, and the transfer switches that bring in generators. Sites are built with duplicate paths (2N) so any one can fail. Tickers: ETN, VRT, ABB, Schneider.

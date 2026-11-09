@@ -150,75 +150,31 @@ const PACKAGE: &str = r#"# Packaging: how a GPU and its memory become one part o
 
 const FIBER: &str = r#"# Link: electrical data in, light through glass, electrical data out
 
- ┌────────────┐          ┌─────────────────────────┐                  ┌────────────────────────┐          ┌────────────┐
- │ SERVER     │   elec   │ TRANSMITTER             │      light       │ RECEIVER               │   elec   │ SERVER     │
- │ GPU / ASIC │─────────▶│ DSP > DRIVER > LASER    │─────────────────▶│ PHOTODIODE > TIA > DSP │─────────▶│ GPU / ASIC │
- │            │  1s+0s   │ (CRDO MRVL / COHR LITE) │═════════════════▶│ (light to current)     │  1s+0s   │            │
- └────────────┘          └─────────────────────────┘                  └────────────────────────┘          └────────────┘
-                                                    1310nm / 1550nm, 0.2 dB/km
-                         laser turns bits into on/off light pulses    photodiode turns light back into bits
+ ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+ │   PAM4 DSP    │────▶│     LASER     │────▶│ OPTICAL FIBER │────▶│  PHOTODIODE   │────▶│  TRANSCEIVER  │────▶│      CPO      │
+ │ clean symbols │     │ bits to light │     │ glass, 0.3 dB │     │ light to amps │     │ the module    │     │ optics on chip│
+ └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘
 
-# Inside the fiber: end view, and side view (total internal reflection)
+ reach: board copper <1 m, DAC copper ~3 m, multimode VCSEL ~100 m, single-mode DR 500 m / FR 2 km, coherent ZR 80 km+
 
-  ┌───────────────────────────┐     ┌──────────────────────────────────────────────────────────┐
-  │  JACKET                   │     │  COATING (acrylate protects the glass)                   │
-  │ ┌───────────────────────┐ │     │ ┌──────────────────────────────────────────────────────┐ │
-  │ │  COATING 250um        │ │     │ │  CLADDING  n = 1.444  (lower index acts as a mirror) │ │
-  │ │ ┌───────────────────┐ │ │     │ │ ┌──────────────────────────────────────────────────┐ │ │
-  │ │ │  CLADDING 125um   │ │ │     │ │ │  CORE  n = 1.450  (higher index)                 │ │ │
-  │ │ │                   │ │ │     │ │ │  light ══▶                                       │ │ │
-  │ │ │   ┌───────────┐   │ │ │     │ │ │   ╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱╲    ╱     │ │ │
-  │ │ │   │  CORE 9um │   │ │ │     │ │ │    ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱  ╲  ╱      │ │ │
-  │ │ │   └───────────┘   │ │ │     │ │ │     ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱    ╲╱       │ │ │
-  │ │ └───────────────────┘ │ │     │ │ └──────────────────────────────────────────────────┘ │ │
-  │ │                       │ │     │ │                                                      │ │
-  │ └───────────────────────┘ │     │ └──────────────────────────────────────────────────────┘ │
-  │                           │     │                                                          │
-  └───────────────────────────┘     └──────────────────────────────────────────────────────────┘
-
-  single-mode fiber, end view       light bounces off the core/cladding boundary and stays inside
-
-# Where fiber sits in an AI data center (reach grows, so does optic cost)
-
- ┌─────────────┐ ┌────────────────┐ ┌────────────────────────┐ ┌─────────────────────────┐ ┌─────────────────────────┐
- │ on-board    │ │ in-rack        │ │ row / hall             │ │ building                │ │ city / subsea           │
- │ copper, <1m │ │ DAC copper <3m │ │ AOC or SR optics <100m │ │ DR / FR optics to 2km   │ │ ZR coherent 80-1000+ km │
- │ (NVLink)    │ │ (cheap, hot)   │ │ (VCSEL, multimode)     │ │ (single-mode, CPO next) │ │ (Ciena, Infinera)       │
- └─────────────┘ └────────────────┘ └────────────────────────┘ └─────────────────────────┘ └─────────────────────────┘
-
- (GLW makes the glass, COHR/LITE the lasers, CRDO/MRVL/AVGO the DSPs, CIEN the long-haul gear)
+ (enter opens a node's page; h/l moves between nodes)
+ (GLW makes the glass, COHR/LITE the lasers, MRVL/AVGO/CRDO the DSPs; Innolight and Eoptolink the most modules)
 "#;
 
 const POWER: &str = r#"# From the utility to the GPU: every hop loses a little and is a bottleneck
 
- (grid)            in: 115-345kV     in: 13.8-34.5kV   in: 480V AC        in: 415/230V   in: 48V/12V      in: ~0.8V core
-                   (GEV ETN)         (ETN SU)          (VRT ETN)          (VRT)          (VRT)
- ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌─────────────┐    ┌─────────┐    ┌───────────┐    ┌───────┐
- │ UTILITY    │    │ SUBSTATION │    │ SWITCHGEAR │    │ UPS         │    │ PDU     │    │ PSU / VRM │    │ GPU   │
- │ grid plant │───▶│ step-down  │───▶│ MV + xfmr  │───▶│ + batteries │───▶│ in rack │───▶│ AC to DC  │───▶│ ~0.8V │
- └────────────┘    └────────────┘    └────────────┘    └─────────────┘    └─────────┘    └───────────┘    └───────┘
-                          │                                   │
-                          │   ┌───────────────────────┐       ▼
-                          │   │ GENERATORS            │┌───────────────────────┐
-                          └──▶│ diesel / gas (CAT CMI)││ BATTERY / FLYWHEEL    │
-                              └───────────────────────┘│ carries the load for  │
-                     ATS: on outage the load moves to g│ minutes until gens run│
-                                                       └───────────────────────┘
+ ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐     ┌───────────────┐
+ │     GRID      │────▶│  SUBSTATION   │────▶│  SWITCHGEAR   │────▶│      UPS      │────▶│  RACK POWER   │────▶│      VRM      │
+ │ 115-345 kV    │     │ to 13.8-34 kV │     │ to 480 V      │     │ batteries+gen │     │ ~50 V DC bus  │     │ ~0.8 V, 1kA+  │
+ └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘     └───────────────┘
 
+ Power left at each stage, one 100 MW site (example):
+   utility 100 MW > switchgear 99 > UPS 96 (3-5% conversion loss) > PDU 95 > chips ~72 (the rest is cooling: PUE 1.3-1.4)
 
-# Power left at each stage, one 100 MW site (example)
+ one NVL72 rack ~120 kW    a row 1-2 MW    a campus 100 MW to 1+ GW    next: 800 V DC racks (NVIDIA, 2027)
 
-  utility feed      ████████████████████████████████████████ 100.0 MW
-  after switchgear  ████████████████████████████████████████  99.0 MW
-  after UPS         ██████████████████████████████████████    96.0 MW  (UPS conversion loss ~3-5%)
-  after PDU         ██████████████████████████████████████    95.0 MW
-  IT load (chips)   █████████████████████████████             72.0 MW  (the rest is cooling and losses: PUE 1.3-1.4)
-
-
-# Scale
-
-  one NVL72 rack ≈ 120-132 kW      a row ≈ 1-2 MW      a campus ≈ 100 MW to 1+ GW
-  trend: 800V DC in the rack (NVIDIA, Vertiv): fewer conversions, thinner copper
+ (enter opens a node's page; h/l moves between nodes)
+ (GEV the turbines and grid gear, ETN/VRT the switchgear and UPS, CAT/CMI the generators, MPWR/VICR/IFNNY the VRMs)
 "#;
 
 const NETWORK: &str = r#"# Data path: GPU to GPU across the building (leaf-spine fabric)

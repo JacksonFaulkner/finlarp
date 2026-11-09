@@ -5,9 +5,10 @@
 //! Solids are z-buffered, flat-shaded triangles. The glass jar is an
 //! alpha-blended wireframe drawn last.
 
-use image::{Rgb, RgbaImage};
+use image::RgbaImage;
 
 mod cell;
+pub mod prof;
 pub use cell::{
     clip_cell_anim, clip_cell_view, notes_alpha, overview_params, render_cell, render_overview, Notes, render_zoom, CellAnim, CellParams,
     CellZoom, render_litho_overview, render_litho_zoom, LithoZoom, LITHO_OVERVIEW_BEATS,
@@ -17,6 +18,8 @@ pub use cell::{
     render_hbm_overview, render_hbm_zoom, HbmZoom, HBM_OVERVIEW_BEATS,
     part_at, render_chip, ChipKey, ChipPart, ChipState,
     pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState,
+    pwr_part_at, render_power, PwrKey, PwrPart, PwrState, PWR_BACKUP_Z, PWR_BOARD_Z, PWR_RACK_Z, PWR_XFMR_Z,
+    link_part_at, render_link, LinkKey, LinkPart, LinkState, LINK_CPO_Z, LINK_GLASS_Z, LINK_LASER_Z, LINK_PD_Z,
 };
 
 type V3 = [f64; 3];
@@ -261,6 +264,10 @@ impl Canvas {
         let dx = pb.0 - pa.0;
         let dy = pb.1 - pa.1;
         let n = dx.abs().max(dy.abs()).ceil().max(1.0) as usize;
+        prof::with(|s| {
+            s.lines += 1;
+            s.line_px += n as u64 + 1;
+        });
         for i in 0..=n {
             let t = i as f64 / n as f64;
             let x = lerp(pa.0, pb.0, t).floor();
@@ -285,66 +292,18 @@ impl Canvas {
         }
     }
 
+    /// One triangle on the whole canvas, single-threaded: the reference `rasterize` must match.
+    #[cfg(test)]
     fn fill_tri(&mut self, cam: &Cam, p: [V3; 3], col: Col) {
-        let mut s = [(0.0f64, 0.0f64, 0.0f64); 3];
-        for i in 0..3 {
-            match cam.project(p[i]) {
-                Some(v) => s[i] = v,
-                None => return,
-            }
-        }
-        let a = (s[0].0, s[0].1);
-        let b = (s[1].0, s[1].1);
-        let c = (s[2].0, s[2].1);
-        let area = edge(a, b, c);
-        if area.abs() < 1e-9 {
+        let Some(t) = ScreenTri::new(cam, p, col, self.w, self.h) else {
             return;
-        }
-        let minx = s
-            .iter()
-            .map(|v| v.0)
-            .fold(f64::INFINITY, f64::min)
-            .floor()
-            .max(0.0);
-        let maxx = s
-            .iter()
-            .map(|v| v.0)
-            .fold(f64::NEG_INFINITY, f64::max)
-            .ceil()
-            .min(self.w as f64 - 1.0);
-        let miny = s
-            .iter()
-            .map(|v| v.1)
-            .fold(f64::INFINITY, f64::min)
-            .floor()
-            .max(0.0);
-        let maxy = s
-            .iter()
-            .map(|v| v.1)
-            .fold(f64::NEG_INFINITY, f64::max)
-            .ceil()
-            .min(self.h as f64 - 1.0);
-        if maxx < 0.0 || maxy < 0.0 || minx > maxx || miny > maxy {
-            return;
-        }
-        for y in miny as usize..=maxy as usize {
-            for x in minx as usize..=maxx as usize {
-                let px = (x as f64 + 0.5, y as f64 + 0.5);
-                let w0 = edge(b, c, px) / area;
-                let w1 = edge(c, a, px) / area;
-                let w2 = 1.0 - w0 - w1;
-                if w0 < 0.0 || w1 < 0.0 || w2 < 0.0 {
-                    continue;
-                }
-                let iz = w0 * s[0].2 + w1 * s[1].2 + w2 * s[2].2;
-                let depth = (1.0 / iz) as f32;
-                let idx = y * self.w + x;
-                if depth < self.z[idx] {
-                    self.z[idx] = depth;
-                    self.rgb[idx] = col;
-                }
-            }
-        }
+        };
+        let (tested, written) = t.fill_rows(&mut self.rgb, &mut self.z, self.w, 0, self.h);
+        prof::with(|s| {
+            s.tris_drawn += 1;
+            s.px_tested += tested;
+            s.px_written += written;
+        });
     }
 
     /// Alpha-blended line. Depth-tested against solids, does not write depth.
@@ -355,6 +314,10 @@ impl Canvas {
         let dx = pb.0 - pa.0;
         let dy = pb.1 - pa.1;
         let n = dx.abs().max(dy.abs()).ceil().max(1.0) as usize;
+        prof::with(|s| {
+            s.lines += 1;
+            s.line_px += n as u64 + 1;
+        });
         for i in 0..=n {
             let t = i as f64 / n as f64;
             let x = lerp(pa.0, pb.0, t).floor();
@@ -372,6 +335,118 @@ impl Canvas {
             }
         }
     }
+}
+
+/// A triangle projected to the screen, with its pixel bounding box and flat colour.
+/// Built once per frame per triangle, then filled band by band (see `rasterize`).
+#[derive(Clone, Copy)]
+struct ScreenTri {
+    s: [(f64, f64, f64); 3],
+    area: f64,
+    minx: f64,
+    maxx: f64,
+    miny: usize,
+    maxy: usize,
+    col: Col,
+}
+
+impl ScreenTri {
+    /// None when a corner is behind the near plane, the triangle is degenerate, or off screen.
+    fn new(cam: &Cam, p: [V3; 3], col: Col, w: usize, h: usize) -> Option<ScreenTri> {
+        let s = [cam.project(p[0])?, cam.project(p[1])?, cam.project(p[2])?];
+        let area = edge((s[0].0, s[0].1), (s[1].0, s[1].1), (s[2].0, s[2].1));
+        if area.abs() < 1e-9 {
+            return None;
+        }
+        let xs = s.map(|v| v.0);
+        let ys = s.map(|v| v.1);
+        let minx = xs.iter().copied().fold(f64::INFINITY, f64::min).floor().max(0.0);
+        let maxx = xs.iter().copied().fold(f64::NEG_INFINITY, f64::max).ceil().min(w as f64 - 1.0);
+        let miny = ys.iter().copied().fold(f64::INFINITY, f64::min).floor().max(0.0);
+        let maxy = ys.iter().copied().fold(f64::NEG_INFINITY, f64::max).ceil().min(h as f64 - 1.0);
+        if maxx < 0.0 || maxy < 0.0 || minx > maxx || miny > maxy {
+            return None;
+        }
+        Some(ScreenTri { s, area, minx, maxx, miny: miny as usize, maxy: maxy as usize, col })
+    }
+
+    /// Fill the rows `y0..y1` of the triangle into `rgb`/`z`, which hold the canvas rows
+    /// from `y0` on (a band, or the whole canvas with y0 = 0). Returns (pixels tested,
+    /// pixels written).
+    fn fill_rows(&self, rgb: &mut [Col], z: &mut [f32], w: usize, y0: usize, y1: usize) -> (u64, u64) {
+        let ScreenTri { s, area, minx, maxx, col, .. } = *self;
+        let (ya, yb) = (self.miny.max(y0), self.maxy.min(y1.saturating_sub(1)));
+        if ya > yb || y1 == 0 {
+            return (0, 0);
+        }
+        let a = (s[0].0, s[0].1);
+        let b = (s[1].0, s[1].1);
+        let c = (s[2].0, s[2].1);
+        let mut written = 0u64;
+        let mut tested = 0u64;
+        // Each barycentric weight is linear in x along a row: w(x) = w(minx) + d * (x - minx).
+        // Solving w >= 0 for all three gives the row's covered span, so only those pixels are
+        // walked. Walking the whole bounding box instead cost ~50x on long thin diagonal
+        // triangles (wires, fibres, tubes), which have huge boxes and few covered pixels.
+        let d0 = -(c.1 - b.1) / area;
+        let d1 = -(a.1 - c.1) / area;
+        let d2 = -(d0 + d1);
+        let (x_lo, x_hi) = (minx as usize, maxx as usize);
+        for y in ya..=yb {
+            let p0 = (minx + 0.5, y as f64 + 0.5);
+            let w0 = edge(b, c, p0) / area;
+            let w1 = edge(c, a, p0) / area;
+            let w2 = 1.0 - w0 - w1;
+            let (mut lo, mut hi) = (0.0f64, maxx - minx);
+            for (w, d) in [(w0, d0), (w1, d1), (w2, d2)] {
+                if d.abs() < 1e-15 {
+                    if w < 0.0 {
+                        hi = -1.0;
+                    }
+                } else if d > 0.0 {
+                    lo = lo.max(-w / d);
+                } else {
+                    hi = hi.min(-w / d);
+                }
+            }
+            if hi < lo {
+                continue;
+            }
+            // one pixel of slack each side: the exact test below decides, so edges match
+            // the bounding-box walk pixel for pixel
+            let xs = (x_lo + lo.ceil().max(0.0) as usize).saturating_sub(1).max(x_lo);
+            let xe = (x_lo + hi.floor().max(0.0) as usize + 1).min(x_hi);
+            tested += (xe + 1).saturating_sub(xs) as u64;
+            let row = (y - y0) * w;
+            for x in xs..=xe {
+                let px = (x as f64 + 0.5, y as f64 + 0.5);
+                let w0 = edge(b, c, px) / area;
+                let w1 = edge(c, a, px) / area;
+                let w2 = 1.0 - w0 - w1;
+                if w0 < 0.0 || w1 < 0.0 || w2 < 0.0 {
+                    continue;
+                }
+                let iz = w0 * s[0].2 + w1 * s[1].2 + w2 * s[2].2;
+                let depth = (1.0 / iz) as f32;
+                let idx = row + x;
+                if depth < z[idx] {
+                    z[idx] = depth;
+                    rgb[idx] = col;
+                    written += 1;
+                }
+            }
+        }
+        (tested, written)
+    }
+}
+
+/// Worker threads for a frame of `px` pixels: one below ~0.25 MP (spawning costs more than
+/// it saves), else up to the core count, capped at 8.
+fn bands_for(px: usize) -> usize {
+    if px < 250_000 {
+        return 1;
+    }
+    std::thread::available_parallelism().map_or(1, |n| n.get()).min(8)
 }
 
 fn edge(a: (f64, f64), b: (f64, f64), p: (f64, f64)) -> f64 {
@@ -564,16 +639,7 @@ fn render_canvas(p: &Params, anim: Anim, view: &View, w: usize, h: usize, bg: Co
     let cam = Cam::orbit(view, p, w, h);
 
     // opaque solids first, depth-tested
-    let mut tris = build_scene(p, anim);
-    tris.sort_by(|a, b| {
-        let da: f64 = a.p.iter().map(|q| cam.view(*q)[2]).sum();
-        let db: f64 = b.p.iter().map(|q| cam.view(*q)[2]).sum();
-        db.partial_cmp(&da).unwrap_or(std::cmp::Ordering::Equal)
-    });
-    for tri in &tris {
-        let col = shade(tri);
-        cv.fill_tri(&cam, tri.p, col);
-    }
+    rasterize(&mut cv, &cam, build_scene(p, anim));
 
     // glass jar, as a translucent wireframe
     draw_jar(&mut cv, &cam, p);
@@ -686,13 +752,89 @@ fn draw_flows(cv: &mut Canvas, cam: &Cam, p: &Params, anim: Anim) {
 pub fn render(p: &Params, anim: Anim, view: &View, w: usize, h: usize, bg: [u8; 3]) -> RgbaImage {
     let bg_f = bg.map(|c| c as f32 / 255.0);
     let cv = render_canvas(p, anim, view, w, h, bg_f);
-    let mut img = RgbaImage::new(w as u32, h as u32);
-    for (i, px) in cv.rgb.iter().enumerate() {
-        let c = Rgb(px.map(|c| (c.clamp(0.0, 1.0) * 255.0).round() as u8));
-        let (x, y) = ((i % w) as u32, (i / w) as u32);
-        img.put_pixel(x, y, image::Rgba([c.0[0], c.0[1], c.0[2], 255]));
-    }
-    img
+    to_image(&cv)
+}
+
+/// Opaque solids, depth-tested. Every renderer's solids go through here, so `prof`
+/// sees them all.
+fn rasterize(cv: &mut Canvas, cam: &Cam, mut tris: Vec<Tri>) {
+    prof::raster_start();
+    let t0 = std::time::Instant::now();
+    tris.sort_by(|x, y| {
+        let dx: f64 = x.p.iter().map(|q| cam.view(*q)[2]).sum();
+        let dy: f64 = y.p.iter().map(|q| cam.view(*q)[2]).sum();
+        dy.partial_cmp(&dx).unwrap_or(std::cmp::Ordering::Equal)
+    });
+    let t1 = std::time::Instant::now();
+    prof::with(|s| s.tris += tris.len() as u64);
+    let (w, h) = (cv.w, cv.h);
+    let screen: Vec<ScreenTri> = tris
+        .iter()
+        .filter_map(|t| ScreenTri::new(cam, t.p, shade(t), w, h))
+        .collect();
+    // Horizontal bands, one per thread. Each band draws every triangle clipped to its rows,
+    // in the same order, so the picture is identical to a single-threaded fill.
+    let n = bands_for(w * h);
+    let rows = h.div_ceil(n).max(1);
+    let (mut tested, mut written) = (0u64, 0u64);
+    std::thread::scope(|sc| {
+        let jobs: Vec<_> = cv
+            .rgb
+            .chunks_mut(rows * w)
+            .zip(cv.z.chunks_mut(rows * w))
+            .enumerate()
+            .map(|(i, (rgb, z))| {
+                let screen = &screen;
+                let mut run = move || {
+                    let (y0, y1) = (i * rows, (i * rows + rgb.len() / w).min(h));
+                    let mut acc = (0u64, 0u64);
+                    for t in screen {
+                        let (a, b) = t.fill_rows(rgb, z, w, y0, y1);
+                        acc.0 += a;
+                        acc.1 += b;
+                    }
+                    acc
+                };
+                if n == 1 { Err(run()) } else { Ok(sc.spawn(run)) }
+            })
+            .collect();
+        for j in jobs {
+            let (a, b) = match j {
+                Ok(h) => h.join().expect("raster band"),
+                Err(r) => r,
+            };
+            tested += a;
+            written += b;
+        }
+    });
+    prof::with(|s| {
+        s.tris_drawn += screen.len() as u64;
+        s.px_tested += tested;
+        s.px_written += written;
+    });
+    let t2 = std::time::Instant::now();
+    prof::raster_end((t1 - t0).as_secs_f64() * 1e3, (t2 - t1).as_secs_f64() * 1e3);
+}
+
+/// The float canvas as 8-bit RGBA.
+fn to_image(cv: &Canvas) -> RgbaImage {
+    prof::image_start(cv.w, cv.h);
+    let mut raw = vec![255u8; cv.w * cv.h * 4];
+    let n = bands_for(cv.w * cv.h);
+    let chunk = (cv.w * cv.h).div_ceil(n).max(1);
+    std::thread::scope(|sc| {
+        for (src, dst) in cv.rgb.chunks(chunk).zip(raw.chunks_mut(chunk * 4)) {
+            let mut conv = move || {
+                for (px, out) in src.iter().zip(dst.chunks_exact_mut(4)) {
+                    for k in 0..3 {
+                        out[k] = (px[k].clamp(0.0, 1.0) * 255.0 + 0.5) as u8;
+                    }
+                }
+            };
+            if n == 1 { conv() } else { sc.spawn(conv); }
+        }
+    });
+    RgbaImage::from_raw(cv.w as u32, cv.h as u32, raw).expect("canvas size")
 }
 
 #[cfg(test)]
@@ -772,6 +914,92 @@ mod tests {
         assert!(with
             .pixels()
             .any(|px| px.0[0] < 140 && px.0[1] > 120 && px.0[2] > 150));
+    }
+
+    /// The row-span walk in `fill_tri` covers exactly the pixels the plain bounding-box
+    /// walk did: same colour and depth buffers on random triangles, thin ones included.
+    #[test]
+    fn span_fill_matches_bounding_box_fill() {
+        let (w, h) = (97usize, 61usize);
+        let cam = Cam::orbit_at(&View::default(), [0.0, 0.0, 0.0], 1000.0, w, h);
+        let mut seed = 0x9e3779b97f4a7c15u64;
+        let mut rnd = || {
+            seed ^= seed << 13;
+            seed ^= seed >> 7;
+            seed ^= seed << 17;
+            (seed >> 11) as f64 / (1u64 << 53) as f64 * 2.0 - 1.0
+        };
+        let mut span = Canvas::new(w, h, [0.0; 3]);
+        let mut bbox = Canvas::new(w, h, [0.0; 3]);
+        for i in 0..400 {
+            let mut p = [[0.0; 3]; 3];
+            let thin = i % 3 == 0;
+            for q in p.iter_mut() {
+                *q = [rnd() * 600.0, rnd() * 400.0, rnd() * 300.0];
+            }
+            if thin {
+                // a sliver: third corner almost on the first edge
+                p[2] = add(p[0], mul(sub(p[1], p[0]), 0.5 + 0.4 * rnd()));
+                p[2][1] += rnd() * 3.0;
+            }
+            let col = [(i % 7) as f32 / 7.0, (i % 11) as f32 / 11.0, 0.5];
+            span.fill_tri(&cam, p, col);
+            // reference: every pixel of the box, the original walk
+            let s: Vec<(f64, f64, f64)> = p.iter().filter_map(|q| cam.project(*q)).collect();
+            if s.len() < 3 {
+                continue;
+            }
+            let (a, b, c) = ((s[0].0, s[0].1), (s[1].0, s[1].1), (s[2].0, s[2].1));
+            let area = edge(a, b, c);
+            if area.abs() < 1e-9 {
+                continue;
+            }
+            for y in 0..h {
+                for x in 0..w {
+                    let px = (x as f64 + 0.5, y as f64 + 0.5);
+                    let w0 = edge(b, c, px) / area;
+                    let w1 = edge(c, a, px) / area;
+                    let w2 = 1.0 - w0 - w1;
+                    if w0 < 0.0 || w1 < 0.0 || w2 < 0.0 {
+                        continue;
+                    }
+                    let depth = (1.0 / (w0 * s[0].2 + w1 * s[1].2 + w2 * s[2].2)) as f32;
+                    let idx = y * w + x;
+                    if depth < bbox.z[idx] {
+                        bbox.z[idx] = depth;
+                        bbox.rgb[idx] = col;
+                    }
+                }
+            }
+        }
+        assert_eq!(span.rgb, bbox.rgb);
+        assert_eq!(span.z, bbox.z);
+    }
+
+    /// Banded, multi-threaded `rasterize` paints exactly what one thread filling every
+    /// triangle in the same order paints.
+    #[test]
+    fn banded_raster_matches_single_thread() {
+        let (w, h) = (900usize, 600usize); // above the threading threshold
+        assert!(bands_for(w * h) >= 1);
+        let p = Params::default();
+        let mut v = View::default();
+        v.orbit(0.7, 0.3);
+        let cam = Cam::orbit(&v, &p, w, h);
+        let mut tris = build_scene(&p, clip_anim(&p, 0.6));
+        let mut banded = Canvas::new(w, h, [0.1; 3]);
+        tris.sort_by(|x, y| {
+            let dx: f64 = x.p.iter().map(|q| cam.view(*q)[2]).sum();
+            let dy: f64 = y.p.iter().map(|q| cam.view(*q)[2]).sum();
+            dy.partial_cmp(&dx).unwrap_or(std::cmp::Ordering::Equal)
+        });
+        let mut single = Canvas::new(w, h, [0.1; 3]);
+        for t in &tris {
+            single.fill_tri(&cam, t.p, shade(t));
+        }
+        rasterize(&mut banded, &cam, tris);
+        assert_eq!(banded.rgb, single.rgb);
+        assert_eq!(banded.z, single.z);
     }
 
     #[test]

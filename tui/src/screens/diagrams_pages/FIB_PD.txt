@@ -1,0 +1,55 @@
+# 1. What happens: each photon becomes a little bit of current
+
+Light leaving the fiber lands on a PIN PHOTODIODE. Its middle layer, INGAAS on an indium phosphide chip, absorbs the photons; each one frees an electron and a hole, which a reverse voltage sweeps to opposite contacts. That makes a current of microamps that rises and falls with the light's PAM4 levels. A TIA beside it turns the current into a voltage for the DSP. In silicon photonics the absorber is GERMANIUM grown on the silicon chip.
+
+# 2. The parts
+
+PIN PHOTODIODE   p-type, intrinsic (absorber), n-type layers, reverse biased
+INGAAS           indium gallium arsenide: absorbs 1310 and 1550 nm light that silicon can't
+RESPONSIVITY     current out per watt of light in; close to 1 A/W for InGaAs
+TIA              transimpedance amplifier: current in, voltage out
+GERMANIUM        absorber grown on silicon for silicon-photonics receivers
+BANDWIDTH        how fast the photodiode and TIA can follow the light; set by size and capacitance
+NOISE            thermal and shot noise from the TIA and photodiode that blur the levels
+LINK BUDGET      transmit power minus losses must stay above the receiver's sensitivity
+
+# 3. Light becomes a voltage, in order
+
+1. a lens focuses light from the fiber onto the photodiode
+2. photons are absorbed in the INGAAS layer
+3. each frees an electron and a hole
+4. the reverse bias sweeps them to the contacts: current
+5. the TIA turns the current into a voltage
+6. the DSP equalizes it and decides each PAM4 level
+
+# 4. Why InGaAs (and germanium)
+
+Silicon is transparent to light longer than about 1.1 um, so it can't detect 1310 or 1550 nm. INGAAS, grown on InP, absorbs them strongly. Silicon photonics instead grows GERMANIUM on the silicon chip, which absorbs at 1310 nm and is made in the same fab as the modulators.
+
+# 5. Responsivity and speed
+
+RESPONSIVITY near 1 A/W means a milliwatt of light gives about a milliamp. To follow 106 GBd symbols the photodiode must be tiny, so its capacitance is small, and the TIA must have BANDWIDTH to match. A smaller photodiode is faster but harder to hit with the light.
+
+# 6. Noise and sensitivity
+
+The TIA's NOISE and the photodiode's shot noise blur the four PAM4 levels. The weakest light the receiver can still decode at its error-rate target is its sensitivity. Because PAM4 levels are a third as far apart as NRZ's, PAM4 receivers need more light for the same error rate.
+
+# 7. The link budget
+
+LINK BUDGET: laser output, minus fiber loss (0.32 dB/km at 1310 nm), minus connectors (often about 0.5 dB each) and splices, must stay above the receiver's sensitivity with margin. Inside a data center the connectors, not the glass, use most of the budget, which is why clean connectors matter.
+
+# 8. Who makes it
+
+Photodiodes: Coherent (COHR), Lumentum (LITE), Hamamatsu and module makers' in-house lines; germanium photodiodes come with silicon-photonics chips. TIAs: MACOM (MTSI), Semtech (SMTC), Marvell (MRVL), Broadcom (AVGO).
+
+# 9. Chokepoints and risks
+
+- Faster lanes need smaller, lower-capacitance photodiodes and faster TIAs.
+- Removing the DSP (LPO) puts the TIA's output straight onto the host's SerDes.
+- Dirty or worn connectors eat the link budget.
+
+# 10. Sources
+
+  [1] Photodiode physics, responsivity and noise: textbook (Agrawal, Fiber-Optic Communication Systems)
+  [2] Fiber loss in the budget: corning.com/content/dam/corning/media/worldwide/coc/documents/Fiber/PI1450_3-2015.pdf
+  [3] LPO receive path: nokia.com/asset/f/215574/

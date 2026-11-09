@@ -1,0 +1,55 @@
+# 1. What happens: batteries bridge the gap until generators run
+
+Utility power flows through the transfer switch into the UPS. A RECTIFIER turns it to DC; the DC keeps a bank of LITHIUM-ION batteries charged and feeds an INVERTER that makes clean AC for the racks. If the utility fails, the inverter just keeps going on battery power, with no break at all. Within seconds the GENERATOR starts, the TRANSFER SWITCH moves the input to it, and the batteries recharge.
+
+# 2. The parts
+
+DOUBLE CONVERSION   AC to DC to AC: the load always runs from the inverter
+RECTIFIER           turns incoming AC into DC
+INVERTER            turns DC back into clean AC
+LITHIUM-ION         the battery chemistry replacing lead-acid in UPS rooms
+RUNTIME             how long batteries carry full load: typically minutes
+GENERATOR           a diesel (or gas) engine and alternator, about 2-3 MW per unit
+TRANSFER SWITCH     the ATS that moves the UPS input from utility to generator
+EFFICIENCY          power out / power in; conversion loses a few percent
+
+# 3. A power cut, in order
+
+1. the utility feed drops
+2. the inverter keeps running on battery DC, no interruption
+3. generators get a start signal
+4. within about ten seconds they reach voltage and frequency
+5. the TRANSFER SWITCH moves the UPS input to the generators
+6. the batteries recharge; when the utility returns, the load moves back
+
+# 4. Why double conversion
+
+In DOUBLE CONVERSION the load never sees the utility directly: every watt passes through the RECTIFIER and INVERTER, so sags, spikes and the outage itself are invisible to the racks. The price is EFFICIENCY: two conversions lose a few percent, which this tab's art puts at 3-5%. "Eco" modes bypass the conversion when the utility is clean.
+
+# 5. Batteries and runtime
+
+LITHIUM-ION cabinets take a fraction of the space and weight of lead-acid and last longer. RUNTIME is sized for minutes, enough to cover generator start with margin; carrying the load for hours would need far more batteries than a site can hold.
+
+# 6. Generators
+
+Each GENERATOR is a large diesel engine and alternator, about 2-3 MW, in a row outside the hall with fuel on site for a day or more. Life-safety rules (NFPA 110 "Type 10") require standby power within 10 seconds; data center gensets are built to that.
+
+# 7. AI loads are spiky
+
+GPUs swing between full power and idle in milliseconds as training steps sync up. Rapid swings stress UPS systems, generators and even the grid, so newer designs add batteries or capacitors in the rack to smooth them.
+
+# 8. Who makes it
+
+UPS: Vertiv (VRT), Schneider Electric, Eaton (ETN), ABB. Generators: Caterpillar (CAT), Cummins (CMI), Rolls-Royce (mtu), Kohler. Batteries: Samsung SDI, LG, CATL and others.
+
+# 9. Chokepoints and risks
+
+- Generator lead times and air permits for diesel engines.
+- Conversion losses scale with every megawatt.
+- Spiky AI loads were not what UPS systems were designed for.
+
+# 10. Sources
+
+  [1] UPS conversion loss 3-5%: this tab's art (example 100 MW site)
+  [2] Standby within 10 seconds: NFPA 110 (Type 10, Level 1)
+  [3] Double conversion, Li-ion, generator sizes: textbook / vendor specifications

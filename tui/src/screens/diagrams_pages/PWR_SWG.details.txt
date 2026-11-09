@@ -1,0 +1,63 @@
+== MEDIUM VOLTAGE
+# What it does
+Medium voltage, 13.8 to 34.5 kV, is the level at which power is distributed around a campus from the substation to each building.
+# Why it matters
+It keeps cable sizes manageable over hundreds of metres; NVIDIA's 800 V DC plan converts straight from 13.8 kV at the perimeter.
+# Source
+NVIDIA 800 VDC blog; textbook.
+
+== CIRCUIT BREAKER
+# What it does
+A circuit breaker opens a circuit on command or on a fault; at medium voltage the contacts separate inside a vacuum bottle so the arc dies quickly.
+# Why it matters
+It is what keeps one fault from taking down the whole site; breakers must be rated for the largest fault current the system can produce.
+# Source
+Textbook.
+
+== UNIT SUBSTATION
+# What it does
+A unit substation pairs a transformer with its switchgear to step medium voltage down to 480 V (or 415 V) for a building or hall.
+# Why it matters
+Each one feeds a block of UPS and racks; as racks go from tens to hundreds of kilowatts, more and larger units are needed.
+# Source
+Textbook.
+
+== 480 V
+# What it does
+480 V three-phase is the US low-voltage distribution level inside data centers; much of the world uses 415/240 V.
+# Why it matters
+It feeds UPS systems and rack power; at 480 V a 1 MW load draws about 1,200 A, so copper adds up fast.
+# Source
+Textbook.
+
+== ATS
+# What it does
+An automatic transfer switch watches the utility supply and, after an outage, moves the load to the generators once they are running, then back again.
+# Why it matters
+It is the link between backup generators and the load; the UPS has to carry the load during the seconds the transfer takes.
+# Source
+NFPA 110; textbook.
+
+== PROTECTION RELAY
+# What it does
+A protection relay measures currents and voltages and trips breakers when it detects a fault, coordinated so the nearest breaker opens first.
+# Why it matters
+Good coordination means a fault drops one feed, not the building.
+# Source
+Textbook (IEEE 242).
+
+== ARC FLASH
+# What it does
+An arc flash is the explosive release of energy when current arcs through air in a fault, reaching thousands of degrees.
+# Why it matters
+It is the main safety hazard in power rooms; switchgear is built to contain arcs and work is done de-energized or in rated gear.
+# Source
+NFPA 70E.
+
+== REDUNDANCY
+# What it does
+Redundancy duplicates power paths: 2N gives two complete independent paths, N+1 one spare unit per group.
+# Why it matters
+It lets any part fail or be serviced without dropping load, at the cost of buying and housing up to twice the equipment.
+# Source
+Textbook (Uptime tiers).

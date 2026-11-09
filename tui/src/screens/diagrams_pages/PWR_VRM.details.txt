@@ -1,0 +1,63 @@
+== INTERMEDIATE BUS
+# What it does
+An intermediate bus converter steps the rack's roughly 50 V DC down to 12 V on the board, feeding the regulators around each chip.
+# Why it matters
+It splits a large voltage step into two efficient ones; as rack voltage rises toward 800 V, more conversion stages move onto boards and sidecars.
+# Source
+Textbook; NVIDIA 800 VDC blog.
+
+== VOLTAGE REGULATOR
+# What it does
+A voltage regulator holds the GPU's supply at its set voltage while the chip's current swings by hundreds of amps in microseconds.
+# Why it matters
+If the voltage sags the chip errors or crashes; if it overshoots it wastes power or ages the silicon.
+# Source
+Textbook.
+
+== MULTIPHASE
+# What it does
+A multiphase regulator splits the load across many identical phases switching in turn, so each carries tens of amps and their ripples cancel.
+# Why it matters
+It is the only practical way to deliver over 1,000 A; Infineon's 16-phase design first did it in 2019.
+# Source
+Infineon (Embedded Computing Design).
+
+== POWER STAGE
+# What it does
+A power stage packages the high- and low-side transistors and their driver for one phase, chopping 12 V into fast pulses.
+# Why it matters
+Its switching and conduction losses become heat right next to the GPU, inside the liquid-cooled tray.
+# Source
+Textbook.
+
+== INDUCTOR
+# What it does
+Each phase's inductor stores energy between pulses and smooths them into a steady current at the low core voltage.
+# Why it matters
+Inductors are among the tallest parts on the board, which is one reason vertical power under the GPU is attractive.
+# Source
+Textbook.
+
+== CORE VOLTAGE
+# What it does
+The core voltage of current GPUs is about 0.75 to 0.85 V, the supply for their logic transistors.
+# Why it matters
+Low voltage saves power in the transistors but means enormous current: a 1,200 W GPU at 0.8 V draws 1,500 A.
+# Source
+Electronic Design.
+
+== VERTICAL POWER
+# What it does
+Vertical power delivery places the regulators directly under the GPU on the back of the board, so current flows straight up through it.
+# Why it matters
+It shortens the high-current path to millimetres; Infineon introduced vertical modules in 2026 and Crescendo showed about 1,000 A at 0.75 V.
+# Source
+Electronic Design, 2026.
+
+== I2R LOSS
+# What it does
+I2R loss is power lost as heat in conductors: current squared times resistance.
+# Why it matters
+At 1,500 A even 0.1 milliohm wastes 225 W, so the distance from regulator to chip directly costs power.
+# Source
+Textbook.

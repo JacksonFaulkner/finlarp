@@ -164,6 +164,8 @@ pub fn orbitable(page: &str, key: char) -> bool {
     ORBIT.iter().any(|(p, k)| *p == page && *k == key)
         || (super::diagrams_scene_chip::node(page).is_some() && super::diagrams_scene_chip::keys_for(page, key).is_some())
         || super::diagrams_scene_pkg::keys_for(page, key).is_some()
+        || super::diagrams_scene_link::keys_for(page, key).is_some()
+        || super::diagrams_scene_pwr::keys_for(page, key).is_some()
 }
 
 /// The animation for a node page (keyed like VISUALS), if it has one.
@@ -198,6 +200,8 @@ pub fn section_anim(page: &str, i: usize) -> Option<fn() -> Box<dyn Scene>> {
         "HBM STACK" => super::diagrams_scene_hbm::SECTIONS.get(i).copied(),
         _ if super::diagrams_scene_chip::node(page).is_some() => super::diagrams_scene_chip::node(page).and_then(|n| n.sections.get(i).copied()),
         _ if super::diagrams_scene_pkg::node(page).is_some() => super::diagrams_scene_pkg::node(page).and_then(|n| n.sections.get(i).copied()),
+        _ if super::diagrams_scene_link::node(page).is_some() => super::diagrams_scene_link::node(page).and_then(|n| n.sections.get(i).copied()),
+        _ if super::diagrams_scene_pwr::node(page).is_some() => super::diagrams_scene_pwr::node(page).and_then(|n| n.sections.get(i).copied()),
         _ => super::diagrams_nodes::section(page, i),
     }
 }
@@ -253,6 +257,12 @@ pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
         return Some(s);
     }
     if let Some(s) = super::diagrams_scene_pkg::overview(page) {
+        return Some(s);
+    }
+    if let Some(s) = super::diagrams_scene_link::overview(page) {
+        return Some(s);
+    }
+    if let Some(s) = super::diagrams_scene_pwr::overview(page) {
         return Some(s);
     }
     match page {

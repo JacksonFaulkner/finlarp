@@ -1,0 +1,63 @@
+== CORE
+# What it does
+The core is the central glass channel that carries the light: about 8.2 um across in single-mode fiber and 50 um in OM3/OM4 multimode fiber, with a slightly higher refractive index than the cladding.
+# Why it matters
+Its size decides single-mode or multimode, which sets the lasers you can use and how far the signal can go.
+# Source
+Corning ecatalog; textbook.
+
+== CLADDING
+# What it does
+The cladding is 125 um of glass around the core with a slightly lower refractive index, so the boundary reflects light back into the core.
+# Why it matters
+Its 125 um diameter is standard across fiber types, so connectors and splicers work with any of them.
+# Source
+Corning SMF-28 Ultra datasheet.
+
+== COATING
+# What it does
+A dual-layer acrylate coating, 242 um across (or 200 um in reduced-diameter fiber), is applied as the fiber is drawn to protect the glass.
+# Why it matters
+Bare glass breaks at the first scratch; thinner 200 um coatings fit more fibers into a cable, which dense AI cabling needs.
+# Source
+Corning SMF-28 Ultra product page.
+
+== TOTAL INTERNAL REFLECTION
+# What it does
+When light inside a higher-index material meets a lower-index one at a shallow enough angle, all of it reflects; none escapes.
+# Why it matters
+It is why light can travel kilometres in a fiber: the core-cladding boundary is a perfect mirror for light travelling nearly along the fiber.
+# Source
+Textbook (Snell's law).
+
+== SINGLE-MODE
+# What it does
+Single-mode fiber's narrow core carries light as one guided mode; at 1310 nm its mode field is 9.2 um wide, a little wider than the core.
+# Why it matters
+With only one path, pulses don't smear, so links reach kilometres; it needs InP lasers and precise alignment.
+# Source
+Corning SMF-28 Ultra datasheet.
+
+== MULTIMODE
+# What it does
+Multimode fiber's 50 um core carries many paths at once and accepts light easily from cheap 850 nm VCSELs.
+# Why it matters
+The paths have different lengths, so pulses smear (modal dispersion) and reach is limited to about 100 m at today's rates.
+# Source
+Textbook.
+
+== ATTENUATION
+# What it does
+Attenuation is the light lost per kilometre to scattering and absorption: at most 0.32 dB/km at 1310 nm and 0.18 dB/km at 1550 nm for SMF-28 Ultra.
+# Why it matters
+Inside a data center the glass loses under 1 dB; connectors and splices dominate the loss budget instead.
+# Source
+Corning SMF-28 Ultra datasheet.
+
+== LATENCY
+# What it does
+Light in glass travels at about two thirds of its vacuum speed, about 5 microseconds per kilometre.
+# Why it matters
+It is a floor on how fast distant GPUs or data centers can talk; hollow-core fiber, guiding light in air, cuts it by about a third.
+# Source
+Textbook (group index about 1.47).

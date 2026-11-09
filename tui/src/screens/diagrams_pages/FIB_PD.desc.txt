@@ -1,0 +1,1 @@
+The photodiode turns light back into electricity. Each absorbed photon frees an electron and a hole, giving a tiny current; a TIA (transimpedance amplifier) turns it into a voltage the DSP can read. Single-mode receivers use InGaAs; silicon photonics uses germanium. Receiver noise and sensitivity set how much light a link can afford to lose. Tickers: COHR, LITE, MTSI, SMTC.

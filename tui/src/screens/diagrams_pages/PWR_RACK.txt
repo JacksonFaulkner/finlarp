@@ -1,0 +1,55 @@
+# 1. What happens: AC in at the top, DC down the back
+
+Power cables from the PDU plug into POWER SHELF units at the top and bottom of the rack. Each shelf holds six PSU modules that convert AC to about 50 V DC and push it onto a copper BUSBAR running down the back of the rack. Every compute tray and switch tray clips onto the busbar and takes its share. A GB200 NVL72 rack draws about 120 kW this way.
+
+# 2. The parts
+
+PDU                 power distribution unit: breakers and outlets feeding the rack
+POWER SHELF         a 1U shelf of power supplies, 33 kW in an NVL72
+PSU                 one power-supply module, 5.5 kW, AC to DC
+BUSBAR              a copper bar down the back carrying DC to every tray
+48 V                the rack DC bus family (about 50 V nominal in NVL72)
+KILOWATTS PER RACK  about 120 kW for NVL72, 132 kW design power, peaks near 192 kW
+800 VDC             NVIDIA's plan to feed 1 MW racks with 800 V DC from 2027
+SIDECAR             a separate power rack beside the compute rack
+
+# 3. Power through the rack, in order
+
+1. 415/480 V three-phase AC arrives from the PDU
+2. each POWER SHELF splits it across six PSU modules
+3. the PSUs make about 50 V DC
+4. the BUSBAR carries it down the back of the rack
+5. each tray takes DC through a clip and converts it again on the board (see VRM)
+
+# 4. Why so many amps
+
+Power is voltage times current: 120 kW at about 50 V is about 2,400 A, and a 192 kW peak is over 3,800 A. That is why the BUSBAR is a thick copper bar, not a cable, and why every connector in the path is rated for hundreds of amps.
+
+# 5. Shelves and redundancy
+
+NVIDIA's DGX GB200 guide describes eight 33 kW shelves for N+N redundancy; other builds use six. Each shelf's six 5.5 kW PSU modules can be pulled and replaced while the rack runs.
+
+# 6. KILOWATTS PER RACK keeps rising
+
+Cloud racks drew 10-20 kW. GB200 NVL72 is about 120 kW (HPE lists 132 kW design power, peaks near 192 kW), and NVIDIA's next racks aim at 600 kW to 1 MW. At 1 MW, a 54 V bus would need up to 200 kg of copper busbar per rack, according to NVIDIA.
+
+# 7. 800 V DC
+
+NVIDIA's 800 VDC plan converts 13.8 kV AC straight to 800 V DC at the edge of the building and runs it to the racks, removing conversion steps; it claims up to 30% lower total cost of ownership, with full-scale production alongside its Kyber racks in 2027. Higher voltage means sixteen times less current than 50 V, so far thinner copper. A SIDECAR power rack can do the final conversion beside the compute rack.
+
+# 8. Who makes it
+
+Power shelves and PSUs: Delta, Lite-On, Vertiv (VRT), Flex. PDUs and busway: Vertiv, Schneider, Eaton (ETN), Legrand. NVIDIA (NVDA) sets the rack reference designs; around 20 partners support 800 VDC.
+
+# 9. Chokepoints and risks
+
+- Thousands of amps per rack strain connectors and busbars.
+- 800 V DC needs new safety practice, breakers and connectors.
+- Each rack's power spikes as GPUs sync, pushing designs to add in-rack storage.
+
+# 10. Sources
+
+  [1] NVL72 shelves, busbar, 120 kW: docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html
+  [2] 5.5 kW PSUs per 33 kW shelf: vertiv.com (PowerDirect 3000 33 kW datasheet)
+  [3] 132 kW TDP, 192 kW peak: hpe.com/us/en/collaterals/collateral.a50009224enw.html
+  [4] 800 VDC, 1 MW racks, 200 kg copper, 30% TCO: developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories

@@ -1,0 +1,55 @@
+# 1. What happens: a laser turns each symbol into a pulse of light
+
+The DSP's symbols reach a driver, which turns them into currents or voltages for the light source. In a single-mode module that source is usually an EML: a DFB LASER making steady light, followed on the same chip by a modulator that dims it to each PAM4 level. Short multimode links use a VCSEL, switched directly. SILICON PHOTONICS modules use a separate CW LASER and a modulator etched in silicon. Lenses focus the light into the fiber.
+
+# 2. The parts
+
+DFB LASER           a laser with a grating that locks it to one WAVELENGTH
+EML                 electro-absorption modulated laser: DFB plus modulator on one chip
+VCSEL               vertical-cavity laser: light leaves the top of the chip, cheap, for multimode
+SILICON PHOTONICS   optical circuits made in a silicon fab; silicon can't emit light itself
+MACH-ZEHNDER        a modulator that splits light into two arms and recombines it
+CW LASER            continuous-wave: a steady laser with no data, feeding a silicon modulator
+INDIUM PHOSPHIDE    InP, the semiconductor single-mode lasers are made of
+WAVELENGTH          1310 nm (O-band) for data-center single-mode, 850 nm for VCSELs
+
+# 3. A symbol becomes light, in order
+
+1. the driver receives a clean PAM4 symbol from the DSP
+2. the DFB section makes steady light at 1310 nm
+3. the modulator section absorbs part of it, to one of four brightness levels
+4. a lens couples the light into the fiber's core
+5. a monitor photodiode keeps the laser's power steady
+
+# 4. EML, VCSEL, silicon photonics
+
+EML: the workhorse of single-mode modules (DR, FR), fast and clean, made in small InP fabs. VCSEL: light leaves the surface, so whole wafers can be tested; cheap and low power but multimode only, up to about 100 m. SILICON PHOTONICS: the modulator, splitters and waveguides are built in a silicon fab, fed by an InP CW LASER; it scales with silicon manufacturing and is what co-packaged optics use.
+
+# 5. How a Mach-Zehnder modulator works
+
+Light splits into two waveguide arms. A voltage on electrodes along each arm slows the light slightly. When the two halves recombine, in phase they add (bright), out of phase they cancel (dark), and anything between gives the middle PAM4 levels. MACH-ZEHNDER modulators are larger than ring modulators but tolerant of temperature.
+
+# 6. 200G per lane
+
+1.6T modules run eight lanes at 200G. That needs EMLs and silicon modulators with roughly twice the bandwidth of 100G parts. Silicon photonics can reach 200G per lane, but still needs an InP laser to supply the light.
+
+# 7. The laser shortage
+
+TrendForce reported in December 2025 that NVIDIA had locked up capacity at key EML suppliers, pushing lead times beyond 2027 and creating a worldwide shortage. Cloud providers moved to CW LASER plus silicon-modulator designs as the main alternative, which shifts demand to InP CW lasers rather than removing it. Upstream, China produces most of the world's indium (one report says about 70%).
+
+# 8. Who makes it
+
+EMLs: Lumentum (LITE), Coherent (COHR), Mitsubishi Electric, Sumitomo, Broadcom (AVGO). VCSELs: Coherent, Broadcom, Lumentum. Silicon photonics: Intel, Cisco, Broadcom, Marvell and others, with wafers from foundries such as TSMC, GlobalFoundries and Tower (TSEM).
+
+# 9. Chokepoints and risks
+
+- EML capacity is small and slow to add; lead times run past 2027.
+- Every route still needs INDIUM PHOSPHIDE lasers.
+- Lasers fail more than electronics, which matters most when they sit inside the switch package (see CPO).
+
+# 10. Sources
+
+  [1] EML shortage: trendforce.com/presscenter/news/20251208-12823.html
+  [2] EML suppliers, CW laser route: ledinside.com/intelligence/2025/12/2025_12_09_01
+  [3] Indium share (report): kucoin.com/blog/inp-laser-shortage-ai-data-centers
+  [4] Laser and modulator types: textbook (Agrawal, Fiber-Optic Communication Systems)

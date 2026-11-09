@@ -1,0 +1,63 @@
+== DFB LASER
+# What it does
+A distributed-feedback laser has a grating etched along its cavity that reflects only one wavelength, so it emits a single, narrow line of light.
+# Why it matters
+A single wavelength spreads less in fiber, so the pulses stay sharp over kilometres; it is the light source inside an EML.
+# Source
+Textbook (Agrawal).
+
+== EML
+# What it does
+An electro-absorption modulated laser puts a DFB laser and an electro-absorption modulator on one InP chip: the laser runs steadily and the modulator absorbs part of the light to set each level.
+# Why it matters
+EMLs drive most single-mode data-center modules; 200G-per-lane EMLs have been short, with lead times reported beyond 2027.
+# Source
+TrendForce, December 2025.
+
+== VCSEL
+# What it does
+A vertical-cavity surface-emitting laser sends light straight up out of the chip from between two mirror stacks, into multimode fiber.
+# Why it matters
+VCSELs are cheap and low power and can be tested on the wafer, but only reach about 100 m in multimode fiber, so they serve in-row links.
+# Source
+Textbook.
+
+== SILICON PHOTONICS
+# What it does
+Silicon photonics builds waveguides, splitters, modulators and germanium photodiodes in a silicon fab. Silicon can't emit light, so an external InP laser supplies it.
+# Why it matters
+It scales with silicon manufacturing and is the main alternative to scarce EMLs; co-packaged optics depend on it.
+# Source
+LEDinside / TrendForce, December 2025.
+
+== MACH-ZEHNDER
+# What it does
+A Mach-Zehnder modulator splits light into two arms, delays one relative to the other with a voltage, and recombines them so the halves add or cancel.
+# Why it matters
+It sets PAM4 brightness levels in silicon photonics and tolerates temperature well, but is larger and needs more drive than a ring modulator.
+# Source
+Textbook.
+
+== CW LASER
+# What it does
+A continuous-wave laser runs steadily and carries no data; it supplies light to a silicon modulator, which adds the data.
+# Why it matters
+CW lasers plus silicon modulators became the main alternative for cloud providers facing EML shortages, moving demand to high-power InP CW lasers.
+# Source
+LEDinside / TrendForce, December 2025.
+
+== INDIUM PHOSPHIDE
+# What it does
+Indium phosphide is the compound semiconductor that 1310 nm and 1550 nm lasers are grown on; its band gap emits at those wavelengths.
+# Why it matters
+Every optical route still needs InP lasers; substrate supply is concentrated, and one report puts China at about 70% of indium production.
+# Source
+Report cited by KuCoin research; Reuters (via the same).
+
+== WAVELENGTH
+# What it does
+Data-center single-mode links run at 1310 nm (the O-band), where standard fiber spreads pulses least; multimode VCSEL links run at 850 nm.
+# Why it matters
+Wavelength decides the fiber, the laser material and the reach; long-haul coherent links use 1550 nm where loss is lowest.
+# Source
+Corning SMF-28 Ultra; textbook.

@@ -1,0 +1,63 @@
+== PDU
+# What it does
+A power distribution unit takes a three-phase feed and splits it through breakers to the rack's power shelves or servers.
+# Why it matters
+At 120 kW per rack, PDUs and their whips carry far more current than in cloud racks, so many sites move to overhead busway instead.
+# Source
+Textbook.
+
+== POWER SHELF
+# What it does
+A power shelf is a rack-mounted enclosure of hot-swappable power supplies that converts AC to DC for the busbar; NVL72 shelves are 33 kW each.
+# Why it matters
+NVIDIA describes eight shelves for N+N redundancy in DGX GB200; some builds use six.
+# Source
+NVIDIA DGX GB200 user guide; Gigabyte; HPE.
+
+== PSU
+# What it does
+A PSU module converts AC to DC; Vertiv's 33 kW NVL72 shelf holds six 5.5 kW modules.
+# Why it matters
+Modules swap while the rack runs; their efficiency decides how much of 120 kW becomes heat before it reaches a chip.
+# Source
+Vertiv PowerDirect 3000 datasheet.
+
+== BUSBAR
+# What it does
+The busbar is a copper bar down the back of the rack that carries DC to every compute and switch tray, which clip onto it.
+# Why it matters
+At about 50 V and 120 kW it carries roughly 2,400 A; NVIDIA says a 1 MW rack at 54 V would need up to 200 kg of copper.
+# Source
+NVIDIA DGX GB200 guide; NVIDIA 800 VDC blog.
+
+== 48 V
+# What it does
+48-54 V DC is the rack power bus family; NVIDIA and HPE list about 50 V nominal for NVL72.
+# Why it matters
+It replaced 12 V racks to cut current fourfold, but AI rack power has grown faster than that, pushing toward 800 V.
+# Source
+NVIDIA; HPE.
+
+== KILOWATTS PER RACK
+# What it does
+Kilowatts per rack measures power density: about 120 kW for GB200 NVL72, with HPE listing 132 kW design power and peaks near 192 kW.
+# Why it matters
+Density sets cooling (liquid, not air), power distribution and building design; next-generation racks target 600 kW to 1 MW.
+# Source
+NVIDIA; HPE; DataCenterDynamics.
+
+== 800 VDC
+# What it does
+NVIDIA's 800 V DC architecture converts 13.8 kV AC to 800 V DC at the building edge and distributes it to the racks.
+# Why it matters
+It cuts current and copper and removes conversion steps; NVIDIA claims up to 30% lower TCO, with full-scale production alongside Kyber racks in 2027.
+# Source
+NVIDIA developer blog, May 2025.
+
+== SIDECAR
+# What it does
+A sidecar is a separate power rack placed beside the compute rack, holding the conversion and storage equipment that no longer fits in it.
+# Why it matters
+As racks head to hundreds of kilowatts, power gear moves out to free space for GPUs; 800 V designs use sidecars to make the final conversion.
+# Source
+Vertiv 800 VDC reference designs (trade press).

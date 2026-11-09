@@ -1,0 +1,56 @@
+# 1. What happens: a chip that cleans up every bit going in and out of the module
+
+The host chip (a GPU or switch) sends data to the module over copper traces, eight SERDES lanes side by side. Each lane is a PAM4 signal: four voltage levels, two bits per symbol. By the time it reaches the module the signal is blurred and noisy. The DSP samples it, applies EQUALIZATION to undo the blur, checks it with FEC, and drives clean symbols to the laser driver. On the receive side it does the same for the weak, noisy signal from the photodiode.
+
+# 2. The parts
+
+SERDES          serializer/deserializer: the fast electrical lanes between chips
+PAM4            four signal levels, two bits per symbol
+BAUD RATE       symbols per second; 53.125 GBd for a 100G lane, 106.25 GBd for 200G
+EQUALIZATION    filters that undo the blur copper and optics add to each symbol
+FEC             forward error correction: extra bits that let the far end fix errors
+RETIMER         recovers the clock and resends the data clean; the DSP is one
+LPO             linear pluggable optics: no DSP in the module, the host's SerDes drives the laser directly
+POWER PER BIT   energy per bit moved, in picojoules; the DSP is most of a module's power
+
+# 3. One symbol's trip, in order
+
+1. the host's SERDES puts a PAM4 symbol on a copper trace
+2. the trace and connector smear it into its neighbours
+3. the DSP samples the signal and EQUALIZATION separates the levels again
+4. the DSP checks and re-encodes the FEC
+5. the driver turns the clean symbol into a current for the laser
+6. at the far end the photodiode's signal goes through a DSP that does the same in reverse
+
+# 4. NRZ vs PAM4: two bits per symbol
+
+NRZ sends one bit per symbol with two levels. PAM4 sends two bits with four levels, doubling the data at the same BAUD RATE. The cost: the gap between levels is a third of NRZ's, so noise matters more (about 9.5 dB of signal-to-noise). A 100G lane runs PAM4 at 53.125 GBd and a 200G lane at 106.25 GBd.
+
+# 5. Equalization and the eye
+
+Overlay many symbols on top of each other and the levels form "eyes": open gaps where the receiver can decide which level it saw. Copper and lasers blur symbols into each other and close the eye. EQUALIZATION filters (and in the DSP, digital filters with many taps) reshape the signal until the eye opens again.
+
+# 6. FEC: fixing errors after the fact
+
+Even an open eye has errors. FEC adds redundant bits so the receiver can correct them. Ethernet at 100G per lane uses a Reed-Solomon code, RS(544,514) ("KP4"), which turns a raw error rate of about 2 in 10,000 into a near-error-free link. The cost is about 5% overhead and some added delay.
+
+# 7. Power, and taking the DSP out
+
+A 1.6T module with a 3 nm DSP is listed at up to about 25 W, and OCP figures put a 5 nm DSP module near 18.75 pJ/bit and a 3 nm one near 16.25 pJ/bit. LPO removes the DSP and lets the host's SERDES drive the optics directly: around 6.25 pJ/bit, and Nokia lists a 1.6T DR8 LPO module under 10 W, 75% below a fully retimed one. LRO keeps the DSP only on the transmit side. The trade is interoperability: without a RETIMER, the host's SerDes must be good enough for every module it talks to.
+
+# 8. Who makes it
+
+Marvell (MRVL) and Broadcom (AVGO) make most optical PAM4 DSPs; Broadcom's 3 nm Sian3 drives 200G-per-lane 1.6T modules. Credo (CRDO) makes DSPs and active electrical cables. All are fabbed at TSMC.
+
+# 9. Chokepoints and risks
+
+- Every lane-rate step (100G to 200G to 400G) needs a new DSP on a newer node.
+- DSP power grows with lanes; tens of thousands of modules per cluster add up.
+- LPO cuts power but makes links depend on the host chip's SerDes quality.
+
+# 10. Sources
+
+  [1] DSP and LPO power: 100gmodules.com/info/1-6t-osfp224-transceivers-in-scalable-ai-infra-103543304.html (citing OCP EMEA 2025)
+  [2] Nokia 1.6T DR8 LPO: nokia.com/asset/f/215574/
+  [3] 1.6T module power and Sian3 DSP: resource.naddod.com (OSFP 1.6T 2xFR4 datasheet)
+  [4] PAM4, baud rates and RS(544,514) FEC: IEEE 802.3ck / 802.3dj (textbook summary)

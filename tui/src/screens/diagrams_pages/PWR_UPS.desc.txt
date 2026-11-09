@@ -1,0 +1,1 @@
+The UPS keeps the racks running through a power cut: incoming AC is turned into DC, which charges batteries and feeds an inverter that rebuilds clean AC. When the utility drops, batteries carry the load instantly for a few minutes while diesel generators start, within about ten seconds, and the transfer switch moves the load to them. Tickers: VRT, ETN, CAT, CMI.

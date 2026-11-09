@@ -1,0 +1,63 @@
+== POWER TRANSFORMER
+# What it does
+A power transformer steps transmission voltage down to medium voltage for a site, using a steel core and copper windings in an oil-filled tank.
+# Why it matters
+Every campus needs one or more at its substation, and they are the longest-lead item on the grid side, about 128 weeks in 2025.
+# Source
+Wood Mackenzie Q2 2025 survey (via POWER).
+
+== CORE
+# What it does
+The core is a stack of thin electrical-steel sheets forming closed loops (three limbs and two yokes) that carry the magnetic field between the windings.
+# Why it matters
+Thin, insulated sheets cut the eddy currents that would otherwise heat the steel; core losses run all day even at no load.
+# Source
+Textbook.
+
+== WINDINGS
+# What it does
+Copper coils around each core limb: the high-voltage winding has many turns, the low-voltage winding inside it has few, heavier turns.
+# Why it matters
+Their resistance is most of the transformer's loss at full load, and their insulation decides how long it lasts.
+# Source
+Textbook.
+
+== TURNS RATIO
+# What it does
+The ratio of turns between the high- and low-voltage windings sets the voltage ratio: 230 kV to 34.5 kV needs about 6.7 times more turns on the high side.
+# Why it matters
+Current goes the other way, so the low-voltage side carries several times the current through thicker copper.
+# Source
+Textbook.
+
+== BUSHING
+# What it does
+A bushing is a tall porcelain or polymer insulator that carries a conductor through the grounded tank lid without arcing to it.
+# Why it matters
+High-voltage bushings are tall because the insulation path must be long; they are a common failure point and a long-lead spare.
+# Source
+Textbook.
+
+== RADIATOR
+# What it does
+Radiators are finned steel panels on the tank sides; hot oil rises into them, cools, and sinks back, sometimes helped by fans and pumps.
+# Why it matters
+Cooling sets how much load a transformer can carry; overheating ages the winding insulation.
+# Source
+Textbook.
+
+== LEAD TIME
+# What it does
+Lead time is the wait from order to delivery: about 50 weeks in 2021, 120 weeks in 2024, and about 128 weeks for large power transformers in Q2 2025.
+# Why it matters
+It can set when a data center opens; Wood Mackenzie expects most specifications to stay in shortage toward 2030.
+# Source
+Wood Mackenzie.
+
+== ELECTRICAL STEEL
+# What it does
+Grain-oriented electrical steel is silicon steel rolled so its crystals align with the magnetic field, cutting core losses.
+# Why it matters
+Few mills make it; in the US Cleveland-Cliffs is the domestic producer, tying transformer output to one steel supplier.
+# Source
+Textbook; industry reporting.

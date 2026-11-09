@@ -1,0 +1,56 @@
+# 1. What happens: one module holds both ends of the conversion
+
+A pluggable transceiver slides into a cage on the switch or server's front panel. Its edge connector takes eight electrical lanes from the host chip. Inside: a DSP, laser drivers and lasers on one side, photodiodes and TIAs on the other, lenses, and an MPO connector where the fiber plugs in. The shell is an OSFP (or QSFP-DD) with fins to shed the heat. The same module receives as well as sends.
+
+# 2. The parts
+
+OSFP      octal small form-factor pluggable: 8 lanes, room for about 25 W, finned shell
+QSFP-DD   double-density QSFP: 8 lanes in a smaller, cooler shell
+DR8       eight single-mode fibers each way, one 100G or 200G lane each, about 500 m
+2xFR4     four wavelengths on one fiber (CWDM), two sets, to 2 km
+SR8       eight multimode fibers, 850 nm VCSELs, short reach
+DAC       direct-attach copper: no optics, a few metres, cheapest
+AOC       active optical cable: transceivers built onto both ends of a fiber
+MPO       multi-fiber connector: 12 or 16 fibers in one plug
+
+# 3. One module's job, in order
+
+1. the host's eight SerDes lanes arrive at the edge connector
+2. the DSP retimes them
+3. drivers and lasers turn each lane into light
+4. lenses couple the light into fibers in the MPO connector
+5. in the other direction, photodiodes and TIAs turn light back into lanes
+6. the module's controller reports power, temperature and light levels to the host
+
+# 4. Reach decides the type
+
+On a board, copper traces. In the rack, a few metres: DAC copper, cheap but heavy and limited in reach. Across a row, up to about 100 m: AOC or SR8 multimode. Across a building, up to 500 m and 2 km: DR8 and 2xFR4 single-mode. Between buildings and cities: coherent modules (ZR) at 80 km and beyond.
+
+# 5. Lanes and speeds
+
+800G modules carry eight 100G PAM4 lanes; 1.6T modules carry eight 200G lanes using 3 nm DSPs. A DR8 module needs a separate fiber per lane, 16 in all, through an MPO connector; 2xFR4 multiplexes four wavelengths onto each fiber to use only four.
+
+# 6. Power and heat
+
+Listings put 1.6T DSP modules at up to about 25-26 W each. A big switch has 64 such ports, so the optics can draw over a kilowatt; the OSFP shell's fins and the switch's fans carry it away. Linear (LPO) modules cut that roughly in half or more.
+
+# 7. Scale: modules per GPU
+
+Large AI clusters connect every GPU through several tiers of switches, and every switch-to-switch link has a module at each end, so clusters use several modules per GPU. Volume, not just speed, is what drives the market.
+
+# 8. Who makes it
+
+LightCounting's 2024 ranking had Innolight first (revenue up 114% to over $3.3 billion) and Eoptolink third ($1.2 billion, up 175%), with Coherent (COHR) a long-time leader; seven of the top ten were Chinese. Lumentum (LITE) and Broadcom supply lasers; Fabrinet (FN) assembles modules under contract.
+
+# 9. Chokepoints and risks
+
+- Lasers (EMLs) and DSPs set how many modules can ship.
+- Most volume is made in China and Southeast Asia, exposed to trade policy.
+- Module power at cluster scale pushes toward LPO and co-packaged optics.
+
+# 10. Sources
+
+  [1] Vendor ranking: lightcounting.com/newsletter/en/may-2025-optical-vendor-landscape-333 ; m.c114.com.cn/w5472-1290362.html
+  [2] 1.6T power and DSP: resource.naddod.com (OSFP 1.6T 2xFR4 datasheet)
+  [3] LPO power: nokia.com/asset/f/215574/
+  [4] Reach tiers and module types: IEEE 802.3 PMD definitions (textbook summary)

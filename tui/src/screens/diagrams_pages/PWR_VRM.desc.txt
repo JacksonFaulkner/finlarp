@@ -1,0 +1,1 @@
+The VRM is the last step: regulators on the GPU board turn 50 V into 12 V, then 12 V into the chip's core voltage of about 0.8 V. A 1,000-1,200 W GPU at 0.8 V draws well over a thousand amps, so the job is split across many phases, each a power stage and an inductor, packed around (or under) the GPU. Tickers: IFNNY, MPWR, VICR, Renesas.

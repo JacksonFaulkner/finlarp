@@ -1,0 +1,63 @@
+== DOUBLE CONVERSION
+# What it does
+A double-conversion UPS rectifies all incoming AC to DC and inverts it back to AC, so the load always runs from the inverter.
+# Why it matters
+The racks never see utility disturbances or the outage itself, at the cost of a few percent lost in the two conversions.
+# Source
+Textbook.
+
+== RECTIFIER
+# What it does
+The rectifier converts incoming three-phase AC to DC, which charges the batteries and feeds the inverter.
+# Why it matters
+It is the first conversion stage and the first place power is lost as heat.
+# Source
+Textbook.
+
+== INVERTER
+# What it does
+The inverter switches DC with power transistors to rebuild a clean AC waveform for the load.
+# Why it matters
+Because it runs continuously, losing the utility changes nothing at the output: the inverter just draws from the batteries instead.
+# Source
+Textbook.
+
+== LITHIUM-ION
+# What it does
+Lithium-ion battery cabinets store the energy that carries the load between an outage and generator start.
+# Why it matters
+They take a fraction of the space and weight of lead-acid and last longer, which matters as UPS rooms grow with megawatt halls.
+# Source
+Textbook.
+
+== RUNTIME
+# What it does
+Runtime is how long the batteries can carry full load, typically a few minutes in data centers.
+# Why it matters
+It only has to bridge generator start and transfer; sizing for hours would need far more batteries than a site can house.
+# Source
+Textbook.
+
+== GENERATOR
+# What it does
+A standby generator is a diesel (or gas) engine driving an alternator, about 2-3 MW per unit, in rows outside the data hall.
+# Why it matters
+NFPA 110 Type 10 requires standby power within 10 seconds; generators set how long a site survives a long outage, limited by fuel on site.
+# Source
+NFPA 110; vendor specifications.
+
+== TRANSFER SWITCH
+# What it does
+The automatic transfer switch moves the UPS input from the utility to running generators, and back when the utility returns.
+# Why it matters
+It must not connect two unsynchronized sources; the batteries carry the load during the switch.
+# Source
+NFPA 110.
+
+== EFFICIENCY
+# What it does
+Efficiency is power out over power in; a double-conversion UPS loses a few percent, which this tab's example puts at 3-5%.
+# Why it matters
+On a 100 MW site that is several megawatts of heat that must also be cooled; eco modes bypass conversion when the utility is clean.
+# Source
+This tab's example; textbook.

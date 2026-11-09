@@ -1,0 +1,54 @@
+# 1. What happens: power is split, switched and protected
+
+Medium-voltage cable runs from the substation to the switchgear house. Inside, a lineup of MEDIUM VOLTAGE cabinets splits the supply into feeds, each with a CIRCUIT BREAKER that opens in milliseconds if a PROTECTION RELAY sees a fault. Each feed goes to a UNIT SUBSTATION, a transformer that steps it down to 480 V, then to the UPS and on to the data hall. Generators connect through an ATS here too.
+
+# 2. The parts
+
+MEDIUM VOLTAGE      13.8 to 34.5 kV: the campus distribution level
+CIRCUIT BREAKER     a switch that can interrupt a fault current; vacuum breakers at medium voltage
+UNIT SUBSTATION     a transformer and its switchgear stepping medium voltage to 480 V
+480 V               the US low-voltage distribution level (415 V in much of the world)
+ATS                 automatic transfer switch: moves the load from utility to generator
+PROTECTION RELAY    measures current and voltage and trips breakers on a fault
+ARC FLASH           the explosive energy of a fault arc; switchgear is built to contain it
+REDUNDANCY          2N or N+1: duplicate paths so any one part can fail or be serviced
+
+# 3. A feed, in order
+
+1. medium-voltage cable arrives from the substation
+2. it lands on the main breaker and the switchgear bus
+3. feeder breakers split it into circuits
+4. each circuit feeds a UNIT SUBSTATION transformer down to 480 V
+5. low-voltage switchboards send it to the UPS and the data hall
+
+# 4. Breaking a fault
+
+A short circuit can draw tens of thousands of amps. The PROTECTION RELAY sees it within a cycle and tells the CIRCUIT BREAKER to open; at medium voltage the contacts part inside a vacuum bottle, where the arc can't sustain itself. Breakers upstream are set to wait a little longer, so only the faulted feed drops.
+
+# 5. Arc flash
+
+A fault arc in open air reaches thousands of degrees and blows out molten metal. ARC FLASH is why switchgear is enclosed, why it is rated to vent or contain arcs, and why technicians work on it only de-energized or in protective gear.
+
+# 6. Redundancy: 2N and N+1
+
+A data hall can't lose power for maintenance. REDUNDANCY means two complete paths (2N), each able to carry the whole load, or one spare unit for every N (N+1). Each server's two power supplies take one feed from each path.
+
+# 7. Where the generators join
+
+The ATS watches the utility feed. If it fails, the generators start and, once they reach voltage and frequency, the ATS moves the load onto them; when the utility returns it moves the load back. The UPS covers the seconds in between (see UPS).
+
+# 8. Who makes it
+
+Eaton (ETN), Schneider Electric, ABB, Siemens, Vertiv (VRT) and GE Vernova (GEV) make switchgear, breakers and unit substations; many are assembled in prefabricated power skids for faster construction.
+
+# 9. Chokepoints and risks
+
+- Switchgear and transformers both have long lead times (not sourced here).
+- Every added layer of REDUNDANCY doubles equipment.
+- More power per rack means more feeders and bigger breakers.
+
+# 10. Sources
+
+  [1] Distribution voltages in the data center: art from this tab (115-345 kV, 13.8-34.5 kV, 480 V)
+  [2] Breakers, relays, arc flash, 2N/N+1: textbook (IEEE 141, NFPA 70E)
+  [3] Generator transfer: NFPA 110
