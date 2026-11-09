@@ -8,8 +8,9 @@ Only screens that read public data are listed. The portfolio, notes, chat, godel
 data; chart and candles show portfolio history and mock bars; intraday is a live feed that starts empty. None of those
 are recorded.
 
-Text only: tmux captures characters, so anything drawn through the kitty graphics protocol (the 3D bell jar, pictures)
-comes out as placeholder boxes. The bell-jar clip is rendered offline by tools/poly3d/run.sh instead.
+Text only: tmux captures characters, so the recorder unsets the GHOSTTY_* variables. fl then draws the 3D bell jar and
+pictures as half-blocks; kitty images would come out as placeholder boxes. The README's bell-jar clip is rendered
+offline by tools/poly3d/run.sh instead.
 
     uv run --with pillow python -m jobs.record_screens [--only dossier] [--out docs/screens]
 
@@ -48,6 +49,7 @@ FG = (214, 218, 226)
 PAD = 12
 
 SGR = re.compile(r"\x1b\[([0-9;]*)m")
+GHOSTTY_VARS = ["GHOSTTY_RESOURCES_DIR", "GHOSTTY_BIN_DIR"]
 
 # xterm's 16 base colours; the rest of the 256 palette is computed.
 BASE16 = [
@@ -69,6 +71,17 @@ class Spec:
 
 
 SPECS = [
+    # The tour, the README's first GIF: home opens intraday (4 live tiles), Escape goes back to home, x opens
+    # diagrams, then polysilicon: node, page, zoom c (the 3D bell jar). h/l step the reactor's beats.
+    Spec(
+        "tour",
+        [],
+        keys=[
+            "i", "wait:6", "Escape", "wait:1",
+            "x", "wait:3", "l", "Enter", "Enter", "wait:3",
+            "c", "wait:3", "l", "wait:3", "l", "wait:3", "l", "wait:3", "h", "wait:2",
+        ],
+    ),
     # The launcher: the keys are the menu, and the cursor walks them.
     Spec("home", [], keys=["h", "h", "j", "l", "l"]),
     # The provenance demo: Revenue & segments, then `i` on a row to see the formula and its source.
@@ -211,7 +224,10 @@ def tmux(*args: str) -> str:
 
 def start(spec: Spec) -> str:
     session = f"gif-{spec.name}-{uuid.uuid4().hex[:6]}"
-    cmd = " ".join([f"'{BINARY}'", *(f"'{a}'" for a in spec.args)])
+    # Ghostty leaves GHOSTTY_* in the environment, and fl then draws kitty images that tmux cannot capture.
+    # Unset them so fl falls back to half-blocks, which the recorder can paint.
+    unset = [x for v in GHOSTTY_VARS for x in ("-u", v)]
+    cmd = " ".join(["env", *unset, f"'{BINARY}'", *(f"'{a}'" for a in spec.args)])
     tmux("new-session", "-d", "-s", session, "-x", str(COLS), "-y", str(ROWS), cmd)
     return session
 

@@ -4,7 +4,7 @@ Terminal-native equity research desk. SEC EDGAR filings, 13F holdings, insider t
 tweets land in a local DuckDB file; a Rust/ratatui terminal UI (`fl`) reads it, and an MCP server
 gives agents the same data.
 
-![dossier: press i on any value to see its formula and where it came from](docs/screens/dossier.gif)
+![tour: live intraday tiles, then the polysilicon bell jar in 3D, stepped through its beats](docs/screens/tour.gif)
 
 ## The rule
 
@@ -57,8 +57,9 @@ The Siemens bell jar from the polysilicon diagram (zoom `c`), in 3D:
 
 </details>
 
-These are recorded from the real binary by `just gifs` (see [Development](#development)). The bell jar is the
-exception: tmux cannot capture the 3D view, so `tools/poly3d` renders that clip offline with the same rasterizer.
+These are recorded from the real binary by `just gifs` (see [Development](#development)). The bell jar in the
+tour is the terminal's own half-block render. The clip above is rendered offline by `tools/poly3d` with the same
+rasterizer, at a finer resolution.
 
 ## Layout
 
