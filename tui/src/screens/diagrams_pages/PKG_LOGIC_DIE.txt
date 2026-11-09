@@ -1,0 +1,56 @@
+# 1. What happens: the compute die, as big as one exposure allows
+
+The logic die is the GPU or accelerator itself, built on a leading-edge node. A scanner prints one field at a time, and that field has a maximum size: the RETICLE LIMIT of 26 x 33 mm, 858 mm2. Big AI dies push right up against it (DIE SIZE): NVIDIA's H100 is about 814 mm2. Past that point the only way to get more silicon is to use several dies (CHIPLETS) joined by a fast DIE-TO-DIE link inside the package, and to place HBM stacks along the die's edges.
+
+# 2. The parts
+
+RETICLE LIMIT     26 x 33 mm = 858 mm2, set by the scanner's optics
+DIE SIZE          H100 about 814 mm2, about 95% of the field (secondary sources)
+YIELD             a defect kills the whole die it lands on, so large dies yield worse
+CHIPLETS          several smaller dies in one package instead of one huge die
+DIE-TO-DIE        the link between chiplets; Blackwell's two dies need about 10 TB/s
+KNOWN GOOD DIE    each die is tested before packaging, since one bad die spoils the package
+HEAT              the logic die makes most of the package's heat
+HBM SHORELINE     HBM can only connect along the die's edges, so edge length limits memory
+
+# 3. One die, in order
+
+1. the design fills one reticle field
+2. the wafer is exposed field by field and processed
+3. wafer test marks the good dies
+4. dies are cut out and only known-good ones go on
+5. each is bonded beside its HBM stacks on an interposer
+
+# 4. The reticle limit and die size
+
+A scanner can't print a die larger than its field: 26 x 33 mm, 858 mm2. H100 at about 814 mm2 already uses about 95% of it. High-NA EUV halves the field in one direction (see the LITHO node), so single dies get smaller, not larger.
+
+# 5. Yield: why big dies cost more
+
+Defects land at random. On an 800 mm2 die each defect scraps 800 mm2; on a 200 mm2 chiplet it scraps 200 mm2. Estimates put yield near 45-47% for an 800-814 mm2 die at typical defect densities (secondary estimates). Smaller dies plus KNOWN GOOD DIE testing raise the yield of the whole package.
+
+# 6. Chiplets and the die-to-die link
+
+CHIPLETS split one design across dies joined in the package. NVIDIA's B100/B200 use two compute dies that need roughly 10 TB/s between them, which is why they moved to CoWoS-L with silicon bridges (Tom's Hardware). The DIE-TO-DIE link must be wide and short enough that software sees one GPU.
+
+# 7. Edges for memory, and heat
+
+HBM SHORELINE: each HBM stack connects along a die edge through the interposer, so more stacks need more edge, one reason packages are growing. Blackwell's memory bandwidth is about 8 TB/s (not to be confused with the 10 TB/s die-to-die). HEAT: the logic die is the main heat source, cooled from the top (see BOARD).
+
+# 8. Who makes it
+
+NVIDIA (NVDA) and AMD design the dies; TSMC (TSM) builds them on N4/N3-class nodes and packages them with CoWoS. Intel (INTC) and Samsung also build large logic dies and their own packaging.
+
+# 9. Chokepoints and risks
+
+- The reticle limit caps single-die size; growth comes from more dies and bigger packages.
+- Large-die yield losses raise cost per good die.
+- Every extra die adds a die-to-die link to design and test.
+
+# 10. Sources
+
+  [1] Reticle 858 mm2: chipscalereview.com (January-February 2022, p. 33)
+  [2] H100 ~814 mm2 and large-die yield: howaiworks.ai/glossary/advanced-packaging (secondary)
+  [3] B200 two dies, ~10 TB/s: tomshardware.com/tech-industry/nvidia-shifts-to-cowos-l-packaging-for-blackwell-gpu-production-ramp-up
+  [4] B200 8 TB/s memory: nextpcb.com/blog/cowos-packaging-h100-b200 (secondary)
+  [5] TSMC CoWoS: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm

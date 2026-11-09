@@ -309,7 +309,7 @@ mod tests {
 
     #[test]
     fn decodes_the_recordings_and_draws() {
-        let mut v = viewer("diagrams_power");
+        let mut v = viewer("events");
         assert!(v.error.is_none(), "{:?}", v.error);
         assert!(v.clip.as_ref().is_some_and(|c| c.frames.len() > 1));
         let mut term = Terminal::new(TestBackend::new(120, 40)).unwrap();
@@ -319,7 +319,7 @@ mod tests {
 
     #[test]
     fn frames_advance_and_pause_holds() {
-        let mut v = viewer("diagrams_power");
+        let mut v = viewer("events");
         v.last = Instant::now() - Duration::from_secs(10);
         v.tick();
         assert_eq!(v.frame, 1 % v.clip.as_ref().unwrap().frames.len());
@@ -332,7 +332,7 @@ mod tests {
 
     #[test]
     fn keys_step_frames_and_clips() {
-        let mut v = viewer("diagrams_power");
+        let mut v = viewer("events");
         let n = v.clip.as_ref().unwrap().frames.len();
         press(&mut v, KeyCode::Char('h'));
         assert_eq!(v.frame, n - 1);

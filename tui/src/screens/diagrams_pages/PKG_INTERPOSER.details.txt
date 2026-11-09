@@ -1,0 +1,63 @@
+== COWOS-S
+# What it does
+CoWoS-S uses one full silicon interposer with fine copper wiring and TSVs, made in a fab on a mature node.
+# Why it matters
+TSMC lists it up to about 3.3x reticle size (about 2,700 mm2); beyond that it recommends CoWoS-L or CoWoS-R.
+# Source
+3dfabric.tsmc.com CoWoS page.
+
+== COWOS-R
+# What it does
+CoWoS-R uses a redistribution-layer interposer of polymer and copper instead of silicon.
+# Why it matters
+It is cheaper and more flexible but its wiring is coarser than silicon's.
+# Source
+semiconductorx.com (secondary); SemiWiki.
+
+== COWOS-L
+# What it does
+CoWoS-L puts small silicon bridges only where dies meet, inside a larger organic interposer.
+# Why it matters
+It lets packages grow beyond one silicon slab; NVIDIA's Blackwell uses it for its two-die, ~10 TB/s link.
+# Source
+Tom's Hardware; TrendForce.
+
+== LSI BRIDGE
+# What it does
+A local silicon interconnect bridge is a small silicon chip embedded under the joint between two dies, carrying their fine wires.
+# Why it matters
+Silicon only where the fine wiring is needed keeps big packages affordable.
+# Source
+Tom's Hardware on CoWoS-L.
+
+== TSV
+# What it does
+Through-silicon vias are copper columns through the interposer that carry power and signals down to the C4 bumps and substrate.
+# Why it matters
+Every amp the logic die draws comes up through the TSV array.
+# Source
+TSMC 3DFabric; textbook.
+
+== RDL
+# What it does
+Redistribution layers are copper wiring in polymer, used for CoWoS-R interposers and on the substrate side.
+# Why it matters
+RDL is cheaper than silicon wiring but coarser.
+# Source
+semiconductorx.com (secondary).
+
+== RETICLE MULTIPLE
+# What it does
+Interposer size is counted in reticle fields: about 3.3x today for CoWoS-S, 9.5x planned for 2027 and over 14x by 2029.
+# Why it matters
+Bigger interposers carry more HBM (up to 24 HBM5E stacks planned) but fit fewer per wafer.
+# Source
+Tom's Hardware, TSMC CoWoS roadmap.
+
+== WIRING DENSITY
+# What it does
+Silicon wiring is fine enough to route a 1024-bit HBM3 bus per stack across a few millimetres to the GPU.
+# Why it matters
+That density is what makes HBM bandwidth possible and why a silicon interposer or bridge is needed.
+# Source
+JEDEC JESD238 (1024-bit HBM3).

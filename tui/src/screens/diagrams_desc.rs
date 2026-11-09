@@ -96,6 +96,13 @@ pub const DESCS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.desc.txt"),
     ),
+    // Packaging tab
+    ("LOGIC DIE", include_str!("diagrams_pages/PKG_LOGIC_DIE.desc.txt")),
+    ("MICROBUMP", include_str!("diagrams_pages/PKG_MICROBUMP.desc.txt")),
+    ("INTERPOSER", include_str!("diagrams_pages/PKG_INTERPOSER.desc.txt")),
+    ("SUBSTRATE", include_str!("diagrams_pages/PKG_SUBSTRATE.desc.txt")),
+    ("ASSEMBLY", include_str!("diagrams_pages/PKG_ASSEMBLY.desc.txt")),
+    ("BOARD", include_str!("diagrams_pages/PKG_BOARD.desc.txt")),
     // Chip tab
     (
         "TOP METAL",
@@ -175,6 +182,13 @@ pub const VISUALS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.txt"),
     ),
+    // Packaging tab
+    ("LOGIC DIE", include_str!("diagrams_pages/PKG_LOGIC_DIE.txt")),
+    ("MICROBUMP", include_str!("diagrams_pages/PKG_MICROBUMP.txt")),
+    ("INTERPOSER", include_str!("diagrams_pages/PKG_INTERPOSER.txt")),
+    ("SUBSTRATE", include_str!("diagrams_pages/PKG_SUBSTRATE.txt")),
+    ("ASSEMBLY", include_str!("diagrams_pages/PKG_ASSEMBLY.txt")),
+    ("BOARD", include_str!("diagrams_pages/PKG_BOARD.txt")),
     // Chip tab
     (
         "TOP METAL",
@@ -305,6 +319,13 @@ pub const DETAILS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.details.txt"),
     ),
+    // Packaging tab
+    ("LOGIC DIE", include_str!("diagrams_pages/PKG_LOGIC_DIE.details.txt")),
+    ("MICROBUMP", include_str!("diagrams_pages/PKG_MICROBUMP.details.txt")),
+    ("INTERPOSER", include_str!("diagrams_pages/PKG_INTERPOSER.details.txt")),
+    ("SUBSTRATE", include_str!("diagrams_pages/PKG_SUBSTRATE.details.txt")),
+    ("ASSEMBLY", include_str!("diagrams_pages/PKG_ASSEMBLY.details.txt")),
+    ("BOARD", include_str!("diagrams_pages/PKG_BOARD.details.txt")),
     // Chip tab
     (
         "TOP METAL",

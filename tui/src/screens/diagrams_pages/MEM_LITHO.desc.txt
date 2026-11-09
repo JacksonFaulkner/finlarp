@@ -1,1 +1,1 @@
-TODO: one paragraph for the node popup: what LITHO is, why it matters, tickers.
+Lithography prints each layer of the memory array. Light goes through a reticle, a lens shrinks the image onto photoresist, and developing leaves the pattern. The smallest printable line sets F, the feature size that fixes the cell area (6F^2 for a 1T1C cell). ASML is the only EUV scanner maker; Canon and Nikon make DUV scanners. Tickers: ASML, 7751.T, 7731.T.

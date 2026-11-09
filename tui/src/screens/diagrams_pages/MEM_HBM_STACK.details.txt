@@ -1,9 +1,63 @@
-== TODO STATE 1
-# Mechanism
-TODO
+== DRAM dies
+# What it does
+The DRAM dies are the memory: each is a full DRAM chip, thinned and given TSVs, stacked 4 to 16 high. HBM4 uses 24 Gb or 32 Gb dies.
 # Why it matters
-TODO
-# Companies
-TODO
-# Sources
-TODO
+Stacking puts many dies in the footprint of one beside the GPU: a 16-high stack of 32 Gb dies holds 64 GB.
+# Source
+JEDEC JESD270-4 (HBM4).
+
+== base logic die
+# What it does
+The base logic die sits under the DRAM dies. It holds the PHY that drives the wide bus to the GPU, test and repair logic, and the field where the TSVs land.
+# Why it matters
+It decides how fast the stack can talk to the GPU. For HBM4 it is reportedly made on foundry logic processes rather than DRAM processes.
+# Source
+JEDEC JESD238/JESD270-4; foundry base die reported in trade press.
+
+== TSVs
+# What it does
+Through-silicon vias are copper wires running straight through each thinned die, carrying signals and power up and down the stack.
+# Why it matters
+They are what make a stack one memory: thousands of short vertical connections instead of wire bonds around the edge.
+# Source
+SemiEngineering (die thinning to 30-50 um).
+
+== microbumps
+# What it does
+Microbumps are tiny solder joints between dies that connect one die's TSVs to the next. Their pitch is about 40 um and heading towards 10 um.
+# Why it matters
+Each joint adds height and must work for the stack to work. HBM4 kept microbumps rather than moving to hybrid bonding.
+# Source
+SemiEngineering, HBM4 sticks with microbumps.
+
+== silicon interposer
+# What it does
+The silicon interposer is a slab of silicon with very fine wiring that the GPU and its HBM stacks sit on side by side.
+# Why it matters
+Only wiring this fine and short can carry a 1024- or 2048-bit bus per stack; it is the core of CoWoS packaging.
+# Source
+Tom's Hardware and TrendForce on CoWoS.
+
+== hybrid bonding
+# What it does
+Hybrid bonding joins copper pads on facing dies directly, with no solder bump between them, so stacks get shorter.
+# Why it matters
+It is expected to be needed beyond 16-high stacks, but it is harder to make with good yield, so HBM4 postponed it.
+# Source
+SemiEngineering; Tom's Hardware on hybrid bonding.
+
+== height limit
+# What it does
+The height limit caps how tall a stack may be so it lines up with the GPU in the package. It was raised from 720 um to 775 um.
+# Why it matters
+Raising it let 16-high HBM4 keep microbumps. Every extra die must fit under it, which is why dies are thinned.
+# Source
+Tom's Hardware; SemiEngineering (press reports).
+
+== CoWoS
+# What it does
+CoWoS (Chip-on-Wafer-on-Substrate) is TSMC's packaging that puts a GPU and its HBM stacks on one silicon interposer, then onto a package substrate.
+# Why it matters
+Almost every high-end AI accelerator uses it, and its capacity rather than wafer supply has limited how many ship.
+# Source
+Tom's Hardware; TrendForce.

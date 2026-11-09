@@ -150,10 +150,11 @@ otherwise the screen shows "claude: Claude popup needs fl run inside tmux".
   captures the pane with colours and paints it to a GIF (`py/jobs/record_screens.py`).
   Add a `Spec` there when a screen is ready to show; leave out screens that show
   personal or mock data. Specs open tabs by number, so update them when the tab
-  order changes. tmux captures text only: anything drawn with the kitty graphics
-  protocol (the 3D bell jar, intraday pictures) comes out as placeholder boxes.
-  The bell-jar clip is rendered offline by `tools/poly3d/run.sh`, which uses the
-  same rasterizer as the full-screen 3D view (`tools/poly3d/src/lib.rs`).
+  order changes. tmux captures text only, so the recorder unsets the `GHOSTTY_*`
+  variables: `fl` then draws half-blocks, not kitty images (kitty placeholders
+  would come out as boxes). The bell-jar clip for the README is rendered offline
+  by `tools/poly3d/run.sh`, which uses the same rasterizer as the 3D view
+  (`tools/poly3d/src/lib.rs`).
 - **Visual check:** release binary in a detached tmux session:
   ```
   tmux new-session -d -s c5 -x 160 -y 40 'cargo run --release -- chart'

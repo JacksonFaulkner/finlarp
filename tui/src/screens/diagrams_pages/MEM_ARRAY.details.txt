@@ -1,9 +1,79 @@
-== TODO STATE 1
-# Mechanism
-TODO
+== row decoder
+# What it does
+The row decoder takes the row part of the address and drives exactly one word line high. Each row has a driver; the decoder picks which one fires.
 # Why it matters
-TODO
-# Companies
-TODO
-# Sources
-TODO
+Every access starts here. Opening a row (ACTIVATE) takes tRCD, 13.75 ns at DDR4-3200, before any column can be read.
+# Source
+Jacob, ENEE 359a DRAM Circuits (word line drivers); DDR4-3200 22-22-22 timings (AnandTech).
+
+== word line
+# What it does
+A word line runs along one row and drives the gate of every access transistor in it. When it goes high, every cell in the row connects to its bit line at once.
+# Why it matters
+Because a word line opens a whole row, the row is the unit of access inside the array: you cannot read one cell alone.
+# Source
+Jacob, ENEE 359a DRAM Circuits; see also the CELL node.
+
+== bit line
+# What it does
+A bit line runs along one column and connects to one cell in every row. When a row opens, the open cell nudges the bit line up for a 1 or down for a 0.
+# Why it matters
+Every cell on the line adds capacitance, and the swing is Cc / (Cc + Cb). Long bit lines give weak signals, which is why arrays are cut into mats.
+# Source
+Jacob, ENEE 359a DRAM Circuits (swing formula, 512 x 512 array).
+
+== sense amps
+# What it does
+One sense amp per bit line amplifies the small nudge into a full 1 or 0, latches it, and drives it back into the cell to restore it.
+# Why it matters
+Together the sense amps hold the whole open row: they are the row buffer. Reads come from them, not from the cells.
+# Source
+Jacob, ENEE 359a DRAM Circuits; Kim et al., arXiv 1805.01966 (local row buffers).
+
+== row buffer
+# What it does
+The row buffer is the row latched in the sense amps after ACTIVATE. On a x8 DDR4 chip it holds 1 KB (8192 bits). READs pick columns out of it.
+# Why it matters
+An open row acts as a cache: a row hit costs tCL (13.75 ns), a row conflict tRP + tRCD + tCL (41.25 ns) at DDR4-3200.
+# Source
+DDR4-3200 22-22-22 timings (AnandTech); Micron DDR4 datasheet for the page size (to link).
+
+== column decoder
+# What it does
+The column decoder takes the column address of a READ and connects the chosen latches of the row buffer to the data lines, 64 bits per READ on a x8 chip.
+# Why it matters
+Only a small part of the open row leaves per READ, so many READs can be served from one ACTIVATE.
+# Source
+DDR4: 8 data pins x burst length 8 on a x8 chip (Micron DDR4 datasheet, to link).
+
+== subarray
+# What it does
+A subarray is a row of mats under one global word line, with its own sense amps: a local row buffer. A bank is many subarrays sharing global bit lines.
+# Why it matters
+In a standard bank only one subarray's row is open at a time. Research designs (SALP) let several work at once for under 0.15% area.
+# Source
+Kim et al., Exploiting the DRAM Microarchitecture to Increase Memory-Level Parallelism (arXiv 1805.01966).
+
+== mats
+# What it does
+A mat is the small tile the array is built from: a grid of cells with local word line drivers on one side and sense amp stripes on two.
+# Why it matters
+Small mats keep word lines and bit lines short, which keeps the signal strong and the timing fast, at the cost of more periphery area.
+# Source
+Jacob, ENEE 359a DRAM Circuits (512 x 512 arrays).
+
+== spare rows
+# What it does
+Spare rows and columns sit at the edge of the array. When test finds a bad cell, fuses store its address and the decoder sends that address to a spare instead.
+# Why it matters
+Redundancy turns dies that would be scrap into good ones. Each spare is area that stores no data, so the number of spares is a yield-versus-area trade.
+# Source
+DRAM redundancy patents, e.g. US 6,731,550 and US 5,325,334.
+
+== burst
+# What it does
+A READ sends 64 bits out of a x8 chip as a burst: 8 transfers on 8 data pins, two per clock.
+# Why it matters
+Bursts make each READ move a useful chunk; streaming bursts from one open row is the fastest way to read DRAM.
+# Source
+DDR4 burst length 8 (Micron DDR4 datasheet, to link).

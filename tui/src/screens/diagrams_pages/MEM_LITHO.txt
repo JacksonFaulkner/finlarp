@@ -1,3 +1,69 @@
-# 1. TODO: LITHO, what happens in one line
+# 1. What happens: a pattern is printed onto the wafer with light
 
- TODO: box-drawing art, same style as CHIP_NMOS.txt. Keep lines under 100 cols.
+Lithography copies the circuit pattern onto the wafer. Light passes through a reticle (the mask), and a lens shrinks the image onto a light-sensitive film called photoresist. Where the light lands, the resist changes. Developing then removes one part and keeps the other, and etch copies the pattern into the film below. Every layer of a DRAM array is printed this way, once per layer.
+
+# 2. The parts
+
+wavelength         the light source sets it: DUV ArF at 193 nm, EUV at 13.5 nm
+reticle            the mask: the pattern as chrome on clear quartz, one per layer
+lens               projection optics that set the numerical aperture and shrink the image (4x)
+photoresist        the light-sensitive film; the exposed part develops away (positive resist)
+wafer stage        carries the wafer field by field, scanning and stepping
+overlay            how exactly this layer lines up with the layers below
+
+# 3. One exposure, in order
+
+1. the source flashes; light passes through the openings in the reticle
+2. the lens projects the image and shrinks it onto the resist
+3. the exposed resist changes chemically
+4. develop: the exposed resist is removed (positive resist)
+5. etch copies the pattern into the film below
+
+# 4. Resolution: the smallest printable line
+
+resolution (Rayleigh criterion):   CD = k1 x wavelength / numerical aperture
+  DUV ArF immersion, 193 nm, NA 1.35, k1 0.4:   CD ~ 57 nm
+  EUV, 13.5 nm, NA 0.33, k1 0.4:                CD ~ 16 nm
+  High-NA EUV, 13.5 nm, NA 0.55, k1 0.4:        CD ~ 10 nm (ASML quotes 8 nm)
+
+k1 sums up the process (resist, mask, illumination). One exposure bottoms out near k1 0.25.
+
+# 5. Depth of focus: what higher NA costs
+
+depth of focus, the height range that stays sharp:   DOF = k2 x wavelength / NA^2
+  NA 0.33 -> 0.55 makes the band (0.55 / 0.33)^2 = 2.8x shorter
+The wafer must stay in that band across the whole field, so higher NA needs flatter wafers and thinner resist.
+
+# 6. Why it matters for memory
+
+The minimum feature size F is set here. The 1T1C cell is 6F^2 with an open bit line, so shrinking F by 0.7 halves the cell area and fits about twice the cells in the same space (see the CELL node). Overlay and pitch limits set how many cells fit on a die.
+
+# 7. Multi-patterning
+
+When k1 is too small for one exposure, multi-patterning splits the pattern across two or more masks (LELE) or builds it with spacers (SADP and similar). Each extra pass adds cost, time and overlay error between passes. Memory makers use several such layers.
+
+# 8. Who makes it
+
+ASML (ASML) is the only maker of EUV scanners and also makes DUV scanners. Nikon (7731.T) and Canon (7751.T) make DUV scanners.
+
+# 9. Chokepoints and risks
+
+- EUV source and optics come from very few suppliers, and ASML is the only EUV scanner maker.
+- Stochastic defects: at small features and low doses, random breaks and bridges grow.
+- High-NA fields are half size, so each wafer takes about twice the exposures.
+- Export controls limit which advanced scanners can be sold abroad (check current rules).
+
+# 10. Sources
+
+- ASML, TWINSCAN EXE:5000 (NA 0.55, 8 nm resolution, 1.7x smaller features than NXE):
+  https://www.asml.com/en/products/euv-lithography-systems/twinscan-exe-5000
+- ASML, 5 things you should know about High NA EUV lithography (2024; anamorphic optics, half-size fields):
+  https://www.asml.com/en/news/stories/2024/5-things-high-na-euv
+- ASML annual report 2024 (NXE:3600D 160 wph, NXE:3800E target 220 wph, matched overlay 0.9 nm):
+  https://www.sec.gov/Archives/edgar/data/937966/000093796625000011/a2024annualreportbasedon.htm
+- ASML 20-F FY2025 (NXE:3800E at full spec, 220 wph):
+  https://www.sec.gov/Archives/edgar/data/0000937966/000162828026011378/asml-20251231.htm
+- US patent 6,839,125 (R = k1 x wavelength / NA, DOF = k2 x wavelength / NA^2, k1 floor ~0.25):
+  https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6839125
+- Not yet sourced here: DUV immersion NA 1.35 (ASML NXT product pages); k1 0.4 and k2 0.5 are illustrative.
+- Fab flow tab, EXPOSE and ETCH nodes; CELL node for 6F^2.

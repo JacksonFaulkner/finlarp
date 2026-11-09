@@ -1,1 +1,1 @@
-TODO: one paragraph for the node popup: what HBM_STACK is, why it matters, tickers.
+An HBM stack is several thinned DRAM dies on a base logic die, joined by TSVs and microbumps, placed beside the GPU on a silicon interposer (CoWoS). That closeness allows a 1024-bit (HBM3, 819 GB/s) or 2048-bit (HBM4, up to 2 TB/s) bus per stack. Height limits, heat, stack yield and CoWoS packaging capacity are the constraints. Tickers: 000660.KS, 005930.KS, MU, TSM.

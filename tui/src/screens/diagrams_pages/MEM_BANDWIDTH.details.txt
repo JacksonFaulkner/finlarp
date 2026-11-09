@@ -1,9 +1,63 @@
-== TODO STATE 1
-# Mechanism
-TODO
+== data rate
+# What it does
+The data rate is how many transfers one pin makes per second. DDR sends one on each edge of the clock, so DDR4-3200 makes 3200 million transfers a second from a 1600 MHz clock.
 # Why it matters
-TODO
-# Companies
-TODO
-# Sources
-TODO
+It is the first factor in bandwidth. GDDR6 pushes it to 16 Gb/s per pin; GDDR6X carries two bits per symbol with PAM4.
+# Source
+Micron GDDR6 flyer; Micron GDDR6X PAM4 brief.
+
+== data pins
+# What it does
+Data pins are the width of the bus: how many bits move side by side on each transfer. A DDR channel has 64, a GDDR6 chip 32, an HBM3 stack 1024.
+# Why it matters
+Width is the second factor in bandwidth and HBM's main advantage: many slower pins instead of a few fast ones.
+# Source
+JEDEC JESD238 (HBM3); Micron GDDR6 flyer (32 DQ).
+
+== memory controller
+# What it does
+The memory controller sits in the processor and drives each channel: it turns requests into commands and keeps the data buses busy within the timing rules.
+# Why it matters
+The number of channels it has caps the system's peak bandwidth, and its scheduling decides how close real traffic gets to that peak.
+# Source
+See the BANK node for scheduling; arithmetic for per-channel peak.
+
+== channels
+# What it does
+A channel is an independent bus from the controller to its memory. A DDR5 DIMM is split into two 32-bit subchannels.
+# Why it matters
+Each channel adds its own bandwidth: four DDR4-3200 channels give 4 x 25.6 = 102.4 GB/s peak.
+# Source
+Micron DDR5 modules (two 40-bit channels per DIMM); arithmetic.
+
+== HBM stack
+# What it does
+An HBM stack is a pile of DRAM dies beside the processor on an interposer, with 1024 data pins. HBM3 runs them at 6.4 Gb/s.
+# Why it matters
+One HBM3 stack gives 819 GB/s, the bandwidth of about thirteen GDDR6 chips, which is why AI accelerators use it.
+# Source
+JEDEC JESD238 (819 GB/s per device).
+
+== effective bandwidth
+# What it does
+Effective bandwidth is what a workload actually gets: peak minus the slots lost to read/write turnarounds, refresh and waits for rows and banks.
+# Why it matters
+Two systems with the same peak can deliver very different effective bandwidth depending on access patterns and the controller.
+# Source
+See the BANK node; block lengths in the scenes are illustrative.
+
+== memory wall
+# What it does
+The memory wall is the growing gap between compute and memory bandwidth: peak compute grew about 3.0x every two years, DRAM bandwidth about 1.6x.
+# Why it matters
+Over twenty years that is about 60,000x against 100x, so many workloads, such as serving large models, wait on memory rather than arithmetic.
+# Source
+Gholami et al., AI and Memory Wall (arXiv 2403.14123).
+
+== PAM4
+# What it does
+PAM4 signalling uses four voltage levels instead of two, so each symbol on a pin carries two bits.
+# Why it matters
+It doubles the bits per symbol without doubling the symbol rate; GDDR6X uses it, at the cost of smaller margins between levels.
+# Source
+Micron GDDR6X PAM4 tech brief.

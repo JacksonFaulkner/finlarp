@@ -7,6 +7,18 @@
 
 use image::{Rgb, RgbaImage};
 
+mod cell;
+pub use cell::{
+    clip_cell_anim, clip_cell_view, notes_alpha, overview_params, render_cell, render_overview, Notes, render_zoom, CellAnim, CellParams,
+    CellZoom, render_litho_overview, render_litho_zoom, LithoZoom, LITHO_OVERVIEW_BEATS,
+    render_array_overview, render_array_zoom, ArrayZoom, ARRAY_OVERVIEW_BEATS,
+    render_bank_overview, render_bank_zoom, BankZoom, BANK_OVERVIEW_BEATS,
+    render_bw_overview, render_bw_zoom, BwZoom, BW_OVERVIEW_BEATS,
+    render_hbm_overview, render_hbm_zoom, HbmZoom, HBM_OVERVIEW_BEATS,
+    part_at, render_chip, ChipKey, ChipPart, ChipState,
+    pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState,
+};
+
 type V3 = [f64; 3];
 type Col = [f32; 3];
 
@@ -187,13 +199,17 @@ struct Cam {
 
 impl Cam {
     fn orbit(view: &View, p: &Params, w: usize, h: usize) -> Cam {
-        let target = [0.0, p.wall_height * 0.48, 0.0];
+        Cam::orbit_at(view, [0.0, p.wall_height * 0.48, 0.0], TARGET_DIST, w, h)
+    }
+
+    /// Camera on a sphere of radius `dist` around `target`, turned by `view`.
+    fn orbit_at(view: &View, target: V3, dist: f64, w: usize, h: usize) -> Cam {
         let dir = [
             view.pitch.cos() * view.yaw.sin(),
             view.pitch.sin(),
             view.pitch.cos() * view.yaw.cos(),
         ];
-        let eye = add(target, mul(dir, TARGET_DIST));
+        let eye = add(target, mul(dir, dist));
         let f = norm(sub(target, eye));
         let r = norm(cross(f, [0.0, 1.0, 0.0]));
         let u = cross(r, f);
@@ -723,7 +739,11 @@ mod tests {
             90,
             BG,
         );
-        let warm = |img: &RgbaImage| img.pixels().filter(|px| px.0[0] > px.0[2] + 60).count();
+        let warm = |img: &RgbaImage| {
+            img.pixels()
+                .filter(|px| px.0[0] as u16 > px.0[2] as u16 + 60)
+                .count()
+        };
         assert!(warm(&hot) > warm(&cold) + 20, "hot rods are orange");
     }
 

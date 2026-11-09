@@ -26,6 +26,12 @@ use super::diagrams_anim::{orbitable, scene_for, section_anim};
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
+use super::diagrams_scene_cell::zoom_scene;
+use super::diagrams_scene_litho::zoom_scene as litho_zoom_scene;
+use super::diagrams_scene_array::zoom_scene as array_zoom_scene;
+use super::diagrams_scene_bank::zoom_scene as bank_zoom_scene;
+use super::diagrams_scene_bandwidth::zoom_scene as bw_zoom_scene;
+use super::diagrams_scene_hbm::zoom_scene as hbm_zoom_scene;
 use super::diagrams_scene_poly_zoom::bell_jar_anim;
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
 use crate::app::{Action, Ctx, Screen};
@@ -144,8 +150,208 @@ pub struct Diagrams {
     last_tick: Instant,
 }
 
-/// What one rendered 3D frame depends on: camera, scene state (quantised), and pixel size.
-type SceneKey = (poly3d::View, [i64; 7], u32, u32);
+/// What a 3D zoom draws: the bell jar, or one of the CELL page's focused scenes at a
+/// beat and a position through it.
+#[derive(Clone, Copy)]
+enum Model {
+    Jar(poly3d::Anim),
+    Cell(poly3d::CellZoom, usize, f64),
+    /// the CELL overview, with its notes on the picture
+    CellOverview(crate::ui::anim::Time),
+    /// one of the LITHO page's focused scenes at a beat and a position through it
+    Litho(poly3d::LithoZoom, usize, f64),
+    /// the LITHO overview, with its notes on the picture
+    LithoOverview(crate::ui::anim::Time),
+    /// one of the ARRAY page's focused scenes at a beat and a position through it
+    Array(poly3d::ArrayZoom, usize, f64),
+    /// the ARRAY overview, with its notes on the picture
+    ArrayOverview(crate::ui::anim::Time),
+    /// one of the BANK page's focused scenes at a beat and a position through it
+    Bank(poly3d::BankZoom, usize, f64),
+    /// the BANK overview, with its notes on the picture
+    BankOverview(crate::ui::anim::Time),
+    /// one of the BANDWIDTH page's focused scenes at a beat and a position through it
+    Bw(poly3d::BwZoom, usize, f64),
+    /// the BANDWIDTH overview, with its notes on the picture
+    BwOverview(crate::ui::anim::Time),
+    /// one of the HBM STACK page's focused scenes at a beat and a position through it
+    Hbm(poly3d::HbmZoom, usize, f64),
+    /// the HBM STACK overview, with its notes on the picture
+    HbmOverview(crate::ui::anim::Time),
+    /// a Chip-tab scene: its keyframes at a beat and a position through it
+    Chip(&'static [poly3d::ChipKey], usize, f64),
+    /// a Chip-tab overview: its beats (for the notes), keyframes, and time
+    ChipOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::ChipKey], crate::ui::anim::Time),
+    /// a Packaging-tab scene: its keyframes at a beat and a position through it
+    Pkg(&'static [poly3d::PkgKey], usize, f64),
+    /// a Packaging-tab overview: its beats (for the notes), keyframes, and time
+    PkgOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::PkgKey], crate::ui::anim::Time),
+}
+
+/// The 3D model of zoom `key` on `page`, at the zoom's clock.
+fn model_at(page: &str, key: char, t: &crate::ui::anim::Time) -> Model {
+    match page {
+        "CELL" => match zoom_scene(key) {
+            Some(z) => Model::Cell(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        "LITHO" => match litho_zoom_scene(key) {
+            Some(z) => Model::Litho(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        "ARRAY" => match array_zoom_scene(key) {
+            Some(z) => Model::Array(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        "BANK" => match bank_zoom_scene(key) {
+            Some(z) => Model::Bank(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        "BANDWIDTH" => match bw_zoom_scene(key) {
+            Some(z) => Model::Bw(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        "HBM STACK" => match hbm_zoom_scene(key) {
+            Some(z) => Model::Hbm(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        _ if super::diagrams_scene_chip::node(page).is_some() => match super::diagrams_scene_chip::keys_for(page, key) {
+            Some(k) => Model::Chip(k, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        _ if super::diagrams_scene_pkg::node(page).is_some() => match super::diagrams_scene_pkg::keys_for(page, key) {
+            Some(k) => Model::Pkg(k, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        _ => Model::Jar(bell_jar_anim(t)),
+    }
+}
+
+/// A model's state, quantised, with a slot telling the jar from the cell.
+type ModelKey = [i64; 8];
+
+fn model_key(m: Model) -> ModelKey {
+    match m {
+        Model::Jar(a) => {
+            let mut k = [0i64; 8];
+            k[..7].copy_from_slice(&scene_key(a));
+            k
+        }
+        Model::Cell(z, beat, local) => {
+            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 1]
+        }
+        Model::CellOverview(t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 2]
+        }
+        Model::Litho(z, beat, local) => {
+            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 3]
+        }
+        Model::LithoOverview(t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 4]
+        }
+        Model::Array(z, beat, local) => {
+            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 5]
+        }
+        Model::ArrayOverview(t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 6]
+        }
+        Model::Bank(z, beat, local) => {
+            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 7]
+        }
+        Model::BankOverview(t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 8]
+        }
+        Model::Bw(z, beat, local) => {
+            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 9]
+        }
+        Model::BwOverview(t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 10]
+        }
+        Model::Hbm(z, beat, local) => {
+            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 11]
+        }
+        Model::HbmOverview(t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 12]
+        }
+        Model::Chip(k, beat, local) => {
+            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 13]
+        }
+        Model::ChipOverview(_, k, t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 14]
+        }
+        Model::Pkg(k, beat, local) => {
+            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 15]
+        }
+        Model::PkgOverview(_, k, t) => {
+            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
+            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 16]
+        }
+    }
+}
+
+fn render_model(m: Model, view: &poly3d::View, w: usize, h: usize) -> RgbaImage {
+    match m {
+        Model::Jar(a) => poly3d::render(&poly3d::Params::default(), a, view, w, h, FULL_BG),
+        Model::Cell(z, beat, local) => {
+            poly3d::render_zoom(z, beat, local, view, w, h, FULL_BG)
+        }
+        Model::CellOverview(t) => {
+            super::diagrams_scene_cell::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::Litho(z, beat, local) => {
+            poly3d::render_litho_zoom(z, beat, local, view, w, h, FULL_BG)
+        }
+        Model::LithoOverview(t) => {
+            super::diagrams_scene_litho::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::Array(z, beat, local) => {
+            poly3d::render_array_zoom(z, beat, local, view, w, h, FULL_BG)
+        }
+        Model::ArrayOverview(t) => {
+            super::diagrams_scene_array::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::Bank(z, beat, local) => {
+            poly3d::render_bank_zoom(z, beat, local, view, w, h, FULL_BG)
+        }
+        Model::BankOverview(t) => {
+            super::diagrams_scene_bank::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::Bw(z, beat, local) => {
+            poly3d::render_bw_zoom(z, beat, local, view, w, h, FULL_BG)
+        }
+        Model::BwOverview(t) => {
+            super::diagrams_scene_bandwidth::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::Hbm(z, beat, local) => {
+            poly3d::render_hbm_zoom(z, beat, local, view, w, h, FULL_BG)
+        }
+        Model::HbmOverview(t) => {
+            super::diagrams_scene_hbm::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::Chip(k, beat, local) => {
+            poly3d::render_chip(k, beat, local, view, None, w, h, FULL_BG)
+        }
+        Model::ChipOverview(b, k, t) => {
+            super::diagrams_scene_chip::frame(b, k, true, &t, view, w as u32, h as u32)
+        }
+        Model::Pkg(k, beat, local) => {
+            poly3d::render_pkg(k, beat, local, view, None, w, h, FULL_BG)
+        }
+        Model::PkgOverview(b, k, t) => {
+            super::diagrams_scene_pkg::frame(b, k, true, &t, view, w as u32, h as u32)
+        }
+    }
+}
+
+/// What one rendered 3D frame depends on: camera, model state (quantised), and pixel size.
+type SceneKey = (poly3d::View, ModelKey, u32, u32);
 
 /// The scene's state, quantised, so a frame re-renders only when something visible changed.
 fn scene_key(a: poly3d::Anim) -> [i64; 7] {
@@ -918,19 +1124,34 @@ impl Diagrams {
         self.view = PopupView::Zoom;
     }
 
-    /// The open zoom-in has a 3D model the full-screen view can orbit.
+    /// The key of the open scene: its letter, or the digit of its numbered section.
+    fn open_key(&self) -> Option<char> {
+        let (i, _) = self.zoom.as_ref()?;
+        if self.zoom_section {
+            char::from_digit(*i as u32 + 1, 10)
+        } else {
+            self.zoom_list().get(*i).map(|(k, _)| *k)
+        }
+    }
+
+    /// The 3D model of the open scene at `time`.
+    fn open_model(&self, time: &crate::ui::anim::Time) -> Model {
+        let page = self.player.as_ref().map_or("", |(p, _)| *p);
+        model_at(page, self.open_key().unwrap_or(' '), time)
+    }
+
+    /// The page's overview is a 3D model HJKL can turn in place (CELL, LITHO, ARRAY, BANK, BANDWIDTH, HBM STACK).
+    fn overview_orbits(&self) -> bool {
+        matches!(&self.player, Some(("CELL" | "LITHO" | "ARRAY" | "BANK" | "BANDWIDTH" | "HBM STACK", Some(_))))
+            || matches!(&self.player, Some((p, Some(_))) if super::diagrams_scene_chip::node(p).is_some() || super::diagrams_scene_pkg::node(p).is_some())
+    }
+
+    /// The open scene has a 3D model the full-screen view can orbit.
     fn can_orbit(&self) -> bool {
-        let Some((i, _)) = &self.zoom else {
-            return false;
-        };
         let Some((page, _)) = &self.player else {
             return false;
         };
-        !self.zoom_section
-            && self
-                .zoom_list()
-                .get(*i)
-                .is_some_and(|(k, _)| orbitable(page, *k))
+        self.open_key().is_some_and(|k| orbitable(page, k))
     }
 
     /// Keys in the full-screen 3D view: hjkl orbit, +/- zoom, HJKL pan, 0
@@ -989,7 +1210,7 @@ impl Diagrams {
     fn full_tick(&mut self, now: Instant) {
         let dt = now.duration_since(self.last_tick).as_secs_f64().min(MAX_DT);
         self.last_tick = now;
-        if !matches!(self.view, PopupView::Full | PopupView::Zoom) || !self.moving(now) {
+        if !matches!(self.view, PopupView::Full | PopupView::Zoom | PopupView::Overview) || !self.moving(now) {
             return;
         }
         if let Some((key, _)) = self.held
@@ -1026,9 +1247,9 @@ impl Diagrams {
         let inner = block.inner(r);
         frame.render_widget(Clear, r);
         frame.render_widget(block, r);
-        let anim = bell_jar_anim(&time);
+        let model = self.open_model(&time);
         let half = self.moving(Instant::now());
-        self.paint_3d(frame, inner, anim, self.orbit, half);
+        self.paint_3d(frame, inner, model, self.orbit, half);
     }
 
     /// Paints a 3D scene into `inner`. Kitty gets a frame sized to whole cells, at the
@@ -1038,7 +1259,7 @@ impl Diagrams {
         &mut self,
         frame: &mut Frame,
         inner: Rect,
-        anim: poly3d::Anim,
+        model: Model,
         view: poly3d::View,
         half: bool,
     ) {
@@ -1079,16 +1300,9 @@ impl Diagrams {
         if w == 0 || h == 0 {
             return;
         }
-        let key: SceneKey = (view, scene_key(anim), w, h);
+        let key: SceneKey = (view, model_key(model), w, h);
         if self.full.as_ref().is_none_or(|f| f.key != key) {
-            let img = poly3d::render(
-                &poly3d::Params::default(),
-                anim,
-                &view,
-                w as usize,
-                h as usize,
-                FULL_BG,
-            );
+            let img = render_model(model, &view, w as usize, h as usize);
             let shown = match self.picker.protocol_type() {
                 ProtocolType::Halfblocks => Shown::Blocks(img),
                 ProtocolType::Kitty => {
@@ -1117,6 +1331,30 @@ impl Diagrams {
             Some(Shown::Blocks(img)) => blit_halfblocks(img, area, frame.buffer_mut()),
             None => {}
         }
+    }
+
+    /// Show one pixel frame of a scene in `area`: a kitty image when the terminal has
+    /// one, half-blocks otherwise. `img` is already sized to `area` in pixels.
+    fn paint_px(&mut self, frame: &mut Frame, area: Rect, img: image::RgbaImage) {
+        let proto_type = self.picker.protocol_type();
+        if proto_type == ProtocolType::Halfblocks {
+            blit_halfblocks(&img, area, frame.buffer_mut());
+            return;
+        }
+        let font = self.picker.font_size();
+        let mut proto = if proto_type == ProtocolType::Kitty {
+            self.full_turn = !self.full_turn;
+            let id = FULL_IMAGE_IDS[self.full_turn as usize];
+            kitty_protocol(&self.picker, DynamicImage::ImageRgba8(img), font, id)
+        } else {
+            self.picker
+                .new_resize_protocol(DynamicImage::ImageRgba8(img))
+        };
+        frame.render_stateful_widget(
+            StatefulImage::default().resize(Resize::Fit(None)),
+            area,
+            &mut proto,
+        );
     }
 
     /// The animation for numbered section `i` of the open page, if it has one.
@@ -1173,7 +1411,11 @@ impl Diagrams {
     fn draw_scene(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         let zooming = self.view == PopupView::Zoom;
         // the zoom's art is its 3D scene, drawn beside the beat's caption and notes
-        let orbit3d = zooming && self.can_orbit();
+        let orbit3d = if zooming {
+            self.can_orbit()
+        } else {
+            self.overview_orbits()
+        };
         let zooms = self.zoom_list();
         let zoom_name = match &self.zoom {
             Some((i, _)) if self.zoom_section => {
@@ -1184,20 +1426,29 @@ impl Diagrams {
         };
         let orbit_key = if zooming && self.can_orbit() {
             "HJKL turn  F full view  "
+        } else if orbit3d {
+            "HJKL turn  0 reset "
         } else {
             ""
         };
         frame.render_widget(Clear, r);
         let paused = self.scene_player().is_some_and(|p| p.is_paused());
-        let play = if paused {
-            "p resume  h/l beat  j/k notes"
-        } else {
-            "p pause  h/l beat  j/k notes"
+        let in_picture = self.scene_player().is_some_and(|p| p.notes_in_picture());
+        let play = match (paused, in_picture) {
+            (true, true) => "p resume  h/l beat",
+            (false, true) => "p pause  h/l beat",
+            (true, false) => "p resume  h/l beat  j/k notes",
+            (false, false) => "p pause  h/l beat  j/k notes",
         };
-        let switch = if self.zoom_section {
-            "1-9 switch section"
+        let letters = match (zooms.first(), zooms.last()) {
+            (Some((a, _)), Some((b, _))) if a != b => format!("{a}-{b} zoom"),
+            (Some((a, _)), _) => format!("{a} zoom"),
+            _ => String::new(),
+        };
+        let switch = if self.section_build(0).is_some() {
+            format!("{letters}  1-9 section")
         } else {
-            "a-d switch zoom"
+            letters
         };
         let (title, hint) = if zooming {
             (
@@ -1212,7 +1463,7 @@ impl Diagrams {
             };
             (
                 format!(" {label} "),
-                format!("{keys} esc menu  1-9 sections  {play} "),
+                format!("{keys} {orbit_key} esc menu  1-9 sections  {play} "),
             )
         };
         let block = Block::new()
@@ -1242,7 +1493,10 @@ impl Diagrams {
         let min_w = p.min_size().0;
         let side_w = inner.width.saturating_sub(min_w + 2).min(46);
         let side = side_w >= 28;
-        let (art_r, note_r) = if side {
+        let (art_r, note_r) = if in_picture {
+            // the notes are on the picture: it takes the whole body
+            (body_r, Rect::new(body_r.x, body_r.y + body_r.height, body_r.width, 0))
+        } else if side {
             let [a, _, n] = Layout::horizontal([
                 Constraint::Length(inner.width - side_w - 2),
                 Constraint::Length(2),
@@ -1269,8 +1523,36 @@ impl Diagrams {
             cap_r,
         );
         if orbit3d {
-            let anim = bell_jar_anim(&time);
-            self.paint_3d(frame, art_r, anim, self.orbit, true);
+            let model = if zooming {
+                self.open_model(&time)
+            } else if matches!(&self.player, Some(("LITHO", _))) {
+                Model::LithoOverview(time)
+            } else if matches!(&self.player, Some(("ARRAY", _))) {
+                Model::ArrayOverview(time)
+            } else if matches!(&self.player, Some(("BANK", _))) {
+                Model::BankOverview(time)
+            } else if matches!(&self.player, Some(("BANDWIDTH", _))) {
+                Model::BwOverview(time)
+            } else if matches!(&self.player, Some(("HBM STACK", _))) {
+                Model::HbmOverview(time)
+            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_chip::node(p)) {
+                Model::ChipOverview(n.beats, n.keys, time)
+            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_pkg::node(p)) {
+                Model::PkgOverview(n.beats, n.keys, time)
+            } else {
+                Model::CellOverview(time)
+            };
+            let half = !zooming && self.moving(Instant::now());
+            self.paint_3d(frame, art_r, model, self.orbit, zooming || half);
+        } else if let Some(img) = {
+            let font = self.picker.font_size();
+            p.pixels(
+                &time,
+                u32::from(art_r.width) * u32::from(font.width),
+                u32::from(art_r.height) * u32::from(font.height),
+            )
+        } {
+            self.paint_px(frame, art_r, img);
         } else {
             let art = shot.lines.join("\n");
             let art_lines = scene_lines(&art, t);
@@ -2001,6 +2283,15 @@ impl Screen for Diagrams {
         if self.popup && self.view == PopupView::Overview && self.has_scene() {
             match key.code {
                 KeyCode::Char('q') => self.popup = false,
+                // HJKL turn the 3D overview, +/- zoom, 0 resets the camera
+                KeyCode::Char('0') if self.overview_orbits() => {
+                    self.orbit = poly3d::View::default()
+                }
+                KeyCode::Char(c) if self.overview_orbits() && turn_key(c).is_some() => {
+                    if let Some(hit) = turn_key(c) {
+                        self.camera_step(hit, Instant::now());
+                    }
+                }
                 KeyCode::Char('m') | KeyCode::Esc | KeyCode::Enter | KeyCode::Char(' ') => {
                     self.browse = key.code == KeyCode::Char('m');
                     self.menu_sel = 0;
@@ -2031,9 +2322,8 @@ impl Screen for Diagrams {
                     };
                     self.view = PopupView::Menu;
                 }
-                KeyCode::Char(c @ '1'..='9') if self.zoom_section => {
-                    self.open_section(c as usize - '1' as usize)
-                }
+                // numbers reach the sections from any scene, as letters reach the zooms
+                KeyCode::Char(c @ '1'..='9') => self.open_section(c as usize - '1' as usize),
                 KeyCode::Char('F') if self.can_orbit() => self.view = PopupView::Full,
                 // HJKL turn the 3D model on the left; lowercase keep the beats and notes
                 KeyCode::Char('0') if self.can_orbit() => self.orbit = poly3d::View::default(),
@@ -2246,7 +2536,7 @@ impl Screen for Diagrams {
     }
 
     fn poll_interval(&self) -> Duration {
-        if matches!(self.view, PopupView::Full | PopupView::Zoom) && self.moving(Instant::now()) {
+        if matches!(self.view, PopupView::Full | PopupView::Zoom | PopupView::Overview) && self.moving(Instant::now()) {
             MOTION_FRAME
         } else if self.animating() {
             FRAME
@@ -2824,6 +3114,72 @@ mod tests {
     }
 
     #[test]
+    fn cell_zooms_are_3d_and_orbit_with_hjkl() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        for key in ['a', 'b', 'c', 'd', 'e'] {
+            let mut d = open(&ctx, Some("memory".into())).unwrap();
+            d.sel = d.nodes[d.tab]
+                .iter()
+                .position(|n| n.label == "CELL")
+                .expect("CELL node");
+            press(&mut d, KeyCode::Enter);
+            press(&mut d, KeyCode::Enter);
+            press(&mut d, KeyCode::Char(key));
+            let zoom = screen_text(&mut d, 175, 48);
+            assert!(zoom.contains("HJKL turn"), "{key}: zoom pane is 3D: {zoom}");
+            press(&mut d, KeyCode::Char('F'));
+            assert_eq!(d.view, PopupView::Full, "{key}");
+            let all = screen_text(&mut d, 175, 48);
+            assert!(all.contains("hjkl orbit"), "{key}: {all}");
+            let start = d.orbit;
+            press(&mut d, KeyCode::Char('l'));
+            assert!(d.orbit.yaw > start.yaw, "{key}: l orbits right");
+        }
+    }
+
+    #[test]
+    fn cell_sections_are_3d_and_numbers_navigate() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, Some("memory".into())).unwrap();
+        d.sel = d.nodes[d.tab]
+            .iter()
+            .position(|n| n.label == "CELL")
+            .expect("CELL node");
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Enter);
+        for key in '1'..='9' {
+            press(&mut d, KeyCode::Char(key));
+            assert_eq!(d.view, PopupView::Zoom, "{key}");
+            assert!(d.zoom_section, "{key}");
+            let all = screen_text(&mut d, 175, 48);
+            assert!(all.contains("HJKL turn"), "{key}: {all}");
+            assert!(all.contains("1-9 section"), "{key}: {all}");
+            assert!(d.can_orbit(), "{key}: HJKL turn it");
+        }
+        // one press, since quick repeats of a key count as holding it
+        let start = d.orbit;
+        press(&mut d, KeyCode::Char('L'));
+        assert!(d.orbit.yaw > start.yaw, "L turns the model");
+        // a letter goes back to a zoom, and a number returns from it
+        press(&mut d, KeyCode::Char('a'));
+        assert!(!d.zoom_section);
+        press(&mut d, KeyCode::Char('3'));
+        assert!(d.zoom_section);
+        // the sources have no scene: from the menu they open as text
+        press(&mut d, KeyCode::Esc);
+        let s0 = d.menu_sections();
+        d.menu_sel = s0 + 9;
+        press(&mut d, KeyCode::Enter);
+        assert_eq!(d.view, PopupView::Pane);
+    }
+
+    #[test]
     fn bell_jar_full_view_orbits_with_hjkl() {
         let ctx = Ctx {
             db_path: Default::default(),
@@ -2913,6 +3269,64 @@ mod tests {
     #[test]
     fn chip_nodes_all_described() {
         all_described(1, 10);
+    }
+
+    #[test]
+    fn packaging_nodes_all_described() {
+        all_described(3, 6);
+    }
+
+    #[test]
+    fn memory_hbm_stack_node_is_complete() {
+        let hots = find_hots("HBM STACK");
+        assert!(hots.len() >= 8, "HBM STACK: only {} hotspots", hots.len());
+        assert_eq!(hots.len(), cards("HBM STACK").len(), "HBM STACK: card label missing from page");
+        assert!(hots.iter().all(|h| h.body.len() > 150), "HBM STACK: short card");
+        assert!(scene_for("HBM STACK").is_some(), "HBM STACK: no animation");
+    }
+
+    #[test]
+    fn memory_bandwidth_node_is_complete() {
+        let hots = find_hots("BANDWIDTH");
+        assert!(hots.len() >= 8, "BANDWIDTH: only {} hotspots", hots.len());
+        assert_eq!(hots.len(), cards("BANDWIDTH").len(), "BANDWIDTH: card label missing from page");
+        assert!(hots.iter().all(|h| h.body.len() > 150), "BANDWIDTH: short card");
+        assert!(scene_for("BANDWIDTH").is_some(), "BANDWIDTH: no animation");
+    }
+
+    #[test]
+    fn memory_bank_node_is_complete() {
+        let hots = find_hots("BANK");
+        assert!(hots.len() >= 8, "BANK: only {} hotspots", hots.len());
+        assert_eq!(hots.len(), cards("BANK").len(), "BANK: card label missing from page");
+        assert!(hots.iter().all(|h| h.body.len() > 150), "BANK: short card");
+        assert!(scene_for("BANK").is_some(), "BANK: no animation");
+    }
+
+    #[test]
+    fn memory_array_node_is_complete() {
+        let hots = find_hots("ARRAY");
+        assert!(hots.len() >= 8, "ARRAY: only {} hotspots", hots.len());
+        assert_eq!(
+            hots.len(),
+            cards("ARRAY").len(),
+            "ARRAY: card label missing from page"
+        );
+        assert!(hots.iter().all(|h| h.body.len() > 150), "ARRAY: short card");
+        assert!(scene_for("ARRAY").is_some(), "ARRAY: no animation");
+    }
+
+    #[test]
+    fn memory_litho_node_is_complete() {
+        let hots = find_hots("LITHO");
+        assert!(hots.len() >= 8, "LITHO: only {} hotspots", hots.len());
+        assert_eq!(
+            hots.len(),
+            cards("LITHO").len(),
+            "LITHO: card label missing from page"
+        );
+        assert!(hots.iter().all(|h| h.body.len() > 150), "LITHO: short card");
+        assert!(scene_for("LITHO").is_some(), "LITHO: no animation");
     }
 
     #[test]

@@ -72,9 +72,24 @@ pub trait Scene {
     fn beats(&self) -> &[Beat];
     /// Draw the frame for `t` onto a cleared canvas.
     fn draw(&self, c: &mut Canvas, t: &Time);
+    /// A pixel frame of `t`, `w` x `h` pixels, for scenes drawn as pictures. When it
+    /// returns Some, the caller shows it instead of the canvas.
+    fn pixels(&self, _t: &Time, _w: u32, _h: u32) -> Option<image::RgbaImage> {
+        None
+    }
     /// Parts worth a closer look, each its own scene.
     fn zooms(&self) -> &[Zoom] {
         &[]
+    }
+    /// The beat's notes are drawn on the picture itself, so the picture takes the
+    /// whole pane and no side panel is shown.
+    fn notes_in_picture(&self) -> bool {
+        false
+    }
+    /// Where in a beat (0..1) stepping to it lands: past any camera move, where the
+    /// beat reads best when paused.
+    fn rest_point(&self) -> f32 {
+        0.0
     }
 }
 
@@ -142,6 +157,16 @@ impl Player {
 
     pub fn zooms(&self) -> &[Zoom] {
         self.scene.zooms()
+    }
+
+    /// The scene draws its notes on the picture (no side panel).
+    pub fn notes_in_picture(&self) -> bool {
+        self.scene.notes_in_picture()
+    }
+
+    /// The pixel frame for `t` at `w` x `h` pixels, if the scene is a picture.
+    pub fn pixels(&self, t: &Time, w: u32, h: u32) -> Option<image::RgbaImage> {
+        self.scene.pixels(t, w, h)
     }
 
     /// Canvas columns.
@@ -235,7 +260,8 @@ impl Player {
         let cur = self.time_at(self.now_ms()).beat as i32;
         let to = (cur + delta).rem_euclid(n) as usize;
         let start: u64 = self.scene.beats()[..to].iter().map(|b| b.ms.max(1)).sum();
-        self.seek(start);
+        let rest = (self.scene.beats()[to].ms.max(1) as f32 * self.scene.rest_point()) as u64;
+        self.seek(start + rest);
     }
 }
 

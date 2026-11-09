@@ -1,3 +1,69 @@
-# 1. TODO: BANDWIDTH, what happens in one line
+# 1. What happens: rate x width x channels
 
- TODO: box-drawing art, same style as CHIP_NMOS.txt. Keep lines under 100 cols.
+Bandwidth is how many bytes memory can move each second. Its peak is the data rate per pin times the number of data pins, divided by 8 bits per byte, times the number of channels. A DDR4-3200 pin moves 3200 million transfers a second; a channel is 64 pins wide, so one channel peaks at 25.6 GB/s, and four channels at 102.4 GB/s. Real traffic gets less than the peak.
+
+# 2. The parts
+
+data rate          transfers per second on one pin; DDR sends one on each clock edge
+data pins          the width: 64 for a DDR channel, 32 for a GDDR6 chip, 1024 for an HBM3 stack
+DIMM               the chips that together fill one channel's width
+memory controller  in the processor; drives every channel
+channels           independent buses run in parallel; each adds its own bandwidth
+HBM stack          very wide memory placed right beside the processor
+
+# 3. Computing peak bandwidth, in order
+
+1. 3200 MT/s on one pin (DDR4-3200)
+2. x 64 pins = 204,800 Mb/s
+3. / 8 bits per byte
+4. = 25.6 GB/s per channel
+5. x 4 channels = 102.4 GB/s
+
+# 4. DDR, GDDR and HBM
+
+DDR5-4800 DIMM     two 32-bit subchannels x 4.8 Gb/s     = 38.4 GB/s
+GDDR6 chip         32 pins x 16 Gb/s                      = 64 GB/s
+HBM3 stack         1024 pins x 6.4 Gb/s                   = 819 GB/s
+GDDR runs few pins very fast over board wiring; HBM runs many slower pins over the short, dense wiring of an interposer. GDDR6X uses PAM4, four voltage levels, to carry two bits per symbol.
+
+# 5. Effective vs peak
+
+Peak assumes data in every bus slot. Real traffic loses slots to the bus turning around between reads and writes, to refresh, and to waits for rows to open or banks to free up (see BANK). The effective bandwidth is what a workload actually gets.
+
+# 6. By the numbers
+
+                 Gb/s per pin    data pins    GB/s per device
+DDR4-3200        3.2             64           25.6 (channel)
+DDR5-4800        4.8             2 x 32       38.4 (DIMM)
+GDDR6            16              32           64 (chip)
+HBM3             6.4             1024         819 (stack)
+
+# 7. The memory wall
+
+Over the last twenty years peak server compute grew about 3.0x every two years, DRAM bandwidth about 1.6x and interconnect about 1.4x: roughly 60,000x against 100x and 30x. Each unit of compute now has far less bandwidth behind it, so workloads that read a lot of data per operation, such as serving large models, are limited by memory.
+
+# 8. Who makes it
+
+DRAM, GDDR and HBM are made by Micron (MU), SK hynix (000660.KS) and Samsung (005930.KS). Market share is covered on the market pages.
+
+# 9. Chokepoints and risks
+
+- The memory wall: compute keeps outgrowing bandwidth.
+- Pins cost package area, board routing and power; faster pins cost more energy per bit.
+- HBM's width depends on interposer packaging beside the processor (see HBM STACK).
+- Effective bandwidth depends on access patterns, not only on the parts.
+
+# 10. Sources
+
+- JEDEC, HBM3 update to the High Bandwidth Memory standard (JESD238): 6.4 Gb/s, 819 GB/s per device:
+  https://www.businesswire.com/news/home/20220127005320/en/JEDEC-Publishes-HBM3-Update-to-High-Bandwidth-Memory-HBM-Standard
+- Micron, GDDR6 product flyer (32 DQ per component, up to 16 Gb/s):
+  https://www.micron.cn/content/dam/micron/global/public/products/product-flyer/gddr6-product-flyer.pdf
+- Micron, GDDR6X PAM4 tech brief (two bits per symbol):
+  https://www.micron.cn/content/dam/micron/global/public/products/technical-marketing-brief/gddr6x-pam4-2x-speed-tech-brief.pdf
+- Micron, DDR5 modules (two 40-bit independent channels per DIMM, BL16):
+  https://www.mouser.se/micron-ddr5-modules
+- Gholami et al., AI and Memory Wall (arXiv 2403.14123, IEEE Micro):
+  https://arxiv.org/pdf/2403.14123
+- DDR4-3200 and DDR5-4800 peak figures are arithmetic: MT/s x data pins / 8.
+- BANK node for refresh and conflicts; HBM STACK node for packaging.

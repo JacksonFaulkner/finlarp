@@ -1,9 +1,71 @@
-== TODO STATE 1
-# Mechanism
-TODO
+== reticle
+# What it does
+The reticle is the mask. It holds the pattern as opaque and clear regions, and light passing through its openings carries the image down to the wafer. Each layer of the array has its own reticle.
 # Why it matters
-TODO
-# Companies
-TODO
-# Sources
-TODO
+The reticle is where the pattern is defined. Every error on it is copied onto every die that uses it, so mask quality sets the yield of a whole layer.
+# Source
+See section 10 of this page (Sources).
+
+== wavelength
+# What it does
+The wavelength is the colour of the light that exposes the resist. DUV ArF lithography uses 193 nm. EUV uses 13.5 nm, which is why EUV scanners need a vacuum and mirrors instead of lenses.
+# Why it matters
+The smallest printable line scales with the wavelength, so a shorter wavelength is the main way to shrink the cell. Most of the cost of a new node is in the light source and optics for this one number.
+# Source
+See section 10 of this page (Sources).
+
+== numerical aperture
+# What it does
+The numerical aperture (NA) measures how steeply the lens collects light from the reticle. A larger NA collects more of the diffracted light, which resolves finer lines.
+# Why it matters
+NA sets the resolution and the depth of focus together. A higher NA prints finer lines but leaves less height range in focus, so the wafer must be flatter and the resist thinner.
+# Source
+See section 10 of this page (Sources).
+
+== resolution
+# What it does
+Resolution is the smallest line the exposure can print. The Rayleigh criterion gives it as CD = k1 x wavelength / NA, where k1 is a process factor that depends on the resist, the mask and the illumination.
+# Why it matters
+Each shrink of CD shrinks F, and F sets the 6F^2 cell area. Worked example: EUV at 13.5 nm with NA 0.33 and k1 0.4 gives about 16 nm.
+# Source
+See section 10 of this page (Sources).
+
+== depth of focus
+# What it does
+Depth of focus is the height range over which the image stays sharp. It falls with the square of NA, roughly DOF = k2 x wavelength / NA^2.
+# Why it matters
+The wafer is not perfectly flat. If the depth of focus is smaller than the wafer's height variation, part of the field prints blurred, so higher NA makes flatness control harder.
+# Source
+See section 10 of this page (Sources).
+
+== photoresist
+# What it does
+Photoresist is the light-sensitive film on the wafer. In positive resist the exposed part becomes soluble and is developed away. The resist's chemistry and thickness set the sharpest line the process can hold.
+# Why it matters
+Resist is the step where the optical image becomes a physical pattern. Its blur and random defects put a floor on feature size, separate from the optics.
+# Source
+See section 10 of this page (Sources).
+
+== develop
+# What it does
+Develop dissolves the exposed resist in a chemical bath, leaving the pattern standing on the wafer. The unexposed resist stays and protects the film below during etch.
+# Why it matters
+Develop fixes the shape of the pattern. Over- or under-develop changes the line width, so it is part of the critical dimension the process controls.
+# Source
+See section 10 of this page (Sources).
+
+== overlay
+# What it does
+Overlay is how exactly one layer lines up with the layers below it, measured in nanometres. The scanner aligns each wafer using marks printed on earlier layers.
+# Why it matters
+A DRAM cell has many layers that must sit on top of each other. If overlay drifts past a fraction of F, contacts miss their targets and the cell fails.
+# Source
+See section 10 of this page (Sources).
+
+== multi-patterning
+# What it does
+Multi-patterning splits one layer across two or more masks when k1 is too small for a single exposure. LELE prints interleaved lines in two exposures, and SADP uses spacers to double the line density.
+# Why it matters
+It lets a node reach finer pitches with the same scanner, but each extra exposure adds cost, time and overlay error. Memory makers use it on the densest layers.
+# Source
+See section 10 of this page (Sources).

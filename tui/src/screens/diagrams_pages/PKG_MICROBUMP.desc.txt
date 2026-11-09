@@ -1,0 +1,1 @@
+Bumps join each level of the package: C4 solder balls at about 150 um pitch to the substrate, microbumps (copper pillars) at about 40 um under the dies, and hybrid bonds at 10 um and below with no solder. Smaller pitch means more connections. Tickers: TSM, ASX, AMKR.

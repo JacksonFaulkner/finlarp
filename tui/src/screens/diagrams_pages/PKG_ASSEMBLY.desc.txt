@@ -1,0 +1,1 @@
+CoWoS assembly bonds known-good dies onto an interposer wafer (chip on wafer), then onto a substrate (on substrate), with reflow, underfill and test at each step. Yield multiplies across every part, and CoWoS capacity has limited AI accelerator output. Tickers: TSM, ASX, AMKR.

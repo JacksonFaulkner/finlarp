@@ -1,0 +1,63 @@
+== C4 BUMP
+# What it does
+C4 bumps are solder balls at about 150 um pitch that join the interposer (or a chip) to the package substrate.
+# Why it matters
+They carry power and signals into the package from below; their coarse pitch is set by the substrate's wiring.
+# Source
+Patent 8896118; SemiEngineering.
+
+== MICROBUMP
+# What it does
+Microbumps join the logic and HBM dies to the interposer at about 40 um pitch: 20-25 um bumps with 15 um spacing.
+# Why it matters
+Their density sets how many connections fit under each die; they are expected to hit a wall near 10 um.
+# Source
+SemiEngineering, scaling bump pitches.
+
+== CU PILLAR
+# What it does
+A copper pillar is a plated copper post with a solder cap, the usual form of a microbump, standing taller than a plain solder ball.
+# Why it matters
+Pillars allow tighter pitch than balls because the copper doesn't spread when the solder melts.
+# Source
+Patent 8896118 (40 um copper pillar array).
+
+== HYBRID BOND
+# What it does
+Hybrid bonding joins polished copper pads directly while the surrounding oxide bonds too, with no solder and no gap, at 10 um pitch and below.
+# Why it matters
+It allows far denser connections and thinner stacks, but needs near-perfect flatness and cleanliness.
+# Source
+SemiEngineering, bumps vs hybrid bonding.
+
+== BUMP PITCH
+# What it does
+Bump pitch is the centre-to-centre spacing of bumps; connection density rises with one over pitch squared.
+# Why it matters
+C4 about 150 um, microbump about 40 um, hybrid 10 um and below: each step multiplies the connections per mm2.
+# Source
+SemiEngineering; patent 8896118.
+
+== UNDERFILL
+# What it does
+Underfill is epoxy wicked between die and interposer and between interposer and substrate, then cured.
+# Why it matters
+It shares thermal-expansion stress across the whole area instead of the outer joints; for C4 joints it gives over 10x thermal-cycle life.
+# Source
+UCLA Pb-free workshop abstract (Totta).
+
+== ELECTROMIGRATION
+# What it does
+As bumps shrink, each carries more current density, and electromigration slowly moves metal atoms until joints fail.
+# Why it matters
+Power for the logic die enters through thousands of bumps, so more bumps share the current.
+# Source
+Textbook; see MID METAL electromigration sources.
+
+== SoIC
+# What it does
+SoIC is TSMC's system-on-integrated-chips stacking, which bonds dies on top of each other with hybrid bonds.
+# Why it matters
+It is TSMC's route past microbump pitch limits for die-on-die stacking.
+# Source
+TSMC 3DFabric.

@@ -1,0 +1,63 @@
+== ABF FILM
+# What it does
+Ajinomoto Build-up Film is the insulating layer between the copper wiring layers of high-end CPU and GPU substrates.
+# Why it matters
+One company's subsidiary is estimated to control about 95% of CPU/GPU-grade ABF, a single-supplier chokepoint (analyst estimate).
+# Source
+wing.vc ABF bottleneck.
+
+== BUILD-UP LAYERS
+# What it does
+Build-up layers alternate ABF film and copper wiring, laminated, drilled and plated one at a time on both sides of the core.
+# Why it matters
+AI GPU substrates need 12-20 of them with fine lines; few makers yield 14+ layers at volume (estimates).
+# Source
+marketsandmarkets GPU substrate (estimates).
+
+== CORE
+# What it does
+The core is the stiff centre of the substrate, with plated through-holes, that the build-up layers are laminated onto.
+# Why it matters
+Its stiffness fights warpage; glass cores are being developed to do better.
+# Source
+Textbook.
+
+== WARPAGE
+# What it does
+A large, thin organic laminate bends as it heats during reflow and cools, stressing the bumps above and the balls below.
+# Why it matters
+Warpage grows with package size and makes assembly and long-term reliability harder.
+# Source
+Textbook; see GLASS CORE.
+
+== BGA
+# What it does
+A ball grid array of solder balls on the substrate's underside joins the package to the board at about 1 mm pitch.
+# Why it matters
+It is the package's connection to the outside world: power in, high-speed signals out.
+# Source
+Patent 8896118 context; textbook.
+
+== FAN-OUT
+# What it does
+Fan-out is spreading tens of thousands of fine-pitch bumps out to the coarse pitch of the board, layer by layer.
+# Why it matters
+The substrate routes power planes and high-speed signals while doing it.
+# Source
+Textbook.
+
+== GLASS CORE
+# What it does
+A glass core is a stiffer, flatter substrate core material that could carry finer wiring than organic cores.
+# Why it matters
+It could ease warpage in very large packages; it is still under development.
+# Source
+Industry development; not sourced here.
+
+== SUBSTRATE MAKERS
+# What it does
+Ibiden, Shinko, Unimicron, AT&S and Nan Ya make high-end substrates; Ibiden is committing about JPY 500B to two fabs from fiscal 2027.
+# Why it matters
+Shares are estimates that disagree (Ibiden ~35% in one, Unimicron ~22% of capacity in another).
+# Source
+marketsandmarkets (estimates).

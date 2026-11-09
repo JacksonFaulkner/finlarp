@@ -1,3 +1,71 @@
-# 1. TODO: ARRAY, what happens in one line
+# 1. What happens: a grid of cells, read a row at a time
 
- TODO: box-drawing art, same style as CHIP_NMOS.txt. Keep lines under 100 cols.
+The array is a grid of 1T1C cells. Each row of cells shares a word line and each column shares a bit line. An access opens one whole row: the row decoder raises its word line, every cell in the row shares its charge with its bit line, and the sense amps latch the row. That latched row is the row buffer. Reads then pick columns out of the row buffer, and precharge closes the row again.
+
+# 2. The parts
+
+cells              one transistor and one capacitor per bit (see the CELL node)
+row decoder        turns the row address into one high word line
+word line          one per row; high opens every cell in the row
+bit line           one per column; carries the charge of the open row's cell
+sense amps         one per bit line; latch the row and restore it (the row buffer)
+column decoder     connects the chosen latches to the data lines
+I/O                sends the chosen bits off the chip as a burst
+
+# 3. One access, in order
+
+1. idle: every bit line is precharged to VDD/2
+2. ACTIVATE: the row decoder raises one word line; the row shares charge with the bit lines
+3. sense: the sense amps latch the row (the row buffer) and rewrite the cells
+4. READ: the column decoder sends a burst of columns to the I/O
+5. PRECHARGE: the word line falls and the bit lines return to VDD/2
+
+# 4. Row hits and misses
+
+The open row works like a small cache.
+  row hit       the row is already open:          tCL               = 13.75 ns
+  row miss      the bank is closed:               tRCD + tCL        = 27.5 ns
+  row conflict  another row is open:              tRP + tRCD + tCL  = 41.25 ns
+(DDR4-3200 22-22-22.) A conflict costs three times a hit, which is why memory controllers try to group requests to the same row.
+
+# 5. Mats and subarrays: why the array is cut up
+
+Every cell on a bit line adds capacitance, and the swing the sense amp sees is Cc / (Cc + Cb), so long bit lines give weak signals. The array is therefore tiled into small mats, each with its own local word line drivers and sense amp stripes. Mats in a row form a subarray with its own local row buffer; many subarrays form a bank and share global bit lines and the bank's I/O.
+
+# 6. By the numbers
+
+typical array        512 word lines x 512 bit lines = 262,144 cells
+row (page)           1 KB = 8192 bits on a x8 DDR4 chip, opened across many arrays at once
+burst                8 transfers on 8 pins = 64 bits per READ (x8, burst length 8)
+timings              tRCD = tCL = tRP = 13.75 ns; tRAS = 32.5 ns (DDR4-3200 22-22-22)
+
+# 7. Redundancy: spare rows and columns
+
+Some cells always fail. Wafer test finds them, and fuses (laser or electrical) store the bad addresses so the decoders send them to spare rows and columns at the edge of the array. Redundancy turns dies that would be scrap into good ones, at the cost of area that holds no data.
+
+# 8. Who makes it
+
+Commodity DRAM is made by Micron (MU), SK hynix (000660.KS) and Samsung (005930.KS). Market share is covered on the market pages.
+
+# 9. Chokepoints and risks
+
+- Row conflicts cost three times a row hit, so access patterns that jump between rows waste bandwidth.
+- RowHammer: opening one row again and again leaks charge from its neighbours until bits flip.
+- The periphery (decoders, sense amp stripes) takes area from the cells, and shorter lines need more of it.
+- Refresh opens every row on a timer and blocks the bank while it runs (see the CELL node).
+
+# 10. Sources
+
+- UMD ENEE 359a, DRAM Circuits (Jacob): 512 x 512 array, word line drivers, sense amps, swing formula:
+  https://ece.umd.edu/class/enee359a.S2007/enee359a-DRAM-ii.pdf
+- Kim et al., Exploiting the DRAM Microarchitecture to Increase Memory-Level Parallelism (SALP retrospective; subarrays with local row buffers, <0.15% area):
+  https://arxiv.org/pdf/1805.01966
+- AnandTech, Insights into DDR5 sub-timings and latencies (DDR4-3200 22-22-22 = 13.75 ns):
+  https://anandtech.com/print/16143/insights-into-ddr5-subtimings-and-latencies
+- DDR4-3200 JEDEC profile listing, CL22-22-22-52 (tRAS 52 clocks = 32.5 ns):
+  https://geizhals.de/2515520
+- DRAM redundancy patents (spare rows/columns, fuse-programmed decoders), e.g. US 6,731,550 and US 5,325,334:
+  https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6731550
+- Kim et al., Flipping Bits in Memory Without Accessing Them (ISCA 2014), RowHammer.
+- Not yet linked here: Micron DDR4 datasheet for the 1 KB x8 page size and burst length 8.
+- CELL node for the 1T1C cell and refresh; LITHO node for F.

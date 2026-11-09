@@ -1,0 +1,1 @@
+The finished package solders to a module board through BGA balls; regulators beside it deliver hundreds of amps at under a volt, a cold plate on the lid carries the heat away (increasingly with liquid), and GPU-to-GPU links tie modules into racks. Tickers: NVDA, AMD.

@@ -1,0 +1,1 @@
+The logic die is the GPU itself, as large as one lithography field allows: 26 x 33 mm, 858 mm2, with H100 at about 814 mm2. Past that, designs split into chiplets joined by a fast die-to-die link, with HBM stacks along the die edges. Tickers: NVDA, AMD, TSM.

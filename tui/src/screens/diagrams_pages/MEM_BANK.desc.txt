@@ -1,1 +1,1 @@
-TODO: one paragraph for the node popup: what BANK is, why it matters, tickers.
+A DRAM chip is split into banks, each a full array with its own open row, all sharing one command bus and one data bus. Overlapping work across banks keeps the bus busy, within timing rules between banks (tRRD, tCCD, tFAW). DDR4 has 16 banks in 4 groups; DDR5 has 32 in 8 and adds same-bank refresh. Tickers: MU, 000660.KS, 005930.KS.

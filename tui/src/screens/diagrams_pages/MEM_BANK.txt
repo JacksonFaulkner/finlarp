@@ -1,3 +1,72 @@
-# 1. TODO: BANK, what happens in one line
+# 1. What happens: many banks, one bus
 
- TODO: box-drawing art, same style as CHIP_NMOS.txt. Keep lines under 100 cols.
+A DRAM chip is split into banks. Each bank is a full array with its own row buffer, so each can hold its own open row and be at its own step: opening, reading, closing. All banks share one command bus and one data bus. While one bank opens a row, another can send data, so with enough banks in flight the data bus stays busy. This is bank-level parallelism.
+
+# 2. The parts
+
+bank               a full array with its own row buffer; holds one open row
+bank group         4 banks sharing some circuits; READs within a group must be further apart
+command bus        carries ACTIVATE, READ, PRECHARGE and REFRESH, one command at a time
+data bus           shared by every bank, one burst at a time
+I/O                the chip's data pins
+controller         in the processor; picks the order of commands within the timing rules
+
+# 3. One interleaved access, in order
+
+1. ACTIVATE bank A: its row opens
+2. ACTIVATE bank B in another group, tRRD later, while A is still opening
+3. READ A: a burst leaves A's row buffer
+4. READ B: B's burst follows straight after on the data bus
+5. PRECHARGE both: the rows close
+
+# 4. The timing rules between banks
+
+tRRD     ACTIVATE to ACTIVATE, different banks:  about 3.7 ns across groups, 5.3 ns within one
+tCCD     READ to READ:                          2.5 ns across groups (one burst), about 5.36 ns within one
+tFAW     at most four ACTIVATEs in any window:  about 21 ns
+(DDR4-3200, module SPD values.) A DDR4-3200 burst of 8 is 4 clocks = 2.5 ns, so alternating bank groups keeps the bus full.
+
+# 5. Bank conflicts and parallelism
+
+Requests spread over many banks overlap and hide each other's waits. Requests that hit one bank at different rows queue up, each paying a full row conflict (tRP + tRCD + tCL). The controller's address mapping decides which bits pick the bank: column bits lowest keeps neighbouring addresses in one open row, and interleaving across banks spreads independent streams. Controllers also reorder requests to serve row hits first.
+
+# 6. By the numbers
+
+DDR4             16 banks in 4 bank groups (x4/x8), burst length 8
+DDR5             32 banks in 8 bank groups, burst length 16
+DDR4-3200        tRRD_S ~3.7 ns, tRRD_L ~5.3 ns, tCCD_S 2.5 ns, tCCD_L ~5.36 ns, tFAW ~21 ns
+
+# 7. Refresh and banks
+
+DDR4's REFRESH works on all banks at once: every bank closes and the rank is locked until it finishes. DDR5 adds same-bank refresh (REFsb), which refreshes the same bank in every bank group while the other banks keep working.
+
+# 8. Who makes it
+
+Commodity DRAM is made by Micron (MU), SK hynix (000660.KS) and Samsung (005930.KS). Market share is covered on the market pages.
+
+# 9. Chokepoints and risks
+
+- Interference: different cores hitting different rows of one bank keep closing each other's rows.
+- tFAW caps how fast rows can be opened, however many banks are free.
+- Denser chips have more rows to refresh in the same window, which eats into bank time.
+- Throughput depends on the controller's mapping and ordering, not only on the chip.
+
+# 10. Sources
+
+- Micron, DDR5 new features white paper (2x banks, 2x bank groups, BL16, same-bank refresh):
+  https://www.micron.cn/content/dam/micron/global/public/products/white-paper/ddr5-new-features-white-paper.pdf
+- DDR5 SDRAM, Wikipedia (up to 8 bank groups of 4 banks; burst length 16 with burst chop):
+  https://iiab.live/kiwix/content/wikipedia_en_all_maxi_2023-05/A/DDR5
+- PCPer, Micron's DDR5 Technology Enablement Program (DDR4 refresh locks the rank; DDR5 per-bank):
+  https://pcper.com/2020/07/microns-ddr5-technology-enablement-program/
+- DDR4-3200 module SPD dumps (tRRD_S ~3.7 ns, tRRD_L ~5.3 ns, tCCD_L ~5.36 ns, tFAW 21-23 ns):
+  https://www.computerbase.de/forum/attachments/corsair-cmk16gx4m2b3200c16-html-pdf.791635/
+  https://www.gskill.us/forum/filedata/fetch?id=129226
+- Interleaving across banks, row-sized granularity (arXiv 1607.08578):
+  https://arxiv.org/pdf/1607.08578
+- Address mapping schemes, column bits lowest (DReAM, arXiv 1509.03721):
+  https://arxiv.org/pdf/1509.03721
+- Bank partitioning to cut interference (HPCA 2012):
+  https://lph.ece.utexas.edu/merez/uploads/MattanErez/bpart_hpca12.pdf
+- Not yet linked here: JEDEC JESD79-4 for normative DDR4 timing values.
+- ARRAY node for tRCD, tCL, tRP; CELL node for the refresh window.

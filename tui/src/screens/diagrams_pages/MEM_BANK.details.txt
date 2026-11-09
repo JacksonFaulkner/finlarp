@@ -1,9 +1,71 @@
-== TODO STATE 1
-# Mechanism
-TODO
+== bank group
+# What it does
+Banks are gathered into groups of four that share some circuits. READs to banks in the same group must be tCCD_L apart; READs that alternate between groups only tCCD_S, one burst.
 # Why it matters
-TODO
-# Companies
-TODO
-# Sources
-TODO
+Bank groups let DDR4 and DDR5 run faster: a controller that alternates groups keeps the data bus full. DDR4 has 4 groups, DDR5 8.
+# Source
+Micron DDR5 white paper (2x bank groups); DDR4-3200 module SPD (tCCD_L ~5.36 ns).
+
+== command bus
+# What it does
+The command bus carries every ACTIVATE, READ, PRECHARGE and REFRESH from the controller to the chip, one command per slot, with the bank address in each.
+# Why it matters
+All banks share it, so command slots can run out when many banks are busy; the controller has to fit every command in within the timing rules.
+# Source
+JEDEC DDR4/DDR5 command set; see the ARRAY node for what each command does.
+
+== data bus
+# What it does
+The data bus carries bursts between the banks and the chip's pins. Only one burst at a time can be on it, whichever bank it comes from.
+# Why it matters
+Bandwidth is lost whenever the data bus is idle. Overlapping banks and alternating groups are how the controller keeps it full.
+# Source
+DDR4 burst length 8 (2.5 ns at DDR4-3200); DDR5 burst length 16 (Micron).
+
+== controller
+# What it does
+The memory controller sits in the processor. It splits each address into row, bank, group and column, queues requests, and picks the next legal command.
+# Why it matters
+Its address mapping and ordering decide how many accesses are row hits and how many banks work at once, so it sets real throughput as much as the chip does.
+# Source
+arXiv 1509.03721 (address mapping schemes); arXiv 1607.08578 (interleaving across banks).
+
+== tRRD
+# What it does
+tRRD is the minimum time between ACTIVATE commands to different banks: tRRD_S across bank groups, tRRD_L within one.
+# Why it matters
+It sets how quickly the controller can start opening rows in several banks, the first step of bank-level parallelism.
+# Source
+DDR4-3200 module SPD: tRRD_S ~3.7 ns, tRRD_L ~5.3 ns.
+
+== tCCD
+# What it does
+tCCD is the minimum time between READ (or WRITE) commands: tCCD_S across bank groups, equal to one burst, and tCCD_L within one group.
+# Why it matters
+When READs stay in one group, gaps of tCCD_L minus one burst leave the data bus idle.
+# Source
+DDR4-3200: tCCD_S = 4 clocks = 2.5 ns; tCCD_L ~5.36 ns (module SPD).
+
+== tFAW
+# What it does
+tFAW is a window in which no more than four ACTIVATE commands may be issued, across all banks of the chip.
+# Why it matters
+Opening rows draws current, and tFAW caps it. With many free banks, tFAW often sets the pace of activations rather than tRRD.
+# Source
+DDR4-3200 module SPD: tFAW ~21-23 ns.
+
+== same-bank refresh
+# What it does
+DDR5's REFsb command refreshes the same bank in every bank group, one bank index at a time, while the other banks stay available.
+# Why it matters
+DDR4's all-bank refresh locks the whole rank; same-bank refresh lets reads to the other banks continue, so refresh costs less throughput.
+# Source
+Micron DDR5 white paper (REFsb); PCPer (DDR4 refresh locks the rank).
+
+== address mapping
+# What it does
+Address mapping is the controller's choice of which address bits select the row, bank, bank group and column.
+# Why it matters
+Column bits lowest keeps neighbouring addresses in one open row (hits); interleaving bank bits spreads independent streams across banks (parallelism).
+# Source
+DReAM, arXiv 1509.03721; arXiv 1607.08578.

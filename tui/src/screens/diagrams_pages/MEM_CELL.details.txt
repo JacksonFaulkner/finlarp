@@ -6,37 +6,37 @@ Only one word line is high at a time, so one row is selected per access. Row sel
 # Source
 Jacob, ENEE 359a DRAM Systems, slide 3; Jacob, DRAM Circuits, slide 5 (word line driver, 512x512 organization).
 
+== access transistor
+# What it does
+The access transistor is a switch between the bit line and the storage node. Its gate is the word line, so the row decides which cells are connected to their bit lines.
+# Why it matters
+It is the only transistor in the 1T1C cell, which is why the cell is small. Its leakage when off also sets how long the stored charge lasts.
+# Source
+Jacob, ENEE 359a DRAM Systems, slide 3 (switching element is a transistor); HiRA, arXiv 2209.10198, p. 2.
+
+== storage capacitor
+# What it does
+The storage capacitor holds the bit as charge on its plate. Full charge reads as 1 and empty reads as 0. It is the only place the data lives.
+# Why it matters
+Charge leaks out of this capacitor, so the bit is not stable without refresh. The capacitance also sets the swing the sense amp sees.
+# Source
+Jacob, ENEE 359a DRAM Systems, slide 3 (storage capacitor); Jacob, DRAM Circuits, slide 9 (cell area 6F^2).
+
 == bit line
 # What it does
 The bit line is the column wire. Each cell in a column connects to it through its access transistor. Before a read, the bit line is precharged to VDD/2.
 # Why it matters
 The cell is tiny, so its charge moves a much bigger bit line only a little. The sense amp has to detect that small move.
 # Source
-Jacob, DRAM Circuits, slides 4 and 11 (charge sharing and precharge to Vcc/2); HiRA, arXiv 2209.10198, p. 2.
+Jacob, DRAM Circuits, slides 4 and 11 (charge sharing and precharge to VDD/2); HiRA, arXiv 2209.10198, p. 2.
 
-== access transistor
+== precharge
 # What it does
-The access transistor is a switch between the bit line and the storage node. Its gate is the word line, so the row decides which cells are connected.
+Precharge holds the bit line at VDD/2 between accesses. It is switched on when the word line falls, so the next read starts from the middle of the swing.
 # Why it matters
-It is the only transistor in the 1T1C cell, which is why the cell is small. Its leakage when off also sets how long the charge lasts.
+A read moves the bit line up or down from VDD/2. If the line started anywhere else, a 1 and a 0 would not look different enough for the sense amp.
 # Source
-Jacob, ENEE 359a DRAM Systems, slide 3 (switching element = transistor); HiRA, arXiv 2209.10198, p. 2.
-
-== storage capacitor
-# What it does
-The storage capacitor holds the bit as charge on its plate. Full charge reads as 1 and empty reads as 0. It is the only place the data lives.
-# Why it matters
-Charge leaks out of this capacitor, so the bit is not stable without refresh. The capacitance also sets the signal the sense amp sees.
-# Source
-Jacob, ENEE 359a DRAM Systems, slide 3 (storage element = capacitor); Mutlu, arXiv 2306.16037, p. 1 (charge loss over time).
-
-== leakage
-# What it does
-Leakage is charge that drains out of the storage node with no access. The main routes in a 1T1C cell are the capacitor dielectric, the junction at the storage node, and subthreshold conduction through the off transistor.
-# Why it matters
-Leakage is why every cell needs refresh. It gets worse as the cell shrinks, because the junction doping rises and the capacitor gets smaller.
-# Source
-Mutlu, arXiv 2306.16037 (retention time and data-pattern dependence). The route list comes from DRAM patent backgrounds found by search; verify against a device paper before release.
+Jacob, DRAM Circuits, slides 4 and 11 (precharge to Vcc/2 before a read).
 
 == charge sharing
 # What it does
@@ -44,7 +44,7 @@ Charge sharing is what happens when the access transistor opens: the cell capaci
 # Why it matters
 The move is small because the bit line capacitance is much bigger than the cell capacitance. The sense amp must amplify this small change.
 # Source
-Jacob, DRAM Circuits, slides 4 and 11: Vx = (Vb Cb + Vc Cc) / (Cb + Cc); Vsignal = Vc Cc / (Cb + Cc).
+Jacob, DRAM Circuits, slides 4 and 11: final voltage (Cb VBL + Cc Vcell) / (Cb + Cc). The swing follows from that: (Vcell - VDD/2) Cc / (Cc + Cb), derived from charge conservation.
 
 == sense amp
 # What it does
@@ -54,6 +54,14 @@ This latch does two jobs: it reads the bit and it restores the destroyed charge.
 # Source
 Jacob, DRAM Circuits, slides 12-14 (sense amplifier circuit and timing); HiRA, arXiv 2209.10198, p. 2 (sense amplifiers).
 
+== restore
+# What it does
+Restore writes the full charge back into the cell after the read. The read drained the capacitor, and the sense amp drives the bit line to a full rail, which charges the cell back through the open access transistor.
+# Why it matters
+Without restore, every read would destroy the bit it reads. Restore is what makes a destructive read safe: the bit is written back right after it is read. It is the same write-back that refresh uses.
+# Source
+Jacob, DRAM Circuits, slides 12-14 (sense and restore); HiRA, arXiv 2209.10198, p. 2.
+
 == refresh
 # What it does
 Refresh rewrites each row before its charge leaks away. Refresh is a read followed by a write-back, done by the controller for every row on a timer.
@@ -61,3 +69,11 @@ Refresh rewrites each row before its charge leaks away. Refresh is a read follow
 Refresh is needed because the bit fades. In DDR4 the window is 64 ms; the controller issues 8192 refresh commands per window, one every 7.8 us.
 # Source
 PROTEAS, arXiv 2404.16256, Table I (Micron DDR4 datasheet: tREFW 64 ms, tREFI 7800 ns, 8192 REFs per window).
+
+== leakage
+# What it does
+Leakage is the slow loss of charge from the storage node while the cell sits idle. It runs through the capacitor dielectric, the storage-node junction and the off access transistor.
+# Why it matters
+Leakage sets the refresh window. Cells differ in how fast they leak, and the window must cover the weakest cell on the chip.
+# Source
+Mutlu, Retrospective: Data Retention Behavior in Modern DRAM (arXiv 2306.16037, p. 1) for retention variation. The split between the three leak paths is not sourced here.

@@ -1,0 +1,56 @@
+# 1. What happens: chip on wafer, then on substrate
+
+CoWoS assembly happens in two stages. CHIP ON WAFER: known-good logic and HBM dies are bonded face down onto a whole interposer wafer, underfilled, and the wafer is thinned to expose its TSVs. ON SUBSTRATE: the wafer is cut into interposers, each is bonded to an organic substrate by C4 REFLOW, underfilled again (UNDERFILL FLOW), lidded and tested (TEST). Every step multiplies yield (YIELD STACKUP), and CAPACITY at this stage has limited AI GPU output.
+
+# 2. The parts
+
+CHIP ON WAFER     dies bonded onto an uncut interposer wafer
+ON SUBSTRATE      the cut interposer bonded onto the package substrate
+REFLOW            heating that melts solder into joints
+UNDERFILL FLOW    epoxy wicked under each level and cured
+TEST              electrical test before and after assembly
+YIELD STACKUP     package yield is the product of every die's and step's yield
+CAPACITY          CoWoS output, measured in wafers per month
+OSAT              outsourced assembly and test houses, such as ASE and Amkor
+
+# 3. One package, in order
+
+1. dies placed face down on the interposer wafer, bonded
+2. underfill and mold, then the wafer thinned to reveal TSVs
+3. the wafer cut into interposers
+4. each bonded to a substrate by C4 reflow and underfilled
+5. lid, test, ship
+
+# 4. Yield stacks up
+
+A package with one logic die, eight HBM stacks and an interposer is only good if all of them and every joint are good, so YIELD STACKUP multiplies: at 99% per part, ten parts give about 90%. That is why only known-good dies are assembled.
+
+# 5. Capacity: the bottleneck
+
+Almost every high-end AI accelerator uses CoWoS, so monthly CoWoS CAPACITY strongly limits how many ship. NVIDIA reportedly took 40-50% of capacity in 2024; TSMC planned to double capacity in 2023 and, on its Q1 2026 call, said advanced packaging remained strained (secondary reports). Blackwell-class parts use more capacity per package because their interposers are bigger.
+
+# 6. Outsourced assembly
+
+OSAT houses add capacity: ASE (ASX) and Amkor (AMKR) take substrate attach and test, and UMC supplies interposers (TrendForce).
+
+# 7. Test
+
+TEST happens at wafer sort (known-good dies), after chip-on-wafer, and on the finished package; a defect found late scraps the whole assembly with all its HBM.
+
+# 8. Who makes it
+
+TSMC (TSM) does most CoWoS; ASE (ASX) and Amkor (AMKR) as OSATs; UMC for interposers. NVIDIA (NVDA) and AMD buy the capacity.
+
+# 9. Chokepoints and risks
+
+- Packaging capacity, not wafers, has limited accelerator shipments.
+- One supplier does most CoWoS.
+- Late defects scrap expensive parts.
+- Notes: capacity and share figures are press reports and estimates.
+
+# 10. Sources
+
+  [1] CoWoS demand: tomshardware.com/tech-industry/tsmc-struggles-meet-demand-for-cowos-packaging-holding-back-ai-and-hpc-silicon-production-report
+  [2] Capacity shares: trendforce.com/news/2024/02/19/insights-cowos-capacity-shortage-challenges-ai-chip-demand-while-taiwanese-manufacturers-expand-to-seize-opportunities/ ; emsnow.com/?p=40232
+  [3] 2026 status: penchan.co/en/market/ai/supply-chain/cowos/ (secondary)
+  [4] TSMC CoWoS: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm

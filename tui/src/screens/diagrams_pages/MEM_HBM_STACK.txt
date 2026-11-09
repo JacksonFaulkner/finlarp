@@ -1,3 +1,68 @@
-# 1. TODO: HBM_STACK, what happens in one line
+# 1. What happens: DRAM stacked beside the processor
 
- TODO: box-drawing art, same style as CHIP_NMOS.txt. Keep lines under 100 cols.
+High Bandwidth Memory stacks several thinned DRAM dies on a base logic die and places the stack right beside the GPU on a silicon interposer. Copper through-silicon vias (TSVs) run up through the dies and microbumps join each die to the next. Because the wires to the GPU are millimetres long and very fine, one stack can use a 1024-bit bus (HBM3) or 2048 bits (HBM4), far wider than a DIMM.
+
+# 2. The parts
+
+DRAM dies          the memory, stacked 4 to 16 high; each has its own banks and arrays
+base logic die     the interface (PHY) to the GPU and test logic; the TSVs land on it
+TSVs               copper wires straight through each thinned die
+microbumps         tiny joints connecting each die's TSVs to the next die
+silicon interposer a slab of silicon wiring the stacks to the GPU
+GPU                the processor the stacks feed, millimetres away
+
+# 3. Building a stack, in order
+
+1. DRAM dies are made on DRAM wafers and tested (each must be good)
+2. dies are thinned and given TSVs and microbumps
+3. dies are stacked and bonded onto the base die
+4. the stack is tested through its TSVs
+5. stacks and GPU are mounted on the interposer (CoWoS) and packaged
+
+# 4. Generations
+
+                 data pins    Gb/s per pin    GB/s per stack    channels
+HBM3             1024         6.4             819               16
+HBM4             2048         8               2048              32 (two pseudo-channels each)
+HBM4 allows 4, 8, 12 or 16-high stacks of 24 Gb or 32 Gb dies: up to 64 GB per stack.
+
+# 5. Height and heat
+
+A stack has a height limit. It was raised from 720 um to 775 um so 16-high stacks fit, and dies are thinned to 30-50 um. Taller stacks add capacity but trap more heat: heat from the lower dies has to pass up through the others to escape.
+
+# 6. Bonding: microbumps and hybrid bonding
+
+Today the dies are joined with microbumps, at a pitch of about 40 um heading towards 10 um. Hybrid bonding joins copper pads directly with no bump, which makes a stack shorter, but it is harder to make with good yield; HBM4 kept microbumps once the height limit rose, and hybrid bonding is expected beyond 16-high.
+
+# 7. Packaging: CoWoS
+
+The GPU and its HBM stacks sit side by side on one silicon interposer, which sits on a package substrate: TSMC calls this Chip-on-Wafer-on-Substrate (CoWoS). Almost every high-end AI accelerator uses it, and CoWoS capacity rather than wafer supply has limited how many ship. More stacks per package need a larger interposer, so fewer fit on each wafer.
+
+# 8. Who makes it
+
+HBM is made by SK hynix (000660.KS), Samsung (005930.KS) and Micron (MU). Packaging is led by TSMC (TSM), with outside assembly houses such as ASE (ASX) and Amkor (AMKR). Market share is covered on the market pages.
+
+# 9. Chokepoints and risks
+
+- Packaging capacity: CoWoS has limited accelerator output, and one supplier does most of it.
+- Stack yield: one bad die or joint spoils the stack, so yield falls as stacks grow taller.
+- Heat: tall stacks trap heat in their lower dies.
+- Bonding: going beyond 16-high is expected to need hybrid bonding, which is not yet in volume.
+
+# 10. Sources
+
+- JEDEC, HBM3 update to the High Bandwidth Memory standard (JESD238): 6.4 Gb/s, 819 GB/s per device:
+  https://www.businesswire.com/news/home/20220127005320/en/JEDEC-Publishes-HBM3-Update-to-High-Bandwidth-Memory-HBM-Standard
+- JEDEC, JESD270-4 HBM4 standard (2048 bits, 8 Gb/s, 2 TB/s, 32 channels, up to 16-high, 64 GB):
+  https://businesswire.com/news/home/20250416843598/en/JEDEC-and-Industry-Leaders-Collaborate-to-Release-JESD270-4-HBM4-Standard-Advancing-Bandwidth-Efficiency-and-Capacity-for-AI-and-HPC
+- SemiEngineering, HBM4 Sticks With Microbumps, Postponing Hybrid Bonding (die thickness, bump pitch, height limit):
+  https://semiengineering.com/hbm4-sticks-with-microbumps-postponing-hybrid-bonding/
+- Tom's Hardware, the current state of hybrid bonding (720 -> 775 um limit):
+  https://tomshardware.com/tech-industry/semiconductors/hybrid-bonding-roadmap-examined
+- Tom's Hardware, TSMC struggles to meet demand for CoWoS packaging:
+  https://www.tomshardware.com/tech-industry/tsmc-struggles-meet-demand-for-cowos-packaging-holding-back-ai-and-hpc-silicon-production-report
+- TrendForce, CoWoS capacity shortage challenges AI chip demand:
+  https://www.trendforce.com/news/2024/02/19/insights-cowos-capacity-shortage-challenges-ai-chip-demand-while-taiwanese-manufacturers-expand-to-seize-opportunities/
+- HBM3 channel count (8 to 16): PC Watch report on JESD238:
+  https://pc.watch.impress.co.jp/docs/news/1384232.html
+- Reported, not confirmed here: HBM4 base dies on foundry logic processes (e.g. TSMC).

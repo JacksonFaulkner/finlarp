@@ -1,1 +1,1 @@
-TODO: one paragraph for the node popup: what BANDWIDTH is, why it matters, tickers.
+Bandwidth is the bytes per second memory can move: data rate per pin x data pins / 8 x channels. A DDR4-3200 channel peaks at 25.6 GB/s, a GDDR6 chip at 64 GB/s and an HBM3 stack at 819 GB/s. Real traffic gets less than peak, and compute has grown far faster than bandwidth (the memory wall). Tickers: MU, 000660.KS, 005930.KS.

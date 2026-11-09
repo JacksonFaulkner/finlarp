@@ -1,0 +1,1 @@
+The interposer is a slab of fine wiring under the GPU and its HBM stacks: TSMC's CoWoS-S uses full silicon (up to about 3.3x reticle), CoWoS-L an organic interposer with silicon bridges (Blackwell), CoWoS-R polymer RDL. Its capacity has limited AI GPU output. Tickers: TSM, ASX, AMKR.

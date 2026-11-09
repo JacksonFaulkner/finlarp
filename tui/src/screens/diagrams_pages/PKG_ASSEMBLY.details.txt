@@ -1,0 +1,63 @@
+== CHIP ON WAFER
+# What it does
+Known-good logic and HBM dies are bonded face down onto a whole, uncut interposer wafer, underfilled, and the wafer is thinned to expose its TSVs.
+# Why it matters
+Working at wafer scale is precise and efficient, but every die placed must be good.
+# Source
+TSMC 3DFabric; textbook flow.
+
+== ON SUBSTRATE
+# What it does
+The interposer wafer is cut, and each interposer with its dies is bonded to an organic substrate through C4 reflow.
+# Why it matters
+This step joins the fine-pitch world to the board-pitch world.
+# Source
+TSMC 3DFabric; textbook flow.
+
+== REFLOW
+# What it does
+Reflow heats the assembly until the solder melts and forms joints, then cools it.
+# Why it matters
+Heating and cooling warp the substrate and stress every joint, so profiles are tightly controlled.
+# Source
+Textbook.
+
+== UNDERFILL FLOW
+# What it does
+Epoxy is dispensed at the die edge, wicks under by capillary action, and is cured, at both the die and the interposer level.
+# Why it matters
+It protects the joints from thermal stress; voids in it are a failure source.
+# Source
+UCLA (Totta) underfill life.
+
+== TEST
+# What it does
+Testing happens at wafer sort, after chip-on-wafer and on the finished package.
+# Why it matters
+A defect found late scraps the whole assembly with all its HBM, so testing early matters.
+# Source
+Textbook.
+
+== YIELD STACKUP
+# What it does
+Package yield is the product of every die's and every step's yield: at 99% per part, ten parts give about 90%.
+# Why it matters
+More stacks and bigger packages make yield harder; known-good dies are essential.
+# Source
+Arithmetic; illustrative.
+
+== CAPACITY
+# What it does
+CoWoS capacity is the number of interposer wafers packaged per month.
+# Why it matters
+It, not wafer supply, has limited high-end AI accelerator shipments; NVIDIA reportedly took 40-50% in 2024.
+# Source
+Tom's Hardware; TrendForce (reports).
+
+== OSAT
+# What it does
+Outsourced assembly and test houses, such as ASE and Amkor, take parts of the flow; UMC supplies interposers.
+# Why it matters
+They add capacity beyond TSMC's own lines.
+# Source
+TrendForce.

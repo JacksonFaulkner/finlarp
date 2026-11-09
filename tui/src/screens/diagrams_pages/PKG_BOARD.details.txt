@@ -1,0 +1,63 @@
+== BGA BALLS
+# What it does
+BGA balls are the solder balls on the package's underside, at about 1 mm pitch, that solder it to the board.
+# Why it matters
+They carry all of the package's power and signals; large packages warp, which stresses them.
+# Source
+Textbook; patent 8896118 context.
+
+== MODULE
+# What it does
+A module is the board carrying the GPU package, its power stages, memory of its own if any, and connectors.
+# Why it matters
+Package growth makes modules bigger and denser.
+# Source
+Textbook.
+
+== POWER DELIVERY
+# What it does
+Power delivery is the path from the board regulator through BGA, substrate, C4, interposer and microbumps to the transistors.
+# Why it matters
+Every stage drops voltage by I x R; at hundreds of amps small resistances matter.
+# Source
+See TOP METAL (Chip tab).
+
+== VRM
+# What it does
+Voltage regulator modules on the board step supply down to under a volt, placed as close to the package as possible.
+# Why it matters
+Shorter paths mean less voltage drop and faster response to load changes.
+# Source
+Textbook.
+
+== COLD PLATE
+# What it does
+A cold plate is a copper block with fins or channels pressed onto the package lid to carry heat away.
+# Why it matters
+The logic die's heat must cross the lid into it; its design sets how much power the package can take.
+# Source
+Textbook.
+
+== LIQUID COOLING
+# What it does
+Liquid cooling pumps coolant through the cold plates instead of blowing air over heat sinks.
+# Why it matters
+At AI power densities air runs out; packages are expected to need thousands of watts.
+# Source
+Tom's Hardware, TSMC roadmap coverage.
+
+== NVLINK
+# What it does
+NVLink is NVIDIA's GPU-to-GPU link; lanes run from the package through the board to switches.
+# Why it matters
+It lets many GPUs act as one large system.
+# Source
+Textbook (vendor technology).
+
+== RACK
+# What it does
+A rack holds many modules with power shelves, network switches and cooling manifolds.
+# Why it matters
+See the Power and Network+Cool tabs for the facility side.
+# Source
+See those tabs.

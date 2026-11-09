@@ -1,0 +1,55 @@
+# 1. What happens: tiny solder joints connect each die to the interposer
+
+Every die in the package is joined to the layer below by an array of bumps. The coarsest, C4 BUMP solder balls at about 150 um pitch, join the interposer to the substrate. Under the dies, a MICROBUMP array at about 40 um pitch (each a CU PILLAR with a solder cap) joins logic and HBM to the interposer. Below about 10 um, HYBRID BOND joints replace solder with direct copper-to-copper contact. Smaller BUMP PITCH means more connections per mm2.
+
+# 2. The parts
+
+C4 BUMP           solder balls, about 150 um pitch, interposer or chip to substrate
+MICROBUMP         about 40 um pitch: 20-25 um bumps with 15 um spacing
+CU PILLAR         a copper post with a solder cap, the usual microbump
+HYBRID BOND       copper-to-copper plus oxide-to-oxide, no solder, 10 um pitch and below
+BUMP PITCH        centre-to-centre spacing; connection density goes with 1 / pitch squared
+UNDERFILL         epoxy flowed between the layers to share the stress
+ELECTROMIGRATION  current density wears out bumps as they shrink
+SoIC              TSMC's hybrid-bonded die stacking
+
+# 3. Making a joint, in order
+
+1. copper pillars are plated on the die
+2. solder caps go on top
+3. the die is placed face down on the interposer
+4. reflow melts the solder into joints
+5. underfill flows in and cures
+
+# 4. Bump pitch: from C4 to hybrid bonds
+
+C4 about 150 um, microbump about 40 um, hybrid bond 10 um and below. Halving the pitch fits four times the connections in the same area. Microbumps are expected to hit a wall near 10 um, where solder bridges between neighbours.
+
+# 5. Why hybrid bonding
+
+HYBRID BOND joints bond polished copper pads directly while the surrounding oxide bonds too, with no solder and no gap, so pitch can fall to a few um and stacks get thinner. They demand very flat, clean surfaces, which makes yield hard. TSMC's SoIC uses them for die-on-die stacking.
+
+# 6. Underfill and stress
+
+The die, interposer and substrate expand at different rates as they heat. UNDERFILL epoxy between them shares the stress across the whole area instead of concentrating it in the outer joints; for C4 joints it gives over 10x thermal-cycle life.
+
+# 7. Current and electromigration
+
+Power for the logic die enters through thousands of bumps. As bumps shrink, each carries more current density, and ELECTROMIGRATION wears joints out; more bumps share the load.
+
+# 8. Who makes it
+
+TSMC (TSM) bumps and bonds dies in CoWoS and SoIC; ASE (ASX) and Amkor (AMKR) do bumping and flip-chip assembly; Besi and others make hybrid-bonding tools (not sourced here).
+
+# 9. Chokepoints and risks
+
+- Solder bridging below about 10 um pitch forces the move to hybrid bonding.
+- Hybrid bonding needs near-perfect flatness and cleanliness.
+- Thermal stress cracks joints without good underfill.
+
+# 10. Sources
+
+  [1] Bump pitches: semiengineering.com/scaling-bump-pitches-in-advanced-packaging ; semiengineering.com/bumps-vs-hybrid-bonding-for-advanced-packaging
+  [2] C4 and Cu pillar pitch: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/8896118
+  [3] Underfill life: seas.ucla.edu/ethinfilm/Pb-freeWorkshop/abs/totta.html
+  [4] TSMC 3DFabric: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm

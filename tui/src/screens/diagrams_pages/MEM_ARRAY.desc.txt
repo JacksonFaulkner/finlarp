@@ -1,1 +1,1 @@
-TODO: one paragraph for the node popup: what ARRAY is, why it matters, tickers.
+The array is the grid of DRAM cells: rows on word lines, columns on bit lines. An access opens a whole row into the sense amps (the row buffer), reads columns from there and closes the row. Open-row hits are three times faster than row conflicts, long bit lines weaken the signal so the array is tiled into mats and subarrays, and spare rows repair defects. Tickers: MU, 000660.KS, 005930.KS.

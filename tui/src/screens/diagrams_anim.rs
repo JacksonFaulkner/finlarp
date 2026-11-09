@@ -69,12 +69,101 @@ pub fn parse(src: &'static str) -> Option<Anim> {
     (height > 0).then_some(Anim { ms, frames, height })
 }
 
-/// Zoom-ins that open in the full-screen 3D view (`F`), by page and zoom key.
-const ORBIT: &[(&str, char)] = &[("POLYSILICON", 'c')];
+/// Zoom-ins that open in the full-screen 3D view (`F`), by page and key: a letter for a
+/// zoom, a digit for a numbered section.
+const ORBIT: &[(&str, char)] = &[
+    ("POLYSILICON", 'c'),
+    ("CELL", 'a'),
+    ("CELL", 'b'),
+    ("CELL", 'c'),
+    ("CELL", 'd'),
+    ("CELL", 'e'),
+    ("CELL", '1'),
+    ("CELL", '2'),
+    ("CELL", '3'),
+    ("CELL", '4'),
+    ("CELL", '5'),
+    ("CELL", '6'),
+    ("CELL", '7'),
+    ("CELL", '8'),
+    ("CELL", '9'),
+    ("LITHO", 'a'),
+    ("LITHO", 'b'),
+    ("LITHO", 'c'),
+    ("LITHO", 'd'),
+    ("LITHO", 'e'),
+    ("LITHO", '1'),
+    ("LITHO", '2'),
+    ("LITHO", '3'),
+    ("LITHO", '4'),
+    ("LITHO", '5'),
+    ("LITHO", '6'),
+    ("LITHO", '7'),
+    ("LITHO", '8'),
+    ("LITHO", '9'),
+    ("ARRAY", 'a'),
+    ("ARRAY", 'b'),
+    ("ARRAY", 'c'),
+    ("ARRAY", 'd'),
+    ("ARRAY", 'e'),
+    ("ARRAY", '1'),
+    ("ARRAY", '2'),
+    ("ARRAY", '3'),
+    ("ARRAY", '4'),
+    ("ARRAY", '5'),
+    ("ARRAY", '6'),
+    ("ARRAY", '7'),
+    ("ARRAY", '8'),
+    ("ARRAY", '9'),
+    ("BANK", 'a'),
+    ("BANK", 'b'),
+    ("BANK", 'c'),
+    ("BANK", 'd'),
+    ("BANK", 'e'),
+    ("BANK", '1'),
+    ("BANK", '2'),
+    ("BANK", '3'),
+    ("BANK", '4'),
+    ("BANK", '5'),
+    ("BANK", '6'),
+    ("BANK", '7'),
+    ("BANK", '8'),
+    ("BANK", '9'),
+    ("BANDWIDTH", 'a'),
+    ("BANDWIDTH", 'b'),
+    ("BANDWIDTH", 'c'),
+    ("BANDWIDTH", 'd'),
+    ("BANDWIDTH", 'e'),
+    ("BANDWIDTH", '1'),
+    ("BANDWIDTH", '2'),
+    ("BANDWIDTH", '3'),
+    ("BANDWIDTH", '4'),
+    ("BANDWIDTH", '5'),
+    ("BANDWIDTH", '6'),
+    ("BANDWIDTH", '7'),
+    ("BANDWIDTH", '8'),
+    ("BANDWIDTH", '9'),
+    ("HBM STACK", 'a'),
+    ("HBM STACK", 'b'),
+    ("HBM STACK", 'c'),
+    ("HBM STACK", 'd'),
+    ("HBM STACK", 'e'),
+    ("HBM STACK", '1'),
+    ("HBM STACK", '2'),
+    ("HBM STACK", '3'),
+    ("HBM STACK", '4'),
+    ("HBM STACK", '5'),
+    ("HBM STACK", '6'),
+    ("HBM STACK", '7'),
+    ("HBM STACK", '8'),
+    ("HBM STACK", '9'),
+];
 
 /// Whether zoom `key` of `page` has a 3D model the full-screen view can orbit.
 pub fn orbitable(page: &str, key: char) -> bool {
     ORBIT.iter().any(|(p, k)| *p == page && *k == key)
+        || (super::diagrams_scene_chip::node(page).is_some() && super::diagrams_scene_chip::keys_for(page, key).is_some())
+        || super::diagrams_scene_pkg::keys_for(page, key).is_some()
 }
 
 /// The animation for a node page (keyed like VISUALS), if it has one.
@@ -101,6 +190,14 @@ const MELT_SECTIONS: [fn() -> Box<dyn Scene>; 9] = [
 pub fn section_anim(page: &str, i: usize) -> Option<fn() -> Box<dyn Scene>> {
     match page {
         "MELT + PULL" => MELT_SECTIONS.get(i).copied(),
+        "CELL" => super::diagrams_scene_cell::SECTIONS.get(i).copied(),
+        "LITHO" => super::diagrams_scene_litho::SECTIONS.get(i).copied(),
+        "ARRAY" => super::diagrams_scene_array::SECTIONS.get(i).copied(),
+        "BANK" => super::diagrams_scene_bank::SECTIONS.get(i).copied(),
+        "BANDWIDTH" => super::diagrams_scene_bandwidth::SECTIONS.get(i).copied(),
+        "HBM STACK" => super::diagrams_scene_hbm::SECTIONS.get(i).copied(),
+        _ if super::diagrams_scene_chip::node(page).is_some() => super::diagrams_scene_chip::node(page).and_then(|n| n.sections.get(i).copied()),
+        _ if super::diagrams_scene_pkg::node(page).is_some() => super::diagrams_scene_pkg::node(page).and_then(|n| n.sections.get(i).copied()),
         _ => super::diagrams_nodes::section(page, i),
     }
 }
@@ -152,10 +249,21 @@ pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
     if let Some(s) = super::diagrams_nodes::overview(page) {
         return Some(s);
     }
+    if let Some(s) = super::diagrams_scene_chip::overview(page) {
+        return Some(s);
+    }
+    if let Some(s) = super::diagrams_scene_pkg::overview(page) {
+        return Some(s);
+    }
     match page {
         "SAND" => Some(Box::new(super::diagrams_scene_sand::Sand)),
         "POLYSILICON" => Some(Box::new(super::diagrams_scene_poly::Poly)),
         "CELL" => Some(Box::new(super::diagrams_scene_cell::MemCell)),
+        "LITHO" => Some(Box::new(super::diagrams_scene_litho::Litho)),
+        "ARRAY" => Some(Box::new(super::diagrams_scene_array::MemArray)),
+        "BANK" => Some(Box::new(super::diagrams_scene_bank::MemBank)),
+        "BANDWIDTH" => Some(Box::new(super::diagrams_scene_bandwidth::MemBandwidth)),
+        "HBM STACK" => Some(Box::new(super::diagrams_scene_hbm::MemHbm)),
         "MELT + PULL" => Some(Box::new(super::diagrams_scene_melt::Melt)),
         _ => anim_for(page).map(|a| Box::new(TextScene::new(a)) as Box<dyn Scene>),
     }

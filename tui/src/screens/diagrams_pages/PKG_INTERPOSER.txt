@@ -1,0 +1,57 @@
+# 1. What happens: a slab of wiring joins the GPU to its HBM
+
+The interposer sits under the logic die and HBM stacks and carries thousands of fine wires between them, then passes power and signals down to the substrate through TSV connections. TSMC calls the whole assembly CoWoS. COWOS-S uses one full silicon interposer; COWOS-R uses an organic RDL interposer; COWOS-L uses an organic interposer with small LSI BRIDGE chips of silicon only where the dies meet.
+
+# 2. The parts
+
+COWOS-S           a full silicon interposer, up to about 3.3x reticle size (about 2,700 mm2)
+COWOS-R           an RDL interposer of polymer and copper layers
+COWOS-L           organic interposer with local silicon bridges, for larger packages
+LSI BRIDGE        a small silicon chip carrying the fine wires between two dies
+TSV               through-silicon vias carrying power and signals down through the interposer
+RDL               redistribution layers: copper wiring in polymer
+RETICLE MULTIPLE  interposer size counted in reticle fields
+WIRING DENSITY    silicon wiring is fine enough for a 1024-bit bus per HBM stack
+
+# 3. A signal from HBM to GPU, in order
+
+1. data leaves the HBM base die through microbumps
+2. it runs across the interposer's fine wiring
+3. and rises through microbumps into the GPU
+4. power climbs the other way, from the substrate through the TSV array
+5. thousands of these wires run in parallel
+
+# 4. CoWoS-S: a full silicon interposer
+
+A single silicon slab with fine copper wiring and TSVs, made in a fab on a mature node. It is limited to about 3.3x the reticle (about 2,700 mm2) on TSMC's page; beyond that TSMC recommends CoWoS-L or CoWoS-R.
+
+# 5. CoWoS-L: silicon only where it's needed
+
+COWOS-L puts small LSI BRIDGE chips under the joints between dies and between dies and HBM, inside a cheaper organic interposer, so packages can grow beyond what one silicon slab allows. NVIDIA moved Blackwell to CoWoS-L because its two dies need about 10 TB/s between them (Tom's Hardware, TrendForce).
+
+# 6. Growing past the reticle
+
+Interposer size is counted as a RETICLE MULTIPLE. TSMC's roadmap (Tom's Hardware) has a 9.5-reticle interposer with 12 HBM stacks in 2027 and over 14 reticles with up to 24 HBM5E stacks by 2029. Bigger interposers mean fewer per wafer and more packaging capacity per GPU.
+
+# 7. Why silicon wiring
+
+WIRING DENSITY: only silicon (or bridges of it) can route the lines fine enough for a 1024-bit HBM3 bus per stack over a few millimetres; organic RDL is coarser but cheaper.
+
+# 8. Who makes it
+
+TSMC (TSM) makes CoWoS interposers and does most of the assembly; UMC supplies outsourced interposers (TrendForce); ASE (ASX) and Amkor (AMKR) add assembly capacity.
+
+# 9. Chokepoints and risks
+
+- CoWoS capacity has limited AI accelerator output.
+- Larger interposers lower packages per wafer.
+- One supplier does most of it.
+
+# 10. Sources
+
+  [1] TSMC CoWoS: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+  [2] Blackwell CoWoS-L: tomshardware.com/tech-industry/nvidia-shifts-to-cowos-l-packaging-for-blackwell-gpu-production-ramp-up ; trendforce.com/news/?p=7724
+  [3] Variants: semiconductorx.com/packaging-cowos.html (secondary)
+  [4] Roadmap: tomshardware.com/tech-industry/semiconductors/tsmcs-details-next-gen-cowos-roadmap-over-14-reticle-packages-and-48x-leap-in-compute-power-expected-by-2029-massive-size-enables-24-hbm5e-stacks-and-additional-memory-bandwidth-jump
+  [5] Capacity: tomshardware.com/tech-industry/tsmc-struggles-meet-demand-for-cowos-packaging-holding-back-ai-and-hpc-silicon-production-report ; trendforce.com/news/2024/02/19/insights-cowos-capacity-shortage-challenges-ai-chip-demand-while-taiwanese-manufacturers-expand-to-seize-opportunities/
+  [6] HBM3 1024-bit: businesswire.com/news/home/20220127005320/en/JEDEC-Publishes-HBM3-Update-to-High-Bandwidth-Memory-HBM-Standard

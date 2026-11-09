@@ -135,37 +135,17 @@ const MEMORY: &str = r#"# A bit is charge on a capacitor. Bandwidth is bus width
  (stub: node pages are placeholders until they are written)
 "#;
 
-const PACKAGE: &str = r#"# Top view: why AI chips are limited by packaging, not only by the die
-      ┌────────────────┐                      ┌────────────────┐
-      │   HBM stack    │                      │   HBM stack    │
-      │ 8-12 DRAM dies │                      │ 8-12 DRAM dies │        ◀ HBM talks to the GPU over a 1024-bit bus
-      └────────────────┘                      └────────────────┘
-  ┌────────────┴───────────────────────────────────────┴───────────┐
-  │           GPU / ACCELERATOR LOGIC DIE  (4nm / 3nm)             │
-  └────────────┬───────────────────────────────────────┬───────────┘
-      ┌────────────────┐                      ┌────────────────┐
-      │   HBM stack    │                      │   HBM stack    │        ◀ ~8 TB/s total memory bandwidth per GPU
-      │ 8-12 DRAM dies │                      │ 8-12 DRAM dies │
-      └────────────────┘                      └────────────────┘
+const PACKAGE: &str = r#"# Packaging: how a GPU and its memory become one part on a board
 
+ ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+ │  LOGIC DIE  │────▶│  MICROBUMP  │────▶│ INTERPOSER  │────▶│  SUBSTRATE  │────▶│  ASSEMBLY   │────▶│    BOARD    │
+ │ reticle cap │     │ die joints  │     │ GPU to HBM  │     │ ABF layers  │     │ CoWoS flow  │     │ power, cool │
+ └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘     └─────────────┘
 
-# Side view
-    ┌────────────┐      ┌──────────────────────────┐  ┌────────────┐      ◀ DRAM layers (MU, SK hynix, Samsung)
-    │    DRAM    │      │                          │  │    DRAM    │        stacked with through-silicon vias (TSV)
-    │    DRAM    │      │        LOGIC DIE         │  │    DRAM    │
-    │    DRAM    │      │      (GPU compute)       │  │    DRAM    │
-    │    DRAM    │      │                          │  │    DRAM    │
-    └──base die──┘      └──────────────────────────┘  └──base die──┘
-      ●   ●   ●           ●     ●     ●     ●   ●       ●   ●   ●         ◀ micro-bumps (~40um pitch)
-  ┌────────────────────────────────────────────────────────────────┐
-  │          SILICON INTERPOSER: wiring only, TSMC CoWoS           │      ◀ thousands of fine wires GPU <-> HBM
-  └────────────────────────────────────────────────────────────────┘
-      ●       ●         ●         ●         ●         ●         ●         ◀ C4 bumps
-  ┌────────────────────────────────────────────────────────────────┐
-  │                  ORGANIC SUBSTRATE (ABF film)                  │      ◀ fans out to board pitch
-  └────────────────────────────────────────────────────────────────┘
-      ●   ●   ●   ●   ●   ●   ●   ●   ●   ●   ●   ●   ●   ●   ●           ◀ BGA balls to the server board
-  ══════════════════════════════════════════════════════════════════
+ bottom to top: board ─ BGA ~1 mm ─ substrate ─ C4 ~150 um ─ interposer ─ microbump ~40 um ─ GPU + HBM ─ lid ─ cold plate
+
+ (enter opens a node's page; h/l moves between nodes)
+ (HBM STACK on the Memory tab is the memory these packages carry)
 "#;
 
 const FIBER: &str = r#"# Link: electrical data in, light through glass, electrical data out

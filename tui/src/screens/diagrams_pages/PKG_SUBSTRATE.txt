@@ -1,0 +1,56 @@
+# 1. What happens: the organic substrate fans fine pitch out to board pitch
+
+Under the interposer sits the package substrate, a laminate of copper wiring layers built up on a core. It takes the C4 bumps at about 150 um pitch and fans them out to the BGA balls that solder to the server board at about 1 mm. The insulating layers are ABF FILM; the stack of BUILD-UP LAYERS on each side of a CORE carries power and signals; AI packages need 12 to 20 of them and very large areas, and WARPAGE is a constant fight.
+
+# 2. The parts
+
+ABF FILM           Ajinomoto Build-up Film, the dielectric between substrate copper layers
+BUILD-UP LAYERS    alternating ABF and copper, laminated layer by layer; 12-20 for AI GPUs
+CORE               the stiff centre the build-up layers are laminated onto
+WARPAGE            the large, thin laminate bends as it heats and cools
+BGA                ball grid array: solder balls joining the substrate to the board
+FAN-OUT            spreading fine-pitch connections out to coarse board pitch
+GLASS CORE         a stiffer, flatter core material under development
+SUBSTRATE MAKERS   Ibiden, Unimicron, Shinko, AT&S, Nan Ya and others
+
+# 3. A substrate, in order
+
+1. start from a core with plated through-holes
+2. laminate a layer of ABF film
+3. drill vias and plate copper wiring
+4. repeat for each build-up layer, both sides
+5. finish with solder resist, then the C4 pads on top and BGA pads below
+
+# 4. ABF film: one supplier
+
+ABF FILM is the build-up dielectric in almost every high-end CPU and GPU substrate; Ajinomoto's subsidiary is estimated to control about 95% of the CPU/GPU-grade market (analyst estimate). A single film supplier is a known chokepoint.
+
+# 5. Layers and size
+
+AI GPU substrates need 12 to 20 build-up layers with fine lines; H100's is estimated at 12+ layers in a package over 120 x 120 mm (research estimates). Multi-die layouts roughly double substrate area per package.
+
+# 6. Warpage and glass cores
+
+WARPAGE: a big, thin organic laminate bends during reflow and in use, stressing bumps and making assembly harder. A GLASS CORE is stiffer and flatter and could carry finer wiring; it is under development.
+
+# 7. Fan-out to the board
+
+FAN-OUT: the substrate spreads tens of thousands of fine bumps out to the BGA balls at board pitch, routing power planes and high-speed signals on the way.
+
+# 8. Who makes it
+
+SUBSTRATE MAKERS: one estimate puts high-end FC-BGA share at Ibiden about 35%, Shinko 18%, Unimicron 14%, AT&S 10%, Nan Ya 5%; another has Unimicron leading at about 22% of capacity (they measure different things; estimates). Ibiden has committed about JPY 500B (US$3.3B) to two fabs ramping from fiscal 2027. Ajinomoto supplies the film.
+
+# 9. Chokepoints and risks
+
+- One supplier for ABF film.
+- Few makers can yield 14+ layer GPU-class substrates.
+- Warpage grows with package size.
+- Notes: share and layer figures are market-research estimates, not company filings.
+
+# 10. Sources
+
+  [1] ABF bottleneck: wing.vc/content/the-abf-substrate-bottleneck
+  [2] GPU substrate shares and layers: marketsandmarkets.com/ResearchInsight/gpu-substrate-companies.asp (estimates)
+  [3] ABF market reports: giiresearch.com/report/moi2065506-ajinomoto-build-up-film-abf-substrate-market-share.html (estimates)
+  [4] C4 and BGA pitch context: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/8896118

@@ -1,112 +1,42 @@
 # 1. What happened: the planar era, from free scaling to the leakage wall
 
- ┌─────────────────┐  ┌──────────────┐  ┌─────────────┐  ┌───────────────────┐  ┌─────────────┐  ┌──────────────┐
- │ DENNARD SCALING │  │ LEAKAGE WALL │  │ STRAINED SI │  │ HIGH-K METAL GATE │  │ FD-SOI      │  │ MATURE NODES │
- │ shrink + V      │─▶│ Vt stalls    │─▶│ SiGe S/D    │─▶│ HfO2 + metal      │─▶│ thin Si/BOX │─▶│ 28nm and up  │
- │ P density flat  │  │ ~2005 on     │  │ PMOS +25%   │  │ 45 to 28nm        │  │ 22FDX       │  │ most wafers  │
- └─────────────────┘  └──────────────┘  └─────────────┘  └───────────────────┘  └─────────────┘  └──────────────┘
+A planar transistor is a flat channel under a flat gate. For decades shrinking it was free: DENNARD SCALING cut every dimension and the voltage together, so speed rose while power density stayed flat. Around 2005 the threshold voltage could no longer fall without leakage exploding, and supply voltage stalled near 1 V: the LEAKAGE WALL. STRAINED SI, then HIGH-K METAL GATE, then FD-SOI patched planar from 90 nm to 22/28 nm before the industry moved to fins. Planar still makes most wafers at MATURE NODES, 28 nm and above.
 
-  (planar = flat channel under a flat gate; each step is a patch to keep the gate in control of the channel)
+# 2. The planar cross-section and where it leaks
 
-# 2. Planar bulk MOSFET cross-section (NMOS) and where it leaks
+An NMOS: n+ source and drain either side of a gate on a thin dielectric (SiON, later HfO2), all on p-type bulk silicon shared by every transistor on the die. Electrons flow source to drain in the inversion layer. Four leakage paths: subthreshold (drain to source below Vt), gate tunnelling through the oxide, junction/GIDL leakage, and punch-through in the body when the gate is short. The gate sees only the top of the channel; the drain's field reaches the source through the body below.
 
- ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
- │   gate voltage Vg                                                                              │
- │        │                                                                                       │
- │   source contact (W)     ┌─────────┐     drain contact (W)                                     │
- │        │         spacer ▒│  GATE   │▒ spacer      │                                            │
- │        ▼                 ├─────────┤ gate dielectric (SiON, later HfO2)                        │
- │   ┌─────────┐            │ channel │              ┌─────────┐                                  │
- │   │ N+ SRC  │~~~~~~~~~~~~│ (Lg)    │~~~~~~~~~~~~~~│ N+ DRN  │                                  │
- │   │ SiGe in │  inversion │ layer   │ electrons    │ SiGe in │                                  │
- │   └─────────┘            └─────────┘ flow S to D  └─────────┘                                  │
- │ ░░░░░░░░░░ P-type bulk silicon body, shared by every transistor on the die ░░░░░░░░░░          │
- │   leak 1 subthreshold (D to S below Vt)     leak 2 gate tunnelling through the oxide           │
- │   leak 3 junction / GIDL                    leak 4 punch-through in the body when Lg is short  │
- └────────────────────────────────────────────────────────────────────────────────────────────────┘
+# 3. Short channels lose control
 
-  (the gate sees only the top of the channel; the drain field reaches the source through the body below it)
+SHORT CHANNEL: as the gate length shrinks, the drain's field meets the source barrier. DIBL: the drain lowers that barrier, so Vt falls as drain voltage rises (Vt roll-off). Swing S = (kT/q) ln10 (1 + Cdep/Cox), floor about 60 mV/decade at 300 K; each 60 mV of Vt lost is 10x more off-state leakage. WHY PLANAR ENDED: the gate cannot cut off the path below the surface. NODE NAME: the "N nm" label no longer equals any real gate length.
 
-# 3. Why short channels lose control
+# 4. Strain and high-k metal gate
 
- ┌────────────────────┐  ┌──────────────────────┐  ┌───────────────────┐  ┌─────────────────┐
- │ SHORT CHANNEL      │  │ DIBL                 │  │ WHY PLANAR ENDED  │  │ NODE NAME       │
- │ Lg shrinks until   │  │ drain lowers the     │  │ gate cannot cut   │  │ label no longer │
- │ drain field meets  │  │ source barrier,      │  │ off the body path │  │ equals any real │
- │ the source barrier │  │ Vt falls as Vd rises │  │ below the surface │  │ gate length     │
- └────────────────────┘  └──────────────────────┘  └───────────────────┘  └─────────────────┘
+STRAINED SI: SiGe in the PMOS source/drain compresses the channel and a nitride cap stretches the NMOS (Intel 90 nm: PMOS +25%). HIGH-K METAL GATE: HfO2 lets the oxide be physically thicker, cutting gate tunnelling, and a metal gate sets Vt; gate-last arrived at 45-28 nm.
 
-  Vt roll-off (textbook sketch)                     subthreshold swing (textbook)
-   Vt                                                SS = (kT/q) ln10 (1 + Cdep/Cox), floor ~60 mV/decade at 300 K
-   │ ●●●●●●●●●●        long channel: flat Vt         each ~60 mV of Vt lost = 10x more off-state leakage
-   │           ●●●                                   more Cox, less Cdep pushes SS toward the floor
-   │              ●●●                                FD-SOI (no depletion charge) and FinFET both do this
-   │                  ●●      short Lg: Vt falls
-   └──────────────────────── Lg (shrinking) ──▶
+# 5. Who still ships planar silicon
 
-# 4. Three fixes before the fin: strain, high-k metal gate, fully depleted SOI
+MATURE NODES (28 nm and above) were 36% of pure-play foundry revenue in 2025, down from 54% in 2021 (Counterpoint). UMC (2303.TW, UMC): 22/28 nm was 35-40% of revenue through 2025; 2025 revenue NT$237.5B, +2.3%; 40 nm and below were 53% of Q4 wafer revenue. GLOBALFOUNDRIES (GFS): FDX, RF and automotive, FY25 revenue $6.79B. SMIC (0981.HK): mostly 28 nm and above, mature and domestic.
 
- ┌─────────────────────┐  ┌────────────────────┐  ┌──────────────────┐  ┌────────────────────┐
- │ STRAINED SI         │  │ HIGH-K METAL GATE  │  │ SOITEC           │  │ BODY BIAS          │
- │ SiGe in PMOS S/D    │  │ HfO2 thicker oxide │  │ Smart Cut wafers │  │ bias under the BOX │
- │ compresses channel  │  │ metal sets Vt      │  │ thin Si over BOX │  │ tune Vt after fab  │
- │ nitride cap on NMOS │  │ gate-last at 28nm  │  │ FD-SOI substrate │  │ speed vs leakage   │
- └─────────────────────┘  └────────────────────┘  └──────────────────┘  └────────────────────┘
+# 6. Dennard scaling arithmetic
 
- ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
- │   BULK                                          FD-SOI                                         │
- │      gate                                          gate                                        │
- │    ┌──────┐                                      ┌──────┐                                      │
- │  S │ ▒▒▒▒ │ D   depletion region under         S │      │ D   ultra-thin undoped Si film       │
- │  ░░│▒▒▒▒▒▒│░░   channel: drain field             ▓▓│▓▓▓▓▓▓│▓▓   (few nm, textbook range)       │
- │  ░░░░░░░░░░░░   can leak through it              ████████████  BOX blocks the                  │
- │  ░░░ bulk Si ░░                                  ░░░ base Si ░░  leak path; back bias ok       │
- └────────────────────────────────────────────────────────────────────────────────────────────────┘
+Scale all dimensions and the voltage by 1/k (k about 1.4 per node): gate delay x 1/k, capacitance x 1/k, voltage x 1/k, power per gate x 1/k^2, gates per area x k^2, so power density x 1. It ended in the mid-2000s when Vt and oxide stopped scaling: Ioff grows exponentially as Vt falls, so Vdd stalled near 1 V, and more transistors at the same power meant dark silicon and multicore.
 
-  (FD-SOI: body too thin to hold depletion charge, so no random-dopant variation and low junction capacitance)
+# 7. FD-SOI: a thin film on buried oxide
 
-# 5. Who still ships planar silicon: the mature-node foundries
+FD-SOI builds the transistor in an ultra-thin, undoped silicon film (a few nm) on a buried oxide (BOX). The body is too thin to hold depletion charge, so there is no random-dopant variation, junction capacitance is low, and the BOX blocks the leakage path under the channel. SOITEC makes the wafers with Smart Cut. BODY BIAS applied under the BOX tunes Vt after fabrication, trading speed against leakage. GlobalFoundries ships it as 22FDX.
 
- ┌──────────────────┐  ┌─────────────────┐  ┌──────────────────┐  ┌─────────────────────┐
- │ UMC              │  │ GLOBALFOUNDRIES │  │ SMIC             │  │ MATURE NODES        │
- │ 2303.TW, UMC     │  │ GFS             │  │ 0981.HK          │  │ 28nm and above      │
- │ 22/28nm = 36% of │  │ FDX, RF, auto   │  │ mostly 28nm+     │  │ 36% of foundry rev  │
- │ Q4-2025 revenue  │  │ FY25 rev $6.79B │  │ mature, domestic │  │ 2025 (Counterpoint) │
- └──────────────────┘  └─────────────────┘  └──────────────────┘  └─────────────────────┘
+# 8. Who makes it
 
-  UMC revenue share from 22/28nm, 2025 (UMC quarterly releases)
-  Q2 2025  ████████████████████████████████████████ 40%
-  Q3 2025  ███████████████████████████████████ 35%
-  Q4 2025  ████████████████████████████████████ 36%
-  (UMC 2025 revenue NT$237.5B, +2.3% y/y; 40nm and below were 53% of Q4 wafer revenue)
+TSMC (TSM, 28 nm still a large line), Intel (INTC, which shipped the first 22 nm FinFET in 2011), UMC, GlobalFoundries (GFS), Soitec (SOI.PA) and SMIC (0981.HK).
 
-  mature node (28nm+) share of pure-play foundry revenue (Counterpoint forecast)
-  2021  ██████████████████████████████████████████████████████ 54%
-  2025  ████████████████████████████████████ 36%
+# 9. Chokepoints and risks
 
-# 6. Dennard scaling arithmetic (textbook)
+- Mature-node overcapacity from China adds price pressure (UMC wafer shipments +12.3% in 2025, revenue +2.3%).
+- FD-SOI is a niche (IoT, RF, automotive); the mass market moved to FinFET at 16/14 nm and below.
+- Notes: scaling steps are textbook; strain figures are Intel 2004-era disclosures via secondary summaries; gate lengths of "N nm" nodes vary by vendor.
 
-  scale all dimensions and voltage by 1/k (k ~ 1.4 per node):
-    gate delay          x 1/k          so clock can rise ~1.4x
-    capacitance         x 1/k
-    voltage             x 1/k
-    power per gate      x 1/k^2        (C V^2 f, with f x k)
-    gates per area      x k^2
-    power density       x 1            the free lunch; ended mid-2000s when Vt and oxide could not keep scaling
-  after: Ioff ~ exp(-Vt / SS-ish) so Vdd stalled near ~1 V; more transistors at same power = dark
-  silicon, multicore
-
-# 7. Risks and positioning
-
-  * Mature-node overcapacity from China adds price pressure (UMC wafer shipments +12.3% in 2025,
-  revenue +2.3%).
-  * Tickers: TSM (28nm still a large line), INTC (first 22nm FinFET, 2011), UMC, GFS, SOI.PA, SMIC (0981.HK).
-  * FD-SOI is a niche (IoT, RF, auto); the mass market moved to FinFET at 16/14nm and below.
-
-  (notes) Scaling steps are textbook; strain figures are Intel 2004-era disclosures via secondary summaries.
-  (notes) Lg of today's "N nm" nodes is secondary-sourced and varies by vendor; see the NODE NAME card.
-
-# Sources
+# 10. Sources
 
   [1] Dennard end: semiengineering.com/dennards-law-and-the-finfet ; allaboutcircuits.com nanoscale SCE article
   [2] FD-SOI: soitec.com press release 2015/07/14 ; compoundsemiconductor.net/article/97528

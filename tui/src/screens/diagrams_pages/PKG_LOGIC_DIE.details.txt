@@ -1,0 +1,63 @@
+== RETICLE LIMIT
+# What it does
+A scanner prints one field at a time, and the largest field is 26 x 33 mm, 858 mm2. No single die can be bigger than that.
+# Why it matters
+It caps the size of one die, so the biggest AI chips are built from several dies in one package instead.
+# Source
+Chip Scale Review, Jan-Feb 2022, p. 33.
+
+== DIE SIZE
+# What it does
+NVIDIA's H100 die is about 814 mm2, roughly 95% of the reticle field, so it is about as large as a single die can be made.
+# Why it matters
+Large dies hold more compute but yield worse and leave no room to grow without moving to chiplets.
+# Source
+howaiworks.ai glossary (secondary); forum dimensions vary.
+
+== YIELD
+# What it does
+A random defect ruins the die it lands on. On an 800 mm2 die each defect scraps 800 mm2; on a 200 mm2 chiplet, only 200 mm2.
+# Why it matters
+Estimates put 800-814 mm2 dies near 45-47% yield at typical defect densities, which drives cost per good die up (secondary estimates).
+# Source
+howaiworks.ai glossary (secondary).
+
+== CHIPLETS
+# What it does
+Chiplets split one design across several smaller dies placed side by side in one package and linked by fast die-to-die connections.
+# Why it matters
+They beat the reticle limit and raise yield, at the cost of die-to-die links and a bigger, harder package.
+# Source
+Tom's Hardware on Blackwell; TrendForce.
+
+== DIE-TO-DIE
+# What it does
+The die-to-die link joins chiplets inside the package, wide and short enough that software sees one GPU. Blackwell's two dies need about 10 TB/s.
+# Why it matters
+It is why Blackwell moved to CoWoS-L with silicon bridges; the link sets how well chiplets act as one chip.
+# Source
+tomshardware.com, Nvidia shifts to CoWoS-L for Blackwell.
+
+== KNOWN GOOD DIE
+# What it does
+Each die is tested at the wafer before it is packaged, so only dies known to work are bonded into a package.
+# Why it matters
+One bad die scraps the whole package with all its HBM, so testing first protects the most expensive parts.
+# Source
+Textbook practice; see the ASSEMBLY node.
+
+== HEAT
+# What it does
+The logic die turns most of the package's power into heat, which must leave through the top into a lid and cold plate.
+# Why it matters
+Heat limits how hard the die can run and is a reason AI racks move to liquid cooling.
+# Source
+See the BOARD node.
+
+== HBM SHORELINE
+# What it does
+HBM stacks connect along the die's edges through the interposer, so the length of usable edge limits how many stacks fit.
+# Why it matters
+More memory needs more edge: one reason packages and interposers keep growing.
+# Source
+TSMC roadmap via Tom's Hardware.
