@@ -247,11 +247,17 @@ impl Cam {
     }
 }
 
+#[derive(Clone)]
 struct Canvas {
     w: usize,
     h: usize,
     rgb: Vec<Col>,
     z: Vec<f32>,
+    /// Part names drawn on this frame and the pixel each points at (see `stage::label`):
+    /// what a user note can pin itself to.
+    names: Vec<(String, (f64, f64))>,
+    /// Pixel rectangles (x0, y0, x1, y1) already holding text, which later text keeps off.
+    plates: Vec<(i64, i64, i64, i64)>,
 }
 
 impl Canvas {
@@ -289,6 +295,8 @@ impl Canvas {
             h,
             rgb: vec![bg; w * h],
             z: vec![f32::INFINITY; w * h],
+            names: Vec::new(),
+            plates: Vec::new(),
         }
     }
 
@@ -817,7 +825,93 @@ fn rasterize(cv: &mut Canvas, cam: &Cam, mut tris: Vec<Tri>) {
 }
 
 /// The float canvas as 8-bit RGBA.
+/// A note added to the picture from outside the scene (the diagrams chat): a small
+/// box of text, pinned to a named part when `on` matches a name on the frame.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct UserNote {
+    pub title: String,
+    pub text: String,
+    /// A part name as the frame labels it ("reticle"); matched loosely, ignoring case.
+    pub on: Option<String>,
+}
+
+static USER_NOTES: std::sync::Mutex<Vec<UserNote>> = std::sync::Mutex::new(Vec::new());
+static USER_MARKS: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+thread_local! {
+    // per thread: a frame's names are read back by the thread that rendered it, and
+    // renders on other threads (tests run many at once) must not replace them
+    static SEEN_NAMES: std::cell::RefCell<Vec<String>> = const { std::cell::RefCell::new(Vec::new()) };
+}
+static BEAT_NOTES_OFF: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+fn lock<T>(m: &std::sync::Mutex<T>) -> std::sync::MutexGuard<'_, T> {
+    m.lock().unwrap_or_else(|e| e.into_inner())
+}
+
+/// Replaces the notes every following frame draws on top of its picture.
+pub fn set_user_notes(notes: Vec<UserNote>) {
+    *lock(&USER_NOTES) = notes;
+}
+
+/// Replaces the parts every following frame rings: names as the frame labels them.
+pub fn set_user_marks(parts: Vec<String>) {
+    *lock(&USER_MARKS) = parts;
+}
+
+/// Which of `names` a note asking for `want` would pin to, if any (the loose match
+/// `UserNote::on` uses).
+pub fn match_name(names: &[String], want: &str) -> Option<String> {
+    cell::match_name(names, want)
+}
+
+/// Shows or hides the scenes' own beat notes (what's happening / why / key numbers).
+pub fn set_beat_notes(show: bool) {
+    BEAT_NOTES_OFF.store(!show, std::sync::atomic::Ordering::Relaxed);
+}
+
+static NAMES_OFF: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Shows or hides the part names on the picture. Hidden names still count for
+/// `seen_names` and for pinning notes: only their text and leader are left off.
+pub fn set_part_names(show: bool) {
+    NAMES_OFF.store(!show, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub(crate) fn part_names_off() -> bool {
+    NAMES_OFF.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub(crate) fn beat_notes_off() -> bool {
+    BEAT_NOTES_OFF.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// Part names the last frame rendered on this thread showed: what a `UserNote::on`
+/// can match.
+pub fn seen_names() -> Vec<String> {
+    SEEN_NAMES.with(|s| s.borrow().clone())
+}
+
+/// The finished frame: user notes go on last, clear of the picture and its text.
 fn to_image(cv: &Canvas) -> RgbaImage {
+    let mut names: Vec<String> = Vec::new();
+    for (n, _) in &cv.names {
+        if !names.iter().any(|x| x.eq_ignore_ascii_case(n)) {
+            names.push(n.clone());
+        }
+    }
+    SEEN_NAMES.with(|s| *s.borrow_mut() = names);
+    let notes = lock(&USER_NOTES).clone();
+    let marks = lock(&USER_MARKS).clone();
+    if notes.is_empty() && marks.is_empty() {
+        return to_image_raw(cv);
+    }
+    let mut noted = cv.clone();
+    cell::draw_user_marks(&mut noted, &marks);
+    cell::draw_user_notes(&mut noted, &notes);
+    to_image_raw(&noted)
+}
+
+fn to_image_raw(cv: &Canvas) -> RgbaImage {
     prof::image_start(cv.w, cv.h);
     let mut raw = vec![255u8; cv.w * cv.h * 4];
     let n = bands_for(cv.w * cv.h);

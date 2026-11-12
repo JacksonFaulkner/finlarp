@@ -414,7 +414,9 @@ pub(super) fn text(cv: &mut Canvas, x: i64, y: i64, s: &str, col: Col, alpha: f6
     }
     let s = s.to_ascii_uppercase();
     let pad = 2 * scale;
-    fill_rect(cv, x - pad, y - pad, x + text_w(&s, scale) + pad, y + 7 * scale + pad, BG, 0.72 * a);
+    let plate = (x - pad, y - pad, x + text_w(&s, scale) + pad, y + 7 * scale + pad);
+    fill_rect(cv, plate.0, plate.1, plate.2, plate.3, BG, 0.72 * a);
+    cv.plates.push(plate);
     glyphs(cv, x, y, &s, col, a, scale);
 }
 
@@ -465,6 +467,13 @@ pub(super) fn label(
     if alpha <= 0.004 {
         return None;
     }
+    if crate::part_names_off() {
+        // the name is known (a note can still pin to it) but not shown
+        if alpha > 0.3 {
+            cv.names.push((s.to_string(), (ax, ay)));
+        }
+        return None;
+    }
     // the leader meets the text at whichever end is nearer the part
     let end_x = if (ax as i64) < x { x - 2 * scale } else { x + w + scale };
     let end = (end_x as f64, (y + tall / 2) as f64);
@@ -472,5 +481,8 @@ pub(super) fn label(
         screen_line(cv, (ax, ay), end, col, 0.55 * alpha, 1);
     }
     text(cv, x, y, s, col, alpha);
+    if alpha > 0.3 {
+        cv.names.push((s.to_string(), (ax, ay)));
+    }
     Some(rect)
 }

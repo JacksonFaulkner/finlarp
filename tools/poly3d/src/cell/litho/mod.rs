@@ -1,9 +1,9 @@
 //! 3D scenes for the LITHO page, on the same template as the CELL page: an overview
-//! with its notes on the picture, five lettered zooms and nine numbered sections.
+//! with its notes on the picture, six lettered zooms and nine numbered sections.
 //!
 //!   rig.rs        the scanner every scene shares (source, reticle, lens, wafer, stage)
 //!   overview.rs   one layer through the scanner, seven beats
-//!   zoom_*.rs     a-e: close-ups of the overview's parts
+//!   zoom_*.rs     a-f: close-ups of the overview's parts, and f on EUV light and mirrors
 //!   sec_*.rs      1-9: the write-up's sections
 //!
 //! It lives under `cell` to share its kit (`stage`, `callout`, the rasterizer).
@@ -19,6 +19,7 @@ mod sec_parts;
 mod sec_print;
 mod sec_resolution;
 mod sec_risks;
+mod zoom_euv;
 mod zoom_lens;
 mod zoom_overlay;
 mod zoom_resist;
@@ -44,6 +45,8 @@ pub enum LithoZoom {
     Scan,
     /// e: overlay: lining the new layer up on the one below
     Overlay,
+    /// f: why EUV is hard: tin droplets and plasma, mirrors that each keep 70%, sub-nm parts
+    Euv,
     /// 1: what happens: light, lens, pattern
     Print,
     /// 2: the six parts, one in the spotlight at a time
@@ -85,6 +88,7 @@ impl LithoZoom {
             LithoZoom::Resist => fns!(zoom_resist, 3),
             LithoZoom::Scan => fns!(zoom_scan, 3),
             LithoZoom::Overlay => fns!(zoom_overlay, 3),
+            LithoZoom::Euv => fns!(zoom_euv, 3),
             LithoZoom::Print => fns!(sec_print, 3),
             LithoZoom::Parts => fns!(sec_parts, sec_parts::BEATS),
             LithoZoom::Order => fns!(sec_order, sec_order::BEATS),

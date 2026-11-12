@@ -458,6 +458,20 @@ const GLIDE: f64 = 0.25;
 
 /// How strongly the beat's notes show at `local`: they fade in once the camera has
 /// settled and out at the very end, so nothing cuts between beats.
+/// Draws the chat's notes on a finished frame (see `callout::draw_user`).
+pub(crate) fn draw_user_notes(cv: &mut crate::Canvas, notes: &[crate::UserNote]) {
+    callout::draw_user(cv, notes);
+}
+
+/// Rings the named parts on a finished frame (see `callout::draw_marks`).
+pub(crate) fn draw_user_marks(cv: &mut crate::Canvas, parts: &[String]) {
+    callout::draw_marks(cv, parts);
+}
+
+pub(crate) fn match_name(names: &[String], want: &str) -> Option<String> {
+    callout::match_name(names, want)
+}
+
 pub fn notes_alpha(local: f64) -> f64 {
     smooth(GLIDE, GLIDE + 0.08, local) * (1.0 - smooth(0.965, 0.998, local))
 }

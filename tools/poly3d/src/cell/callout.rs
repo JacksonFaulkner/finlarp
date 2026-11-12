@@ -62,7 +62,10 @@ struct Laid {
 }
 
 fn lay(c: &Callout, cols: usize, s: i64) -> Laid {
-    let mut lines = vec![(c.title.to_ascii_uppercase(), true)];
+    let mut lines = Vec::new();
+    if !c.title.is_empty() {
+        lines.push((c.title.to_ascii_uppercase(), true));
+    }
     for (i, par) in c.body.iter().enumerate() {
         if i > 0 && !par.starts_with("- ") {
             lines.push((String::new(), false));
@@ -139,21 +142,33 @@ fn overlap(a: Rect, b: Rect) -> i64 {
 
 /// Places each box in turn: the spot near its part with the least taken under it.
 fn place(cv: &Canvas, cam: &Cam, boxes: &[Callout], avoid: &[Rect]) -> Vec<(Laid, Rect, Option<(f64, f64)>)> {
+    let anchors: Vec<Option<(f64, f64)>> =
+        boxes.iter().map(|b| b.anchor.and_then(|p| cam.project(p)).map(|(x, y, _)| (x, y))).collect();
+    place_at(cv, boxes, &anchors, avoid, body_scale(cv))
+}
+
+/// `place` with each box's anchor already in pixels.
+fn place_at(
+    cv: &Canvas,
+    boxes: &[Callout],
+    anchors: &[Option<(f64, f64)>],
+    avoid: &[Rect],
+    s: i64,
+) -> Vec<(Laid, Rect, Option<(f64, f64)>)> {
     let taken = Taken::new(cv, avoid);
-    let s = body_scale(cv);
     let (w, h) = (cv.w as i64, cv.h as i64);
     let margin = 3 * s;
     let gap = 6 * s;
     let step = (h / 48).max(2);
     let mut out: Vec<(Laid, Rect, Option<(f64, f64)>)> = Vec::new();
-    for b in boxes {
-        let anchor = b.anchor.and_then(|p| cam.project(p)).map(|(x, y, _)| (x, y));
+    for (b, anchor) in boxes.iter().zip(anchors) {
+        let anchor = *anchor;
         let want = anchor.unwrap_or((b.prefer.0 * w as f64, b.prefer.1 * h as f64));
         let mut best: Option<(f64, Laid, Rect)> = None;
         // try a few widths: narrow boxes fit gaps, wide ones are shorter
         let max_cols = ((w as f64 * 0.34) / (6 * s) as f64) as usize;
-        for cols in [26usize, 34, 42, 50] {
-            if cols > max_cols.max(26) {
+        for cols in [20usize, 26, 34, 42, 50] {
+            if cols > max_cols.max(20) {
                 continue;
             }
             let laid = lay(b, cols, s);
@@ -191,13 +206,89 @@ fn place(cv: &Canvas, cam: &Cam, boxes: &[Callout], avoid: &[Rect]) -> Vec<(Laid
 
 /// Draws the boxes at `alpha` (they fade in once the camera has settled).
 pub(super) fn draw(cv: &mut Canvas, cam: &Cam, boxes: &[Callout], avoid: &[Rect], alpha: f64) {
-    if alpha <= 0.004 || boxes.is_empty() {
+    if alpha <= 0.004 || boxes.is_empty() || crate::beat_notes_off() {
         return;
     }
-    let s = body_scale(cv);
-    let a = alpha.clamp(0.0, 1.0) as f32;
     let placed = place(cv, cam, boxes, avoid);
+    let s = body_scale(cv);
+    paint(cv, &placed, boxes, alpha, s);
+}
+
+/// Notes from outside the scene, drawn last: each goes by the part whose name on this
+/// frame matches its `on`, else by the left edge, clear of the solids and of every
+/// label and box the scene has drawn.
+pub(crate) fn draw_user(cv: &mut Canvas, notes: &[crate::UserNote]) {
+    let boxes: Vec<Callout> = notes
+        .iter()
+        .enumerate()
+        .map(|(i, n)| Callout {
+            title: &n.title,
+            body: n.text.split('\n').filter(|l| !l.trim().is_empty()).map(str::to_string).collect(),
+            col: stage::GREEN,
+            anchor: None,
+            prefer: (0.0, 0.12 + 0.22 * (i % 4) as f64),
+        })
+        .collect();
+    let anchors: Vec<Option<(f64, f64)>> =
+        notes.iter().map(|n| n.on.as_deref().and_then(|on| find_name(&cv.names, on))).collect();
+    let avoid = cv.plates.clone();
+    // these carry the whole answer, so they are set as large as the part names
+    let s = stage::text_scale(cv).max(body_scale(cv));
+    let placed = place_at(cv, &boxes, &anchors, &avoid, s);
+    paint(cv, &placed, &boxes, 1.0, s);
+}
+
+/// A double ring round each named part, to say "look here" without any text.
+pub(crate) fn draw_marks(cv: &mut Canvas, parts: &[String]) {
+    let r0 = (cv.h as f64 / 28.0).max(6.0);
+    for want in parts {
+        let Some((cx, cy)) = find_name(&cv.names, want) else {
+            continue;
+        };
+        for (r, a) in [(r0, 0.95), (r0 * 1.45, 0.5)] {
+            let n = (r * 7.0) as usize;
+            for i in 0..n {
+                let t = i as f64 / n as f64 * std::f64::consts::TAU;
+                let (x, y) = ((cx + r * t.cos()) as i64, (cy + r * t.sin()) as i64);
+                fill_rect(cv, x, y, x + 2, y + 2, stage::GREEN, a);
+            }
+        }
+    }
+}
+
+/// `find_name` over bare names: the name a note asking for `want` would pin to.
+pub(crate) fn match_name(names: &[String], want: &str) -> Option<String> {
+    let at: Vec<(String, (f64, f64))> =
+        names.iter().enumerate().map(|(i, n)| (n.clone(), (i as f64, 0.0))).collect();
+    find_name(&at, want).map(|(i, _)| names[i as usize].clone())
+}
+
+/// Letters and digits of `s`, lower-cased: how part names are compared.
+fn norm(s: &str) -> String {
+    s.chars().filter(|c| c.is_alphanumeric()).flat_map(char::to_lowercase).collect()
+}
+
+/// The pixel of the part named `want`: the same name, else the shortest name holding
+/// it, else the longest name it holds.
+fn find_name(names: &[(String, (f64, f64))], want: &str) -> Option<(f64, f64)> {
+    let w = norm(want);
+    if w.is_empty() {
+        return None;
+    }
+    let named: Vec<(String, (f64, f64))> = names.iter().map(|(n, p)| (norm(n), *p)).collect();
+    if let Some((_, p)) = named.iter().find(|(n, _)| *n == w) {
+        return Some(*p);
+    }
+    if let Some((_, p)) = named.iter().filter(|(n, _)| n.contains(&w)).min_by_key(|(n, _)| n.len()) {
+        return Some(*p);
+    }
+    named.iter().filter(|(n, _)| n.len() >= 3 && w.contains(n.as_str())).max_by_key(|(n, _)| n.len()).map(|(_, p)| *p)
+}
+
+fn paint(cv: &mut Canvas, placed: &[(Laid, Rect, Option<(f64, f64)>)], boxes: &[Callout], alpha: f64, s: i64) {
+    let a = alpha.clamp(0.0, 1.0) as f32;
     for ((laid, r, anchor), b) in placed.iter().zip(boxes) {
+        cv.plates.push(*r);
         if let Some((ax, ay)) = anchor {
             let ex = ax.clamp(r.0 as f64, r.2 as f64);
             let ey = ay.clamp(r.1 as f64, r.3 as f64);
@@ -226,5 +317,39 @@ mod tests {
         assert_eq!(l.join(" "), "the word line selects a whole row of cells");
         let b = wrap("- one two three four five", 10);
         assert!(b[0].starts_with("- ") && b[1].starts_with("  "), "{b:?}");
+    }
+
+    #[test]
+    fn names_match_loosely() {
+        let names = vec![("lens".to_string(), (1.0, 1.0)), ("projection lens".to_string(), (2.0, 2.0)), ("wafer".to_string(), (3.0, 3.0))];
+        assert_eq!(find_name(&names, "LENS"), Some((1.0, 1.0)));
+        assert_eq!(find_name(&names, "projection"), Some((2.0, 2.0)));
+        assert_eq!(find_name(&names, "the wafer stage"), Some((3.0, 3.0)));
+        assert_eq!(find_name(&names, "reticle"), None);
+    }
+
+    #[test]
+    fn user_notes_keep_off_each_other_and_off_labels() {
+        let mut cv = Canvas::new(960, 600, BG);
+        cv.names.push(("lens".to_string(), (480.0, 300.0)));
+        let label = (440, 290, 520, 310);
+        cv.plates.push(label);
+        let notes: Vec<crate::UserNote> = (0..4)
+            .map(|i| crate::UserNote {
+                title: format!("note {i}"),
+                text: "numerical aperture sets the finest line the lens can print".to_string(),
+                on: Some("lens".to_string()),
+            })
+            .collect();
+        let before = cv.plates.len();
+        draw_user(&mut cv, &notes);
+        let placed = &cv.plates[before..];
+        assert_eq!(placed.len(), 4);
+        for (i, a) in placed.iter().enumerate() {
+            assert_eq!(overlap(*a, label), 0, "note {i} covers the label");
+            for b in &placed[i + 1..] {
+                assert_eq!(overlap(*a, *b), 0, "notes overlap: {a:?} {b:?}");
+            }
+        }
     }
 }
