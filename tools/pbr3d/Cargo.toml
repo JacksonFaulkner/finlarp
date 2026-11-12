@@ -1,0 +1,12 @@
+[package]
+name = "pbr3d"
+version = "0.1.0"
+edition = "2021"
+description = "Physically based GPU renderer (wgpu, headless) for the realistic machine overviews"
+
+[dependencies]
+wgpu = "30"
+pollster = "0.4"
+bytemuck = { version = "1", features = ["derive"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+gltf = { version = "1.4", default-features = false, features = ["KHR_materials_emissive_strength", "import", "names", "utils"] }

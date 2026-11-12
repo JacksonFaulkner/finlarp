@@ -22,3 +22,6 @@ research/
 docs/transcripts/
 # per-machine Claude Code settings
 .claude/settings.local.json
+
+# generated render output (frames and videos from the showcase scripts)
+artifacts/
