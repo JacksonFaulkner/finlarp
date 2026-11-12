@@ -120,6 +120,11 @@ pub const GROUPS: &[Group] = &[
                 cmd: "space a s in a screen with a selection",
             },
             Row {
+                what: "rebuild fl from the checkout and restart into this screen",
+                standalone: Yes,
+                cmd: "space w q in any screen",
+            },
+            Row {
                 what: "chat with Claude Code; tickers in replies open dossier or CANSLIM",
                 standalone: Yes,
                 cmd: "fl chat",

@@ -69,3 +69,19 @@ Multi-patterning splits one layer across two or more masks when k1 is too small 
 It lets a node reach finer pitches with the same scanner, but each extra exposure adds cost, time and overlay error. Memory makers use it on the densest layers.
 # Source
 See section 10 of this page (Sources).
+
+== EUV source
+# What it does
+EUV light at 13.5 nm does not exist in a usable form, so the scanner makes it. Molten tin droplets, smaller than a human hair, are fired at over 240 km/h, about 50,000 times a second. A CO2 laser hits each droplet twice: the first pulse flattens it, and the second vaporises it into a superheated plasma that flashes EUV light.
+# Why it matters
+The source sets the throughput of the whole scanner. The debris and splatter from the blast can coat the optics that make the light, so the source needs constant cleaning and protection.
+# Source
+See section 10 of this page (Sources).
+
+== multilayer mirror
+# What it does
+EUV light is absorbed by nearly all matter, air and glass included, so the whole path is in vacuum and lenses are replaced by reflective mirrors. Each mirror is a stack of molybdenum and silicon layers and keeps about 70% of the light it meets.
+# Why it matters
+The losses compound: a dozen mirrors leave about 1% of the EUV energy before it reaches the wafer. That is why the source must be very bright and stable, and why the optics are so hard to build.
+# Source
+See section 10 of this page (Sources).

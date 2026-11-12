@@ -90,18 +90,50 @@ const BEATS: &[Beat] = &[
 ];
 
 const ZOOMS: &[Zoom] = &[
-    Zoom { key: 'a', label: "the row buffer: a whole row in the sense amps", build: || -> Box<dyn Scene> { Box::new(RowBufZ) } },
-    Zoom { key: 'b', label: "row hit, row miss, row conflict", build: || -> Box<dyn Scene> { Box::new(HitsZ) } },
-    Zoom { key: 'c', label: "mats, subarrays and the bank", build: || -> Box<dyn Scene> { Box::new(MatsZ) } },
-    Zoom { key: 'd', label: "redundancy: a spare row takes over", build: || -> Box<dyn Scene> { Box::new(RedundancyZ) } },
-    Zoom { key: 'e', label: "a burst: eight transfers from the open row", build: || -> Box<dyn Scene> { Box::new(BurstZ) } },
+    Zoom {
+        key: 'a',
+        label: "the row buffer: a whole row in the sense amps",
+        build: || -> Box<dyn Scene> { Box::new(RowBufZ) },
+    },
+    Zoom {
+        key: 'b',
+        label: "row hit, row miss, row conflict",
+        build: || -> Box<dyn Scene> { Box::new(HitsZ) },
+    },
+    Zoom {
+        key: 'c',
+        label: "mats, subarrays and the bank",
+        build: || -> Box<dyn Scene> { Box::new(MatsZ) },
+    },
+    Zoom {
+        key: 'd',
+        label: "redundancy: a spare row takes over",
+        build: || -> Box<dyn Scene> { Box::new(RedundancyZ) },
+    },
+    Zoom {
+        key: 'e',
+        label: "a burst: eight transfers from the open row",
+        build: || -> Box<dyn Scene> { Box::new(BurstZ) },
+    },
 ];
 
 /// The overview at `t`, turned by the user's `view`, with the beat's notes on it.
 pub fn overview_frame(t: &Time, view: &poly3d::View, w: u32, h: u32) -> RgbaImage {
     let b = &BEATS[t.beat.min(BEATS.len() - 1)];
-    let notes = poly3d::Notes { what: b.what, why: b.why, facts: b.facts };
-    poly3d::render_array_overview(t.beat, t.local as f64, view, Some(&notes), w as usize, h as usize, px::BG)
+    let notes = poly3d::Notes {
+        what: b.what,
+        why: b.why,
+        facts: b.facts,
+    };
+    poly3d::render_array_overview(
+        t.beat,
+        t.local as f64,
+        view,
+        Some(&notes),
+        w as usize,
+        h as usize,
+        px::BG,
+    )
 }
 
 /// The ARRAY overview: one access through a subarray.
@@ -308,52 +340,109 @@ const GRID_BEATS: &[Beat] = &[
 
 const PARTS_BEATS: &[Beat] = &[
     Beat::new("cells: one bit each", BEAT_MS)
-        .note("Each cell is one transistor and one capacitor holding one bit.", "The cells keep their colour; the rest go grey.")
+        .note(
+            "Each cell is one transistor and one capacitor holding one bit.",
+            "The cells keep their colour; the rest go grey.",
+        )
         .detail("See the CELL node for how one works.", &["1T1C cell"]),
     Beat::new("row decoder and word lines: pick a row", BEAT_MS)
-        .note("The row decoder turns the row address into one high word line.", "An address runs into the decoder and one word line turns orange.")
+        .note(
+            "The row decoder turns the row address into one high word line.",
+            "An address runs into the decoder and one word line turns orange.",
+        )
         .detail("One word line per row.", &["ACT raises one word line"]),
     Beat::new("bit lines: one per column", BEAT_MS)
-        .note("Each bit line carries the charge of the one cell in the open row that sits on it.", "Dots run from the open row down the bit lines.")
-        .detail("Bit line capacitance grows with its length.", &["One bit line per column"]),
+        .note(
+            "Each bit line carries the charge of the one cell in the open row that sits on it.",
+            "Dots run from the open row down the bit lines.",
+        )
+        .detail(
+            "Bit line capacitance grows with its length.",
+            &["One bit line per column"],
+        ),
     Beat::new("sense amps: the row buffer", BEAT_MS)
-        .note("A sense amp on each bit line amplifies and latches the bit, and restores the cell.", "The sense amp stripe fills with the row's bits.")
-        .detail("The latched row is the row buffer.", &["Row buffer: 1 KB per x8 DDR4 chip"]),
+        .note(
+            "A sense amp on each bit line amplifies and latches the bit, and restores the cell.",
+            "The sense amp stripe fills with the row's bits.",
+        )
+        .detail(
+            "The latched row is the row buffer.",
+            &["Row buffer: 1 KB per x8 DDR4 chip"],
+        ),
     Beat::new("column decoder: pick the bits", BEAT_MS)
-        .note("The column decoder connects a few latches to the data lines.", "Four column decoder slots light green.")
-        .detail("Only a small part of the row leaves per READ.", &["64 bits per READ on a x8 chip"]),
+        .note(
+            "The column decoder connects a few latches to the data lines.",
+            "Four column decoder slots light green.",
+        )
+        .detail(
+            "Only a small part of the row leaves per READ.",
+            &["64 bits per READ on a x8 chip"],
+        ),
     Beat::new("I/O: off the chip", BEAT_MS)
-        .note("The bits leave the chip on the data pins as a burst.", "Green dots reach the I/O pad.")
+        .note(
+            "The bits leave the chip on the data pins as a burst.",
+            "Green dots reach the I/O pad.",
+        )
         .detail("BANK and BANDWIDTH take it from here.", &["Burst length 8"]),
 ];
 
 const ORDER_BEATS: &[Beat] = &[
     Beat::new("1. idle: bit lines precharged to VDD/2", BEAT_MS)
-        .note("Every bit line rests at the middle level; an address arrives.", "Grey bit lines; dots run into the row decoder.")
-        .detail("Every access starts from this state.", &["Bit lines at VDD/2"]),
+        .note(
+            "Every bit line rests at the middle level; an address arrives.",
+            "Grey bit lines; dots run into the row decoder.",
+        )
+        .detail(
+            "Every access starts from this state.",
+            &["Bit lines at VDD/2"],
+        ),
     Beat::new("2. ACT: the word line rises", BEAT_MS)
-        .note("The row's word line goes high and its cells share charge with the bit lines.", "One word line turns orange; dots run onto the bit lines.")
+        .note(
+            "The row's word line goes high and its cells share charge with the bit lines.",
+            "One word line turns orange; dots run onto the bit lines.",
+        )
         .detail("The read has started to drain the cells.", &["ACT"]),
     Beat::new("3. sense: the row is latched", BEAT_MS)
-        .note("The sense amps drive each bit line to a full level and hold it.", "The latches fill; bit lines turn cyan or dark.")
+        .note(
+            "The sense amps drive each bit line to a full level and hold it.",
+            "The latches fill; bit lines turn cyan or dark.",
+        )
         .detail("Columns can be read after tRCD.", &["tRCD = 13.75 ns"]),
     Beat::new("4. READ: columns to the I/O", BEAT_MS)
-        .note("The column decoder sends the chosen bits to the I/O.", "Green dots run to the I/O pad.")
+        .note(
+            "The column decoder sends the chosen bits to the I/O.",
+            "Green dots run to the I/O pad.",
+        )
         .detail("Data arrives tCL after READ.", &["tCL = 13.75 ns"]),
     Beat::new("5. PRE: the row closes", BEAT_MS)
-        .note("The word line falls and the bit lines return to VDD/2.", "The row fades and the stripe empties.")
+        .note(
+            "The word line falls and the bit lines return to VDD/2.",
+            "The row fades and the stripe empties.",
+        )
         .detail("Another row can open after tRP.", &["tRP = 13.75 ns"]),
 ];
 
 const ROWHITS_BEATS: &[Beat] = &[
     Beat::new("row hit: read the open row again", BEAT_MS)
-        .note("Row A is open, so the READ goes straight to the row buffer.", "Row A stays orange and green dots leave the latches.")
+        .note(
+            "Row A is open, so the READ goes straight to the row buffer.",
+            "Row A stays orange and green dots leave the latches.",
+        )
         .detail("13.75 ns at DDR4-3200.", &["Hit: tCL"]),
     Beat::new("row conflict: close A, open B, then read", BEAT_MS)
-        .note("A request for row B finds A open: precharge A, activate B, then read.", "Row A fades, the latches empty, row B opens and they refill.")
-        .detail("41.25 ns: three times the hit.", &["Conflict: tRP + tRCD + tCL"]),
+        .note(
+            "A request for row B finds A open: precharge A, activate B, then read.",
+            "Row A fades, the latches empty, row B opens and they refill.",
+        )
+        .detail(
+            "41.25 ns: three times the hit.",
+            &["Conflict: tRP + tRCD + tCL"],
+        ),
     Beat::new("row miss: the bank is closed, open A and read", BEAT_MS)
-        .note("With the bank closed, the next request only has to activate and read.", "Row B closes; later row A opens and is read.")
+        .note(
+            "With the bank closed, the next request only has to activate and read.",
+            "Row B closes; later row A opens and is read.",
+        )
         .detail("27.5 ns: twice the hit.", &["Miss: tRCD + tCL"]),
 ];
 
@@ -371,14 +460,32 @@ const MATSWHY_BEATS: &[Beat] = &[
 
 const NUMBERS_BEATS: &[Beat] = &[
     Beat::new("one array: 512 x 512 cells", BEAT_MS)
-        .note("A typical array is 512 word lines by 512 bit lines: 262,144 cells.", "A square grid, one line per 8 cells.")
-        .detail("Size is set by bit line length and signal.", &["512 x 512 (Jacob, DRAM Circuits)"]),
+        .note(
+            "A typical array is 512 word lines by 512 bit lines: 262,144 cells.",
+            "A square grid, one line per 8 cells.",
+        )
+        .detail(
+            "Size is set by bit line length and signal.",
+            &["512 x 512 (Jacob, DRAM Circuits)"],
+        ),
     Beat::new("one row: 1 KB on a x8 DDR4 chip", BEAT_MS)
-        .note("A DDR4 row (page) on a x8 chip is 8 Kb, spread over many arrays opened together.", "Sixteen arrays in a line with one row lit across them.")
-        .detail("8192 bits / 512 per array = 16 arrays.", &["Page size 1 KB for x8 (Micron DDR4 datasheet)"]),
+        .note(
+            "A DDR4 row (page) on a x8 chip is 8 Kb, spread over many arrays opened together.",
+            "Sixteen arrays in a line with one row lit across them.",
+        )
+        .detail(
+            "8192 bits / 512 per array = 16 arrays.",
+            &["Page size 1 KB for x8 (Micron DDR4 datasheet)"],
+        ),
     Beat::new("the timings: DDR4-3200 22-22-22", BEAT_MS)
-        .note("tRCD, tCL and tRP are 13.75 ns each; a row must stay open at least tRAS, 32.5 ns.", "Three equal green bars and a taller pink one.")
-        .detail("22 clocks x 0.625 ns = 13.75 ns.", &["tRCD = tCL = tRP = 13.75 ns", "tRAS = 32.5 ns (52 clocks)"]),
+        .note(
+            "tRCD, tCL and tRP are 13.75 ns each; a row must stay open at least tRAS, 32.5 ns.",
+            "Three equal green bars and a taller pink one.",
+        )
+        .detail(
+            "22 clocks x 0.625 ns = 13.75 ns.",
+            &["tRCD = tCL = tRP = 13.75 ns", "tRAS = 32.5 ns (52 clocks)"],
+        ),
 ];
 
 const REPAIR_BEATS: &[Beat] = &[
@@ -395,14 +502,32 @@ const REPAIR_BEATS: &[Beat] = &[
 
 const MAKERS_BEATS: &[Beat] = &[
     Beat::new("Micron (MU)", BEAT_MS)
-        .note("Micron makes commodity DRAM.", "The first wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["Commodity DRAM makers: Micron, SK hynix, Samsung"]),
+        .note(
+            "Micron makes commodity DRAM.",
+            "The first wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["Commodity DRAM makers: Micron, SK hynix, Samsung"],
+        ),
     Beat::new("SK hynix (000660.KS)", BEAT_MS)
-        .note("SK hynix makes commodity DRAM and HBM.", "The second wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["SK hynix ticker: 000660.KS"]),
+        .note(
+            "SK hynix makes commodity DRAM and HBM.",
+            "The second wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["SK hynix ticker: 000660.KS"],
+        ),
     Beat::new("Samsung (005930.KS)", BEAT_MS)
-        .note("Samsung makes commodity DRAM and HBM.", "The third wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["Samsung ticker: 005930.KS"]),
+        .note(
+            "Samsung makes commodity DRAM and HBM.",
+            "The third wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["Samsung ticker: 005930.KS"],
+        ),
 ];
 
 const RISKS_BEATS: &[Beat] = &[
@@ -447,7 +572,12 @@ mod tests {
     use std::time::Instant;
 
     fn at(beat: usize, local: f32) -> Time {
-        Time { ms: 0, beat, local, beat_start: 0 }
+        Time {
+            ms: 0,
+            beat,
+            local,
+            beat_start: 0,
+        }
     }
 
     fn scenes() -> Vec<(String, Box<dyn Scene>)> {
@@ -480,17 +610,30 @@ mod tests {
     fn beats_match_their_pictures() {
         assert_eq!(BEATS.len(), poly3d::ARRAY_OVERVIEW_BEATS);
         for z in ZOOMS {
-            assert_eq!((z.build)().beats().len(), zoom_scene(z.key).unwrap().beats(), "zoom {}", z.key);
+            assert_eq!(
+                (z.build)().beats().len(),
+                zoom_scene(z.key).unwrap().beats(),
+                "zoom {}",
+                z.key
+            );
         }
         for (key, mk) in ('1'..='9').zip(SECTIONS) {
-            assert_eq!(mk().beats().len(), zoom_scene(key).unwrap().beats(), "section {key}");
+            assert_eq!(
+                mk().beats().len(),
+                zoom_scene(key).unwrap().beats(),
+                "section {key}"
+            );
         }
         let heads = super::super::diagrams_desc::visual("ARRAY")
             .unwrap()
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len() + 1, "one scene per section but the sources");
+        assert_eq!(
+            heads,
+            SECTIONS.len() + 1,
+            "one scene per section but the sources"
+        );
     }
 
     #[test]
@@ -530,7 +673,11 @@ mod tests {
             let beats = scene.beats().len();
             let p = Player::new(scene, Instant::now());
             for beat in 0..beats {
-                let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                let (w, h) = if name == "overview" {
+                    (1900, 1000)
+                } else {
+                    (960, 576)
+                };
                 let img = p.pixels(&at(beat, 0.6), w, h).expect("pixel frame");
                 img.save(dir.join(format!("{name}_{beat}.png"))).unwrap();
             }

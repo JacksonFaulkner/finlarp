@@ -153,9 +153,9 @@ fn build_screen(
     arg: Option<String>,
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
-        candles, canslim, chart, chat, diagrams, dossier, earnings_report, events, filings, godel,
-        home, intraday, menu, notes, pick, portfolio, rows, search, sources, universe, video,
-        claude_history, claude_log, docview, keys, note, onboard, transactions, watchlists,
+        candles, canslim, chart, chat, claude_history, claude_log, diagrams, docview, dossier,
+        earnings_report, events, filings, godel, home, intraday, keys, menu, note, notes, onboard,
+        pick, portfolio, rebuild, rows, search, sources, transactions, universe, video, watchlists,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -188,6 +188,8 @@ fn build_screen(
         ("claude_history", _) => Box::new(claude_history::open(ctx, arg)?),
         ("claude_log", _) => Box::new(claude_log::open(ctx, arg)?),
         ("keys", _) => Box::new(keys::open(ctx, arg)?),
+        // Reached only through Route::Rebuild (`<space>wq`), not the CLI.
+        ("rebuild", _) => Box::new(rebuild::open(ctx, arg)?),
         _ => Box::new(chart::open(ctx, arg)?),
     })
 }
@@ -215,22 +217,33 @@ fn label(screen: &str, arg: Option<&str>) -> String {
     }
 }
 
-fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Result<i32> {
+/// A screen on the session stack: (screen, is_picker, window label,
+/// (screen name, arg) to restart into after a rebuild).
+type Entry = (Box<dyn app::Screen>, bool, String, (String, Option<String>));
+
+/// How a session ended: exit with a code, or exec the rebuilt binary into
+/// this screen and argument.
+enum End {
+    Code(i32),
+    Restart { screen: String, arg: Option<String> },
+}
+
+fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Result<End> {
     use app::Route;
     if start == "diagrams" {
         if let Some(rest) = arg.as_deref().and_then(|a| a.strip_prefix("pdf")) {
             export_diagram_pdfs(ctx, rest)?;
-            return Ok(0);
+            return Ok(End::Code(0));
         }
     }
     // Restores the tmux window name when this session ends (drop, not exit(),
     // so it runs before main calls process::exit).
     let title = tmux_title::WindowTitle::claim();
-    // (screen, is_picker, window label)
-    let mut stack: Vec<(Box<dyn app::Screen>, bool, String)> = vec![(
+    let mut stack: Vec<Entry> = vec![(
         build_screen(ctx, start, arg.clone())?,
         upper(arg.clone()).is_none() && matches!(start, "canslim" | "dossier"),
         label(start, arg.as_deref()),
+        (start.to_string(), arg.clone()),
     )];
     // One tape for the whole session: handing off to another screen keeps its data.
     let mut tape = ui::tape::Tape::new();
@@ -241,6 +254,16 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
         }
         let exit = app::run(top.0.as_mut(), &mut tape, ctx.theme)?;
         let next = match exit.handoff {
+            Some(Route::Restart) => {
+                // The rebuild screen is on top; restart into the one beneath.
+                stack.pop();
+                let (screen, arg) = stack
+                    .last()
+                    .map(|e| e.3.clone())
+                    .unwrap_or_else(|| ("home".to_string(), None));
+                return Ok(End::Restart { screen, arg });
+            }
+            Some(Route::Rebuild) => Some(("rebuild".to_string(), None)),
             Some(Route::Screen { screen, arg }) => Some((screen, arg)),
             Some(Route::Picker { screen }) => Some((screen, None)),
             _ => None,
@@ -250,20 +273,58 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
                 let is_picker = upper(arg.clone()).is_none()
                     && matches!(screen.as_str(), "canslim" | "dossier");
                 let child_label = label(&screen, arg.as_deref());
-                let child = build_screen(ctx, &screen, arg)?;
+                let restart = (screen.clone(), arg.clone());
+                let child = match build_screen(ctx, &screen, arg) {
+                    Ok(c) => c,
+                    // A rebuild that cannot start (no cargo) should not end the session.
+                    Err(e) if screen == "rebuild" => {
+                        top_flash(&mut stack, e.to_string());
+                        continue;
+                    }
+                    Err(e) => return Err(e),
+                };
                 if stack.last().is_some_and(|t| t.1) {
                     stack.pop(); // replace the picker with its pick
                 }
-                stack.push((child, is_picker, child_label));
+                stack.push((child, is_picker, child_label, restart));
             }
             None => {
                 stack.pop();
                 if exit.code != 0 || stack.is_empty() {
-                    return Ok(exit.code);
+                    return Ok(End::Code(exit.code));
                 }
             }
         }
     }
+}
+
+fn top_flash(stack: &mut [Entry], msg: String) {
+    if let Some(top) = stack.last_mut() {
+        top.0.set_flash(msg);
+    }
+}
+
+/// Replaces this process with the freshly built fl: same colour flags, the
+/// screen that was open. Only returns if the exec failed.
+fn exec_rebuilt(args: &[String], screen: &str, arg: Option<&str>) -> std::io::Error {
+    use std::os::unix::process::CommandExt;
+    let mut flags: Vec<String> = Vec::new();
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        let f = a.split_once('=').map_or(a.as_str(), |(f, _)| f);
+        if matches!(f, "--bg" | "--up" | "--down") {
+            flags.push(a.clone());
+            if f == a {
+                flags.extend(it.next().cloned());
+            }
+        }
+    }
+    let mut cmd = std::process::Command::new(screens::rebuild::built_binary());
+    cmd.args(flags).arg(screen);
+    if let Some(a) = arg {
+        cmd.args(a.split_whitespace());
+    }
+    cmd.exec()
 }
 
 /// Every launch of `fl` works from the finlarp checkout, whatever directory
@@ -283,6 +344,11 @@ fn enter_finlarp_root() {
 fn main() {
     enter_finlarp_root();
     let args: Vec<String> = env::args().skip(1).collect();
+    // `fl diagram-mcp`: the MCP server Claude reaches an open diagram through
+    // (screens::diagrams_ipc). No screen, no terminal: stdio only.
+    if args.first().map(String::as_str) == Some("diagram-mcp") {
+        std::process::exit(screens::diagrams_ipc::run_mcp());
+    }
     let cli = match parse_args(&args) {
         Ok(c) => c,
         Err(msg) => {
@@ -299,7 +365,12 @@ fn main() {
         ),
     };
     match run_session(&ctx, &cli.screen, cli.arg) {
-        Ok(code) => std::process::exit(code),
+        Ok(End::Code(code)) => std::process::exit(code),
+        Ok(End::Restart { screen, arg }) => {
+            let e = exec_rebuilt(&args, &screen, arg.as_deref());
+            eprintln!("finlarp: restart failed: {e}");
+            std::process::exit(1);
+        }
         Err(e) => {
             eprintln!("finlarp: {e}");
             std::process::exit(1);

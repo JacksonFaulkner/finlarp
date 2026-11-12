@@ -12,9 +12,9 @@ use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Alignment, Constraint, Layout, Rect};
 use ratatui::style::{Color, Modifier, Style};
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Paragraph};
+use ratatui::widgets::{Block, Paragraph, Wrap};
 
-use crate::app::{Action, Ctx, Route, Screen};
+use crate::app::{Action, Ctx, LEADER_CHORDS, Route, Screen};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -62,20 +62,75 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
     ),
     ("Events", "events", "catalyst calendar", 'v'),
     ("Chat", "chat", "ask Claude; open the tickers it names", 'a'),
-    ("Candles", "candles", "daily OHLC and volume for one ticker", 'b'),
+    (
+        "Candles",
+        "candles",
+        "daily OHLC and volume for one ticker",
+        'b',
+    ),
     ("Intraday", "intraday", "2x2 live candle tapes", 'i'),
     ("Filings", "filings", "EDGAR 8-K and 6-K filing search", 'f'),
-    ("Notes", "notes", "questions asked, answers as they arrive", 'n'),
-    ("New note", "note", "type a note; answered in the background", 'N'),
+    (
+        "Notes",
+        "notes",
+        "questions asked, answers as they arrive",
+        'n',
+    ),
+    (
+        "New note",
+        "note",
+        "type a note; answered in the background",
+        'N',
+    ),
     ("Godel", "godel", "ranked commands for a question", 'r'),
-    ("Menu", "menu", "filterable list of standalone commands", 'M'),
-    ("Sources", "sources", "data providers, keys and schedules", 'S'),
-    ("Transactions", "transactions", "E*TRADE transaction history", 't'),
-    ("Watchlists", "watchlists", "watchlist with daily change", 'w'),
-    ("Onboard", "onboard", "add a ticker, pull its data, build its dossier", 'o'),
-    ("Claude history", "claude_history", "browse Claude Code sessions", 'H'),
-    ("Claude log", "claude_log", "tail of the Claude background log", 'l'),
-    ("Video", "video", "play docs screen recordings in the terminal", 'V'),
+    (
+        "Menu",
+        "menu",
+        "filterable list of standalone commands",
+        'M',
+    ),
+    (
+        "Sources",
+        "sources",
+        "data providers, keys and schedules",
+        'S',
+    ),
+    (
+        "Transactions",
+        "transactions",
+        "E*TRADE transaction history",
+        't',
+    ),
+    (
+        "Watchlists",
+        "watchlists",
+        "watchlist with daily change",
+        'w',
+    ),
+    (
+        "Onboard",
+        "onboard",
+        "add a ticker, pull its data, build its dossier",
+        'o',
+    ),
+    (
+        "Claude history",
+        "claude_history",
+        "browse Claude Code sessions",
+        'H',
+    ),
+    (
+        "Claude log",
+        "claude_log",
+        "tail of the Claude background log",
+        'l',
+    ),
+    (
+        "Video",
+        "video",
+        "play docs screen recordings in the terminal",
+        'V',
+    ),
     ("Keys", "keys", "command and key reference", '?'),
 ];
 
@@ -107,7 +162,6 @@ const WORDMARK: &str = r"▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄
 ░█▄┼┼▒      ░█▄┼┼┼░ ░█▄┼┼░ ░┼┼▄█░ ░█▄┼┼┼┼┼┼┼▒ ░█▄┼┼▒ ▒┼┼▄█░ ░┼┼┼┼░ ▒┼┼▄█▒ ░█▄┼▐▒      
 ▀▀▀▀▀▀      ▀▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀ ▀▀▀▀▀▀      ";
 const WORDMARK_H: u16 = 8;
-
 
 /// The shifted character a key produces on this board.
 fn shifted(c: char) -> char {
@@ -160,11 +214,7 @@ fn key_pos(c: char) -> Option<(usize, usize)> {
 
 /// Columns in a board row. The space bar row has one cell.
 fn row_len(r: usize) -> usize {
-    if r == SPACE_ROW {
-        1
-    } else {
-        BOARD[r].len()
-    }
+    if r == SPACE_ROW { 1 } else { BOARD[r].len() }
 }
 
 /// Horizontal centre of a cell, in quarters of a key, so rows line up as drawn.
@@ -216,6 +266,38 @@ fn edge(t: &Theme) -> Style {
 fn lit(t: &Theme) -> Style {
     t.accent()
 }
+/// The space bar's chord legend: `ac chat · as add context · …`, keys bright
+/// and descriptions grey (all one style when the bar is selected). Narrower
+/// than `width`, it drops the descriptions: `ac · as · y · to · wq`.
+fn leader_chords(style: Style, on: bool, t: &Theme, width: u16) -> Line<'static> {
+    let desc = if on { style } else { grey(t) };
+    let keys = if on {
+        style
+    } else {
+        style.add_modifier(Modifier::BOLD)
+    };
+    let mut spans = Vec::new();
+    for (i, (k, what)) in LEADER_CHORDS.iter().enumerate() {
+        if i > 0 {
+            spans.push(Span::styled(" · ", desc));
+        }
+        spans.push(Span::styled(*k, keys));
+        spans.push(Span::styled(format!(" {what}"), desc));
+    }
+    let full = Line::from(spans);
+    if full.width() <= width as usize {
+        return full;
+    }
+    let mut spans = Vec::new();
+    for (i, (k, _)) in LEADER_CHORDS.iter().enumerate() {
+        if i > 0 {
+            spans.push(Span::styled(" · ", desc));
+        }
+        spans.push(Span::styled(*k, keys));
+    }
+    Line::from(spans)
+}
+
 fn grey(t: &Theme) -> Style {
     t.dim()
 }
@@ -375,13 +457,13 @@ impl Screen for Home {
             frame.render_widget(
                 Paragraph::new(vec![
                     Line::styled("leader", style),
-                    Line::styled("ac chat", if on { style } else { grey(&t) }),
+                    leader_chords(style, on, &t, inner.width),
                 ])
-                .alignment(Alignment::Center),
+                .alignment(Alignment::Center)
+                .wrap(Wrap { trim: true }),
                 inner,
             );
         }
-
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -607,6 +689,7 @@ mod tests {
         assert!(out.contains("┌ 0 "), "number row cut short: {out}");
         assert!(out.contains("space"), "space bar missing: {out}");
         assert!(out.contains("leader"), "space bar legend missing: {out}");
+        assert!(out.contains("wq"), "leader chords missing: {out}");
     }
 
     #[test]
@@ -614,7 +697,11 @@ mod tests {
         for e in ENTRIES {
             let lines = title_lines(e.0, 10);
             assert!(lines.len() <= 2, "{}: {lines:?}", e.0);
-            assert!(lines.iter().all(|l| text::width(l) <= 10), "{}: {lines:?}", e.0);
+            assert!(
+                lines.iter().all(|l| text::width(l) <= 10),
+                "{}: {lines:?}",
+                e.0
+            );
         }
     }
 }

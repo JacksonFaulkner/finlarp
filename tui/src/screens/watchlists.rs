@@ -86,7 +86,8 @@ fn parse(text: &str) -> Vec<String> {
 pub fn valid_symbol(s: &str) -> bool {
     s.len() <= 12
         && s.chars().next().is_some_and(|c| c.is_ascii_alphanumeric())
-        && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '-')
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '-')
 }
 
 /// `text` with `sym` appended on its own line; unchanged if already listed.
@@ -261,8 +262,8 @@ impl Watchlists {
             self.flash = Some(format!("{sym} is already on the watchlist"));
             return;
         }
-        let written = read_file(&self.path)
-            .and_then(|t| write_file(&self.path, &with_symbol(&t, &sym)));
+        let written =
+            read_file(&self.path).and_then(|t| write_file(&self.path, &with_symbol(&t, &sym)));
         match written {
             Ok(()) => {
                 self.reload();
@@ -279,8 +280,8 @@ impl Watchlists {
         let Some(sym) = self.selected().map(|r| r.symbol.clone()) else {
             return;
         };
-        let written = read_file(&self.path)
-            .and_then(|t| write_file(&self.path, &without_symbol(&t, &sym)));
+        let written =
+            read_file(&self.path).and_then(|t| write_file(&self.path, &without_symbol(&t, &sym)));
         match written {
             Ok(()) => {
                 self.reload();
@@ -469,9 +470,9 @@ impl Screen for Watchlists {
 
 #[cfg(test)]
 mod tests {
+    use ratatui::Terminal;
     use ratatui::backend::TestBackend;
     use ratatui::crossterm::event::{KeyEventKind, KeyEventState};
-    use ratatui::Terminal;
 
     use super::*;
 
@@ -548,10 +549,18 @@ mod tests {
 
     #[test]
     fn change_is_relative_to_previous_close() {
-        let q = Quote { date: "2026-10-28".into(), last: 213.66, prev: Some(215.38) };
+        let q = Quote {
+            date: "2026-10-28".into(),
+            last: 213.66,
+            prev: Some(215.38),
+        };
         let c = change_pct(&q).unwrap();
         assert!((c + 0.7989).abs() < 1e-3, "{c}");
-        let none = Quote { date: String::new(), last: 1.0, prev: None };
+        let none = Quote {
+            date: String::new(),
+            last: 1.0,
+            prev: None,
+        };
         assert_eq!(change_pct(&none), None);
     }
 
@@ -648,7 +657,10 @@ mod tests {
                         prev: Some(215.38),
                     }),
                 },
-                Row { symbol: "MU".into(), quote: None },
+                Row {
+                    symbol: "MU".into(),
+                    quote: None,
+                },
             ],
             state: ListState::default(),
             adding: None,

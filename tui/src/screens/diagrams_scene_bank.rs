@@ -73,18 +73,50 @@ const BEATS: &[Beat] = &[
 ];
 
 const ZOOMS: &[Zoom] = &[
-    Zoom { key: 'a', label: "one bank: its own row and states", build: || -> Box<dyn Scene> { Box::new(OneZ) } },
-    Zoom { key: 'b', label: "bank groups: why alternating groups is faster", build: || -> Box<dyn Scene> { Box::new(GroupsZ) } },
-    Zoom { key: 'c', label: "the four-activate window", build: || -> Box<dyn Scene> { Box::new(FawZ) } },
-    Zoom { key: 'd', label: "address mapping: which bits pick the bank", build: || -> Box<dyn Scene> { Box::new(MapZ) } },
-    Zoom { key: 'e', label: "refresh: all banks vs one bank per group", build: || -> Box<dyn Scene> { Box::new(RefreshZ) } },
+    Zoom {
+        key: 'a',
+        label: "one bank: its own row and states",
+        build: || -> Box<dyn Scene> { Box::new(OneZ) },
+    },
+    Zoom {
+        key: 'b',
+        label: "bank groups: why alternating groups is faster",
+        build: || -> Box<dyn Scene> { Box::new(GroupsZ) },
+    },
+    Zoom {
+        key: 'c',
+        label: "the four-activate window",
+        build: || -> Box<dyn Scene> { Box::new(FawZ) },
+    },
+    Zoom {
+        key: 'd',
+        label: "address mapping: which bits pick the bank",
+        build: || -> Box<dyn Scene> { Box::new(MapZ) },
+    },
+    Zoom {
+        key: 'e',
+        label: "refresh: all banks vs one bank per group",
+        build: || -> Box<dyn Scene> { Box::new(RefreshZ) },
+    },
 ];
 
 /// The overview at `t`, turned by the user's `view`, with the beat's notes on it.
 pub fn overview_frame(t: &Time, view: &poly3d::View, w: u32, h: u32) -> RgbaImage {
     let b = &BEATS[t.beat.min(BEATS.len() - 1)];
-    let notes = poly3d::Notes { what: b.what, why: b.why, facts: b.facts };
-    poly3d::render_bank_overview(t.beat, t.local as f64, view, Some(&notes), w as usize, h as usize, px::BG)
+    let notes = poly3d::Notes {
+        what: b.what,
+        why: b.why,
+        facts: b.facts,
+    };
+    poly3d::render_bank_overview(
+        t.beat,
+        t.local as f64,
+        view,
+        Some(&notes),
+        w as usize,
+        h as usize,
+        px::BG,
+    )
 }
 
 /// The BANK overview: banks working in parallel.
@@ -187,14 +219,32 @@ const GROUPS_BEATS: &[Beat] = &[
 
 const FAW_BEATS: &[Beat] = &[
     Beat::new("four ACTIVATEs, tRRD apart", BEAT_MS)
-        .note("ACTIVATEs to different banks need tRRD between them.", "Four orange ACT blocks step along the time axis.")
-        .detail("About 3.7 ns across groups at DDR4-3200.", &["tRRD_S about 3.7 ns (module SPD)"]),
+        .note(
+            "ACTIVATEs to different banks need tRRD between them.",
+            "Four orange ACT blocks step along the time axis.",
+        )
+        .detail(
+            "About 3.7 ns across groups at DDR4-3200.",
+            &["tRRD_S about 3.7 ns (module SPD)"],
+        ),
     Beat::new("the window: no more than four in tFAW", BEAT_MS)
-        .note("Any tFAW window may hold at most four ACTIVATEs.", "A long pink window block grows from the first ACT.")
-        .detail("Opening rows draws current; the window caps it.", &["tFAW about 21 ns (module SPD)"]),
+        .note(
+            "Any tFAW window may hold at most four ACTIVATEs.",
+            "A long pink window block grows from the first ACT.",
+        )
+        .detail(
+            "Opening rows draws current; the window caps it.",
+            &["tFAW about 21 ns (module SPD)"],
+        ),
     Beat::new("the fifth ACTIVATE waits for the window", BEAT_MS)
-        .note("A fifth ACTIVATE wanted early has to wait until the first one's window ends.", "A pink 'wanted' block, then ACT 5 at the end of the window.")
-        .detail("With many banks, tFAW often sets the pace, not tRRD.", &["4 x 3.7 ns = 14.8 ns < 21 ns"]),
+        .note(
+            "A fifth ACTIVATE wanted early has to wait until the first one's window ends.",
+            "A pink 'wanted' block, then ACT 5 at the end of the window.",
+        )
+        .detail(
+            "With many banks, tFAW often sets the pace, not tRRD.",
+            &["4 x 3.7 ns = 14.8 ns < 21 ns"],
+        ),
 ];
 
 const MAP_BEATS: &[Beat] = &[
@@ -211,14 +261,32 @@ const MAP_BEATS: &[Beat] = &[
 
 const REFRESH_BEATS: &[Beat] = &[
     Beat::new("DDR4 all-bank refresh: the rank is blocked", BEAT_MS)
-        .note("REFRESH in DDR4 refreshes every bank at once; reads waiting for any bank must wait.", "All sixteen banks turn cyan; three banks with queued reads get pink frames.")
-        .detail("The whole rank is locked while it runs.", &["DDR4: entire rank locked during refresh (PCPer)"]),
+        .note(
+            "REFRESH in DDR4 refreshes every bank at once; reads waiting for any bank must wait.",
+            "All sixteen banks turn cyan; three banks with queued reads get pink frames.",
+        )
+        .detail(
+            "The whole rank is locked while it runs.",
+            &["DDR4: entire rank locked during refresh (PCPer)"],
+        ),
     Beat::new("DDR5 same-bank refresh: one bank per group", BEAT_MS)
-        .note("DDR5's REFsb refreshes the same bank in every group, one bank index at a time.", "One bank in each group turns cyan, stepping through the four.")
-        .detail("The other banks stay available.", &["REFsb targets the same bank in every bank group (Micron)"]),
+        .note(
+            "DDR5's REFsb refreshes the same bank in every group, one bank index at a time.",
+            "One bank in each group turns cyan, stepping through the four.",
+        )
+        .detail(
+            "The other banks stay available.",
+            &["REFsb targets the same bank in every bank group (Micron)"],
+        ),
     Beat::new("the other banks keep serving reads", BEAT_MS)
-        .note("While one bank per group refreshes, reads to the rest carry on.", "Green dots keep leaving banks that are not refreshing.")
-        .detail("Refresh costs less throughput as chips get denser.", &["Drawn with 16 banks; DDR5 has 32"]),
+        .note(
+            "While one bank per group refreshes, reads to the rest carry on.",
+            "Green dots keep leaving banks that are not refreshing.",
+        )
+        .detail(
+            "Refresh costs less throughput as chips get denser.",
+            &["Drawn with 16 banks; DDR5 has 32"],
+        ),
 ];
 
 const BANKS_BEATS: &[Beat] = &[
@@ -256,19 +324,31 @@ const PARTS_BEATS: &[Beat] = &[
 
 const ORDER_BEATS: &[Beat] = &[
     Beat::new("1. ACT bank A", BEAT_MS)
-        .note("Bank A opens its row.", "A command reaches bank A and a row lights.")
+        .note(
+            "Bank A opens its row.",
+            "A command reaches bank A and a row lights.",
+        )
         .detail("tRCD until it can be read.", &["tRCD = 13.75 ns"]),
     Beat::new("2. ACT bank B (another group)", BEAT_MS)
-        .note("Bank B opens a row while A is still opening.", "Bank B lights its row too.")
+        .note(
+            "Bank B opens a row while A is still opening.",
+            "Bank B lights its row too.",
+        )
         .detail("Only tRRD after A's ACT.", &["tRRD_S about 3.7 ns"]),
     Beat::new("3. READ A", BEAT_MS)
         .note("A's row buffer sends a burst.", "Green dots from bank A.")
         .detail("Data tCL after the READ.", &["tCL = 13.75 ns"]),
     Beat::new("4. READ B", BEAT_MS)
-        .note("B's burst follows straight after on the bus.", "Green dots from bank B.")
+        .note(
+            "B's burst follows straight after on the bus.",
+            "Green dots from bank B.",
+        )
         .detail("Across groups: tCCD_S apart.", &["tCCD_S = 2.5 ns"]),
     Beat::new("5. PRECHARGE both", BEAT_MS)
-        .note("Both banks close their rows.", "Both banks flash pink and go idle.")
+        .note(
+            "Both banks close their rows.",
+            "Both banks flash pink and go idle.",
+        )
         .detail("Ready for new rows.", &["tRP = 13.75 ns"]),
 ];
 
@@ -298,38 +378,92 @@ const CONFLICT_BEATS: &[Beat] = &[
 
 const NUMBERS_BEATS: &[Beat] = &[
     Beat::new("DDR4: 16 banks in 4 groups", BEAT_MS)
-        .note("A DDR4 x4/x8 chip has 4 bank groups of 4 banks.", "Sixteen tiles in four groups.")
-        .detail("x16 parts have 2 groups of 4.", &["DDR4: 16 banks, 4 groups"]),
+        .note(
+            "A DDR4 x4/x8 chip has 4 bank groups of 4 banks.",
+            "Sixteen tiles in four groups.",
+        )
+        .detail(
+            "x16 parts have 2 groups of 4.",
+            &["DDR4: 16 banks, 4 groups"],
+        ),
     Beat::new("DDR5: 32 banks in 8 groups", BEAT_MS)
-        .note("DDR5 doubles both: 8 groups of 4 banks.", "Thirty-two tiles in eight groups.")
-        .detail("More banks, more rows open at once.", &["DDR5: 2x banks, 2x bank groups (Micron)", "Up to 8 groups of 4 banks"]),
+        .note(
+            "DDR5 doubles both: 8 groups of 4 banks.",
+            "Thirty-two tiles in eight groups.",
+        )
+        .detail(
+            "More banks, more rows open at once.",
+            &[
+                "DDR5: 2x banks, 2x bank groups (Micron)",
+                "Up to 8 groups of 4 banks",
+            ],
+        ),
     Beat::new("bursts: 8 transfers on DDR4, 16 on DDR5", BEAT_MS)
-        .note("DDR5 doubles the minimum burst length to 16.", "Two lanes of transfer blocks, 8 and 16 long.")
-        .detail("Longer bursts keep a narrower channel full.", &["DDR5 BL16, burst chop after 8"]),
+        .note(
+            "DDR5 doubles the minimum burst length to 16.",
+            "Two lanes of transfer blocks, 8 and 16 long.",
+        )
+        .detail(
+            "Longer bursts keep a narrower channel full.",
+            &["DDR5 BL16, burst chop after 8"],
+        ),
 ];
 
 const REFSEC_BEATS: &[Beat] = &[
     Beat::new("DDR4 all-bank refresh blocks everything", BEAT_MS)
-        .note("REFab refreshes all banks; none can be used until it ends.", "One long pink block across the first lane.")
-        .detail("Block lengths are illustrative.", &["DDR4 refresh locks the rank"]),
+        .note(
+            "REFab refreshes all banks; none can be used until it ends.",
+            "One long pink block across the first lane.",
+        )
+        .detail(
+            "Block lengths are illustrative.",
+            &["DDR4 refresh locks the rank"],
+        ),
     Beat::new("DDR5 same-bank refresh, staggered", BEAT_MS)
-        .note("REFsb refreshes one bank index in every group, then the next.", "Cyan blocks step down the bank lanes.")
+        .note(
+            "REFsb refreshes one bank index in every group, then the next.",
+            "Cyan blocks step down the bank lanes.",
+        )
         .detail("One bank per group busy at a time.", &["REFsb (Micron)"]),
     Beat::new("reads carry on around it", BEAT_MS)
-        .note("Reads to the other banks keep going during same-bank refresh.", "A lane of green RD blocks fills in.")
-        .detail("Refresh steals less bandwidth.", &["Other banks stay available"]),
+        .note(
+            "Reads to the other banks keep going during same-bank refresh.",
+            "A lane of green RD blocks fills in.",
+        )
+        .detail(
+            "Refresh steals less bandwidth.",
+            &["Other banks stay available"],
+        ),
 ];
 
 const MAKERS_BEATS: &[Beat] = &[
     Beat::new("Micron (MU)", BEAT_MS)
-        .note("Micron makes commodity DRAM.", "The first wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["Commodity DRAM makers: Micron, SK hynix, Samsung"]),
+        .note(
+            "Micron makes commodity DRAM.",
+            "The first wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["Commodity DRAM makers: Micron, SK hynix, Samsung"],
+        ),
     Beat::new("SK hynix (000660.KS)", BEAT_MS)
-        .note("SK hynix makes commodity DRAM and HBM.", "The second wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["SK hynix ticker: 000660.KS"]),
+        .note(
+            "SK hynix makes commodity DRAM and HBM.",
+            "The second wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["SK hynix ticker: 000660.KS"],
+        ),
     Beat::new("Samsung (005930.KS)", BEAT_MS)
-        .note("Samsung makes commodity DRAM and HBM.", "The third wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["Samsung ticker: 005930.KS"]),
+        .note(
+            "Samsung makes commodity DRAM and HBM.",
+            "The third wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["Samsung ticker: 005930.KS"],
+        ),
 ];
 
 const RISKS_BEATS: &[Beat] = &[
@@ -379,7 +513,12 @@ mod tests {
     use std::time::Instant;
 
     fn at(beat: usize, local: f32) -> Time {
-        Time { ms: 0, beat, local, beat_start: 0 }
+        Time {
+            ms: 0,
+            beat,
+            local,
+            beat_start: 0,
+        }
     }
 
     fn scenes() -> Vec<(String, Box<dyn Scene>)> {
@@ -412,17 +551,30 @@ mod tests {
     fn beats_match_their_pictures() {
         assert_eq!(BEATS.len(), poly3d::BANK_OVERVIEW_BEATS);
         for z in ZOOMS {
-            assert_eq!((z.build)().beats().len(), zoom_scene(z.key).unwrap().beats(), "zoom {}", z.key);
+            assert_eq!(
+                (z.build)().beats().len(),
+                zoom_scene(z.key).unwrap().beats(),
+                "zoom {}",
+                z.key
+            );
         }
         for (key, mk) in ('1'..='9').zip(SECTIONS) {
-            assert_eq!(mk().beats().len(), zoom_scene(key).unwrap().beats(), "section {key}");
+            assert_eq!(
+                mk().beats().len(),
+                zoom_scene(key).unwrap().beats(),
+                "section {key}"
+            );
         }
         let heads = super::super::diagrams_desc::visual("BANK")
             .unwrap()
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len() + 1, "one scene per section but the sources");
+        assert_eq!(
+            heads,
+            SECTIONS.len() + 1,
+            "one scene per section but the sources"
+        );
     }
 
     #[test]
@@ -462,7 +614,11 @@ mod tests {
             let beats = scene.beats().len();
             let p = Player::new(scene, Instant::now());
             for beat in 0..beats {
-                let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                let (w, h) = if name == "overview" {
+                    (1900, 1000)
+                } else {
+                    (960, 576)
+                };
                 let img = p.pixels(&at(beat, 0.6), w, h).expect("pixel frame");
                 img.save(dir.join(format!("{name}_{beat}.png"))).unwrap();
             }

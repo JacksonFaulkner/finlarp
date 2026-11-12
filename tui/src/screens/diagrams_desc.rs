@@ -97,23 +97,53 @@ pub const DESCS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/MEM_HBM_STACK.desc.txt"),
     ),
     // Packaging tab
-    ("LOGIC DIE", include_str!("diagrams_pages/PKG_LOGIC_DIE.desc.txt")),
-    ("MICROBUMP", include_str!("diagrams_pages/PKG_MICROBUMP.desc.txt")),
-    ("INTERPOSER", include_str!("diagrams_pages/PKG_INTERPOSER.desc.txt")),
-    ("SUBSTRATE", include_str!("diagrams_pages/PKG_SUBSTRATE.desc.txt")),
-    ("ASSEMBLY", include_str!("diagrams_pages/PKG_ASSEMBLY.desc.txt")),
+    (
+        "LOGIC DIE",
+        include_str!("diagrams_pages/PKG_LOGIC_DIE.desc.txt"),
+    ),
+    (
+        "MICROBUMP",
+        include_str!("diagrams_pages/PKG_MICROBUMP.desc.txt"),
+    ),
+    (
+        "INTERPOSER",
+        include_str!("diagrams_pages/PKG_INTERPOSER.desc.txt"),
+    ),
+    (
+        "SUBSTRATE",
+        include_str!("diagrams_pages/PKG_SUBSTRATE.desc.txt"),
+    ),
+    (
+        "ASSEMBLY",
+        include_str!("diagrams_pages/PKG_ASSEMBLY.desc.txt"),
+    ),
     ("BOARD", include_str!("diagrams_pages/PKG_BOARD.desc.txt")),
     ("PAM4 DSP", include_str!("diagrams_pages/FIB_DSP.desc.txt")),
     ("LASER", include_str!("diagrams_pages/FIB_LASER.desc.txt")),
-    ("OPTICAL FIBER", include_str!("diagrams_pages/FIB_FIBER.desc.txt")),
+    (
+        "OPTICAL FIBER",
+        include_str!("diagrams_pages/FIB_FIBER.desc.txt"),
+    ),
     ("PHOTODIODE", include_str!("diagrams_pages/FIB_PD.desc.txt")),
-    ("TRANSCEIVER", include_str!("diagrams_pages/FIB_TRX.desc.txt")),
+    (
+        "TRANSCEIVER",
+        include_str!("diagrams_pages/FIB_TRX.desc.txt"),
+    ),
     ("CPO", include_str!("diagrams_pages/FIB_CPO.desc.txt")),
     ("GRID", include_str!("diagrams_pages/PWR_GRID.desc.txt")),
-    ("SUBSTATION", include_str!("diagrams_pages/PWR_SUB.desc.txt")),
-    ("SWITCHGEAR", include_str!("diagrams_pages/PWR_SWG.desc.txt")),
+    (
+        "SUBSTATION",
+        include_str!("diagrams_pages/PWR_SUB.desc.txt"),
+    ),
+    (
+        "SWITCHGEAR",
+        include_str!("diagrams_pages/PWR_SWG.desc.txt"),
+    ),
     ("UPS", include_str!("diagrams_pages/PWR_UPS.desc.txt")),
-    ("RACK POWER", include_str!("diagrams_pages/PWR_RACK.desc.txt")),
+    (
+        "RACK POWER",
+        include_str!("diagrams_pages/PWR_RACK.desc.txt"),
+    ),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.desc.txt")),
     // Chip tab
     (
@@ -195,15 +225,30 @@ pub const VISUALS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/MEM_HBM_STACK.txt"),
     ),
     // Packaging tab
-    ("LOGIC DIE", include_str!("diagrams_pages/PKG_LOGIC_DIE.txt")),
-    ("MICROBUMP", include_str!("diagrams_pages/PKG_MICROBUMP.txt")),
-    ("INTERPOSER", include_str!("diagrams_pages/PKG_INTERPOSER.txt")),
-    ("SUBSTRATE", include_str!("diagrams_pages/PKG_SUBSTRATE.txt")),
+    (
+        "LOGIC DIE",
+        include_str!("diagrams_pages/PKG_LOGIC_DIE.txt"),
+    ),
+    (
+        "MICROBUMP",
+        include_str!("diagrams_pages/PKG_MICROBUMP.txt"),
+    ),
+    (
+        "INTERPOSER",
+        include_str!("diagrams_pages/PKG_INTERPOSER.txt"),
+    ),
+    (
+        "SUBSTRATE",
+        include_str!("diagrams_pages/PKG_SUBSTRATE.txt"),
+    ),
     ("ASSEMBLY", include_str!("diagrams_pages/PKG_ASSEMBLY.txt")),
     ("BOARD", include_str!("diagrams_pages/PKG_BOARD.txt")),
     ("PAM4 DSP", include_str!("diagrams_pages/FIB_DSP.txt")),
     ("LASER", include_str!("diagrams_pages/FIB_LASER.txt")),
-    ("OPTICAL FIBER", include_str!("diagrams_pages/FIB_FIBER.txt")),
+    (
+        "OPTICAL FIBER",
+        include_str!("diagrams_pages/FIB_FIBER.txt"),
+    ),
     ("PHOTODIODE", include_str!("diagrams_pages/FIB_PD.txt")),
     ("TRANSCEIVER", include_str!("diagrams_pages/FIB_TRX.txt")),
     ("CPO", include_str!("diagrams_pages/FIB_CPO.txt")),
@@ -344,23 +389,65 @@ pub const DETAILS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/MEM_HBM_STACK.details.txt"),
     ),
     // Packaging tab
-    ("LOGIC DIE", include_str!("diagrams_pages/PKG_LOGIC_DIE.details.txt")),
-    ("MICROBUMP", include_str!("diagrams_pages/PKG_MICROBUMP.details.txt")),
-    ("INTERPOSER", include_str!("diagrams_pages/PKG_INTERPOSER.details.txt")),
-    ("SUBSTRATE", include_str!("diagrams_pages/PKG_SUBSTRATE.details.txt")),
-    ("ASSEMBLY", include_str!("diagrams_pages/PKG_ASSEMBLY.details.txt")),
-    ("BOARD", include_str!("diagrams_pages/PKG_BOARD.details.txt")),
-    ("PAM4 DSP", include_str!("diagrams_pages/FIB_DSP.details.txt")),
-    ("LASER", include_str!("diagrams_pages/FIB_LASER.details.txt")),
-    ("OPTICAL FIBER", include_str!("diagrams_pages/FIB_FIBER.details.txt")),
-    ("PHOTODIODE", include_str!("diagrams_pages/FIB_PD.details.txt")),
-    ("TRANSCEIVER", include_str!("diagrams_pages/FIB_TRX.details.txt")),
+    (
+        "LOGIC DIE",
+        include_str!("diagrams_pages/PKG_LOGIC_DIE.details.txt"),
+    ),
+    (
+        "MICROBUMP",
+        include_str!("diagrams_pages/PKG_MICROBUMP.details.txt"),
+    ),
+    (
+        "INTERPOSER",
+        include_str!("diagrams_pages/PKG_INTERPOSER.details.txt"),
+    ),
+    (
+        "SUBSTRATE",
+        include_str!("diagrams_pages/PKG_SUBSTRATE.details.txt"),
+    ),
+    (
+        "ASSEMBLY",
+        include_str!("diagrams_pages/PKG_ASSEMBLY.details.txt"),
+    ),
+    (
+        "BOARD",
+        include_str!("diagrams_pages/PKG_BOARD.details.txt"),
+    ),
+    (
+        "PAM4 DSP",
+        include_str!("diagrams_pages/FIB_DSP.details.txt"),
+    ),
+    (
+        "LASER",
+        include_str!("diagrams_pages/FIB_LASER.details.txt"),
+    ),
+    (
+        "OPTICAL FIBER",
+        include_str!("diagrams_pages/FIB_FIBER.details.txt"),
+    ),
+    (
+        "PHOTODIODE",
+        include_str!("diagrams_pages/FIB_PD.details.txt"),
+    ),
+    (
+        "TRANSCEIVER",
+        include_str!("diagrams_pages/FIB_TRX.details.txt"),
+    ),
     ("CPO", include_str!("diagrams_pages/FIB_CPO.details.txt")),
     ("GRID", include_str!("diagrams_pages/PWR_GRID.details.txt")),
-    ("SUBSTATION", include_str!("diagrams_pages/PWR_SUB.details.txt")),
-    ("SWITCHGEAR", include_str!("diagrams_pages/PWR_SWG.details.txt")),
+    (
+        "SUBSTATION",
+        include_str!("diagrams_pages/PWR_SUB.details.txt"),
+    ),
+    (
+        "SWITCHGEAR",
+        include_str!("diagrams_pages/PWR_SWG.details.txt"),
+    ),
     ("UPS", include_str!("diagrams_pages/PWR_UPS.details.txt")),
-    ("RACK POWER", include_str!("diagrams_pages/PWR_RACK.details.txt")),
+    (
+        "RACK POWER",
+        include_str!("diagrams_pages/PWR_RACK.details.txt"),
+    ),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.details.txt")),
     // Chip tab
     (

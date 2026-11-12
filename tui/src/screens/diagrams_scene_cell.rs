@@ -257,7 +257,11 @@ fn cell_anim(t: &Time) -> poly3d::CellAnim {
         sa_rgb: sa_rgb(t),
         read,
         restore,
-        leak: if t.beat == LEAK { envelope(t, 0.0, 1.0) } else { 0.0 },
+        leak: if t.beat == LEAK {
+            envelope(t, 0.0, 1.0)
+        } else {
+            0.0
+        },
         phase: t.ms as f64 / 2600.0,
     }
 }
@@ -768,7 +772,11 @@ mod tests {
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len() + 1, "one scene per section but the sources");
+        assert_eq!(
+            heads,
+            SECTIONS.len() + 1,
+            "one scene per section but the sources"
+        );
     }
 
     /// Each beat starts where the last ended, including the wrap back to the first.
@@ -789,7 +797,10 @@ mod tests {
                 assert!((p - q).abs() < 0.02, "beat {beat} {name}: {p} -> {q}");
             }
             for i in 0..3 {
-                assert!((x.sa_rgb[i] - y.sa_rgb[i]).abs() < 0.02, "beat {beat} sense amp colour");
+                assert!(
+                    (x.sa_rgb[i] - y.sa_rgb[i]).abs() < 0.02,
+                    "beat {beat} sense amp colour"
+                );
             }
         }
     }
@@ -811,9 +822,14 @@ mod tests {
                 for (k, local) in [0.25_f32, 0.6].into_iter().enumerate() {
                     let t = at(beat, local);
                     // the overview fills a whole popup, so check it at that size
-                    let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                    let (w, h) = if name == "overview" {
+                        (1900, 1000)
+                    } else {
+                        (960, 576)
+                    };
                     let img = p.pixels(&t, w, h).expect("pixel frame");
-                    img.save(dir.join(format!("{name}_{beat}_{k}.png"))).unwrap();
+                    img.save(dir.join(format!("{name}_{beat}_{k}.png")))
+                        .unwrap();
                 }
             }
         }

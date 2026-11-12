@@ -60,7 +60,12 @@ impl Session {
         let Ok(file) = File::open(&self.path) else {
             return;
         };
-        let (cwd, prompt) = parse_header(BufReader::new(file).lines().map_while(Result::ok).take(MAX_LINES));
+        let (cwd, prompt) = parse_header(
+            BufReader::new(file)
+                .lines()
+                .map_while(Result::ok)
+                .take(MAX_LINES),
+        );
         self.cwd = cwd;
         self.prompt = prompt;
     }
@@ -70,7 +75,8 @@ impl Session {
             return true;
         }
         self.parsed
-            && (self.cwd.to_lowercase().contains(q_lower) || self.prompt.to_lowercase().contains(q_lower))
+            && (self.cwd.to_lowercase().contains(q_lower)
+                || self.prompt.to_lowercase().contains(q_lower))
     }
 
     fn project_label(&self) -> String {
@@ -205,7 +211,9 @@ fn tmux_args(session: &Session) -> Vec<String> {
 
 fn tilde(path: &str) -> String {
     match std::env::var("HOME") {
-        Ok(home) if !home.is_empty() && path.starts_with(&home) => format!("~{}", &path[home.len()..]),
+        Ok(home) if !home.is_empty() && path.starts_with(&home) => {
+            format!("~{}", &path[home.len()..])
+        }
         _ => path.to_string(),
     }
 }
@@ -256,7 +264,10 @@ impl ClaudeHistory {
     }
 
     fn selected_session(&self) -> Option<usize> {
-        self.state.selected().and_then(|p| self.shown.get(p)).copied()
+        self.state
+            .selected()
+            .and_then(|p| self.shown.get(p))
+            .copied()
     }
 
     /// Recompute `shown`, keeping the cursor on the same session when it still matches.
@@ -278,7 +289,8 @@ impl ClaudeHistory {
             return;
         }
         let cur = self.state.selected().unwrap_or(0) as isize;
-        self.state.select(Some((cur + delta).clamp(0, n as isize - 1) as usize));
+        self.state
+            .select(Some((cur + delta).clamp(0, n as isize - 1) as usize));
     }
 
     fn jump(&mut self, pos: usize) {
@@ -301,11 +313,13 @@ impl ClaudeHistory {
             self.flash = Some("bad session id".into());
             return;
         }
-        self.flash = Some(match Command::new("tmux").args(tmux_args(session)).output() {
-            Ok(out) if out.status.success() => "resumed in a new tmux window".into(),
-            Ok(out) => format!("tmux: {}", String::from_utf8_lossy(&out.stderr).trim()),
-            Err(e) => format!("tmux: {e}"),
-        });
+        self.flash = Some(
+            match Command::new("tmux").args(tmux_args(session)).output() {
+                Ok(out) if out.status.success() => "resumed in a new tmux window".into(),
+                Ok(out) => format!("tmux: {}", String::from_utf8_lossy(&out.stderr).trim()),
+                Err(e) => format!("tmux: {e}"),
+            },
+        );
     }
 
     fn on_filter_key(&mut self, key: KeyEvent) -> Action {
@@ -325,7 +339,11 @@ impl ClaudeHistory {
                 self.query.clear();
                 self.refilter();
             }
-            KeyCode::Char(c) if !key.modifiers.intersects(KeyModifiers::CONTROL | KeyModifiers::ALT) => {
+            KeyCode::Char(c)
+                if !key
+                    .modifiers
+                    .intersects(KeyModifiers::CONTROL | KeyModifiers::ALT) =>
+            {
                 self.query.push(c);
                 self.refilter();
             }
@@ -338,7 +356,9 @@ impl ClaudeHistory {
 
     fn row(&self, s: &Session) -> Line<'static> {
         let t = self.theme;
-        let date = DateTime::<Local>::from(s.modified).format(DATE_FMT).to_string();
+        let date = DateTime::<Local>::from(s.modified)
+            .format(DATE_FMT)
+            .to_string();
         let prompt = if !s.parsed {
             "…".to_string()
         } else if s.prompt.is_empty() {
@@ -349,11 +369,16 @@ impl ClaudeHistory {
         let prompt_w = (self.width as usize).saturating_sub(date.len() + 2 + PROJECT_COL + 2);
         Line::from(vec![
             Span::styled(format!("{date}  "), t.dim()),
-            Span::styled(text::fit(&s.project_label(), PROJECT_COL, false), t.accent()),
-            Span::styled(format!("  {}", text::fit(&prompt, prompt_w, false)), t.base()),
+            Span::styled(
+                text::fit(&s.project_label(), PROJECT_COL, false),
+                t.accent(),
+            ),
+            Span::styled(
+                format!("  {}", text::fit(&prompt, prompt_w, false)),
+                t.base(),
+            ),
         ])
     }
-
 }
 
 impl Screen for ClaudeHistory {
@@ -373,10 +398,19 @@ impl Screen for ClaudeHistory {
         self.width = list_area.width;
 
         let total = self.sessions.len();
-        let mut head = vec![Span::styled("Claude history", t.accent().add_modifier(Modifier::BOLD))];
-        head.push(Span::styled(format!("  {} of {total}", self.shown.len()), t.dim()));
+        let mut head = vec![Span::styled(
+            "Claude history",
+            t.accent().add_modifier(Modifier::BOLD),
+        )];
+        head.push(Span::styled(
+            format!("  {} of {total}", self.shown.len()),
+            t.dim(),
+        ));
         if self.parsed < total {
-            head.push(Span::styled(format!("  reading {}/{total}", self.parsed), t.dim()));
+            head.push(Span::styled(
+                format!("  reading {}/{total}", self.parsed),
+                t.dim(),
+            ));
         }
         if !self.root_exists {
             head.push(Span::styled("  no ~/.claude/projects", t.dim()));
@@ -417,7 +451,11 @@ impl Screen for ClaudeHistory {
             (Some(f), _) => Span::styled(f.clone(), t.accent()),
             (None, Some(i)) => {
                 let s = &self.sessions[i];
-                let cwd = if s.cwd.is_empty() { s.project_dir.clone() } else { tilde(&s.cwd) };
+                let cwd = if s.cwd.is_empty() {
+                    s.project_dir.clone()
+                } else {
+                    tilde(&s.cwd)
+                };
                 Span::styled(cwd, t.dim())
             }
             (None, None) => Span::styled("", t.dim()),
@@ -554,7 +592,12 @@ mod tests {
         fs::write(proj.join("sub").join("nested.jsonl"), "").unwrap();
         fs::write(proj.join("notes.txt"), "").unwrap();
         let t0 = SystemTime::UNIX_EPOCH + std::time::Duration::from_secs(1_000);
-        fs::File::options().write(true).open(&old).unwrap().set_modified(t0).unwrap();
+        fs::File::options()
+            .write(true)
+            .open(&old)
+            .unwrap()
+            .set_modified(t0)
+            .unwrap();
         fs::File::options()
             .write(true)
             .open(&new)
@@ -605,7 +648,11 @@ mod tests {
 
     #[test]
     fn esc_q_quit_and_gg_jump() {
-        let mut s = screen(vec![sess("1", "/a", "x"), sess("2", "/b", "y"), sess("3", "/c", "z")]);
+        let mut s = screen(vec![
+            sess("1", "/a", "x"),
+            sess("2", "/b", "y"),
+            sess("3", "/c", "z"),
+        ]);
         assert_eq!(s.on_key(key(KeyCode::Char('G'))), Action::None);
         assert_eq!(s.selected_session(), Some(2));
         s.on_key(key(KeyCode::Char('g')));
@@ -619,7 +666,12 @@ mod tests {
         let s = sess("0123-abcd", "/code/finlarp", "x");
         assert_eq!(
             tmux_args(&s),
-            vec!["new-window", "-c", "/code/finlarp", "claude --resume 0123-abcd"]
+            vec![
+                "new-window",
+                "-c",
+                "/code/finlarp",
+                "claude --resume 0123-abcd"
+            ]
         );
         assert!(valid_session_id("0123-abcd"));
         assert!(!valid_session_id("a;rm -rf"));

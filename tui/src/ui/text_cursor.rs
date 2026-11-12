@@ -185,7 +185,14 @@ impl TextCursor {
         let mut left = n;
         let mut cand = row;
         while left > 0 {
-            let next = if down { r + 1 } else { match r.checked_sub(1) { Some(x) => x, None => break } };
+            let next = if down {
+                r + 1
+            } else {
+                match r.checked_sub(1) {
+                    Some(x) => x,
+                    None => break,
+                }
+            };
             if next >= self.rows.len() {
                 break;
             }
@@ -305,9 +312,15 @@ impl TextCursor {
         self.pos.col = self.first_nonblank(self.pos.row);
         self.want = self.pos.col;
         self.top = if self.center {
-            self.pos.row.saturating_sub(self.height / 2).min(self.max_top())
+            self.pos
+                .row
+                .saturating_sub(self.height / 2)
+                .min(self.max_top())
         } else {
-            self.pos.row.saturating_sub(self.scrolloff.min(self.height / 3)).min(self.max_top())
+            self.pos
+                .row
+                .saturating_sub(self.scrolloff.min(self.height / 3))
+                .min(self.max_top())
         };
     }
 
@@ -332,7 +345,11 @@ impl TextCursor {
     /// Keeps the cursor inside the window (with scrolloff).
     fn follow(&mut self) {
         if self.center {
-            self.top = self.pos.row.saturating_sub(self.height / 2).min(self.max_top());
+            self.top = self
+                .pos
+                .row
+                .saturating_sub(self.height / 2)
+                .min(self.max_top());
             return;
         }
         let off = self.off();
@@ -365,9 +382,15 @@ impl TextCursor {
     /// which counts as whitespace). None at the end.
     fn next(&self, p: Pos) -> Option<Pos> {
         if p.col + 1 < self.row_len(p.row) {
-            Some(Pos { row: p.row, col: p.col + 1 })
+            Some(Pos {
+                row: p.row,
+                col: p.col + 1,
+            })
         } else if p.row + 1 < self.rows.len() {
-            Some(Pos { row: p.row + 1, col: 0 })
+            Some(Pos {
+                row: p.row + 1,
+                col: 0,
+            })
         } else {
             None
         }
@@ -375,9 +398,15 @@ impl TextCursor {
 
     fn prev(&self, p: Pos) -> Option<Pos> {
         if p.col > 0 {
-            Some(Pos { row: p.row, col: p.col - 1 })
+            Some(Pos {
+                row: p.row,
+                col: p.col - 1,
+            })
         } else if p.row > 0 {
-            Some(Pos { row: p.row - 1, col: self.last_col(p.row - 1) })
+            Some(Pos {
+                row: p.row - 1,
+                col: self.last_col(p.row - 1),
+            })
         } else {
             None
         }
@@ -466,7 +495,9 @@ impl TextCursor {
     }
 
     fn blank(&self, row: usize) -> bool {
-        self.rows.get(row).is_none_or(|r| r.iter().all(|c| c.is_whitespace()))
+        self.rows
+            .get(row)
+            .is_none_or(|r| r.iter().all(|c| c.is_whitespace()))
     }
 
     /// `}`: next blank row after a non-blank run.
@@ -506,7 +537,10 @@ impl TextCursor {
         Some(match self.mode {
             Mode::VisualLine => (
                 Pos { row: a.row, col: 0 },
-                Pos { row: b.row, col: usize::MAX },
+                Pos {
+                    row: b.row,
+                    col: usize::MAX,
+                },
             ),
             _ => (a, b),
         })
@@ -519,7 +553,11 @@ impl TextCursor {
         for row in a.row..=b.row.min(self.rows.len().saturating_sub(1)) {
             let r = &self.rows[row];
             let from = if row == a.row { a.col.min(r.len()) } else { 0 };
-            let to = if row == b.row { b.col.saturating_add(1).min(r.len()) } else { r.len() };
+            let to = if row == b.row {
+                b.col.saturating_add(1).min(r.len())
+            } else {
+                r.len()
+            };
             let s: String = r[from..to.max(from)].iter().collect();
             lines.push(s.trim_end().to_string());
         }
@@ -540,7 +578,9 @@ impl TextCursor {
                 if skip_first && i == 0 {
                     l.clone()
                 } else {
-                    l.chars().skip(margin.min(l.chars().take_while(|c| *c == ' ').count())).collect()
+                    l.chars()
+                        .skip(margin.min(l.chars().take_while(|c| *c == ' ').count()))
+                        .collect()
                 }
             })
             .collect();
@@ -667,7 +707,10 @@ impl TextCursor {
                     }
                 }
                 self.anchor = Pos { row: a, col: 0 };
-                self.pos = Pos { row: b, col: self.last_col(b) };
+                self.pos = Pos {
+                    row: b,
+                    col: self.last_col(b),
+                };
                 self.mode = Mode::VisualLine;
             }
             _ => return,
@@ -696,7 +739,11 @@ impl TextCursor {
                     self.set_col(self.first_nonblank(self.pos.row));
                 }
                 ('z', KeyCode::Char('z')) => {
-                    self.top = self.pos.row.saturating_sub(self.height / 2).min(self.max_top());
+                    self.top = self
+                        .pos
+                        .row
+                        .saturating_sub(self.height / 2)
+                        .min(self.max_top());
                     return Outcome::Handled;
                 }
                 ('z', KeyCode::Char('t')) => {
@@ -704,7 +751,9 @@ impl TextCursor {
                     return Outcome::Handled;
                 }
                 ('z', KeyCode::Char('b')) => {
-                    self.top = (self.pos.row + 1).saturating_sub(self.height).min(self.max_top());
+                    self.top = (self.pos.row + 1)
+                        .saturating_sub(self.height)
+                        .min(self.max_top());
                     return Outcome::Handled;
                 }
                 ('g', KeyCode::Char('h')) => self.set_col(self.first_nonblank(self.pos.row)),
@@ -797,8 +846,12 @@ impl TextCursor {
                 return Outcome::Handled;
             }
             _ if ctrl => return Outcome::Unhandled,
-            KeyCode::Char('j') | KeyCode::Down => self.set_row(self.step_rows(self.pos.row, n, true)),
-            KeyCode::Char('k') | KeyCode::Up => self.set_row(self.step_rows(self.pos.row, n, false)),
+            KeyCode::Char('j') | KeyCode::Down => {
+                self.set_row(self.step_rows(self.pos.row, n, true))
+            }
+            KeyCode::Char('k') | KeyCode::Up => {
+                self.set_row(self.step_rows(self.pos.row, n, false))
+            }
             KeyCode::Char('h') | KeyCode::Left => self.set_col(self.pos.col.saturating_sub(n)),
             KeyCode::Char('l') | KeyCode::Right => self.set_col(self.pos.col + n),
             KeyCode::Char('0') | KeyCode::Home => self.set_col(0),
@@ -850,12 +903,20 @@ impl TextCursor {
                 self.set_col(0);
             }
             KeyCode::Char(c @ ('v' | 'V')) => {
-                let want = if c == 'v' { Mode::Visual } else { Mode::VisualLine };
+                let want = if c == 'v' {
+                    Mode::Visual
+                } else {
+                    Mode::VisualLine
+                };
                 if self.mode == Mode::Normal {
                     self.anchor = self.pos;
                 }
                 // same key leaves visual; the other key switches kind, keeping the selection
-                self.mode = if self.mode == want { Mode::Normal } else { want };
+                self.mode = if self.mode == want {
+                    Mode::Normal
+                } else {
+                    want
+                };
             }
             KeyCode::Char('o') if self.is_visual() => {
                 std::mem::swap(&mut self.anchor, &mut self.pos);
@@ -880,7 +941,8 @@ impl TextCursor {
     fn scroll_with_cursor(&mut self, delta: isize) {
         if self.center {
             // cursor moves by the delta and the view recentres on it
-            let row = (self.pos.row as isize + delta).clamp(0, self.rows.len() as isize - 1) as usize;
+            let row =
+                (self.pos.row as isize + delta).clamp(0, self.rows.len() as isize - 1) as usize;
             self.set_row(row);
             self.settle(delta > 0);
             self.follow();
@@ -891,7 +953,8 @@ impl TextCursor {
         let moved = self.top as isize - before as isize;
         // Move the cursor by the same amount; at the ends, by the full delta.
         let step = if moved == 0 { delta } else { moved };
-        let mut row = (self.pos.row as isize + step).clamp(0, self.rows.len() as isize - 1) as usize;
+        let mut row =
+            (self.pos.row as isize + step).clamp(0, self.rows.len() as isize - 1) as usize;
         // Keep scrolloff by nudging the cursor, not the view (the view moved
         // exactly one half page, as in vim).
         let off = self.off();
@@ -1050,7 +1113,15 @@ mod tests {
     #[test]
     fn skip_blank_never_rests_on_empty_rows() {
         let mut t = TextCursor::skipping_blanks();
-        t.set_rows(&["  intro line", "", "  • first bullet", "    wraps here", "", "", "  • second"]);
+        t.set_rows(&[
+            "  intro line",
+            "",
+            "  • first bullet",
+            "    wraps here",
+            "",
+            "",
+            "  • second",
+        ]);
         t.set_height(20);
         keys(&mut t, "^");
         keys(&mut t, "j");
@@ -1102,21 +1173,42 @@ mod tests {
 
     #[test]
     fn text_objects_select_words_and_paragraphs() {
-        let mut t = cur(&["  intro text here", "", "  Revenue  $1,200", "  Cost       (300)", "", "  after"], 20);
+        let mut t = cur(
+            &[
+                "  intro text here",
+                "",
+                "  Revenue  $1,200",
+                "  Cost       (300)",
+                "",
+                "  after",
+            ],
+            20,
+        );
         keys(&mut t, "^wviw");
         assert_eq!(t.selected_text().as_deref(), Some("text"));
         t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
         keys(&mut t, "vaw");
-        assert_eq!(t.selection().map(|(a, b)| (a.col, b.col)), Some((8, 12)), "aw takes the trailing space");
+        assert_eq!(
+            t.selection().map(|(a, b)| (a.col, b.col)),
+            Some((8, 12)),
+            "aw takes the trailing space"
+        );
         t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
         keys(&mut t, "jjviW");
         t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
         keys(&mut t, "vip");
         assert_eq!(t.mode, Mode::VisualLine);
-        assert_eq!(t.selected_text().as_deref(), Some("Revenue  $1,200\nCost       (300)"));
+        assert_eq!(
+            t.selected_text().as_deref(),
+            Some("Revenue  $1,200\nCost       (300)")
+        );
         t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
         keys(&mut t, "vap");
-        assert_eq!(t.selection().map(|(a, b)| (a.row, b.row)), Some((2, 4)), "ap takes the blank after");
+        assert_eq!(
+            t.selection().map(|(a, b)| (a.row, b.row)),
+            Some((2, 4)),
+            "ap takes the blank after"
+        );
         // i / a outside visual mode are the owner's keys
         t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
         assert_eq!(t.on_key(k('i')), Outcome::Unhandled);
@@ -1175,20 +1267,37 @@ mod tests {
 
     #[test]
     fn visual_yank_dedents_the_reading_margin() {
-        let mut t = cur(&["    Revenue grew 85%.", "    Margins held.", "", "    Next."], 10);
+        let mut t = cur(
+            &[
+                "    Revenue grew 85%.",
+                "    Margins held.",
+                "",
+                "    Next.",
+            ],
+            10,
+        );
         keys(&mut t, "^V");
         assert_eq!(t.status().as_deref(), Some("-- VISUAL LINE --"));
         keys(&mut t, "j");
-        assert_eq!(keys(&mut t, "y"), Outcome::Yank("Revenue grew 85%.\nMargins held.".into()));
+        assert_eq!(
+            keys(&mut t, "y"),
+            Outcome::Yank("Revenue grew 85%.\nMargins held.".into())
+        );
         assert_eq!(t.mode, Mode::Normal);
 
         // charwise, mid-row start, across rows
         keys(&mut t, "gg^w");
         keys(&mut t, "vje");
-        assert_eq!(t.selected_text().as_deref(), Some("grew 85%.\nMargins held"));
+        assert_eq!(
+            t.selected_text().as_deref(),
+            Some("grew 85%.\nMargins held")
+        );
         keys(&mut t, "o");
         assert_eq!(t.pos, Pos { row: 0, col: 12 }, "o swaps ends");
-        assert_eq!(t.take_selection().as_deref(), Some("grew 85%.\nMargins held"));
+        assert_eq!(
+            t.take_selection().as_deref(),
+            Some("grew 85%.\nMargins held")
+        );
         assert!(!t.is_visual());
         assert_eq!(t.take_selection(), None, "nothing selected in normal mode");
     }
@@ -1205,8 +1314,15 @@ mod tests {
         assert_eq!(t.pos.row, 12);
         assert_eq!(t.on_key(k('q')), Outcome::Unhandled);
         assert_eq!(t.on_key(k('n')), Outcome::Unhandled);
-        assert_eq!(t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)), Outcome::Unhandled);
-        assert_eq!(t.on_key(k('y')), Outcome::Unhandled, "y outside visual is the owner's");
+        assert_eq!(
+            t.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
+            Outcome::Unhandled
+        );
+        assert_eq!(
+            t.on_key(k('y')),
+            Outcome::Unhandled,
+            "y outside visual is the owner's"
+        );
     }
 
     #[test]
@@ -1217,7 +1333,11 @@ mod tests {
         let line = t.decorate(0, Line::from("abcdef"), &th);
         let text: String = line.spans.iter().map(|s| s.content.as_ref()).collect();
         assert_eq!(text, "abcdef", "decoration never changes the text");
-        let cursor_span = line.spans.iter().find(|s| s.style.add_modifier.contains(Modifier::REVERSED)).expect("cursor");
+        let cursor_span = line
+            .spans
+            .iter()
+            .find(|s| s.style.add_modifier.contains(Modifier::REVERSED))
+            .expect("cursor");
         assert_eq!(cursor_span.content, "d");
         // a blank row still shows the cursor cell
         let mut t = cur(&[""], 5);

@@ -47,6 +47,11 @@ pub enum Route {
     /// `<space>ac` / `<space>as`: show the Claude popup, or with `text`
     /// type it into Claude's prompt first.
     Claude { text: Option<String> },
+    /// `<space>wq`: rebuild fl from the checkout (screens::rebuild).
+    Rebuild,
+    /// The rebuild finished: main execs the new binary into the screen
+    /// beneath the rebuild screen.
+    Restart,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -59,7 +64,10 @@ pub enum Action {
     Copy(String),
     /// Run `cmd` in a new tmux window named `name`, in fl's working
     /// directory (`<space>to` opens lazygit, like the nvim mapping).
-    TmuxWindow { name: String, cmd: String },
+    TmuxWindow {
+        name: String,
+        cmd: String,
+    },
     /// Screen, picker, or Claude request; see `Route`.
     Route(Route),
 }
@@ -114,15 +122,32 @@ pub trait Screen {
     fn take_claude_selection(&mut self) -> Option<String> {
         self.take_selection()
     }
+    /// `<space>aw` on a screen that asks Claude in place (the diagrams' ask box):
+    /// true if the screen took it. Elsewhere `<space>aw` does nothing.
+    fn ask_claude(&mut self) -> bool {
+        false
+    }
 }
 
-/// Progress through the `<space>a{c,s}` / `<space>y` / `<space>to` leader chords.
+/// Every leader chord as (keys after space, what it does), in the order
+/// the home screen's space bar lists them. Keep in step with `route_key`.
+pub const LEADER_CHORDS: &[(&str, &str)] = &[
+    ("ac", "chat"),
+    ("aw", "ask here, in a diagram"),
+    ("as", "add context"),
+    ("y", "copy"),
+    ("to", "lazygit"),
+    ("wq", "rebuild"),
+];
+
+/// Progress through the `<space>a{c,s,w}` / `<space>y` / `<space>to` / `<space>wq` leader chords.
 #[derive(Clone, Copy, PartialEq)]
 enum Chord {
     Idle,
     Space,
     SpaceA,
     SpaceT,
+    SpaceW,
 }
 
 fn is_plain(key: &KeyEvent, c: char) -> bool {
@@ -133,10 +158,11 @@ fn is_plain(key: &KeyEvent, c: char) -> bool {
 }
 
 /// Feeds one key through the leader chord, then to the screen. `<space>ac`
-/// opens Claude (with the visual selection, if any, in the prompt),
+/// opens Claude (with the visual selection, if any, in the prompt) the same
+/// way on every screen, `<space>aw` asks about the open diagram in place,
 /// `<space>as` adds the selected context to it, `<space>y`
 /// copies the screen's visual selection to the clipboard, `<space>to` opens
-/// lazygit in a new tmux window. A
+/// lazygit in a new tmux window, `<space>wq` rebuilds fl and restarts it. A
 /// space not followed by `a` is replayed to the screen, so it still works
 /// (one key late).
 fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Action {
@@ -157,6 +183,10 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
             }
             if is_plain(&key, 't') {
                 *chord = Chord::SpaceT;
+                return Action::None;
+            }
+            if is_plain(&key, 'w') {
+                *chord = Chord::SpaceW;
                 return Action::None;
             }
             if is_plain(&key, 'y') {
@@ -185,12 +215,25 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
                 Action::None
             }
         }
+        Chord::SpaceW => {
+            *chord = Chord::Idle;
+            if is_plain(&key, 'q') {
+                Action::Route(Route::Rebuild)
+            } else {
+                Action::None
+            }
+        }
         Chord::SpaceA => {
             *chord = Chord::Idle;
             if is_plain(&key, 'c') {
                 Action::Route(Route::Claude {
                     text: screen.take_claude_selection(),
                 })
+            } else if is_plain(&key, 'w') {
+                if !screen.ask_claude() {
+                    screen.set_flash("nothing to ask here (space aw works inside a diagram)".into());
+                }
+                Action::None
             } else if is_plain(&key, 's') {
                 match screen.claude_context() {
                     Some(text) => Action::Route(Route::Claude { text: Some(text) }),
@@ -279,7 +322,15 @@ fn draw_with_tape(
         let p = body.backend().cursor_position();
         frame.set_cursor_position((area.x + p.x, area.y + p.y));
     }
-    tape.draw(frame, Rect { y: area.y + rows, height: 1, ..area }, theme);
+    tape.draw(
+        frame,
+        Rect {
+            y: area.y + rows,
+            height: 1,
+            ..area
+        },
+        theme,
+    );
 }
 
 pub(crate) fn event_loop<B: Backend>(
@@ -364,7 +415,9 @@ pub(crate) fn event_loop<B: Backend>(
                     .status();
                 match res {
                     Ok(s) if s.success() => {}
-                    Ok(_) => screen.set_flash(format!("{name}: tmux new-window failed (inside tmux?)")),
+                    Ok(_) => {
+                        screen.set_flash(format!("{name}: tmux new-window failed (inside tmux?)"))
+                    }
                     Err(e) => screen.set_flash(format!("{name}: {e}")),
                 }
             }
@@ -377,7 +430,9 @@ pub(crate) fn event_loop<B: Backend>(
             }
             // Screen/picker requests always go to main's session stack, so q/esc
             // in the child returns here.
-            Action::Route(r @ (Route::Screen { .. } | Route::Picker { .. })) => {
+            Action::Route(
+                r @ (Route::Screen { .. } | Route::Picker { .. } | Route::Rebuild | Route::Restart),
+            ) => {
                 return Ok(Exit {
                     code: 0,
                     handoff: Some(r),
@@ -455,6 +510,61 @@ mod tests {
     }
 
     #[test]
+    fn leader_ac_is_the_same_everywhere_and_aw_asks_in_place() {
+        // a screen that asks in place: ac still opens Claude, aw asks and takes the key
+        struct Asks {
+            asked: bool,
+        }
+        impl Screen for Asks {
+            fn draw(&mut self, _: &mut Frame) {}
+            fn on_key(&mut self, _: KeyEvent) -> Action {
+                Action::Quit
+            }
+            fn ask_claude(&mut self) -> bool {
+                self.asked = true;
+                true
+            }
+        }
+        let k = |ch| KeyEvent::new(KeyCode::Char(ch), KeyModifiers::NONE);
+        let mut s = Asks { asked: false };
+        let mut c = Chord::Idle;
+        for ch in [' ', 'a'] {
+            route_key(&mut s, &mut c, k(ch));
+        }
+        assert_eq!(
+            route_key(&mut s, &mut c, k('c')),
+            Action::Route(Route::Claude { text: None })
+        );
+        assert!(!s.asked, "ac never asks in place");
+        for ch in [' ', 'a'] {
+            route_key(&mut s, &mut c, k(ch));
+        }
+        assert_eq!(route_key(&mut s, &mut c, k('w')), Action::None);
+        assert!(s.asked, "aw asks in place");
+        // a screen that does not ask: aw does nothing and ac still opens Claude
+        struct Plain;
+        impl Screen for Plain {
+            fn draw(&mut self, _: &mut Frame) {}
+            fn on_key(&mut self, _: KeyEvent) -> Action {
+                Action::Quit
+            }
+        }
+        let mut p = Plain;
+        let mut c = Chord::Idle;
+        for ch in [' ', 'a'] {
+            route_key(&mut p, &mut c, k(ch));
+        }
+        assert_eq!(route_key(&mut p, &mut c, k('w')), Action::None);
+        for ch in [' ', 'a'] {
+            route_key(&mut p, &mut c, k(ch));
+        }
+        assert_eq!(
+            route_key(&mut p, &mut c, k('c')),
+            Action::Route(Route::Claude { text: None })
+        );
+    }
+
+    #[test]
     fn leader_chord_toggles_and_adds_context() {
         struct Ctx1;
         impl Screen for Ctx1 {
@@ -497,7 +607,10 @@ mod tests {
         }
         let mut sel = Sel(Some("picked".into()));
         route_key(&mut sel, &mut c, k(' '));
-        assert_eq!(route_key(&mut sel, &mut c, k('y')), Action::Copy("picked".into()));
+        assert_eq!(
+            route_key(&mut sel, &mut c, k('y')),
+            Action::Copy("picked".into())
+        );
         route_key(&mut sel, &mut c, k(' '));
         assert_eq!(route_key(&mut sel, &mut c, k('y')), Action::None);
         // <space>ac takes the selection into the prompt; without one, plain Claude
@@ -507,18 +620,26 @@ mod tests {
         }
         assert_eq!(
             route_key(&mut sel, &mut c, k('c')),
-            Action::Route(Route::Claude { text: Some("excerpt".into()) })
+            Action::Route(Route::Claude {
+                text: Some("excerpt".into())
+            })
         );
         for ch in [' ', 'a'] {
             route_key(&mut sel, &mut c, k(ch));
         }
-        assert_eq!(route_key(&mut sel, &mut c, k('c')), Action::Route(Route::Claude { text: None }));
+        assert_eq!(
+            route_key(&mut sel, &mut c, k('c')),
+            Action::Route(Route::Claude { text: None })
+        );
         // <space>to opens lazygit in a tmux window; <space>t + other is a no-op
         route_key(&mut s, &mut c, k(' '));
         route_key(&mut s, &mut c, k('t'));
         assert_eq!(
             route_key(&mut s, &mut c, k('o')),
-            Action::TmuxWindow { name: "lazygit".into(), cmd: "lazygit".into() }
+            Action::TmuxWindow {
+                name: "lazygit".into(),
+                cmd: "lazygit".into()
+            }
         );
         route_key(&mut s, &mut c, k(' '));
         route_key(&mut s, &mut c, k('t'));

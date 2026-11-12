@@ -68,7 +68,9 @@ fn jk_bindings() -> String {
             "bind-key -T fl-jk {key} send-keys -l j \\; send-keys -l {arg} \\; set -g @fl_jk 0 \\; switch-client -T root\n"
         ));
     }
-    for key in ["Enter", "Tab", "BSpace", "Escape", "Up", "Down", "Left", "Right"] {
+    for key in [
+        "Enter", "Tab", "BSpace", "Escape", "Up", "Down", "Left", "Right",
+    ] {
         out.push_str(&format!(
             "bind-key -T fl-jk {key} send-keys -l j \\; send-keys {key} \\; set -g @fl_jk 0 \\; switch-client -T root\n"
         ));
@@ -95,7 +97,16 @@ pub fn open(text: Option<&str>) -> io::Result<()> {
         None => {}
     }
     // Popup targets the pane fl runs in, so it lands on the right client.
-    let mut args = vec!["display-popup", "-E", "-w", "90%", "-h", "90%", "-b", "rounded"];
+    let mut args = vec![
+        "display-popup",
+        "-E",
+        "-w",
+        "90%",
+        "-h",
+        "90%",
+        "-b",
+        "rounded",
+    ];
     let pane = env::var("TMUX_PANE").ok();
     if let Some(p) = pane.as_deref() {
         args.extend(["-t", p]);
@@ -142,7 +153,9 @@ fn ensure_session() -> io::Result<()> {
 /// copied to the `fl-g`, `fl-sp` and `fl-spa` tables first, so an unbound key
 /// after `g` or `space` still acts as normal; then KEYS and the `fl-jk` table.
 fn source_keys() -> io::Result<()> {
-    let list = server().args(["list-keys", "-T", "copy-mode-vi"]).output()?;
+    let list = server()
+        .args(["list-keys", "-T", "copy-mode-vi"])
+        .output()?;
     let script = keys_script(&String::from_utf8_lossy(&list.stdout));
     let mut child = server()
         .args(["source-file", "-"])

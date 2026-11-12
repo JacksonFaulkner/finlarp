@@ -64,7 +64,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<ClaudeLog> {
 }
 
 fn home() -> PathBuf {
-    std::env::var_os("HOME").map(PathBuf::from).unwrap_or_default()
+    std::env::var_os("HOME")
+        .map(PathBuf::from)
+        .unwrap_or_default()
 }
 
 /// Directory of the Claude background logs, keyed by the current project name.
@@ -277,7 +279,11 @@ impl Screen for ClaudeLog {
             Some(p) => tilde(p),
             None => "no log".to_string(),
         };
-        let mode = if self.follow { "following" } else { "paused · G to follow" };
+        let mode = if self.follow {
+            "following"
+        } else {
+            "paused · G to follow"
+        };
         let head_line = Line::from(vec![
             Span::styled("Claude log", t.accent()),
             Span::styled(format!("  {location}  ·  {mode}"), t.dim()),
@@ -285,7 +291,8 @@ impl Screen for ClaudeLog {
         frame.render_widget(Paragraph::new(head_line), head);
 
         if self.path.is_none() {
-            let msg = Paragraph::new(Span::styled(self.missing_message(), t.dim())).wrap(Wrap { trim: false });
+            let msg = Paragraph::new(Span::styled(self.missing_message(), t.dim()))
+                .wrap(Wrap { trim: false });
             frame.render_widget(msg, body);
         } else if self.total() == 0 {
             frame.render_widget(Paragraph::new(Span::styled("(empty log)", t.dim())), body);
@@ -306,7 +313,10 @@ impl Screen for ClaudeLog {
         }
 
         let mut foot_spans = vec![Span::styled(
-            format!("{} lines  ·  j/k scroll · ^d/^u page · g top · G follow · esc back", self.total()),
+            format!(
+                "{} lines  ·  j/k scroll · ^d/^u page · g top · G follow · esc back",
+                self.total()
+            ),
             t.dim(),
         )];
         if let Some(e) = &self.error {
@@ -378,7 +388,8 @@ mod tests {
     }
 
     fn temp_file(name: &str, contents: &[u8]) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("claude_log_test_{}_{name}", std::process::id()));
+        let dir =
+            std::env::temp_dir().join(format!("claude_log_test_{}_{name}", std::process::id()));
         let _ = fs::create_dir_all(&dir);
         let path = dir.join("bg.log");
         fs::write(&path, contents).unwrap();
@@ -386,7 +397,11 @@ mod tests {
     }
 
     fn screen_for(path: &Path) -> ClaudeLog {
-        let mut s = ClaudeLog::new(Some(path.to_path_buf()), PathBuf::new(), Theme::from_args(None, None, None));
+        let mut s = ClaudeLog::new(
+            Some(path.to_path_buf()),
+            PathBuf::new(),
+            Theme::from_args(None, None, None),
+        );
         s.set_path(s.resolve());
         s.refresh();
         s.page = 3;
@@ -447,13 +462,21 @@ mod tests {
         let lines = all(&s);
         assert!(lines.len() < body.lines().count());
         assert_eq!(lines.last().map(String::as_str), body.lines().last());
-        assert!(lines[0].len() == 7, "partial first line must be dropped: {:?}", lines[0]);
+        assert!(
+            lines[0].len() == 7,
+            "partial first line must be dropped: {:?}",
+            lines[0]
+        );
     }
 
     #[test]
     fn missing_file_gives_message_and_no_path() {
         let missing = std::env::temp_dir().join("claude_log_definitely_missing.log");
-        let s = ClaudeLog::new(Some(missing.clone()), PathBuf::new(), Theme::from_args(None, None, None));
+        let s = ClaudeLog::new(
+            Some(missing.clone()),
+            PathBuf::new(),
+            Theme::from_args(None, None, None),
+        );
         assert!(s.resolve().is_none());
         assert!(s.missing_message().starts_with("no log at "));
     }

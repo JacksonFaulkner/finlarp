@@ -73,18 +73,50 @@ const BEATS: &[Beat] = &[
 ];
 
 const ZOOMS: &[Zoom] = &[
-    Zoom { key: 'a', label: "one pin: transfers per clock, then PAM4", build: || -> Box<dyn Scene> { Box::new(PinZ) } },
-    Zoom { key: 'b', label: "DDR5: two subchannels per DIMM", build: || -> Box<dyn Scene> { Box::new(SubchZ) } },
-    Zoom { key: 'c', label: "GDDR next to HBM", build: || -> Box<dyn Scene> { Box::new(HbmZ) } },
-    Zoom { key: 'd', label: "where peak goes: turnarounds and refresh", build: || -> Box<dyn Scene> { Box::new(GapsZ) } },
-    Zoom { key: 'e', label: "the memory wall", build: || -> Box<dyn Scene> { Box::new(WallZ) } },
+    Zoom {
+        key: 'a',
+        label: "one pin: transfers per clock, then PAM4",
+        build: || -> Box<dyn Scene> { Box::new(PinZ) },
+    },
+    Zoom {
+        key: 'b',
+        label: "DDR5: two subchannels per DIMM",
+        build: || -> Box<dyn Scene> { Box::new(SubchZ) },
+    },
+    Zoom {
+        key: 'c',
+        label: "GDDR next to HBM",
+        build: || -> Box<dyn Scene> { Box::new(HbmZ) },
+    },
+    Zoom {
+        key: 'd',
+        label: "where peak goes: turnarounds and refresh",
+        build: || -> Box<dyn Scene> { Box::new(GapsZ) },
+    },
+    Zoom {
+        key: 'e',
+        label: "the memory wall",
+        build: || -> Box<dyn Scene> { Box::new(WallZ) },
+    },
 ];
 
 /// The overview at `t`, turned by the user's `view`, with the beat's notes on it.
 pub fn overview_frame(t: &Time, view: &poly3d::View, w: u32, h: u32) -> RgbaImage {
     let b = &BEATS[t.beat.min(BEATS.len() - 1)];
-    let notes = poly3d::Notes { what: b.what, why: b.why, facts: b.facts };
-    poly3d::render_bw_overview(t.beat, t.local as f64, view, Some(&notes), w as usize, h as usize, px::BG)
+    let notes = poly3d::Notes {
+        what: b.what,
+        why: b.why,
+        facts: b.facts,
+    };
+    poly3d::render_bw_overview(
+        t.beat,
+        t.local as f64,
+        view,
+        Some(&notes),
+        w as usize,
+        h as usize,
+        px::BG,
+    )
 }
 
 /// The BANDWIDTH overview: how a peak bandwidth is built.
@@ -163,14 +195,32 @@ macro_rules! zoom_scene_impl {
 
 const PIN_BEATS: &[Beat] = &[
     Beat::new("one transfer per clock", BEAT_MS)
-        .note("A clock runs above the pin. Sending one bit per cycle gives one transfer per clock.", "A square wave moves above the wire; one block per cycle rides along.")
-        .detail("This is how the oldest memory worked.", &["1 transfer per clock"]),
+        .note(
+            "A clock runs above the pin. Sending one bit per cycle gives one transfer per clock.",
+            "A square wave moves above the wire; one block per cycle rides along.",
+        )
+        .detail(
+            "This is how the oldest memory worked.",
+            &["1 transfer per clock"],
+        ),
     Beat::new("DDR: a transfer on each edge", BEAT_MS)
-        .note("Double data rate sends a bit on the rising and the falling edge, two per cycle.", "Extra blocks grow in between, one per falling edge.")
-        .detail("DDR4-3200: 3200 MT/s from a 1600 MHz clock.", &["2 transfers per clock"]),
+        .note(
+            "Double data rate sends a bit on the rising and the falling edge, two per cycle.",
+            "Extra blocks grow in between, one per falling edge.",
+        )
+        .detail(
+            "DDR4-3200: 3200 MT/s from a 1600 MHz clock.",
+            &["2 transfers per clock"],
+        ),
     Beat::new("PAM4: four levels, two bits per symbol", BEAT_MS)
-        .note("Instead of two voltage levels, PAM4 uses four, so each symbol carries two bits.", "The blocks take four different heights.")
-        .detail("GDDR6X uses PAM4 to double the bits per symbol.", &["PAM4: 2 bits per symbol (Micron GDDR6X brief)"]),
+        .note(
+            "Instead of two voltage levels, PAM4 uses four, so each symbol carries two bits.",
+            "The blocks take four different heights.",
+        )
+        .detail(
+            "GDDR6X uses PAM4 to double the bits per symbol.",
+            &["PAM4: 2 bits per symbol (Micron GDDR6X brief)"],
+        ),
 ];
 
 const SUBCH_BEATS: &[Beat] = &[
@@ -223,88 +273,178 @@ const WALL_BEATS: &[Beat] = &[
 
 const PEAK_BEATS: &[Beat] = &[
     Beat::new("one pin", BEAT_MS)
-        .note("Start with one data pin at 3200 million transfers a second.", "One wire carries dots; the gauge reads 0.4 GB/s.")
+        .note(
+            "Start with one data pin at 3200 million transfers a second.",
+            "One wire carries dots; the gauge reads 0.4 GB/s.",
+        )
         .detail("Rate per pin is the first factor.", &["0.4 GB/s"]),
     Beat::new("x 64 pins: one channel", BEAT_MS)
-        .note("A channel puts 64 pins side by side.", "The channel fills; the gauge reads 25.6 GB/s.")
+        .note(
+            "A channel puts 64 pins side by side.",
+            "The channel fills; the gauge reads 25.6 GB/s.",
+        )
         .detail("Width is the second factor.", &["25.6 GB/s"]),
     Beat::new("x channels", BEAT_MS)
-        .note("Several channels run in parallel.", "Four channels; the gauge reads 102.4 GB/s.")
+        .note(
+            "Several channels run in parallel.",
+            "Four channels; the gauge reads 102.4 GB/s.",
+        )
         .detail("Channel count is the third.", &["102.4 GB/s"]),
 ];
 
 const PARTS_BEATS: &[Beat] = &[
     Beat::new("pin: the data rate", BEAT_MS)
-        .note("One wire, so many transfers per second.", "One wire lights; the rest go grey.")
-        .detail("DDR4-3200: 3200 MT/s.", &["MT/s = million transfers per second"]),
+        .note(
+            "One wire, so many transfers per second.",
+            "One wire lights; the rest go grey.",
+        )
+        .detail(
+            "DDR4-3200: 3200 MT/s.",
+            &["MT/s = million transfers per second"],
+        ),
     Beat::new("channel: the width", BEAT_MS)
-        .note("64 data pins side by side make one channel.", "The whole ribbon lights.")
+        .note(
+            "64 data pins side by side make one channel.",
+            "The whole ribbon lights.",
+        )
         .detail("DDR5 splits it into two 32-bit halves.", &["64 data pins"]),
     Beat::new("DIMM: the chips behind it", BEAT_MS)
-        .note("A DIMM's chips together fill the channel's width.", "The DIMM at the end lights.")
+        .note(
+            "A DIMM's chips together fill the channel's width.",
+            "The DIMM at the end lights.",
+        )
         .detail("Eight x8 chips make 64 bits.", &["8 chips x 8 pins = 64"]),
     Beat::new("controller: drives the channels", BEAT_MS)
-        .note("The memory controller in the processor runs every channel.", "The processor block lights.")
-        .detail("Its channel count caps the system's bandwidth.", &["One controller, many channels"]),
+        .note(
+            "The memory controller in the processor runs every channel.",
+            "The processor block lights.",
+        )
+        .detail(
+            "Its channel count caps the system's bandwidth.",
+            &["One controller, many channels"],
+        ),
     Beat::new("channels: more in parallel", BEAT_MS)
-        .note("Each extra channel adds its own bandwidth.", "Three more channels appear.")
+        .note(
+            "Each extra channel adds its own bandwidth.",
+            "Three more channels appear.",
+        )
         .detail("Servers have many channels.", &["4 x 25.6 = 102.4 GB/s"]),
     Beat::new("HBM: width at short range", BEAT_MS)
-        .note("An HBM stack beside the processor gives 1024 pins.", "The stack and its dense ribbon appear.")
+        .note(
+            "An HBM stack beside the processor gives 1024 pins.",
+            "The stack and its dense ribbon appear.",
+        )
         .detail("819 GB/s per HBM3 stack.", &["JEDEC JESD238"]),
 ];
 
 const ORDER_BEATS: &[Beat] = &[
     Beat::new("1. 3200 MT/s on one pin", BEAT_MS)
-        .note("DDR4-3200 moves 3200 million transfers a second per pin.", "One wire carries dots; line 1 appears.")
+        .note(
+            "DDR4-3200 moves 3200 million transfers a second per pin.",
+            "One wire carries dots; line 1 appears.",
+        )
         .detail("One bit per transfer.", &["3200 MT/s"]),
     Beat::new("2. x 64 pins", BEAT_MS)
-        .note("A channel is 64 pins wide: 204,800 million bits a second.", "The channel fills; line 2 appears.")
-        .detail("Every pin switches together.", &["3200 x 64 = 204,800 Mb/s"]),
+        .note(
+            "A channel is 64 pins wide: 204,800 million bits a second.",
+            "The channel fills; line 2 appears.",
+        )
+        .detail(
+            "Every pin switches together.",
+            &["3200 x 64 = 204,800 Mb/s"],
+        ),
     Beat::new("3. / 8 bits per byte", BEAT_MS)
-        .note("Divide by 8 to turn bits into bytes.", "Line 3 appears beside the gauge.")
+        .note(
+            "Divide by 8 to turn bits into bytes.",
+            "Line 3 appears beside the gauge.",
+        )
         .detail("GB/s, not Gb/s.", &["8 bits = 1 byte"]),
     Beat::new("4. = 25.6 GB/s per channel", BEAT_MS)
-        .note("One DDR4-3200 channel peaks at 25.6 GB/s.", "The gauge climbs to 25.6.")
+        .note(
+            "One DDR4-3200 channel peaks at 25.6 GB/s.",
+            "The gauge climbs to 25.6.",
+        )
         .detail("Per channel, not per chip.", &["25.6 GB/s"]),
     Beat::new("5. x 4 channels = 102.4 GB/s", BEAT_MS)
-        .note("Four channels make 102.4 GB/s peak.", "Three more channels appear; the gauge climbs.")
+        .note(
+            "Four channels make 102.4 GB/s peak.",
+            "Three more channels appear; the gauge climbs.",
+        )
         .detail("Then the sum clears for the next pass.", &["102.4 GB/s"]),
 ];
 
 const KINDS_BEATS: &[Beat] = &[
     Beat::new("DDR5-4800 DIMM: 38.4 GB/s", BEAT_MS)
-        .note("Two 32-bit subchannels at 4.8 Gb/s per pin.", "The green bar is in the spotlight.")
-        .detail("Main memory in PCs and servers.", &["2 x 32 x 4.8 / 8 = 38.4 GB/s"]),
+        .note(
+            "Two 32-bit subchannels at 4.8 Gb/s per pin.",
+            "The green bar is in the spotlight.",
+        )
+        .detail(
+            "Main memory in PCs and servers.",
+            &["2 x 32 x 4.8 / 8 = 38.4 GB/s"],
+        ),
     Beat::new("GDDR6 chip: 64 GB/s", BEAT_MS)
-        .note("32 pins at 16 Gb/s each.", "The cyan bar is in the spotlight.")
-        .detail("Graphics boards use many chips.", &["GDDR6: 32 DQ, 16 Gb/s (Micron)"]),
+        .note(
+            "32 pins at 16 Gb/s each.",
+            "The cyan bar is in the spotlight.",
+        )
+        .detail(
+            "Graphics boards use many chips.",
+            &["GDDR6: 32 DQ, 16 Gb/s (Micron)"],
+        ),
     Beat::new("HBM3 stack: 819 GB/s", BEAT_MS)
-        .note("1024 pins at 6.4 Gb/s each.", "The orange bar towers over the rest.")
-        .detail("AI accelerators use several stacks.", &["HBM3: 819 GB/s per device (JEDEC)"]),
+        .note(
+            "1024 pins at 6.4 Gb/s each.",
+            "The orange bar towers over the rest.",
+        )
+        .detail(
+            "AI accelerators use several stacks.",
+            &["HBM3: 819 GB/s per device (JEDEC)"],
+        ),
 ];
 
 const GAPSEC_BEATS: &[Beat] = &[
     Beat::new("peak: every slot full", BEAT_MS)
-        .note("Peak assumes data in every bus slot. Real traffic starts with a run of reads.", "A full cyan peak lane; green reads begin below it.")
+        .note(
+            "Peak assumes data in every bus slot. Real traffic starts with a run of reads.",
+            "A full cyan peak lane; green reads begin below it.",
+        )
         .detail("Block lengths are illustrative.", &["Peak = rate x width"]),
     Beat::new("turnarounds around the writes", BEAT_MS)
-        .note("Switching to writes and back leaves empty slots.", "Pink turnaround blocks frame an orange write run.")
+        .note(
+            "Switching to writes and back leaves empty slots.",
+            "Pink turnaround blocks frame an orange write run.",
+        )
         .detail("Bus idle each switch.", &["Turnaround"]),
     Beat::new("refresh and row misses", BEAT_MS)
-        .note("Refresh and waits for rows to open leave more holes.", "Pink refresh and row-miss blocks break up the reads.")
-        .detail("Effective bandwidth is what is left.", &["Effective < peak"]),
+        .note(
+            "Refresh and waits for rows to open leave more holes.",
+            "Pink refresh and row-miss blocks break up the reads.",
+        )
+        .detail(
+            "Effective bandwidth is what is left.",
+            &["Effective < peak"],
+        ),
 ];
 
 const NUMBERS_BEATS: &[Beat] = &[
     Beat::new("rate per pin", BEAT_MS)
-        .note("DDR4-3200 3.2, DDR5-4800 4.8, GDDR6 16, HBM3 6.4 Gb/s per pin.", "Four bars: GDDR6 is the fastest per pin.")
+        .note(
+            "DDR4-3200 3.2, DDR5-4800 4.8, GDDR6 16, HBM3 6.4 Gb/s per pin.",
+            "Four bars: GDDR6 is the fastest per pin.",
+        )
         .detail("HBM's pins are slower than GDDR's.", &["Gb/s per pin"]),
     Beat::new("data pins", BEAT_MS)
-        .note("64 for a DDR channel or DIMM, 32 for a GDDR6 chip, 1024 for an HBM3 stack.", "Four bars: HBM's towers.")
+        .note(
+            "64 for a DDR channel or DIMM, 32 for a GDDR6 chip, 1024 for an HBM3 stack.",
+            "Four bars: HBM's towers.",
+        )
         .detail("Width is HBM's advantage.", &["Data pins per device"]),
     Beat::new("bandwidth per device", BEAT_MS)
-        .note("25.6, 38.4, 64 and 819.2 GB/s.", "Four bars: rate x pins / 8.")
+        .note(
+            "25.6, 38.4, 64 and 819.2 GB/s.",
+            "Four bars: rate x pins / 8.",
+        )
         .detail("Log scales throughout.", &["GB/s = Gb/s x pins / 8"]),
 ];
 
@@ -322,14 +462,32 @@ const WALLSEC_BEATS: &[Beat] = &[
 
 const MAKERS_BEATS: &[Beat] = &[
     Beat::new("Micron (MU)", BEAT_MS)
-        .note("Micron makes DRAM, GDDR and HBM.", "The first wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["DRAM makers: Micron, SK hynix, Samsung"]),
+        .note(
+            "Micron makes DRAM, GDDR and HBM.",
+            "The first wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["DRAM makers: Micron, SK hynix, Samsung"],
+        ),
     Beat::new("SK hynix (000660.KS)", BEAT_MS)
-        .note("SK hynix makes DRAM, GDDR and HBM.", "The second wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["SK hynix ticker: 000660.KS"]),
+        .note(
+            "SK hynix makes DRAM, GDDR and HBM.",
+            "The second wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["SK hynix ticker: 000660.KS"],
+        ),
     Beat::new("Samsung (005930.KS)", BEAT_MS)
-        .note("Samsung makes DRAM, GDDR and HBM.", "The third wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["Samsung ticker: 005930.KS"]),
+        .note(
+            "Samsung makes DRAM, GDDR and HBM.",
+            "The third wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["Samsung ticker: 005930.KS"],
+        ),
 ];
 
 const RISKS_BEATS: &[Beat] = &[
@@ -379,11 +537,17 @@ mod tests {
     use std::time::Instant;
 
     fn at(beat: usize, local: f32) -> Time {
-        Time { ms: 0, beat, local, beat_start: 0 }
+        Time {
+            ms: 0,
+            beat,
+            local,
+            beat_start: 0,
+        }
     }
 
     fn scenes() -> Vec<(String, Box<dyn Scene>)> {
-        let mut v: Vec<(String, Box<dyn Scene>)> = vec![("overview".into(), Box::new(MemBandwidth))];
+        let mut v: Vec<(String, Box<dyn Scene>)> =
+            vec![("overview".into(), Box::new(MemBandwidth))];
         for z in ZOOMS {
             v.push((z.key.to_string(), (z.build)()));
         }
@@ -412,17 +576,30 @@ mod tests {
     fn beats_match_their_pictures() {
         assert_eq!(BEATS.len(), poly3d::BW_OVERVIEW_BEATS);
         for z in ZOOMS {
-            assert_eq!((z.build)().beats().len(), zoom_scene(z.key).unwrap().beats(), "zoom {}", z.key);
+            assert_eq!(
+                (z.build)().beats().len(),
+                zoom_scene(z.key).unwrap().beats(),
+                "zoom {}",
+                z.key
+            );
         }
         for (key, mk) in ('1'..='9').zip(SECTIONS) {
-            assert_eq!(mk().beats().len(), zoom_scene(key).unwrap().beats(), "section {key}");
+            assert_eq!(
+                mk().beats().len(),
+                zoom_scene(key).unwrap().beats(),
+                "section {key}"
+            );
         }
         let heads = super::super::diagrams_desc::visual("BANDWIDTH")
             .unwrap()
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len() + 1, "one scene per section but the sources");
+        assert_eq!(
+            heads,
+            SECTIONS.len() + 1,
+            "one scene per section but the sources"
+        );
     }
 
     #[test]
@@ -462,7 +639,11 @@ mod tests {
             let beats = scene.beats().len();
             let p = Player::new(scene, Instant::now());
             for beat in 0..beats {
-                let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                let (w, h) = if name == "overview" {
+                    (1900, 1000)
+                } else {
+                    (960, 576)
+                };
                 let img = p.pixels(&at(beat, 0.6), w, h).expect("pixel frame");
                 img.save(dir.join(format!("{name}_{beat}.png"))).unwrap();
             }

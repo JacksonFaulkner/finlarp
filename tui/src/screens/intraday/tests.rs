@@ -369,9 +369,17 @@ fn tiles_draw_as_pictures_when_the_terminal_has_graphics() {
         "every tile sent a picture"
     );
     // a tick with no new bars keeps the last picture (same content, same key)
-    let before: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().key).collect();
+    let before: Vec<u64> = s
+        .tiles
+        .iter()
+        .map(|t| t.pic.as_ref().unwrap().key)
+        .collect();
     render(&mut s, 160, 45);
-    let after: Vec<u64> = s.tiles.iter().map(|t| t.pic.as_ref().unwrap().key).collect();
+    let after: Vec<u64> = s
+        .tiles
+        .iter()
+        .map(|t| t.pic.as_ref().unwrap().key)
+        .collect();
     assert_eq!(before, after);
     // g flips back to the ASCII tapes
     press(&mut s, KeyCode::Char('g'));
@@ -407,9 +415,19 @@ fn move_cost() {
         press(&mut s, KeyCode::Char('K'));
         let mut t = Terminal::new(TestBackend::new(200, 60)).unwrap();
         t.draw(|f| s.draw(f)).unwrap();
-        bytes += t.backend().buffer().content.iter().map(|c| c.symbol().len()).sum::<usize>();
+        bytes += t
+            .backend()
+            .buffer()
+            .content
+            .iter()
+            .map(|c| c.symbol().len())
+            .sum::<usize>();
     }
-    println!("per move: {:?}, {} KB written", t0.elapsed() / n, bytes / n as usize / 1024);
+    println!(
+        "per move: {:?}, {} KB written",
+        t0.elapsed() / n,
+        bytes / n as usize / 1024
+    );
 }
 
 #[test]
@@ -489,9 +507,14 @@ impl std::io::Write for SharedVec {
 #[ignore]
 fn bench_combo() {
     let (mut s, tx) = screen();
-    for (i, (sym, base)) in [("MKSI", 240.0), ("WDC", 370.0), ("WULF", 12.0), ("APLD", 22.0)]
-        .into_iter()
-        .enumerate()
+    for (i, (sym, base)) in [
+        ("MKSI", 240.0),
+        ("WDC", 370.0),
+        ("WULF", 12.0),
+        ("APLD", 22.0),
+    ]
+    .into_iter()
+    .enumerate()
     {
         tx.send(Event::Seed {
             sym: sym.into(),

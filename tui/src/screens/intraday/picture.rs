@@ -102,7 +102,16 @@ pub fn render_into(img: &mut RgbaImage, pic: &Pic, pal: &Palette) {
         let base = if b.is_up() { pal.up } else { pal.down };
         // wick, then body (at least one pixel tall, so a flat bar still shows)
         let (wick_hi, wick_lo) = (y(b.high), y(b.low));
-        fill_rect(raw, w, h, cx, wick_hi.min(wick_lo), cx, wick_hi.max(wick_lo), base);
+        fill_rect(
+            raw,
+            w,
+            h,
+            cx,
+            wick_hi.min(wick_lo),
+            cx,
+            wick_hi.max(wick_lo),
+            base,
+        );
         let (top, bot) = (y(b.open.max(b.close)), y(b.open.min(b.close)));
         fill_rect(
             raw,
@@ -168,8 +177,8 @@ fn fill_rect(raw: &mut [u8], w: u32, h: u32, x0: u32, y0: u32, x1: u32, y1: u32,
 mod tests {
     use super::*;
     use crate::ui::pixels::{fill, hline, vline};
-    use image::Rgba;
     use crate::ui::theme::Theme;
+    use image::Rgba;
     use ratatui::style::Color;
 
     fn bar(open: f64, high: f64, low: f64, close: f64, volume: u64) -> HBar {
@@ -311,9 +320,17 @@ mod tests {
                     o.max(c) + rnd(),
                     o.min(c) - rnd(),
                     c,
-                    if i % 17 == 0 { 0 } else { 1 + (rnd() * 5000.0) as u64 },
+                    if i % 17 == 0 {
+                        0
+                    } else {
+                        1 + (rnd() * 5000.0) as u64
+                    },
                 );
-                b.session = if i % 5 == 0 { Session::Pre } else { Session::Regular };
+                b.session = if i % 5 == 0 {
+                    Session::Pre
+                } else {
+                    Session::Regular
+                };
                 b
             })
             .collect()
@@ -324,7 +341,14 @@ mod tests {
         let p = pal();
         for (seed, n) in [(1u64, 0usize), (2, 1), (3, 7), (4, 90), (5, 400)] {
             let bars = varied_bars(n, seed * 977);
-            for (w, h) in [(1u32, 1u32), (3, 2), (30, 30), (101, 37), (480, 260), (9, 200)] {
+            for (w, h) in [
+                (1u32, 1u32),
+                (3, 2),
+                (30, 30),
+                (101, 37),
+                (480, 260),
+                (9, 200),
+            ] {
                 for (vwap, prev_close, sel) in [
                     (None, None, None),
                     (Some(101.0), Some(99.0), Some(n / 2)),

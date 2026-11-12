@@ -448,10 +448,7 @@ impl Intraday {
                 );
                 self.deferred |= deferred;
                 if let Some(s) = sel {
-                    frame.render_widget(
-                        cursor_row(s, visible.len(), px.0, font.width, &t),
-                        marks,
-                    );
+                    frame.render_widget(cursor_row(s, visible.len(), px.0, font.width, &t), marks);
                 }
             }
             None => frame.render_widget(

@@ -4,18 +4,62 @@
 // n-well, b SiGe strain, c the inverter, d width ratio, e GAA PFET. Sources: section
 // 10 of CHIP_PMOS.txt.
 
-use super::diagrams_scene_chip::{chip_node, ChipNode, ChipState, SecData, ZoomData, BASE, BEAT_MS, DEV, FIN, OVERVIEW_MS, P, STACK};
+use super::diagrams_scene_chip::{
+    BASE, BEAT_MS, ChipNode, ChipState, DEV, FIN, OVERVIEW_MS, P, STACK, SecData, ZoomData,
+    chip_node,
+};
 use crate::ui::anim::Beat;
 use poly3d::ChipKey;
 
-const PM: ChipState = ChipState { pmos: 1.0, vg: 1.0, vd: 0.3, ..BASE };
-const PON: ChipState = ChipState { pmos: 1.0, vg: 0.0, vd: 0.6, inversion: 1.0, depletion: 1.0, flow: 1.0, ..BASE };
-const SIGE: ChipState = ChipState { strain: 1.0, dopants: 1.0, ..PON };
+const PM: ChipState = ChipState {
+    pmos: 1.0,
+    vg: 1.0,
+    vd: 0.3,
+    ..BASE
+};
+const PON: ChipState = ChipState {
+    pmos: 1.0,
+    vg: 0.0,
+    vd: 0.6,
+    inversion: 1.0,
+    depletion: 1.0,
+    flow: 1.0,
+    ..BASE
+};
+const SIGE: ChipState = ChipState {
+    strain: 1.0,
+    dopants: 1.0,
+    ..PON
+};
 /// inverter, input 0: PMOS (cell 0) on, NMOS (cell 1) off
-const INV0: ChipState = ChipState { pmos: 1.0, pair: 1.0, cells: 2.0, vg: 0.0, inversion: 1.0, flow: 1.0, inv2: 0.0, flow2: 0.0, contacts: 1.0, ..BASE };
+const INV0: ChipState = ChipState {
+    pmos: 1.0,
+    pair: 1.0,
+    cells: 2.0,
+    vg: 0.0,
+    inversion: 1.0,
+    flow: 1.0,
+    inv2: 0.0,
+    flow2: 0.0,
+    contacts: 1.0,
+    ..BASE
+};
 /// inverter, input 1: PMOS off, NMOS on
-const INV1: ChipState = ChipState { vg: 1.0, inversion: 0.0, flow: 0.0, inv2: 1.0, flow2: 1.0, ..INV0 };
-const ROW: ChipState = ChipState { cells: 4.0, contacts: 1.0, metal: 2.0, signal: 1.0, ..INV0 };
+const INV1: ChipState = ChipState {
+    vg: 1.0,
+    inversion: 0.0,
+    flow: 0.0,
+    inv2: 1.0,
+    flow2: 1.0,
+    ..INV0
+};
+const ROW: ChipState = ChipState {
+    cells: 4.0,
+    contacts: 1.0,
+    metal: 2.0,
+    signal: 1.0,
+    ..INV0
+};
 const PAIR_VIEW: [f64; 3] = [0.0, 60.0, 0.0];
 
 const BEATS: &[Beat] = &[
@@ -42,24 +86,91 @@ const BEATS: &[Beat] = &[
         .detail("Cell height is counted in metal tracks.", &["ASAP7: 9-track and 7.5-track cells"]),
 ];
 const KEYS: &[ChipKey] = &[
-    ChipKey::at(DEV, 1000.0, 0.55, 0.35, PM).labels(&[(P::Source, "p+ source"), (P::Drain, "p+ drain"), (P::Well, "n-well")]).notes(P::Source, Some(P::Well)),
-    ChipKey::at(DEV, 900.0, 0.40, 0.30, PON).labels(&[(P::Drift, "holes: source to drain"), (P::Gate, "gate low")]).notes(P::Drift, Some(P::Gate)),
-    ChipKey::at(DEV, 850.0, 0.50, 0.30, SIGE).labels(&[(P::Channel, "squeezed channel"), (P::Dopants, "SiGe:B")]).notes(P::Channel, Some(P::Source)),
-    ChipKey::at(PAIR_VIEW, 1500.0, 0.40, 0.40, ChipState { vg: 0.5, inversion: 0.0, flow: 0.0, ..INV0 }).labels(&[(P::Source, "PMOS"), (P::Contact, "tied gates and drains")]).notes(P::Contact, Some(P::Gate)),
-    ChipKey::at(PAIR_VIEW, 1450.0, 0.35, 0.35, INV0).labels(&[(P::Drift, "PMOS on: output to Vdd")]).notes(P::Drift, Some(P::Contact)),
-    ChipKey::at(PAIR_VIEW, 1450.0, 0.55, 0.35, INV1).labels(&[(P::Drain, "NMOS on: output to ground")]).notes(P::Drain, Some(P::Contact)),
-    ChipKey::at(STACK, 2600.0, 0.45, 0.35, ROW).labels(&[(P::ThinMetal, "rails and wiring"), (P::Gate, "standard cells")]).notes(P::Gate, Some(P::ThinMetal)),
+    ChipKey::at(DEV, 1000.0, 0.55, 0.35, PM)
+        .labels(&[
+            (P::Source, "p+ source"),
+            (P::Drain, "p+ drain"),
+            (P::Well, "n-well"),
+        ])
+        .notes(P::Source, Some(P::Well)),
+    ChipKey::at(DEV, 900.0, 0.40, 0.30, PON)
+        .labels(&[(P::Drift, "holes: source to drain"), (P::Gate, "gate low")])
+        .notes(P::Drift, Some(P::Gate)),
+    ChipKey::at(DEV, 850.0, 0.50, 0.30, SIGE)
+        .labels(&[(P::Channel, "squeezed channel"), (P::Dopants, "SiGe:B")])
+        .notes(P::Channel, Some(P::Source)),
+    ChipKey::at(
+        PAIR_VIEW,
+        1500.0,
+        0.40,
+        0.40,
+        ChipState {
+            vg: 0.5,
+            inversion: 0.0,
+            flow: 0.0,
+            ..INV0
+        },
+    )
+    .labels(&[(P::Source, "PMOS"), (P::Contact, "tied gates and drains")])
+    .notes(P::Contact, Some(P::Gate)),
+    ChipKey::at(PAIR_VIEW, 1450.0, 0.35, 0.35, INV0)
+        .labels(&[(P::Drift, "PMOS on: output to Vdd")])
+        .notes(P::Drift, Some(P::Contact)),
+    ChipKey::at(PAIR_VIEW, 1450.0, 0.55, 0.35, INV1)
+        .labels(&[(P::Drain, "NMOS on: output to ground")])
+        .notes(P::Drain, Some(P::Contact)),
+    ChipKey::at(STACK, 2600.0, 0.45, 0.35, ROW)
+        .labels(&[
+            (P::ThinMetal, "rails and wiring"),
+            (P::Gate, "standard cells"),
+        ])
+        .notes(P::Gate, Some(P::ThinMetal)),
 ];
 
 const ZA_B: &[Beat] = &[
-    Beat::new("the n-well: n-type silicon under the PMOS", BEAT_MS).note("The PMOS sits in an n-type well inside the p-type substrate.", "The n-well lights.").detail("Its junctions with the p+ regions are reverse-biased.", &["N-WELL"]),
-    Beat::new("tied to Vdd through a tap", BEAT_MS).note("A tap ties the well to Vdd so the junctions stay reverse-biased.", "Contacts rise from the well side.").detail("Tap cells do this along each row.", &["TAP CELL"]),
-    Beat::new("the n-well keeps the PMOS isolated", BEAT_MS).note("With the well biased, current only flows through the channel when the gate is low.", "The channel conducts; the well stays dark.").detail("Latch-up prevention depends on these taps.", &["Latch-up"]),
+    Beat::new("the n-well: n-type silicon under the PMOS", BEAT_MS)
+        .note(
+            "The PMOS sits in an n-type well inside the p-type substrate.",
+            "The n-well lights.",
+        )
+        .detail(
+            "Its junctions with the p+ regions are reverse-biased.",
+            &["N-WELL"],
+        ),
+    Beat::new("tied to Vdd through a tap", BEAT_MS)
+        .note(
+            "A tap ties the well to Vdd so the junctions stay reverse-biased.",
+            "Contacts rise from the well side.",
+        )
+        .detail("Tap cells do this along each row.", &["TAP CELL"]),
+    Beat::new("the n-well keeps the PMOS isolated", BEAT_MS)
+        .note(
+            "With the well biased, current only flows through the channel when the gate is low.",
+            "The channel conducts; the well stays dark.",
+        )
+        .detail("Latch-up prevention depends on these taps.", &["Latch-up"]),
 ];
 const ZA_K: &[ChipKey] = &[
-    ChipKey::at(DEV, 950.0, 0.45, 0.15, PM.spot(P::Well)).labels(&[(P::Well, "n-well")]).title("n-well", "n-type tub"),
-    ChipKey::at(DEV, 950.0, 0.60, 0.30, ChipState { contacts: 1.0, ..PM }.spot(P::Contact).spot(P::Well)).labels(&[(P::Contact, "tap to Vdd")]).title("well tap", "tied to Vdd"),
-    ChipKey::at(DEV, 900.0, 0.45, 0.25, PON).labels(&[(P::Drift, "only the channel conducts")]).title("isolated", "reverse-biased junctions"),
+    ChipKey::at(DEV, 950.0, 0.45, 0.15, PM.spot(P::Well))
+        .labels(&[(P::Well, "n-well")])
+        .title("n-well", "n-type tub"),
+    ChipKey::at(
+        DEV,
+        950.0,
+        0.60,
+        0.30,
+        ChipState {
+            contacts: 1.0,
+            ..PM
+        }
+        .spot(P::Contact)
+        .spot(P::Well),
+    )
+    .labels(&[(P::Contact, "tap to Vdd")])
+    .title("well tap", "tied to Vdd"),
+    ChipKey::at(DEV, 900.0, 0.45, 0.25, PON)
+        .labels(&[(P::Drift, "only the channel conducts")])
+        .title("isolated", "reverse-biased junctions"),
 ];
 
 const ZB_B: &[Beat] = &[
@@ -68,20 +179,68 @@ const ZB_B: &[Beat] = &[
     Beat::new("faster holes, more drive", BEAT_MS).note("Strain raises hole mobility; Intel's 90 nm strain gave PMOS 25% more drive for about 2% cost.", "Holes stream faster through the squeezed channel.").detail("Intel 2004: 0.72 mA/um at 1.2 V.", &["+25% PMOS drive", "~2% process cost"]),
 ];
 const ZB_K: &[ChipKey] = &[
-    ChipKey::at(DEV, 850.0, 0.45, 0.35, ChipState { dopants: 1.0, ..PM }).labels(&[(P::Dopants, "SiGe:B")]).title("SiGe:B", "regrown source and drain"),
-    ChipKey::at(DEV, 820.0, 0.30, 0.25, ChipState { strain: 1.0, dopants: 0.5, ..PM }).labels(&[(P::Channel, "compressed")]).title("compressive strain", "along the channel"),
-    ChipKey::at(DEV, 850.0, 0.50, 0.30, SIGE).labels(&[(P::Drift, "faster holes")]).title("more drive", "Intel 90 nm: +25%"),
+    ChipKey::at(DEV, 850.0, 0.45, 0.35, ChipState { dopants: 1.0, ..PM })
+        .labels(&[(P::Dopants, "SiGe:B")])
+        .title("SiGe:B", "regrown source and drain"),
+    ChipKey::at(
+        DEV,
+        820.0,
+        0.30,
+        0.25,
+        ChipState {
+            strain: 1.0,
+            dopants: 0.5,
+            ..PM
+        },
+    )
+    .labels(&[(P::Channel, "compressed")])
+    .title("compressive strain", "along the channel"),
+    ChipKey::at(DEV, 850.0, 0.50, 0.30, SIGE)
+        .labels(&[(P::Drift, "faster holes")])
+        .title("more drive", "Intel 90 nm: +25%"),
 ];
 
 const ZC_B: &[Beat] = &[
-    Beat::new("PMOS pull-up, NMOS pull-down", BEAT_MS).note("An inverter: PMOS to Vdd, NMOS to ground, gates and drains tied.", "The pair side by side, both idle.").detail("The basic CMOS gate.", &["INVERTER"]),
-    Beat::new("input low: output high", BEAT_MS).note("The PMOS conducts and charges the output; the NMOS is off.", "Holes flow in the PMOS.").detail("No Vdd-to-ground path.", &["In 0 -> Out 1"]),
-    Beat::new("input high: output low", BEAT_MS).note("The NMOS conducts and discharges the output; the PMOS is off.", "Electrons flow in the NMOS.").detail("Power only on the flip: C x V^2 x f.", &["CMOS POWER"]),
+    Beat::new("PMOS pull-up, NMOS pull-down", BEAT_MS)
+        .note(
+            "An inverter: PMOS to Vdd, NMOS to ground, gates and drains tied.",
+            "The pair side by side, both idle.",
+        )
+        .detail("The basic CMOS gate.", &["INVERTER"]),
+    Beat::new("input low: output high", BEAT_MS)
+        .note(
+            "The PMOS conducts and charges the output; the NMOS is off.",
+            "Holes flow in the PMOS.",
+        )
+        .detail("No Vdd-to-ground path.", &["In 0 -> Out 1"]),
+    Beat::new("input high: output low", BEAT_MS)
+        .note(
+            "The NMOS conducts and discharges the output; the PMOS is off.",
+            "Electrons flow in the NMOS.",
+        )
+        .detail("Power only on the flip: C x V^2 x f.", &["CMOS POWER"]),
 ];
 const ZC_K: &[ChipKey] = &[
-    ChipKey::at(PAIR_VIEW, 1400.0, 0.40, 0.40, ChipState { vg: 0.5, inversion: 0.0, flow: 0.0, ..INV0 }).labels(&[(P::Source, "PMOS"), (P::Drain, "NMOS")]).title("CMOS inverter", "gates tied, drains tied"),
-    ChipKey::at(PAIR_VIEW, 1400.0, 0.35, 0.35, INV0).labels(&[(P::Drift, "PMOS conducts")]).title("in = 0", "out = 1"),
-    ChipKey::at(PAIR_VIEW, 1400.0, 0.55, 0.35, INV1).labels(&[(P::Drain, "NMOS conducts")]).title("in = 1", "out = 0"),
+    ChipKey::at(
+        PAIR_VIEW,
+        1400.0,
+        0.40,
+        0.40,
+        ChipState {
+            vg: 0.5,
+            inversion: 0.0,
+            flow: 0.0,
+            ..INV0
+        },
+    )
+    .labels(&[(P::Source, "PMOS"), (P::Drain, "NMOS")])
+    .title("CMOS inverter", "gates tied, drains tied"),
+    ChipKey::at(PAIR_VIEW, 1400.0, 0.35, 0.35, INV0)
+        .labels(&[(P::Drift, "PMOS conducts")])
+        .title("in = 0", "out = 1"),
+    ChipKey::at(PAIR_VIEW, 1400.0, 0.55, 0.35, INV1)
+        .labels(&[(P::Drain, "NMOS conducts")])
+        .title("in = 1", "out = 0"),
 ];
 
 const ZD_B: &[Beat] = &[
@@ -90,9 +249,57 @@ const ZD_B: &[Beat] = &[
     Beat::new("in fins, width comes in whole fins", BEAT_MS).note("In FinFET and GAA, width is counted in fins or sheets, so the PMOS gets more of them; strain shrinks the ratio.", "Fins standing in both transistors.").detail("Quantised width.", &["FinFET / GAA"]),
 ];
 const ZD_K: &[ChipKey] = &[
-    ChipKey::at(PAIR_VIEW, 1400.0, 0.40, 0.35, ChipState { vg: 0.0, inversion: 1.0, flow: 0.4, inv2: 1.0, flow2: 1.0, ..INV0 }).labels(&[(P::Drift, "slow holes")]).title("hole mobility", "~450 vs ~1400"),
-    ChipKey::at(PAIR_VIEW, 1350.0, 0.30, 0.40, ChipState { arch: 1.0, vg: 0.0, inversion: 1.0, flow: 1.0, inv2: 1.0, flow2: 1.0, ..INV0 }).labels(&[(P::Fin, "more PMOS width")]).title("width ratio", "Wp/Wn ~2-2.5"),
-    ChipKey::at(PAIR_VIEW, 1300.0, 0.25, 0.30, ChipState { arch: 1.0, cut: 1.0, vg: 0.0, inversion: 1.0, flow: 1.0, inv2: 1.0, flow2: 1.0, ..INV0 }).labels(&[(P::Fin, "width in whole fins")]).title("quantised width", "fins or sheets"),
+    ChipKey::at(
+        PAIR_VIEW,
+        1400.0,
+        0.40,
+        0.35,
+        ChipState {
+            vg: 0.0,
+            inversion: 1.0,
+            flow: 0.4,
+            inv2: 1.0,
+            flow2: 1.0,
+            ..INV0
+        },
+    )
+    .labels(&[(P::Drift, "slow holes")])
+    .title("hole mobility", "~450 vs ~1400"),
+    ChipKey::at(
+        PAIR_VIEW,
+        1350.0,
+        0.30,
+        0.40,
+        ChipState {
+            arch: 1.0,
+            vg: 0.0,
+            inversion: 1.0,
+            flow: 1.0,
+            inv2: 1.0,
+            flow2: 1.0,
+            ..INV0
+        },
+    )
+    .labels(&[(P::Fin, "more PMOS width")])
+    .title("width ratio", "Wp/Wn ~2-2.5"),
+    ChipKey::at(
+        PAIR_VIEW,
+        1300.0,
+        0.25,
+        0.30,
+        ChipState {
+            arch: 1.0,
+            cut: 1.0,
+            vg: 0.0,
+            inversion: 1.0,
+            flow: 1.0,
+            inv2: 1.0,
+            flow2: 1.0,
+            ..INV0
+        },
+    )
+    .labels(&[(P::Fin, "width in whole fins")])
+    .title("quantised width", "fins or sheets"),
 ];
 
 const ZE_B: &[Beat] = &[
@@ -101,9 +308,47 @@ const ZE_B: &[Beat] = &[
     Beat::new("germanium: even faster holes", BEAT_MS).note("Germanium's hole mobility is about 1900 against silicon's 450, but its oxide and leakage are hard.", "Holes race through the sheets.").detail("Boron diffusion is another obstacle.", &["GE CHANNEL ~1900 cm2/Vs"]),
 ];
 const ZE_K: &[ChipKey] = &[
-    ChipKey::at(FIN, 800.0, 0.30, 0.25, ChipState { arch: 2.0, cut: 1.0, ..PM }).labels(&[(P::Sheet, "PMOS sheets")]).title("GAA PFET", "stacked sheets"),
-    ChipKey::at(FIN, 780.0, 0.20, 0.22, ChipState { arch: 2.0, cut: 1.0, strain: 1.0, ..PON }).labels(&[(P::Sheet, "SiGe, ~1 GPa")]).title("strained SiGe sheets", "IBM: +100% mobility"),
-    ChipKey::at(FIN, 780.0, 0.35, 0.25, ChipState { arch: 2.0, cut: 1.0, strain: 1.0, ..PON }).labels(&[(P::Drift, "Ge: ~1900 cm2/Vs")]).title("germanium channel", "fast holes, hard oxide"),
+    ChipKey::at(
+        FIN,
+        800.0,
+        0.30,
+        0.25,
+        ChipState {
+            arch: 2.0,
+            cut: 1.0,
+            ..PM
+        },
+    )
+    .labels(&[(P::Sheet, "PMOS sheets")])
+    .title("GAA PFET", "stacked sheets"),
+    ChipKey::at(
+        FIN,
+        780.0,
+        0.20,
+        0.22,
+        ChipState {
+            arch: 2.0,
+            cut: 1.0,
+            strain: 1.0,
+            ..PON
+        },
+    )
+    .labels(&[(P::Sheet, "SiGe, ~1 GPa")])
+    .title("strained SiGe sheets", "IBM: +100% mobility"),
+    ChipKey::at(
+        FIN,
+        780.0,
+        0.35,
+        0.25,
+        ChipState {
+            arch: 2.0,
+            cut: 1.0,
+            strain: 1.0,
+            ..PON
+        },
+    )
+    .labels(&[(P::Drift, "Ge: ~1900 cm2/Vs")])
+    .title("germanium channel", "fast holes, hard oxide"),
 ];
 
 const Z: [ZoomData; 5] = [
@@ -115,9 +360,24 @@ const Z: [ZoomData; 5] = [
 ];
 
 const S1_B: &[Beat] = &[
-    Beat::new("a PMOS at rest", BEAT_MS).note("p+ source and drain in an n-well, gate high: off.", "The PMOS, dark.").detail("Mirror of the NMOS.", &["PMOS"]),
-    Beat::new("gate low: holes flow", BEAT_MS).note("A low gate opens a hole channel.", "Holes flow source to drain.").detail("Holes are the weak carrier.", &["HOLE MOBILITY"]),
-    Beat::new("paired with an NMOS", BEAT_MS).note("Together they make a CMOS inverter.", "The pair side by side.").detail("Power only on the flip.", &["INVERTER"]),
+    Beat::new("a PMOS at rest", BEAT_MS)
+        .note(
+            "p+ source and drain in an n-well, gate high: off.",
+            "The PMOS, dark.",
+        )
+        .detail("Mirror of the NMOS.", &["PMOS"]),
+    Beat::new("gate low: holes flow", BEAT_MS)
+        .note(
+            "A low gate opens a hole channel.",
+            "Holes flow source to drain.",
+        )
+        .detail("Holes are the weak carrier.", &["HOLE MOBILITY"]),
+    Beat::new("paired with an NMOS", BEAT_MS)
+        .note(
+            "Together they make a CMOS inverter.",
+            "The pair side by side.",
+        )
+        .detail("Power only on the flip.", &["INVERTER"]),
 ];
 const S1_K: &[ChipKey] = &[
     ChipKey::at(DEV, 1000.0, 0.50, 0.35, PM).title("PMOS", "off: gate high"),
@@ -126,33 +386,109 @@ const S1_K: &[ChipKey] = &[
 ];
 
 const S2_B: &[Beat] = &[
-    Beat::new("p+ SOURCE", BEAT_MS).note("SiGe:B on the Vdd side.", "The source lights.").detail("Boron-doped SiGe.", &["p+ SOURCE"]),
-    Beat::new("PMOS CHANNEL", BEAT_MS).note("Holes flow here when the gate is low.", "The channel lights; holes flow.").detail("Squeezed by the stressors.", &["PMOS CHANNEL"]),
-    Beat::new("p+ DRAIN", BEAT_MS).note("SiGe:B, the output.", "The drain lights.").detail("Same stressor as the source.", &["p+ DRAIN"]),
-    Beat::new("PMOS GATE", BEAT_MS).note("Metal gate on HfO2 with spacers.", "The gate lights.").detail("Its work function sets Vt.", &["PMOS GATE"]),
-    Beat::new("N-WELL", BEAT_MS).note("n-type silicon tied to Vdd.", "The well lights.").detail("Reverse-biases the junctions.", &["N-WELL"]),
-    Beat::new("SiGe STRESSOR and BORON DOPING", BEAT_MS).note("Regrown SiGe squeezes the channel; boron is grown in.", "Arrows and dopants light.").detail("Boron diffuses fast.", &["SiGe:B"]),
+    Beat::new("p+ SOURCE", BEAT_MS)
+        .note("SiGe:B on the Vdd side.", "The source lights.")
+        .detail("Boron-doped SiGe.", &["p+ SOURCE"]),
+    Beat::new("PMOS CHANNEL", BEAT_MS)
+        .note(
+            "Holes flow here when the gate is low.",
+            "The channel lights; holes flow.",
+        )
+        .detail("Squeezed by the stressors.", &["PMOS CHANNEL"]),
+    Beat::new("p+ DRAIN", BEAT_MS)
+        .note("SiGe:B, the output.", "The drain lights.")
+        .detail("Same stressor as the source.", &["p+ DRAIN"]),
+    Beat::new("PMOS GATE", BEAT_MS)
+        .note("Metal gate on HfO2 with spacers.", "The gate lights.")
+        .detail("Its work function sets Vt.", &["PMOS GATE"]),
+    Beat::new("N-WELL", BEAT_MS)
+        .note("n-type silicon tied to Vdd.", "The well lights.")
+        .detail("Reverse-biases the junctions.", &["N-WELL"]),
+    Beat::new("SiGe STRESSOR and BORON DOPING", BEAT_MS)
+        .note(
+            "Regrown SiGe squeezes the channel; boron is grown in.",
+            "Arrows and dopants light.",
+        )
+        .detail("Boron diffuses fast.", &["SiGe:B"]),
 ];
 const S2_K: &[ChipKey] = &[
     ChipKey::at(DEV, 850.0, 0.30, 0.35, PM.spot(P::Source)).labels(&[(P::Source, "p+ source")]),
     ChipKey::at(DEV, 820.0, 0.40, 0.25, PON.spot(P::Channel)).labels(&[(P::Channel, "channel")]),
     ChipKey::at(DEV, 850.0, 0.70, 0.35, PM.spot(P::Drain)).labels(&[(P::Drain, "p+ drain")]),
-    ChipKey::at(FIN, 700.0, 0.30, 0.25, ChipState { cut: 1.0, ..PM }.spot(P::Gate)).labels(&[(P::Gate, "gate")]),
+    ChipKey::at(
+        FIN,
+        700.0,
+        0.30,
+        0.25,
+        ChipState { cut: 1.0, ..PM }.spot(P::Gate),
+    )
+    .labels(&[(P::Gate, "gate")]),
     ChipKey::at(DEV, 950.0, 0.50, 0.15, PM.spot(P::Well)).labels(&[(P::Well, "n-well")]),
-    ChipKey::at(DEV, 850.0, 0.50, 0.30, SIGE.spot(P::Dopants).spot(P::Channel)).labels(&[(P::Dopants, "SiGe:B"), (P::Channel, "squeezed")]),
+    ChipKey::at(
+        DEV,
+        850.0,
+        0.50,
+        0.30,
+        SIGE.spot(P::Dopants).spot(P::Channel),
+    )
+    .labels(&[(P::Dopants, "SiGe:B"), (P::Channel, "squeezed")]),
 ];
 
 const S3_B: &[Beat] = ZC_B;
 const S3_K: &[ChipKey] = ZC_K;
 
 const S4_B: &[Beat] = &[
-    Beat::new("STD CELL: PMOS on top, NMOS below", BEAT_MS).note("A standard cell stacks a PMOS strip over an NMOS strip with a shared gate.", "A pair with its contacts.").detail("Thousands of cell types per library.", &["STD CELL"]),
-    Beat::new("rails along the edges", BEAT_MS).note("Vdd and ground rails run along the top and bottom edges in metal.", "Metal rails appear over the pair.").detail("Cell height = tracks x metal-2 pitch.", &["9T, 7.5T (ASAP7)"]),
-    Beat::new("TAP CELL and rows", BEAT_MS).note("Cells tile in rows; tap cells tie the wells to the rails to prevent latch-up.", "Pairs repeat in a row under the metal.").detail("7-8 tracks favour area, 11-12 speed.", &["TAP CELL"]),
+    Beat::new("STD CELL: PMOS on top, NMOS below", BEAT_MS)
+        .note(
+            "A standard cell stacks a PMOS strip over an NMOS strip with a shared gate.",
+            "A pair with its contacts.",
+        )
+        .detail("Thousands of cell types per library.", &["STD CELL"]),
+    Beat::new("rails along the edges", BEAT_MS)
+        .note(
+            "Vdd and ground rails run along the top and bottom edges in metal.",
+            "Metal rails appear over the pair.",
+        )
+        .detail(
+            "Cell height = tracks x metal-2 pitch.",
+            &["9T, 7.5T (ASAP7)"],
+        ),
+    Beat::new("TAP CELL and rows", BEAT_MS)
+        .note(
+            "Cells tile in rows; tap cells tie the wells to the rails to prevent latch-up.",
+            "Pairs repeat in a row under the metal.",
+        )
+        .detail("7-8 tracks favour area, 11-12 speed.", &["TAP CELL"]),
 ];
 const S4_K: &[ChipKey] = &[
-    ChipKey::at(PAIR_VIEW, 1400.0, 0.40, 0.40, ChipState { vg: 0.5, inversion: 0.0, flow: 0.0, ..INV0 }).title("standard cell", "PMOS over NMOS"),
-    ChipKey::at(STACK, 1900.0, 0.40, 0.40, ChipState { metal: 2.0, vg: 0.5, inversion: 0.0, flow: 0.0, ..INV0 }).labels(&[(P::ThinMetal, "rails")]).title("rails", "Vdd and ground"),
+    ChipKey::at(
+        PAIR_VIEW,
+        1400.0,
+        0.40,
+        0.40,
+        ChipState {
+            vg: 0.5,
+            inversion: 0.0,
+            flow: 0.0,
+            ..INV0
+        },
+    )
+    .title("standard cell", "PMOS over NMOS"),
+    ChipKey::at(
+        STACK,
+        1900.0,
+        0.40,
+        0.40,
+        ChipState {
+            metal: 2.0,
+            vg: 0.5,
+            inversion: 0.0,
+            flow: 0.0,
+            ..INV0
+        },
+    )
+    .labels(&[(P::ThinMetal, "rails")])
+    .title("rails", "Vdd and ground"),
     ChipKey::at(STACK, 2600.0, 0.45, 0.35, ROW).title("rows", "tap cells tie the wells"),
 ];
 
@@ -169,8 +505,10 @@ const S8_B: &[Beat] = &[
     Beat::new("Synopsys, Cadence, Arm: cells and layout", BEAT_MS).note("Layout, place-and-route and cell libraries turn pairs into chips.", "Rows of standard cells with metal.").detail("SNPS, CDNS, ARM.", &["EDA and IP"]),
 ];
 const S8_K: &[ChipKey] = &[
-    ChipKey::at(FIN, 850.0, 0.40, 0.30, ChipState { arch: 1.0, ..SIGE }).title("foundries", "TSMC, Intel, Samsung"),
-    ChipKey::at(DEV, 850.0, 0.45, 0.35, ChipState { dopants: 1.0, ..PM }).title("epitaxy", "Applied Materials"),
+    ChipKey::at(FIN, 850.0, 0.40, 0.30, ChipState { arch: 1.0, ..SIGE })
+        .title("foundries", "TSMC, Intel, Samsung"),
+    ChipKey::at(DEV, 850.0, 0.45, 0.35, ChipState { dopants: 1.0, ..PM })
+        .title("epitaxy", "Applied Materials"),
     ChipKey::at(STACK, 2600.0, 0.45, 0.35, ROW).title("cells and layout", "Synopsys, Cadence, Arm"),
 ];
 
@@ -180,13 +518,44 @@ const S9_B: &[Beat] = &[
     Beat::new("few epi vendors", BEAT_MS).note("Epitaxy tools come from few vendors; current shares are not public in the sources found.", "The SiGe source and drain.").detail("A tooling chokepoint.", &["Epi tools"]),
 ];
 const S9_K: &[ChipKey] = &[
-    ChipKey::at(DEV, 900.0, 0.45, 0.30, ChipState { flow: 0.4, ..PON }).title("slow holes", "the weaker carrier"),
-    ChipKey::at(DEV, 820.0, 0.30, 0.25, ChipState { dopants: 1.0, halo: 0.6, ..PM }).title("boron, germanium", "diffusion and oxide"),
-    ChipKey::at(DEV, 850.0, 0.50, 0.35, SIGE.spot(P::Source).spot(P::Drain)).title("epitaxy", "few tool vendors"),
+    ChipKey::at(DEV, 900.0, 0.45, 0.30, ChipState { flow: 0.4, ..PON })
+        .title("slow holes", "the weaker carrier"),
+    ChipKey::at(
+        DEV,
+        820.0,
+        0.30,
+        0.25,
+        ChipState {
+            dopants: 1.0,
+            halo: 0.6,
+            ..PM
+        },
+    )
+    .title("boron, germanium", "diffusion and oxide"),
+    ChipKey::at(DEV, 850.0, 0.50, 0.35, SIGE.spot(P::Source).spot(P::Drain))
+        .title("epitaxy", "few tool vendors"),
 ];
 
-const S: [SecData; 9] = [(S1_B, S1_K), (S2_B, S2_K), (S3_B, S3_K), (S4_B, S4_K), (S5_B, S5_K), (S6_B, S6_K), (S7_B, S7_K), (S8_B, S8_K), (S9_B, S9_K)];
+const S: [SecData; 9] = [
+    (S1_B, S1_K),
+    (S2_B, S2_K),
+    (S3_B, S3_K),
+    (S4_B, S4_K),
+    (S5_B, S5_K),
+    (S6_B, S6_K),
+    (S7_B, S7_K),
+    (S8_B, S8_K),
+    (S9_B, S9_K),
+];
 
 chip_node!(ZOOMS, SECTIONS, Z, S);
 
-pub static NODE: ChipNode = ChipNode { page: "PMOS", beats: BEATS, keys: KEYS, zooms: &ZOOMS, zoom_data: &Z, sections: &SECTIONS, section_data: &S };
+pub static NODE: ChipNode = ChipNode {
+    page: "PMOS",
+    beats: BEATS,
+    keys: KEYS,
+    zooms: &ZOOMS,
+    zoom_data: &Z,
+    sections: &SECTIONS,
+    section_data: &S,
+};

@@ -259,7 +259,11 @@ pub fn resume_args(n: &Note, in_tmux: bool) -> Result<Vec<String>, String> {
     if let Some(cwd) = n.cwd.as_deref().filter(|c| !c.is_empty()) {
         args.extend(["-c".to_string(), cwd.to_string()]);
     }
-    args.extend(["claude".to_string(), "--resume".to_string(), sid.to_string()]);
+    args.extend([
+        "claude".to_string(),
+        "--resume".to_string(),
+        sid.to_string(),
+    ]);
     Ok(args)
 }
 
@@ -290,7 +294,9 @@ pub struct Notes {
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Notes> {
-    let last = arg.as_deref().is_some_and(|a| a.trim().eq_ignore_ascii_case("last"));
+    let last = arg
+        .as_deref()
+        .is_some_and(|a| a.trim().eq_ignore_ascii_case("last"));
     let mut s = Notes::empty(ctx.theme, last);
     s.loading = true;
     s.refresh = Some(pyrun::spawn_script(CLI, &["index"]));
@@ -415,7 +421,9 @@ impl Notes {
         let in_tmux = std::env::var_os("TMUX").is_some();
         let msg = match resume_args(n, in_tmux) {
             Ok(args) => match Command::new("tmux").args(&args).output() {
-                Ok(out) if out.status.success() => "opened the chat in a new tmux window".to_string(),
+                Ok(out) if out.status.success() => {
+                    "opened the chat in a new tmux window".to_string()
+                }
                 Ok(out) => format!("tmux: {}", String::from_utf8_lossy(&out.stderr).trim()),
                 Err(e) => format!("tmux: {e}"),
             },
@@ -929,12 +937,18 @@ mod tests {
     #[test]
     fn last_picks_newest_answered_note() {
         let picked = pick_last(parsed());
-        assert_eq!(picked.iter().map(|n| n.id.as_str()).collect::<Vec<_>>(), ["a1"]);
+        assert_eq!(
+            picked.iter().map(|n| n.id.as_str()).collect::<Vec<_>>(),
+            ["a1"]
+        );
         // nothing answered yet: the newest note, whatever its status
         let mut pending: Vec<Note> = parsed();
         pending.retain(|n| n.id != "a1");
         let picked = pick_last(pending);
-        assert_eq!(picked.iter().map(|n| n.id.as_str()).collect::<Vec<_>>(), ["b"]);
+        assert_eq!(
+            picked.iter().map(|n| n.id.as_str()).collect::<Vec<_>>(),
+            ["b"]
+        );
         assert!(pick_last(Vec::new()).is_empty());
     }
 
@@ -948,7 +962,11 @@ mod tests {
 
     #[test]
     fn resume_argv_is_tmux_new_window_in_cwd() {
-        let n = notes().notes.into_iter().find(|n| n.id == "a1").expect("a1");
+        let n = notes()
+            .notes
+            .into_iter()
+            .find(|n| n.id == "a1")
+            .expect("a1");
         assert_eq!(
             resume_args(&n, true).expect("argv"),
             [
@@ -970,7 +988,11 @@ mod tests {
 
     #[test]
     fn resume_rejects_odd_session_ids() {
-        let mut n = notes().notes.into_iter().find(|n| n.id == "a1").expect("a1");
+        let mut n = notes()
+            .notes
+            .into_iter()
+            .find(|n| n.id == "a1")
+            .expect("a1");
         n.session_id = Some("x; rm -rf ~".into());
         assert!(resume_args(&n, true).is_err());
         n.session_id = Some("abc-123".into());

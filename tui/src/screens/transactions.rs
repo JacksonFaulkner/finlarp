@@ -179,13 +179,16 @@ impl Transactions {
     fn empty_message(&self) -> Option<String> {
         if self.rows.is_empty() {
             Some(match &self.error {
-                Some(e) => format!(
-                    "no transactions cached\n\n{e}\n\nRefresh the cache to fill it."
-                ),
+                Some(e) => {
+                    format!("no transactions cached\n\n{e}\n\nRefresh the cache to fill it.")
+                }
                 None => "no transactions cached yet. Refresh the cache to fill it.".into(),
             })
         } else if self.shown.is_empty() {
-            Some(format!("no transactions match \"{}\"  (esc clears)", self.query))
+            Some(format!(
+                "no transactions match \"{}\"  (esc clears)",
+                self.query
+            ))
         } else {
             None
         }
@@ -269,7 +272,9 @@ impl Screen for Transactions {
         match self.empty_message() {
             Some(msg) => {
                 frame.render_widget(
-                    Paragraph::new(msg).style(t.dim()).wrap(Wrap { trim: false }),
+                    Paragraph::new(msg)
+                        .style(t.dim())
+                        .wrap(Wrap { trim: false }),
                     body,
                 );
             }
@@ -494,8 +499,7 @@ pub fn load(db_path: &Path) -> Loaded {
 }
 
 fn read_cache(conn: &duckdb::Connection) -> Result<Vec<(String, Option<f64>)>, duckdb::Error> {
-    let mut stmt =
-        conn.prepare("SELECT transactions_json, fetched_at FROM transactions_cache")?;
+    let mut stmt = conn.prepare("SELECT transactions_json, fetched_at FROM transactions_cache")?;
     let rows = stmt.query_map([], |r| {
         Ok((r.get::<_, String>(0)?, r.get::<_, Option<f64>>(1)?))
     })?;
@@ -593,10 +597,7 @@ mod tests {
     }
 
     fn symbols(s: &Transactions) -> Vec<String> {
-        s.shown
-            .iter()
-            .map(|&i| s.rows[i].symbol.clone())
-            .collect()
+        s.shown.iter().map(|&i| s.rows[i].symbol.clone()).collect()
     }
 
     fn render(s: &mut Transactions, w: u16, h: u16) -> String {
@@ -698,7 +699,11 @@ mod tests {
     fn empty_cache_shows_message() {
         let mut s = screen_with("[]");
         assert!(s.rows.is_empty());
-        assert!(s.empty_message().unwrap().contains("no transactions cached"));
+        assert!(
+            s.empty_message()
+                .unwrap()
+                .contains("no transactions cached")
+        );
         assert!(render(&mut s, 80, 10).contains("no transactions cached"));
     }
 
@@ -707,7 +712,10 @@ mod tests {
         let conn = duckdb::Connection::open_in_memory().unwrap();
         let loaded = load_from(&conn);
         assert!(loaded.rows.is_empty());
-        assert_eq!(loaded.error.as_deref(), Some("transactions_cache table not found"));
+        assert_eq!(
+            loaded.error.as_deref(),
+            Some("transactions_cache table not found")
+        );
     }
 
     #[test]

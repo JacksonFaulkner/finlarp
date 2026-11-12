@@ -4,16 +4,47 @@
 // leaks, b DIBL, c high-k metal gate, d FD-SOI and body bias, e Dennard scaling.
 // Sources: section 10 of CHIP_PLANAR.txt.
 
-use super::diagrams_scene_chip::{chip_node, ChipNode, ChipState, SecData, ZoomData, BASE, BEAT_MS, DEV, FIN, OVERVIEW_MS, P};
+use super::diagrams_scene_chip::{
+    BASE, BEAT_MS, ChipNode, ChipState, DEV, FIN, OVERVIEW_MS, P, SecData, ZoomData, chip_node,
+};
 use crate::ui::anim::Beat;
 use poly3d::ChipKey;
 
-const ON: ChipState = ChipState { vg: 0.9, vd: 0.6, inversion: 1.0, depletion: 1.0, flow: 1.0, ..BASE };
-const BIG: ChipState = ChipState { gate_len: 1.6, ..ON };
-const SMALL: ChipState = ChipState { gate_len: 0.6, ..ON };
-const LEAKS: ChipState = ChipState { vd: 0.8, leak: 1.0, gate_len: 0.6, hik: 0.0, metal_gate: 0.0, ..BASE };
-const STRAINED: ChipState = ChipState { strain: 1.0, dopants: 0.6, ..ON };
-const HKMG: ChipState = ChipState { hik: 1.0, metal_gate: 1.0, cut: 1.0, ..ON };
+const ON: ChipState = ChipState {
+    vg: 0.9,
+    vd: 0.6,
+    inversion: 1.0,
+    depletion: 1.0,
+    flow: 1.0,
+    ..BASE
+};
+const BIG: ChipState = ChipState {
+    gate_len: 1.6,
+    ..ON
+};
+const SMALL: ChipState = ChipState {
+    gate_len: 0.6,
+    ..ON
+};
+const LEAKS: ChipState = ChipState {
+    vd: 0.8,
+    leak: 1.0,
+    gate_len: 0.6,
+    hik: 0.0,
+    metal_gate: 0.0,
+    ..BASE
+};
+const STRAINED: ChipState = ChipState {
+    strain: 1.0,
+    dopants: 0.6,
+    ..ON
+};
+const HKMG: ChipState = ChipState {
+    hik: 1.0,
+    metal_gate: 1.0,
+    cut: 1.0,
+    ..ON
+};
 const SOI: ChipState = ChipState { soi: 1.0, ..ON };
 
 const BEATS: &[Beat] = &[
@@ -40,24 +71,88 @@ const BEATS: &[Beat] = &[
         .detail("Mature nodes, 28 nm and up, still make most wafers.", &["Mature nodes: 36% of foundry revenue (2025)"]),
 ];
 const KEYS: &[ChipKey] = &[
-    ChipKey::at(DEV, 1000.0, 0.50, 0.35, BIG).labels(&[(P::Gate, "flat gate"), (P::Inversion, "channel at the surface")]).notes(P::Gate, Some(P::Inversion)),
-    ChipKey::at(DEV, 950.0, 0.45, 0.35, SMALL).labels(&[(P::Gate, "shrunk by 1/k")]).notes(P::Gate, Some(P::Drift)),
-    ChipKey::at(DEV, 900.0, 0.40, 0.22, LEAKS).labels(&[(P::Substrate, "under the channel"), (P::Oxide, "through the oxide")]).notes(P::Substrate, Some(P::Oxide)),
-    ChipKey::at(DEV, 900.0, 0.50, 0.30, STRAINED).labels(&[(P::Channel, "strained channel")]).notes(P::Channel, Some(P::Drift)),
-    ChipKey::at(FIN, 720.0, 0.25, 0.25, HKMG).labels(&[(P::Oxide, "HfO2"), (P::Gate, "metal gate")]).notes(P::Oxide, Some(P::Gate)),
-    ChipKey::at(DEV, 950.0, 0.45, 0.18, SOI).labels(&[(P::Well, "buried oxide")]).notes(P::Well, Some(P::Drift)),
-    ChipKey::at(FIN, 850.0, 0.35, 0.28, ChipState { arch: 1.0, ..ON }).labels(&[(P::Fin, "fins")]).notes(P::Fin, Some(P::Gate)),
+    ChipKey::at(DEV, 1000.0, 0.50, 0.35, BIG)
+        .labels(&[
+            (P::Gate, "flat gate"),
+            (P::Inversion, "channel at the surface"),
+        ])
+        .notes(P::Gate, Some(P::Inversion)),
+    ChipKey::at(DEV, 950.0, 0.45, 0.35, SMALL)
+        .labels(&[(P::Gate, "shrunk by 1/k")])
+        .notes(P::Gate, Some(P::Drift)),
+    ChipKey::at(DEV, 900.0, 0.40, 0.22, LEAKS)
+        .labels(&[
+            (P::Substrate, "under the channel"),
+            (P::Oxide, "through the oxide"),
+        ])
+        .notes(P::Substrate, Some(P::Oxide)),
+    ChipKey::at(DEV, 900.0, 0.50, 0.30, STRAINED)
+        .labels(&[(P::Channel, "strained channel")])
+        .notes(P::Channel, Some(P::Drift)),
+    ChipKey::at(FIN, 720.0, 0.25, 0.25, HKMG)
+        .labels(&[(P::Oxide, "HfO2"), (P::Gate, "metal gate")])
+        .notes(P::Oxide, Some(P::Gate)),
+    ChipKey::at(DEV, 950.0, 0.45, 0.18, SOI)
+        .labels(&[(P::Well, "buried oxide")])
+        .notes(P::Well, Some(P::Drift)),
+    ChipKey::at(FIN, 850.0, 0.35, 0.28, ChipState { arch: 1.0, ..ON })
+        .labels(&[(P::Fin, "fins")])
+        .notes(P::Fin, Some(P::Gate)),
 ];
 
 const ZA_B: &[Beat] = &[
-    Beat::new("subthreshold: drain to source below Vt", BEAT_MS).note("Below threshold the channel still passes a weak current.", "Faint carriers cross under the gate.").detail("Set by the swing and Vt.", &["Leak 1"]),
-    Beat::new("gate tunnelling through thin oxide", BEAT_MS).note("Thin SiO2 lets carriers tunnel straight through the gate dielectric.", "Pink dots rise through the oxide.").detail("High-k fixed this.", &["Leak 2"]),
-    Beat::new("punch-through and junction leakage", BEAT_MS).note("In short devices the depletion regions meet in the body; junctions leak too (GIDL).", "Carriers take the deep path under the channel.").detail("Halos and fins fight it.", &["Leak 3, leak 4"]),
+    Beat::new("subthreshold: drain to source below Vt", BEAT_MS)
+        .note(
+            "Below threshold the channel still passes a weak current.",
+            "Faint carriers cross under the gate.",
+        )
+        .detail("Set by the swing and Vt.", &["Leak 1"]),
+    Beat::new("gate tunnelling through thin oxide", BEAT_MS)
+        .note(
+            "Thin SiO2 lets carriers tunnel straight through the gate dielectric.",
+            "Pink dots rise through the oxide.",
+        )
+        .detail("High-k fixed this.", &["Leak 2"]),
+    Beat::new("punch-through and junction leakage", BEAT_MS)
+        .note(
+            "In short devices the depletion regions meet in the body; junctions leak too (GIDL).",
+            "Carriers take the deep path under the channel.",
+        )
+        .detail("Halos and fins fight it.", &["Leak 3, leak 4"]),
 ];
 const ZA_K: &[ChipKey] = &[
-    ChipKey::at(DEV, 900.0, 0.40, 0.25, ChipState { vg: 0.2, vd: 0.8, leak: 0.6, ..BASE }).labels(&[(P::Drift, "subthreshold")]).title("leak 1", "subthreshold"),
-    ChipKey::at(FIN, 720.0, 0.25, 0.25, ChipState { cut: 1.0, hik: 0.0, metal_gate: 0.0, leak: 1.0, ..BASE }).labels(&[(P::Oxide, "tunnelling")]).title("leak 2", "gate tunnelling"),
-    ChipKey::at(DEV, 900.0, 0.45, 0.20, LEAKS).labels(&[(P::Substrate, "punch-through")]).title("leaks 3 and 4", "junction, punch-through"),
+    ChipKey::at(
+        DEV,
+        900.0,
+        0.40,
+        0.25,
+        ChipState {
+            vg: 0.2,
+            vd: 0.8,
+            leak: 0.6,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Drift, "subthreshold")])
+    .title("leak 1", "subthreshold"),
+    ChipKey::at(
+        FIN,
+        720.0,
+        0.25,
+        0.25,
+        ChipState {
+            cut: 1.0,
+            hik: 0.0,
+            metal_gate: 0.0,
+            leak: 1.0,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Oxide, "tunnelling")])
+    .title("leak 2", "gate tunnelling"),
+    ChipKey::at(DEV, 900.0, 0.45, 0.20, LEAKS)
+        .labels(&[(P::Substrate, "punch-through")])
+        .title("leaks 3 and 4", "junction, punch-through"),
 ];
 
 const ZB_B: &[Beat] = &[
@@ -66,9 +161,49 @@ const ZB_B: &[Beat] = &[
     Beat::new("the swing floor", BEAT_MS).note("Swing can't go below about 60 mV/decade at room temperature; each 60 mV of Vt lost costs 10x leakage.", "A device barely off, leaking.").detail("More Cox, less Cdep pushes S toward the floor.", &["S >= 60 mV/dec at 300 K"]),
 ];
 const ZB_K: &[ChipKey] = &[
-    ChipKey::at(DEV, 900.0, 0.45, 0.30, ChipState { gate_len: 0.6, vd: 0.5, leak: 0.3, ..BASE }).labels(&[(P::Gate, "short gate")]).title("short channel", "drain meets source"),
-    ChipKey::at(DEV, 880.0, 0.50, 0.28, ChipState { gate_len: 0.6, vd: 1.0, leak: 1.0, ..BASE }).labels(&[(P::Drain, "drain up, Vt down")]).title("DIBL", "Vt roll-off"),
-    ChipKey::at(DEV, 900.0, 0.40, 0.25, ChipState { vg: 0.3, vd: 0.6, leak: 0.7, depletion: 1.0, ..BASE }).labels(&[(P::Depletion, "Cdep")]).title("swing floor", "60 mV/decade"),
+    ChipKey::at(
+        DEV,
+        900.0,
+        0.45,
+        0.30,
+        ChipState {
+            gate_len: 0.6,
+            vd: 0.5,
+            leak: 0.3,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Gate, "short gate")])
+    .title("short channel", "drain meets source"),
+    ChipKey::at(
+        DEV,
+        880.0,
+        0.50,
+        0.28,
+        ChipState {
+            gate_len: 0.6,
+            vd: 1.0,
+            leak: 1.0,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Drain, "drain up, Vt down")])
+    .title("DIBL", "Vt roll-off"),
+    ChipKey::at(
+        DEV,
+        900.0,
+        0.40,
+        0.25,
+        ChipState {
+            vg: 0.3,
+            vd: 0.6,
+            leak: 0.7,
+            depletion: 1.0,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Depletion, "Cdep")])
+    .title("swing floor", "60 mV/decade"),
 ];
 
 const ZC_B: &[Beat] = &[
@@ -77,9 +212,38 @@ const ZC_B: &[Beat] = &[
     Beat::new("a metal gate sets Vt", BEAT_MS).note("A metal gate replaces poly; its work function sets the threshold, and gate-last flows arrived at 45-28 nm.", "The gate turns metal-grey.").detail("See the GATE STACK node.", &["HIGH-K METAL GATE"]),
 ];
 const ZC_K: &[ChipKey] = &[
-    ChipKey::at(FIN, 720.0, 0.25, 0.25, ChipState { cut: 1.0, hik: 0.0, metal_gate: 0.0, leak: 0.8, ..BASE }).labels(&[(P::Gate, "polysilicon"), (P::Oxide, "SiON")]).title("poly on SiON", "leaks as it thins"),
-    ChipKey::at(FIN, 700.0, 0.20, 0.22, ChipState { cut: 1.0, hik: 1.0, metal_gate: 0.0, ..BASE }).labels(&[(P::Oxide, "HfO2")]).title("high-k", "physically thicker"),
-    ChipKey::at(FIN, 700.0, 0.30, 0.25, HKMG).labels(&[(P::Gate, "metal gate")]).title("metal gate", "work function sets Vt"),
+    ChipKey::at(
+        FIN,
+        720.0,
+        0.25,
+        0.25,
+        ChipState {
+            cut: 1.0,
+            hik: 0.0,
+            metal_gate: 0.0,
+            leak: 0.8,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Gate, "polysilicon"), (P::Oxide, "SiON")])
+    .title("poly on SiON", "leaks as it thins"),
+    ChipKey::at(
+        FIN,
+        700.0,
+        0.20,
+        0.22,
+        ChipState {
+            cut: 1.0,
+            hik: 1.0,
+            metal_gate: 0.0,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Oxide, "HfO2")])
+    .title("high-k", "physically thicker"),
+    ChipKey::at(FIN, 700.0, 0.30, 0.25, HKMG)
+        .labels(&[(P::Gate, "metal gate")])
+        .title("metal gate", "work function sets Vt"),
 ];
 
 const ZD_B: &[Beat] = &[
@@ -88,9 +252,49 @@ const ZD_B: &[Beat] = &[
     Beat::new("body bias under the BOX", BEAT_MS).note("A voltage under the BOX tunes Vt after fabrication: fast when needed, low-leak when idle.", "The substrate under the BOX lights.").detail("GlobalFoundries 22FDX.", &["BODY BIAS"]),
 ];
 const ZD_K: &[ChipKey] = &[
-    ChipKey::at(DEV, 950.0, 0.45, 0.15, ChipState { vg: 0.4, vd: 0.8, depletion: 1.0, leak: 0.8, gate_len: 0.7, ..BASE }).labels(&[(P::Depletion, "deep depletion")]).title("bulk", "leak path below"),
-    ChipKey::at(DEV, 950.0, 0.45, 0.15, ChipState { soi: 1.0, gate_len: 0.7, ..ON }).labels(&[(P::Well, "buried oxide")]).title("FD-SOI", "thin film on BOX"),
-    ChipKey::at(DEV, 950.0, 0.55, 0.15, ChipState { soi: 1.0, gate_len: 0.7, ..ON }.spot(P::Substrate)).labels(&[(P::Substrate, "back bias")]).title("body bias", "tune Vt after fab"),
+    ChipKey::at(
+        DEV,
+        950.0,
+        0.45,
+        0.15,
+        ChipState {
+            vg: 0.4,
+            vd: 0.8,
+            depletion: 1.0,
+            leak: 0.8,
+            gate_len: 0.7,
+            ..BASE
+        },
+    )
+    .labels(&[(P::Depletion, "deep depletion")])
+    .title("bulk", "leak path below"),
+    ChipKey::at(
+        DEV,
+        950.0,
+        0.45,
+        0.15,
+        ChipState {
+            soi: 1.0,
+            gate_len: 0.7,
+            ..ON
+        },
+    )
+    .labels(&[(P::Well, "buried oxide")])
+    .title("FD-SOI", "thin film on BOX"),
+    ChipKey::at(
+        DEV,
+        950.0,
+        0.55,
+        0.15,
+        ChipState {
+            soi: 1.0,
+            gate_len: 0.7,
+            ..ON
+        }
+        .spot(P::Substrate),
+    )
+    .labels(&[(P::Substrate, "back bias")])
+    .title("body bias", "tune Vt after fab"),
 ];
 
 const ZE_B: &[Beat] = &[
@@ -99,9 +303,30 @@ const ZE_B: &[Beat] = &[
     Beat::new("until Vt stopped scaling", BEAT_MS).note("Leakage grows exponentially as Vt falls, so voltage stalled near 1 V: more transistors at the same power meant dark silicon and multicore.", "Small transistors leaking.").detail("Mid-2000s.", &["LEAKAGE WALL"]),
 ];
 const ZE_K: &[ChipKey] = &[
-    ChipKey::at([0.0, 20.0, 0.0], 1600.0, 0.45, 0.40, BIG).title("Dennard scaling", "shrink by 1/k"),
-    ChipKey::at([0.0, 20.0, 0.0], 1900.0, 0.40, 0.45, ChipState { cells: 3.0, ..SMALL }).title("k^2 more gates", "same power density"),
-    ChipKey::at([0.0, 20.0, 0.0], 1900.0, 0.40, 0.40, ChipState { cells: 3.0, ..LEAKS }).title("the leakage wall", "Vdd stalls near 1 V"),
+    ChipKey::at([0.0, 20.0, 0.0], 1600.0, 0.45, 0.40, BIG)
+        .title("Dennard scaling", "shrink by 1/k"),
+    ChipKey::at(
+        [0.0, 20.0, 0.0],
+        1900.0,
+        0.40,
+        0.45,
+        ChipState {
+            cells: 3.0,
+            ..SMALL
+        },
+    )
+    .title("k^2 more gates", "same power density"),
+    ChipKey::at(
+        [0.0, 20.0, 0.0],
+        1900.0,
+        0.40,
+        0.40,
+        ChipState {
+            cells: 3.0,
+            ..LEAKS
+        },
+    )
+    .title("the leakage wall", "Vdd stalls near 1 V"),
 ];
 
 const Z: [ZoomData; 5] = [
@@ -113,19 +338,44 @@ const Z: [ZoomData; 5] = [
 ];
 
 const S1_B: &[Beat] = &[
-    Beat::new("DENNARD SCALING", BEAT_MS).note("Shrinking was free for decades.", "A big planar device.").detail("Speed up, power density flat.", &["k ~1.4"]),
-    Beat::new("the LEAKAGE WALL", BEAT_MS).note("Around 2005, Vt and voltage stopped scaling.", "A short device leaking.").detail("Vdd ~1 V.", &["Leakage"]),
-    Beat::new("patched, then replaced", BEAT_MS).note("Strain, high-k metal gate and FD-SOI patched planar until the fin.", "The channel rises into fins.").detail("MATURE NODES still planar.", &["22/28 nm"]),
+    Beat::new("DENNARD SCALING", BEAT_MS)
+        .note("Shrinking was free for decades.", "A big planar device.")
+        .detail("Speed up, power density flat.", &["k ~1.4"]),
+    Beat::new("the LEAKAGE WALL", BEAT_MS)
+        .note(
+            "Around 2005, Vt and voltage stopped scaling.",
+            "A short device leaking.",
+        )
+        .detail("Vdd ~1 V.", &["Leakage"]),
+    Beat::new("patched, then replaced", BEAT_MS)
+        .note(
+            "Strain, high-k metal gate and FD-SOI patched planar until the fin.",
+            "The channel rises into fins.",
+        )
+        .detail("MATURE NODES still planar.", &["22/28 nm"]),
 ];
 const S1_K: &[ChipKey] = &[
     ChipKey::at(DEV, 1000.0, 0.50, 0.35, BIG).title("free scaling", "Dennard"),
     ChipKey::at(DEV, 900.0, 0.40, 0.22, LEAKS).title("leakage wall", "~2005"),
-    ChipKey::at(FIN, 850.0, 0.35, 0.28, ChipState { arch: 1.0, ..ON }).title("then the fin", "22 nm"),
+    ChipKey::at(FIN, 850.0, 0.35, 0.28, ChipState { arch: 1.0, ..ON })
+        .title("then the fin", "22 nm"),
 ];
 const S2_B: &[Beat] = &[
-    Beat::new("the cross-section", BEAT_MS).note("n+ source and drain, gate on a thin dielectric, p-type bulk shared by all.", "A planar NMOS conducting.").detail("Electrons in the inversion layer.", &["Planar bulk"]),
-    Beat::new("off, it should block", BEAT_MS).note("With the gate low the channel is gone.", "The device off.").detail("But it leaks.", &["Off"]),
-    Beat::new("four leak paths", BEAT_MS).note("Subthreshold, tunnelling, junction/GIDL and punch-through.", "Leakage under the channel and through the oxide.").detail("The gate sees only the top.", &["4 leaks"]),
+    Beat::new("the cross-section", BEAT_MS)
+        .note(
+            "n+ source and drain, gate on a thin dielectric, p-type bulk shared by all.",
+            "A planar NMOS conducting.",
+        )
+        .detail("Electrons in the inversion layer.", &["Planar bulk"]),
+    Beat::new("off, it should block", BEAT_MS)
+        .note("With the gate low the channel is gone.", "The device off.")
+        .detail("But it leaks.", &["Off"]),
+    Beat::new("four leak paths", BEAT_MS)
+        .note(
+            "Subthreshold, tunnelling, junction/GIDL and punch-through.",
+            "Leakage under the channel and through the oxide.",
+        )
+        .detail("The gate sees only the top.", &["4 leaks"]),
 ];
 const S2_K: &[ChipKey] = &[
     ChipKey::at(DEV, 950.0, 0.45, 0.30, ON).title("planar NMOS", "conducting"),
@@ -135,13 +385,37 @@ const S2_K: &[ChipKey] = &[
 const S3_B: &[Beat] = ZB_B;
 const S3_K: &[ChipKey] = ZB_K;
 const S4_B: &[Beat] = &[
-    Beat::new("STRAINED SI", BEAT_MS).note("SiGe squeezes PMOS channels; nitride caps stretch NMOS ones.", "Strain arrows on the channel.").detail("Intel 90 nm: PMOS +25%.", &["STRAINED SI"]),
-    Beat::new("HIGH-K METAL GATE: the dielectric", BEAT_MS).note("HfO2 replaces SiON, cutting tunnelling.", "A thick bright dielectric.").detail("45-28 nm.", &["HfO2"]),
-    Beat::new("HIGH-K METAL GATE: the metal", BEAT_MS).note("A metal gate replaces poly and sets Vt.", "The metal gate.").detail("Gate-last flows.", &["Metal gate"]),
+    Beat::new("STRAINED SI", BEAT_MS)
+        .note(
+            "SiGe squeezes PMOS channels; nitride caps stretch NMOS ones.",
+            "Strain arrows on the channel.",
+        )
+        .detail("Intel 90 nm: PMOS +25%.", &["STRAINED SI"]),
+    Beat::new("HIGH-K METAL GATE: the dielectric", BEAT_MS)
+        .note(
+            "HfO2 replaces SiON, cutting tunnelling.",
+            "A thick bright dielectric.",
+        )
+        .detail("45-28 nm.", &["HfO2"]),
+    Beat::new("HIGH-K METAL GATE: the metal", BEAT_MS)
+        .note("A metal gate replaces poly and sets Vt.", "The metal gate.")
+        .detail("Gate-last flows.", &["Metal gate"]),
 ];
 const S4_K: &[ChipKey] = &[
     ChipKey::at(DEV, 900.0, 0.50, 0.30, STRAINED).title("strained silicon", "90 nm"),
-    ChipKey::at(FIN, 700.0, 0.20, 0.22, ChipState { cut: 1.0, hik: 1.0, metal_gate: 0.0, ..ON }).title("high-k", "HfO2"),
+    ChipKey::at(
+        FIN,
+        700.0,
+        0.20,
+        0.22,
+        ChipState {
+            cut: 1.0,
+            hik: 1.0,
+            metal_gate: 0.0,
+            ..ON
+        },
+    )
+    .title("high-k", "HfO2"),
     ChipKey::at(FIN, 700.0, 0.30, 0.25, HKMG).title("metal gate", "sets Vt"),
 ];
 const S5_B: &[Beat] = &[
@@ -150,22 +424,59 @@ const S5_B: &[Beat] = &[
     Beat::new("SMIC", BEAT_MS).note("SMIC builds mostly 28 nm and above, for mature and domestic demand.", "Planar devices in a row.").detail("0981.HK.", &["SMIC"]),
 ];
 const S5_K: &[ChipKey] = &[
-    ChipKey::at([0.0, 20.0, 0.0], 1900.0, 0.40, 0.45, ChipState { cells: 3.0, ..ON }).title("mature nodes", "28 nm and above"),
+    ChipKey::at(
+        [0.0, 20.0, 0.0],
+        1900.0,
+        0.40,
+        0.45,
+        ChipState { cells: 3.0, ..ON },
+    )
+    .title("mature nodes", "28 nm and above"),
     ChipKey::at(DEV, 950.0, 0.45, 0.18, SOI).title("UMC, GlobalFoundries", "22/28 nm, FDX"),
-    ChipKey::at([0.0, 20.0, 0.0], 1900.0, 0.40, 0.45, ChipState { cells: 3.0, ..BIG }).title("SMIC", "28 nm and up"),
+    ChipKey::at(
+        [0.0, 20.0, 0.0],
+        1900.0,
+        0.40,
+        0.45,
+        ChipState { cells: 3.0, ..BIG },
+    )
+    .title("SMIC", "28 nm and up"),
 ];
 const S6_B: &[Beat] = ZE_B;
 const S6_K: &[ChipKey] = ZE_K;
 const S7_B: &[Beat] = ZD_B;
 const S7_K: &[ChipKey] = ZD_K;
 const S8_B: &[Beat] = &[
-    Beat::new("TSMC and Intel", BEAT_MS).note("TSMC still runs a large 28 nm line; Intel shipped the first 22 nm FinFET in 2011.", "A planar device turning into a FinFET.").detail("TSM, INTC.", &["TSMC, Intel"]),
-    Beat::new("UMC, GlobalFoundries, SMIC", BEAT_MS).note("The mature-node foundries ship most planar wafers.", "Rows of planar devices.").detail("UMC, GFS, 0981.HK.", &["Mature foundries"]),
-    Beat::new("Soitec", BEAT_MS).note("Soitec makes the SOI wafers FD-SOI is built on.", "The buried oxide under the device.").detail("SOI.PA.", &["SOITEC"]),
+    Beat::new("TSMC and Intel", BEAT_MS)
+        .note(
+            "TSMC still runs a large 28 nm line; Intel shipped the first 22 nm FinFET in 2011.",
+            "A planar device turning into a FinFET.",
+        )
+        .detail("TSM, INTC.", &["TSMC, Intel"]),
+    Beat::new("UMC, GlobalFoundries, SMIC", BEAT_MS)
+        .note(
+            "The mature-node foundries ship most planar wafers.",
+            "Rows of planar devices.",
+        )
+        .detail("UMC, GFS, 0981.HK.", &["Mature foundries"]),
+    Beat::new("Soitec", BEAT_MS)
+        .note(
+            "Soitec makes the SOI wafers FD-SOI is built on.",
+            "The buried oxide under the device.",
+        )
+        .detail("SOI.PA.", &["SOITEC"]),
 ];
 const S8_K: &[ChipKey] = &[
-    ChipKey::at(FIN, 850.0, 0.35, 0.28, ChipState { arch: 0.6, ..ON }).title("TSMC, Intel", "28 nm, first FinFET"),
-    ChipKey::at([0.0, 20.0, 0.0], 1900.0, 0.40, 0.45, ChipState { cells: 3.0, ..ON }).title("UMC, GF, SMIC", "mature nodes"),
+    ChipKey::at(FIN, 850.0, 0.35, 0.28, ChipState { arch: 0.6, ..ON })
+        .title("TSMC, Intel", "28 nm, first FinFET"),
+    ChipKey::at(
+        [0.0, 20.0, 0.0],
+        1900.0,
+        0.40,
+        0.45,
+        ChipState { cells: 3.0, ..ON },
+    )
+    .title("UMC, GF, SMIC", "mature nodes"),
     ChipKey::at(DEV, 950.0, 0.45, 0.15, SOI).title("Soitec", "SOI wafers"),
 ];
 const S9_B: &[Beat] = &[
@@ -174,13 +485,38 @@ const S9_B: &[Beat] = &[
     Beat::new("node names", BEAT_MS).note("'N nm' labels no longer match any real gate length; compare by density instead.", "A shrinking gate.").detail("NODE NAME card.", &["Marketing names"]),
 ];
 const S9_K: &[ChipKey] = &[
-    ChipKey::at([0.0, 20.0, 0.0], 1900.0, 0.40, 0.45, ChipState { cells: 3.0, ..ON }).title("overcapacity", "price pressure"),
+    ChipKey::at(
+        [0.0, 20.0, 0.0],
+        1900.0,
+        0.40,
+        0.45,
+        ChipState { cells: 3.0, ..ON },
+    )
+    .title("overcapacity", "price pressure"),
     ChipKey::at(DEV, 950.0, 0.45, 0.15, SOI).title("FD-SOI", "IoT, RF, auto"),
     ChipKey::at(DEV, 900.0, 0.45, 0.30, SMALL).title("node names", "not gate lengths"),
 ];
 
-const S: [SecData; 9] = [(S1_B, S1_K), (S2_B, S2_K), (S3_B, S3_K), (S4_B, S4_K), (S5_B, S5_K), (S6_B, S6_K), (S7_B, S7_K), (S8_B, S8_K), (S9_B, S9_K)];
+const S: [SecData; 9] = [
+    (S1_B, S1_K),
+    (S2_B, S2_K),
+    (S3_B, S3_K),
+    (S4_B, S4_K),
+    (S5_B, S5_K),
+    (S6_B, S6_K),
+    (S7_B, S7_K),
+    (S8_B, S8_K),
+    (S9_B, S9_K),
+];
 
 chip_node!(ZOOMS, SECTIONS, Z, S);
 
-pub static NODE: ChipNode = ChipNode { page: "PLANAR", beats: BEATS, keys: KEYS, zooms: &ZOOMS, zoom_data: &Z, sections: &SECTIONS, section_data: &S };
+pub static NODE: ChipNode = ChipNode {
+    page: "PLANAR",
+    beats: BEATS,
+    keys: KEYS,
+    zooms: &ZOOMS,
+    zoom_data: &Z,
+    sections: &SECTIONS,
+    section_data: &S,
+};

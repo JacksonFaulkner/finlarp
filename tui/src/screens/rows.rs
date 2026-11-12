@@ -42,7 +42,10 @@ const TEXT_MAX: usize = 42;
 const DETAIL_H: u16 = 7;
 
 const KEYS: &[Key] = &[
-    key("type", "query (t:NVDA since:2026 field:value \"phrase\" -word)"),
+    key(
+        "type",
+        "query (t:NVDA since:2026 field:value \"phrase\" -word)",
+    ),
     key("tab ↓", "input → table"),
     key("/ i", "back to the input"),
     key("j k g G", "move"),
@@ -369,7 +372,14 @@ impl Rows {
         } else if self.sel >= self.top + self.page {
             self.top = self.sel + 1 - self.page;
         }
-        for (i, r) in self.reply.rows.iter().enumerate().skip(self.top).take(self.page) {
+        for (i, r) in self
+            .reply
+            .rows
+            .iter()
+            .enumerate()
+            .skip(self.top)
+            .take(self.page)
+        {
             let s = format!(" {}", self.line(&r.cells, &widths));
             let st = if i == self.sel && self.focus == Focus::Table {
                 t.selected()
@@ -390,22 +400,28 @@ impl Rows {
     fn draw_detail(&self, frame: &mut Frame, area: Rect) {
         let t = self.theme;
         let Some(r) = self.selected() else { return };
-        let fields: Vec<&(String, String)> = r.detail.iter().filter(|(_, v)| !v.is_empty()).collect();
+        let fields: Vec<&(String, String)> =
+            r.detail.iter().filter(|(_, v)| !v.is_empty()).collect();
         let per_col = area.height.saturating_sub(1).max(1) as usize;
         let ncols = fields.len().div_ceil(per_col).max(1);
         let col_w = (area.width as usize / ncols).max(20);
-        let label_w = fields.iter().map(|(k, _)| text::width(k)).max().unwrap_or(0).min(18);
-        let mut lines: Vec<Line> = vec![Line::styled(
-            "─".repeat(area.width as usize),
-            t.border(),
-        )];
+        let label_w = fields
+            .iter()
+            .map(|(k, _)| text::width(k))
+            .max()
+            .unwrap_or(0)
+            .min(18);
+        let mut lines: Vec<Line> = vec![Line::styled("─".repeat(area.width as usize), t.border())];
         for row in 0..per_col {
             let mut spans = Vec::new();
             for c in 0..ncols {
                 if let Some((k, v)) = fields.get(c * per_col + row) {
                     let val_w = col_w.saturating_sub(label_w + 3);
                     let v = text::truncate(v, val_w);
-                    spans.push(Span::styled(format!(" {:<label_w$} ", text::truncate(k, label_w)), t.dim()));
+                    spans.push(Span::styled(
+                        format!(" {:<label_w$} ", text::truncate(k, label_w)),
+                        t.dim(),
+                    ));
                     spans.push(Span::styled(format!("{v:<val_w$} "), t.base()));
                 }
             }
@@ -428,16 +444,16 @@ impl Rows {
         let mut s = if self.loading {
             " searching…".to_string()
         } else {
-            format!(
-                " {}{n} rows",
-                if self.reply.more { "first " } else { "" }
-            )
+            format!(" {}{n} rows", if self.reply.more { "first " } else { "" })
         };
         if let Some(ms) = self.reply.ms {
             s.push_str(&format!(" · {ms}ms"));
         }
         if !self.reply.fields.is_empty() {
-            s.push_str(&format!(" · filters t: since: until: {}:", self.reply.fields.join(": ")));
+            s.push_str(&format!(
+                " · filters t: since: until: {}:",
+                self.reply.fields.join(": ")
+            ));
         }
         s.push_str(match self.focus {
             Focus::Input => " · tab table · esc back",
@@ -473,7 +489,11 @@ impl Screen for Rows {
         let prompt = " / ";
         let inner_w = input.width.saturating_sub(prompt.len() as u16 + 1) as usize;
         let scroll = self.input.visual_scroll(inner_w);
-        let in_style = if self.focus == Focus::Input { t.base() } else { t.dim() };
+        let in_style = if self.focus == Focus::Input {
+            t.base()
+        } else {
+            t.dim()
+        };
         frame.render_widget(
             Paragraph::new(Line::from(vec![
                 Span::styled(prompt, t.accent()),
@@ -487,7 +507,10 @@ impl Screen for Rows {
             frame.set_cursor_position(Position::new(input.x + prompt.len() as u16 + x, input.y));
         }
         if let Some(h) = self.reply.hint.as_deref().filter(|h| !h.is_empty()) {
-            frame.render_widget(Paragraph::new(Line::styled(format!("   {h}"), t.dim())), hint);
+            frame.render_widget(
+                Paragraph::new(Line::styled(format!("   {h}"), t.dim())),
+                hint,
+            );
         }
         self.draw_table(frame, table);
         if detail_h > 0 {

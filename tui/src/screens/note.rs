@@ -169,7 +169,10 @@ impl Screen for Note {
         let label = if self.context.is_empty() {
             "no anchor".to_string()
         } else {
-            text::truncate(&self.context, (area.width as usize).saturating_sub(10).max(10))
+            text::truncate(
+                &self.context,
+                (area.width as usize).saturating_sub(10).max(10),
+            )
         };
         frame.render_widget(
             Paragraph::new(Line::from(vec![
@@ -220,7 +223,8 @@ impl Screen for Note {
         match key.code {
             KeyCode::Esc => Action::Quit,
             KeyCode::Char('q')
-                if self.input.value().is_empty() && !key.modifiers.contains(KeyModifiers::CONTROL) =>
+                if self.input.value().is_empty()
+                    && !key.modifiers.contains(KeyModifiers::CONTROL) =>
             {
                 Action::Quit
             }
@@ -241,7 +245,8 @@ impl Screen for Note {
                 self.save = None;
                 match res {
                     Ok(id) => {
-                        self.status = format!("saved {id} · answering in the background (fl notes last)");
+                        self.status =
+                            format!("saved {id} · answering in the background (fl notes last)");
                         self.input.reset();
                     }
                     Err(e) => self.status = e,

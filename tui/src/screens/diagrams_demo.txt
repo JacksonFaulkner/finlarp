@@ -1,0 +1,27 @@
+# The diagrams demo: `fl diagrams demo` asks these in order and takes a 1-100 rating
+# after each (saved to data/diagram_demo/ratings.jsonl). One per line: NODE | question.
+# The mix is deliberate: explain, find, walk through, numbers, compare, cross-node, quiz.
+CELL | explain the storage capacitor
+CELL | walk me through one read, step by step
+CELL | why does the charge leak, and where does it go?
+CELL | quiz me on this node
+LITHO | where do i see what sets the smallest printable line? show me
+LITHO | walk me through one exposure
+LITHO | what does higher NA cost me?
+LITHO | hide the labels and test me on the parts
+ARRAY | how does one cell get picked out of the whole array?
+ARRAY | what are the word line and the bit line? point at them
+BANK | why can't two rows in the same bank be open at once?
+BANDWIDTH | what are the key numbers here and what do they mean?
+HBM STACK | how is this different from a normal DRAM chip? show me the parts that are new
+HBM STACK | where is the chokepoint in making this, and who owns it?
+FINFET | why stand the channel up as a fin? compare it to planar
+GATE-ALL-AROUND | what changes from finfet to this? show me on the picture
+NMOS | walk me through turning the transistor on
+INTERPOSER | what is this for, and what would break without it?
+MICROBUMP | turn the model so i can see the bumps, then explain the pitch
+LASER | how does the light get made? walk me through it
+CPO | why move the optics onto the package? show me the path of one bit
+VRM | where does the power go from here to the chip? step through it
+POLYSILICON | which of the zooms shows the Siemens process? take me there and explain it
+SAND | before you play it: ask me what i think happens in the arc furnace, then show me

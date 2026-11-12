@@ -858,7 +858,11 @@ mod tests {
     #[test]
     fn every_sec_edgar_dataset_is_searchable() {
         for src in SOURCES.iter().filter(|x| x.provider == "SEC EDGAR") {
-            assert!(!matches!(src.search, Search::Off), "{} has no search", src.name);
+            assert!(
+                !matches!(src.search, Search::Off),
+                "{} has no search",
+                src.name
+            );
         }
     }
 

@@ -27,7 +27,10 @@ pub const fn key(keys: &'static str, desc: &'static str) -> Key {
 /// A section title inside a key list (the overlay draws it as a heading;
 /// the footer skips it).
 pub const fn section(title: &'static str) -> Key {
-    Key { keys: "", desc: title }
+    Key {
+        keys: "",
+        desc: title,
+    }
 }
 
 /// Keys every sourced screen shares (see ui::source_bar::source_action).
@@ -139,7 +142,11 @@ impl Widget for &KeyOverlay<'_> {
         let col_w = kw + dw + 2;
         // Two columns when one would be taller than the screen.
         let n = self.keys.len() as u16;
-        let cols: u16 = if n + 2 > area.height && area.width >= 2 * col_w + 7 { 2 } else { 1 };
+        let cols: u16 = if n + 2 > area.height && area.width >= 2 * col_w + 7 {
+            2
+        } else {
+            1
+        };
         let per = n.div_ceil(cols);
         let width = (cols * col_w + (cols - 1) * 3 + 4).max(tw).max(24);
         let height = per + 2;
@@ -178,7 +185,12 @@ impl Widget for &KeyOverlay<'_> {
             .spacing(3)
             .split(inner);
         for (i, part) in parts.iter().enumerate() {
-            let chunk = self.keys.iter().skip(i * per as usize).take(per as usize).map(row);
+            let chunk = self
+                .keys
+                .iter()
+                .skip(i * per as usize)
+                .take(per as usize)
+                .map(row);
             Table::new(chunk, [Constraint::Length(kw), Constraint::Fill(1)])
                 .column_spacing(2)
                 .render(*part, buf);

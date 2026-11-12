@@ -219,8 +219,49 @@ impl Scene for Blank {
     }
 }
 
+/// The WAFER overview, drawn from the Blender scene (tools/pbr3d/blender/wafer_overview.py).
+static WAFER_SCENE: std::sync::OnceLock<pbr3d::scene_gltf::Scene> = std::sync::OnceLock::new();
+
+fn wafer_scene() -> &'static pbr3d::scene_gltf::Scene {
+    WAFER_SCENE.get_or_init(|| {
+        pbr3d::scene_gltf::Scene::from_glb(include_bytes!("../../../../../tools/pbr3d/assets/wafer_overview.glb"))
+            .expect("wafer_overview.glb is a valid export")
+    })
+}
+
+pub struct BlenderWafer;
+
+impl Scene for BlenderWafer {
+    fn size(&self) -> (u16, u16) {
+        (MIN_W, MIN_H)
+    }
+
+    fn beats(&self) -> &[Beat] {
+        BEATS
+    }
+
+    fn draw(&self, _c: &mut Canvas, _t: &Time) {}
+
+    fn pixels(&self, t: &Time, w: u32, h: u32) -> Option<image::RgbaImage> {
+        let secs = t.beat as f32 + t.local;
+        Some(pbr3d::scene_gltf::render(wafer_scene(), secs, w, h, crate::screens::diagrams_px::BG))
+    }
+
+    fn zooms(&self) -> &[Zoom] {
+        ZOOMS
+    }
+
+    fn notes_in_picture(&self) -> bool {
+        true
+    }
+
+    fn rest_point(&self) -> f32 {
+        0.4
+    }
+}
+
 pub fn build() -> Box<dyn Scene> {
-    Box::new(Blank)
+    Box::new(BlenderWafer)
 }
 
 #[cfg(test)]
@@ -262,6 +303,25 @@ mod tests {
                 let s = p.shot_at(k * 500);
                 assert!(s.lines.iter().all(|l| l.chars().count() <= p.width()));
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod blender_overview_tests {
+    use crate::ui::anim::{Time, Scene};
+
+    #[test]
+    fn blender_wafer_draws_every_beat() {
+        let scene = super::build();
+        let beats = scene.beats().len();
+        assert_eq!(beats, 4);
+        for beat in 0..beats {
+            let t = Time { beat, local: 0.5, ms: 0, beat_start: 0 };
+            let img = scene.pixels(&t, 160, 100).expect("the Blender overview draws a picture");
+            let bg = crate::screens::diagrams_px::BG;
+            let drawn = img.pixels().filter(|p| p.0[0] != bg[0] || p.0[1] != bg[1] || p.0[2] != bg[2]).count();
+            assert!(drawn > 160 * 100 / 50, "beat {beat} only {drawn} pixels off the background");
         }
     }
 }

@@ -424,7 +424,10 @@ impl Screen for PortfolioScreen {
         // The Signals tab is a calendar: it takes its own keys, except the ones that leave the screen or switch tabs.
         let tab_key = matches!(
             key.code,
-            KeyCode::Char('q' | '?' | '1'..='7' | 'H' | 'L') | KeyCode::Tab | KeyCode::BackTab | KeyCode::Esc
+            KeyCode::Char('q' | '?' | '1'..='7' | 'H' | 'L')
+                | KeyCode::Tab
+                | KeyCode::BackTab
+                | KeyCode::Esc
         );
         if self.tab == 5 && !tab_key && self.signals.on_key(key) {
             return Action::None;

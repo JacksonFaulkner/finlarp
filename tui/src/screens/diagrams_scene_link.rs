@@ -50,10 +50,31 @@ pub struct LinkScene {
 }
 
 /// A frame of `keys` at `t`, turned by `view`, with `beats`' notes on it when `notes`.
-pub fn frame(beats: &[Beat], keys: &'static [LinkKey], notes: bool, t: &Time, view: &poly3d::View, w: u32, h: u32) -> RgbaImage {
+pub fn frame(
+    beats: &[Beat],
+    keys: &'static [LinkKey],
+    notes: bool,
+    t: &Time,
+    view: &poly3d::View,
+    w: u32,
+    h: u32,
+) -> RgbaImage {
     let b = &beats[t.beat.min(beats.len() - 1)];
-    let n = poly3d::Notes { what: b.what, why: b.why, facts: b.facts };
-    poly3d::render_link(keys, t.beat, t.local as f64, view, notes.then_some(&n), w as usize, h as usize, px::BG)
+    let n = poly3d::Notes {
+        what: b.what,
+        why: b.why,
+        facts: b.facts,
+    };
+    poly3d::render_link(
+        keys,
+        t.beat,
+        t.local as f64,
+        view,
+        notes.then_some(&n),
+        w as usize,
+        h as usize,
+        px::BG,
+    )
 }
 
 impl Scene for LinkScene {
@@ -68,7 +89,15 @@ impl Scene for LinkScene {
         self.zooms
     }
     fn pixels(&self, t: &Time, w: u32, h: u32) -> Option<RgbaImage> {
-        Some(frame(self.beats, self.keys, self.notes, t, &poly3d::View::default(), w, h))
+        Some(frame(
+            self.beats,
+            self.keys,
+            self.notes,
+            t,
+            &poly3d::View::default(),
+            w,
+            h,
+        ))
     }
     fn notes_in_picture(&self) -> bool {
         self.notes
@@ -94,22 +123,140 @@ pub struct LinkNode {
 macro_rules! link_node {
     ($zooms:ident, $sections:ident, $z:ident, $s:ident) => {
         pub const $zooms: [crate::ui::anim::Zoom; 5] = [
-            crate::ui::anim::Zoom { key: $z[0].0, label: $z[0].1, build: || Box::new(super::diagrams_scene_link::LinkScene { beats: $z[0].2, keys: $z[0].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[1].0, label: $z[1].1, build: || Box::new(super::diagrams_scene_link::LinkScene { beats: $z[1].2, keys: $z[1].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[2].0, label: $z[2].1, build: || Box::new(super::diagrams_scene_link::LinkScene { beats: $z[2].2, keys: $z[2].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[3].0, label: $z[3].1, build: || Box::new(super::diagrams_scene_link::LinkScene { beats: $z[3].2, keys: $z[3].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[4].0, label: $z[4].1, build: || Box::new(super::diagrams_scene_link::LinkScene { beats: $z[4].2, keys: $z[4].3, zooms: &[], notes: false }) },
+            crate::ui::anim::Zoom {
+                key: $z[0].0,
+                label: $z[0].1,
+                build: || {
+                    Box::new(super::diagrams_scene_link::LinkScene {
+                        beats: $z[0].2,
+                        keys: $z[0].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[1].0,
+                label: $z[1].1,
+                build: || {
+                    Box::new(super::diagrams_scene_link::LinkScene {
+                        beats: $z[1].2,
+                        keys: $z[1].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[2].0,
+                label: $z[2].1,
+                build: || {
+                    Box::new(super::diagrams_scene_link::LinkScene {
+                        beats: $z[2].2,
+                        keys: $z[2].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[3].0,
+                label: $z[3].1,
+                build: || {
+                    Box::new(super::diagrams_scene_link::LinkScene {
+                        beats: $z[3].2,
+                        keys: $z[3].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[4].0,
+                label: $z[4].1,
+                build: || {
+                    Box::new(super::diagrams_scene_link::LinkScene {
+                        beats: $z[4].2,
+                        keys: $z[4].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
         ];
         pub const $sections: [fn() -> Box<dyn crate::ui::anim::Scene>; 9] = [
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[0].0, keys: $s[0].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[1].0, keys: $s[1].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[2].0, keys: $s[2].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[3].0, keys: $s[3].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[4].0, keys: $s[4].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[5].0, keys: $s[5].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[6].0, keys: $s[6].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[7].0, keys: $s[7].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_link::LinkScene { beats: $s[8].0, keys: $s[8].1, zooms: &[], notes: false }),
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[0].0,
+                    keys: $s[0].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[1].0,
+                    keys: $s[1].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[2].0,
+                    keys: $s[2].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[3].0,
+                    keys: $s[3].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[4].0,
+                    keys: $s[4].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[5].0,
+                    keys: $s[5].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[6].0,
+                    keys: $s[6].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[7].0,
+                    keys: $s[7].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_link::LinkScene {
+                    beats: $s[8].0,
+                    keys: $s[8].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
         ];
     };
 }
@@ -133,16 +280,67 @@ pub fn node(page: &str) -> Option<&'static LinkNode> {
 }
 
 /// The overview scene of a Fiber-tab page.
+/// The LASER overview, authored in Blender (tools/pbr3d/blender/laser_overview.py) and played
+/// back by pbr3d: the same seven beats and the same camera tour as the poly3d keyframes.
+static LASER_SCENE: std::sync::OnceLock<pbr3d::scene_gltf::Scene> = std::sync::OnceLock::new();
+
+fn laser_scene() -> &'static pbr3d::scene_gltf::Scene {
+    LASER_SCENE.get_or_init(|| {
+        pbr3d::scene_gltf::Scene::from_glb(include_bytes!("../../../tools/pbr3d/assets/laser_overview.glb"))
+            .expect("laser_overview.glb is a valid export")
+    })
+}
+
+/// The LASER overview as a Blender scene: beat `t.beat` at `t.local` is that point of the file's clock.
+pub struct LaserOverview {
+    beats: &'static [Beat],
+    zooms: &'static [Zoom],
+}
+
+impl Scene for LaserOverview {
+    fn size(&self) -> (u16, u16) {
+        (MIN_W, MIN_H)
+    }
+    fn beats(&self) -> &[Beat] {
+        self.beats
+    }
+    fn draw(&self, _c: &mut Canvas, _t: &Time) {}
+    fn zooms(&self) -> &[Zoom] {
+        self.zooms
+    }
+    fn pixels(&self, t: &Time, w: u32, h: u32) -> Option<RgbaImage> {
+        let secs = t.beat as f32 + t.local;
+        Some(pbr3d::scene_gltf::render(laser_scene(), secs, w, h, px::BG))
+    }
+    fn notes_in_picture(&self) -> bool {
+        true
+    }
+    fn rest_point(&self) -> f32 {
+        0.4
+    }
+}
+
 pub fn overview(page: &str) -> Option<Box<dyn Scene>> {
     let n = node(page)?;
-    Some(Box::new(LinkScene { beats: n.beats, keys: n.keys, zooms: n.zooms, notes: true }))
+    if page == "LASER" {
+        return Some(Box::new(LaserOverview { beats: n.beats, zooms: n.zooms }));
+    }
+    Some(Box::new(LinkScene {
+        beats: n.beats,
+        keys: n.keys,
+        zooms: n.zooms,
+        notes: true,
+    }))
 }
 
 /// The keyframes behind zoom `key` (a letter) or section `key` (a digit) of `page`.
 pub fn keys_for(page: &str, key: char) -> Option<&'static [LinkKey]> {
     let n = node(page)?;
     if let Some(d) = key.to_digit(10) {
-        return n.section_data.get((d as usize).checked_sub(1)?).map(|s| s.1);
+        return n
+            .section_data
+            .get((d as usize).checked_sub(1)?)
+            .map(|s| s.1);
     }
     n.zoom_data.iter().find(|z| z.0 == key).map(|z| z.3)
 }
@@ -154,7 +352,8 @@ mod tests {
     use std::time::Instant;
 
     fn all_scenes(n: &LinkNode) -> Vec<(String, Box<dyn Scene>)> {
-        let mut v: Vec<(String, Box<dyn Scene>)> = vec![("overview".into(), overview(n.page).unwrap())];
+        let mut v: Vec<(String, Box<dyn Scene>)> =
+            vec![("overview".into(), overview(n.page).unwrap())];
         for z in n.zooms {
             v.push((z.key.to_string(), (z.build)()));
         }
@@ -182,7 +381,12 @@ mod tests {
             assert_eq!(heads, 10, "{}: nine scene sections plus sources", n.page);
             for (_, sc) in all_scenes(n) {
                 for b in sc.beats() {
-                    assert!(!b.caption.is_empty() && !b.what.is_empty(), "{}: {}", n.page, b.caption);
+                    assert!(
+                        !b.caption.is_empty() && !b.what.is_empty(),
+                        "{}: {}",
+                        n.page,
+                        b.caption
+                    );
                 }
             }
         }
@@ -198,7 +402,12 @@ mod tests {
                     let img = p.pixels(&p.time_at(ms), 120, 72).expect("pixel frame");
                     seen.insert(img.into_raw());
                 }
-                assert!(seen.len() > 8, "{} {name}: {} distinct frames", n.page, seen.len());
+                assert!(
+                    seen.len() > 8,
+                    "{} {name}: {} distinct frames",
+                    n.page,
+                    seen.len()
+                );
             }
         }
     }
@@ -208,7 +417,9 @@ mod tests {
     #[test]
     #[ignore]
     fn dump_link_frames() {
-        let Some(dir) = std::env::var_os("FL_PX_DUMP") else { return };
+        let Some(dir) = std::env::var_os("FL_PX_DUMP") else {
+            return;
+        };
         let only = std::env::var("FL_LINK").ok();
         let dir = std::path::PathBuf::from(dir);
         std::fs::create_dir_all(&dir).unwrap();
@@ -220,12 +431,41 @@ mod tests {
                 let beats = sc.beats().len();
                 let p = Player::new(sc, Instant::now());
                 for beat in 0..beats {
-                    let t = Time { ms: 0, beat, local: 0.7, beat_start: 0 };
-                    let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                    let t = Time {
+                        ms: 0,
+                        beat,
+                        local: 0.7,
+                        beat_start: 0,
+                    };
+                    let (w, h) = if name == "overview" {
+                        (1900, 1000)
+                    } else {
+                        (960, 576)
+                    };
                     let img = p.pixels(&t, w, h).unwrap();
-                    img.save(dir.join(format!("{}_{name}_{beat}.png", n.page.replace(' ', "_")))).unwrap();
+                    img.save(dir.join(format!("{}_{name}_{beat}.png", n.page.replace(' ', "_"))))
+                        .unwrap();
                 }
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod laser_overview_tests {
+    use super::*;
+
+    #[test]
+    fn blender_overview_draws_every_beat() {
+        let scene = overview("LASER").expect("LASER page has an overview");
+        let beats = scene.beats().len();
+        assert_eq!(beats, 7);
+        for beat in 0..beats {
+            let t = Time { beat, local: 0.5, ms: 0, beat_start: 0 };
+            let img = scene.pixels(&t, 160, 100).expect("the Blender overview draws a picture");
+            let bg = px::BG;
+            let drawn = img.pixels().filter(|p| p.0[0] != bg[0] || p.0[1] != bg[1] || p.0[2] != bg[2]).count();
+            assert!(drawn > 160 * 100 / 50, "beat {beat} only {drawn} pixels off the background");
         }
     }
 }

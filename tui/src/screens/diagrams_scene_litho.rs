@@ -2,8 +2,9 @@
 // The overview walks one layer through the scanner: align, light the reticle, project
 // it 4x smaller, scan one field, step across the wafer, develop, and strip for the next
 // layer, with the camera gliding to the part each beat is about and the notes on the
-// picture. Each zoom (a-e) is its own focused 3D scene: a the reticle, b the lens and
-// NA, c inside the resist, d step and scan, e overlay. Sections 1-9 each have one too.
+// picture. Each zoom (a-f) is its own focused 3D scene: a the reticle, b the lens and
+// NA, c inside the resist, d step and scan, e overlay, f why EUV is hard. Sections 1-9
+// each have one too.
 //
 // Everything is continuous between beats and across the loop, so nothing cuts.
 //
@@ -122,6 +123,11 @@ const ZOOMS: &[Zoom] = &[
         label: "overlay: lining up with the layer below",
         build: || -> Box<dyn Scene> { Box::new(OverlayZ) },
     },
+    Zoom {
+        key: 'f',
+        label: "EUV light: tin, plasma and mirrors",
+        build: || -> Box<dyn Scene> { Box::new(EuvZ) },
+    },
 ];
 
 /// The overview at `t`, turned by the user's `view`, with the beat's notes drawn on
@@ -180,6 +186,7 @@ pub fn zoom_scene(key: char) -> Option<LithoZoom> {
         'c' => LithoZoom::Resist,
         'd' => LithoZoom::Scan,
         'e' => LithoZoom::Overlay,
+        'f' => LithoZoom::Euv,
         '1' => LithoZoom::Print,
         '2' => LithoZoom::Parts,
         '3' => LithoZoom::Order,
@@ -290,7 +297,8 @@ const SCAN_BEATS: &[Beat] = &[
             "The reticle runs along its rails while the wafer runs the other way, and pink lines grow across one field.",
         )
         .detail("Only a slit of the lens is used, which keeps the optics' errors small.", &["Reticle travel = 4x wafer travel"]),
-    Beat::new("step: field after field, scans alternating", BEAT_MS)
+    // twice the time: the walk steps through every field on the wafer, so this halves its speed
+    Beat::new("step: field after field, scans alternating", BEAT_MS * 2)
         .note(
             "The stage steps to the next field and scans again, each scan the opposite way to the last, until every field on the wafer is exposed.",
             "Looking down, the wafer hops in rows and the fields fill in one after another.",
@@ -330,8 +338,30 @@ zoom_scene_impl!(LensZ, LENS_BEATS, LithoZoom::Lens);
 zoom_scene_impl!(ResistZ, RESIST_BEATS, LithoZoom::Resist);
 zoom_scene_impl!(ScanZ, SCAN_BEATS, LithoZoom::Scan);
 zoom_scene_impl!(OverlayZ, OVERLAY_BEATS, LithoZoom::Overlay);
+zoom_scene_impl!(EuvZ, EUV_BEATS, LithoZoom::Euv);
 
 // ---- 1-9: the write-up's sections ---------------------------------------------
+
+const EUV_BEATS: &[Beat] = &[
+    Beat::new("EUV light: a laser hits each tin droplet twice", BEAT_MS)
+        .note(
+            "Tin droplets fall at over 240 km/h, about 50,000 a second. A CO2 laser hits each one twice: the first pulse flattens it, the second vaporises it into plasma that flashes 13.5 nm light.",
+            "A tin droplet falls into a laser flash; a bright plasma bursts where it lands and debris flies off.",
+        )
+        .detail("Debris from the blast can coat the optics that make the light.", &["Tin droplet: about 50,000 a second", "13.5 nm light from the plasma"]),
+    Beat::new("no glass: the light bounces off mirrors", BEAT_MS)
+        .note(
+            "EUV is absorbed by air and by glass, so the whole path sits in vacuum and the light bounces off multilayer mirrors. Each keeps about 70%, so a dozen leave about 1%.",
+            "Light zig-zags down a row of mirrors, each one glowing a little dimmer than the last.",
+        )
+        .detail("Each mirror is a stack of molybdenum and silicon layers.", &["Each Mo/Si mirror keeps about 70%", "A dozen mirrors leave about 1%"]),
+    Beat::new("sub-nanometre parts from a long supply chain", BEAT_MS)
+        .note(
+            "Mirrors, stages and lasers must hold sub-nanometre alignment. The machine is hundreds of thousands of parts, many from a few specialist suppliers such as Zeiss for ultra-flat optics.",
+            "Parts settle into a pile in front of the mirror stack, and one mirror trembles.",
+        )
+        .detail("Decades of know-how make the tool hard to copy.", &["Zeiss: ultra-flat optics", "ASML integrates the scanner"]),
+];
 
 const PRINT_BEATS: &[Beat] = &[
     Beat::new("light passes the openings in the reticle", BEAT_MS)
@@ -443,14 +473,32 @@ const MULTI_BEATS: &[Beat] = &[
 
 const MAKERS_BEATS: &[Beat] = &[
     Beat::new("ASML (ASML): EUV and DUV", BEAT_MS)
-        .note("ASML is the only maker of EUV scanners, and also makes DUV scanners.", "The ASML scanner carries a glowing EUV source.")
-        .detail("Every EUV layer in the world runs on an ASML tool.", &["Only EUV scanner maker: ASML (ASML 20-F)"]),
+        .note(
+            "ASML is the only maker of EUV scanners, and also makes DUV scanners.",
+            "The ASML scanner carries a glowing EUV source.",
+        )
+        .detail(
+            "Every EUV layer in the world runs on an ASML tool.",
+            &["Only EUV scanner maker: ASML (ASML 20-F)"],
+        ),
     Beat::new("Nikon (7731.T): DUV", BEAT_MS)
-        .note("Nikon makes DUV scanners.", "The Nikon scanner is in the spotlight.")
-        .detail("DUV still prints most layers of a chip.", &["Nikon ticker: 7731.T"]),
+        .note(
+            "Nikon makes DUV scanners.",
+            "The Nikon scanner is in the spotlight.",
+        )
+        .detail(
+            "DUV still prints most layers of a chip.",
+            &["Nikon ticker: 7731.T"],
+        ),
     Beat::new("Canon (7751.T): DUV", BEAT_MS)
-        .note("Canon makes DUV scanners.", "The Canon scanner is in the spotlight.")
-        .detail("Resist makers are mostly in Japan.", &["Canon ticker: 7751.T"]),
+        .note(
+            "Canon makes DUV scanners.",
+            "The Canon scanner is in the spotlight.",
+        )
+        .detail(
+            "Resist makers are mostly in Japan.",
+            &["Canon ticker: 7751.T"],
+        ),
 ];
 
 const RISKS_BEATS: &[Beat] = &[
@@ -533,17 +581,30 @@ mod tests {
     fn beats_match_their_pictures() {
         assert_eq!(BEATS.len(), poly3d::LITHO_OVERVIEW_BEATS);
         for z in ZOOMS {
-            assert_eq!((z.build)().beats().len(), zoom_scene(z.key).unwrap().beats(), "zoom {}", z.key);
+            assert_eq!(
+                (z.build)().beats().len(),
+                zoom_scene(z.key).unwrap().beats(),
+                "zoom {}",
+                z.key
+            );
         }
         for (key, mk) in ('1'..='9').zip(SECTIONS) {
-            assert_eq!(mk().beats().len(), zoom_scene(key).unwrap().beats(), "section {key}");
+            assert_eq!(
+                mk().beats().len(),
+                zoom_scene(key).unwrap().beats(),
+                "section {key}"
+            );
         }
         let heads = super::super::diagrams_desc::visual("LITHO")
             .unwrap()
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len() + 1, "one scene per section but the sources");
+        assert_eq!(
+            heads,
+            SECTIONS.len() + 1,
+            "one scene per section but the sources"
+        );
     }
 
     #[test]
@@ -584,7 +645,11 @@ mod tests {
             let p = Player::new(scene, Instant::now());
             for beat in 0..beats {
                 let t = at(beat, 0.6);
-                let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                let (w, h) = if name == "overview" {
+                    (1900, 1000)
+                } else {
+                    (960, 576)
+                };
                 let img = p.pixels(&t, w, h).expect("pixel frame");
                 img.save(dir.join(format!("{name}_{beat}.png"))).unwrap();
             }

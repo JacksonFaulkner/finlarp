@@ -42,10 +42,31 @@ pub struct PkgScene {
 }
 
 /// A frame of `keys` at `t`, turned by `view`, with `beats`' notes on it when `notes`.
-pub fn frame(beats: &[Beat], keys: &'static [PkgKey], notes: bool, t: &Time, view: &poly3d::View, w: u32, h: u32) -> RgbaImage {
+pub fn frame(
+    beats: &[Beat],
+    keys: &'static [PkgKey],
+    notes: bool,
+    t: &Time,
+    view: &poly3d::View,
+    w: u32,
+    h: u32,
+) -> RgbaImage {
     let b = &beats[t.beat.min(beats.len() - 1)];
-    let n = poly3d::Notes { what: b.what, why: b.why, facts: b.facts };
-    poly3d::render_pkg(keys, t.beat, t.local as f64, view, notes.then_some(&n), w as usize, h as usize, px::BG)
+    let n = poly3d::Notes {
+        what: b.what,
+        why: b.why,
+        facts: b.facts,
+    };
+    poly3d::render_pkg(
+        keys,
+        t.beat,
+        t.local as f64,
+        view,
+        notes.then_some(&n),
+        w as usize,
+        h as usize,
+        px::BG,
+    )
 }
 
 impl Scene for PkgScene {
@@ -60,7 +81,15 @@ impl Scene for PkgScene {
         self.zooms
     }
     fn pixels(&self, t: &Time, w: u32, h: u32) -> Option<RgbaImage> {
-        Some(frame(self.beats, self.keys, self.notes, t, &poly3d::View::default(), w, h))
+        Some(frame(
+            self.beats,
+            self.keys,
+            self.notes,
+            t,
+            &poly3d::View::default(),
+            w,
+            h,
+        ))
     }
     fn notes_in_picture(&self) -> bool {
         self.notes
@@ -86,22 +115,140 @@ pub struct PkgNode {
 macro_rules! pkg_node {
     ($zooms:ident, $sections:ident, $z:ident, $s:ident) => {
         pub const $zooms: [crate::ui::anim::Zoom; 5] = [
-            crate::ui::anim::Zoom { key: $z[0].0, label: $z[0].1, build: || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $z[0].2, keys: $z[0].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[1].0, label: $z[1].1, build: || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $z[1].2, keys: $z[1].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[2].0, label: $z[2].1, build: || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $z[2].2, keys: $z[2].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[3].0, label: $z[3].1, build: || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $z[3].2, keys: $z[3].3, zooms: &[], notes: false }) },
-            crate::ui::anim::Zoom { key: $z[4].0, label: $z[4].1, build: || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $z[4].2, keys: $z[4].3, zooms: &[], notes: false }) },
+            crate::ui::anim::Zoom {
+                key: $z[0].0,
+                label: $z[0].1,
+                build: || {
+                    Box::new(super::diagrams_scene_pkg::PkgScene {
+                        beats: $z[0].2,
+                        keys: $z[0].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[1].0,
+                label: $z[1].1,
+                build: || {
+                    Box::new(super::diagrams_scene_pkg::PkgScene {
+                        beats: $z[1].2,
+                        keys: $z[1].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[2].0,
+                label: $z[2].1,
+                build: || {
+                    Box::new(super::diagrams_scene_pkg::PkgScene {
+                        beats: $z[2].2,
+                        keys: $z[2].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[3].0,
+                label: $z[3].1,
+                build: || {
+                    Box::new(super::diagrams_scene_pkg::PkgScene {
+                        beats: $z[3].2,
+                        keys: $z[3].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
+            crate::ui::anim::Zoom {
+                key: $z[4].0,
+                label: $z[4].1,
+                build: || {
+                    Box::new(super::diagrams_scene_pkg::PkgScene {
+                        beats: $z[4].2,
+                        keys: $z[4].3,
+                        zooms: &[],
+                        notes: false,
+                    })
+                },
+            },
         ];
         pub const $sections: [fn() -> Box<dyn crate::ui::anim::Scene>; 9] = [
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[0].0, keys: $s[0].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[1].0, keys: $s[1].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[2].0, keys: $s[2].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[3].0, keys: $s[3].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[4].0, keys: $s[4].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[5].0, keys: $s[5].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[6].0, keys: $s[6].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[7].0, keys: $s[7].1, zooms: &[], notes: false }),
-            || Box::new(super::diagrams_scene_pkg::PkgScene { beats: $s[8].0, keys: $s[8].1, zooms: &[], notes: false }),
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[0].0,
+                    keys: $s[0].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[1].0,
+                    keys: $s[1].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[2].0,
+                    keys: $s[2].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[3].0,
+                    keys: $s[3].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[4].0,
+                    keys: $s[4].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[5].0,
+                    keys: $s[5].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[6].0,
+                    keys: $s[6].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[7].0,
+                    keys: $s[7].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
+            || {
+                Box::new(super::diagrams_scene_pkg::PkgScene {
+                    beats: $s[8].0,
+                    keys: $s[8].1,
+                    zooms: &[],
+                    notes: false,
+                })
+            },
         ];
     };
 }
@@ -127,14 +274,22 @@ pub fn node(page: &str) -> Option<&'static PkgNode> {
 /// The overview scene of a Packaging-tab page.
 pub fn overview(page: &str) -> Option<Box<dyn Scene>> {
     let n = node(page)?;
-    Some(Box::new(PkgScene { beats: n.beats, keys: n.keys, zooms: n.zooms, notes: true }))
+    Some(Box::new(PkgScene {
+        beats: n.beats,
+        keys: n.keys,
+        zooms: n.zooms,
+        notes: true,
+    }))
 }
 
 /// The keyframes behind zoom `key` (a letter) or section `key` (a digit) of `page`.
 pub fn keys_for(page: &str, key: char) -> Option<&'static [PkgKey]> {
     let n = node(page)?;
     if let Some(d) = key.to_digit(10) {
-        return n.section_data.get((d as usize).checked_sub(1)?).map(|s| s.1);
+        return n
+            .section_data
+            .get((d as usize).checked_sub(1)?)
+            .map(|s| s.1);
     }
     n.zoom_data.iter().find(|z| z.0 == key).map(|z| z.3)
 }
@@ -146,7 +301,8 @@ mod tests {
     use std::time::Instant;
 
     fn all_scenes(n: &PkgNode) -> Vec<(String, Box<dyn Scene>)> {
-        let mut v: Vec<(String, Box<dyn Scene>)> = vec![("overview".into(), overview(n.page).unwrap())];
+        let mut v: Vec<(String, Box<dyn Scene>)> =
+            vec![("overview".into(), overview(n.page).unwrap())];
         for z in n.zooms {
             v.push((z.key.to_string(), (z.build)()));
         }
@@ -174,7 +330,12 @@ mod tests {
             assert_eq!(heads, 10, "{}: nine scene sections plus sources", n.page);
             for (_, sc) in all_scenes(n) {
                 for b in sc.beats() {
-                    assert!(!b.caption.is_empty() && !b.what.is_empty(), "{}: {}", n.page, b.caption);
+                    assert!(
+                        !b.caption.is_empty() && !b.what.is_empty(),
+                        "{}: {}",
+                        n.page,
+                        b.caption
+                    );
                 }
             }
         }
@@ -190,7 +351,12 @@ mod tests {
                     let img = p.pixels(&p.time_at(ms), 120, 72).expect("pixel frame");
                     seen.insert(img.into_raw());
                 }
-                assert!(seen.len() > 8, "{} {name}: {} distinct frames", n.page, seen.len());
+                assert!(
+                    seen.len() > 8,
+                    "{} {name}: {} distinct frames",
+                    n.page,
+                    seen.len()
+                );
             }
         }
     }
@@ -200,7 +366,9 @@ mod tests {
     #[test]
     #[ignore]
     fn dump_pkg_frames() {
-        let Some(dir) = std::env::var_os("FL_PX_DUMP") else { return };
+        let Some(dir) = std::env::var_os("FL_PX_DUMP") else {
+            return;
+        };
         let only = std::env::var("FL_PKG").ok();
         let dir = std::path::PathBuf::from(dir);
         std::fs::create_dir_all(&dir).unwrap();
@@ -212,10 +380,20 @@ mod tests {
                 let beats = sc.beats().len();
                 let p = Player::new(sc, Instant::now());
                 for beat in 0..beats {
-                    let t = Time { ms: 0, beat, local: 0.7, beat_start: 0 };
-                    let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                    let t = Time {
+                        ms: 0,
+                        beat,
+                        local: 0.7,
+                        beat_start: 0,
+                    };
+                    let (w, h) = if name == "overview" {
+                        (1900, 1000)
+                    } else {
+                        (960, 576)
+                    };
                     let img = p.pixels(&t, w, h).unwrap();
-                    img.save(dir.join(format!("{}_{name}_{beat}.png", n.page.replace(' ', "_")))).unwrap();
+                    img.save(dir.join(format!("{}_{name}_{beat}.png", n.page.replace(' ', "_"))))
+                        .unwrap();
                 }
             }
         }

@@ -87,11 +87,24 @@ const ORBIT: &[(&str, char)] = &[
     ("CELL", '7'),
     ("CELL", '8'),
     ("CELL", '9'),
+    ("MELT + PULL", 'a'),
+    ("MELT + PULL", 'b'),
+    ("MELT + PULL", 'c'),
+    ("MELT + PULL", '1'),
+    ("MELT + PULL", '2'),
+    ("MELT + PULL", '3'),
+    ("MELT + PULL", '4'),
+    ("MELT + PULL", '5'),
+    ("MELT + PULL", '6'),
+    ("MELT + PULL", '7'),
+    ("MELT + PULL", '8'),
+    ("MELT + PULL", '9'),
     ("LITHO", 'a'),
     ("LITHO", 'b'),
     ("LITHO", 'c'),
     ("LITHO", 'd'),
     ("LITHO", 'e'),
+    ("LITHO", 'f'),
     ("LITHO", '1'),
     ("LITHO", '2'),
     ("LITHO", '3'),
@@ -162,7 +175,8 @@ const ORBIT: &[(&str, char)] = &[
 /// Whether zoom `key` of `page` has a 3D model the full-screen view can orbit.
 pub fn orbitable(page: &str, key: char) -> bool {
     ORBIT.iter().any(|(p, k)| *p == page && *k == key)
-        || (super::diagrams_scene_chip::node(page).is_some() && super::diagrams_scene_chip::keys_for(page, key).is_some())
+        || (super::diagrams_scene_chip::node(page).is_some()
+            && super::diagrams_scene_chip::keys_for(page, key).is_some())
         || super::diagrams_scene_pkg::keys_for(page, key).is_some()
         || super::diagrams_scene_link::keys_for(page, key).is_some()
         || super::diagrams_scene_pwr::keys_for(page, key).is_some()
@@ -176,32 +190,28 @@ pub fn anim_for(page: &str) -> Option<Anim> {
         .and_then(|(_, s)| parse(s))
 }
 
-const MELT_SECTIONS: [fn() -> Box<dyn Scene>; 9] = [
-    super::diagrams_sec_melt_1::build,
-    super::diagrams_sec_melt_2::build,
-    super::diagrams_sec_melt_3::build,
-    super::diagrams_sec_melt_4::build,
-    super::diagrams_sec_melt_5::build,
-    super::diagrams_sec_melt_6::build,
-    super::diagrams_sec_melt_7::build,
-    super::diagrams_sec_melt_8::build,
-    super::diagrams_sec_melt_9::build,
-];
-
 /// Animated close-up for numbered section `i` of a node page, if the page has one.
 pub fn section_anim(page: &str, i: usize) -> Option<fn() -> Box<dyn Scene>> {
     match page {
-        "MELT + PULL" => MELT_SECTIONS.get(i).copied(),
+        "MELT + PULL" => super::diagrams_scene_melt_sec::SECTIONS.get(i).copied(),
         "CELL" => super::diagrams_scene_cell::SECTIONS.get(i).copied(),
         "LITHO" => super::diagrams_scene_litho::SECTIONS.get(i).copied(),
         "ARRAY" => super::diagrams_scene_array::SECTIONS.get(i).copied(),
         "BANK" => super::diagrams_scene_bank::SECTIONS.get(i).copied(),
         "BANDWIDTH" => super::diagrams_scene_bandwidth::SECTIONS.get(i).copied(),
         "HBM STACK" => super::diagrams_scene_hbm::SECTIONS.get(i).copied(),
-        _ if super::diagrams_scene_chip::node(page).is_some() => super::diagrams_scene_chip::node(page).and_then(|n| n.sections.get(i).copied()),
-        _ if super::diagrams_scene_pkg::node(page).is_some() => super::diagrams_scene_pkg::node(page).and_then(|n| n.sections.get(i).copied()),
-        _ if super::diagrams_scene_link::node(page).is_some() => super::diagrams_scene_link::node(page).and_then(|n| n.sections.get(i).copied()),
-        _ if super::diagrams_scene_pwr::node(page).is_some() => super::diagrams_scene_pwr::node(page).and_then(|n| n.sections.get(i).copied()),
+        _ if super::diagrams_scene_chip::node(page).is_some() => {
+            super::diagrams_scene_chip::node(page).and_then(|n| n.sections.get(i).copied())
+        }
+        _ if super::diagrams_scene_pkg::node(page).is_some() => {
+            super::diagrams_scene_pkg::node(page).and_then(|n| n.sections.get(i).copied())
+        }
+        _ if super::diagrams_scene_link::node(page).is_some() => {
+            super::diagrams_scene_link::node(page).and_then(|n| n.sections.get(i).copied())
+        }
+        _ if super::diagrams_scene_pwr::node(page).is_some() => {
+            super::diagrams_scene_pwr::node(page).and_then(|n| n.sections.get(i).copied())
+        }
         _ => super::diagrams_nodes::section(page, i),
     }
 }

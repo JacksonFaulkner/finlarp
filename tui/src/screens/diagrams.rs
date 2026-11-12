@@ -24,14 +24,16 @@ use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 
 use super::diagrams_anim::{orbitable, scene_for, section_anim};
 use super::diagrams_art::{DIAGRAMS, Diagram};
+use super::diagrams_chat::{Chat, Quiz, Step};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
-use super::diagrams_scene_cell::zoom_scene;
-use super::diagrams_scene_litho::zoom_scene as litho_zoom_scene;
 use super::diagrams_scene_array::zoom_scene as array_zoom_scene;
-use super::diagrams_scene_bank::zoom_scene as bank_zoom_scene;
 use super::diagrams_scene_bandwidth::zoom_scene as bw_zoom_scene;
+use super::diagrams_scene_bank::zoom_scene as bank_zoom_scene;
+use super::diagrams_scene_cell::zoom_scene;
 use super::diagrams_scene_hbm::zoom_scene as hbm_zoom_scene;
+use super::diagrams_scene_litho::zoom_scene as litho_zoom_scene;
+use super::diagrams_scene_melt_zoom::shot_for as melt_shot_for;
 use super::diagrams_scene_poly_zoom::bell_jar_anim;
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
 use crate::app::{Action, Ctx, Screen};
@@ -40,6 +42,10 @@ use crate::ui::help::{Key, key, render_footer, render_overlay};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 use image::{DynamicImage, RgbaImage};
+
+// Claude's tools and the demo, working on this screen's fields.
+#[path = "diagrams_tools.rs"]
+mod tools;
 use ratatui_image::picker::cap_parser::QueryStdioOptions;
 use ratatui_image::picker::{Picker, ProtocolType};
 use ratatui_image::protocol::kitty::StatefulKitty;
@@ -59,6 +65,9 @@ const KEYS: &[Key] = &[
     key("H/L, [/]", "previous / next diagram"),
     key("1-6", "jump to diagram"),
     key("g/G", "top / bottom"),
+    key("space aw", "ask claude (in a node)"),
+    key("X", "clear claude's notes"),
+    key("D", "demo: set questions, rate each"),
     key("?", "this help"),
     key("q", "back"),
 ];
@@ -97,9 +106,19 @@ pub struct Diagrams {
     popup_scroll: u16,
     view: PopupView,
     menu_sel: usize,
-    /// Scroll of the beat notes beside an animation (j/k), and the beat they were last scrolled on.
-    notes_scroll: u16,
-    notes_beat: Option<usize>,
+    /// Asking Claude about the open node (`<space>aw`), and the node its notes belong to.
+    chat: Chat,
+    note_page: Option<String>,
+    /// Directives from the answer still to run, and when the next may (a `wait`).
+    queue: std::collections::VecDeque<Step>,
+    wait_until: Option<Instant>,
+    /// Claude's tools: the socket they arrive on, a result still owed, the part names.
+    tools: tools::Tools,
+    /// The run through the set questions (`fl diagrams demo`), and where it starts.
+    demo: Option<tools::Demo>,
+    demo_start: Option<usize>,
+    /// A tool changed the screen: draw once more.
+    redraw: bool,
     /// The open zoom-in: (index in the scene's zooms, its player).
     zoom: Option<(usize, Player)>,
     /// The open animation is a numbered section, not a zoom-in.
@@ -166,8 +185,12 @@ enum Model {
     CellOverview(crate::ui::anim::Time),
     /// one of the LITHO page's focused scenes at a beat and a position through it
     Litho(poly3d::LithoZoom, usize, f64),
+    /// a MELT + PULL zoom or section: a 3D close-up from pbr3d
+    Melt(pbr3d::Shot, usize, f64),
     /// the LITHO overview, with its notes on the picture
     LithoOverview(crate::ui::anim::Time),
+    /// the MELT + PULL overview: the realistic GPU render of the puller
+    MeltOverview(crate::ui::anim::Time),
     /// one of the ARRAY page's focused scenes at a beat and a position through it
     Array(poly3d::ArrayZoom, usize, f64),
     /// the ARRAY overview, with its notes on the picture
@@ -187,19 +210,35 @@ enum Model {
     /// a Chip-tab scene: its keyframes at a beat and a position through it
     Chip(&'static [poly3d::ChipKey], usize, f64),
     /// a Chip-tab overview: its beats (for the notes), keyframes, and time
-    ChipOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::ChipKey], crate::ui::anim::Time),
+    ChipOverview(
+        &'static [crate::ui::anim::Beat],
+        &'static [poly3d::ChipKey],
+        crate::ui::anim::Time,
+    ),
     /// a Packaging-tab scene: its keyframes at a beat and a position through it
     Pkg(&'static [poly3d::PkgKey], usize, f64),
     /// a Packaging-tab overview: its beats (for the notes), keyframes, and time
-    PkgOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::PkgKey], crate::ui::anim::Time),
+    PkgOverview(
+        &'static [crate::ui::anim::Beat],
+        &'static [poly3d::PkgKey],
+        crate::ui::anim::Time,
+    ),
     /// a Fiber-tab scene: its keyframes at a beat and a position through it
     Link(&'static [poly3d::LinkKey], usize, f64),
     /// a Fiber-tab overview: its beats (for the notes), keyframes, and time
-    LinkOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::LinkKey], crate::ui::anim::Time),
+    LinkOverview(
+        &'static [crate::ui::anim::Beat],
+        &'static [poly3d::LinkKey],
+        crate::ui::anim::Time,
+    ),
     /// a Power-tab scene: its keyframes at a beat and a position through it
     Pwr(&'static [poly3d::PwrKey], usize, f64),
     /// a Power-tab overview: its beats (for the notes), keyframes, and time
-    PwrOverview(&'static [crate::ui::anim::Beat], &'static [poly3d::PwrKey], crate::ui::anim::Time),
+    PwrOverview(
+        &'static [crate::ui::anim::Beat],
+        &'static [poly3d::PwrKey],
+        crate::ui::anim::Time,
+    ),
 }
 
 /// The 3D model of zoom `key` on `page`, at the zoom's clock.
@@ -211,6 +250,10 @@ fn model_at(page: &str, key: char, t: &crate::ui::anim::Time) -> Model {
         },
         "LITHO" => match litho_zoom_scene(key) {
             Some(z) => Model::Litho(z, t.beat, f64::from(t.local)),
+            None => Model::Jar(bell_jar_anim(t)),
+        },
+        "MELT + PULL" => match melt_shot_for(key) {
+            Some(s) => Model::Melt(s, t.beat, f64::from(t.local)),
             None => Model::Jar(bell_jar_anim(t)),
         },
         "ARRAY" => match array_zoom_scene(key) {
@@ -229,22 +272,30 @@ fn model_at(page: &str, key: char, t: &crate::ui::anim::Time) -> Model {
             Some(z) => Model::Hbm(z, t.beat, f64::from(t.local)),
             None => Model::Jar(bell_jar_anim(t)),
         },
-        _ if super::diagrams_scene_chip::node(page).is_some() => match super::diagrams_scene_chip::keys_for(page, key) {
-            Some(k) => Model::Chip(k, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        _ if super::diagrams_scene_pkg::node(page).is_some() => match super::diagrams_scene_pkg::keys_for(page, key) {
-            Some(k) => Model::Pkg(k, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        _ if super::diagrams_scene_link::node(page).is_some() => match super::diagrams_scene_link::keys_for(page, key) {
-            Some(k) => Model::Link(k, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        _ if super::diagrams_scene_pwr::node(page).is_some() => match super::diagrams_scene_pwr::keys_for(page, key) {
-            Some(k) => Model::Pwr(k, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
+        _ if super::diagrams_scene_chip::node(page).is_some() => {
+            match super::diagrams_scene_chip::keys_for(page, key) {
+                Some(k) => Model::Chip(k, t.beat, f64::from(t.local)),
+                None => Model::Jar(bell_jar_anim(t)),
+            }
+        }
+        _ if super::diagrams_scene_pkg::node(page).is_some() => {
+            match super::diagrams_scene_pkg::keys_for(page, key) {
+                Some(k) => Model::Pkg(k, t.beat, f64::from(t.local)),
+                None => Model::Jar(bell_jar_anim(t)),
+            }
+        }
+        _ if super::diagrams_scene_link::node(page).is_some() => {
+            match super::diagrams_scene_link::keys_for(page, key) {
+                Some(k) => Model::Link(k, t.beat, f64::from(t.local)),
+                None => Model::Jar(bell_jar_anim(t)),
+            }
+        }
+        _ if super::diagrams_scene_pwr::node(page).is_some() => {
+            match super::diagrams_scene_pwr::keys_for(page, key) {
+                Some(k) => Model::Pwr(k, t.beat, f64::from(t.local)),
+                None => Model::Jar(bell_jar_anim(t)),
+            }
+        }
         _ => Model::Jar(bell_jar_anim(t)),
     }
 }
@@ -259,93 +310,258 @@ fn model_key(m: Model) -> ModelKey {
             k[..7].copy_from_slice(&scene_key(a));
             k
         }
-        Model::Cell(z, beat, local) => {
-            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 1]
-        }
+        Model::Cell(z, beat, local) => [
+            z as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            1,
+        ],
         Model::CellOverview(t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 2]
         }
-        Model::Litho(z, beat, local) => {
-            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 3]
-        }
+        Model::Melt(s, beat, local) => [
+            match s {
+                pbr3d::Shot::Neck => 0,
+                pbr3d::Shot::Convection => 1,
+                pbr3d::Shot::HotZone => 2,
+                pbr3d::Shot::Sec(n) => 2 + n as i64,
+            },
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            22,
+        ],
+        Model::Litho(z, beat, local) => [
+            z as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            3,
+        ],
         Model::LithoOverview(t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 4]
         }
-        Model::Array(z, beat, local) => {
-            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 5]
-        }
+        Model::MeltOverview(t) => [t.beat as i64, (t.ms / 40) as i64, 0, 0, 0, 0, 0, 21],
+        Model::Array(z, beat, local) => [
+            z as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            5,
+        ],
         Model::ArrayOverview(t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 6]
         }
-        Model::Bank(z, beat, local) => {
-            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 7]
-        }
+        Model::Bank(z, beat, local) => [
+            z as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            7,
+        ],
         Model::BankOverview(t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 8]
         }
-        Model::Bw(z, beat, local) => {
-            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 9]
-        }
+        Model::Bw(z, beat, local) => [
+            z as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            9,
+        ],
         Model::BwOverview(t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 10]
         }
-        Model::Hbm(z, beat, local) => {
-            [z as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 11]
-        }
+        Model::Hbm(z, beat, local) => [
+            z as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            11,
+        ],
         Model::HbmOverview(t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
             [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 12]
         }
-        Model::Chip(k, beat, local) => {
-            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 13]
-        }
+        Model::Chip(k, beat, local) => [
+            k.as_ptr() as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            13,
+        ],
         Model::ChipOverview(_, k, t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 14]
+            [
+                k.as_ptr() as i64,
+                t.beat as i64,
+                (t.ms / 40) as i64,
+                a,
+                0,
+                0,
+                0,
+                14,
+            ]
         }
-        Model::Pkg(k, beat, local) => {
-            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 15]
-        }
+        Model::Pkg(k, beat, local) => [
+            k.as_ptr() as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            15,
+        ],
         Model::PkgOverview(_, k, t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 16]
+            [
+                k.as_ptr() as i64,
+                t.beat as i64,
+                (t.ms / 40) as i64,
+                a,
+                0,
+                0,
+                0,
+                16,
+            ]
         }
-        Model::Link(k, beat, local) => {
-            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 17]
-        }
+        Model::Link(k, beat, local) => [
+            k.as_ptr() as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            17,
+        ],
         Model::LinkOverview(_, k, t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 18]
+            [
+                k.as_ptr() as i64,
+                t.beat as i64,
+                (t.ms / 40) as i64,
+                a,
+                0,
+                0,
+                0,
+                18,
+            ]
         }
-        Model::Pwr(k, beat, local) => {
-            [k.as_ptr() as i64, beat as i64, (local * 400.0).round() as i64, 0, 0, 0, 0, 19]
-        }
+        Model::Pwr(k, beat, local) => [
+            k.as_ptr() as i64,
+            beat as i64,
+            (local * 400.0).round() as i64,
+            0,
+            0,
+            0,
+            0,
+            19,
+        ],
         Model::PwrOverview(_, k, t) => {
             let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [k.as_ptr() as i64, t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 20]
+            [
+                k.as_ptr() as i64,
+                t.beat as i64,
+                (t.ms / 40) as i64,
+                a,
+                0,
+                0,
+                0,
+                20,
+            ]
         }
     }
+}
+
+/// The chat's notes as plain rows over the foot of `r`, for scenes that are not 3D.
+fn draw_note_cells(frame: &mut Frame, r: Rect, notes: &[super::diagrams_chat::Note], t: &Theme) {
+    if notes.is_empty() || r.width < 24 || r.height < 4 {
+        return;
+    }
+    let w = (r.width as usize - 2).min(64);
+    let mut lines: Vec<Line> = Vec::new();
+    for n in notes {
+        let head = match (n.title.is_empty(), &n.on) {
+            (false, _) => format!("{}: ", n.title.to_uppercase()),
+            (true, Some(on)) => format!("{}: ", on.to_uppercase()),
+            (true, None) => String::new(),
+        };
+        for (i, l) in text::wrap(&format!("{head}{}", n.text), w.saturating_sub(2).max(10))
+            .into_iter()
+            .enumerate()
+        {
+            let bar = if i == 0 { "\u{258C} " } else { "  " };
+            lines.push(Line::from(vec![
+                Span::styled(bar, t.up()),
+                Span::styled(l, t.base()),
+            ]));
+        }
+    }
+    let h = (lines.len() as u16).min(r.height / 2);
+    let wide = lines.iter().map(Line::width).max().unwrap_or(0) as u16;
+    let at = Rect::new(r.x, r.y + r.height - h, wide.min(r.width), h);
+    frame.render_widget(Clear, at);
+    frame.render_widget(Paragraph::new(lines).style(t.base()), at);
 }
 
 fn render_model(m: Model, view: &poly3d::View, w: usize, h: usize) -> RgbaImage {
     match m {
         Model::Jar(a) => poly3d::render(&poly3d::Params::default(), a, view, w, h, FULL_BG),
-        Model::Cell(z, beat, local) => {
-            poly3d::render_zoom(z, beat, local, view, w, h, FULL_BG)
-        }
+        Model::Cell(z, beat, local) => poly3d::render_zoom(z, beat, local, view, w, h, FULL_BG),
         Model::CellOverview(t) => {
             super::diagrams_scene_cell::overview_frame(&t, view, w as u32, h as u32)
         }
+        Model::Melt(s, beat, local) => pbr3d::render_shot(
+            s,
+            beat,
+            local as f32,
+            view.yaw as f32,
+            view.pitch as f32,
+            view.zoom as f32,
+            w as u32,
+            h as u32,
+            FULL_BG,
+        ),
         Model::Litho(z, beat, local) => {
             poly3d::render_litho_zoom(z, beat, local, view, w, h, FULL_BG)
         }
         Model::LithoOverview(t) => {
             super::diagrams_scene_litho::overview_frame(&t, view, w as u32, h as u32)
+        }
+        Model::MeltOverview(t) => {
+            super::diagrams_scene_melt::overview_frame(&t, view, w as u32, h as u32)
         }
         Model::Array(z, beat, local) => {
             poly3d::render_array_zoom(z, beat, local, view, w, h, FULL_BG)
@@ -359,15 +575,11 @@ fn render_model(m: Model, view: &poly3d::View, w: usize, h: usize) -> RgbaImage 
         Model::BankOverview(t) => {
             super::diagrams_scene_bank::overview_frame(&t, view, w as u32, h as u32)
         }
-        Model::Bw(z, beat, local) => {
-            poly3d::render_bw_zoom(z, beat, local, view, w, h, FULL_BG)
-        }
+        Model::Bw(z, beat, local) => poly3d::render_bw_zoom(z, beat, local, view, w, h, FULL_BG),
         Model::BwOverview(t) => {
             super::diagrams_scene_bandwidth::overview_frame(&t, view, w as u32, h as u32)
         }
-        Model::Hbm(z, beat, local) => {
-            poly3d::render_hbm_zoom(z, beat, local, view, w, h, FULL_BG)
-        }
+        Model::Hbm(z, beat, local) => poly3d::render_hbm_zoom(z, beat, local, view, w, h, FULL_BG),
         Model::HbmOverview(t) => {
             super::diagrams_scene_hbm::overview_frame(&t, view, w as u32, h as u32)
         }
@@ -377,9 +589,7 @@ fn render_model(m: Model, view: &poly3d::View, w: usize, h: usize) -> RgbaImage 
         Model::ChipOverview(b, k, t) => {
             super::diagrams_scene_chip::frame(b, k, true, &t, view, w as u32, h as u32)
         }
-        Model::Pkg(k, beat, local) => {
-            poly3d::render_pkg(k, beat, local, view, None, w, h, FULL_BG)
-        }
+        Model::Pkg(k, beat, local) => poly3d::render_pkg(k, beat, local, view, None, w, h, FULL_BG),
         Model::PkgOverview(b, k, t) => {
             super::diagrams_scene_pkg::frame(b, k, true, &t, view, w as u32, h as u32)
         }
@@ -763,6 +973,12 @@ fn pane_ranges(art: &str) -> Vec<(usize, usize, usize)> {
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
+    // `fl diagrams demo [n]`: the set questions, from the nth
+    let demo_start = arg
+        .as_deref()
+        .map(str::trim)
+        .and_then(|a| a.strip_prefix("demo"))
+        .map(|n| n.trim().parse::<usize>().unwrap_or(1));
     let tab = arg
         .as_deref()
         .map(str::to_lowercase)
@@ -774,6 +990,17 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         .unwrap_or(0);
     // Must run before the event loop reads stdin: the terminal answers the query on stdin.
     let picker = query_picker();
+    // The realistic renderer's device and pipelines, built off the UI thread.
+    #[cfg(not(test))]
+    std::thread::spawn(pbr3d::warm);
+    // The chat column stands where the beats' notes were: the scenes leave theirs off
+    // the picture, and the chat's own notes start empty. (Tests render scenes in
+    // parallel against the same renderer, so they keep its defaults.)
+    #[cfg(not(test))]
+    {
+        poly3d::set_beat_notes(false);
+        poly3d::set_user_notes(Vec::new());
+    }
     Ok(Diagrams {
         theme: ctx.theme,
         picker,
@@ -795,8 +1022,14 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         popup_scroll: 0,
         view: PopupView::Pane,
         menu_sel: 0,
-        notes_scroll: 0,
-        notes_beat: None,
+        chat: Chat::new(),
+        note_page: None,
+        queue: std::collections::VecDeque::new(),
+        wait_until: None,
+        tools: tools::Tools::default(),
+        demo: None,
+        demo_start,
+        redraw: false,
         zoom: None,
         zoom_section: false,
         preview: None,
@@ -1049,6 +1282,189 @@ impl Diagrams {
         }
     }
 
+    /// Opens the selected node's popup: its menu when the page has a scene, else its text.
+    fn open_popup(&mut self) {
+        self.popup = !self.nodes[self.tab].is_empty();
+        self.popup_scroll = 0;
+        self.pane = 0;
+        self.anim_start = Instant::now();
+        self.player = self.cur_label().and_then(|l| page_key(&l)).map(|page| {
+            (
+                page,
+                scene_for(page).map(|sc| Player::new(sc, self.anim_start)),
+            )
+        });
+        self.view = if self.has_scene() {
+            PopupView::Menu
+        } else {
+            PopupView::Pane
+        };
+        self.menu_sel = 0;
+        self.zoom = None;
+        self.preview = None;
+        self.browse = false;
+        self.detail = false;
+        self.hsel = 0;
+        self.hots = self.nodes[self.tab]
+            .get(self.sel)
+            .map(|n| find_hots(&n.label))
+            .unwrap_or_default();
+        // notes point at one node's parts: a different node starts clean
+        let page = self.cur_label();
+        if self.note_page != page {
+            self.note_page = page;
+            if self.chat.clear_notes() {
+                self.sync_notes();
+            }
+        }
+    }
+
+    /// Hands Claude's notes and rings to the 3D renderer and drops the cached frame, so
+    /// the next draw shows them.
+    fn sync_notes(&mut self) {
+        self.full = None;
+        self.redraw = true;
+        // tests render scenes in parallel and share the renderer's note list: leave it alone
+        #[cfg(not(test))]
+        {
+            poly3d::set_user_notes(
+                self.chat
+                    .notes()
+                    .iter()
+                    .map(|n| poly3d::UserNote {
+                        title: n.title.clone(),
+                        text: n.text.clone(),
+                        on: n.on.clone(),
+                    })
+                    .collect(),
+            );
+            // a "pick the part" question moves a ring of its own
+            let mut marks = self.chat.marks().to_vec();
+            if let Some(Quiz::Part { names, cur, .. }) = &self.chat.quiz {
+                marks = names.get(*cur).cloned().into_iter().collect();
+            }
+            poly3d::set_user_marks(marks);
+            poly3d::set_part_names(!self.tools.names_hidden);
+        }
+    }
+
+    /// What Claude is told with each question: where the user is, what the picture
+    /// shows, and where it can go. The page's write-up goes with the first question
+    /// asked on a node.
+    fn chat_context(&mut self) -> String {
+        let d = &DIAGRAMS[self.tab];
+        let label = self.cur_label().unwrap_or_default();
+        let zooms = self.zoom_list();
+        let titles = self.pane_titles();
+        let mut s = format!(
+            "[diagram]\ntab: {} ({})\nnode: {}\n",
+            d.tab,
+            d.title,
+            label.trim()
+        );
+        let view = match self.view {
+            PopupView::Menu => "the node's menu".to_string(),
+            PopupView::Overview => "the overview animation".to_string(),
+            PopupView::Zoom | PopupView::Full => {
+                let i = self.zoom.as_ref().map_or(0, |(i, _)| *i);
+                if self.zoom_section {
+                    format!(
+                        "section animation {}",
+                        titles.get(i).cloned().unwrap_or_default()
+                    )
+                } else {
+                    let (k, l) = zooms.get(i).copied().unwrap_or((' ', ""));
+                    format!("zoom-in {k}: {l}")
+                }
+            }
+            PopupView::Pane => {
+                format!(
+                    "section text {}",
+                    titles.get(self.pane).cloned().unwrap_or_default()
+                )
+            }
+        };
+        s.push_str(&format!("view: {view}\n"));
+        let pictured =
+            matches!(self.view, PopupView::Overview | PopupView::Zoom) && self.has_scene();
+        s.push_str(if pictured {
+            "notes: visible in this view\n"
+        } else {
+            "notes: not visible in this view (no picture): goto the overview or a zoom-in to use them\n"
+        });
+        let in_scene = matches!(
+            self.view,
+            PopupView::Overview | PopupView::Zoom | PopupView::Full
+        );
+        if in_scene && let Some(p) = self.scene_player_mut() {
+            let paused = p.is_paused();
+            let shot = p.shot();
+            s.push_str(&format!(
+                "beat: {} of {}{}: {}\n",
+                shot.beat + 1,
+                shot.beats,
+                if paused { " (held)" } else { "" },
+                shot.caption
+            ));
+            for (head, body) in [
+                ("what's happening", shot.what),
+                ("why it matters", shot.why),
+                ("look for", shot.look),
+            ] {
+                if !body.is_empty() {
+                    s.push_str(&format!("{head}: {body}\n"));
+                }
+            }
+            if !shot.facts.is_empty() {
+                s.push_str(&format!("key numbers: {}\n", shot.facts.join("; ")));
+            }
+            let names = poly3d::seen_names();
+            if !names.is_empty() {
+                s.push_str(&format!("labels on the picture: {}\n", names.join(", ")));
+            }
+        }
+        if !zooms.is_empty() {
+            let list: Vec<String> = zooms.iter().map(|(k, l)| format!("{k} = {l}")).collect();
+            s.push_str(&format!("zoom-ins: {}\n", list.join("; ")));
+        }
+        if !titles.is_empty() {
+            s.push_str(&format!("sections: {}\n", titles.join("; ")));
+        }
+        if !self.chat.notes().is_empty() {
+            let list: Vec<String> = self
+                .chat
+                .notes()
+                .iter()
+                .map(|n| match &n.on {
+                    Some(on) => format!("{} (on {on}): {}", n.id, n.text),
+                    None => format!("{}: {}", n.id, n.text),
+                })
+                .collect();
+            s.push_str(&format!("notes up: {}\n", list.join(" | ")));
+        }
+        for (tab, nodes) in self.nodes.iter().enumerate() {
+            let list: Vec<&str> = nodes.iter().map(|n| n.label.trim()).collect();
+            if !list.is_empty() {
+                s.push_str(&format!(
+                    "nodes on tab {}: {}\n",
+                    DIAGRAMS[tab].tab,
+                    list.join(", ")
+                ));
+            }
+        }
+        if self.chat.sent_page.as_deref() != Some(label.as_str()) {
+            if let Some(desc) = describe(&label) {
+                s.push_str(&format!("\nabout this node: {desc}\n"));
+            }
+            if let Some(text) = visual(&label) {
+                s.push_str(&format!("\nwrite-up of this node:\n{text}\n"));
+            }
+            self.chat.sent_page = Some(label);
+        }
+        s.push_str("[/diagram]");
+        s
+    }
+
     /// A page animation is playing in the open popup.
     fn animating(&self) -> bool {
         if !self.popup || !self.has_scene() {
@@ -1090,18 +1506,7 @@ impl Diagrams {
             KeyCode::Char('p') => p.toggle_pause(),
             KeyCode::Char('l') | KeyCode::Right => p.step_beat(1),
             KeyCode::Char('h') | KeyCode::Left => p.step_beat(-1),
-            KeyCode::Char('j') | KeyCode::Down => {
-                self.notes_scroll = self.notes_scroll.saturating_add(2);
-                return true;
-            }
-            KeyCode::Char('k') | KeyCode::Up => {
-                self.notes_scroll = self.notes_scroll.saturating_sub(2);
-                return true;
-            }
             _ => return false,
-        }
-        if code != KeyCode::Char('p') {
-            self.notes_scroll = 0;
         }
         true
     }
@@ -1195,8 +1600,13 @@ impl Diagrams {
 
     /// The page's overview is a 3D model HJKL can turn in place (CELL, LITHO, ARRAY, BANK, BANDWIDTH, HBM STACK).
     fn overview_orbits(&self) -> bool {
-        matches!(&self.player, Some(("CELL" | "LITHO" | "ARRAY" | "BANK" | "BANDWIDTH" | "HBM STACK", Some(_))))
-            || matches!(&self.player, Some((p, Some(_))) if super::diagrams_scene_chip::node(p).is_some() || super::diagrams_scene_pkg::node(p).is_some() || super::diagrams_scene_link::node(p).is_some() || super::diagrams_scene_pwr::node(p).is_some())
+        matches!(
+            &self.player,
+            Some((
+                "CELL" | "LITHO" | "ARRAY" | "BANK" | "BANDWIDTH" | "HBM STACK" | "MELT + PULL",
+                Some(_)
+            ))
+        ) || matches!(&self.player, Some((p, Some(_))) if super::diagrams_scene_chip::node(p).is_some() || super::diagrams_scene_pkg::node(p).is_some() || super::diagrams_scene_link::node(p).is_some() || super::diagrams_scene_pwr::node(p).is_some())
     }
 
     /// The open scene has a 3D model the full-screen view can orbit.
@@ -1270,7 +1680,11 @@ impl Diagrams {
     fn full_tick(&mut self, now: Instant) {
         let dt = now.duration_since(self.last_tick).as_secs_f64().min(MAX_DT);
         self.last_tick = now;
-        if !matches!(self.view, PopupView::Full | PopupView::Zoom | PopupView::Overview) || !self.moving(now) {
+        if !matches!(
+            self.view,
+            PopupView::Full | PopupView::Zoom | PopupView::Overview
+        ) || !self.moving(now)
+        {
             return;
         }
         if let Some((key, _)) = self.held
@@ -1493,12 +1907,10 @@ impl Diagrams {
         };
         frame.render_widget(Clear, r);
         let paused = self.scene_player().is_some_and(|p| p.is_paused());
-        let in_picture = self.scene_player().is_some_and(|p| p.notes_in_picture());
-        let play = match (paused, in_picture) {
-            (true, true) => "p resume  h/l beat",
-            (false, true) => "p pause  h/l beat",
-            (true, false) => "p resume  h/l beat  j/k notes",
-            (false, false) => "p pause  h/l beat  j/k notes",
+        let play = if paused {
+            "p resume  h/l beat  space aw ask"
+        } else {
+            "p pause  h/l beat  space aw ask"
         };
         let letters = match (zooms.first(), zooms.last()) {
             (Some((a, _)), Some((b, _))) if a != b => format!("{a}-{b} zoom"),
@@ -1550,26 +1962,8 @@ impl Diagrams {
             Constraint::Length(1),
         ])
         .areas(inner);
-        let min_w = p.min_size().0;
-        let side_w = inner.width.saturating_sub(min_w + 2).min(46);
-        let side = side_w >= 28;
-        let (art_r, note_r) = if in_picture {
-            // the notes are on the picture: it takes the whole body
-            (body_r, Rect::new(body_r.x, body_r.y + body_r.height, body_r.width, 0))
-        } else if side {
-            let [a, _, n] = Layout::horizontal([
-                Constraint::Length(inner.width - side_w - 2),
-                Constraint::Length(2),
-                Constraint::Length(side_w),
-            ])
-            .areas(body_r);
-            (a, n)
-        } else {
-            let notes_h = 9.min(body_r.height / 3);
-            let [a, n] =
-                Layout::vertical([Constraint::Min(0), Constraint::Length(notes_h)]).areas(body_r);
-            (a, n)
-        };
+        // the picture takes the whole body: what the notes said, Claude is asked for
+        let art_r = body_r;
         p.fit(art_r.width, art_r.height);
         let shot = p.shot();
         let time = p.time_at(p.now_ms());
@@ -1587,6 +1981,8 @@ impl Diagrams {
                 self.open_model(&time)
             } else if matches!(&self.player, Some(("LITHO", _))) {
                 Model::LithoOverview(time)
+            } else if matches!(&self.player, Some(("MELT + PULL", _))) {
+                Model::MeltOverview(time)
             } else if matches!(&self.player, Some(("ARRAY", _))) {
                 Model::ArrayOverview(time)
             } else if matches!(&self.player, Some(("BANK", _))) {
@@ -1595,13 +1991,29 @@ impl Diagrams {
                 Model::BwOverview(time)
             } else if matches!(&self.player, Some(("HBM STACK", _))) {
                 Model::HbmOverview(time)
-            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_chip::node(p)) {
+            } else if let Some(n) = self
+                .player
+                .as_ref()
+                .and_then(|(p, _)| super::diagrams_scene_chip::node(p))
+            {
                 Model::ChipOverview(n.beats, n.keys, time)
-            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_pkg::node(p)) {
+            } else if let Some(n) = self
+                .player
+                .as_ref()
+                .and_then(|(p, _)| super::diagrams_scene_pkg::node(p))
+            {
                 Model::PkgOverview(n.beats, n.keys, time)
-            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_link::node(p)) {
+            } else if let Some(n) = self
+                .player
+                .as_ref()
+                .and_then(|(p, _)| super::diagrams_scene_link::node(p))
+            {
                 Model::LinkOverview(n.beats, n.keys, time)
-            } else if let Some(n) = self.player.as_ref().and_then(|(p, _)| super::diagrams_scene_pwr::node(p)) {
+            } else if let Some(n) = self
+                .player
+                .as_ref()
+                .and_then(|(p, _)| super::diagrams_scene_pwr::node(p))
+            {
                 Model::PwrOverview(n.beats, n.keys, time)
             } else {
                 Model::CellOverview(time)
@@ -1622,54 +2034,9 @@ impl Diagrams {
             let art_lines = scene_lines(&art, t);
             frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
         }
-        let mut notes: Vec<Line> = Vec::new();
-        for (head, body) in [
-            ("WHAT'S HAPPENING", shot.what),
-            ("WHY IT MATTERS", shot.why),
-        ] {
-            if body.is_empty() {
-                continue;
-            }
-            if !notes.is_empty() {
-                notes.push(Line::default());
-            }
-            notes.push(Line::from(Span::styled(head, t.accent())));
-            notes.push(Line::from(Span::styled(body, t.base())));
-        }
-        if !shot.facts.is_empty() {
-            notes.push(Line::default());
-            notes.push(Line::from(Span::styled("KEY NUMBERS", t.accent())));
-            for f in shot.facts {
-                notes.push(Line::from(vec![
-                    Span::styled("\u{25B8} ", t.dim()),
-                    Span::styled(*f, t.base()),
-                ]));
-            }
-        }
-        if !shot.look.is_empty() {
-            notes.push(Line::default());
-            notes.push(Line::from(Span::styled("LOOK FOR", t.accent())));
-            notes.push(Line::from(Span::styled(shot.look, t.base())));
-        }
-        if self.notes_beat != Some(shot.beat) {
-            self.notes_beat = Some(shot.beat);
-            self.notes_scroll = 0;
-        }
-        let para = Paragraph::new(notes)
-            .style(t.base())
-            .wrap(Wrap { trim: true });
-        let overflow = (para.line_count(note_r.width) as u16).saturating_sub(note_r.height);
-        self.notes_scroll = self.notes_scroll.min(overflow);
-        frame.render_widget(para.scroll((self.notes_scroll, 0)), note_r);
-        if overflow > 0 && note_r.height > 1 {
-            let more = if self.notes_scroll < overflow {
-                "\u{25BC} j/k scrolls the notes"
-            } else {
-                "\u{25B2} j/k scrolls the notes"
-            };
-            let bar = Rect::new(note_r.x, note_r.y + note_r.height - 1, note_r.width, 1);
-            frame.render_widget(Clear, bar);
-            frame.render_widget(Paragraph::new(Span::styled(more, t.dim())), bar);
+        if !orbit3d {
+            // a flat scene has no 3D frame for the notes to sit on: list them over its foot
+            draw_note_cells(frame, art_r, self.chat.notes(), t);
         }
         if chips_h > 0 {
             let mut chips = vec![Span::styled("zoom in  ", t.dim())];
@@ -1839,6 +2206,19 @@ impl Diagrams {
             return;
         };
         let label = n.label.clone();
+        // the ask box and Claude's caption take a few rows under the view while there
+        // is something in them; otherwise the view has the whole popup
+        let area = if self.view != PopupView::Full && !self.detail {
+            let h = self.chat.bar_height(area.width, t).min(area.height / 2);
+            let [main, bar] =
+                Layout::vertical([Constraint::Min(0), Constraint::Length(h)]).areas(area);
+            if h > 0 {
+                self.chat.draw(frame, bar, t);
+            }
+            main
+        } else {
+            area
+        };
         match self.view {
             PopupView::Overview | PopupView::Zoom if self.has_scene() => {
                 return self.draw_scene(frame, area, &label, t);
@@ -2280,6 +2660,7 @@ impl Diagrams {
 
 impl Screen for Diagrams {
     fn draw(&mut self, frame: &mut Frame) {
+        self.redraw = false;
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
@@ -2328,6 +2709,37 @@ impl Screen for Diagrams {
         if self.help {
             self.help = false;
             return Action::None;
+        }
+        if self.popup && self.chat.focus {
+            if let Some(q) = self.chat.key(key) {
+                self.ask(&q);
+            }
+            return Action::None;
+        }
+        // a question Claude is asking, then the demo's rating, come before the diagram
+        if self.popup && (self.quiz_key(key) || self.demo_key(key)) {
+            return Action::None;
+        }
+        if self.popup && !self.detail && self.view != PopupView::Full {
+            match key.code {
+                KeyCode::Char('/') => {
+                    self.chat.focus = true;
+                    return Action::None;
+                }
+                // esc first stops an answer that is still playing out
+                KeyCode::Esc if self.answering() => {
+                    self.stop_answer();
+                    return Action::None;
+                }
+                KeyCode::Char('X') => {
+                    self.stop_answer();
+                    self.chat.banner.clear();
+                    self.exec(Step::Clear);
+                    self.exec(Step::Labels(true));
+                    return Action::None;
+                }
+                _ => {}
+            }
         }
         if self.popup && self.detail {
             self.detail_key(key);
@@ -2467,7 +2879,9 @@ impl Screen for Diagrams {
                             Some(c) => c.secs.iter().map(|s| (s.title, s.text)).collect(),
                             None => sections(h.body),
                         };
-                        let has_mol = self.card.is_none() && mol_for(h.label).is_some();
+                        // MELT + PULL cards get the 3D pictures, not the atom grids
+                        let mol_ok = page != "MELT + PULL";
+                        let has_mol = self.card.is_none() && mol_ok && mol_for(h.label).is_some();
                         if self.card.is_some() || has_mol {
                             self.secs.insert(0, ("Overview", ""));
                         }
@@ -2476,7 +2890,7 @@ impl Screen for Diagrams {
                         self.pscroll = 0;
                         self.pcur = 0;
                         self.vcur = 0;
-                        self.mol = if self.card.is_some() {
+                        self.mol = if self.card.is_some() || !mol_ok {
                             None
                         } else {
                             mol_for(h.label)
@@ -2532,37 +2946,12 @@ impl Screen for Diagrams {
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
             KeyCode::Char('?') => self.help = true,
+            KeyCode::Char('D') => self.start_demo(1),
             KeyCode::Char('L') | KeyCode::Char(']') => self.goto(self.tab + 1),
             KeyCode::Char('H') | KeyCode::Char('[') => self.goto(self.tab + DIAGRAMS.len() - 1),
             KeyCode::Char('l') | KeyCode::Right | KeyCode::Tab => self.step_node(1),
             KeyCode::Char('h') | KeyCode::Left | KeyCode::BackTab => self.step_node(-1),
-            KeyCode::Enter => {
-                self.popup = !self.nodes[self.tab].is_empty();
-                self.popup_scroll = 0;
-                self.pane = 0;
-                self.anim_start = Instant::now();
-                self.player = self.cur_label().and_then(|l| page_key(&l)).map(|page| {
-                    (
-                        page,
-                        scene_for(page).map(|sc| Player::new(sc, self.anim_start)),
-                    )
-                });
-                self.view = if self.has_scene() {
-                    PopupView::Menu
-                } else {
-                    PopupView::Pane
-                };
-                self.menu_sel = 0;
-                self.zoom = None;
-                self.preview = None;
-                self.browse = false;
-                self.detail = false;
-                self.hsel = 0;
-                self.hots = self.nodes[self.tab]
-                    .get(self.sel)
-                    .map(|n| find_hots(&n.label))
-                    .unwrap_or_default();
-            }
+            KeyCode::Enter => self.open_popup(),
             KeyCode::Char('j') | KeyCode::Down => {
                 if !self.step_row(1) {
                     self.scroll = self.scroll.saturating_add(1)
@@ -2593,6 +2982,11 @@ impl Screen for Diagrams {
     fn tick(&mut self) -> Action {
         let now = Instant::now();
         self.full_tick(now);
+        self.chat.tick();
+        if let Some(from) = self.demo_start.take() {
+            self.start_demo(from);
+        }
+        self.tools_tick(now);
         // the loop draws before each tick, so `sharpen` lives for exactly one draw
         self.sharpen = false;
         if self.settle_until.is_some_and(|until| now >= until) {
@@ -2603,11 +2997,33 @@ impl Screen for Diagrams {
     }
 
     fn needs_redraw(&self) -> bool {
-        self.animating() || self.settle_until.is_some() || self.sharpen
+        self.animating()
+            || self.settle_until.is_some()
+            || self.sharpen
+            || (self.popup && self.chat.wants_redraw())
+            || self.redraw
+    }
+
+    fn leader_ok(&self) -> bool {
+        // space is a plain character while a question is being typed
+        !(self.popup && self.chat.focus)
+    }
+
+    fn ask_claude(&mut self) -> bool {
+        // inside a node, <space>aw asks about the diagram in place
+        let here = self.popup && !self.detail && self.view != PopupView::Full;
+        if here {
+            self.chat.focus = true;
+        }
+        here
     }
 
     fn poll_interval(&self) -> Duration {
-        if matches!(self.view, PopupView::Full | PopupView::Zoom | PopupView::Overview) && self.coarse(Instant::now()) {
+        if matches!(
+            self.view,
+            PopupView::Full | PopupView::Zoom | PopupView::Overview
+        ) && self.coarse(Instant::now())
+        {
             MOTION_FRAME
         } else if self.animating() {
             FRAME
@@ -2801,6 +3217,7 @@ pub fn export_pdfs(dir: &Path, t: &Theme) -> io::Result<Vec<String>> {
 
 #[cfg(test)]
 mod tests {
+    use super::super::diagrams_chat::Target;
     use super::*;
 
     #[test]
@@ -2876,8 +3293,9 @@ mod tests {
         press(&mut d, KeyCode::Enter);
         assert_eq!(d.view, PopupView::Overview);
         let all = screen_text(&mut d, 170, 50);
+        // the beat's notes are gone from the screen: Claude is asked for them
         assert!(
-            all.contains("WHAT'S HAPPENING") && all.contains("LOOK FOR"),
+            all.contains("space aw ask") && !all.contains("WHAT'S HAPPENING"),
             "{all}"
         );
 
@@ -2888,7 +3306,7 @@ mod tests {
         assert!(d.animating() && d.needs_redraw());
         let all = screen_text(&mut d, 170, 50);
         assert!(
-            all.contains("gas cavity") && all.contains("WHAT'S HAPPENING"),
+            all.contains("gas cavity") && all.contains("space aw ask"),
             "{all}"
         );
         press(&mut d, KeyCode::Char('c')); // switch straight to the tapping zoom
@@ -2978,8 +3396,7 @@ mod tests {
         assert!(d.animating(), "the overview was not paused");
     }
 
-    #[test]
-    fn long_notes_scroll_with_j_k_and_reset_on_a_new_beat() {
+    fn polysilicon() -> Diagrams {
         let ctx = Ctx {
             db_path: Default::default(),
             theme: Theme::default(),
@@ -2990,33 +3407,441 @@ mod tests {
             .position(|n| n.label == "POLYSILICON")
             .unwrap();
         press(&mut d, KeyCode::Enter);
+        d
+    }
+
+    #[test]
+    fn space_aw_opens_the_ask_box_which_takes_the_keys() {
+        let mut d = polysilicon();
+        // outside a node, <space>aw has nothing to ask (<space>ac is the Claude popup)
+        d.popup = false;
+        assert!(!d.ask_claude());
+        d.popup = true;
         press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Char('p'));
-        press(&mut d, KeyCode::Char('l')); // beat 2: the fluidized bed
-        let tall = screen_text(&mut d, 175, 60);
-        for head in [
-            "WHAT'S HAPPENING",
-            "WHY IT MATTERS",
-            "KEY NUMBERS",
-            "LOOK FOR",
+        assert_eq!(d.view, PopupView::Overview);
+        let plain = screen_text(&mut d, 175, 48);
+        assert!(!plain.contains(" claude "), "no bar until asked: {plain}");
+        assert!(d.leader_ok());
+        assert!(d.ask_claude());
+        assert!(d.chat.focus && !d.leader_ok());
+        // a, c and q are a zoom, a zoom and close when the diagram has the keys
+        for c in "a cq".chars() {
+            press(&mut d, KeyCode::Char(c));
+        }
+        assert_eq!(d.view, PopupView::Overview);
+        assert!(d.popup);
+        let all = screen_text(&mut d, 175, 48);
+        assert!(all.contains("a cq") && all.contains("enter ask"), "{all}");
+        press(&mut d, KeyCode::Esc);
+        assert!(!d.chat.focus && d.popup);
+        assert!(!screen_text(&mut d, 175, 48).contains("enter ask"));
+        press(&mut d, KeyCode::Char('c'));
+        assert_eq!(d.view, PopupView::Zoom);
+    }
+
+    #[test]
+    fn a_wait_holds_the_directives_behind_it() {
+        let mut d = polysilicon();
+        d.queue.extend([
+            Step::Goto(Target::Zoom('a')),
+            Step::Wait(60_000),
+            Step::Goto(Target::Zoom('c')),
+        ]);
+        d.tick();
+        assert_eq!(d.open_key(), Some('a'));
+        assert!(d.wait_until.is_some() && d.queue.len() == 1 && d.answering());
+        d.tick();
+        assert_eq!(d.open_key(), Some('a'), "still waiting");
+        d.wait_until = Some(Instant::now());
+        d.tick();
+        assert_eq!(d.open_key(), Some('c'));
+        assert!(d.queue.is_empty());
+        // esc drops what is left of an answer before it does anything else
+        d.queue
+            .extend([Step::Wait(60_000), Step::Goto(Target::Menu)]);
+        d.tick();
+        press(&mut d, KeyCode::Esc);
+        assert!(d.queue.is_empty() && d.wait_until.is_none());
+        assert_eq!(d.view, PopupView::Zoom);
+    }
+
+    #[test]
+    fn the_ask_box_shows_under_every_view_of_a_node() {
+        let mut d = polysilicon();
+        assert_eq!(d.view, PopupView::Menu);
+        assert!(d.ask_claude());
+        for (w, h) in [(175, 48), (90, 40)] {
+            let all = screen_text(&mut d, w, h);
+            assert!(
+                all.contains("enter ask") && all.contains("SECTIONS"),
+                "{w}x{h}: {all}"
+            );
+        }
+        d.open_pane(0);
+        assert_eq!(d.view, PopupView::Pane);
+        assert!(screen_text(&mut d, 175, 48).contains("enter ask"));
+    }
+
+    #[test]
+    fn directives_steer_the_open_node() {
+        let mut d = polysilicon();
+        d.exec(Step::Goto(Target::Zoom('c')));
+        assert_eq!(d.view, PopupView::Zoom);
+        assert_eq!(d.open_key(), Some('c'));
+        d.exec(Step::Beat(2));
+        let p = d.scene_player_mut().unwrap();
+        assert!(p.is_paused());
+        assert_eq!(p.shot().beat, 1);
+        d.exec(Step::Beat(99)); // past the end holds on the last beat
+        let shot = d.scene_player_mut().unwrap().shot();
+        assert_eq!(shot.beat, shot.beats - 1);
+        d.exec(Step::Play);
+        assert!(d.animating());
+        d.exec(Step::Goto(Target::Overview));
+        assert_eq!(d.view, PopupView::Overview);
+        d.exec(Step::Goto(Target::Menu));
+        assert_eq!(d.view, PopupView::Menu);
+        d.exec(Step::Goto(Target::Zoom('!'))); // no such zoom: stays put
+        assert_eq!(d.view, PopupView::Menu);
+
+        // another node, by name, on any tab
+        d.exec(Step::Open("litho".into()));
+        assert_eq!(d.cur_label().as_deref().map(str::trim), Some("LITHO"));
+        assert!(d.popup && d.view == PopupView::Overview);
+        d.exec(Step::Goto(Target::Zoom('b')));
+        assert_eq!(d.open_key(), Some('b'));
+
+        // with the popup closed a call is refused: there is nothing to steer
+        d.popup = false;
+        let out = call(&mut d, "open_node", serde_json::json!({"node": "SAND"})).unwrap();
+        assert_eq!(out["ok"], false);
+        assert_eq!(d.cur_label().as_deref().map(str::trim), Some("LITHO"));
+    }
+
+    /// One tool call, and its result if it came at once.
+    fn call(d: &mut Diagrams, tool: &str, args: serde_json::Value) -> Option<serde_json::Value> {
+        let (reply, got) = std::sync::mpsc::channel();
+        d.call(super::super::diagrams_ipc::Request {
+            tool: tool.to_string(),
+            args,
+            reply,
+        });
+        got.try_recv().ok()
+    }
+
+    fn litho() -> Diagrams {
+        let mut d = polysilicon();
+        d.exec(Step::Open("LITHO".into()));
+        assert_eq!(d.view, PopupView::Overview);
+        d
+    }
+
+    #[test]
+    fn notes_list_over_a_flat_scene_and_clear_with_x_or_a_new_node() {
+        use serde_json::json;
+        let mut d = polysilicon();
+        press(&mut d, KeyCode::Enter);
+        // a flat scene has no named parts: a free note goes up, a pinned one is refused
+        let out = call(
+            &mut d,
+            "note",
+            json!({"id": "a", "title": "bed", "text": "granules grow here"}),
+        )
+        .unwrap();
+        assert_eq!(out["ok"], true, "{out}");
+        let out = call(&mut d, "note", json!({"id": "b", "on": "bed", "text": "x"})).unwrap();
+        assert_eq!(out["ok"], false);
+        assert!(
+            out["error"].as_str().unwrap().contains("no named parts"),
+            "{out}"
+        );
+        let all = screen_text(&mut d, 175, 48);
+        assert!(all.contains("BED: granules grow here"), "{all}");
+        press(&mut d, KeyCode::Char('X'));
+        assert!(d.chat.notes().is_empty());
+        assert!(!screen_text(&mut d, 175, 48).contains("granules grow here"));
+
+        call(&mut d, "note", json!({"id": "a", "text": "stale"})).unwrap();
+        d.exec(Step::Open("SAND".into()));
+        assert!(d.chat.notes().is_empty(), "a new node starts without notes");
+    }
+
+    #[test]
+    fn wrong_calls_are_refused_with_the_valid_choices() {
+        use serde_json::json;
+        let mut d = litho();
+        let err = |out: Option<serde_json::Value>| {
+            let out = out.unwrap();
+            assert_eq!(out["ok"], false, "{out}");
+            out["error"].as_str().unwrap().to_string()
+        };
+        let e = err(call(&mut d, "goto", json!({"zoom": "z"})));
+        assert!(e.contains("Zoom-ins: a = "), "{e}");
+        let e = err(call(
+            &mut d,
+            "note",
+            json!({"id": "n", "on": "banana", "text": "x"}),
+        ));
+        assert!(
+            e.contains("no part \"banana\"") && e.contains("projection lens"),
+            "{e}"
+        );
+        let e = err(call(&mut d, "beat", json!({"n": 99})));
+        assert!(e.contains("beats, no beat 99"), "{e}");
+        let e = err(call(&mut d, "open_node", json!({"node": "NOPE"})));
+        assert!(e.contains("Nodes: ") && e.contains("LITHO"), "{e}");
+        let e = err(call(&mut d, "remove_note", json!({"id": "zz"})));
+        assert!(e.contains("Notes up: none"), "{e}");
+        let e = err(call(&mut d, "goto", json!({"section": 99})));
+        assert!(e.contains("sections, no section 99"), "{e}");
+        let e = err(call(&mut d, "fly", json!({})));
+        assert!(e.contains("no tool"), "{e}");
+        assert_eq!((d.tools.calls, d.tools.refused), (7, 7));
+        assert_eq!(
+            d.view,
+            PopupView::Overview,
+            "a refused call changes nothing"
+        );
+
+        // the right name pins, loosely matched, and the result says what is on screen
+        let out = call(
+            &mut d,
+            "note",
+            json!({"id": "n", "on": "lens", "title": "NA", "text": "sets the line"}),
+        )
+        .unwrap();
+        assert_eq!(out["ok"], true, "{out}");
+        assert_eq!(out["notes_up"][0]["on"], "lens");
+        assert!(
+            out["parts_on_picture"]
+                .as_array()
+                .is_some_and(|p| !p.is_empty()),
+            "{out}"
+        );
+        // a fifth note is one too many
+        for id in ["b", "c", "d"] {
+            call(&mut d, "note", json!({"id": id, "text": "x"})).unwrap();
+        }
+        let e = err(call(&mut d, "note", json!({"id": "e", "text": "x"})));
+        assert!(e.contains("already up"), "{e}");
+        // replacing one that is up is fine
+        let out = call(&mut d, "note", json!({"id": "b", "text": "y"})).unwrap();
+        assert_eq!(out["ok"], true);
+    }
+
+    #[test]
+    fn read_tools_describe_the_node() {
+        use serde_json::json;
+        let mut d = litho();
+        let state = call(&mut d, "state", json!({})).unwrap();
+        assert_eq!(
+            (state["node"].as_str(), state["view"].as_str()),
+            (Some("LITHO"), Some("overview"))
+        );
+        assert_eq!(state["beat"]["n"], 1);
+        let parts = call(&mut d, "parts", json!({})).unwrap();
+        let views = parts["parts_by_view_then_beat"].as_object().unwrap();
+        assert!(
+            views.contains_key("overview") && views.contains_key("b"),
+            "{parts}"
+        );
+        assert!(parts.to_string().contains("projection lens"), "{parts}");
+        let nodes = call(&mut d, "list_nodes", json!({})).unwrap();
+        assert!(nodes.to_string().contains("HBM STACK"));
+        let sec = call(&mut d, "read_section", json!({"n": 4})).unwrap();
+        assert!(
+            sec["text"].as_str().unwrap().contains("Resolution"),
+            "{sec}"
+        );
+        assert_eq!(
+            call(&mut d, "read_section", json!({"n": 99})).unwrap()["ok"],
+            false
+        );
+    }
+
+    #[test]
+    fn a_sequence_is_checked_whole_then_played_and_answered_at_the_end() {
+        use serde_json::json;
+        let mut d = litho();
+        // step 3 pins to a part zoom b does not have: nothing runs
+        let out = call(
+            &mut d,
+            "sequence",
+            json!({"steps": [
+                {"do": "goto", "zoom": "b"},
+                {"do": "beat", "n": 1},
+                {"do": "note", "id": "x", "on": "banana", "text": "no"},
+            ]}),
+        )
+        .unwrap();
+        assert_eq!(out["ok"], false);
+        let e = out["error"].as_str().unwrap();
+        assert!(
+            e.starts_with("step 3 (note)") && e.contains("Nothing was run"),
+            "{e}"
+        );
+        assert_eq!(d.view, PopupView::Overview);
+
+        let got = call(
+            &mut d,
+            "sequence",
+            json!({"steps": [
+                {"do": "goto", "zoom": "b"},
+                {"do": "caption", "text": "watch the lens"},
+                {"do": "wait", "ms": 5000},
+                {"do": "beat", "n": 2},
+            ]}),
+        );
+        assert!(got.is_none(), "the result waits for the last step");
+        d.tick();
+        assert_eq!(d.open_key(), Some('b'));
+        assert_eq!(d.chat.caption(), "watch the lens");
+        assert!(d.answering() && d.wait_until.is_some());
+        // a call while one is running is refused
+        assert_eq!(call(&mut d, "state", json!({})).unwrap()["ok"], false);
+        // esc drops the rest and tells Claude
+        press(&mut d, KeyCode::Esc);
+        assert!(!d.answering());
+        assert_eq!(d.open_key(), Some('b'));
+    }
+
+    #[test]
+    fn a_question_waits_for_the_users_key() {
+        use serde_json::json;
+        let mut d = litho();
+        let (reply, got) = std::sync::mpsc::channel();
+        d.call(super::super::diagrams_ipc::Request {
+            tool: "ask".into(),
+            args: json!({"question": "what sets the finest line?", "choices": ["the wafer", "the lens NA"]}),
+            reply,
+        });
+        assert!(got.try_recv().is_err());
+        let all = screen_text(&mut d, 175, 48);
+        assert!(
+            all.contains("what sets the finest line?") && all.contains("[b] the lens NA"),
+            "{all}"
+        );
+        press(&mut d, KeyCode::Char('z')); // not a choice: nothing
+        assert!(d.chat.quiz.is_some());
+        press(&mut d, KeyCode::Char('b'));
+        let out = got.try_recv().unwrap();
+        assert_eq!(
+            (out["picked"].as_str(), out["choice"].as_str()),
+            (Some("b"), Some("the lens NA"))
+        );
+        assert!(d.chat.quiz.is_none() && d.view == PopupView::Overview);
+
+        // pick a part: the ring moves with l, enter picks it
+        let (reply, got) = std::sync::mpsc::channel();
+        d.call(super::super::diagrams_ipc::Request {
+            tool: "ask_part".into(),
+            args: json!({"question": "which part shrinks the image?"}),
+            reply,
+        });
+        let Some(Quiz::Part { names, .. }) = d.chat.quiz.clone() else {
+            panic!("no part question");
+        };
+        press(&mut d, KeyCode::Char('l'));
+        press(&mut d, KeyCode::Enter);
+        assert_eq!(
+            got.try_recv().unwrap()["picked"].as_str(),
+            Some(names[1].as_str())
+        );
+        // esc skips
+        let (reply, got) = std::sync::mpsc::channel();
+        d.call(super::super::diagrams_ipc::Request {
+            tool: "ask".into(),
+            args: json!({"question": "q?", "choices": ["a", "b"]}),
+            reply,
+        });
+        press(&mut d, KeyCode::Esc);
+        assert_eq!(got.try_recv().unwrap()["skipped"], true);
+    }
+
+    #[test]
+    fn the_demo_asks_then_takes_a_rating_then_moves_on() {
+        let mut d = polysilicon();
+        d.start_demo(1);
+        let items = tools::demo_items();
+        assert!(items.len() >= 20);
+        for (node, _) in &items {
+            assert!(
+                d.find_node(node).is_some(),
+                "demo node {node} does not exist"
+            );
+        }
+        assert_eq!(d.demo_phase(), Some((0, tools::Phase::Answering)));
+        assert_eq!(
+            d.cur_label().as_deref().map(str::trim),
+            Some(items[0].0.as_str())
+        );
+        let all = screen_text(&mut d, 175, 48);
+        assert!(
+            all.contains("demo 1/") && all.contains(&items[0].1),
+            "{all}"
+        );
+        let out = d.demo_settle().unwrap();
+        let _ = std::fs::remove_file(&out);
+        d.tick();
+        assert_eq!(d.demo_phase(), Some((0, tools::Phase::Rating)));
+        assert!(screen_text(&mut d, 175, 48).contains("rate this answer 1-100:"));
+        // 0 and 101 are not ratings
+        press(&mut d, KeyCode::Char('0'));
+        press(&mut d, KeyCode::Enter);
+        assert_eq!(d.demo_phase(), Some((0, tools::Phase::Rating)));
+        for c in "85".chars() {
+            press(&mut d, KeyCode::Char(c));
+        }
+        press(&mut d, KeyCode::Enter);
+        assert_eq!(d.demo_phase(), Some((1, tools::Phase::Answering)));
+        let saved = std::fs::read_to_string(&out).unwrap();
+        assert!(
+            saved.contains("\"rating\":85") && saved.contains(&items[0].1),
+            "{saved}"
+        );
+        // s skips, esc ends with the summary
+        d.demo_settle();
+        d.tick();
+        press(&mut d, KeyCode::Char('s'));
+        assert_eq!(d.demo_phase(), Some((2, tools::Phase::Answering)));
+        d.demo_settle();
+        d.tick();
+        press(&mut d, KeyCode::Esc);
+        assert_eq!(d.demo_phase(), None);
+        assert!(
+            d.chat.banner.contains("1 rated") && d.chat.banner.contains("mean 85"),
+            "{}",
+            d.chat.banner
+        );
+        let _ = std::fs::remove_file(&out);
+    }
+
+    #[test]
+    fn the_context_says_where_the_user_is_and_sends_the_write_up_once() {
+        let mut d = polysilicon();
+        let first = d.chat_context();
+        for want in [
+            "tab: Fab",
+            "node: POLYSILICON",
+            "view: the node's menu",
+            "zoom-ins: a = ",
+            "sections: 1. ",
+            "write-up of this node:",
+            "nodes on tab Memory: ",
         ] {
-            assert!(tall.contains(head), "{head} missing on a tall screen");
+            assert!(first.contains(want), "{want} missing: {first}");
         }
-        let short = screen_text(&mut d, 175, 24);
-        assert!(
-            !short.contains("LOOK FOR") && short.contains("j/k scrolls the notes"),
-            "{short}"
-        );
-        for _ in 0..8 {
-            press(&mut d, KeyCode::Char('j'));
-        }
-        let scrolled = screen_text(&mut d, 175, 24);
-        assert!(
-            scrolled.contains("LOOK FOR") && !scrolled.contains("WHAT'S HAPPENING"),
-            "{scrolled}"
-        );
-        press(&mut d, KeyCode::Char('l')); // next beat starts from the top again
-        assert!(screen_text(&mut d, 175, 24).contains("WHAT'S HAPPENING"));
+        assert!(!first.contains("beat: "), "{first}");
+        assert!(first.contains("notes: not visible"), "{first}");
+        press(&mut d, KeyCode::Char('c'));
+        let second = d.chat_context();
+        assert!(second.contains("view: zoom-in c: "), "{second}");
+        assert!(second.contains("beat: 1 of "), "{second}");
+        assert!(second.contains("notes: visible"), "{second}");
+        assert!(second.contains("what's happening: "), "{second}");
+        assert!(!second.contains("write-up of this node:"), "{second}");
+        d.exec(Step::Open("SAND".into()));
+        assert!(d.chat_context().contains("write-up of this node:"));
     }
 
     #[test]
@@ -3048,7 +3873,7 @@ mod tests {
             assert_eq!(d.view, PopupView::Zoom);
             let all = screen_text(&mut d, 175, 48);
             assert!(all.contains(want), "{key}: {all}");
-            assert!(all.contains("WHAT'S HAPPENING"));
+            assert!(all.contains("space aw ask"));
         }
     }
 
@@ -3064,8 +3889,14 @@ mod tests {
         assert!(!d.coarse(t0));
         d.full_key(KeyCode::Char('h'), t0);
         assert!(!d.moving(t0), "a tap does not start held motion");
-        assert!(d.coarse(t0 + Duration::from_millis(10)), "but it renders coarse");
-        assert!(!d.coarse(t0 + SETTLE + Duration::from_millis(1)), "then sharp");
+        assert!(
+            d.coarse(t0 + Duration::from_millis(10)),
+            "but it renders coarse"
+        );
+        assert!(
+            !d.coarse(t0 + SETTLE + Duration::from_millis(1)),
+            "then sharp"
+        );
     }
 
     #[test]
@@ -3377,8 +4208,15 @@ mod tests {
     fn memory_hbm_stack_node_is_complete() {
         let hots = find_hots("HBM STACK");
         assert!(hots.len() >= 8, "HBM STACK: only {} hotspots", hots.len());
-        assert_eq!(hots.len(), cards("HBM STACK").len(), "HBM STACK: card label missing from page");
-        assert!(hots.iter().all(|h| h.body.len() > 150), "HBM STACK: short card");
+        assert_eq!(
+            hots.len(),
+            cards("HBM STACK").len(),
+            "HBM STACK: card label missing from page"
+        );
+        assert!(
+            hots.iter().all(|h| h.body.len() > 150),
+            "HBM STACK: short card"
+        );
         assert!(scene_for("HBM STACK").is_some(), "HBM STACK: no animation");
     }
 
@@ -3386,8 +4224,15 @@ mod tests {
     fn memory_bandwidth_node_is_complete() {
         let hots = find_hots("BANDWIDTH");
         assert!(hots.len() >= 8, "BANDWIDTH: only {} hotspots", hots.len());
-        assert_eq!(hots.len(), cards("BANDWIDTH").len(), "BANDWIDTH: card label missing from page");
-        assert!(hots.iter().all(|h| h.body.len() > 150), "BANDWIDTH: short card");
+        assert_eq!(
+            hots.len(),
+            cards("BANDWIDTH").len(),
+            "BANDWIDTH: card label missing from page"
+        );
+        assert!(
+            hots.iter().all(|h| h.body.len() > 150),
+            "BANDWIDTH: short card"
+        );
         assert!(scene_for("BANDWIDTH").is_some(), "BANDWIDTH: no animation");
     }
 
@@ -3395,7 +4240,11 @@ mod tests {
     fn memory_bank_node_is_complete() {
         let hots = find_hots("BANK");
         assert!(hots.len() >= 8, "BANK: only {} hotspots", hots.len());
-        assert_eq!(hots.len(), cards("BANK").len(), "BANK: card label missing from page");
+        assert_eq!(
+            hots.len(),
+            cards("BANK").len(),
+            "BANK: card label missing from page"
+        );
         assert!(hots.iter().all(|h| h.body.len() > 150), "BANK: short card");
         assert!(scene_for("BANK").is_some(), "BANK: no animation");
     }

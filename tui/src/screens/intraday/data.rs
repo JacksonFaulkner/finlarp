@@ -254,7 +254,10 @@ mod tests {
         assert_eq!(s.aggregate(1, false).len(), 6);
         let all = s.aggregate(1, true);
         assert_eq!(all.len(), 7);
-        assert_eq!((all[0].session, all[1].session), (Session::Pre, Session::Regular));
+        assert_eq!(
+            (all[0].session, all[1].session),
+            (Session::Pre, Session::Regular)
+        );
     }
 
     #[test]

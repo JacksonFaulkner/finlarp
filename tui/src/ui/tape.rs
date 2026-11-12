@@ -104,7 +104,10 @@ impl Tape {
                     self.status = TapeStatus::Failed("the movers run stopped".into());
                 }
             }
-        } else if self.fetched.is_none_or(|f| now.duration_since(f) >= TAPE_EVERY) {
+        } else if self
+            .fetched
+            .is_none_or(|f| now.duration_since(f) >= TAPE_EVERY)
+        {
             self.rx = Some(pyrun::spawn_script(TAPE_SCRIPT, &[]));
         }
     }
@@ -268,7 +271,12 @@ mod tests {
     #[test]
     fn tape_text_carries_the_ticker_move_and_volume() {
         let t = Theme::default();
-        let movers = [Mover { ticker: "TEM".into(), pct: 11.17, ratio: 2.47, ext: None }];
+        let movers = [Mover {
+            ticker: "TEM".into(),
+            pct: 11.17,
+            ratio: 2.47,
+            ext: None,
+        }];
         let text: String = tape_cells(&movers, t).into_iter().map(|(c, _)| c).collect();
         assert!(text.starts_with("TEM ▲+11.2% 2.5×  ·  "), "{text}");
     }
@@ -277,8 +285,18 @@ mod tests {
     fn tape_text_adds_the_extended_hours_move() {
         let t = Theme::default();
         let movers = [
-            Mover { ticker: "AEHR".into(), pct: -6.23, ratio: 1.9, ext: Some(("AH".into(), 3.1)) },
-            Mover { ticker: "NVDA".into(), pct: 2.0, ratio: 1.6, ext: Some(("PM".into(), -1.04)) },
+            Mover {
+                ticker: "AEHR".into(),
+                pct: -6.23,
+                ratio: 1.9,
+                ext: Some(("AH".into(), 3.1)),
+            },
+            Mover {
+                ticker: "NVDA".into(),
+                pct: 2.0,
+                ratio: 1.6,
+                ext: Some(("PM".into(), -1.04)),
+            },
         ];
         let cells = tape_cells(&movers, t);
         let text: String = cells.iter().map(|(c, _)| *c).collect();

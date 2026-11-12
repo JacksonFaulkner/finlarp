@@ -69,13 +69,7 @@ impl Px {
 
     /// Paint every pixel in the design-space box whose coverage `cov` (in pixel
     /// coordinates, 0..1) is above zero.
-    fn paint(
-        &mut self,
-        bx: (f32, f32, f32, f32),
-        c: Rgb,
-        a: f32,
-        cov: impl Fn(f32, f32) -> f32,
-    ) {
+    fn paint(&mut self, bx: (f32, f32, f32, f32), c: Rgb, a: f32, cov: impl Fn(f32, f32) -> f32) {
         let (x0, y0) = self.to_px(bx.0, bx.1);
         let (x1, y1) = self.to_px(bx.2, bx.3);
         for py in (y0.floor() as i64)..=(y1.ceil() as i64) {
@@ -157,7 +151,10 @@ impl Px {
         let ang = (y1 - y0).atan2(x1 - x0);
         let head = 9.0 + width;
         for side in [2.6_f32, -2.6] {
-            let (hx, hy) = (x1 - head * (ang + side).cos(), y1 - head * (ang + side).sin());
+            let (hx, hy) = (
+                x1 - head * (ang + side).cos(),
+                y1 - head * (ang + side).sin(),
+            );
             self.line(x1, y1, hx, hy, width, c, a);
         }
     }
@@ -175,7 +172,10 @@ pub fn along(pts: &[(f32, f32)], s: f32) -> (f32, f32) {
         let l = seg_len(w[0], w[1]);
         if want <= l {
             let t = if l > 0.0 { want / l } else { 0.0 };
-            return (w[0].0 + (w[1].0 - w[0].0) * t, w[0].1 + (w[1].1 - w[0].1) * t);
+            return (
+                w[0].0 + (w[1].0 - w[0].0) * t,
+                w[0].1 + (w[1].1 - w[0].1) * t,
+            );
         }
         want -= l;
     }

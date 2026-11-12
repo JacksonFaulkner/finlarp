@@ -51,7 +51,8 @@ const SEARCH_PY: &str = "py/derive/search.py";
 /// Marks the hit inside a chunk's neighbourhood.
 const MATCH_MARK: &str = ">>> match";
 const HINT: &str = "? keys  hjkl wbe  v/V select  ␣y copy  n/N match  o browser  y url  q back";
-const BLOCK_HINT: &str = "? keys  hjkl wbe  v/V select  ␣y copy  ]]/[[ item  ]h/[h heading  n/N match  q back";
+const BLOCK_HINT: &str =
+    "? keys  hjkl wbe  v/V select  ␣y copy  ]]/[[ item  ]h/[h heading  n/N match  q back";
 
 /// Docview's own keys; the `?` overlay shows these after the cursor's.
 const DOC_KEYS: &[Key] = &[
@@ -227,9 +228,16 @@ impl Docview {
             .collect();
         let at = self.cur.pos.row;
         let target = if forward {
-            rows.iter().copied().find(|r| *r > at).or(rows.first().copied())
+            rows.iter()
+                .copied()
+                .find(|r| *r > at)
+                .or(rows.first().copied())
         } else {
-            rows.iter().copied().rev().find(|r| *r < at).or(rows.last().copied())
+            rows.iter()
+                .copied()
+                .rev()
+                .find(|r| *r < at)
+                .or(rows.last().copied())
         };
         if let Some(row) = target {
             self.cur.goto_row(row);
@@ -340,13 +348,21 @@ fn load_url(url: &str, quote: Option<&str>) -> Result<Doc, String> {
     args.extend(["--json", "--blocks"]);
     let out = pyrun::run_script(DOCVIEW_PY, &args)?;
     let loc: Located = serde_json::from_str(&out).map_err(|e| format!("docview.py output: {e}"))?;
-    let open_url = loc.index_url.clone().or(loc.url.clone()).or_else(|| Some(url.to_string()));
+    let open_url = loc
+        .index_url
+        .clone()
+        .or(loc.url.clone())
+        .or_else(|| Some(url.to_string()));
     let title = loc
         .title
         .clone()
         .filter(|t| !t.is_empty())
         .unwrap_or_else(|| url.to_string());
-    if let Some(blocks) = loc.blocks_path.as_deref().and_then(|p| doc_blocks::load(p).ok()) {
+    if let Some(blocks) = loc
+        .blocks_path
+        .as_deref()
+        .and_then(|p| doc_blocks::load(p).ok())
+    {
         if !blocks.is_empty() {
             let matches: Vec<usize> = loc.block.into_iter().collect();
             return Ok(Doc {
@@ -611,7 +627,13 @@ fn gutter(line: &Line<'static>, style: Style) -> Line<'static> {
 }
 
 fn doc_has_blocks(state: &State) -> bool {
-    matches!(state, State::Ready(Doc { blocks: Some(_), .. }))
+    matches!(
+        state,
+        State::Ready(Doc {
+            blocks: Some(_),
+            ..
+        })
+    )
 }
 
 impl Screen for Docview {
@@ -642,7 +664,8 @@ impl Screen for Docview {
                     None => 0,
                 };
                 self.cur.remap(remap);
-                let texts: Vec<String> = rows.iter().map(|(_, l)| TextCursor::line_text(l)).collect();
+                let texts: Vec<String> =
+                    rows.iter().map(|(_, l)| TextCursor::line_text(l)).collect();
                 (self.rows, self.starts) = (rows, starts);
                 self.cur.set_rows(&texts);
                 self.wrapped_at = width;
@@ -961,7 +984,10 @@ mod tests {
         assert!(text.contains("Title"), "{text}");
         v.pending = Some(50);
         screen_text(&mut v, 40, 13);
-        assert_eq!(v.cur.pos.row, 50, "first draw lands the cursor on the match");
+        assert_eq!(
+            v.cur.pos.row, 50,
+            "first draw lands the cursor on the match"
+        );
         assert!(v.cur.visible().contains(&50));
         press(&mut v, KeyCode::Char('n'));
         assert_eq!(v.cur.pos.row, 120);
@@ -979,7 +1005,11 @@ mod tests {
         press(&mut v, KeyCode::Char('k'));
         assert_eq!(v.cur.pos.row, 1);
         v.on_key(KeyEvent::new(KeyCode::Char('d'), KeyModifiers::CONTROL));
-        assert_eq!((v.cur.pos.row, v.cur.top), (6, 1), "half page down, view centred on the cursor");
+        assert_eq!(
+            (v.cur.pos.row, v.cur.top),
+            (6, 1),
+            "half page down, view centred on the cursor"
+        );
         v.on_key(KeyEvent::new(KeyCode::Char('u'), KeyModifiers::CONTROL));
         assert_eq!((v.cur.pos.row, v.cur.top), (1, 0));
     }
@@ -991,7 +1021,11 @@ mod tests {
         press(&mut v, KeyCode::Char('k'));
         assert_eq!((v.cur.pos.row, v.cur.top), (0, 0));
         press(&mut v, KeyCode::Char('G'));
-        assert_eq!((v.cur.pos.row, v.cur.top), (1, 0), "short doc fits, nothing to scroll");
+        assert_eq!(
+            (v.cur.pos.row, v.cur.top),
+            (1, 0),
+            "short doc fits, nothing to scroll"
+        );
     }
 
     #[test]
@@ -1007,15 +1041,24 @@ mod tests {
             v.claude_context().as_deref(),
             Some("From Title (https://a/b.htm):\n```\nalpha beta\ngamma delta\n```\n")
         );
-        assert_eq!(v.take_selection().as_deref(), Some("alpha beta\ngamma delta"));
+        assert_eq!(
+            v.take_selection().as_deref(),
+            Some("alpha beta\ngamma delta")
+        );
         assert!(!v.cur.is_visual(), "<space>y ends visual mode");
         // y in visual yanks; y in normal still copies the url
         press(&mut v, KeyCode::Char('g'));
         press(&mut v, KeyCode::Char('g'));
         press(&mut v, KeyCode::Char('v'));
         press(&mut v, KeyCode::Char('e'));
-        assert_eq!(press(&mut v, KeyCode::Char('y')), Action::Copy("alpha".into()));
-        assert_eq!(press(&mut v, KeyCode::Char('y')), Action::Copy("https://a/b.htm".into()));
+        assert_eq!(
+            press(&mut v, KeyCode::Char('y')),
+            Action::Copy("alpha".into())
+        );
+        assert_eq!(
+            press(&mut v, KeyCode::Char('y')),
+            Action::Copy("https://a/b.htm".into())
+        );
         // esc leaves visual mode instead of quitting
         press(&mut v, KeyCode::Char('v'));
         assert_eq!(press(&mut v, KeyCode::Esc), Action::None);
@@ -1116,7 +1159,10 @@ mod tests {
         v.pending = Some(3);
         let text = screen_text(&mut v, 60, 20);
         assert!(text.contains("We make chips."), "{text}");
-        assert!(text.contains("▌"), "matched block gets the gutter bar: {text}");
+        assert!(
+            text.contains("▌"),
+            "matched block gets the gutter bar: {text}"
+        );
         assert!(text.contains("• Supply is concentrated."), "{text}");
         screen_text(&mut v, 60, 5); // short view so there is room to scroll
         press(&mut v, KeyCode::Char('g'));
@@ -1129,7 +1175,10 @@ mod tests {
         assert_eq!(v.cur.pos.row, v.starts[0]);
         press(&mut v, KeyCode::Char(']'));
         press(&mut v, KeyCode::Char('h'));
-        assert_eq!(v.cur.pos.row, v.starts[2], "]h stops at the level-3 heading");
+        assert_eq!(
+            v.cur.pos.row, v.starts[2],
+            "]h stops at the level-3 heading"
+        );
     }
 
     #[test]
@@ -1137,7 +1186,14 @@ mod tests {
         let mut v = doc(vec!["a".into()], vec![], None);
         press(&mut v, KeyCode::Char('?'));
         let text = screen_text(&mut v, 120, 40);
-        for k in ["reader keys", "gh gl", "ip ap", "spc a c", "]] [[", "half page down"] {
+        for k in [
+            "reader keys",
+            "gh gl",
+            "ip ap",
+            "spc a c",
+            "]] [[",
+            "half page down",
+        ] {
             assert!(text.contains(k), "{k} missing:\n{text}");
         }
         // any key closes it without acting

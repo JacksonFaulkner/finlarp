@@ -71,18 +71,50 @@ const BEATS: &[Beat] = &[
 ];
 
 const ZOOMS: &[Zoom] = &[
-    Zoom { key: 'a', label: "a TSV and its microbumps, cut open", build: || -> Box<dyn Scene> { Box::new(TsvZ) } },
-    Zoom { key: 'b', label: "the base logic die", build: || -> Box<dyn Scene> { Box::new(BaseZ) } },
-    Zoom { key: 'c', label: "channels: one stack, many buses", build: || -> Box<dyn Scene> { Box::new(ChannelsZ) } },
-    Zoom { key: 'd', label: "microbumps vs hybrid bonding", build: || -> Box<dyn Scene> { Box::new(BondZ) } },
-    Zoom { key: 'e', label: "CoWoS: more stacks, bigger interposer", build: || -> Box<dyn Scene> { Box::new(CowosZ) } },
+    Zoom {
+        key: 'a',
+        label: "a TSV and its microbumps, cut open",
+        build: || -> Box<dyn Scene> { Box::new(TsvZ) },
+    },
+    Zoom {
+        key: 'b',
+        label: "the base logic die",
+        build: || -> Box<dyn Scene> { Box::new(BaseZ) },
+    },
+    Zoom {
+        key: 'c',
+        label: "channels: one stack, many buses",
+        build: || -> Box<dyn Scene> { Box::new(ChannelsZ) },
+    },
+    Zoom {
+        key: 'd',
+        label: "microbumps vs hybrid bonding",
+        build: || -> Box<dyn Scene> { Box::new(BondZ) },
+    },
+    Zoom {
+        key: 'e',
+        label: "CoWoS: more stacks, bigger interposer",
+        build: || -> Box<dyn Scene> { Box::new(CowosZ) },
+    },
 ];
 
 /// The overview at `t`, turned by the user's `view`, with the beat's notes on it.
 pub fn overview_frame(t: &Time, view: &poly3d::View, w: u32, h: u32) -> RgbaImage {
     let b = &BEATS[t.beat.min(BEATS.len() - 1)];
-    let notes = poly3d::Notes { what: b.what, why: b.why, facts: b.facts };
-    poly3d::render_hbm_overview(t.beat, t.local as f64, view, Some(&notes), w as usize, h as usize, px::BG)
+    let notes = poly3d::Notes {
+        what: b.what,
+        why: b.why,
+        facts: b.facts,
+    };
+    poly3d::render_hbm_overview(
+        t.beat,
+        t.local as f64,
+        view,
+        Some(&notes),
+        w as usize,
+        h as usize,
+        px::BG,
+    )
 }
 
 /// The HBM STACK overview: the stack and its package.
@@ -233,76 +265,160 @@ const STACK_BEATS: &[Beat] = &[
 
 const PARTS_BEATS: &[Beat] = &[
     Beat::new("DRAM dies", BEAT_MS)
-        .note("The memory itself, stacked 4 to 16 high.", "The DRAM dies keep their colour; the rest go grey.")
-        .detail("Each die has its own banks and arrays.", &["24 or 32 Gb per die (HBM4)"]),
+        .note(
+            "The memory itself, stacked 4 to 16 high.",
+            "The DRAM dies keep their colour; the rest go grey.",
+        )
+        .detail(
+            "Each die has its own banks and arrays.",
+            &["24 or 32 Gb per die (HBM4)"],
+        ),
     Beat::new("base logic die", BEAT_MS)
-        .note("The interface to the GPU, plus test logic; the TSVs land on it.", "The base die lights.")
-        .detail("Moving to foundry logic for HBM4 (reported).", &["PHY + test"]),
+        .note(
+            "The interface to the GPU, plus test logic; the TSVs land on it.",
+            "The base die lights.",
+        )
+        .detail(
+            "Moving to foundry logic for HBM4 (reported).",
+            &["PHY + test"],
+        ),
     Beat::new("TSVs", BEAT_MS)
-        .note("Copper wires straight through each die, carrying signals and power up and down.", "The stack opens and the copper columns light.")
+        .note(
+            "Copper wires straight through each die, carrying signals and power up and down.",
+            "The stack opens and the copper columns light.",
+        )
         .detail("Only possible in thinned dies.", &["30-50 um dies"]),
     Beat::new("microbumps", BEAT_MS)
-        .note("Tiny joints that connect each die's TSVs to the next die.", "The bumps between the dies light.")
-        .detail("Pitch shrinking from ~40 um.", &["Microbumps (SemiEngineering)"]),
+        .note(
+            "Tiny joints that connect each die's TSVs to the next die.",
+            "The bumps between the dies light.",
+        )
+        .detail(
+            "Pitch shrinking from ~40 um.",
+            &["Microbumps (SemiEngineering)"],
+        ),
     Beat::new("silicon interposer", BEAT_MS)
-        .note("A slab of silicon wiring the stacks to the GPU with thousands of short lines.", "The interposer and its wiring light.")
+        .note(
+            "A slab of silicon wiring the stacks to the GPU with thousands of short lines.",
+            "The interposer and its wiring light.",
+        )
         .detail("Part of CoWoS packaging.", &["2.5D packaging"]),
     Beat::new("GPU", BEAT_MS)
-        .note("The processor the stacks feed, millimetres away.", "The GPU lights; data streams to it.")
-        .detail("Several stacks per GPU.", &["4 x 819 GB/s = 3.3 TB/s (HBM3)"]),
+        .note(
+            "The processor the stacks feed, millimetres away.",
+            "The GPU lights; data streams to it.",
+        )
+        .detail(
+            "Several stacks per GPU.",
+            &["4 x 819 GB/s = 3.3 TB/s (HBM3)"],
+        ),
 ];
 
 const BUILD_BEATS: &[Beat] = &[
     Beat::new("1. DRAM dies made and stacked one by one", BEAT_MS)
-        .note("DRAM dies made on DRAM wafers are placed one at a time.", "Dies appear one after another on the base die.")
-        .detail("Every die must be good: a bad one spoils the stack.", &["Known-good dies"]),
+        .note(
+            "DRAM dies made on DRAM wafers are placed one at a time.",
+            "Dies appear one after another on the base die.",
+        )
+        .detail(
+            "Every die must be good: a bad one spoils the stack.",
+            &["Known-good dies"],
+        ),
     Beat::new("2. thinned, with TSVs and bumps", BEAT_MS)
-        .note("Each die is thinned and carries TSVs and microbumps.", "The stack shown pulled apart with its bumps.")
+        .note(
+            "Each die is thinned and carries TSVs and microbumps.",
+            "The stack shown pulled apart with its bumps.",
+        )
         .detail("30-50 um dies.", &["SemiEngineering"]),
     Beat::new("3. bonded onto the base die", BEAT_MS)
-        .note("The dies are bonded down onto the base die into one stack.", "The gaps close.")
+        .note(
+            "The dies are bonded down onto the base die into one stack.",
+            "The gaps close.",
+        )
         .detail("Microbumps for HBM4.", &["Bonding"]),
     Beat::new("4. tested", BEAT_MS)
-        .note("The finished stack is tested by reading through its TSVs.", "Dots run down the TSVs.")
+        .note(
+            "The finished stack is tested by reading through its TSVs.",
+            "Dots run down the TSVs.",
+        )
         .detail("Bad stacks are rejected before packaging.", &["Stack test"]),
     Beat::new("5. mounted beside the GPU", BEAT_MS)
-        .note("Stacks and GPU are mounted on the interposer and linked.", "Data flows across the interposer; then the stack is taken away for the next build.")
+        .note(
+            "Stacks and GPU are mounted on the interposer and linked.",
+            "Data flows across the interposer; then the stack is taken away for the next build.",
+        )
         .detail("CoWoS packaging (TSMC).", &["Interposer mount"]),
 ];
 
 const GENS_BEATS: &[Beat] = &[
     Beat::new("data pins: 1024 to 2048", BEAT_MS)
-        .note("HBM4 doubles the interface width of HBM3.", "Two bars: HBM4 twice as tall.")
+        .note(
+            "HBM4 doubles the interface width of HBM3.",
+            "Two bars: HBM4 twice as tall.",
+        )
         .detail("More pins, more channels.", &["JEDEC JESD238, JESD270-4"]),
     Beat::new("rate per pin: 6.4 to 8 Gbit/s", BEAT_MS)
-        .note("The per-pin rate rises too, at the JEDEC baseline.", "Two bars, the second a quarter taller.")
-        .detail("Vendors push beyond the baseline.", &["HBM3 6.4, HBM4 8 Gb/s"]),
+        .note(
+            "The per-pin rate rises too, at the JEDEC baseline.",
+            "Two bars, the second a quarter taller.",
+        )
+        .detail(
+            "Vendors push beyond the baseline.",
+            &["HBM3 6.4, HBM4 8 Gb/s"],
+        ),
     Beat::new("bandwidth per stack: 819 GB/s to 2 TB/s", BEAT_MS)
-        .note("Width and rate together give up to 2 TB/s per HBM4 stack.", "Two bars, the second about 2.5x.")
-        .detail("Capacity rises to 64 GB at 16-high.", &["2048 x 8 / 8 = 2048 GB/s"]),
+        .note(
+            "Width and rate together give up to 2 TB/s per HBM4 stack.",
+            "Two bars, the second about 2.5x.",
+        )
+        .detail(
+            "Capacity rises to 64 GB at 16-high.",
+            &["2048 x 8 / 8 = 2048 GB/s"],
+        ),
 ];
 
 const HEIGHT_BEATS: &[Beat] = &[
     Beat::new("8-high", BEAT_MS)
-        .note("Eight DRAM dies on the base die, well under the height limit.", "An 8-high stack under the pink limit plane.")
+        .note(
+            "Eight DRAM dies on the base die, well under the height limit.",
+            "An 8-high stack under the pink limit plane.",
+        )
         .detail("Height includes every die and joint.", &["Limit 720 um"]),
     Beat::new("12-high", BEAT_MS)
-        .note("Four more dies add capacity and height, and the heat starts to build.", "The stack grows to 12 dies.")
+        .note(
+            "Four more dies add capacity and height, and the heat starts to build.",
+            "The stack grows to 12 dies.",
+        )
         .detail("Thinner dies keep it under the limit.", &["30-50 um dies"]),
     Beat::new("16-high, under a raised limit", BEAT_MS)
-        .note("Sixteen dies needed the limit raised from 720 to 775 um; the lower dies run hottest.", "The stack reaches 16; the plane rises; the bottom glows.")
-        .detail("Heat leaves through the top.", &["720 -> 775 um (press reports)"]),
+        .note(
+            "Sixteen dies needed the limit raised from 720 to 775 um; the lower dies run hottest.",
+            "The stack reaches 16; the plane rises; the bottom glows.",
+        )
+        .detail(
+            "Heat leaves through the top.",
+            &["720 -> 775 um (press reports)"],
+        ),
 ];
 
 const BONDSEC_BEATS: &[Beat] = &[
     Beat::new("microbumps between the dies", BEAT_MS)
-        .note("Opened up: microbumps sit between every pair of dies.", "The stack pulls apart; yellow bumps show.")
+        .note(
+            "Opened up: microbumps sit between every pair of dies.",
+            "The stack pulls apart; yellow bumps show.",
+        )
         .detail("Bump pitch ~40 um, shrinking.", &["SemiEngineering"]),
     Beat::new("bonded on bumps", BEAT_MS)
-        .note("Closed, each joint still leaves a small gap.", "The stack closes up.")
+        .note(
+            "Closed, each joint still leaves a small gap.",
+            "The stack closes up.",
+        )
         .detail("HBM4 keeps microbumps.", &["SemiEngineering"]),
     Beat::new("hybrid bonding: no gap", BEAT_MS)
-        .note("Hybrid bonding joins copper directly; the gaps vanish and the stack gets shorter.", "The bumps disappear and the stack shrinks.")
+        .note(
+            "Hybrid bonding joins copper directly; the gaps vanish and the stack gets shorter.",
+            "The bumps disappear and the stack shrinks.",
+        )
         .detail("Expected beyond 16-high.", &["Hybrid bonding"]),
 ];
 
@@ -321,25 +437,55 @@ const COWOSSEC_BEATS: &[Beat] = &[
 const MAKERS_BEATS: &[Beat] = &[
     Beat::new("Micron (MU)", BEAT_MS)
         .note("Micron makes HBM.", "The first wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["HBM makers: SK hynix, Samsung, Micron"]),
+        .detail(
+            "Market share is on the market pages.",
+            &["HBM makers: SK hynix, Samsung, Micron"],
+        ),
     Beat::new("SK hynix (000660.KS)", BEAT_MS)
-        .note("SK hynix makes HBM.", "The second wafer is in the spotlight.")
-        .detail("Market share is on the market pages.", &["SK hynix ticker: 000660.KS"]),
+        .note(
+            "SK hynix makes HBM.",
+            "The second wafer is in the spotlight.",
+        )
+        .detail(
+            "Market share is on the market pages.",
+            &["SK hynix ticker: 000660.KS"],
+        ),
     Beat::new("Samsung (005930.KS)", BEAT_MS)
         .note("Samsung makes HBM.", "The third wafer is in the spotlight.")
-        .detail("Packaging: TSMC (TSM), with ASE and Amkor.", &["Samsung ticker: 005930.KS"]),
+        .detail(
+            "Packaging: TSMC (TSM), with ASE and Amkor.",
+            &["Samsung ticker: 005930.KS"],
+        ),
 ];
 
 const RISKS_BEATS: &[Beat] = &[
     Beat::new("packaging capacity", BEAT_MS)
-        .note("Finished GPUs wait on interposer packaging; one supplier does most of it.", "GPU dies queue at a packaging line.")
-        .detail("Capacity has been expanding but stayed tight.", &["CoWoS (TSMC)"]),
+        .note(
+            "Finished GPUs wait on interposer packaging; one supplier does most of it.",
+            "GPU dies queue at a packaging line.",
+        )
+        .detail(
+            "Capacity has been expanding but stayed tight.",
+            &["CoWoS (TSMC)"],
+        ),
     Beat::new("stack yield falls with height", BEAT_MS)
-        .note("A stack is only good if every die and joint is good, so yield drops as stacks grow.", "Bars for 8, 12 and 16-high at 99% per die.")
-        .detail("99% per die is illustrative.", &["0.99^8 = 92%, ^12 = 89%, ^16 = 85%"]),
+        .note(
+            "A stack is only good if every die and joint is good, so yield drops as stacks grow.",
+            "Bars for 8, 12 and 16-high at 99% per die.",
+        )
+        .detail(
+            "99% per die is illustrative.",
+            &["0.99^8 = 92%, ^12 = 89%, ^16 = 85%"],
+        ),
     Beat::new("heat in tall stacks", BEAT_MS)
-        .note("Heat from the lower dies must pass through the whole stack.", "A 16-high stack glowing hot at the bottom.")
-        .detail("Limits how fast and how tall stacks can go.", &["Heat path"]),
+        .note(
+            "Heat from the lower dies must pass through the whole stack.",
+            "A 16-high stack glowing hot at the bottom.",
+        )
+        .detail(
+            "Limits how fast and how tall stacks can go.",
+            &["Heat path"],
+        ),
 ];
 
 zoom_scene_impl!(TsvZ, TSV_BEATS, HbmZoom::Tsv);
@@ -377,7 +523,12 @@ mod tests {
     use std::time::Instant;
 
     fn at(beat: usize, local: f32) -> Time {
-        Time { ms: 0, beat, local, beat_start: 0 }
+        Time {
+            ms: 0,
+            beat,
+            local,
+            beat_start: 0,
+        }
     }
 
     fn scenes() -> Vec<(String, Box<dyn Scene>)> {
@@ -410,17 +561,30 @@ mod tests {
     fn beats_match_their_pictures() {
         assert_eq!(BEATS.len(), poly3d::HBM_OVERVIEW_BEATS);
         for z in ZOOMS {
-            assert_eq!((z.build)().beats().len(), zoom_scene(z.key).unwrap().beats(), "zoom {}", z.key);
+            assert_eq!(
+                (z.build)().beats().len(),
+                zoom_scene(z.key).unwrap().beats(),
+                "zoom {}",
+                z.key
+            );
         }
         for (key, mk) in ('1'..='9').zip(SECTIONS) {
-            assert_eq!(mk().beats().len(), zoom_scene(key).unwrap().beats(), "section {key}");
+            assert_eq!(
+                mk().beats().len(),
+                zoom_scene(key).unwrap().beats(),
+                "section {key}"
+            );
         }
         let heads = super::super::diagrams_desc::visual("HBM STACK")
             .unwrap()
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len() + 1, "one scene per section but the sources");
+        assert_eq!(
+            heads,
+            SECTIONS.len() + 1,
+            "one scene per section but the sources"
+        );
     }
 
     #[test]
@@ -460,7 +624,11 @@ mod tests {
             let beats = scene.beats().len();
             let p = Player::new(scene, Instant::now());
             for beat in 0..beats {
-                let (w, h) = if name == "overview" { (1900, 1000) } else { (960, 576) };
+                let (w, h) = if name == "overview" {
+                    (1900, 1000)
+                } else {
+                    (960, 576)
+                };
                 let img = p.pixels(&at(beat, 0.6), w, h).expect("pixel frame");
                 img.save(dir.join(format!("{name}_{beat}.png"))).unwrap();
             }

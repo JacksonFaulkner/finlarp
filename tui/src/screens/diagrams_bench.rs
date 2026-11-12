@@ -36,15 +36,33 @@ struct Case {
 }
 
 fn time(beat: usize, local: f32) -> Time {
-    Time { ms: (beat as u64) * 4000 + (local * 4000.0) as u64, beat, local, beat_start: beat as u64 * 4000 }
+    Time {
+        ms: (beat as u64) * 4000 + (local * 4000.0) as u64,
+        beat,
+        local,
+        beat_start: beat as u64 * 4000,
+    }
 }
 
-const KEYS: [char; 14] = ['a', 'b', 'c', 'd', 'e', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+const KEYS: [char; 15] = [
+    'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+];
 
 fn cases() -> Vec<Case> {
-    use super::super::{diagrams_scene_chip as chip, diagrams_scene_link as link, diagrams_scene_pkg as pkg, diagrams_scene_pwr as pwr};
+    use super::super::{
+        diagrams_scene_chip as chip, diagrams_scene_link as link, diagrams_scene_pkg as pkg,
+        diagrams_scene_pwr as pwr,
+    };
     let mut out: Vec<Case> = Vec::new();
-    let mut pages: Vec<&'static str> = vec!["POLYSILICON", "CELL", "LITHO", "ARRAY", "BANK", "BANDWIDTH", "HBM STACK"];
+    let mut pages: Vec<&'static str> = vec![
+        "POLYSILICON",
+        "CELL",
+        "LITHO",
+        "ARRAY",
+        "BANK",
+        "BANDWIDTH",
+        "HBM STACK",
+    ];
     pages.extend(chip::nodes().iter().map(|n| n.page));
     pages.extend(pkg::nodes().iter().map(|n| n.page));
     pages.extend(link::nodes().iter().map(|n| n.page));
@@ -54,27 +72,58 @@ fn cases() -> Vec<Case> {
         // overviews
         let ov: Option<(usize, Box<dyn Fn(usize, f32) -> Model>)> = match page {
             "CELL" => Some((7, Box::new(|b, l| Model::CellOverview(time(b, l))))),
-            "LITHO" => Some((poly3d::LITHO_OVERVIEW_BEATS, Box::new(|b, l| Model::LithoOverview(time(b, l))))),
-            "ARRAY" => Some((poly3d::ARRAY_OVERVIEW_BEATS, Box::new(|b, l| Model::ArrayOverview(time(b, l))))),
-            "BANK" => Some((poly3d::BANK_OVERVIEW_BEATS, Box::new(|b, l| Model::BankOverview(time(b, l))))),
-            "BANDWIDTH" => Some((poly3d::BW_OVERVIEW_BEATS, Box::new(|b, l| Model::BwOverview(time(b, l))))),
-            "HBM STACK" => Some((poly3d::HBM_OVERVIEW_BEATS, Box::new(|b, l| Model::HbmOverview(time(b, l))))),
+            "LITHO" => Some((
+                poly3d::LITHO_OVERVIEW_BEATS,
+                Box::new(|b, l| Model::LithoOverview(time(b, l))),
+            )),
+            "ARRAY" => Some((
+                poly3d::ARRAY_OVERVIEW_BEATS,
+                Box::new(|b, l| Model::ArrayOverview(time(b, l))),
+            )),
+            "BANK" => Some((
+                poly3d::BANK_OVERVIEW_BEATS,
+                Box::new(|b, l| Model::BankOverview(time(b, l))),
+            )),
+            "BANDWIDTH" => Some((
+                poly3d::BW_OVERVIEW_BEATS,
+                Box::new(|b, l| Model::BwOverview(time(b, l))),
+            )),
+            "HBM STACK" => Some((
+                poly3d::HBM_OVERVIEW_BEATS,
+                Box::new(|b, l| Model::HbmOverview(time(b, l))),
+            )),
             _ => {
                 if let Some(n) = chip::node(page) {
-                    Some((n.keys.len(), Box::new(move |b, l| Model::ChipOverview(n.beats, n.keys, time(b, l)))))
+                    Some((
+                        n.keys.len(),
+                        Box::new(move |b, l| Model::ChipOverview(n.beats, n.keys, time(b, l))),
+                    ))
                 } else if let Some(n) = pkg::node(page) {
-                    Some((n.keys.len(), Box::new(move |b, l| Model::PkgOverview(n.beats, n.keys, time(b, l)))))
+                    Some((
+                        n.keys.len(),
+                        Box::new(move |b, l| Model::PkgOverview(n.beats, n.keys, time(b, l))),
+                    ))
                 } else if let Some(n) = link::node(page) {
-                    Some((n.keys.len(), Box::new(move |b, l| Model::LinkOverview(n.beats, n.keys, time(b, l)))))
+                    Some((
+                        n.keys.len(),
+                        Box::new(move |b, l| Model::LinkOverview(n.beats, n.keys, time(b, l))),
+                    ))
                 } else if let Some(n) = pwr::node(page) {
-                    Some((n.keys.len(), Box::new(move |b, l| Model::PwrOverview(n.beats, n.keys, time(b, l)))))
+                    Some((
+                        n.keys.len(),
+                        Box::new(move |b, l| Model::PwrOverview(n.beats, n.keys, time(b, l))),
+                    ))
                 } else {
                     None
                 }
             }
         };
         if let Some((beats, model)) = ov {
-            out.push(Case { name: format!("{page} overview"), beats: beats.max(1), model });
+            out.push(Case {
+                name: format!("{page} overview"),
+                beats: beats.max(1),
+                model,
+            });
         }
         // zooms and sections
         for k in KEYS {
@@ -114,7 +163,10 @@ struct Row {
 }
 
 fn env<T: std::str::FromStr>(k: &str, d: T) -> T {
-    std::env::var(k).ok().and_then(|v| v.parse().ok()).unwrap_or(d)
+    std::env::var(k)
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(d)
 }
 
 fn kitty_encode_ms(img: image::RgbaImage) -> f64 {
@@ -122,11 +174,18 @@ fn kitty_encode_ms(img: image::RgbaImage) -> f64 {
     picker.set_protocol_type(ProtocolType::Kitty);
     let font = picker.font_size();
     let (w, h) = (img.width(), img.height());
-    let area = Rect::new(0, 0, (w / font.width as u32).max(1) as u16, (h / font.height as u32).max(1) as u16);
+    let area = Rect::new(
+        0,
+        0,
+        (w / font.width as u32).max(1) as u16,
+        (h / font.height as u32).max(1) as u16,
+    );
     let t0 = Instant::now();
     let mut proto = kitty_protocol(&picker, DynamicImage::ImageRgba8(img), font, 0x00F3_D101);
     let mut buf = Buffer::empty(area);
-    StatefulImage::default().resize(Resize::Fit(None)).render(area, &mut buf, &mut proto);
+    StatefulImage::default()
+        .resize(Resize::Fit(None))
+        .render(area, &mut buf, &mut proto);
     t0.elapsed().as_secs_f64() * 1e3
 }
 
@@ -134,7 +193,10 @@ fn kitty_encode_ms(img: image::RgbaImage) -> f64 {
 #[ignore = "bench: cargo test --release bench_3d -- --ignored --nocapture"]
 fn bench_3d() {
     let size = std::env::var("FL_BENCH_SIZE").unwrap_or_else(|_| "1200x660".into());
-    let (w, h) = size.split_once('x').map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap())).unwrap_or((1200usize, 660usize));
+    let (w, h) = size
+        .split_once('x')
+        .map(|(a, b)| (a.parse().unwrap(), b.parse().unwrap()))
+        .unwrap_or((1200usize, 660usize));
     let frames: usize = env("FL_BENCH_FRAMES", 12);
     let top: usize = env("FL_BENCH_TOP", 40);
     let encode = env("FL_BENCH_ENCODE", 1) != 0;
@@ -162,15 +224,35 @@ fn bench_3d() {
             }
         }
         let k = 1.0 / frames as f64;
-        rows.push(Row { name: c.name, s: sum.scaled(k), render_ms: wall * k, encode_ms: enc * k });
+        rows.push(Row {
+            name: c.name,
+            s: sum.scaled(k),
+            render_ms: wall * k,
+            encode_ms: enc * k,
+        });
     }
     rows.sort_by(|a, b| (b.render_ms + b.encode_ms).total_cmp(&(a.render_ms + a.encode_ms)));
 
-    println!("\n3D frame cost at {w}x{h}, {frames} frames/scene, yawing (what a held HJKL key renders)");
+    println!(
+        "\n3D frame cost at {w}x{h}, {frames} frames/scene, yawing (what a held HJKL key renders)"
+    );
     println!("budget: MOTION_FRAME is 30 ms. 'frame' = render + kitty encode.\n");
     println!(
         "{:<30} {:>7} {:>7} {:>6} | {:>6} {:>5} {:>6} {:>7} {:>6} | {:>7} {:>7} {:>6} {:>7} {:>7}",
-        "scene", "frame", "render", "enc", "build", "sort", "raster", "overlay", "image", "tris", "drawn", "ovrdr", "linepx", "dotpx"
+        "scene",
+        "frame",
+        "render",
+        "enc",
+        "build",
+        "sort",
+        "raster",
+        "overlay",
+        "image",
+        "tris",
+        "drawn",
+        "ovrdr",
+        "linepx",
+        "dotpx"
     );
     for r in rows.iter().take(top) {
         let s = &r.s;
@@ -206,7 +288,12 @@ fn bench_3d() {
         mean(&|r| r.s.image_ms),
         mean(&|r| r.encode_ms),
     );
-    println!("over budget (>30 ms): {}", rows.iter().filter(|r| r.render_ms + r.encode_ms > 30.0).count());
+    println!(
+        "over budget (>30 ms): {}",
+        rows.iter()
+            .filter(|r| r.render_ms + r.encode_ms > 30.0)
+            .count()
+    );
 
     if let Ok(path) = std::env::var("FL_BENCH_JSON") {
         let lines: Vec<String> = rows
@@ -268,5 +355,9 @@ fn scenes_stay_inside_frame_budget() {
             }
         }
     }
-    assert!(over.is_empty(), "scenes over the frame budget:\n{}", over.join("\n"));
+    assert!(
+        over.is_empty(),
+        "scenes over the frame budget:\n{}",
+        over.join("\n")
+    );
 }

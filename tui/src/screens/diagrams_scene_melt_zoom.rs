@@ -1,48 +1,16 @@
-// Zoom-ins for the MELT + PULL overview.
-//
-//   Neck        seed contact, dash neck with dislocations sliding out, the weight it carries, a dislocation that stays
-//   Convection  melt flow driven by the hot wall, damped by a magnetic field, the interface shape, SiO from the quartz
-//   HotZone     heater and felt, the axial temperature gradient, the heat shield, argon sweeping out the base
+// MELT + PULL zooms a-c, drawn in 3D by pbr3d in the same shaded style as the overview:
+// a the dash neck, b the melt convection with its magnetic field, c the hot zone with its argon
+// sweep. Each zoom is four beats, each beat its own 3D close-up (tools/pbr3d/src/shot_zoom.rs).
 
-use crate::ui::anim::shapes::{Path, flow, titled_box};
-use crate::ui::anim::{Beat, Canvas, Particles, Scene, Time, ease_in_out, flicker, lerp};
+use image::RgbaImage;
 
-const MIN_W: u16 = 80;
-const MIN_H: u16 = 26;
+use super::diagrams_px as px;
+use crate::ui::anim::{Beat, Canvas, Scene, Time};
+use pbr3d::Shot;
+
+const MIN_W: u16 = 100;
+const MIN_H: u16 = 30;
 const BEAT_MS: u64 = 5200;
-
-fn dims(c: &Canvas) -> (i32, i32) {
-    (
-        c.width().max(MIN_W as usize) as i32,
-        c.height().max(MIN_H as usize) as i32,
-    )
-}
-
-/// Melt surface with a moving ripple and a few rows of liquid below it.
-fn surface(c: &mut Canvas, cx: i32, mel: i32, t: &Time) {
-    for x in cx - 16..=cx + 16 {
-        let ch = if (x + (t.ms / 400) as i32).rem_euclid(2) == 0 {
-            '≈'
-        } else {
-            '~'
-        };
-        c.put(x, mel, ch);
-    }
-    c.hline(cx - 16, mel + 1, 33, '~');
-}
-
-/// A crystal row: one cell for the neck, otherwise `hw` cells either side of the axis.
-fn hrow(c: &mut Canvas, cx: i32, y: i32, hw: i32) {
-    if hw == 0 {
-        c.put(cx, y, '▓');
-    } else {
-        c.hline(cx - hw, y, 2 * hw + 1, '▓');
-    }
-}
-
-// ---- a: the dash neck -----------------------------------------------------------
-
-pub struct Neck;
 
 const NECK_BEATS: &[Beat] = &[
     Beat::new(
@@ -111,104 +79,6 @@ const NECK_BEATS: &[Beat] = &[
     ),
 ];
 
-impl Scene for Neck {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        NECK_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cx = w / 2;
-        let mel = h - 6;
-        c.vline(cx - 16, mel, h - mel, '│');
-        c.vline(cx + 16, mel, h - mel, '│');
-        surface(c, cx, mel, t);
-        let neck_len = 10;
-        match t.beat {
-            0 => {
-                let tip = lerp(2.0, (mel - 2) as f32, ease_in_out(t.local)).round() as i32;
-                c.vline(cx, 1, tip - 1, '│');
-                c.hline(cx - 2, tip, 5, '▀');
-                if t.local > 0.9 {
-                    for dx in [-2, 2] {
-                        c.put(cx + dx, mel - 1, '*');
-                    }
-                    for k in 0..3 {
-                        c.put(cx - 1 + k, mel - 2 - k, '/');
-                    }
-                }
-            }
-            1 => {
-                let len = (neck_len as f32 * ease_in_out(t.local)).round() as i32;
-                let top = mel - 1 - len;
-                c.vline(cx, 1, top - 1, '│');
-                for y in top..mel {
-                    c.hline(cx - 1, y, 3, '▓');
-                }
-                for k in 0..3 {
-                    let f = (t.local * 1.3 + k as f32 * 0.33) % 1.0;
-                    let y = mel - 2 - (f * 8.0) as i32;
-                    if f < 0.6 {
-                        c.put(cx, y, '/');
-                    } else {
-                        let side = if k % 2 == 0 { -2 } else { 2 };
-                        c.put(cx + side, y, '·');
-                    }
-                }
-            }
-            2 => {
-                let top = mel - 1 - neck_len;
-                c.vline(cx, 1, top - 1, '│');
-                for y in top..mel {
-                    c.hline(cx - 1, y, 3, '▓');
-                }
-                for y in top - 5..top {
-                    hrow(c, cx, y, 4);
-                }
-                let crack = if flicker(t.ms, 300, 9, 2) != 0 {
-                    '╳'
-                } else {
-                    '┼'
-                };
-                c.put(cx, mel - 5, crack);
-                c.put(cx, top - 6, '↓');
-                c.label(cx + 6, top - 3, "~several hundred kg");
-            }
-            _ => {
-                let top = mel - 1 - neck_len;
-                c.vline(cx, 1, top - 1, '│');
-                for y in top..mel {
-                    c.hline(cx - 1, y, 3, '▓');
-                }
-                let drop = if t.local < 0.5 {
-                    0
-                } else {
-                    (9.0 * ease_in_out((t.local - 0.5) * 2.0)).round() as i32
-                };
-                for y in top - 5..top {
-                    hrow(c, cx, y + drop, 4);
-                }
-                if drop == 0 {
-                    for y in top - 5..top {
-                        c.put(cx - 1, y, '/');
-                    }
-                    c.label(cx + 6, top - 3, "dislocation stays");
-                } else {
-                    c.label(cx + 6, mel - 3, "remelt");
-                }
-            }
-        }
-    }
-}
-
-// ---- b: melt convection and the magnetic field -----------------------------------
-
-pub struct Convection;
-
 const CONV_BEATS: &[Beat] = &[
     Beat::new(
         "the melt convects: the hot crucible wall drives buoyancy flow, and rotation adds more",
@@ -275,101 +145,6 @@ const CONV_BEATS: &[Beat] = &[
         ],
     ),
 ];
-
-impl Scene for Convection {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        CONV_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cx = w / 2;
-        let mel = h - 12;
-        let bot = h - 3;
-        let (cl, cr) = (cx - 16, cx + 16);
-        // crucible walls: solid, then dissolving once the quartz starts to go
-        let wall = if t.beat == 3 { '░' } else { '│' };
-        c.vline(cl, mel - 4, bot - mel + 4, wall);
-        c.vline(cr, mel - 4, bot - mel + 4, wall);
-        c.hline(cl, bot, cr - cl + 1, '─');
-        c.put(cl, bot, '└');
-        c.put(cr, bot, '┘');
-        for y in mel..bot {
-            for x in cl + 1..cr {
-                let ch = if (x + (t.ms / 400) as i32).rem_euclid(2) == 0 {
-                    '≈'
-                } else {
-                    '~'
-                };
-                c.put(x, y, ch);
-            }
-        }
-        if t.beat == 1 {
-            for row in [mel + 1, mel + 3] {
-                c.hline(cl + 1, row, cr - cl - 1, '═');
-            }
-            c.label(cr + 2, mel + 2, "B field (HMCZ)");
-        }
-        // interface: bulges into the melt while the flow is strong, then goes flat
-        let bulge = match t.beat {
-            0 => 2.0,
-            1 => lerp(2.0, 1.0, ease_in_out(t.local)),
-            2 => lerp(1.0, 0.0, ease_in_out(t.local)),
-            _ => 0.0,
-        };
-        for x in cx - 4..=cx + 4 {
-            let dx = (x - cx) as f32 / 4.0;
-            let off = (bulge * (1.0 - dx * dx)).round() as i32;
-            for y in mel - 4..=mel - 1 + off {
-                c.put(x, y, '▓');
-            }
-        }
-        if t.beat == 0 {
-            // crucible spins one way, crystal the other: forced flow stirs the melt
-            c.label(cr + 2, mel + 4, "crucible ↺  crystal ↻");
-        }
-        let ring = Path::new(&[
-            (cl + 2, mel + 2),
-            (cr - 2, mel + 2),
-            (cr - 2, bot - 1),
-            (cl + 2, bot - 1),
-            (cl + 2, mel + 2),
-        ]);
-        ring.draw(c);
-        match t.beat {
-            0 => flow(c, &ring, t.ms, Particles::new(301, 260, 2600), |q| {
-                if q.rand(1) > 0.5 { '°' } else { '·' }
-            }),
-            1 => flow(c, &ring, t.ms, Particles::new(302, 700, 2600), |q| {
-                if q.rand(1) > 0.5 { '°' } else { '·' }
-            }),
-            2 => c.label(cr + 2, mel - 1, "flat interface"),
-            3 => {
-                // argon at 2500 Pa: sparse, so little gas pushes back on the SiO leaving the surface
-                for y in mel - 3..mel {
-                    for x in cl + 1..cr {
-                        if (x * 7 + y * 3).rem_euclid(5) == 0 {
-                            c.put_if_blank(x, y, '·');
-                        }
-                    }
-                }
-                let rise = Path::new(&[(cl + 1, bot - 1), (cl + 1, mel)]);
-                flow(c, &rise, t.ms, Particles::new(303, 400, 1800), |_| '*');
-                c.label(cr + 2, mel + 1, "SiO ↑");
-                c.label(cr + 2, mel - 2, "2500 Pa: little gas to push back");
-            }
-            _ => {}
-        }
-    }
-}
-
-// ---- c: the hot zone and the argon sweep -------------------------------------------
-
-pub struct HotZone;
 
 const HOT_BEATS: &[Beat] = &[
     Beat::new(
@@ -438,162 +213,46 @@ const HOT_BEATS: &[Beat] = &[
     ),
 ];
 
-impl Scene for HotZone {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
+macro_rules! zoom_scene_impl {
+    ($name:ident, $beats:ident, $shot:expr) => {
+        pub struct $name;
 
-    fn beats(&self) -> &[Beat] {
-        HOT_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cx = w / 2;
-        let mel = h - 12;
-        let bot = h - 6;
-        let (cl, cr) = (cx - 10, cx + 10);
-        // chamber, felt, heater, crucible
-        titled_box(c, cx - 18, 0, 37, h - 2, "chamber, water-cooled");
-        let glow = if flicker(t.ms, 200, 5, 3) != 0 {
-            '▒'
-        } else {
-            '░'
-        };
-        let heat = if t.beat == 0 { '░' } else { glow };
-        if t.beat == 0 {
-            c.label(cx + 20, mel - 5, "heater ▒  felt ░");
-        }
-        for x in [cx - 15, cx + 15] {
-            c.vline(x, mel - 6, bot - mel + 6, '░');
-        }
-        for x in [cx - 13, cx + 13] {
-            c.vline(x, mel - 5, bot - mel + 5, heat);
-        }
-        c.hline(cx - 13, bot + 1, 27, heat);
-        c.vline(cl, mel - 4, bot - mel + 4, '│');
-        c.vline(cr, mel - 4, bot - mel + 4, '│');
-        c.hline(cl, bot, cr - cl + 1, '─');
-        surface(c, cx, mel, t);
-        // crystal: a gradient from hot at the melt to cool at the top, with a heat shield in beat 2
-        let g = 8;
-        for y in mel - g..mel {
-            let d = (mel - 1 - y) as f32 / g as f32;
-            let ch = if t.beat == 0 || d < 0.33 {
-                '▓'
-            } else if d < 0.66 {
-                '▒'
-            } else {
-                '░'
-            };
-            for x in cx - 4..=cx + 4 {
-                c.put(x, y, ch);
+        impl Scene for $name {
+            fn size(&self) -> (u16, u16) {
+                (MIN_W, MIN_H)
+            }
+            fn beats(&self) -> &[Beat] {
+                $beats
+            }
+            fn draw(&self, _c: &mut Canvas, _t: &Time) {}
+            fn pixels(&self, t: &Time, w: u32, h: u32) -> Option<RgbaImage> {
+                Some(pbr3d::render_shot(
+                    $shot,
+                    t.beat,
+                    t.local,
+                    0.0,
+                    0.0,
+                    1.0,
+                    w,
+                    h,
+                    px::BG,
+                ))
             }
         }
-        if t.beat == 1 {
-            c.label(cx + 6, mel - 1, "1414 C");
-            c.label(cx + 6, mel - g, "cooler");
-        }
-        if t.beat == 2 {
-            c.vline(cx - 6, mel - 10, 9, '║');
-            c.vline(cx + 6, mel - 10, 9, '║');
-            c.hline(cx - 6, mel - 10, 13, '═');
-            c.label(cx + 8, mel - 10, "heat shield");
-        }
-        if t.beat == 3 {
-            let path = Path::new(&[(cx + 9, 1), (cx + 9, bot - 1)]);
-            path.draw(c);
-            flow(c, &path, t.ms, Particles::new(401, 240, 2400), |q| {
-                if q.rand(1) > 0.6 { '°' } else { '·' }
-            });
-            let sio = Path::new(&[(cx + 9, mel - 1), (cx + 9, 1)]);
-            flow(c, &sio, t.ms, Particles::new(402, 900, 2000), |q| {
-                if q.rand(1) > 0.5 { '*' } else { '·' }
-            });
-            c.label(cx + 11, bot + 2, "argon out the base");
-        }
-    }
+    };
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::ui::anim::Player;
-    use std::time::Instant;
+zoom_scene_impl!(Neck, NECK_BEATS, Shot::Neck);
+zoom_scene_impl!(Convection, CONV_BEATS, Shot::Convection);
+zoom_scene_impl!(HotZone, HOT_BEATS, Shot::HotZone);
 
-    fn scenes() -> Vec<(&'static str, fn() -> Box<dyn Scene>)> {
-        vec![
-            ("neck", || Box::new(Neck)),
-            ("convection", || Box::new(Convection)),
-            ("hotzone", || Box::new(HotZone)),
-        ]
-    }
-
-    fn at(p: &mut Player, beat: usize, frac: f32) -> String {
-        p.shot_at((beat as f32 * BEAT_MS as f32 + frac * BEAT_MS as f32) as u64)
-            .lines
-            .join("\n")
-    }
-
-    #[test]
-    fn every_beat_is_captioned_and_explained() {
-        for (name, mk) in scenes() {
-            let s = mk();
-            assert_eq!(s.beats().len(), 4, "{name}");
-            for (i, b) in s.beats().iter().enumerate() {
-                assert!(
-                    !b.what.is_empty()
-                        && !b.look.is_empty()
-                        && !b.why.is_empty()
-                        && !b.facts.is_empty(),
-                    "{name} {i}"
-                );
-            }
-        }
-    }
-
-    #[test]
-    fn zooms_scale_and_move() {
-        for (name, mk) in scenes() {
-            for (w, h) in [(50, 10), (80, 26), (130, 40), (240, 80)] {
-                let mut p = Player::new(mk(), Instant::now());
-                p.fit(w, h);
-                let mut seen = std::collections::HashSet::new();
-                for ms in (0..p.loop_ms()).step_by(173) {
-                    let s = p.shot_at(ms);
-                    assert_eq!(s.lines.len(), p.height());
-                    assert!(s.lines.iter().all(|l| l.chars().count() <= p.width()));
-                    seen.insert(s.lines.join("\n"));
-                }
-                assert!(seen.len() > 15, "{name} {w}x{h}: {}", seen.len());
-            }
-        }
-    }
-
-    #[test]
-    fn each_zoom_shows_its_story() {
-        let mk = |s: Box<dyn Scene>| {
-            let mut p = Player::new(s, Instant::now());
-            p.fit(120, 38);
-            p
-        };
-        let mut p = mk(Box::new(Neck));
-        assert!(at(&mut p, 0, 0.95).contains('*'));
-        assert!(
-            at(&mut p, 2, 0.5).contains('▓') && at(&mut p, 2, 0.5).contains("several hundred kg")
-        );
-        assert!(at(&mut p, 3, 0.9).contains("remelt"));
-        assert!(at(&mut p, 3, 0.2).contains("dislocation stays"));
-        let mut p = mk(Box::new(Convection));
-        assert!(at(&mut p, 1, 0.5).contains("B field"));
-        assert!(at(&mut p, 0, 0.5).contains("crucible ↺"));
-        assert!(at(&mut p, 3, 0.5).contains("2500 Pa"));
-        assert!(at(&mut p, 3, 0.5).contains("SiO"));
-        assert!(at(&mut p, 2, 0.5).contains("flat interface"));
-        let mut p = mk(Box::new(HotZone));
-        assert!(at(&mut p, 0, 0.5).contains("felt ░"));
-        assert!(at(&mut p, 1, 0.5).contains("1414 C"));
-        assert!(at(&mut p, 2, 0.5).contains("heat shield"));
-        assert!(at(&mut p, 3, 0.5).contains("argon out the base"));
+/// The 3D close-up for zoom or section key `key` ('a'-'c' zooms, '1'-'9' sections).
+pub fn shot_for(key: char) -> Option<Shot> {
+    match key {
+        'a' => Some(Shot::Neck),
+        'b' => Some(Shot::Convection),
+        'c' => Some(Shot::HotZone),
+        '1'..='9' => Some(Shot::Sec(key as u8 - b'0')),
+        _ => None,
     }
 }

@@ -144,7 +144,9 @@ pub fn load(path: &str) -> Result<Vec<Block>, String> {
 pub fn block_text(b: &Block) -> String {
     match b {
         Block::H { text, .. } => text.clone(),
-        Block::P { spans } | Block::Li { spans, .. } => spans.iter().map(|s| s.s.as_str()).collect(),
+        Block::P { spans } | Block::Li { spans, .. } => {
+            spans.iter().map(|s| s.s.as_str()).collect()
+        }
         Block::Table(t) => match num_rows(t) {
             Some(rows) => rows
                 .iter()
@@ -226,10 +228,16 @@ fn words(spans: &[TSpan], st: &Styles, base: Style) -> Vec<(String, Style)> {
         let mut first = !sp.s.starts_with(char::is_whitespace);
         for w in sp.s.split_whitespace() {
             let core = w.trim_end_matches([',', '.', ';', ':', ')']);
-            let is_num = looks_amount(core) || sp.x.is_some() && core.chars().any(|c| c.is_ascii_digit());
-            let is_scale = prev_num && matches!(core, "million" | "billion" | "thousand" | "trillion" | "percent");
+            let is_num =
+                looks_amount(core) || sp.x.is_some() && core.chars().any(|c| c.is_ascii_digit());
+            let is_scale = prev_num
+                && matches!(
+                    core,
+                    "million" | "billion" | "thousand" | "trillion" | "percent"
+                );
             let ws = if is_num {
-                let neg = core.contains('(') && core.chars().any(|c| c.is_ascii_digit()) || core.starts_with("-$");
+                let neg = core.contains('(') && core.chars().any(|c| c.is_ascii_digit())
+                    || core.starts_with("-$");
                 prev_color = if neg { st.neg } else { st.num };
                 style.patch(prev_color)
             } else if is_scale {
@@ -428,7 +436,9 @@ impl Row {
 // --------------------------------------------------------------------------
 
 fn num_table(t: &Table, rows: &[NumRow], avail: usize, st: &Styles) -> Vec<Line<'static>> {
-    let n = t.cols.max(rows.iter().map(|r| r.v.len()).max().unwrap_or(0));
+    let n = t
+        .cols
+        .max(rows.iter().map(|r| r.v.len()).max().unwrap_or(0));
     if n == 0 {
         return Vec::new();
     }
@@ -446,7 +456,11 @@ fn num_table(t: &Table, rows: &[NumRow], avail: usize, st: &Styles) -> Vec<Line<
             let want = if c.s.width() <= 12 {
                 c.s.width()
             } else {
-                c.s.split_whitespace().map(|w| w.width()).max().unwrap_or(0).min(14)
+                c.s.split_whitespace()
+                    .map(|w| w.width())
+                    .max()
+                    .unwrap_or(0)
+                    .min(14)
             };
             vw[c.c - 1] = vw[c.c - 1].max(want);
         }
@@ -463,7 +477,9 @@ fn num_table(t: &Table, rows: &[NumRow], avail: usize, st: &Styles) -> Vec<Line<
     while shown > 1 && 16.min(label_need) + vals(shown) > avail {
         shown -= 1;
     }
-    let label_w = avail.saturating_sub(vals(shown)).clamp(8, label_need.max(8));
+    let label_w = avail
+        .saturating_sub(vals(shown))
+        .clamp(8, label_need.max(8));
     let total = label_w + vals(shown);
     let col_x = |i: usize| label_w + vals(i) + GAP; // i: 0-based value column
     let mut out: Vec<Line<'static>> = Vec::new();
@@ -482,7 +498,11 @@ fn num_table(t: &Table, rows: &[NumRow], avail: usize, st: &Styles) -> Vec<Line<
         let titles = h.len() == 1
             && h[0].c >= 1
             && h[0].span >= shown
-            && (h[0].s.chars().filter(|c| c.is_alphabetic()).all(char::is_uppercase)
+            && (h[0]
+                .s
+                .chars()
+                .filter(|c| c.is_alphabetic())
+                .all(char::is_uppercase)
                 || (h[0].s.starts_with('(') && h[0].s.ends_with(')'))
                 || h[0].s.width() > total - label_w);
         if titles {
@@ -494,7 +514,13 @@ fn num_table(t: &Table, rows: &[NumRow], avail: usize, st: &Styles) -> Vec<Line<
         let mut cells: Vec<(usize, usize, Vec<String>, Style, bool)> = Vec::new();
         for c in h {
             if c.c == 0 {
-                cells.push((0, label_w.saturating_sub(1), plain_wrap(&c.s, label_w.saturating_sub(1)), st.dim, false));
+                cells.push((
+                    0,
+                    label_w.saturating_sub(1),
+                    plain_wrap(&c.s, label_w.saturating_sub(1)),
+                    st.dim,
+                    false,
+                ));
                 continue;
             }
             let first = c.c - 1;
@@ -621,31 +647,52 @@ fn text_table(t: &Table, avail: usize, st: &Styles) -> Vec<Line<'static>> {
     }
     let n = rows.iter().map(Vec::len).max().unwrap_or(0);
     let mut w: Vec<usize> = (0..n)
-        .map(|i| rows.iter().filter_map(|r| r.get(i)).map(|c| c.width()).max().unwrap_or(0).max(1))
+        .map(|i| {
+            rows.iter()
+                .filter_map(|r| r.get(i))
+                .map(|c| c.width())
+                .max()
+                .unwrap_or(0)
+                .max(1)
+        })
         .collect();
     let budget = avail.saturating_sub(GAP * n.saturating_sub(1)).max(n);
     while w.iter().sum::<usize>() > budget {
-        let (i, max) = w.iter().copied().enumerate().max_by_key(|(_, v)| *v).expect("n > 0");
+        let (i, max) = w
+            .iter()
+            .copied()
+            .enumerate()
+            .max_by_key(|(_, v)| *v)
+            .expect("n > 0");
         if max <= 8 {
             break;
         }
         w[i] -= 1;
     }
     let total = w.iter().sum::<usize>() + GAP * n.saturating_sub(1);
-    let header = t.kind == "exhibits" || (rows.len() > 2 && rows[0].iter().all(|c| !c.is_empty() && c.width() < 30));
+    let header = t.kind == "exhibits"
+        || (rows.len() > 2 && rows[0].iter().all(|c| !c.is_empty() && c.width() < 30));
     let mut out = Vec::new();
     for (ri, r) in rows.iter().enumerate() {
         let cells: Vec<Vec<String>> = (0..n)
             .map(|i| plain_wrap(r.get(i).map(String::as_str).unwrap_or(""), w[i]))
             .collect();
         let h = cells.iter().map(Vec::len).max().unwrap_or(1);
-        let style = if header && ri == 0 { base.add_modifier(Modifier::BOLD) } else { base };
+        let style = if header && ri == 0 {
+            base.add_modifier(Modifier::BOLD)
+        } else {
+            base
+        };
         for k in 0..h {
             let mut row = Row::new(total);
             let mut x = 0;
             for (i, c) in cells.iter().enumerate() {
                 if let Some(text) = c.get(k) {
-                    let s = if text.contains('☒') || text.contains('☑') { st.accent } else { style };
+                    let s = if text.contains('☒') || text.contains('☑') {
+                        st.accent
+                    } else {
+                        style
+                    };
                     row.put(x, text, s);
                 }
                 x += w[i] + GAP;
@@ -663,15 +710,22 @@ fn text_table(t: &Table, avail: usize, st: &Styles) -> Vec<Line<'static>> {
 fn toc(rows: &[Vec<String>], width: usize, st: &Styles) -> Vec<Line<'static>> {
     let mut out = Vec::new();
     for r in rows {
-        let cells: Vec<&str> = r.iter().map(String::as_str).filter(|c| !c.is_empty()).collect();
+        let cells: Vec<&str> = r
+            .iter()
+            .map(String::as_str)
+            .filter(|c| !c.is_empty())
+            .collect();
         if cells.is_empty() {
             continue;
         }
         let (label, page) = match cells.last() {
-            Some(p) if cells.len() > 1 && p.width() <= 6 => (cells[..cells.len() - 1].join("  "), *p),
+            Some(p) if cells.len() > 1 && p.width() <= 6 => {
+                (cells[..cells.len() - 1].join("  "), *p)
+            }
             _ => (cells.join("  "), ""),
         };
-        let is_item = label.to_lowercase().starts_with("item") || label.to_lowercase().starts_with("part");
+        let is_item =
+            label.to_lowercase().starts_with("item") || label.to_lowercase().starts_with("part");
         let ls = if is_item { st.body } else { st.dim };
         let room = width.saturating_sub(page.width() + 2);
         let label = truncate(&label, room);
@@ -707,7 +761,11 @@ fn humanize_concept(c: &str) -> String {
 
 /// Rows for `blocks` at `width` columns: (block index, line), plus the first
 /// row of each block.
-pub fn layout(blocks: &[Block], width: usize, th: &Theme) -> (Vec<(usize, Line<'static>)>, Vec<usize>) {
+pub fn layout(
+    blocks: &[Block],
+    width: usize,
+    th: &Theme,
+) -> (Vec<(usize, Line<'static>)>, Vec<usize>) {
     let st = Styles::new(th);
     let width = width.max(20);
     let measure = width.saturating_sub(4).min(MEASURE).max(16);
@@ -747,7 +805,10 @@ pub fn layout(blocks: &[Block], width: usize, th: &Theme) -> (Vec<(usize, Line<'
             Block::H { level: 1, text, .. } => {
                 for l in plain_wrap(text, measure.saturating_sub(2)) {
                     let fill = measure.saturating_sub(l.width() + 1);
-                    lines.push(Line::from(Span::styled(format!(" {l}{}", " ".repeat(fill)), st.band)));
+                    lines.push(Line::from(Span::styled(
+                        format!(" {l}{}", " ".repeat(fill)),
+                        st.band,
+                    )));
                 }
                 lines.push(Line::default());
             }
@@ -760,13 +821,18 @@ pub fn layout(blocks: &[Block], width: usize, th: &Theme) -> (Vec<(usize, Line<'
             }
             Block::H { text, .. } => {
                 let s = st.body.add_modifier(Modifier::BOLD);
-                lines.extend(plain_wrap(text, measure).into_iter().map(|l| Line::from(Span::styled(l, s))));
+                lines.extend(
+                    plain_wrap(text, measure)
+                        .into_iter()
+                        .map(|l| Line::from(Span::styled(l, s))),
+                );
             }
             Block::P { spans } => {
                 lines = wrap_words(&words(spans, &st, st.body), measure, Vec::new(), "");
             }
             Block::Li { spans, marker } => {
-                let m = if marker.chars().count() == 1 && !marker.chars().all(char::is_alphanumeric) {
+                let m = if marker.chars().count() == 1 && !marker.chars().all(char::is_alphanumeric)
+                {
                     "•".to_string()
                 } else {
                     marker.clone()
@@ -787,14 +853,28 @@ pub fn layout(blocks: &[Block], width: usize, th: &Theme) -> (Vec<(usize, Line<'
                 };
                 // Tables sit centred under the prose column.
                 let w = lines.iter().map(Line::width).max().unwrap_or(0);
-                pad = if w <= measure { margin } else { (width.saturating_sub(w) / 2).max(table_margin) };
+                pad = if w <= measure {
+                    margin
+                } else {
+                    (width.saturating_sub(w) / 2).max(table_margin)
+                };
             }
             Block::Img { alt, src } => {
-                let name = if alt.is_empty() { src.rsplit('/').next().unwrap_or(src) } else { alt };
-                lines.push(Line::from(Span::styled(format!("▣ image · {name}"), st.dim)));
+                let name = if alt.is_empty() {
+                    src.rsplit('/').next().unwrap_or(src)
+                } else {
+                    alt
+                };
+                lines.push(Line::from(Span::styled(
+                    format!("▣ image · {name}"),
+                    st.dim,
+                )));
             }
             Block::Page { n } => {
-                let label = n.as_deref().map(|n| format!("─ {n}")).unwrap_or_else(|| "─".into());
+                let label = n
+                    .as_deref()
+                    .map(|n| format!("─ {n}"))
+                    .unwrap_or_else(|| "─".into());
                 let s = truncate(&label, measure);
                 lines.push(Line::from(Span::styled(
                     format!("{}{s}", " ".repeat(measure.saturating_sub(s.width()))),
@@ -821,7 +901,12 @@ mod tests {
 
     fn text(rows: &[(usize, Line<'static>)]) -> Vec<String> {
         rows.iter()
-            .map(|(_, l)| l.spans.iter().map(|s| s.content.as_ref()).collect::<String>())
+            .map(|(_, l)| {
+                l.spans
+                    .iter()
+                    .map(|s| s.content.as_ref())
+                    .collect::<String>()
+            })
             .collect()
     }
 
@@ -851,13 +936,19 @@ mod tests {
     #[test]
     fn prose_wraps_to_the_measure_and_centres() {
         let long = "word ".repeat(60);
-        let b = parse(&format!(r#"{{"blocks":[{{"t":"p","spans":[{{"s":"{long}"}}]}}]}}"#));
+        let b = parse(&format!(
+            r#"{{"blocks":[{{"t":"p","spans":[{{"s":"{long}"}}]}}]}}"#
+        ));
         let (rows, starts) = layout(&b, 120, &Theme::default());
         assert_eq!(starts, vec![0]);
         let lines = text(&rows);
         let margin = (120 - MEASURE) / 2;
         assert!(lines.iter().all(|l| l.starts_with(&" ".repeat(margin))));
-        assert!(lines.iter().all(|l| l.trim_end().width() <= margin + MEASURE));
+        assert!(
+            lines
+                .iter()
+                .all(|l| l.trim_end().width() <= margin + MEASURE)
+        );
     }
 
     #[test]
@@ -865,15 +956,30 @@ mod tests {
         let th = Theme::default();
         let st = Styles::new(&th);
         let ws = words(
-            &[TSpan { s: "Net loss was $(2.9) million, revenue $18.8 million.".into(), b: None, i: None, u: None, x: None }],
+            &[TSpan {
+                s: "Net loss was $(2.9) million, revenue $18.8 million.".into(),
+                b: None,
+                i: None,
+                u: None,
+                x: None,
+            }],
             &st,
             st.body,
         );
-        let style_of = |w: &str| ws.iter().find(|(s, _)| s.starts_with(w)).map(|(_, s)| s.fg).flatten();
+        let style_of = |w: &str| {
+            ws.iter()
+                .find(|(s, _)| s.starts_with(w))
+                .map(|(_, s)| s.fg)
+                .flatten()
+        };
         assert_eq!(style_of("$(2.9)"), Some(th.down));
         assert_eq!(style_of("$18.8"), Some(th.num));
         assert_eq!(style_of("revenue"), Some(th.fg));
-        assert_eq!(style_of("million,"), Some(th.down), "scale word follows a negative amount");
+        assert_eq!(
+            style_of("million,"),
+            Some(th.down),
+            "scale word follows a negative amount"
+        );
     }
 
     #[test]
@@ -891,18 +997,29 @@ mod tests {
         assert!(joined.contains("in millions"), "{joined}");
         assert!(joined.contains("Year Ended"), "{joined}");
         assert!(joined.contains("═"), "{joined}");
-        let rev = lines.iter().find(|l| l.contains("Revenue")).expect("revenue row");
-        let gp = lines.iter().find(|l| l.contains("Gross profit")).unwrap_or_else(|| panic!("{joined}"));
+        let rev = lines
+            .iter()
+            .find(|l| l.contains("Revenue"))
+            .expect("revenue row");
+        let gp = lines
+            .iter()
+            .find(|l| l.contains("Gross profit"))
+            .unwrap_or_else(|| panic!("{joined}"));
         // values right-align: both rows end their first value at the same column
         let end = |l: &str, v: &str| l.find(v).map(|i| i + v.len());
         assert_eq!(end(rev, "1,200"), end(gp, "900 ").map(|e| e - 1));
         let cost = lines.iter().find(|l| l.contains("Cost")).expect("cost row");
-        assert!(cost.trim_start().starts_with("Cost") && cost.find("Cost") > rev.find("Revenue"), "indented");
+        assert!(
+            cost.trim_start().starts_with("Cost") && cost.find("Cost") > rev.find("Revenue"),
+            "indented"
+        );
     }
 
     #[test]
     fn narrow_windows_drop_columns_with_a_note() {
-        let vals: Vec<String> = (0..12).map(|i| format!(r#"{{"s":"{},000,000"}}"#, i + 1)).collect();
+        let vals: Vec<String> = (0..12)
+            .map(|i| format!(r#"{{"s":"{},000,000"}}"#, i + 1))
+            .collect();
         let json = format!(
             r#"{{"blocks":[{{"t":"table","kind":"num","cols":12,"header":[],"rows":[{{"label":"Revenue","v":[{}]}}]}}]}}"#,
             vals.join(",")
@@ -915,9 +1032,15 @@ mod tests {
 
     #[test]
     fn toc_uses_dot_leaders() {
-        let b = parse(r#"{"blocks":[{"t":"table","kind":"toc","rows":[["Item 1.","Business","4"],["Item 1A.","Risk Factors","12"]]}]}"#);
+        let b = parse(
+            r#"{"blocks":[{"t":"table","kind":"toc","rows":[["Item 1.","Business","4"],["Item 1A.","Risk Factors","12"]]}]}"#,
+        );
         let (rows, _) = layout(&b, 80, &Theme::default());
         let lines = text(&rows);
-        assert!(lines[0].contains("Item 1.  Business") && lines[0].contains("·") && lines[0].trim_end().ends_with('4'));
+        assert!(
+            lines[0].contains("Item 1.  Business")
+                && lines[0].contains("·")
+                && lines[0].trim_end().ends_with('4')
+        );
     }
 }

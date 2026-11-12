@@ -5,6 +5,8 @@ Lithography copies the circuit pattern onto the wafer. Light passes through a re
 # 2. The parts
 
 wavelength         the light source sets it: DUV ArF at 193 nm, EUV at 13.5 nm
+EUV source         a CO2 laser hits each tin droplet twice; the second pulse makes the plasma that emits 13.5 nm light
+multilayer mirrors EUV is absorbed by air and glass, so the path is in vacuum with mirrors; each keeps about 70%
 reticle            the mask: the pattern as chrome on clear quartz, one per layer
 lens               projection optics that set the numerical aperture and shrink the image (4x)
 photoresist        the light-sensitive film; the exposed part develops away (positive resist)
@@ -49,6 +51,7 @@ ASML (ASML) is the only maker of EUV scanners and also makes DUV scanners. Nikon
 # 9. Chokepoints and risks
 
 - EUV source and optics come from very few suppliers, and ASML is the only EUV scanner maker.
+- Mirror optics (Zeiss, for ultra-flat optics) and the tin-droplet source are single points of failure: a dozen mirrors leave about 1% of the light.
 - Stochastic defects: at small features and low doses, random breaks and bridges grow.
 - High-NA fields are half size, so each wafer takes about twice the exposures.
 - Export controls limit which advanced scanners can be sold abroad (check current rules).
@@ -66,4 +69,5 @@ ASML (ASML) is the only maker of EUV scanners and also makes DUV scanners. Nikon
 - US patent 6,839,125 (R = k1 x wavelength / NA, DOF = k2 x wavelength / NA^2, k1 floor ~0.25):
   https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/6839125
 - Not yet sourced here: DUV immersion NA 1.35 (ASML NXT product pages); k1 0.4 and k2 0.5 are illustrative.
+- Not yet sourced here: EUV source and mirror figures (about 50,000 tin droplets a second, a CO2 laser double pulse, about 70% per Mo/Si mirror, about 1% after a dozen). From a summary, not checked against ASML or Zeiss material.
 - Fab flow tab, EXPOSE and ETCH nodes; CELL node for 6F^2.
