@@ -94,12 +94,6 @@ pub(super) fn demo_items() -> Vec<(String, String)> {
 /// The 3D model of a page's overview at `time`, if its overview is one.
 fn overview_model(page: &str, time: crate::ui::anim::Time) -> Option<Model> {
     Some(match page {
-        "CELL" => Model::CellOverview(time),
-        "LITHO" => Model::LithoOverview(time),
-        "ARRAY" => Model::ArrayOverview(time),
-        "BANK" => Model::BankOverview(time),
-        "BANDWIDTH" => Model::BwOverview(time),
-        "HBM STACK" => Model::HbmOverview(time),
         p => {
             if let Some(n) = super::super::diagrams_scene_chip::node(p) {
                 Model::ChipOverview(n.beats, n.keys, time)

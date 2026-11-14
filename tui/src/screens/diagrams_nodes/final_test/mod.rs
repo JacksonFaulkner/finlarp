@@ -6,4 +6,5 @@ pub const NODE: Node = Node {
     page: "FINAL TEST",
     overview: None,
     sections: &[],
+    clips: false,
 };

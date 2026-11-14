@@ -6,4 +6,5 @@ pub const NODE: Node = Node {
     page: "PICK",
     overview: None,
     sections: &[],
+    clips: false,
 };

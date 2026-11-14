@@ -73,107 +73,14 @@ pub fn parse(src: &'static str) -> Option<Anim> {
 /// zoom, a digit for a numbered section.
 const ORBIT: &[(&str, char)] = &[
     ("POLYSILICON", 'c'),
-    ("CELL", 'a'),
-    ("CELL", 'b'),
-    ("CELL", 'c'),
-    ("CELL", 'd'),
-    ("CELL", 'e'),
-    ("CELL", '1'),
-    ("CELL", '2'),
-    ("CELL", '3'),
-    ("CELL", '4'),
-    ("CELL", '5'),
-    ("CELL", '6'),
-    ("CELL", '7'),
-    ("CELL", '8'),
-    ("CELL", '9'),
-    ("MELT + PULL", 'a'),
-    ("MELT + PULL", 'b'),
-    ("MELT + PULL", 'c'),
-    ("MELT + PULL", '1'),
-    ("MELT + PULL", '2'),
-    ("MELT + PULL", '3'),
-    ("MELT + PULL", '4'),
-    ("MELT + PULL", '5'),
-    ("MELT + PULL", '6'),
-    ("MELT + PULL", '7'),
-    ("MELT + PULL", '8'),
-    ("MELT + PULL", '9'),
-    ("LITHO", 'a'),
-    ("LITHO", 'b'),
-    ("LITHO", 'c'),
-    ("LITHO", 'd'),
-    ("LITHO", 'e'),
-    ("LITHO", 'f'),
-    ("LITHO", '1'),
-    ("LITHO", '2'),
-    ("LITHO", '3'),
-    ("LITHO", '4'),
-    ("LITHO", '5'),
-    ("LITHO", '6'),
-    ("LITHO", '7'),
-    ("LITHO", '8'),
-    ("LITHO", '9'),
-    ("ARRAY", 'a'),
-    ("ARRAY", 'b'),
-    ("ARRAY", 'c'),
-    ("ARRAY", 'd'),
-    ("ARRAY", 'e'),
-    ("ARRAY", '1'),
-    ("ARRAY", '2'),
-    ("ARRAY", '3'),
-    ("ARRAY", '4'),
-    ("ARRAY", '5'),
-    ("ARRAY", '6'),
-    ("ARRAY", '7'),
-    ("ARRAY", '8'),
-    ("ARRAY", '9'),
-    ("BANK", 'a'),
-    ("BANK", 'b'),
-    ("BANK", 'c'),
-    ("BANK", 'd'),
-    ("BANK", 'e'),
-    ("BANK", '1'),
-    ("BANK", '2'),
-    ("BANK", '3'),
-    ("BANK", '4'),
-    ("BANK", '5'),
-    ("BANK", '6'),
-    ("BANK", '7'),
-    ("BANK", '8'),
-    ("BANK", '9'),
-    ("BANDWIDTH", 'a'),
-    ("BANDWIDTH", 'b'),
-    ("BANDWIDTH", 'c'),
-    ("BANDWIDTH", 'd'),
-    ("BANDWIDTH", 'e'),
-    ("BANDWIDTH", '1'),
-    ("BANDWIDTH", '2'),
-    ("BANDWIDTH", '3'),
-    ("BANDWIDTH", '4'),
-    ("BANDWIDTH", '5'),
-    ("BANDWIDTH", '6'),
-    ("BANDWIDTH", '7'),
-    ("BANDWIDTH", '8'),
-    ("BANDWIDTH", '9'),
-    ("HBM STACK", 'a'),
-    ("HBM STACK", 'b'),
-    ("HBM STACK", 'c'),
-    ("HBM STACK", 'd'),
-    ("HBM STACK", 'e'),
-    ("HBM STACK", '1'),
-    ("HBM STACK", '2'),
-    ("HBM STACK", '3'),
-    ("HBM STACK", '4'),
-    ("HBM STACK", '5'),
-    ("HBM STACK", '6'),
-    ("HBM STACK", '7'),
-    ("HBM STACK", '8'),
-    ("HBM STACK", '9'),
 ];
 
 /// Whether zoom `key` of `page` has a 3D model the full-screen view can orbit.
 pub fn orbitable(page: &str, key: char) -> bool {
+    // a page with Blender pictures plays them everywhere; nothing there is a 3D model to turn
+    if super::diagrams_nodes::overview(page).is_some() {
+        return false;
+    }
     ORBIT.iter().any(|(p, k)| *p == page && *k == key)
         || (super::diagrams_scene_chip::node(page).is_some()
             && super::diagrams_scene_chip::keys_for(page, key).is_some())
@@ -193,13 +100,6 @@ pub fn anim_for(page: &str) -> Option<Anim> {
 /// Animated close-up for numbered section `i` of a node page, if the page has one.
 pub fn section_anim(page: &str, i: usize) -> Option<fn() -> Box<dyn Scene>> {
     match page {
-        "MELT + PULL" => super::diagrams_scene_melt_sec::SECTIONS.get(i).copied(),
-        "CELL" => super::diagrams_scene_cell::SECTIONS.get(i).copied(),
-        "LITHO" => super::diagrams_scene_litho::SECTIONS.get(i).copied(),
-        "ARRAY" => super::diagrams_scene_array::SECTIONS.get(i).copied(),
-        "BANK" => super::diagrams_scene_bank::SECTIONS.get(i).copied(),
-        "BANDWIDTH" => super::diagrams_scene_bandwidth::SECTIONS.get(i).copied(),
-        "HBM STACK" => super::diagrams_scene_hbm::SECTIONS.get(i).copied(),
         _ if super::diagrams_scene_chip::node(page).is_some() => {
             super::diagrams_scene_chip::node(page).and_then(|n| n.sections.get(i).copied())
         }
@@ -275,18 +175,7 @@ pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
     if let Some(s) = super::diagrams_scene_pwr::overview(page) {
         return Some(s);
     }
-    match page {
-        "SAND" => Some(Box::new(super::diagrams_scene_sand::Sand)),
-        "POLYSILICON" => Some(Box::new(super::diagrams_scene_poly::Poly)),
-        "CELL" => Some(Box::new(super::diagrams_scene_cell::MemCell)),
-        "LITHO" => Some(Box::new(super::diagrams_scene_litho::Litho)),
-        "ARRAY" => Some(Box::new(super::diagrams_scene_array::MemArray)),
-        "BANK" => Some(Box::new(super::diagrams_scene_bank::MemBank)),
-        "BANDWIDTH" => Some(Box::new(super::diagrams_scene_bandwidth::MemBandwidth)),
-        "HBM STACK" => Some(Box::new(super::diagrams_scene_hbm::MemHbm)),
-        "MELT + PULL" => Some(Box::new(super::diagrams_scene_melt::Melt)),
-        _ => anim_for(page).map(|a| Box::new(TextScene::new(a)) as Box<dyn Scene>),
-    }
+    anim_for(page).map(|a| Box::new(TextScene::new(a)) as Box<dyn Scene>)
 }
 
 #[cfg(test)]
@@ -324,6 +213,63 @@ mod tests {
         assert!(scene_for("MELT + PULL").is_some());
         assert!(scene_for("WAFER").is_some());
         assert!(scene_for("NOPE").is_none());
+    }
+
+    /// The memory pages play their node's overview and sections, and their zoom-ins are
+    /// node pictures, not 3D models the full view can orbit.
+    #[test]
+    fn memory_pages_play_their_node() {
+        for page in ["CELL", "LITHO", "ARRAY", "BANK", "BANDWIDTH", "HBM STACK"] {
+            let node = super::super::diagrams_nodes::overview(page)
+                .unwrap_or_else(|| panic!("{page}: node has no overview"));
+            let scene = scene_for(page).unwrap_or_else(|| panic!("{page}: no scene"));
+            assert_eq!(
+                scene.beats().len(),
+                node.beats().len(),
+                "{page}: overview beats differ from the node"
+            );
+            assert!(scene.beats().len() >= 3, "{page}: overview too short");
+            assert!(!scene.zooms().is_empty(), "{page}: no zoom-ins");
+            for key in 'a'..='f' {
+                assert!(!orbitable(page, key), "{page} {key}: orbits");
+            }
+            for key in '1'..='9' {
+                assert!(!orbitable(page, key), "{page} {key}: orbits");
+            }
+        }
+    }
+
+    /// One close-up per `# ` heading, reached by keys 1-9 then 0: ten headings need ten keys,
+    /// nine headings stop at 9. Each close-up is 3 to 5 beats.
+    #[test]
+    fn section_keys_cover_every_heading() {
+        use crate::ui::anim::Player;
+        let want = [
+            ("CELL", 10),
+            ("LITHO", 10),
+            ("ARRAY", 10),
+            ("BANK", 10),
+            ("BANDWIDTH", 10),
+            ("HBM STACK", 10),
+            ("INGOT", 10),
+            ("SLICE + POLISH", 10),
+            ("WAFER", 9),
+        ];
+        for (page, n) in want {
+            let art = super::super::diagrams_desc::visual(page)
+                .unwrap_or_else(|| panic!("{page}: no page"));
+            let heads = art.lines().filter(|l| l.starts_with("# ")).count();
+            assert_eq!(heads, n, "{page}: headings");
+            for i in 0..n {
+                let build = section_anim(page, i)
+                    .unwrap_or_else(|| panic!("{page}: no section {}", i + 1));
+                let beats = Player::new(build(), std::time::Instant::now())
+                    .shot_at(0)
+                    .beats;
+                assert!((3..=5).contains(&beats), "{page} {}: {beats} beats", i + 1);
+            }
+            assert!(section_anim(page, n).is_none(), "{page}: extra section");
+        }
     }
 
     #[test]

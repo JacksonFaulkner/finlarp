@@ -6,4 +6,5 @@ pub const NODE: Node = Node {
     page: "IMPLANT",
     overview: None,
     sections: &[],
+    clips: false,
 };

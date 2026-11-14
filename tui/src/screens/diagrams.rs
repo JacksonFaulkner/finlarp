@@ -27,14 +27,7 @@ use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_chat::{Chat, Quiz, Step};
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
-use super::diagrams_scene_array::zoom_scene as array_zoom_scene;
-use super::diagrams_scene_bandwidth::zoom_scene as bw_zoom_scene;
-use super::diagrams_scene_bank::zoom_scene as bank_zoom_scene;
-use super::diagrams_scene_cell::zoom_scene;
-use super::diagrams_scene_hbm::zoom_scene as hbm_zoom_scene;
-use super::diagrams_scene_litho::zoom_scene as litho_zoom_scene;
-use super::diagrams_scene_melt_zoom::shot_for as melt_shot_for;
-use super::diagrams_scene_poly_zoom::bell_jar_anim;
+use super::diagrams_jar_3d::bell_jar_anim;
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
 use crate::app::{Action, Ctx, Screen};
 use crate::ui::anim::Player;
@@ -47,7 +40,7 @@ use image::{DynamicImage, RgbaImage};
 #[path = "diagrams_tools.rs"]
 mod tools;
 use ratatui_image::picker::cap_parser::QueryStdioOptions;
-use ratatui_image::picker::{Picker, ProtocolType};
+use ratatui_image::picker::{Capability, Picker, ProtocolType};
 use ratatui_image::protocol::kitty::StatefulKitty;
 use ratatui_image::protocol::{StatefulProtocol, StatefulProtocolType};
 use ratatui_image::{FontSize, Resize, StatefulImage};
@@ -162,6 +155,13 @@ pub struct Diagrams {
     full: Option<FullFrame>,
     /// Which of the two kitty image ids the next frame uses (see FULL_IMAGE_ID).
     full_turn: bool,
+    /// The pixel frame on screen for a scene picture, with its protocol already sent. A redraw
+    /// of the same frame reuses it, so the picture is not re-sent (see `px_key`).
+    px_frame: Option<PxFrame>,
+    /// Kitty animation of picture scenes (FL_KITTY_ANIM=1): the beat's frames loop in the terminal.
+    kitty_anim: super::diagrams_kitty_anim::Anim,
+    /// Bare-metal H.264 clips of picture scenes (FL_H264=1): the terminal decodes and loops them.
+    h264: super::diagrams_h264::Playback,
     /// Camera key held: its canonical key and last press. `live_until` is set while
     /// key repeat drives motion; `last_tick` is when the camera last advanced.
     held: Option<(char, Instant)>,
@@ -175,38 +175,10 @@ pub struct Diagrams {
     sharpen: bool,
 }
 
-/// What a 3D zoom draws: the bell jar, or one of the CELL page's focused scenes at a
-/// beat and a position through it.
+/// What a 3D zoom draws: the bell jar, or a node's scene at a beat and a position through it.
 #[derive(Clone, Copy)]
 enum Model {
     Jar(poly3d::Anim),
-    Cell(poly3d::CellZoom, usize, f64),
-    /// the CELL overview, with its notes on the picture
-    CellOverview(crate::ui::anim::Time),
-    /// one of the LITHO page's focused scenes at a beat and a position through it
-    Litho(poly3d::LithoZoom, usize, f64),
-    /// a MELT + PULL zoom or section: a 3D close-up from pbr3d
-    Melt(pbr3d::Shot, usize, f64),
-    /// the LITHO overview, with its notes on the picture
-    LithoOverview(crate::ui::anim::Time),
-    /// the MELT + PULL overview: the realistic GPU render of the puller
-    MeltOverview(crate::ui::anim::Time),
-    /// one of the ARRAY page's focused scenes at a beat and a position through it
-    Array(poly3d::ArrayZoom, usize, f64),
-    /// the ARRAY overview, with its notes on the picture
-    ArrayOverview(crate::ui::anim::Time),
-    /// one of the BANK page's focused scenes at a beat and a position through it
-    Bank(poly3d::BankZoom, usize, f64),
-    /// the BANK overview, with its notes on the picture
-    BankOverview(crate::ui::anim::Time),
-    /// one of the BANDWIDTH page's focused scenes at a beat and a position through it
-    Bw(poly3d::BwZoom, usize, f64),
-    /// the BANDWIDTH overview, with its notes on the picture
-    BwOverview(crate::ui::anim::Time),
-    /// one of the HBM STACK page's focused scenes at a beat and a position through it
-    Hbm(poly3d::HbmZoom, usize, f64),
-    /// the HBM STACK overview, with its notes on the picture
-    HbmOverview(crate::ui::anim::Time),
     /// a Chip-tab scene: its keyframes at a beat and a position through it
     Chip(&'static [poly3d::ChipKey], usize, f64),
     /// a Chip-tab overview: its beats (for the notes), keyframes, and time
@@ -244,34 +216,6 @@ enum Model {
 /// The 3D model of zoom `key` on `page`, at the zoom's clock.
 fn model_at(page: &str, key: char, t: &crate::ui::anim::Time) -> Model {
     match page {
-        "CELL" => match zoom_scene(key) {
-            Some(z) => Model::Cell(z, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        "LITHO" => match litho_zoom_scene(key) {
-            Some(z) => Model::Litho(z, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        "MELT + PULL" => match melt_shot_for(key) {
-            Some(s) => Model::Melt(s, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        "ARRAY" => match array_zoom_scene(key) {
-            Some(z) => Model::Array(z, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        "BANK" => match bank_zoom_scene(key) {
-            Some(z) => Model::Bank(z, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        "BANDWIDTH" => match bw_zoom_scene(key) {
-            Some(z) => Model::Bw(z, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
-        "HBM STACK" => match hbm_zoom_scene(key) {
-            Some(z) => Model::Hbm(z, t.beat, f64::from(t.local)),
-            None => Model::Jar(bell_jar_anim(t)),
-        },
         _ if super::diagrams_scene_chip::node(page).is_some() => {
             match super::diagrams_scene_chip::keys_for(page, key) {
                 Some(k) => Model::Chip(k, t.beat, f64::from(t.local)),
@@ -309,106 +253,6 @@ fn model_key(m: Model) -> ModelKey {
             let mut k = [0i64; 8];
             k[..7].copy_from_slice(&scene_key(a));
             k
-        }
-        Model::Cell(z, beat, local) => [
-            z as i64,
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            1,
-        ],
-        Model::CellOverview(t) => {
-            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 2]
-        }
-        Model::Melt(s, beat, local) => [
-            match s {
-                pbr3d::Shot::Neck => 0,
-                pbr3d::Shot::Convection => 1,
-                pbr3d::Shot::HotZone => 2,
-                pbr3d::Shot::Sec(n) => 2 + n as i64,
-            },
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            22,
-        ],
-        Model::Litho(z, beat, local) => [
-            z as i64,
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            3,
-        ],
-        Model::LithoOverview(t) => {
-            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 4]
-        }
-        Model::MeltOverview(t) => [t.beat as i64, (t.ms / 40) as i64, 0, 0, 0, 0, 0, 21],
-        Model::Array(z, beat, local) => [
-            z as i64,
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            5,
-        ],
-        Model::ArrayOverview(t) => {
-            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 6]
-        }
-        Model::Bank(z, beat, local) => [
-            z as i64,
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            7,
-        ],
-        Model::BankOverview(t) => {
-            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 8]
-        }
-        Model::Bw(z, beat, local) => [
-            z as i64,
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            9,
-        ],
-        Model::BwOverview(t) => {
-            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 10]
-        }
-        Model::Hbm(z, beat, local) => [
-            z as i64,
-            beat as i64,
-            (local * 400.0).round() as i64,
-            0,
-            0,
-            0,
-            0,
-            11,
-        ],
-        Model::HbmOverview(t) => {
-            let a = (poly3d::notes_alpha(f64::from(t.local)) * 40.0).round() as i64;
-            [t.beat as i64, (t.ms / 40) as i64, a, 0, 0, 0, 0, 12]
         }
         Model::Chip(k, beat, local) => [
             k.as_ptr() as i64,
@@ -539,50 +383,6 @@ fn draw_note_cells(frame: &mut Frame, r: Rect, notes: &[super::diagrams_chat::No
 fn render_model(m: Model, view: &poly3d::View, w: usize, h: usize) -> RgbaImage {
     match m {
         Model::Jar(a) => poly3d::render(&poly3d::Params::default(), a, view, w, h, FULL_BG),
-        Model::Cell(z, beat, local) => poly3d::render_zoom(z, beat, local, view, w, h, FULL_BG),
-        Model::CellOverview(t) => {
-            super::diagrams_scene_cell::overview_frame(&t, view, w as u32, h as u32)
-        }
-        Model::Melt(s, beat, local) => pbr3d::render_shot(
-            s,
-            beat,
-            local as f32,
-            view.yaw as f32,
-            view.pitch as f32,
-            view.zoom as f32,
-            w as u32,
-            h as u32,
-            FULL_BG,
-        ),
-        Model::Litho(z, beat, local) => {
-            poly3d::render_litho_zoom(z, beat, local, view, w, h, FULL_BG)
-        }
-        Model::LithoOverview(t) => {
-            super::diagrams_scene_litho::overview_frame(&t, view, w as u32, h as u32)
-        }
-        Model::MeltOverview(t) => {
-            super::diagrams_scene_melt::overview_frame(&t, view, w as u32, h as u32)
-        }
-        Model::Array(z, beat, local) => {
-            poly3d::render_array_zoom(z, beat, local, view, w, h, FULL_BG)
-        }
-        Model::ArrayOverview(t) => {
-            super::diagrams_scene_array::overview_frame(&t, view, w as u32, h as u32)
-        }
-        Model::Bank(z, beat, local) => {
-            poly3d::render_bank_zoom(z, beat, local, view, w, h, FULL_BG)
-        }
-        Model::BankOverview(t) => {
-            super::diagrams_scene_bank::overview_frame(&t, view, w as u32, h as u32)
-        }
-        Model::Bw(z, beat, local) => poly3d::render_bw_zoom(z, beat, local, view, w, h, FULL_BG),
-        Model::BwOverview(t) => {
-            super::diagrams_scene_bandwidth::overview_frame(&t, view, w as u32, h as u32)
-        }
-        Model::Hbm(z, beat, local) => poly3d::render_hbm_zoom(z, beat, local, view, w, h, FULL_BG),
-        Model::HbmOverview(t) => {
-            super::diagrams_scene_hbm::overview_frame(&t, view, w as u32, h as u32)
-        }
         Model::Chip(k, beat, local) => {
             poly3d::render_chip(k, beat, local, view, None, w, h, FULL_BG)
         }
@@ -679,16 +479,46 @@ const FULL_IMAGE_IDS: [u32; 2] = [
     u32::from_be_bytes([0, 0xF3, 0xD1, 0x02]),
 ];
 
+/// What a scene picture is drawn from: the caption (it names the scene and the beat), the loop clock
+/// in animation ticks, and the pixel size. Two draws with the same key are the same picture, so the
+/// second sends nothing. Key presses between ticks redraw the page but not the picture; a paused
+/// scene keeps its clock, so its picture is never re-sent.
+type PxKey = (u64, u64, u32, u32);
+
+fn px_key(caption: &str, t: &crate::ui::anim::Time, w: u32, h: u32) -> PxKey {
+    use std::hash::{Hash, Hasher};
+    let mut hs = std::collections::hash_map::DefaultHasher::new();
+    caption.hash(&mut hs);
+    (hs.finish(), t.ms / FRAME.as_millis() as u64, w, h)
+}
+
+/// A scene picture on screen: its key, the area it fills, and the kitty protocol that drew it.
+struct PxFrame {
+    key: PxKey,
+    area: Rect,
+    proto: StatefulProtocol,
+}
+
 /// Kitty protocol for one frame, with the stable id. ratatui-image's own kitty protocol takes
 /// a random id per send and never deletes the old image.
 fn kitty_protocol(picker: &Picker, img: DynamicImage, font: FontSize, id: u32) -> StatefulProtocol {
-    // zlib (o=z) is on: the query checks it, and Ghostty and kitty both support it. Without a
-    // query (see query_picker) the capability list is empty, so it is not read here.
+    // The transport comes from what the query found (see query_picker). Shared memory sends
+    // no pixels through the terminal stream, so it wins when the terminal takes it; zlib is
+    // only for the stream. With no query at all (the Ghostty fallback) the capability list is
+    // empty, and zlib stays on as before.
+    let caps = picker.capabilities();
+    // Inside tmux the query reply never arrives, so the capability list stays empty. Then
+    // shared memory is only on when FL_KITTY=shm asks for it (unconfirmed: unset it if images
+    // stop drawing).
+    let blind = caps.is_empty();
+    let smo = caps.contains(&Capability::KittySharedMemory)
+        || (blind && std::env::var("FL_KITTY").is_ok_and(|v| v == "shm"));
+    let compress = !smo && (blind || caps.contains(&Capability::KittyCompression));
     StatefulProtocol::new(
         img,
         font,
         None,
-        StatefulProtocolType::Kitty(StatefulKitty::new(id, picker.tmux_detected(), true, false)),
+        StatefulProtocolType::Kitty(StatefulKitty::new(id, picker.tmux_detected(), compress, smo)),
     )
 }
 
@@ -990,6 +820,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         .unwrap_or(0);
     // Must run before the event loop reads stdin: the terminal answers the query on stdin.
     let picker = query_picker();
+    // Same rule for the clip probe: does the terminal decode H.264 images (the Ghostty fork)?
+    #[cfg(not(test))]
+    super::diagrams_h264::init(picker.protocol_type() == ProtocolType::Kitty);
     // The realistic renderer's device and pipelines, built off the UI thread.
     #[cfg(not(test))]
     std::thread::spawn(pbr3d::warm);
@@ -1007,6 +840,9 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         orbit: poly3d::View::default(),
         full: None,
         full_turn: false,
+        px_frame: None,
+        kitty_anim: super::diagrams_kitty_anim::Anim::default(),
+        h264: super::diagrams_h264::Playback::default(),
         held: None,
         live_until: None,
         settle_until: None,
@@ -1586,7 +1422,8 @@ impl Diagrams {
     fn open_key(&self) -> Option<char> {
         let (i, _) = self.zoom.as_ref()?;
         if self.zoom_section {
-            char::from_digit(*i as u32 + 1, 10)
+            // sections 1-9 are the digits, section 10 is 0
+            char::from_digit((*i as u32 + 1) % 10, 10)
         } else {
             self.zoom_list().get(*i).map(|(k, _)| *k)
         }
@@ -1598,15 +1435,16 @@ impl Diagrams {
         model_at(page, self.open_key().unwrap_or(' '), time)
     }
 
-    /// The page's overview is a 3D model HJKL can turn in place (CELL, LITHO, ARRAY, BANK, BANDWIDTH, HBM STACK).
+    /// The page's overview is a 3D model HJKL can turn in place: the Chip, Packaging, Fiber and
+    /// Power nodes.
     fn overview_orbits(&self) -> bool {
-        matches!(
-            &self.player,
-            Some((
-                "CELL" | "LITHO" | "ARRAY" | "BANK" | "BANDWIDTH" | "HBM STACK" | "MELT + PULL",
-                Some(_)
-            ))
-        ) || matches!(&self.player, Some((p, Some(_))) if super::diagrams_scene_chip::node(p).is_some() || super::diagrams_scene_pkg::node(p).is_some() || super::diagrams_scene_link::node(p).is_some() || super::diagrams_scene_pwr::node(p).is_some())
+        // a page with a Blender overview plays that picture, not the old 3D model
+        matches!(&self.player, Some((p, Some(_)))
+            if super::diagrams_nodes::overview(p).is_none()
+                && (super::diagrams_scene_chip::node(p).is_some()
+                || super::diagrams_scene_pkg::node(p).is_some()
+                || super::diagrams_scene_link::node(p).is_some()
+                || super::diagrams_scene_pwr::node(p).is_some()))
     }
 
     /// The open scene has a 3D model the full-screen view can orbit.
@@ -1809,7 +1647,7 @@ impl Diagrams {
 
     /// Show one pixel frame of a scene in `area`: a kitty image when the terminal has
     /// one, half-blocks otherwise. `img` is already sized to `area` in pixels.
-    fn paint_px(&mut self, frame: &mut Frame, area: Rect, img: image::RgbaImage) {
+    fn paint_px(&mut self, frame: &mut Frame, area: Rect, img: image::RgbaImage, key: PxKey) {
         let proto_type = self.picker.protocol_type();
         if proto_type == ProtocolType::Halfblocks {
             blit_halfblocks(&img, area, frame.buffer_mut());
@@ -1817,6 +1655,7 @@ impl Diagrams {
         }
         let font = self.picker.font_size();
         let mut proto = if proto_type == ProtocolType::Kitty {
+            // a new picture takes the other id, so the old one stays up until this has arrived
             self.full_turn = !self.full_turn;
             let id = FULL_IMAGE_IDS[self.full_turn as usize];
             kitty_protocol(&self.picker, DynamicImage::ImageRgba8(img), font, id)
@@ -1829,6 +1668,9 @@ impl Diagrams {
             area,
             &mut proto,
         );
+        if proto_type == ProtocolType::Kitty {
+            self.px_frame = Some(PxFrame { key, area, proto });
+        }
     }
 
     /// The animation for numbered section `i` of the open page, if it has one.
@@ -1874,6 +1716,49 @@ impl Diagrams {
         }
     }
 
+    /// The pre-rendered clip on screen: the page and clip name (overview, the open zoom-in or
+    /// section). None when no animation is open, the page has no clips, or the terminal cannot
+    /// play them.
+    fn h264_clip(&self, zooming: bool) -> Option<(&'static str, String)> {
+        let page = self.clip_page()?;
+        let clip = if zooming {
+            let (i, _) = self.zoom.as_ref()?;
+            if self.zoom_section {
+                format!("section-{}", i + 1)
+            } else {
+                format!("zoom-{}", self.zoom_list().get(*i)?.0)
+            }
+        } else {
+            "overview".to_string()
+        };
+        Some((page, clip))
+    }
+
+    /// The clip for menu row `sel` in the preview: overview, a zoom-in, or a section.
+    fn preview_clip(&self, sel: usize) -> Option<(&'static str, String)> {
+        let page = self.clip_page()?;
+        let s0 = self.menu_sections();
+        let clip = if sel == 0 {
+            "overview".to_string()
+        } else if sel < s0 {
+            format!("zoom-{}", self.zoom_list().get(sel - 1)?.0)
+        } else {
+            format!("section-{}", sel - s0 + 1)
+        };
+        Some((page, clip))
+    }
+
+    /// The open page, when it plays as clips here: it opted in and the terminal decodes them.
+    fn clip_page(&self) -> Option<&'static str> {
+        let (page, _) = self.player.as_ref()?;
+        (super::diagrams_nodes::clips(page) && super::diagrams_h264::enabled()).then_some(*page)
+    }
+
+    /// The number keys that open sections: 1-9, and 0 as a tenth when the page has one.
+    fn section_keys(&self) -> &'static str {
+        if self.section_build(9).is_some() { "1-0" } else { "1-9" }
+    }
+
     /// Menu index of the zoom bound to `key`.
     fn zoom_for_key(&self, key: char) -> Option<usize> {
         self.zoom_list().iter().position(|(k, _)| *k == key)
@@ -1917,8 +1802,9 @@ impl Diagrams {
             (Some((a, _)), _) => format!("{a} zoom"),
             _ => String::new(),
         };
+        let digits = self.section_keys();
         let switch = if self.section_build(0).is_some() {
-            format!("{letters}  1-9 section")
+            format!("{letters}  {digits} section")
         } else {
             letters
         };
@@ -1935,8 +1821,14 @@ impl Diagrams {
             };
             (
                 format!(" {label} "),
-                format!("{keys} {orbit_key} esc menu  1-9 sections  {play} "),
+                format!("{keys} {orbit_key} esc menu  {digits} sections  {play} "),
             )
+        };
+        // the page's clips are being (re)rendered in the background: frames until they land
+        let hint = if self.h264.rendering() && self.clip_page().is_some() {
+            format!("{hint}\u{00B7} rendering clips ")
+        } else {
+            hint
         };
         let block = Block::new()
             .borders(Borders::ALL)
@@ -1947,6 +1839,16 @@ impl Diagrams {
         let inner = block.inner(r);
         frame.render_widget(block, r);
         let chips_h = u16::from(!zooming && !zooms.is_empty());
+        // which scene this is, for the animation's slots: the page, and the zoom-in if one is open
+        let scene_id = {
+            use std::hash::{Hash, Hasher};
+            let mut hs = std::collections::hash_map::DefaultHasher::new();
+            self.player.as_ref().map(|(n, _)| *n).hash(&mut hs);
+            (zooming, self.zoom.as_ref().map(|(i, _)| *i)).hash(&mut hs);
+            hs.finish()
+        };
+        // the clip the picture would stream, looked up before the player borrows the zoom state
+        let h264_src = self.h264_clip(zooming);
         let player = if zooming {
             self.zoom.as_mut().map(|(_, p)| p)
         } else {
@@ -1979,18 +1881,6 @@ impl Diagrams {
         if orbit3d {
             let model = if zooming {
                 self.open_model(&time)
-            } else if matches!(&self.player, Some(("LITHO", _))) {
-                Model::LithoOverview(time)
-            } else if matches!(&self.player, Some(("MELT + PULL", _))) {
-                Model::MeltOverview(time)
-            } else if matches!(&self.player, Some(("ARRAY", _))) {
-                Model::ArrayOverview(time)
-            } else if matches!(&self.player, Some(("BANK", _))) {
-                Model::BankOverview(time)
-            } else if matches!(&self.player, Some(("BANDWIDTH", _))) {
-                Model::BwOverview(time)
-            } else if matches!(&self.player, Some(("HBM STACK", _))) {
-                Model::HbmOverview(time)
             } else if let Some(n) = self
                 .player
                 .as_ref()
@@ -2016,23 +1906,80 @@ impl Diagrams {
             {
                 Model::PwrOverview(n.beats, n.keys, time)
             } else {
-                Model::CellOverview(time)
+                Model::Jar(bell_jar_anim(&time))
             };
             let half = !zooming && self.coarse(Instant::now());
             self.paint_3d(frame, art_r, model, self.orbit, zooming || half);
-        } else if let Some(img) = {
+        } else {
             let font = self.picker.font_size();
-            p.pixels(
-                &time,
+            let (pw, ph) = (
                 u32::from(art_r.width) * u32::from(font.width),
                 u32::from(art_r.height) * u32::from(font.height),
-            )
-        } {
-            self.paint_px(frame, art_r, img);
-        } else {
-            let art = shot.lines.join("\n");
-            let art_lines = scene_lines(&art, t);
-            frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
+            );
+            let key = px_key(&shot.caption, &time, pw, ph);
+            // a page with clips, in a terminal that decodes them: the beat's pre-rendered H.264
+            // stream goes out once and the terminal loops it (missing or stale clips fall through)
+            let streamed = self.picker.protocol_type() == ProtocolType::Kitty
+                && match h264_src.as_ref() {
+                    Some((page, clip)) => {
+                        let beats_ms: Vec<u64> = (0..shot.beats).map(|i| p.beat_len(i)).collect();
+                        self.h264.paint(
+                            frame,
+                            art_r,
+                            page,
+                            clip,
+                            shot.beat,
+                            &beats_ms,
+                            (font.width, font.height),
+                            self.picker.tmux_detected(),
+                            &mut |t, w, h| p.pixels(t, w, h),
+                        )
+                    }
+                    None => false,
+                };
+            // with FL_KITTY_ANIM=1 the beat's frames are loaded into the terminal once and loop there
+            let animated = streamed
+                || self.picker.protocol_type() == ProtocolType::Kitty
+                && super::diagrams_kitty_anim::enabled()
+                && {
+                    let beat_ms = p.beat_len(shot.beat);
+                    let tmux = self.picker.tmux_detected();
+                    let cell_px = (font.width, font.height);
+                    self.kitty_anim.paint(
+                        frame,
+                        art_r,
+                        scene_id,
+                        shot.beat,
+                        beat_ms,
+                        cell_px,
+                        tmux,
+                        &mut |t, w, h| p.pixels(t, w, h),
+                    )
+                };
+            // the frame on screen is the same picture: draw its protocol again, which sends nothing
+            let same = !animated
+                && self.picker.protocol_type() == ProtocolType::Kitty
+                && self
+                    .px_frame
+                    .as_ref()
+                    .is_some_and(|px| px.key == key && px.area == art_r);
+            if animated {
+                // the terminal is playing the frames: nothing to draw here
+            } else if same {
+                if let Some(px) = self.px_frame.as_mut() {
+                    frame.render_stateful_widget(
+                        StatefulImage::default().resize(Resize::Fit(None)),
+                        art_r,
+                        &mut px.proto,
+                    );
+                }
+            } else if let Some(img) = p.pixels(&time, pw, ph) {
+                self.paint_px(frame, art_r, img, key);
+            } else {
+                let art = shot.lines.join("\n");
+                let art_lines = scene_lines(&art, t);
+                frame.render_widget(Paragraph::new(art_lines).style(t.base()), art_r);
+            }
         }
         if !orbit3d {
             // a flat scene has no 3D frame for the notes to sit on: list them over its foot
@@ -2172,6 +2119,7 @@ impl Diagrams {
     /// The highlighted animation (the overview or a zoom-in) playing in the preview.
     fn draw_preview_scene(&mut self, frame: &mut Frame, r: Rect, t: &Theme) {
         let sel = self.menu_sel;
+        let clip = self.preview_clip(sel);
         let p = if sel == 0 {
             self.player.as_mut().and_then(|(_, p)| p.as_mut())
         } else {
@@ -2197,6 +2145,26 @@ impl Diagrams {
             .style(t.base()),
             cap_r,
         );
+        // a page with clips plays the highlighted one here; the text frames are the fallback
+        if self.picker.protocol_type() == ProtocolType::Kitty
+            && let Some((page, clip)) = clip
+        {
+            let font = self.picker.font_size();
+            let beats_ms: Vec<u64> = (0..shot.beats).map(|i| p.beat_len(i)).collect();
+            if self.h264.paint(
+                frame,
+                art_r,
+                page,
+                &clip,
+                shot.beat,
+                &beats_ms,
+                (font.width, font.height),
+                self.picker.tmux_detected(),
+                &mut |tm, w, h| p.pixels(tm, w, h),
+            ) {
+                return;
+            }
+        }
         let art = shot.lines.join("\n");
         frame.render_widget(Paragraph::new(scene_lines(&art, t)).style(t.base()), art_r);
     }
@@ -2777,6 +2745,7 @@ impl Screen for Diagrams {
                 KeyCode::Char(c @ '1'..='9') => {
                     self.open_section_or_pane(c as usize - '1' as usize)
                 }
+                KeyCode::Char('0') if self.section_build(9).is_some() => self.open_section(9),
                 KeyCode::Char(c) => {
                     if let Some(i) = self.zoom_for_key(c) {
                         self.open_zoom(i);
@@ -2803,6 +2772,7 @@ impl Screen for Diagrams {
                 KeyCode::Char('F') if self.can_orbit() => self.view = PopupView::Full,
                 // HJKL turn the 3D model on the left; lowercase keep the beats and notes
                 KeyCode::Char('0') if self.can_orbit() => self.orbit = poly3d::View::default(),
+                KeyCode::Char('0') if self.section_build(9).is_some() => self.open_section(9),
                 KeyCode::Char(c) if self.can_orbit() && turn_key(c).is_some() => {
                     if let Some(hit) = turn_key(c) {
                         self.camera_step(hit, Instant::now());
@@ -2839,6 +2809,7 @@ impl Screen for Diagrams {
                 KeyCode::Char(c @ '1'..='9') => {
                     self.open_section_or_pane(c as usize - '1' as usize)
                 }
+                KeyCode::Char('0') if self.section_build(9).is_some() => self.open_section(9),
                 KeyCode::Char(c) => {
                     if let Some(i) = self.zoom_for_key(c) {
                         self.open_zoom(i);
@@ -3233,6 +3204,20 @@ mod tests {
         d.on_key(KeyEvent::new(code, KeyModifiers::NONE));
     }
 
+    /// The screen text with every kitty image id (`i=<n>`) blanked out.
+    fn without_image_ids(s: &str) -> String {
+        let mut out = String::new();
+        let mut rest = s;
+        while let Some(p) = rest.find("i=") {
+            out.push_str(&rest[..p + 2]);
+            rest = &rest[p + 2..];
+            let end = rest.find(|c: char| !c.is_ascii_digit()).unwrap_or(rest.len());
+            rest = &rest[end..];
+        }
+        out.push_str(rest);
+        out
+    }
+
     fn screen_text(d: &mut Diagrams, w: u16, h: u16) -> String {
         use ratatui::Terminal;
         use ratatui::backend::TestBackend;
@@ -3273,7 +3258,7 @@ mod tests {
         );
         // the highlighted overview plays in the preview beside the list
         assert!(
-            all.contains("preview \u{00B7} overview") && all.contains("E1"),
+            all.contains("preview \u{00B7} overview") && all.contains("1/6"),
             "{all}"
         );
         assert!(d.animating() && d.needs_redraw());
@@ -3286,7 +3271,8 @@ mod tests {
         for _ in 0..4 {
             press(&mut d, KeyCode::Char('j')); // past the four zooms
         }
-        assert!(!d.animating(), "a section preview is static");
+        // sections 1-10 are 3D pictures now, so the preview animates as the zooms do
+        assert!(d.animating(), "a section picture animates");
         screen_text(&mut d, 170, 50);
 
         press(&mut d, KeyCode::Char('g'));
@@ -3315,13 +3301,16 @@ mod tests {
         press(&mut d, KeyCode::Esc);
         assert_eq!((d.view, d.menu_sel), (PopupView::Menu, 3));
 
+        // sections 1-9 are 3D pictures, opened like MELT's sections
         press(&mut d, KeyCode::Char('1'));
-        assert_eq!((d.view, d.pane), (PopupView::Pane, 0));
-        screen_text(&mut d, 170, 50); // pane view draws
+        assert_eq!(d.view, PopupView::Zoom);
+        assert!(d.zoom_section);
+        assert!(screen_text(&mut d, 170, 50).contains("quartzite"));
         press(&mut d, KeyCode::Esc);
         assert_eq!((d.view, d.menu_sel), (PopupView::Menu, 5));
         press(&mut d, KeyCode::Char('3'));
-        assert_eq!((d.view, d.pane), (PopupView::Pane, 2));
+        assert_eq!(d.view, PopupView::Zoom);
+        assert!(d.zoom_section);
         press(&mut d, KeyCode::Esc);
         press(&mut d, KeyCode::Esc);
         assert!(!d.popup);
@@ -3372,14 +3361,16 @@ mod tests {
         let a = screen_text(&mut d, 170, 50);
         assert!(a.contains("PAUSED") && a.contains("p resume"), "{a}");
         std::thread::sleep(std::time::Duration::from_millis(120));
-        assert_eq!(screen_text(&mut d, 170, 50), a, "frame is frozen");
+        // a paused picture is on screen already: a redraw sends no image data (the frame cache)
+        let b = screen_text(&mut d, 170, 50);
+        assert!(!b.contains("i="), "a paused picture is not re-sent");
 
         // stepping while paused moves to the next beat and stays paused
         press(&mut d, KeyCode::Char('l'));
         let b = screen_text(&mut d, 170, 50);
-        assert!(b.contains("2/8") && b.contains("PAUSED"), "{b}");
+        assert!(b.contains("2/6") && b.contains("PAUSED"), "{b}");
         press(&mut d, KeyCode::Char('h'));
-        assert!(screen_text(&mut d, 170, 50).contains("1/8"));
+        assert!(screen_text(&mut d, 170, 50).contains("1/6"));
 
         press(&mut d, KeyCode::Char('p'));
         assert!(d.animating() && !screen_text(&mut d, 170, 50).contains("PAUSED"));
@@ -3505,8 +3496,8 @@ mod tests {
         assert_eq!(d.view, PopupView::Menu);
 
         // another node, by name, on any tab
-        d.exec(Step::Open("litho".into()));
-        assert_eq!(d.cur_label().as_deref().map(str::trim), Some("LITHO"));
+        d.exec(Step::Open("nmos".into()));
+        assert_eq!(d.cur_label().as_deref().map(str::trim), Some("NMOS"));
         assert!(d.popup && d.view == PopupView::Overview);
         d.exec(Step::Goto(Target::Zoom('b')));
         assert_eq!(d.open_key(), Some('b'));
@@ -3515,7 +3506,7 @@ mod tests {
         d.popup = false;
         let out = call(&mut d, "open_node", serde_json::json!({"node": "SAND"})).unwrap();
         assert_eq!(out["ok"], false);
-        assert_eq!(d.cur_label().as_deref().map(str::trim), Some("LITHO"));
+        assert_eq!(d.cur_label().as_deref().map(str::trim), Some("NMOS"));
     }
 
     /// One tool call, and its result if it came at once.
@@ -3529,9 +3520,9 @@ mod tests {
         got.try_recv().ok()
     }
 
-    fn litho() -> Diagrams {
+    fn nmos() -> Diagrams {
         let mut d = polysilicon();
-        d.exec(Step::Open("LITHO".into()));
+        d.exec(Step::Open("NMOS".into()));
         assert_eq!(d.view, PopupView::Overview);
         d
     }
@@ -3569,7 +3560,7 @@ mod tests {
     #[test]
     fn wrong_calls_are_refused_with_the_valid_choices() {
         use serde_json::json;
-        let mut d = litho();
+        let mut d = nmos();
         let err = |out: Option<serde_json::Value>| {
             let out = out.unwrap();
             assert_eq!(out["ok"], false, "{out}");
@@ -3583,7 +3574,7 @@ mod tests {
             json!({"id": "n", "on": "banana", "text": "x"}),
         ));
         assert!(
-            e.contains("no part \"banana\"") && e.contains("projection lens"),
+            e.contains("no part \"banana\"") && e.contains("gate"),
             "{e}"
         );
         let e = err(call(&mut d, "beat", json!({"n": 99})));
@@ -3607,11 +3598,11 @@ mod tests {
         let out = call(
             &mut d,
             "note",
-            json!({"id": "n", "on": "lens", "title": "NA", "text": "sets the line"}),
+            json!({"id": "n", "on": "gate", "title": "gate", "text": "sets the line"}),
         )
         .unwrap();
         assert_eq!(out["ok"], true, "{out}");
-        assert_eq!(out["notes_up"][0]["on"], "lens");
+        assert_eq!(out["notes_up"][0]["on"], "gate");
         assert!(
             out["parts_on_picture"]
                 .as_array()
@@ -3632,11 +3623,11 @@ mod tests {
     #[test]
     fn read_tools_describe_the_node() {
         use serde_json::json;
-        let mut d = litho();
+        let mut d = nmos();
         let state = call(&mut d, "state", json!({})).unwrap();
         assert_eq!(
             (state["node"].as_str(), state["view"].as_str()),
-            (Some("LITHO"), Some("overview"))
+            (Some("NMOS"), Some("overview"))
         );
         assert_eq!(state["beat"]["n"], 1);
         let parts = call(&mut d, "parts", json!({})).unwrap();
@@ -3645,12 +3636,12 @@ mod tests {
             views.contains_key("overview") && views.contains_key("b"),
             "{parts}"
         );
-        assert!(parts.to_string().contains("projection lens"), "{parts}");
+        assert!(parts.to_string().contains("gate"), "{parts}");
         let nodes = call(&mut d, "list_nodes", json!({})).unwrap();
         assert!(nodes.to_string().contains("HBM STACK"));
         let sec = call(&mut d, "read_section", json!({"n": 4})).unwrap();
         assert!(
-            sec["text"].as_str().unwrap().contains("Resolution"),
+            sec["text"].as_str().unwrap().contains("Threshold"),
             "{sec}"
         );
         assert_eq!(
@@ -3662,7 +3653,7 @@ mod tests {
     #[test]
     fn a_sequence_is_checked_whole_then_played_and_answered_at_the_end() {
         use serde_json::json;
-        let mut d = litho();
+        let mut d = nmos();
         // step 3 pins to a part zoom b does not have: nothing runs
         let out = call(
             &mut d,
@@ -3708,17 +3699,17 @@ mod tests {
     #[test]
     fn a_question_waits_for_the_users_key() {
         use serde_json::json;
-        let mut d = litho();
+        let mut d = nmos();
         let (reply, got) = std::sync::mpsc::channel();
         d.call(super::super::diagrams_ipc::Request {
             tool: "ask".into(),
-            args: json!({"question": "what sets the finest line?", "choices": ["the wafer", "the lens NA"]}),
+            args: json!({"question": "what turns the channel on?", "choices": ["the wafer", "the gate"]}),
             reply,
         });
         assert!(got.try_recv().is_err());
         let all = screen_text(&mut d, 175, 48);
         assert!(
-            all.contains("what sets the finest line?") && all.contains("[b] the lens NA"),
+            all.contains("what turns the channel on?") && all.contains("[b] the gate"),
             "{all}"
         );
         press(&mut d, KeyCode::Char('z')); // not a choice: nothing
@@ -3727,7 +3718,7 @@ mod tests {
         let out = got.try_recv().unwrap();
         assert_eq!(
             (out["picked"].as_str(), out["choice"].as_str()),
-            (Some("b"), Some("the lens NA"))
+            (Some("b"), Some("the gate"))
         );
         assert!(d.chat.quiz.is_none() && d.view == PopupView::Overview);
 
@@ -3860,14 +3851,15 @@ mod tests {
         assert_eq!(d.view, PopupView::Overview);
         let all = screen_text(&mut d, 175, 48);
         assert!(
-            all.contains("fluid bed") && all.contains("[c] the Siemens bell jar"),
+            all.contains("[a] the fluidized bed") && all.contains("[c] the Siemens bell jar"),
             "{all}"
         );
+        // each zoom opens on its first beat's caption
         for (key, want) in [
-            ('a', "fluidized bed reactor"),
-            ('b', "reboiler"),
-            ('c', "bell jar"),
-            ('d', "growth rate"),
+            ('a', "silicon and HCl meet in the bed"),
+            ('b', "vapour rises through the trays"),
+            ('c', "the current runs up one rod"),
+            ('d', "H2 and HCl are recovered"),
         ] {
             press(&mut d, KeyCode::Char(key));
             assert_eq!(d.view, PopupView::Zoom);
@@ -4032,7 +4024,7 @@ mod tests {
     }
 
     #[test]
-    fn cell_zooms_are_3d_and_orbit_with_hjkl() {
+    fn memory_zooms_are_node_pictures() {
         let ctx = Ctx {
             db_path: Default::default(),
             theme: Theme::default(),
@@ -4046,20 +4038,19 @@ mod tests {
             press(&mut d, KeyCode::Enter);
             press(&mut d, KeyCode::Enter);
             press(&mut d, KeyCode::Char(key));
+            assert_eq!(d.view, PopupView::Zoom, "{key}");
+            assert_eq!(d.open_key(), Some(key), "{key}");
+            // the zoom-in is the node's picture: no 3D model to turn
+            assert!(!d.can_orbit(), "{key}: node zoom-ins do not orbit");
             let zoom = screen_text(&mut d, 175, 48);
-            assert!(zoom.contains("HJKL turn"), "{key}: zoom pane is 3D: {zoom}");
+            assert!(!zoom.contains("HJKL turn"), "{key}: {zoom}");
             press(&mut d, KeyCode::Char('F'));
-            assert_eq!(d.view, PopupView::Full, "{key}");
-            let all = screen_text(&mut d, 175, 48);
-            assert!(all.contains("hjkl orbit"), "{key}: {all}");
-            let start = d.orbit;
-            press(&mut d, KeyCode::Char('l'));
-            assert!(d.orbit.yaw > start.yaw, "{key}: l orbits right");
+            assert_eq!(d.view, PopupView::Zoom, "{key}: F has no full view");
         }
     }
 
     #[test]
-    fn cell_sections_are_3d_and_numbers_navigate() {
+    fn memory_sections_come_from_the_node() {
         let ctx = Ctx {
             db_path: Default::default(),
             theme: Theme::default(),
@@ -4071,30 +4062,33 @@ mod tests {
             .expect("CELL node");
         press(&mut d, KeyCode::Enter);
         press(&mut d, KeyCode::Enter);
+        // 1-9 are sections 1-9, and 0 is the tenth
         for key in '1'..='9' {
             press(&mut d, KeyCode::Char(key));
             assert_eq!(d.view, PopupView::Zoom, "{key}");
             assert!(d.zoom_section, "{key}");
+            assert_eq!(d.open_key(), Some(key), "{key}");
             let all = screen_text(&mut d, 175, 48);
-            assert!(all.contains("HJKL turn"), "{key}: {all}");
-            assert!(all.contains("1-9 section"), "{key}: {all}");
-            assert!(d.can_orbit(), "{key}: HJKL turn it");
+            assert!(all.contains("1-0 section"), "{key}: {all}");
+            assert!(!d.can_orbit(), "{key}: section pictures do not orbit");
         }
-        // one press, since quick repeats of a key count as holding it
-        let start = d.orbit;
-        press(&mut d, KeyCode::Char('L'));
-        assert!(d.orbit.yaw > start.yaw, "L turns the model");
+        press(&mut d, KeyCode::Char('0'));
+        assert_eq!(d.view, PopupView::Zoom);
+        assert!(d.zoom_section);
+        assert_eq!(d.zoom.as_ref().map(|(i, _)| *i), Some(9));
+        assert_eq!(d.open_key(), Some('0'));
         // a letter goes back to a zoom, and a number returns from it
         press(&mut d, KeyCode::Char('a'));
         assert!(!d.zoom_section);
         press(&mut d, KeyCode::Char('3'));
         assert!(d.zoom_section);
-        // the sources have no scene: from the menu they open as text
+        // the menu lists all ten sections, and the tenth opens its picture
         press(&mut d, KeyCode::Esc);
         let s0 = d.menu_sections();
         d.menu_sel = s0 + 9;
         press(&mut d, KeyCode::Enter);
-        assert_eq!(d.view, PopupView::Pane);
+        assert_eq!(d.view, PopupView::Zoom);
+        assert_eq!(d.zoom.as_ref().map(|(i, _)| *i), Some(9));
     }
 
     #[test]

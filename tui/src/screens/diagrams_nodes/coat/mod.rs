@@ -6,4 +6,5 @@ pub const NODE: Node = Node {
     page: "COAT",
     overview: None,
     sections: &[],
+    clips: false,
 };

@@ -4,6 +4,12 @@
 
 use crate::ui::anim::Scene;
 
+mod array;
+mod bandwidth;
+mod bank;
+mod blender;
+mod cell;
+mod chip;
 mod clean;
 mod coat;
 mod deposit;
@@ -12,8 +18,11 @@ mod dice;
 mod etch;
 mod expose;
 mod final_test;
+mod hbm;
 mod implant;
 mod ingot;
+mod litho;
+mod melt;
 mod package;
 mod pick;
 mod polysilicon;
@@ -33,14 +42,25 @@ pub struct Node {
     pub overview: Option<Build>,
     /// One close-up per `# ` section of the page, in order; empty until written.
     pub sections: &'static [Build],
+    /// Plays as pre-rendered H.264 clips in a terminal that decodes them (diagrams_h264): the
+    /// overview, zoom-ins and sections are rendered once to data/clips, and re-rendered in the
+    /// background when the scene changes. Opt in once the page's pictures are final.
+    pub clips: bool,
 }
 
 const NODES: &[Node] = &[
     sand::NODE,
     polysilicon::NODE,
+    melt::NODE,
     ingot::NODE,
     slice_polish::NODE,
     wafer::NODE,
+    cell::NODE,
+    litho::NODE,
+    array::NODE,
+    bank::NODE,
+    bandwidth::NODE,
+    hbm::NODE,
     deposit::NODE,
     coat::NODE,
     expose::NODE,
@@ -57,12 +77,17 @@ const NODES: &[Node] = &[
 ];
 
 fn node(page: &str) -> Option<&'static Node> {
-    NODES.iter().find(|n| n.page == page)
+    NODES.iter().find(|n| n.page == page).or_else(|| chip::NODES.iter().copied().find(|n| n.page == page))
 }
 
 /// The overview scene for a node page, when its module has one.
 pub fn overview(page: &str) -> Option<Box<dyn Scene>> {
     node(page)?.overview.map(|b| b())
+}
+
+/// Whether a node page plays as pre-rendered clips (see `Node::clips`).
+pub fn clips(page: &str) -> bool {
+    node(page).is_some_and(|n| n.clips)
 }
 
 /// The close-up for section `i` of a node page, when its module has one.

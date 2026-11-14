@@ -6,4 +6,5 @@ pub const NODE: Node = Node {
     page: "WAFER SORT",
     overview: None,
     sections: &[],
+    clips: false,
 };

@@ -44,8 +44,8 @@ fn time(beat: usize, local: f32) -> Time {
     }
 }
 
-const KEYS: [char; 15] = [
-    'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+const KEYS: [char; 16] = [
+    'a', 'b', 'c', 'd', 'e', 'f', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
 ];
 
 fn cases() -> Vec<Case> {
@@ -54,15 +54,7 @@ fn cases() -> Vec<Case> {
         diagrams_scene_pwr as pwr,
     };
     let mut out: Vec<Case> = Vec::new();
-    let mut pages: Vec<&'static str> = vec![
-        "POLYSILICON",
-        "CELL",
-        "LITHO",
-        "ARRAY",
-        "BANK",
-        "BANDWIDTH",
-        "HBM STACK",
-    ];
+    let mut pages: Vec<&'static str> = vec!["POLYSILICON"];
     pages.extend(chip::nodes().iter().map(|n| n.page));
     pages.extend(pkg::nodes().iter().map(|n| n.page));
     pages.extend(link::nodes().iter().map(|n| n.page));
@@ -70,52 +62,29 @@ fn cases() -> Vec<Case> {
 
     for page in pages {
         // overviews
-        let ov: Option<(usize, Box<dyn Fn(usize, f32) -> Model>)> = match page {
-            "CELL" => Some((7, Box::new(|b, l| Model::CellOverview(time(b, l))))),
-            "LITHO" => Some((
-                poly3d::LITHO_OVERVIEW_BEATS,
-                Box::new(|b, l| Model::LithoOverview(time(b, l))),
-            )),
-            "ARRAY" => Some((
-                poly3d::ARRAY_OVERVIEW_BEATS,
-                Box::new(|b, l| Model::ArrayOverview(time(b, l))),
-            )),
-            "BANK" => Some((
-                poly3d::BANK_OVERVIEW_BEATS,
-                Box::new(|b, l| Model::BankOverview(time(b, l))),
-            )),
-            "BANDWIDTH" => Some((
-                poly3d::BW_OVERVIEW_BEATS,
-                Box::new(|b, l| Model::BwOverview(time(b, l))),
-            )),
-            "HBM STACK" => Some((
-                poly3d::HBM_OVERVIEW_BEATS,
-                Box::new(|b, l| Model::HbmOverview(time(b, l))),
-            )),
-            _ => {
-                if let Some(n) = chip::node(page) {
-                    Some((
-                        n.keys.len(),
-                        Box::new(move |b, l| Model::ChipOverview(n.beats, n.keys, time(b, l))),
-                    ))
-                } else if let Some(n) = pkg::node(page) {
-                    Some((
-                        n.keys.len(),
-                        Box::new(move |b, l| Model::PkgOverview(n.beats, n.keys, time(b, l))),
-                    ))
-                } else if let Some(n) = link::node(page) {
-                    Some((
-                        n.keys.len(),
-                        Box::new(move |b, l| Model::LinkOverview(n.beats, n.keys, time(b, l))),
-                    ))
-                } else if let Some(n) = pwr::node(page) {
-                    Some((
-                        n.keys.len(),
-                        Box::new(move |b, l| Model::PwrOverview(n.beats, n.keys, time(b, l))),
-                    ))
-                } else {
-                    None
-                }
+        let ov: Option<(usize, Box<dyn Fn(usize, f32) -> Model>)> = {
+            if let Some(n) = chip::node(page) {
+                Some((
+                    n.keys.len(),
+                    Box::new(move |b, l| Model::ChipOverview(n.beats, n.keys, time(b, l))),
+                ))
+            } else if let Some(n) = pkg::node(page) {
+                Some((
+                    n.keys.len(),
+                    Box::new(move |b, l| Model::PkgOverview(n.beats, n.keys, time(b, l))),
+                ))
+            } else if let Some(n) = link::node(page) {
+                Some((
+                    n.keys.len(),
+                    Box::new(move |b, l| Model::LinkOverview(n.beats, n.keys, time(b, l))),
+                ))
+            } else if let Some(n) = pwr::node(page) {
+                Some((
+                    n.keys.len(),
+                    Box::new(move |b, l| Model::PwrOverview(n.beats, n.keys, time(b, l))),
+                ))
+            } else {
+                None
             }
         };
         if let Some((beats, model)) = ov {
@@ -131,12 +100,6 @@ fn cases() -> Vec<Case> {
                 continue;
             }
             let beats = match model_at(page, k, &time(0, 0.0)) {
-                Model::Cell(z, ..) => z.beats(),
-                Model::Litho(z, ..) => z.beats(),
-                Model::Array(z, ..) => z.beats(),
-                Model::Bank(z, ..) => z.beats(),
-                Model::Bw(z, ..) => z.beats(),
-                Model::Hbm(z, ..) => z.beats(),
                 Model::Chip(keys, ..) => keys.len(),
                 Model::Pkg(keys, ..) => keys.len(),
                 Model::Link(keys, ..) => keys.len(),

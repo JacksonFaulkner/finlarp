@@ -21,6 +21,9 @@ tui-input = "0.15"
 throbber-widgets-tui = "0.11"
 ratatui-image = { version = "12.0.0-rc.3", default-features = false, features = ["crossterm"] }
 image = { version = "0.25", default-features = false, features = ["gif", "png"] }
+flate2 = "1"
+# poll(2) on stdin for the terminal capability probe (diagrams_h264).
+libc = "0.2"
 # The bell-jar rasterizer: shared with the offline GIF tool (tools/poly3d).
 poly3d = { path = "../tools/poly3d" }
 # The realistic GPU renderer (headless wgpu): the MELT + PULL overview.
