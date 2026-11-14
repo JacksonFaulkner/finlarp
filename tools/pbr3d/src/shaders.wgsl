@@ -333,6 +333,17 @@ fn fs_glass(i: VsOut) -> @location(0) vec4<f32> {
     if (dot(n, v) < 0.0) {
         n = -n;
     }
+    if (i.mat.z > 5.5) {
+        // clear glass: it transmits nearly all light, so the base and rim behind it keep their
+        // own colour. Only a faint Fresnel reflection (sun glint, sky sheen) is added. Premultiplied,
+        // like the rest of the glass.
+        let fres_c = 0.04 + 0.96 * pow(1.0 - max(dot(n, v), 0.0), 5.0);
+        var j = i;
+        j.alb = vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        let refl = shade(j, v, n);
+        let ac = clamp(i.mat.y + fres_c * 0.2, 0.0, 1.0);
+        return vec4<f32>(refl * ac, ac);
+    }
     let ndv = max(dot(n, v), 0.0);
     let fres = 0.04 + 0.96 * pow(1.0 - ndv, 5.0);
     let c = shade(i, v, n);
@@ -399,10 +410,15 @@ fn aces(x: vec3<f32>) -> vec3<f32> {
 fn fs_composite(i: FsIn) -> @location(0) vec4<f32> {
     let hdr = textureSample(src_a, lin, i.uv);
     let bloom = textureSample(src_b, lin, i.uv).rgb;
-    let lin_col = (hdr.rgb + bloom * pp.b.x) * pp.b.y;
-    let disp = pow(aces(lin_col), vec3<f32>(1.0 / 2.2));
-    let bg = pp.a.rgb;
-    return vec4<f32>(disp + (1.0 - hdr.a) * bg, 1.0);
+    // The scene is premultiplied by its coverage a. Un-premultiply before tone mapping, then lay
+    // the foreground over the background by a. Tone-mapping the premultiplied value instead lifted
+    // faint glass toward white over light backgrounds.
+    let a = hdr.a;
+    let c = hdr.rgb / max(a, 1e-4);
+    let glow = bloom * pp.b.x * pp.b.y;
+    let fg = pow(aces(c * pp.b.y + glow), vec3<f32>(1.0 / 2.2));
+    let bgl = pp.a.rgb + pow(aces(glow), vec3<f32>(1.0 / 2.2));
+    return vec4<f32>(a * fg + (1.0 - a) * bgl, 1.0);
 }
 
 // ---- screen-space ambient occlusion ----
@@ -438,7 +454,7 @@ fn to_px(v: vec3<f32>) -> vec2<i32> {
     return vec2<i32>(i32((nx * 0.5 + 0.5) * dims.x), i32((0.5 - ny * 0.5) * dims.y));
 }
 
-// Raw occlusion: 24 samples in a sphere around each point, 12 near and 12 far, each
+// Raw occlusion: 16 samples in a sphere around each point, 8 near and 8 far, each
 // pixel rotated differently so the noise is fine and the blur can hide it.
 @fragment
 fn fs_ao_raw(i: FsIn) -> @location(0) vec4<f32> {
@@ -458,7 +474,7 @@ fn fs_ao_raw(i: FsIn) -> @location(0) vec4<f32> {
     let rot = f32(((px.x * 1973) + (px.y * 9277)) & 1023) * 0.0061359;
     let bias = ao.s.y;
     var occ = 0.0;
-    let count = 24;
+    let count = 16;
     for (var k = 0; k < count; k++) {
         let fk = f32(k);
         let zz = 1.0 - (fk + 0.5) / f32(count);
@@ -468,7 +484,7 @@ fn fs_ao_raw(i: FsIn) -> @location(0) vec4<f32> {
         if (dot(dir, n) < 0.0) {
             dir = -dir;
         }
-        let radius = select(ao.s.x, ao.s.z, k >= 12);
+        let radius = select(ao.s.x, ao.s.z, k >= count / 2);
         let scale = 0.3 + 0.7 * fract(fk * 0.618 + rot * 0.1);
         let sp = p + dir * radius * scale;
         let sc = view_at(to_px(sp));
@@ -480,23 +496,32 @@ fn fs_ao_raw(i: FsIn) -> @location(0) vec4<f32> {
     return vec4<f32>(a, a, a, 1.0);
 }
 
-// Blur of the raw occlusion over 7x7, weighted by depth so edges stay sharp.
-@fragment
-fn fs_ao_blur(i: FsIn) -> @location(0) vec4<f32> {
-    let px = vec2<i32>(i.pos.xy);
+// Blur of the raw occlusion over 7 taps along `dir`, weighted by depth so edges stay sharp.
+// Run twice (across, then down): 14 taps a pixel instead of a 7x7 box's 49.
+fn ao_blur_1d(px: vec2<i32>, dir: vec2<i32>) -> f32 {
     let z0 = view_at(px).z;
+    let hi = vec2<i32>(ao.d.xy) - vec2<i32>(1);
     var sum = 0.0;
     var wsum = 0.0;
-    for (var y = -3; y <= 3; y++) {
-        for (var x = -3; x <= 3; x++) {
-            let q = px + vec2<i32>(x, y);
-            let zq = view_at(q).z;
-            let w = exp(-abs(zq - z0) / (0.03 * abs(z0) + 1.0));
-            sum += textureLoad(ao_a, clamp(q, vec2<i32>(0), vec2<i32>(ao.d.xy) - vec2<i32>(1)), 0).r * w;
-            wsum += w;
-        }
+    for (var k = -3; k <= 3; k++) {
+        let q = px + dir * k;
+        let zq = view_at(q).z;
+        let w = exp(-abs(zq - z0) / (0.03 * abs(z0) + 1.0));
+        sum += textureLoad(ao_a, clamp(q, vec2<i32>(0), hi), 0).r * w;
+        wsum += w;
     }
-    let a = sum / max(wsum, 1e-4);
+    return sum / max(wsum, 1e-4);
+}
+
+@fragment
+fn fs_ao_blur_h(i: FsIn) -> @location(0) vec4<f32> {
+    let a = ao_blur_1d(vec2<i32>(i.pos.xy), vec2<i32>(1, 0));
+    return vec4<f32>(a, a, a, 1.0);
+}
+
+@fragment
+fn fs_ao_blur_v(i: FsIn) -> @location(0) vec4<f32> {
+    let a = ao_blur_1d(vec2<i32>(i.pos.xy), vec2<i32>(0, 1));
     return vec4<f32>(a, a, a, 1.0);
 }
 

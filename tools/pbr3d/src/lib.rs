@@ -4,12 +4,14 @@
 //! last, bloom from the emissive parts, and an ACES tone map into display sRGB.
 //! `melt` is the first machine built on it.
 
+pub mod caption;
 pub mod font;
 pub mod gpu;
 pub mod math;
 pub mod melt;
 pub mod mesh;
 pub mod scene_gltf;
+pub mod text;
 mod shot;
 mod shot_parts;
 mod shot_sec;

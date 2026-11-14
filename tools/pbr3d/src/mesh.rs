@@ -28,6 +28,8 @@ pub enum Kind {
     Felt = 3,
     Silicon = 4,
     Glass = 5,
+    /// Clear glass: transmits nearly all light, adds only a faint Fresnel reflection.
+    ClearGlass = 6,
 }
 
 impl Mat {

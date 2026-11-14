@@ -17,5 +17,5 @@ pub mod scene;
 pub mod shapes;
 
 pub use canvas::Canvas;
-pub use motion::{Particles, ease_in_out, flicker, lerp, noise};
+pub use motion::ease_in_out;
 pub use scene::{Beat, Player, Scene, Time, Zoom};

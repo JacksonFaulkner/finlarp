@@ -12,6 +12,8 @@ use crate::mesh::Mesh;
 const SHADOW_SIZE: u32 = 2048;
 const MSAA: u32 = 4;
 const HDR: wgpu::TextureFormat = wgpu::TextureFormat::Rgba16Float;
+/// The occlusion buffers hold one value: a quarter of the HDR format's bandwidth.
+const AO: wgpu::TextureFormat = wgpu::TextureFormat::R16Float;
 const DEPTH: wgpu::TextureFormat = wgpu::TextureFormat::Depth32Float;
 
 /// Everything the shaders read per frame. Layout must match `struct Globals`.
@@ -98,6 +100,7 @@ pub struct Renderer {
     depth_pipe: wgpu::RenderPipeline,
     ao_raw_pipe: wgpu::RenderPipeline,
     ao_blur_pipe: wgpu::RenderPipeline,
+    ao_blur_v_pipe: wgpu::RenderPipeline,
     ao_apply_pipe: wgpu::RenderPipeline,
     bgl_ao: wgpu::BindGroupLayout,
     ao_buf: wgpu::Buffer,
@@ -113,8 +116,27 @@ pub struct Renderer {
 
 static RENDERER: OnceLock<Mutex<Renderer>> = OnceLock::new();
 
-/// Runs `f` on the process's renderer, creating the GPU device on first use.
+thread_local! {
+    static LOCAL: std::cell::RefCell<Option<Renderer>> = const { std::cell::RefCell::new(None) };
+}
+
+static PER_THREAD: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Gives each thread its own GPU device and queue from now on, instead of one shared renderer
+/// behind a lock. Batch renders on several threads keep the GPU busier this way (about 1.2-1.3x
+/// at 4 threads); a single-threaded caller gains nothing and pays a device per thread.
+pub fn set_per_thread(on: bool) {
+    PER_THREAD.store(on, std::sync::atomic::Ordering::Relaxed);
+}
+
+/// Runs `f` on the process's renderer, creating the GPU device on first use. Per thread after
+/// `set_per_thread(true)` or with `PBR3D_PER_THREAD=1`.
 pub fn with_renderer<T>(f: impl FnOnce(&mut Renderer) -> T) -> T {
+    static ENV: OnceLock<bool> = OnceLock::new();
+    let env = *ENV.get_or_init(|| std::env::var("PBR3D_PER_THREAD").is_ok_and(|v| v == "1"));
+    if env || PER_THREAD.load(std::sync::atomic::Ordering::Relaxed) {
+        return LOCAL.with(|l| f(l.borrow_mut().get_or_insert_with(Renderer::new)));
+    }
     let m = RENDERER.get_or_init(|| Mutex::new(Renderer::new()));
     let mut r = m.lock().unwrap_or_else(|e| e.into_inner());
     f(&mut r)
@@ -450,7 +472,7 @@ impl Renderer {
             bind_group_layouts: &[Some(&bgl_ao)],
             immediate_size: 0,
         });
-        let ao_pipe_for = |entry: &str| {
+        let ao_pipe_for = |entry: &str, format: wgpu::TextureFormat| {
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some(entry),
                 layout: Some(&pl_ao),
@@ -462,15 +484,16 @@ impl Renderer {
                     module: &shader,
                     entry_point: Some(entry),
                     compilation_options: Default::default(),
-                    targets: &[Some(wgpu::ColorTargetState { format: HDR, blend: None, write_mask: wgpu::ColorWrites::ALL })],
+                    targets: &[Some(wgpu::ColorTargetState { format, blend: None, write_mask: wgpu::ColorWrites::ALL })],
                 }),
                 multiview_mask: None,
                 cache: None,
             })
         };
-        let ao_raw_pipe = ao_pipe_for("fs_ao_raw");
-        let ao_blur_pipe = ao_pipe_for("fs_ao_blur");
-        let ao_apply_pipe = ao_pipe_for("fs_ao_apply");
+        let ao_raw_pipe = ao_pipe_for("fs_ao_raw", AO);
+        let ao_blur_pipe = ao_pipe_for("fs_ao_blur_h", AO);
+        let ao_blur_v_pipe = ao_pipe_for("fs_ao_blur_v", AO);
+        let ao_apply_pipe = ao_pipe_for("fs_ao_apply", HDR);
         let ao_buf = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("ao params"),
             size: 48,
@@ -580,6 +603,7 @@ impl Renderer {
             depth_pipe,
             ao_raw_pipe,
             ao_blur_pipe,
+            ao_blur_v_pipe,
             ao_apply_pipe,
             bgl_ao,
             ao_buf,
@@ -618,8 +642,8 @@ impl Renderer {
         let hdr = tex("hdr", w, h, HDR, 1, rt);
         let hdr2 = tex("hdr2", w, h, HDR, 1, rt);
         let depth1 = tex("depth1", w, h, DEPTH, 1, rt);
-        let ao_raw = tex("ao raw", w, h, HDR, 1, rt);
-        let ao_blur = tex("ao blur", w, h, HDR, 1, rt);
+        let ao_raw = tex("ao raw", w, h, AO, 1, rt);
+        let ao_blur = tex("ao blur", w, h, AO, 1, rt);
         let depth = tex("depth", w, h, DEPTH, MSAA, wgpu::TextureUsages::RENDER_ATTACHMENT);
         let (hw, hh) = ((w / 2).max(1), (h / 2).max(1));
         let bloom_a = tex("bloom a", hw, hh, HDR, 1, rt);
@@ -654,6 +678,7 @@ impl Renderer {
 
     /// Renders `solid` (opaque) and `glass` (alpha) meshes under `f` and returns the frame.
     pub fn render(&mut self, f: &Frame, solid: &Mesh, glass: &Mesh, w: u32, h: u32) -> RgbaImage {
+        let t_start = std::time::Instant::now();
         self.ensure_targets(w, h);
         let globals = Globals {
             view_proj: f.view_proj,
@@ -711,9 +736,13 @@ impl Renderer {
 
         let t = self.targets.as_ref().expect("targets");
         let mut enc = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("frame") });
+        // timing experiments only: PBR3D_SKIP=shadow,scene,depth,ao,bloom drops those passes
+        static SKIP: OnceLock<String> = OnceLock::new();
+        let skips = SKIP.get_or_init(|| std::env::var("PBR3D_SKIP").unwrap_or_default());
+        let skip = |name: &str| skips.split(',').any(|p| p == name);
 
         // 1. sun shadow map (opaque only: the glass casts none)
-        {
+        if !skip("shadow") {
             let mut p = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("shadow"),
                 color_attachments: &[],
@@ -734,7 +763,7 @@ impl Renderer {
         }
 
         // 2. the scene, 4x MSAA, resolved into the HDR target
-        {
+        if !skip("scene") {
             let mut p = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("scene"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
@@ -764,7 +793,7 @@ impl Renderer {
         }
 
         // 2b. depth prepass (opaque, cut) for the occlusion pass
-        {
+        if !skip("depth") {
             let mut p = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("depth"),
                 color_attachments: &[],
@@ -813,9 +842,13 @@ impl Renderer {
             p.set_bind_group(0, &bg, &[]);
             p.draw(0..3, 0..1);
         };
-        ao_pass(&mut enc, "ao raw", &self.ao_raw_pipe, &t.hdr_view, &t.hdr_view, &t.ao_raw_view);
-        ao_pass(&mut enc, "ao blur", &self.ao_blur_pipe, &t.ao_raw_view, &t.hdr_view, &t.ao_blur_view);
-        ao_pass(&mut enc, "ao apply", &self.ao_apply_pipe, &t.ao_blur_view, &t.hdr_view, &t.hdr2_view);
+        if !skip("ao") {
+            ao_pass(&mut enc, "ao raw", &self.ao_raw_pipe, &t.hdr_view, &t.hdr_view, &t.ao_raw_view);
+            // separable: across into ao_blur, then down back into ao_raw
+            ao_pass(&mut enc, "ao blur h", &self.ao_blur_pipe, &t.ao_raw_view, &t.hdr_view, &t.ao_blur_view);
+            ao_pass(&mut enc, "ao blur v", &self.ao_blur_v_pipe, &t.ao_blur_view, &t.hdr_view, &t.ao_raw_view);
+        }
+        ao_pass(&mut enc, "ao apply", &self.ao_apply_pipe, &t.ao_raw_view, &t.hdr_view, &t.hdr2_view);
 
         // 3. bright pass -> half-res, blur, blur back
         let post = |enc: &mut wgpu::CommandEncoder, label: &str, pipe: &wgpu::RenderPipeline, src_a: &wgpu::TextureView, src_b: &wgpu::TextureView, dst: &wgpu::TextureView, params: &wgpu::Buffer, out_fmt_is_comp: bool| {
@@ -846,9 +879,11 @@ impl Renderer {
             p.set_bind_group(0, &bg, &[]);
             p.draw(0..3, 0..1);
         };
-        post(&mut enc, "bright", &self.bright_pipe, &t.hdr2_view, &t.hdr2_view, &t.bloom_a, &self.params_buf[0], false);
-        post(&mut enc, "blur h", &self.blur_pipe, &t.bloom_a, &t.bloom_a, &t.bloom_b, &self.params_buf[1], false);
-        post(&mut enc, "blur v", &self.blur_pipe, &t.bloom_b, &t.bloom_b, &t.bloom_a, &self.params_buf[2], false);
+        if !skip("bloom") {
+            post(&mut enc, "bright", &self.bright_pipe, &t.hdr2_view, &t.hdr2_view, &t.bloom_a, &self.params_buf[0], false);
+            post(&mut enc, "blur h", &self.blur_pipe, &t.bloom_a, &t.bloom_a, &t.bloom_b, &self.params_buf[1], false);
+            post(&mut enc, "blur v", &self.blur_pipe, &t.bloom_b, &t.bloom_b, &t.bloom_a, &self.params_buf[2], false);
+        }
 
         // 4. composite to display sRGB
         post(&mut enc, "composite", &self.comp_pipe, &t.hdr2_view, &t.bloom_a, &t.out_view, &self.params_buf[3], true);
@@ -863,10 +898,12 @@ impl Renderer {
             wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
         );
         self.queue.submit(Some(enc.finish()));
+        let t_submit = std::time::Instant::now();
 
         let slice = t.read.slice(..);
         slice.map_async(wgpu::MapMode::Read, |_| {});
         let _ = self.device.poll(wgpu::PollType::wait_indefinitely());
+        let t_wait = std::time::Instant::now();
         let data = slice.get_mapped_range().unwrap();
         let mut px = Vec::with_capacity((w * h * 4) as usize);
         for row in 0..h as usize {
@@ -875,7 +912,30 @@ impl Renderer {
         }
         drop(data);
         t.read.unmap();
+        prof::add(t_submit - t_start, t_wait - t_submit, t_wait.elapsed());
         RgbaImage::from_raw(w, h, px).expect("frame size")
     }
 }
 
+
+/// Where a frame's time goes: CPU setup and command encoding, waiting on the GPU, and copying
+/// the readback out. `prof::take()` returns the totals in ms and resets them.
+pub mod prof {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    use std::time::Duration;
+    static SETUP: AtomicU64 = AtomicU64::new(0);
+    static WAIT: AtomicU64 = AtomicU64::new(0);
+    static COPY: AtomicU64 = AtomicU64::new(0);
+    static FRAMES: AtomicU64 = AtomicU64::new(0);
+    pub(crate) fn add(setup: Duration, wait: Duration, copy: Duration) {
+        SETUP.fetch_add(setup.as_nanos() as u64, Ordering::Relaxed);
+        WAIT.fetch_add(wait.as_nanos() as u64, Ordering::Relaxed);
+        COPY.fetch_add(copy.as_nanos() as u64, Ordering::Relaxed);
+        FRAMES.fetch_add(1, Ordering::Relaxed);
+    }
+    /// (frames, setup ms, wait ms, copy ms) since the last take.
+    pub fn take() -> (u64, f64, f64, f64) {
+        let ms = |a: &AtomicU64| a.swap(0, Ordering::Relaxed) as f64 / 1e6;
+        (FRAMES.swap(0, Ordering::Relaxed), ms(&SETUP), ms(&WAIT), ms(&COPY))
+    }
+}

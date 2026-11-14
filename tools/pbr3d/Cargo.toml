@@ -10,3 +10,4 @@ pollster = "0.4"
 bytemuck = { version = "1", features = ["derive"] }
 image = { version = "0.25", default-features = false, features = ["png"] }
 gltf = { version = "1.4", default-features = false, features = ["KHR_materials_emissive_strength", "import", "names", "utils"] }
+ab_glyph = "0.2"

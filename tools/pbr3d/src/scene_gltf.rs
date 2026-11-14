@@ -24,6 +24,8 @@ struct Prim {
     metal: f32,
     rough: f32,
     alpha: f32,
+    /// Blender material named `clear*`: rendered as clear glass.
+    clear: bool,
     emit: [f32; 3],
 }
 
@@ -191,6 +193,26 @@ impl Scene {
         Some((translation(world[eye]), translation(world[target])))
     }
 
+    /// Tags authored as empties named `label:<text>`: the text and its world position at time
+    /// `t`, for every one whose own scale and its parents' are not switched off.
+    pub fn labels(&self, t: f32) -> Vec<(String, V3)> {
+        let locals = self.locals(t);
+        let world = self.worlds(&locals);
+        self.nodes
+            .iter()
+            .enumerate()
+            .filter_map(|(i, n)| {
+                let text = n.name.strip_prefix("label:")?;
+                // Blender appends .001 to repeated names; drop it
+                let text = match text.rsplit_once('.') {
+                    Some((a, b)) if b.len() == 3 && b.chars().all(|c| c.is_ascii_digit()) => a,
+                    _ => text,
+                };
+                visible(&world[i]).then(|| (text.replace('_', " "), translation(world[i])))
+            })
+            .collect()
+    }
+
     /// The opaque and glass meshes of everything visible at time `t`.
     pub fn meshes(&self, t: f32) -> (Mesh, Mesh) {
         let locals = self.locals(t);
@@ -242,6 +264,7 @@ fn read_prim(p: &gltf::Primitive, buffers: &[gltf::buffer::Data]) -> Option<Prim
         metal: pbr.metallic_factor(),
         rough: pbr.roughness_factor(),
         alpha: bc[3],
+        clear: m.name().is_some_and(|n| n.starts_with("clear")),
         emit: [emit[0] * strength, emit[1] * strength, emit[2] * strength],
     })
 }
@@ -346,7 +369,7 @@ fn transform_normal(m: &M4, n: V3) -> V3 {
 
 fn emit(p: &Prim, world: &M4, into: &mut Mesh) {
     let kind = if p.alpha < 0.99 {
-        Kind::Glass
+        if p.clear { Kind::ClearGlass } else { Kind::Glass }
     } else {
         Kind::Plain
     };
@@ -371,10 +394,26 @@ fn emit(p: &Prim, world: &M4, into: &mut Mesh) {
 
 /// One frame of the scene at time `t` (seconds), from its own camera. The light is the
 /// melt rig's sun, so the two pictures sit together in the same look.
+/// Where the world point `p` lands in a `w` x `h` picture of `scene` at time `t`, in pixels from
+/// the top left; None behind the camera.
+pub fn project(scene: &Scene, t: f32, w: u32, h: u32, p: V3) -> Option<(f32, f32)> {
+    let (eye, target) = cam(scene, t);
+    let vp = math::mul(math::perspective(FOV, w as f32 / h.max(1) as f32, 40.0, 40000.0), math::look_at(eye, target, [0.0, 1.0, 0.0]));
+    let c: Vec<f32> = (0..4).map(|r| vp[0][r] * p[0] + vp[1][r] * p[1] + vp[2][r] * p[2] + vp[3][r]).collect();
+    if c[3] <= 1.0 {
+        return None;
+    }
+    Some(((c[0] / c[3] * 0.5 + 0.5) * w as f32, (0.5 - c[1] / c[3] * 0.5) * h as f32))
+}
+
+const FOV: f32 = 0.52;
+
+fn cam(scene: &Scene, t: f32) -> (V3, V3) {
+    scene.camera(t).unwrap_or(([0.0, 500.0, 3000.0], [0.0, 0.0, 0.0]))
+}
+
 pub fn render(scene: &Scene, t: f32, w: u32, h: u32, bg: [u8; 3]) -> image::RgbaImage {
-    let (eye, target) = scene
-        .camera(t)
-        .unwrap_or(([0.0, 500.0, 3000.0], [0.0, 0.0, 0.0]));
+    let (eye, target) = cam(scene, t);
     let (solid, glass) = scene.meshes(t);
     let bgf = [
         bg[0] as f32 / 255.0,
@@ -382,7 +421,7 @@ pub fn render(scene: &Scene, t: f32, w: u32, h: u32, bg: [u8; 3]) -> image::Rgba
         bg[2] as f32 / 255.0,
     ];
     let view = math::look_at(eye, target, [0.0, 1.0, 0.0]);
-    let proj = math::perspective(0.52, w as f32 / h.max(1) as f32, 40.0, 40000.0);
+    let proj = math::perspective(FOV, w as f32 / h.max(1) as f32, 40.0, 40000.0);
     let sun = math::norm([-0.55, 0.8, 0.42]);
     let light_c = target;
     let light_eye = math::add(light_c, math::scale(sun, 15000.0));

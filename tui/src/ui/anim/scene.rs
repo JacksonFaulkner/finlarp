@@ -221,6 +221,11 @@ impl Player {
     }
 
     /// Where the loop is right now, in ms (frozen while paused).
+    /// How long beat `i` lasts on the loop clock, in ms.
+    pub fn beat_len(&self, i: usize) -> u64 {
+        self.scene.beats().get(i).map_or(1, |b| b.ms.max(1))
+    }
+
     pub fn now_ms(&self) -> u64 {
         if self.paused {
             self.base
