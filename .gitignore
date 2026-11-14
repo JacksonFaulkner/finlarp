@@ -25,3 +25,11 @@ docs/transcripts/
 
 # generated render output (frames and videos from the showcase scripts)
 artifacts/
+
+# pbr3d Blender outputs: GLB scenes and .blend sources sync from S3, not git
+*.glb
+*.blend
+*.blend1
+tools/pbr3d/assets/fonts/
+# per-machine window layout dumps
+jackwitapack_screen_*.json
