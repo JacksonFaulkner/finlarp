@@ -349,6 +349,11 @@ fn main() {
     if args.first().map(String::as_str) == Some("diagram-mcp") {
         std::process::exit(screens::diagrams_ipc::run_mcp());
     }
+    // `fl render-video PAGE... --out DIR`: the diagram pages as HLS video (screens::diagrams_video).
+    // Headless: no terminal, so it runs the same way in CI and over ssh.
+    if args.first().map(String::as_str) == Some("render-video") {
+        std::process::exit(screens::diagrams_video::run_cli(&args[1..]));
+    }
     let cli = match parse_args(&args) {
         Ok(c) => c,
         Err(msg) => {

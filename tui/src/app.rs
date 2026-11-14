@@ -439,7 +439,12 @@ pub(crate) fn event_loop<B: Backend>(
                 });
             }
             Action::Route(Route::Claude { text }) => {
-                if let Err(e) = crate::claude_popup::open(text.as_deref()) {
+                let res = crate::claude_popup::open(text.as_deref());
+                // Without tmux, fl left its screen for the attach; repaint it all.
+                if std::env::var_os("TMUX").is_none() {
+                    terminal.clear().map_err(|e| io::Error::other(e.to_string()))?;
+                }
+                if let Err(e) = res {
                     screen.set_flash(format!("claude: {e}"));
                 }
             }

@@ -1,8 +1,10 @@
 // `<space>ac` / `<space>as`: a floating Claude Code session over the current
 // screen. Claude runs in its own detached tmux session, so closing the popup
 // (prefix-d) leaves it running and the next `<space>ac` shows the same conversation.
-// Needs fl to run inside tmux; the popup is a `tmux display-popup -E`, which
-// blocks fl until it closes.
+// Inside tmux the popup is a `tmux display-popup -E`, which blocks fl until it
+// closes. Outside tmux (fl run straight in Ghostty, so diagram frames skip tmux)
+// fl leaves its screen, attaches the Claude session full screen in the same
+// terminal, and comes back when it detaches.
 //
 // The session lives on its own tmux server (`-L fl-claude`), so the keys in
 // KEYS and `jk_bindings` stay off the user's tmux and only apply to this popup.
@@ -83,9 +85,6 @@ fn jk_bindings() -> String {
 /// typed; several lines are pasted (bracketed paste) so line breaks and table
 /// layout survive and Enter isn't sent.
 pub fn open(text: Option<&str>) -> io::Result<()> {
-    if env::var_os("TMUX").is_none() {
-        return Err(io::Error::other("Claude popup needs fl run inside tmux"));
-    }
     ensure_session()?;
     match text.filter(|t| !t.trim().is_empty()) {
         Some(t) if t.contains('\n') => {
@@ -95,6 +94,9 @@ pub fn open(text: Option<&str>) -> io::Result<()> {
         }
         Some(t) => tmux(&["send-keys", "-t", SESSION, "-l", t])?,
         None => {}
+    }
+    if env::var_os("TMUX").is_none() {
+        return attach_here();
     }
     // Popup targets the pane fl runs in, so it lands on the right client.
     let mut args = vec![
@@ -119,6 +121,27 @@ pub fn open(text: Option<&str>) -> io::Result<()> {
         Ok(())
     } else {
         Err(io::Error::other("tmux display-popup failed"))
+    }
+}
+
+/// No outer tmux: hand the terminal to `tmux attach` until the session
+/// detaches, then take it back. The caller clears the terminal so the next
+/// draw repaints everything.
+fn attach_here() -> io::Result<()> {
+    use ratatui::crossterm::execute;
+    use ratatui::crossterm::terminal::{
+        EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
+    };
+    let mut out = io::stdout();
+    execute!(out, LeaveAlternateScreen)?;
+    disable_raw_mode()?;
+    let status = server().args(["attach", "-t", SESSION]).status();
+    enable_raw_mode()?;
+    execute!(out, EnterAlternateScreen)?;
+    if status?.success() {
+        Ok(())
+    } else {
+        Err(io::Error::other("tmux attach failed"))
     }
 }
 
