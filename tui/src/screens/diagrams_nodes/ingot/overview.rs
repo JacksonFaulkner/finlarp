@@ -1,85 +1,96 @@
-// INGOT page overview: the as-pulled rod moves through the six stages in page order: cropped,
-// tested, ground to diameter, notched, then sawn. Zoom-ins (a-d) open the grind, the notch,
-// the cut-face test and the wire saw.
+// INGOT overview in the picture-and-panel template: the as-pulled rod moves through six stations,
+// cropped, tested on its cut face, ground to 300 mm, notched and wire-sawn. Played back from the
+// Blender scene (tools/pbr3d/blender/ingot_overview.py). Zooms (a-d) open the grind, the notch,
+// the X-ray test and the wire saw (tools/pbr3d/blender/ingot_zooms.py).
 //
-//   Rod      schematic, not to scale; the cones are cut off, the body is ground and notched
-//   Stages   the strip across the top; the current stage is marked below it
-//
-// Sources: see zoom.rs and the section files. The rod is schematic; the stage order is the page's.
+// Sources: page text (INGOT.txt sections 1-9) and INGOT.details.txt; Wikipedia, Czochralski method
+// and Wafer (electronics); SV029 datasheet (300 mm wafer: diameter, notch); US 8,376,809 (Sumco
+// grinder); US 11,551,922 (periphery grind and notch); US 5,529,051 (<110> found by X-ray); US 12617032
+// and US 12605863 (crop, grind, notch, saw steps, patent text); US 9,988,736 (tail growth).
+// The rod drawings are schematic, not to scale.
 
+use super::super::blender::{Cell, Page, BEAT_MS};
 use super::zoom;
-use crate::ui::anim::shapes::{Path, fill_disc, flow, titled_box};
-use crate::ui::anim::{Beat, Canvas, Particles, Scene, Time, Zoom, ease_in_out, flicker, lerp};
-
-const MIN_W: u16 = 100;
-const MIN_H: u16 = 30;
-const BEAT_MS: u64 = 5200;
-
-// stations: boxes SW columns wide, PITCH apart, from column X0; the ingot rides the track below
-const SW: i32 = 13;
-const PITCH: i32 = 15;
-const X0: i32 = 6;
-const BOX_TOP: i32 = 2;
-const BOX_BOT: i32 = 13;
-const ROD_Y: i32 = 16;
-const TRACK: i32 = 18;
-
-const STATIONS: [&str; 6] = ["PULLER", "CROP", "TEST", "GRIND OD", "NOTCH", "WIRE SAW"];
+use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[
-    Beat::new("as-pulled: a rough rod with a cone on each end", BEAT_MS)
+    Beat::new("as-pulled: a rough rod with a cone on each end, a little over 300 mm", BEAT_MS)
         .note(
-            "the rod as it comes off the puller, seed cone on the left, tail cone on the right",
-            "rough edges; the cones taper to a point",
+            "The rod comes off the puller as a rough, slightly wavy cylinder: a seed cone and neck at one end, a tail cone at the other. It is ground to size later, so it is left a little over 300 mm and not round.",
+            "a grey rod on two cradles, a pale rough skin wider than the body under it, and a dark cone at each end",
         )
         .detail(
-            "The crystal is up to about 2 m long and several hundred kg, and it holds the value of one furnace run (INGOT page; Wikipedia).",
-            &["the as-pulled rod is oversize and not round (INGOT page)"],
+            "The rod holds the value of one whole furnace run, so each later step tries to keep as much of it as possible.",
+            &[
+                "Up to about 2 m long and several hundred kg (Wikipedia, Czochralski method)",
+                "The as-pulled rod is oversize and not round (INGOT page)",
+                "A 450 mm crystal would have weighed about 1 tonne (INGOT details)",
+            ],
         ),
-    Beat::new("crop: the seed and tail cones are cut off", BEAT_MS)
+    Beat::new("crop: blades cut the seed and tail cones off at the joints", BEAT_MS)
         .note(
-            "crop lines mark where the saw will cut the cones away",
-            "the cones are marked with crop lines at each end of the body",
+            "Saw blades take the two cones off at the crop lines. The cones fall away as scrap, and the body is left with flat cut faces ready for testing.",
+            "two thin steel blades at the joints of the rod, and the dark cones dropping away below it",
         )
         .detail(
-            "Crop position is set by measurement: the tail end is richest in dopant and metal, so cuts move with each crystal (INGOT page).",
-            &["a longer crop gives cleaner wafers but fewer of them (INGOT page)"],
+            "Where the cut goes is set by measurement, not at a fixed distance. A conservative crop loses silicon; an aggressive one passes marginal wafers to customers.",
+            &[
+                "Cropping also removes zones with voids or contamination (patent text, US 12617032)",
+                "The tail is the most contaminated end, since dopants and metals concentrate in the last melt (textbook)",
+                "Crop length is part of the wafers-per-pull figure; no source here gives that number",
+            ],
         ),
-    Beat::new("test: the cut faces are checked for orientation", BEAT_MS)
+    Beat::new("test: X-ray on the cut face checks the orientation before grinding", BEAT_MS)
         .note(
-            "the cones are gone; the cut faces are where the test samples come from",
-            "X-ray marks sit on both cut faces",
+            "A test sample is taken from the cut face and X-rays are aimed at it. The reflected beam makes spots, and when they line up the crystal plane is found. The orientation is confirmed before the rod is committed to grinding and slicing.",
+            "a cyan X-ray beam hitting the flat end face, a reflected beam to a detector block, and four bright spots on the face",
         )
         .detail(
-            "Test samples from the cut faces confirm orientation, doping type and resistivity (INGOT page).",
-            &["orientation is checked by X-ray diffraction (INGOT page)"],
+            "This is the last cheap point to reject a crystal. Rejecting after slicing wastes saw time and wire.",
+            &[
+                "Orientation is checked by X-ray diffraction against the intended Miller plane (INGOT details)",
+                "The notch tolerance is <110> +/- 1 degree (vendor datasheet)",
+                "{100} for logic and CMOS, {111} for bipolar, power and MEMS (Wikipedia infobox)",
+            ],
         ),
-    Beat::new("grind OD: the body is ground round to 300 mm", BEAT_MS)
+    Beat::new("grind OD: a wheel grinds the rod round to 300 mm", BEAT_MS)
         .note(
-            "the rough edges are ground away and the body becomes a clean cylinder",
-            "the rough edge fades to a clean edge as the wheel passes",
+            "A grind wheel runs along the rough rod and takes the oversize skin off, so the finished cylinder is round and at the target outer diameter.",
+            "a dark wheel pressed onto the top of the rod, a row of orange sparks where it touches, and the pale skin going",
         )
         .detail(
-            "The grind sets the outer diameter to 300 mm +/- 0.2 mm (SV029 datasheet).",
-            &["grinding is traverse OD grinding along the axis (US 8,376,809)"],
+            "Diameter control matters because wafer handling robots, FOUPs and every downstream tool assume the 300 mm standard. The removed material is silicon that was already pulled and paid for.",
+            &[
+                "Diameter 300 mm, tolerance +/- 0.2 mm (vendor datasheet, SV029)",
+                "A grind wheel brings the ingot to target outer diameter and length (patent text, US 12617032)",
+                "Grinding damage, chipping at the ends and wheel wear causing taper are the failure modes (INGOT details)",
+            ],
         ),
-    Beat::new("notch: a V groove is ground along the length", BEAT_MS)
+    Beat::new("notch: a 90 degree V groove is ground the full length, marking <110>", BEAT_MS)
         .note(
-            "the notch is ground on the rim along the full length of the body",
-            "a V mark appears on the top rim",
+            "A V groove is ground along the whole length of the cylinder. It marks the <110> direction, so every tool can align the wafer to the crystal.",
+            "an orange V-shaped groove running along the top of the cylinder from one end to the other",
         )
         .detail(
-            "Notch: 90 deg, depth 1.0 mm (+0.25/-0.00), on <110> +/- 1 deg (SV029 datasheet).",
-            &["notch marks orientation; it does not show doping type (INGOT page)"],
+            "Wafers of 200 mm and up carry one notch instead of flats, because a notch wastes less area. The notch marks <110> and does not show doping type.",
+            &[
+                "Depth 1.0 mm (+0.25 / -0.00), 90 degree included angle, on <110> +/- 1 degree (vendor datasheet, SV029)",
+                "Periphery grind and notch: an arc or approximate V groove marks <110> (US 11,551,922)",
+                "450 mm wafers were to be notchless, with a laser mark (INGOT page)",
+            ],
         ),
-    Beat::new("wire saw: the cylinder is sawn into wafers", BEAT_MS)
+    Beat::new("wire saw: a diamond wire web slices the ingot into wafers", BEAT_MS)
         .note(
-            "the ground, notched cylinder goes to the wire saw; its wire passes cut across the body",
-            "wire lines cross the body; the body is the finished ingot leaving this node",
+            "The ingot is bonded to a mounting beam and lowered into a web of diamond-abrasive wire, which cuts every wafer at once. The wire pitch sets the wafer thickness plus the kerf.",
+            "the rod with a pale mounting beam on top, the wires running across it, and the cut wafers starting to part along the kerf",
         )
         .detail(
-            "Wire pitch sets wafer thickness plus kerf; pitch and kerf for 300 mm were not found (INGOT page).",
-            &["the saw output goes on to lap, etch and polish (INGOT page)"],
+            "Saw loss is silicon that was already grown, so thinner wire is a direct yield gain. The page finds no kerf, speed or wafers-per-ingot number for 300 mm sawing.",
+            &[
+                "Wafer thickness 775 um, +/- 25 um in vendor sheets (INGOT page)",
+                "Wire pitch sets wafer thickness plus kerf (INGOT page)",
+                "No kerf number for 300 mm sawing was found (INGOT page)",
+            ],
         ),
 ];
 
@@ -87,235 +98,51 @@ const ZOOMS: &[Zoom] = &[
     Zoom {
         key: 'a',
         label: "the grind to 300 mm",
-        build: || -> Box<dyn Scene> { Box::new(zoom::Grind) },
+        build: || -> Box<dyn Scene> { zoom::grind() },
     },
     Zoom {
         key: 'b',
-        label: "the V notch on the rim",
-        build: || -> Box<dyn Scene> { Box::new(zoom::Notch) },
+        label: "the V notch along the length",
+        build: || -> Box<dyn Scene> { zoom::notch() },
     },
     Zoom {
         key: 'c',
         label: "X-ray on the cut face",
-        build: || -> Box<dyn Scene> { Box::new(zoom::Test) },
+        build: || -> Box<dyn Scene> { zoom::test() },
     },
     Zoom {
         key: 'd',
         label: "the wire web slices the ingot",
-        build: || -> Box<dyn Scene> { Box::new(zoom::Saw) },
+        build: || -> Box<dyn Scene> { zoom::saw() },
     },
 ];
 
-fn station_x(i: usize) -> i32 {
-    X0 + i as i32 * PITCH
-}
-
-fn station_mid(i: usize) -> i32 {
-    station_x(i) + SW / 2
-}
-
-pub struct Ingot;
-
-/// One station box with its equipment drawn inside.
-fn station(c: &mut Canvas, i: usize, t: &Time) {
-    let x = station_x(i);
-    titled_box(c, x, BOX_TOP, SW, BOX_BOT - BOX_TOP + 1, STATIONS[i]);
-    let cx = x + SW / 2;
-    match i {
-        0 => puller(c, x, t),
-        1 => {
-            // the cutting wheel turns; the cut-off cones drop into the scrap bin
-            wheel(c, cx, 7, 4.0, 2.0, t);
-            if t.beat == 1 {
-                let drop = Path::new(&[(cx, 9), (cx, 19)]);
-                flow(c, &drop, t.ms, Particles::new(61, 420, 1100), |_| 'O');
-            }
-        }
-        2 => {
-            // X-ray beam into the cut face; spots come back in the last beats
-            c.text(x + 1, 5, "X◉");
-            c.hline(x + 3, 5, 3, '═');
-            c.hline(x + 7, 4, 2, '▓');
-            c.hline(x + 7, 5, 2, '▓');
-            c.hline(x + 7, 6, 2, '▓');
-            if t.beat >= 1 {
-                for (k, row) in [3, 5, 7].iter().enumerate() {
-                    let on = t.beat == 2 || flicker(t.ms, 350, 5 + k as u64, 2) == 0;
-                    if on {
-                        c.put(x + 11, *row, '•');
-                    }
-                }
-            }
-        }
-        3 => {
-            // the grind wheel, with its spokes turning
-            wheel(c, cx, 7, 4.0, 2.0, t);
-            if t.beat == 3 {
-                let sparks = Path::new(&[(cx + 4, 7), (cx + 8, 11)]);
-                flow(c, &sparks, t.ms, Particles::new(62, 260, 700), |_| '·');
-            }
-        }
-        4 => {
-            // a small wheel cuts the V on the rim
-            wheel(c, cx, 7, 3.0, 1.5, t);
-            c.text(x + 2, 11, "V groove");
-        }
-        _ => {
-            // three rollers carry the wire web; the top run moves, the slices fall to the tray
-            for (rx, ry) in [(x + 3, 6), (x + 9, 6), (x + 6, 10)] {
-                fill_disc(c, rx, ry, 2.0, 1.0, '▒');
-            }
-            c.hline(x + 3, 4, 7, '─');
-            let run = Path::new(&[(x + 3, 4), (x + 9, 4)]);
-            flow(c, &run, t.ms, Particles::new(63, 220, 800), |_| '▸');
-            if t.beat == 5 {
-                let slices = Path::new(&[(cx, 11), (cx, 19)]);
-                flow(c, &slices, t.ms, Particles::new(64, 380, 1000), |_| '▪');
-            }
-        }
-    }
-}
-
-/// A disc with a spoke that turns in time.
-fn wheel(c: &mut Canvas, cx: i32, cy: i32, rx: f32, ry: f32, t: &Time) {
-    fill_disc(c, cx, cy, rx, ry, '▒');
-    let spoke = ['|', '/', '—', '\\'][((t.ms / 150) % 4) as usize];
-    c.put(cx, cy, spoke);
-}
-
-/// Czochralski puller: the crucible with its melt, and the crystal being pulled from it in beat 0.
-fn puller(c: &mut Canvas, x: i32, t: &Time) {
-    let cx = x + SW / 2;
-    c.boxed(x + 3, 9, 7, 4);
-    let melt = if (t.ms / 400).is_multiple_of(2) {
-        '≈'
-    } else {
-        '~'
-    };
-    c.hline(x + 4, 11, 5, melt);
-    if t.beat == 0 {
-        // the crystal grows up out of the melt as it is pulled
-        let top = lerp(8.0, 4.0, ease_in_out(t.local.clamp(0.0, 1.0))).round() as i32;
-        for y in top..=8 {
-            c.hline(cx - 1, y, 3, '▓');
-        }
-        c.vline(cx, BOX_TOP + 1, (top - BOX_TOP - 1).max(0), '│');
-    }
-}
-
-/// The ingot on the track. Hidden in beat 0 (it is still in the puller); from beat 1 it rides
-/// from the previous station to this one during the first quarter of each beat.
-fn rod(c: &mut Canvas, t: &Time) {
-    if t.beat == 0 {
-        return;
-    }
-    let moved = ease_in_out((t.local / 0.25).clamp(0.0, 1.0));
-    let cx = lerp(
-        station_mid(t.beat - 1) as f32,
-        station_mid(t.beat) as f32,
-        moved,
-    )
-    .round() as i32;
-    let (x0, x1) = (cx - 5, cx + 5);
-    for y in ROD_Y - 1..=ROD_Y + 1 {
-        c.hline(x0, y, x1 - x0 + 1, '▓');
-    }
-    c.put(x0 - 1, ROD_Y, '(');
-    c.put(x1 + 1, ROD_Y, ')');
-    if t.beat == 4 {
-        c.put(cx, ROD_Y - 2, '▽');
-    }
-    if t.beat == 5 {
-        // the wire web passes down through the rod, one cut per pass
-        let mut x = x0 + 1;
-        while x < x1 {
-            c.vline(x, ROD_Y - 1, 3, '│');
-            x += 3;
-        }
-    }
-}
-
-impl Scene for Ingot {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let w = c.width().max(MIN_W as usize) as i32;
-        for i in 0..STATIONS.len() {
-            station(c, i, t);
-        }
-        // the track the ingot rides on, and a marker over the station that is active now
-        c.hline(2, TRACK, w - 4, '═');
-        c.put(station_mid(t.beat), BOX_BOT + 1, '▼');
-        rod(c, t);
-        // scrap bin under the crop station, slice tray under the saw
-        titled_box(c, station_x(1), 20, SW, 3, "scrap");
-        titled_box(c, station_x(5), 20, SW, 3, "slices");
-        c.text(
-            X0,
-            25,
-            "▓ ingot   ▒ wheel or saw   ═ track   ▼ station now   O scrap   ▪ slices",
-        );
-        c.text(
-            X0,
-            27,
-            "next: SLICE + POLISH (the slices go to lap, etch and polish)",
-        );
-    }
-
-    fn zooms(&self) -> &[Zoom] {
-        ZOOMS
-    }
-}
+static OVERVIEW: Cell = std::sync::OnceLock::new();
 
 pub fn build() -> Box<dyn Scene> {
-    Box::new(Ingot)
+    Box::new(Page {
+        cell: &OVERVIEW,
+        glb: include_bytes!("../../../../../tools/pbr3d/assets/ingot_overview.glb"),
+        beats: BEATS,
+        zooms: ZOOMS,
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ui::anim::Player;
-    use std::time::Instant;
 
     #[test]
-    fn beats_are_captioned_and_explained() {
+    fn overview_is_explained_and_keyed() {
         let s = build();
-        assert!(s.beats().len() >= 3);
-        for (i, b) in s.beats().iter().enumerate() {
-            assert!(
-                !b.caption.is_empty()
-                    && !b.what.is_empty()
-                    && !b.look.is_empty()
-                    && !b.why.is_empty()
-                    && !b.facts.is_empty()
-                    && b.facts.iter().all(|f| !f.is_empty()),
-                "beat {i}"
-            );
-        }
-    }
-
-    #[test]
-    fn zooms_are_keyed_a_to_d() {
-        let s = build();
+        assert_eq!(s.beats().len(), 6);
+        super::super::super::blender::explained(s.as_ref(), "INGOT overview");
         let keys: String = s.zooms().iter().map(|z| z.key).collect();
         assert_eq!(keys, "abcd");
     }
 
     #[test]
-    fn draws_at_several_sizes_and_times() {
-        for (w, h) in [(80, 26), (120, 40), (200, 60)] {
-            let mut p = Player::new(build(), Instant::now());
-            p.fit(w, h);
-            for k in 0..p.loop_ms() / 500 {
-                let s = p.shot_at(k * 500);
-                assert!(s.lines.iter().all(|l| l.chars().count() <= p.width()));
-            }
-        }
+    fn overview_draws_every_beat() {
+        super::super::super::blender::draws_every_beat(build().as_ref(), "INGOT overview");
     }
 }

@@ -1,337 +1,274 @@
-// Zoom-ins for the WAFER overview. Each opens one part of the blank disc.
+// WAFER zoom-ins a-d in the picture-and-panel template, from the Blender scenes in
+// tools/pbr3d/blender/wafer_zooms.py: a flatness sites, b the epi layer, c SOI by Smart Cut,
+// d the spec sheet. Four beats each. Cross-sections are drawn thicker than life.
 //
-//   Sites  a: the disc from above, cut into scanner sites; SFQR is measured per site
-//   Epi    b: a thin layer grown by CVD on the polished face, a few um thick
-//   Soi    c: Smart Cut: implant, bond, split; the buried oxide sits between two Si layers
-//   Spec   d: the spec numbers from the vendor sheet, drawn as a thickness budget
-//
-// Sources: the page's own list ([1]-[9] in WAFER.txt), read as text. No PDF figure was drawn from,
-// so every drawing is schematic and not to scale. Numbers are as the page quotes them.
+// Sources: SEMI 2025 wafer shipments and revenue [1]; vendor 300 mm datasheets SV029 and SV031 [2];
+// SEMI M1 and M43 [3]; SFQR / ESFQR patent US 12,635,427 [4]; SOI implant depth US 8,497,187 [7].
 
-use crate::ui::anim::shapes::{Path, fill_disc, flow};
-use crate::ui::anim::{Beat, Canvas, Particles, Scene, Time, ease_in_out, lerp};
+use super::super::blender::{page, Cell, BEAT_MS};
+use crate::ui::anim::{Beat, Scene};
 
-const MIN_W: u16 = 80;
-const MIN_H: u16 = 26;
-const BEAT_MS: u64 = 5200;
+pub const SITES_BEATS: &[Beat] = &[
+    Beat::new("the wafer is cut into scanner-field sites, with a 3 mm rim left out", BEAT_MS)
+        .note(
+            "A lithography scanner exposes the wafer one field at a time, so flatness is judged site by site. The disc is tiled with square sites, and the sites that fit inside the rim with 3.0 mm edge exclusion are the ones that count.",
+            "a grey grid of square sites tiles the top of the disc, with a thin gap between each site and the grey rim at the edge",
+        )
+        .detail(
+            "SFQR is the number that maps most directly onto lithography focus, so it is checked one site at a time.",
+            &[
+                "SFQR: site flatness within one scanner-field-sized site (SEMI M1 family, page section 3)",
+                "Edge exclusion 3.0 mm on 300 mm p-type Cz vendor sheets (SV029, SV031)",
+                "ESFQR is the same idea on the edge sites, where partial sites count too (US 12,635,427)",
+            ],
+        ),
+    Beat::new("a scan bar reads each site against a best-fit focal plane", BEAT_MS)
+        .note(
+            "A scan bar crosses the disc and reads the sites as it goes. Each site is measured against a best-fit focal plane; sites that pass light up green, and the rim sites turn gold as they are read.",
+            "a cyan bar sweeps across the grid from the left; behind it the interior sites turn green and the rim sites go gold",
+        )
+        .detail(
+            "The scanner's focus has to hold across every site in the field, so one bad site can cost yield even when the average is good.",
+            &[
+                "SFQR and ESFQR and edge exclusion are defined in US 12,635,427 (page source [4])",
+                "SEMI M1 numeric SFQR limits are not public in what the page found; buyers set them per node",
+            ],
+        ),
+    Beat::new("edge sites: ESFQR must hold on partial sites, with only 3.0 mm of edge exclusion", BEAT_MS)
+        .note(
+            "The rim is the hardest part of the wafer to keep flat. ESFQR applies to the edge sites, and flatness must hold on partial sites with only the small edge exclusion left.",
+            "a ring of gold edge sites round the disc, and two red sites near the rim that fail the limit",
+        )
+        .detail(
+            "A failing site is a reason to reject the wafer or send it elsewhere. Buyers set limits per node and per customer, so a wafer can pass for one fab and fail for another.",
+            &[
+                "Edge exclusion 3.0 mm (SV029, SV031 datasheets)",
+                "ESFQR on partial sites with tiny edge exclusion (US 12,635,427)",
+                "Buyers set SFQR limits per node (page section 3)",
+            ],
+        ),
+    Beat::new("one site can pass on paper and still miss the focus budget on the chuck", BEAT_MS)
+        .note(
+            "A patent argues SFQR is computed as if the wafer lay on an ideal plane, but the scanner holds it on its own chuck. A site that is flat by SFQR can therefore push critical-dimension variation out of tolerance.",
+            "one red site rises as a raised block in the grid, with a tag reading chuck: focus budget can fail",
+        )
+        .detail(
+            "This is why chucked flatness matters as much as the datasheet number, and why SFQR is a lithography figure as well as a wafer one.",
+            &[
+                "A wafer flat by SFQR can still exceed the focus budget (patent US 7,474,386)",
+                "An older interferometry paper cites an ITRS nanotopography projection of 13 nm or less by 2010 (dated)",
+            ],
+        ),
+];
 
-fn dims(c: &Canvas) -> (i32, i32) {
-    (
-        c.width().max(MIN_W as usize) as i32,
-        c.height().max(MIN_H as usize) as i32,
+pub const EPI_BEATS: &[Beat] = &[
+    Beat::new("the bulk wafer is the base that an epi layer is grown on", BEAT_MS)
+        .note(
+            "Epi is a thin single-crystal layer grown on top of a bulk substrate, done by the wafer maker. This cut-away shows the bulk substrate alone, with its polished top face.",
+            "a grey block cut open at the front: the bulk silicon, with a pale polished top face",
+        )
+        .detail(
+            "The substrate sets the mechanical base. The layer on top is where the electrical properties of the transistors are set.",
+            &[
+                "775 +/- 25 um thickness on a typical 300 mm p-type sheet (SV029)",
+                "TTV 5 um or less on the same sheet (SV029, SV031)",
+                "The block is drawn thicker than life; this picture is not to scale",
+            ],
+        ),
+    Beat::new("trichlorosilane gas flows over the hot wafer and silicon deposits on it", BEAT_MS)
+        .note(
+            "Gas carrying silicon flows over the heated wafer, and silicon deposits on the top face as a single-crystal layer. The patent examples grow the layer from trichlorosilane at 1100 to 1130 C on 300 mm wafers.",
+            "pale blue gas blobs drift along the top face from left to right over the grey block",
+        )
+        .detail(
+            "The grower picks gas, temperature and time, which set the layer's thickness and doping. That is why epi is made by the wafer maker, not the chipmaker.",
+            &[
+                "Trichlorosilane at 1100 to 1130 C on 300 mm wafers (patents, not a standard)",
+                "Epi is grown by CVD from gas (page section 2)",
+            ],
+        ),
+    Beat::new("the epi layer grows up on the bulk: 1 to 10 um in patents, about 3 to 6 um typical", BEAT_MS)
+        .note(
+            "The tan layer builds up on the substrate until it sits on the bulk. It is a thin single-crystal film, continuing the crystal below it (textbook).",
+            "a tan band grows up along the top of the grey block until it covers the whole top face",
+        )
+        .detail(
+            "Patent examples put the layer at 1 to 10 um, with about 3 to 6 um typical. The page says these are patent figures, not a standard.",
+            &[
+                "Epi 1 to 10 um, about 3 to 6 um typical (patents)",
+                "For imaging sensors one patent prefers 3 to 6 um (patent)",
+                "Epi drawn about 10 times thicker than life here",
+            ],
+        ),
+    Beat::new("devices sit in the epi layer, where doping and purity are tuned", BEAT_MS)
+        .note(
+            "The layer can differ in doping and purity from the substrate, giving fewer crystal defects and better-controlled electrical properties where the transistors sit. SEMI ties advanced epi to sub-3nm logic.",
+            "the tan epi band on top of the grey bulk, with tags on the layer and on its tuned doping",
+        )
+        .detail(
+            "Advanced epi for sub-3nm logic is one of the demand drivers SEMI named for 2025, and the segment is lumpy because it follows foundry utilisation.",
+            &[
+                "Advanced epi for sub-3nm logic is a 2025 demand driver (SEMI)",
+                "Two Japanese firms held over 60% of 300 mm epi in 2H 2020 (SEMI)",
+            ],
+        ),
+];
+
+pub const SOI_BEATS: &[Beat] = &[
+    Beat::new("a hydrogen implant forms a weak layer in the donor wafer", BEAT_MS)
+        .note(
+            "SOI is made with Smart Cut: hydrogen ions are implanted into a donor wafer to a set depth. That depth bounds how thick the top silicon layer can be.",
+            "a grey donor block sits high in the frame; cyan ions rise into its underside, and a thin gold plane marks the weak layer",
+        )
+        .detail(
+            "The donor wafer is reused after the split, which is part of the economics of the process.",
+            &[
+                "Implant depth about 2 um max at roughly 200 keV (patent US 8,497,187)",
+                "Smart Cut: implant, bond, split, then CMP polish (Electronic Design)",
+            ],
+        ),
+    Beat::new("the donor is pressed face down onto the oxide-covered handle wafer", BEAT_MS)
+        .note(
+            "The implanted face of the donor comes down onto a handle wafer that already carries a buried oxide. The two are pressed together to form the bond.",
+            "the grey donor comes down over the handle, meeting its gold oxide band",
+        )
+        .detail(
+            "Bonding sets up the stack: the slice of the donor above the implant becomes the device layer.",
+            &[
+                "SOI stacks a device layer over a buried oxide on a handle wafer (WAFER page, section 2)",
+                "Soitec is the SOI name in the share table: 5.5% about 2021 (Semiconductor Engineering)",
+            ],
+        ),
+    Beat::new("an anneal splits the donor along the hydrogen layer; the rest lifts away", BEAT_MS)
+        .note(
+            "An anneal splits the donor at the hydrogen layer. The thin film stays bonded to the handle, and the rest of the donor lifts clear. A polish then smooths the transferred film.",
+            "the upper part of the donor rises away from the film, which stays on the oxide; the gold weak plane is gone",
+        )
+        .detail(
+            "The split is what leaves a thin film on the handle. The donor is not thrown away.",
+            &[
+                "Anneal splits at the hydrogen layer, then CMP polishes the film (Electronic Design)",
+                "The donor wafer is reused (Soitec process)",
+            ],
+        ),
+    Beat::new("the device layer sits on the buried oxide, over the handle wafer", BEAT_MS)
+        .note(
+            "The finished SOI stack has a thin top silicon device layer, a buried oxide and a handle wafer. Implant settings give good control of the top-layer thickness.",
+            "three bands: a teal device layer on top, a gold oxide line, and the grey handle wafer beneath, with tags naming each",
+        )
+        .detail(
+            "The buried oxide isolates the devices from the handle. Each rung up the wafer ladder costs more and has fewer qualified suppliers (textbook).",
+            &[
+                "Device layer about 2 um max, bounded by implant depth (US 8,497,187)",
+                "Soitec 5.5% share about 2021; no current FD-SOI capacity figures were found",
+            ],
+        ),
+];
+
+pub const SPEC_BEATS: &[Beat] = &[
+    Beat::new("thickness: 775 um +/- 25 um on a typical 300 mm p-type vendor sheet", BEAT_MS)
+        .note(
+            "The spec sheet starts with thickness. A typical 300 mm p-type Cz vendor sheet specifies 775 +/- 25 um, with a 3.0 mm edge exclusion. The gold dimension bar marks the range and is not to scale.",
+            "a grey slab cut open, with a gold dimension bar at its right and a tag marking the thickness as not to scale",
+        )
+        .detail(
+            "Thickness is the coarse number. The tighter ones follow: TTV, then the site flatness measures.",
+            &[
+                "775 +/- 25 um, TTV 5 um or less, edge exclusion 3.0 mm (SV029, SV031)",
+                "Spec fields as printed on the vendor sheets (page section 3)",
+            ],
+        ),
+    Beat::new("TTV: the maximum minus the minimum thickness across the wafer", BEAT_MS)
+        .note(
+            "Total thickness variation is the maximum minus the minimum thickness across the wafer. Commodity 300 mm sheets allow 5 um or less, and leading-edge specs are much tighter.",
+            "the slab's top face is tilted, exaggerated, so one end sits higher than the other",
+        )
+        .detail(
+            "Tighter TTV and SFQR means more polishing and metrology at the wafer maker, which is part of why leading-edge wafers price above commodity.",
+            &[
+                "TTV 5 um or less (SV029, SV031)",
+                "Vendor guidance: TTV under 1 um at 10 nm nodes and beyond (guidance, not a standard)",
+            ],
+        ),
+    Beat::new("SFQR: flatness within each scanner-field site, against a best-fit plane", BEAT_MS)
+        .note(
+            "Site flatness (SFQR) is the range of wafer topography within one scanner-field-sized site, measured against a best-fit focal plane. It is the number that maps most directly onto lithography focus.",
+            "a top-down disc with a grid of grey sites tiled across it, tags naming SFQR for one site",
+        )
+        .detail(
+            "The patents argue SFQR is computed as if the wafer were perfectly chucked, which a real scanner does not do. That is why flatness is also measured in a chucked state.",
+            &[
+                "SFQR and ESFQR with edge exclusion (US 12,635,427)",
+                "Site flatness under 0.1 um at 10 nm nodes and beyond (vendor guidance, not a standard)",
+            ],
+        ),
+    Beat::new("area: pi times (150 mm) squared, about 70,686 mm2 on each face", BEAT_MS)
+        .note(
+            "One face of a 300 mm wafer has an area of pi times 150 mm squared, about 70,686 mm2, which is about 109.6 square inches. The gold ring marks the rim.",
+            "a top-down disc with a gold ring at its rim and a tag giving the face area",
+        )
+        .detail(
+            "Area is the denominator for the per-area price in section 4. The arithmetic is the page's own, so it is not a sourced figure.",
+            &[
+                "pi x (150 mm)^2 = 70,686 mm2 (page arithmetic)",
+                "About 109.6 square inches per face (page arithmetic)",
+            ],
+        ),
+];
+
+static SITES: Cell = std::sync::OnceLock::new();
+static EPI: Cell = std::sync::OnceLock::new();
+static SOI: Cell = std::sync::OnceLock::new();
+static SPEC: Cell = std::sync::OnceLock::new();
+
+pub fn sites() -> Box<dyn Scene> {
+    page(
+        &SITES,
+        include_bytes!("../../../../../tools/pbr3d/assets/wafer_zoom_sites.glb"),
+        SITES_BEATS,
     )
 }
 
-/// Time through the current beat, 0..1.
-fn local(t: &Time) -> f32 {
-    t.local.clamp(0.0, 1.0)
+pub fn epi() -> Box<dyn Scene> {
+    page(
+        &EPI,
+        include_bytes!("../../../../../tools/pbr3d/assets/wafer_zoom_epi.glb"),
+        EPI_BEATS,
+    )
 }
 
-// ---- a: flatness sites ----------------------------------------------------
-
-pub struct Sites;
-
-const SITE_BEATS: &[Beat] = &[
-    Beat::new("the disc from above, tiled into scanner sites", BEAT_MS)
-        .note(
-            "a grid of square sites covers the disc; each is one scanner field",
-            "the grid lines draw in, then the sites fill one by one",
-        )
-        .detail(
-            "SFQR is the flatness of one scanner-field-sized site; it is a lithography number as much as a wafer one (WAFER page, sections 3 and 8).",
-            &["SFQR and ESFQR definitions: US 12,635,427 (WAFER page source [4])"],
-        ),
-    Beat::new("the scanner measures each site's height spread", BEAT_MS)
-        .note(
-            "a probe steps across the sites; the spread of height inside each one is shown",
-            "a bar over each site shows its spread; edge sites are marked separately",
-        )
-        .detail(
-            "Edge sites are checked too, with tiny edge exclusion, so flatness must hold on partial sites (WAFER page, section 3).",
-            &[
-                "edge exclusion 3.0 mm (SV029 datasheet)",
-                "SEMI M1 numeric limits are not public in what the page found; buyers set them per node",
-            ],
-        ),
-    Beat::new("sites that miss the spec are flagged for the buyer", BEAT_MS)
-        .note(
-            "a site whose spread is too large is marked; the rest pass",
-            "one or two sites carry a flag; the others stay plain",
-        )
-        .detail(
-            "The buyer sets the flatness limits per node, so a flagged site is judged against that buyer's spec (WAFER page, section 3).",
-            &["qualification takes many months per fab process (WAFER page, section 7)"],
-        ),
-];
-
-impl Scene for Sites {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        SITE_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let (cx, cy) = (w / 2, h / 2);
-        fill_disc(c, cx, cy, 16.0, 8.0, '░');
-        // the site grid: lines every 6 cells across and every 3 down, drawn in during beat 0
-        let reach = if t.beat == 0 {
-            (local(t) * 16.0) as i32
-        } else {
-            16
-        };
-        for gx in (-16i32..=16).step_by(6) {
-            if gx.abs() <= reach {
-                c.vline(cx + gx, cy - 8, 17, '┊');
-            }
-        }
-        for gy in (-8..=8).step_by(3) {
-            c.hline(cx - 16, cy + gy, 33, '┄');
-        }
-        if t.beat == 1 {
-            // a probe steps across the sites; each site it passes gets a spread bar
-            let px = cx - 16 + (local(t) * 32.0) as i32;
-            c.vline(px, cy - 9, 19, '│');
-        }
-        c.text(2, h - 2, "top view: SFQR sites, one scanner field each");
-    }
+pub fn soi() -> Box<dyn Scene> {
+    page(
+        &SOI,
+        include_bytes!("../../../../../tools/pbr3d/assets/wafer_zoom_soi.glb"),
+        SOI_BEATS,
+    )
 }
 
-// ---- b: epi layer ---------------------------------------------------------
-
-pub struct Epi;
-
-const EPI_BEATS: &[Beat] = &[
-    Beat::new("gas arrives over the polished face", BEAT_MS)
-        .note(
-            "precursor gas flows over the hot disc; the bulk silicon sits below",
-            "dots drift across the top face, the disc below is plain",
-        )
-        .detail(
-            "Epi is grown by chemical vapour deposition on the polished face (WAFER page, section 2).",
-            &["an epitaxial layer is a device-quality layer on the bulk substrate (WAFER page, section 2)"],
-        ),
-    Beat::new("the layer grows to a few um", BEAT_MS)
-        .note(
-            "the layer builds up from the surface; its thickness is set by the time in the reactor",
-            "the light band thickens over the beat, then stops",
-        )
-        .detail(
-            "Epi thickness is not sourced on the page; the layer is a few um (WAFER page, section 2).",
-            &["epi layers are grown by CVD from gas (WAFER page, section 1)"],
-        ),
-    Beat::new("the epi wafer is ready: a device layer on bulk", BEAT_MS)
-        .note(
-            "the layer stops growing; the finished epi wafer shows layer over bulk",
-            "a check sits over the wafer once the layer is set",
-        )
-        .detail(
-            "Two Japanese firms held more than 60 percent of 300 mm epitaxial wafers in 2H 2020 (SEMI, via SemiEngineering).",
-            &["advanced epi wafers are a strong part of the AI-driven demand (WAFER page, section 4)"],
-        ),
-];
-
-impl Scene for Epi {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        EPI_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let (cx, cy) = (w / 2, h / 2);
-        let x0 = cx - 18;
-        let x1 = cx + 18;
-        // bulk silicon, the disc's body
-        for y in cy + 1..=cy + 4 {
-            c.hline(x0, y, x1 - x0 + 1, '▓');
-        }
-        // the epi layer grows on top: thin at beat 0, thicker as beat 1 runs
-        let thick = if t.beat == 0 {
-            0
-        } else {
-            (1.0 + 2.0 * ease_in_out(local(t))).round() as i32
-        };
-        for y in cy - thick..cy + 1 {
-            c.hline(x0, y, x1 - x0 + 1, '░');
-        }
-        if t.beat == 0 {
-            // precursor gas drifts over the face
-            let gas = Path::new(&[(x0, cy - 3), (x1, cy - 3)]);
-            flow(c, &gas, t.ms, Particles::new(91, 240, 1000), |_| '·');
-        }
-        c.text(x0, cy - 6, "epi layer, a few um (CVD)");
-        c.text(x0, cy + 6, "bulk Si substrate");
-    }
-}
-
-// ---- c: SOI ---------------------------------------------------------------
-
-pub struct Soi;
-
-const SOI_BEATS: &[Beat] = &[
-    Beat::new("implant: hydrogen goes in to a set depth", BEAT_MS)
-        .note(
-            "a hydrogen beam enters the handle wafer; the dose lodges in a band",
-            "a dotted band forms under the top face at the implant depth",
-        )
-        .detail(
-            "Smart Cut: implant a light dose to set the split depth; the device layer is bounded by implant depth (WAFER page, section 2).",
-            &["SOI layer is bounded by implant depth, about 2 um max at ~200 keV (US 8,497,187; WAFER page source [7])"],
-        ),
-    Beat::new("bond and split: the thin layer breaks off", BEAT_MS)
-        .note(
-            "the implanted wafer is bonded face-down onto the handle; heat splits it at the band",
-            "a buried oxide line sits between the thin top layer and the handle",
-        )
-        .detail(
-            "Bond, then split: the thin top Si device layer stays on a buried oxide (BOX) over the handle wafer (WAFER page, section 2).",
-            &["SOI is the variant that adds a buried oxide, bonded (WAFER page, section 7)"],
-        ),
-    Beat::new("the SOI wafer is done: thin device layer on a buried oxide", BEAT_MS)
-        .note(
-            "the split is complete; the thin layer sits on the oxide over the handle",
-            "the thin top layer and the oxide line are both in place",
-        )
-        .detail(
-            "Each step up from bulk polished to epi to SOI costs more and has fewer qualified suppliers; Soitec is the SOI name (WAFER page, section 7).",
-            &["Soitec (SOI.PA) is the SOI supplier named on the page (WAFER page, section 6)"],
-        ),
-];
-
-impl Scene for Soi {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        SOI_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let (cx, cy) = (w / 2, h / 2);
-        let x0 = cx - 18;
-        let x1 = cx + 18;
-        if t.beat == 0 {
-            // the handle wafer with the implant band forming under the top face
-            for y in cy - 1..=cy + 4 {
-                c.hline(x0, y, x1 - x0 + 1, '▓');
-            }
-            let band = (local(t) * 9.0) as i32;
-            let dots = Path::new(&[(x0 + 2, cy), (x0 + 2 + band, cy)]);
-            flow(c, &dots, t.ms, Particles::new(92, 220, 800), |_| '·');
-            c.text(x0, cy - 3, "H+ implant: split depth");
-        } else {
-            // thin top layer, buried oxide line, handle wafer below; the split closes in
-            let gap = lerp(4.0, 1.0, ease_in_out(local(t))).round() as i32;
-            for y in cy - 4..cy - gap {
-                c.hline(x0, y, x1 - x0 + 1, '░');
-            }
-            c.hline(x0, cy - gap, x1 - x0 + 1, '═');
-            for y in cy - gap + 1..=cy + 4 {
-                c.hline(x0, y, x1 - x0 + 1, '▓');
-            }
-            c.text(x0, cy - 6, "thin Si device layer");
-            c.text(x0, cy + 6, "buried oxide (BOX) and handle");
-        }
-        // the split line: a cut that moves down through the band as the beat runs
-        c.text(2, h - 2, "cross-section: Smart Cut");
-    }
-}
-
-// ---- d: spec sheet --------------------------------------------------------
-
-pub struct Spec;
-
-const SPEC_BEATS: &[Beat] = &[
-    Beat::new("the thickness budget: 775 um +/- 25 um", BEAT_MS)
-        .note(
-            "a bar for the disc's thickness with the +/- 25 um band marked on both ends",
-            "the band brackets the bar; the bar holds at the nominal value",
-        )
-        .detail(
-            "Spec fields in a typical 300 mm p-type Cz vendor sheet: thickness 775 +/- 25 um, TTV 5 um or less, edge exclusion 3.0 mm (SV029 / SV031).",
-            &["TTV is the thickness spread across the wafer (max minus min)"],
-        ),
-    Beat::new("TTV and edge exclusion sit on top of the thickness", BEAT_MS)
-        .note(
-            "a thin ticker shows TTV inside the thickness band; the rim is marked as excluded",
-            "the TTV tick stays small; the rim strip is hatched",
-        )
-        .detail(
-            "TTV is the total thickness variation across the wafer; edge exclusion keeps the rim out of the spec area (WAFER page, section 3).",
-            &["TTV 5 um or less; edge exclusion 3.0 mm (SV029 datasheet)"],
-        ),
-    Beat::new("the disc passes the sheet: a check against each limit", BEAT_MS)
-        .note(
-            "the measured values sit inside every limit; a check mark closes the sheet",
-            "the band holds; the check mark appears over the bar",
-        )
-        .detail(
-            "Buyers set their own limits per node; the vendor sheet is the starting point (WAFER page, section 3).",
-            &["SEMI M1 is the wafer specification; M43 covers nanotopography (WAFER page source [3])"],
-        ),
-];
-
-impl Scene for Spec {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        SPEC_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let (cx, cy) = (w / 2, h / 2);
-        let (x0, x1) = (cx - 20, cx + 20);
-        // the nominal bar, with its +/- 25 um band as brackets at each end
-        c.hline(x0, cy, x1 - x0 + 1, '█');
-        c.put(x0 - 1, cy, '[');
-        c.put(x1 + 1, cy, ']');
-        c.text(cx - 8, cy - 3, "775 um +/- 25 um");
-        if t.beat == 1 {
-            // TTV: a tick inside the band; the edge strips are hatched as excluded
-            let tick = cx + (local(t) * 3.0) as i32 - 1;
-            c.put(tick, cy - 1, '▲');
-            c.hline(x0, cy + 2, 3, '/');
-            c.hline(x1 - 2, cy + 2, 3, '/');
-            c.text(cx - 9, cy + 4, "TTV 5 um; edge exclusion 3.0 mm");
-        }
-        c.text(2, h - 2, "spec: 300 mm p-type Cz vendor sheet");
-    }
+pub fn spec() -> Box<dyn Scene> {
+    page(
+        &SPEC,
+        include_bytes!("../../../../../tools/pbr3d/assets/wafer_zoom_spec.glb"),
+        SPEC_BEATS,
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ui::anim::Player;
-    use std::time::Instant;
 
     #[test]
-    fn each_zoom_draws_at_several_times() {
-        let scenes: [Box<dyn Scene>; 4] = [
-            Box::new(Sites),
-            Box::new(Epi),
-            Box::new(Soi),
-            Box::new(Spec),
-        ];
-        for s in scenes {
-            assert!(!s.beats().is_empty());
-            let mut p = Player::new(s, Instant::now());
-            p.fit(120, 40);
-            for k in 0..p.loop_ms() / 500 {
-                let shot = p.shot_at(k * 500);
-                assert!(shot.lines.iter().all(|l| l.chars().count() <= p.width()));
-            }
+    fn zooms_have_four_explained_beats_and_draw() {
+        for (name, build) in [
+            ("sites", sites as fn() -> Box<dyn Scene>),
+            ("epi", epi),
+            ("soi", soi),
+            ("spec", spec),
+        ] {
+            let s = build();
+            assert_eq!(s.beats().len(), 4, "{name}");
+            super::super::super::blender::explained(s.as_ref(), name);
+            super::super::super::blender::draws_every_beat(s.as_ref(), name);
         }
     }
 }

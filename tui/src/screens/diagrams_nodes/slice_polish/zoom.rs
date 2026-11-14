@@ -1,664 +1,267 @@
-// Zoom-ins for the SLICE + POLISH overview. Each opens one part of the flow.
-//
-//   WebSaw   a: the wire web, one slot per pass; the kerf of one cut; wire wear makes waviness
-//   Lap      b: two plates and loose slurry lap both faces at once; the lapped wafer is micro-cracked below
-//   Preston  c: the pad softens and wipes the surface; removal follows RR = K*P + C; pH moves the rate
-//   Budget   d: where the silicon goes, using the page's thickness-budget numbers
-//
-// Sources: the page's own list ([1]-[8] in SLICE_POLISH.txt), read as text. No PDF figure was drawn from,
-// so every drawing is schematic and not to scale. Numbers are as the page quotes them.
+// SLICE + POLISH zoom-ins a-d in the picture-and-panel template, from the Blender scenes in
+// tools/pbr3d/blender/slice_zooms.py: a the wire web and its kerf, b lapping both faces, c the Preston
+// polish and pH, d the thickness budget. Four beats each.
 
-use crate::ui::anim::shapes::{Path, ellipse_e, fill_disc, flow};
-use crate::ui::anim::{Beat, Canvas, Particles, Scene, Time, ease_in_out, flicker, lerp};
-
-const MIN_W: u16 = 80;
-const MIN_H: u16 = 26;
-const BEAT_MS: u64 = 5200;
-
-fn dims(c: &Canvas) -> (i32, i32) {
-    (
-        c.width().max(MIN_W as usize) as i32,
-        c.height().max(MIN_H as usize) as i32,
-    )
-}
-
-/// Time through the current beat, 0..1.
-fn local(t: &Time) -> f32 {
-    t.local.clamp(0.0, 1.0)
-}
-
-// ---- a: wire web ----------------------------------------------------------
-
-pub struct WebSaw;
+use super::super::blender::{page, Cell, BEAT_MS};
+use crate::ui::anim::{Beat, Scene};
 
 const WEB_BEATS: &[Beat] = &[
-    Beat::new("one wire runs round three sawing rollers; the brick comes down", BEAT_MS)
+    Beat::new("the ingot is fed down through a wire web of parallel diamond wires", BEAT_MS)
         .note(
-            "the wire loops over rollers 1, 2 and 3; the brick is lowered toward the top run",
-            "the arrows show the wire moving; the brick falls to just above the wire",
+            "A multi-wire saw holds a web of parallel wires. The ingot comes down into the web, and each wire will cut one slot as it passes through.",
+            "the grey ingot sinking through six horizontal steel wires strung between two posts",
         )
         .detail(
-            "Multi-wire diamond saw: the wire runs over grooved guide rollers, and each pass cuts one slot in every wafer at once (page section 2).",
+            "Each slot is one wire pass across every wafer at once, so the web is what sets the number of wafers.",
             &[
-                "kerf: wire plus diamond layer, about 125 um today (page source [1])",
-                "coolant lubricates and cools the cut; vendor claim, not verified (Junhe 2523 product page)",
+                "Multi-wire diamond saw: grooved guide rollers, one pass per slot (page section 2)",
+                "Each wire is a steel core with diamond grit fixed on it (page section 2)",
             ],
         ),
-    Beat::new("the brick presses the top run down by dzmax", BEAT_MS)
+    Beat::new("one wire pass cuts one slot: the kerf is about 125 um", BEAT_MS)
         .note(
-            "the top run bows down under the brick; dzmax is how far it is pressed",
-            "the wire bows under the brick, and the arrows keep moving along it",
+            "The wire removes a slot as wide as its diamond layer plus wobble. The wafers stand in a stack with a thin gap between them, and the wire lies in each gap.",
+            "seven slices standing one above another, a wire lying in each gap",
         )
         .detail(
-            "Wire deflection under load is what makes the cut wavy and sets thickness variation (Springer 2026; page source [3]).",
-            &["the cut is made where the wire is moving through the silicon (page section 2)"],
+            "The kerf is silicon grown at great cost and lost as swarf, so a thinner wire yields more wafers per ingot.",
+            &[
+                "Kerf about 125 um per slot for diamond wire today (page source [1])",
+                "Kerf is the effective wire diameter including the diamond layer, plus wobble (page section 2)",
+            ],
         ),
-    Beat::new("a worn wire deflects more: the faces come out wavy", BEAT_MS)
+    Beat::new("a worn wire bows under the load: the cut gets wavier", BEAT_MS)
         .note(
-            "the same press, with a worn wire: the bow under the brick is deeper",
-            "the dzmax marker is deeper than in the last beat",
+            "A worn wire deflects more under the load, so it bows deeper at the middle. The wafers that come out have more thickness variation and a wavier surface.",
+            "one wire bowed into a V under the load, its dzmax marker deeper than the straight wires beside it",
         )
         .detail(
-            "Wear raises wire deflection, thickness variation and kerf (Springer 2026; page source [3]).",
-            &["a worn wire is the failure the page calls the highest-value risk (page section 7)"],
+            "Wire breakage and wear are the main saw risks on the page, and the worn wire is the one to watch.",
+            &[
+                "Wear raises wire deflection, thickness variation and kerf (Springer 2026; source [3])",
+                "A worn wire is the highest-value risk for the saw (page section 7)",
+            ],
         ),
-    Beat::new("near the end of the cut: wafers still attached look like teeth", BEAT_MS)
+    Beat::new("near the end of the cut, the last wafers still hang from the block", BEAT_MS)
         .note(
-            "the sawn wafers still hang from the block like teeth, one slot between each pair",
-            "the wire runs through the slots; each tooth is a wafer not yet freed",
+            "Near the end of the cut the last wafers are still held by the uncut base of the block, so the face looks like a comb of teeth.",
+            "the slices stacked on an uncut base, the last wire passing through the bottom gap",
         )
         .detail(
-            "Near the end of a cut the last wafers are still held by the block, so the cut face looks like a comb (photo of a multi-wire saw; source not checked).",
-            &["the page gives no kerf count per slot; each slot is one wire pass (page section 2)"],
+            "The wire has to finish every slot before the wafers are free, so a late wire break costs the whole cut.",
+            &[
+                "The page gives no kerf count per slot; each slot is one wire pass (page section 2)",
+                "Wafers held by the block until the cut finishes (general knowledge)",
+            ],
         ),
 ];
-
-/// Roller radius in cells: x is twice y, so the wheel looks round in a terminal.
-const ROLL_RX: f32 = 5.0;
-const ROLL_RY: f32 = 2.5;
-
-/// A sawing roller: a filled wheel with a hollow centre, the wire runs over its rim.
-fn roller(c: &mut Canvas, x: i32, y: i32) {
-    fill_disc(c, x, y, ROLL_RX, ROLL_RY, '▒');
-    for dy in -2..=2 {
-        for dx in -4..=4 {
-            if ellipse_e(x + dx, y + dy, x, y, ROLL_RX, ROLL_RY) < 0.5 {
-                c.put(x + dx, y + dy, ' ');
-            }
-        }
-    }
-    c.put(x, y, '+');
-}
-
-/// How far the top run is pulled down at `x`: full `dz` under the brick centre, none past its edge.
-fn sag(x: i32, cx: i32, dz: f32) -> f32 {
-    dz * (1.0 - ((x - cx) as f32 / 16.0).powi(2)).max(0.0)
-}
-
-/// The wire loop as cells, in run order: the top run (sagging under the brick), round roller 2,
-/// under roller 3, back up round roller 1. Each cell carries the glyph of its local slope.
-fn loop_cells(cx: i32, cy: i32, dz: f32) -> Vec<(i32, i32, char)> {
-    let top = cy - 4;
-    let run = |dx: i32| (cx + dx, top + sag(cx + dx, cx, dz).round() as i32);
-    let mut corners: Vec<(i32, i32)> = [-20, -14, -7, 0, 7, 14, 20]
-        .iter()
-        .map(|&d| run(d))
-        .collect();
-    corners.extend([
-        (cx + 25, cy - 2),
-        (cx + 5, cy + 6),
-        (cx, cy + 8),
-        (cx - 5, cy + 6),
-        (cx - 25, cy - 2),
-        run(-20),
-    ]);
-    let mut out: Vec<(i32, i32, char)> = Vec::new();
-    for w in corners.windows(2) {
-        let ((x0, y0), (x1, y1)) = (w[0], w[1]);
-        let (dx, dy) = (x1 - x0, y1 - y0);
-        let n = dx.abs().max(dy.abs()).max(1);
-        // a shallow run is '─'; a steep leg leans '╲' or '╱' by its direction
-        let ch = if dy.abs() * 2 <= dx.abs() {
-            '─'
-        } else if (dx > 0) == (dy > 0) {
-            '╲'
-        } else {
-            '╱'
-        };
-        for i in 0..n {
-            let x = lerp(x0 as f32, x1 as f32, i as f32 / n as f32).round() as i32;
-            let y = lerp(y0 as f32, y1 as f32, i as f32 / n as f32).round() as i32;
-            if out.last().is_none_or(|&(px, py, _)| (px, py) != (x, y)) {
-                out.push((x, y, ch));
-            }
-        }
-    }
-    out
-}
-
-fn web_side(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
-    let dz: f32 = match t.beat {
-        0 => 0.0,
-        1 => 2.0 * ease_in_out(local(t)),
-        _ => 3.0,
-    };
-    let top = cy - 4;
-    // the rest line of the top run, so the press reads against it
-    for x in cx - 16..=cx + 16 {
-        if x % 2 == 0 {
-            c.put(x, top, '·');
-        }
-    }
-    roller(c, cx - 20, cy - 2);
-    roller(c, cx + 20, cy - 2);
-    roller(c, cx, cy + 6);
-    // the brick: falls in beat 0 as a flat block; from beat 1 its underside follows the sagging
-    // run, column by column, so it reads as pressing down on the wire
-    let bottom = match t.beat {
-        0 => lerp(top as f32 - 12.0, top as f32 - 2.0, ease_in_out(local(t))),
-        _ => top as f32 + dz - 1.0,
-    }
-    .round() as i32;
-    for x in cx - 14..=cx + 14 {
-        let wy = top + sag(x, cx, dz).round() as i32;
-        let b = match t.beat {
-            0 => bottom,
-            3 => wy - 4,
-            _ => wy - 1,
-        };
-        for y in b - 4..=b {
-            c.put(x, y, '▓');
-        }
-        // near the end of the cut, the wafers not yet freed hang from the block as teeth;
-        // the slots between them are the kerf, with the wire running through
-        if t.beat == 3 {
-            let glyph = if (x - cx).rem_euclid(3) == 0 {
-                '┊'
-            } else {
-                '▓'
-            };
-            for y in b + 1..wy {
-                c.put(x, y, glyph);
-            }
-        }
-    }
-    c.text(cx - 6, bottom - 2, "silicon brick");
-    if t.beat == 3 {
-        c.text(
-            cx - 17,
-            bottom - 7,
-            "teeth: wafers not yet freed; slots are kerf",
-        );
-    }
-    // the wire: horizontal along the top run, diagonal down to roller 3
-    let cells = loop_cells(cx, cy, dz);
-    for &(x, y, ch) in &cells {
-        c.put(x, y, ch);
-    }
-    // flow particles run along the same cells, so they follow the wire exactly
-    let pts: Vec<(i32, i32)> = cells.iter().map(|&(x, y, _)| (x, y)).collect();
-    flow(
-        c,
-        &Path::new(&pts),
-        t.ms,
-        Particles::new(41, 240, 2800),
-        |_| '▸',
-    );
-    if dz > 0.0 && t.beat < 3 {
-        c.put(cx, bottom - 5, '▼');
-        c.text(cx - 6, bottom - 6, "dzmax");
-    }
-}
-
-/// The same web from above: each wire pass runs along x, and the passes sit side by side in z.
-/// The brick covers the middle of them; the passes show either side, with arrows moving along.
-fn web_above(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
-    let half = 11;
-    for k in 0..5 {
-        let z = cy - 4 + 2 * k;
-        c.hline(cx - half, z, 2 * half + 1, '─');
-        let pass = Path::new(&[(cx - half, z), (cx + half, z)]);
-        flow(
-            c,
-            &pass,
-            t.ms + k as u64 * 300,
-            Particles::new(50 + k as u64, 220, 900),
-            |_| '▸',
-        );
-    }
-    fill_disc_rect(c, cx - 7, cy - 5, 15, 11, '▓');
-}
-
-/// A filled rectangle of cells.
-fn fill_disc_rect(c: &mut Canvas, x: i32, y: i32, w: i32, h: i32, ch: char) {
-    for yy in y..y + h {
-        c.hline(x, yy, w, ch);
-    }
-}
-
-impl Scene for WebSaw {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        WEB_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cy = h / 2 + 1;
-        c.text(2, h - 2, "SIDE: one wire on three rollers");
-        c.text(57, h - 2, "FROM ABOVE: the passes");
-        web_side(c, w / 2 - 14, cy, t);
-        web_above(c, w - 12, cy, t);
-    }
-}
-
-// ---- b: lapping -----------------------------------------------------------
-
-pub struct Lap;
 
 const LAP_BEATS: &[Beat] = &[
     Beat::new("the wafers sit between two plates, with slurry in the gap", BEAT_MS)
         .note(
-            "side: the upper plate hangs above the wafer; top-down: the wafers ride the lower plate",
-            "slurry grains flicker in the gaps; the wafers orbit in the top-down view",
+            "The wafer sits between two flat plates with loose abrasive slurry in the gap. Both faces are worked at the same time.",
+            "the upper plate hanging above the wafer on the lower plate, with slurry grains in the gap",
         )
         .detail(
-            "Lapping uses loose abrasive slurry between two plates, both faces at once; it sets flatness and parallelism (page section 3).",
-            &["double-side lapping removes 80 to 200 um in total (page section 4)"],
+            "Lapping sets flatness and parallelism, and it is the step that takes the saw damage down.",
+            &[
+                "Double-side lapping removes 80 to 200 um in total (page section 4)",
+                "Lapping uses loose abrasive slurry between two plates (page section 3)",
+            ],
         ),
     Beat::new("the upper plate presses down: both faces wear at once", BEAT_MS)
         .note(
-            "side: the gap closes and the pressure arrows show the load; top-down: the wafers keep orbiting",
-            "the upper plate drops onto the wafer; the grains keep flickering",
+            "Pressure from the upper plate drives the slurry grains into both faces. The wafer thins on both sides together.",
+            "red pressure arrows on the upper plate, which drops onto the wafer",
         )
         .detail(
-            "Both faces are lapped together, so the wafer comes out flat and parallel (page section 3).",
-            &["lapping stock removal: one 200-300 mm patent example is 80 um, 40 min (page section 4)"],
+            "Pressure and speed set how fast the wafer thins, and the slurry sets how fine the finish is.",
+            &[
+                "One 200-300 mm patent example: 80 um in 40 min (page section 4)",
+                "Lapping stock removal is the second-largest planned loss (page section 5)",
+            ],
         ),
     Beat::new("lapped: flat and parallel, but cracked underneath", BEAT_MS)
         .note(
-            "side: the wafer is flat; cracks run under its surface. top-down: flat discs",
-            "short cracks sit under the surface; the wafers are flat, and no longer orbit as bright",
+            "The wafer comes out flat and parallel, but cracks run under its surface. Those cracks are what the etch has to remove next.",
+            "the plate closing on a flat wafer, with an orange damage layer showing at its faces",
         )
         .detail(
-            "The lapped wafer is flat and parallel but micro-cracked underneath (SLICE_POLISH.anim.txt storyboard; page section 3 on damage).",
-            &["etch removes about 15-25 um after lapping (page section 4)"],
+            "The lapped wafer is flat but micro-cracked underneath, so the etch step is not optional.",
+            &[
+                "Sawing and lapping leave a cracked layer microns deep (page section 3)",
+                "Etch removes about 15-25 um after lapping (page section 4)",
+            ],
+        ),
+    Beat::new("the plate lifts away: 80 to 200 um came off in total", BEAT_MS)
+        .note(
+            "The upper plate lifts clear, and the wafer is ready for the etch. The 80 um in this picture is one patent example; the range is 80 to 200 um.",
+            "the upper plate lifted clear above the wafer on its lower plate",
+        )
+        .detail(
+            "The figure depends on the process; the page calls it a patent example, not a standard.",
+            &[
+                "80 um in one 200-300 mm patent example (page section 4)",
+                "Removal amounts are patent examples, not a standard (page section 9)",
+            ],
         ),
 ];
-
-/// Two panels split at the middle; `row` is where the titles sit.
-fn panels(c: &mut Canvas, w: i32, h: i32, row: i32, left: &str, right: &str) {
-    c.vline(w / 2, row, h - row - 3, '┊');
-    c.text(w / 4 - left.chars().count() as i32 / 2, row, left);
-    c.text(3 * w / 4 - right.chars().count() as i32 / 2, row, right);
-}
-
-/// Side view of the lapping stack: the upper plate, the wafer, the lower plate, slurry between.
-fn lap_side(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
-    let gap = match t.beat {
-        0 => 4.0,
-        1 => lerp(4.0, 1.0, ease_in_out(local(t))),
-        _ => 1.0,
-    }
-    .round() as i32;
-    let upper = cy - 2 - gap;
-    let lower = cy + 6;
-    c.hline(cx - 15, upper, 31, '═');
-    c.hline(cx - 15, lower, 31, '═');
-    for y in cy - 1..=cy + 1 {
-        c.hline(cx - 12, y, 25, '▓');
-    }
-    // slurry grains in both gaps, flickering
-    for i in 0..10 {
-        let x = cx - 13 + i * 3;
-        if flicker(t.ms, 300, 11 + i as u64, 2) == 0 {
-            c.put(x, upper + 1, '·');
-            c.put(x, cy - 2, '·');
-            c.put(x, cy + 2, '·');
-            c.put(x, lower - 1, '·');
-        }
-    }
-    if t.beat == 1 {
-        for x in [cx - 8, cx, cx + 8] {
-            c.put(x, upper - 1, '▼');
-        }
-    }
-    if t.beat == 2 {
-        // micro-cracks, drawn over the wafer body
-        for i in 0..5 {
-            let x = cx - 10 + i * 4;
-            c.put(x, cy, '╱');
-            c.put(x + 1, cy + 1, '╲');
-        }
-    }
-}
-
-/// Top-down view of the same plate: a disc, with two wafers riding it on a circle.
-fn lap_top(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
-    fill_disc(c, cx, cy, 11.0, 5.0, '░');
-    c.put(cx, cy, '+');
-    let a = t.ms as f32 / 1400.0;
-    let wafer = if t.beat == 2 { '▓' } else { '█' };
-    for k in 0..2 {
-        let th = a + k as f32 * std::f32::consts::PI;
-        let px = cx + (7.0 * th.cos()).round() as i32;
-        let py = cy + (3.0 * th.sin()).round() as i32;
-        fill_disc(c, px, py, 3.0, 1.5, wafer);
-    }
-}
-
-impl Scene for Lap {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        LAP_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cy = h / 2 + 1;
-        panels(
-            c,
-            w,
-            h,
-            5,
-            "SIDE: plates and wafer",
-            "TOP-DOWN: wafers on the plate",
-        );
-        lap_side(c, w / 4, cy, t);
-        lap_top(c, 3 * w / 4, cy, t);
-    }
-}
-
-// ---- c: Preston polish ----------------------------------------------------
-
-pub struct Preston;
 
 const PRESTON_BEATS: &[Beat] = &[
     Beat::new("the pad sits on the wafer; abrasive grains move under it", BEAT_MS)
         .note(
-            "side: the pad over the wafer, grains flowing between them; graph: removal rate at the start",
-            "a soft band sits on the top of the wafer; the grains keep flowing",
+            "A pad sits over the wafer with slurry grains between them. The pad averages out the high spots as it works.",
+            "a tan pad above a grey wafer, with dark grains scattered over the wafer's top face",
         )
         .detail(
-            "Polishing is chemical plus mechanical: the chemistry softens the surface and the abrasive removes it (page section 3).",
-            &["the surface is softened or oxidised, then wiped off (textbook picture, page)"],
+            "Planarity comes from the pad asperities and the slurry flow averaging out high spots (textbook).",
+            &[
+                "Polishing is chemical plus mechanical: the chemistry softens the surface and the abrasive removes it (page section 3)",
+                "Surface softened or oxidised, then wiped off (textbook picture, page section 3)",
+            ],
         ),
     Beat::new("pressure sets the rate: RR = K*P + C", BEAT_MS)
         .note(
-            "side: the pad presses and the softened band is wiped away; graph: the marker climbs with pressure",
-            "arrows press on the pad; the wipe runs left to right; the marker rises along the line",
+            "The pad presses on the softened top layer and wipes it off. The removal rate follows Preston's law, RR = K*P + C, so more pressure removes more. The gold bar climbs with the pressure.",
+            "the pad lowered onto the wafer and the gold bar at the right growing with the pressure",
         )
         .detail(
-            "Preston's law: removal rate RR = K*P + C, with K the Preston constant, P the pressure, and C the zero-pressure term (page section 3; source [5]).",
-            &["double-side polish removes 10 to 20 um in total (page section 4)"],
+            "Higher pressure and speed raise the removal rate; the pad, slurry and temperature fold into K.",
+            &[
+                "Preston law: K the Preston constant, P pressure, C the zero-pressure term (page section 3; source [5])",
+                "Double-side polish removes 10 to 20 um in total (page section 4)",
+            ],
         ),
-    Beat::new("pH moves the rate: silica, ceria, and pitting", BEAT_MS)
+    Beat::new("pH moves the rate: silica rises with pH, ceria peaks near 8-9", BEAT_MS)
         .note(
-            "side: the surface is polished; graph: a pH scale with the page's two markers",
-            "markers at about pH 8.5 (ceria peak) and at pH 13 (pitting)",
+            "For oxide CMP the slurry pH matters. Removal rises with pH for silica slurries, and ceria slurries peak between about pH 8 and 9. The pad is lifted to show the pH scale along the front.",
+            "a long grey pH scale along the front edge of the wafer, with two small red markers on it",
         )
         .detail(
-            "Removal rises with pH for silica slurries; pitting was seen at pH 13; ceria peaks near pH 8-9 (page section 3; source [5]).",
-            &["the Preston law runs on both ends of the chip: polish and later CMP (page section 8)"],
+            "So slurry chemistry is a real tuning axis, not only the abrasive size.",
+            &[
+                "Removal rises with pH for silica slurries; ceria peaks near pH 8-9 (page section 3; source [5])",
+                "The Preston law runs on both ends of the chip (page section 8)",
+            ],
         ),
-];
-
-/// Side view of the pad, the softened band on the wafer, and the abrasive grains between them.
-fn preston_side(c: &mut Canvas, cx: i32, cy: i32, t: &Time) {
-    c.hline(cx - 16, cy - 5, 33, '░');
-    for y in cy - 1..=cy + 1 {
-        c.hline(cx - 14, y, 29, '▓');
-    }
-    match t.beat {
-        0 => c.hline(cx - 14, cy - 1, 29, '▒'),
-        1 => {
-            // the softened row is wiped away from the left as the pad presses
-            c.hline(cx - 14, cy - 1, 29, '▒');
-            let wiped = (ease_in_out(local(t)) * 29.0).round() as i32;
-            c.hline(cx - 14, cy - 1, wiped, ' ');
-            for x in [cx - 8, cx, cx + 8] {
-                c.put(x, cy - 7, '▼');
-            }
-        }
-        _ => c.hline(cx - 14, cy - 1, 29, '░'),
-    }
-    let grains = Path::new(&[(cx - 14, cy - 3), (cx + 14, cy - 3)]);
-    flow(c, &grains, t.ms, Particles::new(77, 180, 1400), |_| '·');
-}
-
-/// Graph of removal rate against pressure: the line RR = K*P + C, with a marker at pressure `f`.
-fn preston_graph(c: &mut Canvas, x0: i32, yb: i32, f: f32) {
-    c.vline(x0, yb - 9, 10, '│');
-    c.hline(x0, yb, 27, '─');
-    c.put(x0, yb, '└');
-    c.text(x0 + 1, yb - 9, "RR");
-    c.text(x0 + 22, yb + 1, "P");
-    for i in 0..=24 {
-        let g = i as f32 / 24.0;
-        c.put(x0 + 1 + i, yb - 1 - (2.0 + 6.0 * g).round() as i32, '·');
-    }
-    let mx = x0 + 1 + (f * 24.0).round() as i32;
-    let my = yb - 1 - (2.0 + 6.0 * f).round() as i32;
-    c.put(mx, my, '●');
-    c.text(x0 + 1, yb + 2, "RR = K*P + C");
-}
-
-/// pH scale from 1 to 14, two cells per unit, with the page's markers.
-fn ph_scale(c: &mut Canvas, x0: i32, yb: i32) {
-    c.hline(x0, yb, 27, '─');
-    let at = |ph: f32| x0 + ((ph - 1.0) * 2.0).round() as i32;
-    c.put(at(8.5), yb - 1, '▲');
-    c.text(at(8.5) - 4, yb - 2, "ceria peak");
-    c.put(at(13.0), yb - 1, '▲');
-    c.text(at(13.0) - 3, yb + 1, "pitting");
-    c.text(x0, yb + 2, "pH 1");
-    c.text(x0 + 22, yb + 2, "pH 14");
-}
-
-impl Scene for Preston {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
-
-    fn beats(&self) -> &[Beat] {
-        PRESTON_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cy = h / 2 + 1;
-        panels(
-            c,
-            w,
-            h,
-            5,
-            "SIDE: pad, grains, wafer",
-            "GRAPH: removal vs pressure",
-        );
-        preston_side(c, w / 4, cy, t);
-        match t.beat {
-            0 => preston_graph(c, 3 * w / 4 - 13, cy + 4, 0.0),
-            1 => preston_graph(c, 3 * w / 4 - 13, cy + 4, ease_in_out(local(t))),
-            _ => ph_scale(c, 3 * w / 4 - 13, cy + 4),
-        }
-    }
-}
-
-// ---- d: thickness budget --------------------------------------------------
-
-pub struct Budget;
-
-/// One bar cell is 8 um; one stack row is 25 um. Values are the page's sampled numbers.
-const BAR_UM: f32 = 8.0;
-const ROW_UM: f32 = 25.0;
-
-/// (um, glyph, label) per removal, in process order.
-const REMOVALS: [(f32, char, &str); 4] = [
-    (125.0, '░', "kerf 125 um"),
-    (80.0, '▒', "lapping 80 um"),
-    (20.0, '▓', "etch 20 um"),
-    (15.0, '█', "polish 15 um"),
+    Beat::new("at pH 13 the surface pits", BEAT_MS)
+        .note(
+            "At pH 13 the surface pits, so the chemistry has to be held inside a window. The pits are shown as dark red dots in a patch on the wafer top.",
+            "a patch of dark red pits on the top of the wafer, with the pad gone",
+        )
+        .detail(
+            "Pitting is the failure the pH window is there to avoid.",
+            &[
+                "Pitting seen at pH 13 (page section 3; source [5])",
+                "Oxide CMP chemistry is tuned by pH (page section 3)",
+            ],
+        ),
 ];
 
 const BUDGET_BEATS: &[Beat] = &[
     Beat::new("kerf: the first loss, at the saw", BEAT_MS)
         .note(
-            "bars: the kerf grows first; stack: its rows are the first layer to be removed",
-            "a shaded bar grows left to right; the stack builds from the top",
+            "The kerf is the first loss. About 125 um of silicon per wafer cut becomes swarf at the saw. The top slab peels off to the side.",
+            "the top slab sliding off to the left of a grey stack of layers",
         )
         .detail(
-            "Diamond wire kerf is about 125 um today, per the page's thickness budget (source [1]).",
-            &["kerf is per wafer cut; the wire sets it (page section 2)"],
+            "The kerf is the one part of the budget that is pure loss.",
+            &[
+                "Diamond wire kerf about 125 um, per the page's thickness budget (source [1])",
+                "Kerf is per wafer cut; the wire sets it (page section 2)",
+            ],
         ),
     Beat::new("lapping takes the next biggest share", BEAT_MS)
         .note(
-            "bars: lapping grows after the kerf; stack: its rows are added below",
-            "a second shade grows; the stack gains its rows",
+            "Lapping takes the next layer. The 80 um layer is one patent example; the range is 80 to 200 um, and the page shows the ranges in parentheses.",
+            "the second slab, thicker than the etch and polish layers, sliding off to the left",
         )
         .detail(
-            "Double-side lapping removes 80 to 200 um; the 80 um bar is one patent example (page section 5).",
-            &["the ranges are shown in parentheses on the page"],
+            "Double-side lapping removes 80 to 200 um, and the 80 um figure is one example.",
+            &[
+                "Lapping removes 80 to 200 um double-side (page section 5)",
+                "One 200-300 mm patent example: 80 um, 40 min (page section 4)",
+            ],
         ),
-    Beat::new("etch and polish: small, and not one wafer's history", BEAT_MS)
+    Beat::new("etch: a thin layer, 15 to 25 um", BEAT_MS)
         .note(
-            "bars: the last two shades grow; stack: the thinnest rows are added",
-            "the bars do not add up to one wafer's history: each number comes from a different example",
+            "The etch removes a thin layer of about 15 to 25 um. The 20 um slab is the midpoint of that range.",
+            "a thin slab sliding off to the left, between the lapped layer and the wafer below",
         )
         .detail(
-            "Etch removes about 15-25 um after lapping; double-side polish 10-20 um (page sections 4-5).",
-            &["each number is a different patent or source; they do not close into one wafer (page caveat)"],
+            "Etch removes the damage that lapping leaves behind.",
+            &[
+                "Etch removes about 15-25 um after lapping (page sections 4-5)",
+                "Etch is chemical, so it removes damage without adding mechanical stress (page section 4)",
+            ],
+        ),
+    Beat::new("DSP polish: 10 to 20 um, and 775 um is left", BEAT_MS)
+        .note(
+            "Double-side polish takes the last thin layer, about 10 to 20 um, and the 15 um slab is the midpoint. What is left is the 775 um wafer. The four layers are patent and source examples that do not close into one wafer's history.",
+            "the last thin slab sliding off, and the finished wafer standing alone in the middle",
+        )
+        .detail(
+            "Each number comes from a different source, so they do not close into one wafer's history.",
+            &[
+                "DSP removes 10 to 20 um total (page section 4)",
+                "End result: 775 um +/- 25 um thick (vendor datasheet, see WAFER)",
+            ],
         ),
 ];
 
-/// Horizontal bars, one per removal, on the left: a bar grows in its beat and stays after.
-fn budget_bars(c: &mut Canvas, x0: i32, cy: i32, t: &Time) {
-    for (i, (um, ch, label)) in REMOVALS.iter().enumerate() {
-        let y = cy - 6 + 3 * i as i32;
-        let full = (um / BAR_UM).round() as i32;
-        let beat_for = if i < 2 { i } else { 2 };
-        let len = if t.beat > beat_for {
-            full
-        } else if t.beat == beat_for {
-            (full as f32 * ease_in_out(local(t))).round() as i32
-        } else {
-            0
-        };
-        if len == 0 {
-            continue;
-        }
-        c.text(x0, y - 1, label);
-        c.hline(x0, y, len, *ch);
-    }
-    c.text(x0, cy + 7, "bar: one cell = 8 um");
+static WEB: Cell = std::sync::OnceLock::new();
+static LAP: Cell = std::sync::OnceLock::new();
+static PRESTON: Cell = std::sync::OnceLock::new();
+static BUDGET: Cell = std::sync::OnceLock::new();
+
+pub fn web() -> Box<dyn Scene> {
+    page(
+        &WEB,
+        include_bytes!("../../../../../tools/pbr3d/assets/slice_zoom_web.glb"),
+        WEB_BEATS,
+    )
 }
 
-/// Stack of the removed layers, one row per 25 um, on the right: rows are added in their beat.
-fn budget_stack(c: &mut Canvas, x0: i32, cy: i32, t: &Time) {
-    let mut y = cy - 5;
-    for (i, (um, ch, label)) in REMOVALS.iter().enumerate() {
-        let rows = (um / ROW_UM).round() as i32;
-        let beat_for = if i < 2 { i } else { 2 };
-        let shown = if t.beat > beat_for {
-            rows
-        } else if t.beat == beat_for {
-            (rows as f32 * ease_in_out(local(t))).round() as i32
-        } else {
-            0
-        };
-        for k in 0..shown {
-            c.hline(x0, y + k, 12, *ch);
-        }
-        if shown > 0 {
-            c.text(x0 + 14, y, label);
-        }
-        y += rows;
-    }
-    c.text(x0, cy + 7, "stack: one row = 25 um");
+pub fn lap() -> Box<dyn Scene> {
+    page(
+        &LAP,
+        include_bytes!("../../../../../tools/pbr3d/assets/slice_zoom_lap.glb"),
+        LAP_BEATS,
+    )
 }
 
-impl Scene for Budget {
-    fn size(&self) -> (u16, u16) {
-        (MIN_W, MIN_H)
-    }
+pub fn preston() -> Box<dyn Scene> {
+    page(
+        &PRESTON,
+        include_bytes!("../../../../../tools/pbr3d/assets/slice_zoom_preston.glb"),
+        PRESTON_BEATS,
+    )
+}
 
-    fn beats(&self) -> &[Beat] {
-        BUDGET_BEATS
-    }
-
-    fn draw(&self, c: &mut Canvas, t: &Time) {
-        let (w, h) = dims(c);
-        let cy = h / 2 + 1;
-        panels(
-            c,
-            w,
-            h,
-            5,
-            "BARS: each removal",
-            "STACK: the removed layers",
-        );
-        budget_bars(c, 4, cy, t);
-        budget_stack(c, 3 * w / 4 - 12, cy, t);
-        if t.beat == 2 {
-            c.text(
-                2,
-                h - 3,
-                "page example values; they do not close into one wafer's history",
-            );
-        }
-    }
+pub fn budget() -> Box<dyn Scene> {
+    page(
+        &BUDGET,
+        include_bytes!("../../../../../tools/pbr3d/assets/slice_zoom_budget.glb"),
+        BUDGET_BEATS,
+    )
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ui::anim::Player;
-    use std::time::Instant;
-
-    fn beats_ok(s: &dyn Scene) {
-        assert!(s.beats().len() >= 3);
-        for (i, b) in s.beats().iter().enumerate() {
-            assert!(
-                !b.caption.is_empty()
-                    && !b.what.is_empty()
-                    && !b.look.is_empty()
-                    && !b.why.is_empty()
-                    && !b.facts.is_empty()
-                    && b.facts.iter().all(|f| !f.is_empty()),
-                "beat {i}"
-            );
-        }
-    }
 
     #[test]
-    fn beats_are_captioned_and_explained() {
-        beats_ok(&WebSaw);
-        beats_ok(&Lap);
-        beats_ok(&Preston);
-        beats_ok(&Budget);
-    }
-
-    #[test]
-    fn draws_at_several_sizes_and_times() {
-        for build in [
-            || -> Box<dyn Scene> { Box::new(WebSaw) },
-            || -> Box<dyn Scene> { Box::new(Lap) },
-            || -> Box<dyn Scene> { Box::new(Preston) },
-            || -> Box<dyn Scene> { Box::new(Budget) },
+    fn zooms_have_four_explained_beats_and_draw() {
+        for (name, build) in [
+            ("web", web as fn() -> Box<dyn Scene>),
+            ("lap", lap),
+            ("preston", preston),
+            ("budget", budget),
         ] {
-            for (w, h) in [(80, 26), (120, 40), (200, 60)] {
-                let mut p = Player::new(build(), Instant::now());
-                p.fit(w, h);
-                for k in 0..p.loop_ms() / 500 {
-                    let s = p.shot_at(k * 500);
-                    assert!(s.lines.iter().all(|l| l.chars().count() <= p.width()));
-                }
-            }
+            let s = build();
+            assert_eq!(s.beats().len(), 4, "{name}");
+            super::super::super::blender::explained(s.as_ref(), name);
+            super::super::super::blender::draws_every_beat(s.as_ref(), name);
         }
     }
 }
