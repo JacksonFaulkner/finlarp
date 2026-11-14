@@ -10,12 +10,8 @@ use image::RgbaImage;
 mod cell;
 pub mod prof;
 pub use cell::{
-    clip_cell_anim, clip_cell_view, notes_alpha, overview_params, render_cell, render_overview, Notes, render_zoom, CellAnim, CellParams,
-    CellZoom, render_litho_overview, render_litho_zoom, LithoZoom, LITHO_OVERVIEW_BEATS,
-    render_array_overview, render_array_zoom, ArrayZoom, ARRAY_OVERVIEW_BEATS,
-    render_bank_overview, render_bank_zoom, BankZoom, BANK_OVERVIEW_BEATS,
-    render_bw_overview, render_bw_zoom, BwZoom, BW_OVERVIEW_BEATS,
-    render_hbm_overview, render_hbm_zoom, HbmZoom, HBM_OVERVIEW_BEATS,
+    clip_cell_anim, clip_cell_view, notes_alpha, render_cell, Notes, render_zoom, CellAnim, CellParams,
+    CellZoom,
     part_at, render_chip, ChipKey, ChipPart, ChipState,
     pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState,
     pwr_part_at, render_power, PwrKey, PwrPart, PwrState, PWR_BACKUP_Z, PWR_BOARD_Z, PWR_RACK_Z, PWR_XFMR_Z,

@@ -16,12 +16,7 @@
 mod callout;
 mod charge;
 mod chip;
-mod array;
-mod bandwidth;
-mod bank;
 mod glass;
-mod hbm;
-mod litho;
 mod pkg;
 mod link;
 mod power;
@@ -45,15 +40,10 @@ mod zoom_shrink;
 
 use image::RgbaImage;
 
-pub use bandwidth::{render_bw_overview, render_bw_zoom, BwZoom, BW_OVERVIEW_BEATS};
-pub use bank::{render_bank_overview, render_bank_zoom, BankZoom, BANK_OVERVIEW_BEATS};
 pub use chip::{part_at, render_chip, ChipKey, ChipPart, ChipState};
 pub use pkg::{pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState};
 pub use power::{pwr_part_at, render_power, PwrKey, PwrPart, PwrState, PWR_BACKUP_Z, PWR_BOARD_Z, PWR_RACK_Z, PWR_XFMR_Z};
 pub use link::{link_part_at, render_link, LinkKey, LinkPart, LinkState, LINK_CPO_Z, LINK_GLASS_Z, LINK_LASER_Z, LINK_PD_Z};
-pub use hbm::{render_hbm_overview, render_hbm_zoom, HbmZoom, HBM_OVERVIEW_BEATS};
-pub use array::{render_array_overview, render_array_zoom, ArrayZoom, ARRAY_OVERVIEW_BEATS};
-pub use litho::{render_litho_overview, render_litho_zoom, LithoZoom, LITHO_OVERVIEW_BEATS};
 
 use crate::{Cam, Canvas, Tri, View};
 
@@ -246,20 +236,6 @@ pub fn clip_cell_view(t: f64) -> View {
     }
 }
 
-/// The overview's layout at `beat` of its seven beats: the camera glides to the part
-/// the beat is about (idle, word line, sharing, sense, precharge, leak, refresh).
-pub fn overview_params(beat: usize, local: f64) -> CellParams {
-    use stage::Shot;
-    let d = CellParams::default();
-    let whole = Shot { target: d.target, dist: 1440.0, yaw: 0.0, pitch: 0.0 };
-    let gate = Shot { target: [0.0, 400.0, 0.0], dist: 1080.0, yaw: 0.0, pitch: 0.0 };
-    let path = Shot { target: [0.0, 320.0, 0.0], dist: 1180.0, yaw: 0.0, pitch: 0.0 };
-    let amp = Shot { target: [-130.0, 230.0, 0.0], dist: 1120.0, yaw: 0.0, pitch: 0.0 };
-    let cap = Shot { target: [d.cap_x, 290.0, 0.0], dist: 860.0, yaw: 0.0, pitch: 0.0 };
-    let s = stage::shot_at(&[whole, gate, path, amp, whole, cap, path], beat, local);
-    CellParams { target: s.target, cam_dist: s.dist, ..d }
-}
-
 /// The focused scenes behind the CELL page: the lettered zooms look closer at parts of
 /// the overview, and the numbered ones illustrate the sections of the write-up.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -405,54 +381,6 @@ pub struct Notes<'a> {
     pub facts: &'a [&'a str],
 }
 
-/// The parts a note can point at.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Part {
-    WordLine,
-    Transistor,
-    BitLine,
-    SenseAmp,
-    Capacitor,
-    Gauge,
-}
-
-impl Part {
-    fn at(self, p: &CellParams) -> [f64; 3] {
-        match self {
-            Part::WordLine => [p.gate_x, p.wl_y, -120.0],
-            Part::Transistor => [(p.gate_x + p.cap_x) / 2.0 + 30.0, p.ch_y, 0.0],
-            Part::BitLine => [p.bl_x, p.ch_y * 0.62, 0.0],
-            Part::SenseAmp => [p.bl_x, p.sa_h * 0.6, p.sa_half_d],
-            Part::Capacitor => [p.cap_x + p.plate_r * 0.9, (p.bot_plate_y + p.top_plate_y) / 2.0, 0.0],
-            Part::Gauge => [p.gauge_x, p.gauge_h * 0.62, p.gauge_z],
-        }
-    }
-}
-
-/// One overview beat: where the camera sits and which parts its notes point at.
-struct Stop {
-    shot: stage::Shot,
-    what: Part,
-    why: Option<Part>,
-}
-
-/// The overview's seven beats (idle, word line, sharing, sense, precharge, leak,
-/// refresh). Each angle leaves open floor beside the parts its notes are about.
-fn stops() -> [Stop; 7] {
-    use stage::Shot;
-    let d = CellParams::default();
-    let shot = |target: [f64; 3], dist: f64, yaw: f64, pitch: f64| Shot { target, dist, yaw, pitch };
-    [
-        Stop { shot: shot([60.0, 300.0, 0.0], 1500.0, 0.45, 0.25), what: Part::Capacitor, why: Some(Part::Transistor) },
-        Stop { shot: shot([20.0, 420.0, 0.0], 1250.0, 0.25, 0.30), what: Part::WordLine, why: Some(Part::Transistor) },
-        Stop { shot: shot([-60.0, 330.0, 0.0], 1450.0, 0.55, 0.22), what: Part::BitLine, why: Some(Part::Capacitor) },
-        Stop { shot: shot([-20.0, 280.0, 0.0], 1450.0, -0.15, 0.25), what: Part::SenseAmp, why: Some(Part::Gauge) },
-        Stop { shot: shot([-80.0, 330.0, 0.0], 1500.0, 0.10, 0.28), what: Part::WordLine, why: Some(Part::Gauge) },
-        Stop { shot: shot([d.cap_x, 290.0, 0.0], 1050.0, 0.75, 0.30), what: Part::Capacitor, why: None },
-        Stop { shot: shot([0.0, 330.0, 0.0], 1450.0, 0.40, 0.25), what: Part::WordLine, why: Some(Part::SenseAmp) },
-    ]
-}
-
 /// The camera glides to the beat's angle in this first part of the beat, then holds.
 const GLIDE: f64 = 0.25;
 
@@ -474,91 +402,6 @@ pub(crate) fn match_name(names: &[String], want: &str) -> Option<String> {
 
 pub fn notes_alpha(local: f64) -> f64 {
     smooth(GLIDE, GLIDE + 0.08, local) * (1.0 - smooth(0.965, 0.998, local))
-}
-
-/// One overview frame at `beat` and `local` (0..1 through it): the camera at the
-/// beat's angle turned by the user's `view` (measured from `View::default()`), the
-/// parts named, and the beat's `notes` as boxes beside them.
-pub fn render_overview(
-    beat: usize,
-    local: f64,
-    a: &CellAnim,
-    view: &View,
-    notes: Option<&Notes>,
-    w: usize,
-    h: usize,
-    bg: [u8; 3],
-) -> RgbaImage {
-    let p = CellParams::default();
-    let all = stops();
-    let keys: Vec<stage::Shot> = all.iter().map(|s| s.shot).collect();
-    let n = all.len();
-    let beat = beat % n;
-    let shot = stage::shot_glide(&keys, beat, local, GLIDE);
-    let mut cam = stage::camera(&shot, view, w, h);
-    // the cell sits left of centre in a wide frame, leaving the right for the notes
-    if w as f64 > h as f64 * 1.3 {
-        cam.cx -= w as f64 * 0.13;
-    }
-    let mut cv = Canvas::new(w, h, bg.map(|c| c as f32 / 255.0));
-    let mut tris: Vec<Tri> = Vec::new();
-    solids::build(&p, a, &mut tris);
-    wiring::build(&p, a, &mut tris);
-    charge::build(&p, a, &mut tris);
-    glass::build(&p, a, &mut tris);
-    rasterize(&mut cv, &cam, tris);
-    glass::frame(&mut cv, &cam, &p, a);
-    charge::flows(&mut cv, &cam, &p, a);
-    let mut avoid = names(&mut cv, &cam, &p, a);
-    avoid.extend(gauge_rect(&cam, &p));
-    if let Some(nt) = notes {
-        let stop = &all[beat];
-        let mut boxes = Vec::new();
-        if !nt.what.is_empty() {
-            boxes.push(callout::Callout {
-                title: "what's happening",
-                body: vec![nt.what.to_string()],
-                col: stage::ORANGE,
-                anchor: Some(stop.what.at(&p)),
-                prefer: (0.7, 0.2),
-            });
-        }
-        if !nt.why.is_empty() {
-            boxes.push(callout::Callout {
-                title: "why it matters",
-                body: vec![nt.why.to_string()],
-                col: stage::CYAN,
-                anchor: stop.why.map(|q| q.at(&p)),
-                prefer: (0.75, 0.55),
-            });
-        }
-        if !nt.facts.is_empty() {
-            boxes.push(callout::Callout {
-                title: "key numbers",
-                body: nt.facts.iter().map(|f| format!("- {f}")).collect(),
-                col: stage::PURPLE,
-                anchor: None,
-                prefer: (1.0, 1.0),
-            });
-        }
-        callout::draw(&mut cv, &cam, &boxes, &avoid, notes_alpha(local));
-    }
-    to_image(&cv)
-}
-
-/// The gauge is glass (lines, not solids), so it is not in the depth buffer: its
-/// screen box, for the callouts to keep clear of.
-fn gauge_rect(cam: &Cam, p: &CellParams) -> Option<stage::Rect> {
-    let mut r = (i64::MAX, i64::MAX, i64::MIN, i64::MIN);
-    for k in 0..8 {
-        let th = std::f64::consts::TAU * k as f64 / 8.0;
-        for y in [0.0, p.gauge_h] {
-            let q = [p.gauge_x + p.gauge_r * th.cos(), y, p.gauge_z + p.gauge_r * th.sin()];
-            let (x, y, _) = cam.project(q)?;
-            r = (r.0.min(x as i64), r.1.min(y as i64), r.2.max(x as i64), r.3.max(y as i64));
-        }
-    }
-    Some(r)
 }
 
 /// The overview's parts, named on the picture. A part is brightest while it is acting.
