@@ -1,10 +1,11 @@
-// CHIP tab, FINFET: the overview is the whole-chip scene (tools/pbr3d/blender/chip_finfet.py,
-// built on chip_kit.py) zoomed in on the NMOS, which is a FinFET here. Six beats: the whole chip,
-// the planar channel it replaces, the fin standing up, the gate wrapping three sides, the channel
-// on with current along the fin, and the gate low with the channel pinched shut.
+// CHIP tab, FINFET: the overview is the whole chip (chip_kit.py) with a detailed FinFET drawn at
+// the NMOS spot (tools/pbr3d/blender/chip_finfet_detail.py), the camera gliding in on it. Six
+// beats: the whole chip, the planar transistor it replaces, the fins rising, the gate wrapping
+// three sides, the channel on with electrons riding contact to contact, and back out.
 //
-// Zoom-ins a-e and sections 1-10 are the same silicon and fin, the camera on the part each one
-// explains (chip_finfet.py, zoom_* and sec* builders). Three beats each.
+// Zoom-ins a-e and sections 1-10 are detailed, cut-away close-ups of the same nanometre-scale fin,
+// gate-stack and epi structure (chip_finfet_detail.py), the camera framed on each beat's part.
+// Three beats each.
 //
 // Sources: Intel 22 nm Tri-Gate, realworldtech.com/?p=1082 and techradar.com (2011 press); TSMC 16FF+,
 // pr.tsmc.com/english/news/1835; SAQP fin patterning, USPTO 10121785; TSMC FinFlex, tsmc.com blog
@@ -17,169 +18,151 @@ use crate::ui::anim::{Beat, Scene, Zoom};
 const BEATS: &[Beat] = &[
     Beat::new("whole chip: the NMOS is a FinFET", BEAT_MS)
         .note(
-            "This transistor is the NMOS of the chip, and at this node it is a FinFET: the same chip as the hero, with this one picked out.",
-            "the cyan box round the NMOS, a narrow fin standing where the planar NMOS sits in the hero",
+            "This is the same chip as the hero: silicon at the bottom, three tiers of copper wiring and the bumps on top. Here its NMOS transistor is a FinFET, drawn at the NMOS spot. FinFETs are what most chips from about 2012 to 2024 were built on.",
+            "The cyan box at the left of the silicon, under the wiring: a small FinFET with blue epi and a teal gate cap.",
         )
         .detail(
-            "Intel shipped the first volume FinFET, the 22 nm Tri-Gate, in 2012; TSMC's 16FF+ followed in 2015.",
+            "Intel shipped the first volume FinFET; TSMC followed at 16 nm.",
             &[
-                "Intel 22 nm Tri-Gate: announced 2011, Ivy Bridge 2012 (realworldtech.com/?p=1082)",
-                "TSMC 16FF+: risk production, November 2014 (pr.tsmc.com/english/news/1835)",
+                "Intel 22 nm Tri-Gate: announced 2011, Ivy Bridge 2012",
+                "TSMC 16FF+: risk production Nov 2014, volume 2015",
             ],
         ),
     Beat::new("planar: the channel lies flat under one face of the gate", BEAT_MS)
         .note(
-            "A planar gate sits on top of a flat channel, so it controls the channel from one face. As the gate shrinks, that one face loses its grip and the channel leaks.",
-            "a translucent gate lying flat over the cyan channel in the silicon, with no fin yet",
+            "Before FinFETs, the transistor was flat. The gate stack lies on the silicon surface and controls a thin channel just under it from one side only. As gates shrank below about 30 nm, that one face could no longer shut the channel off, and current leaked even when the transistor was off.",
+            "Blue source and drain implanted flush with the silicon, the gate stack (yellow high-k, bronze metal, dark fill, teal cap) lying flat between them, and the thin cyan channel under it.",
         )
         .detail(
-            "One gated face, against three for a fin (textbook). Press coverage of the 2011 announcement compared 22 nm with 32 nm planar.",
-            &[
-                "One gated face against three (textbook)",
-                "Intel 22 nm vs 32 nm planar: up to 37% lower gate delay at low voltage (techradar.com)",
-            ],
+            "One gated face against three for a fin.",
+            &["Intel 22 nm vs 32 nm planar: up to 37% lower gate delay at low voltage (press, 2011)"],
         ),
     Beat::new("rise: the channel stands up as a fin", BEAT_MS)
         .note(
-            "The planar gate goes, and the channel is stood up as a thin silicon fin rising out of the substrate. The source and drain are raised at its two ends.",
-            "the blue fin growing out of the silicon, with raised source and drain blocks at either end",
+            "The FinFET stands the channel on its edge. Thin silicon fins rise out of the substrate, three side by side, and the source and drain are grown back on them as raised, faceted epitaxy that merges across the fins.",
+            "Three grey fins growing up out of the silicon, then blue diamond-shaped epi blocks growing over their ends.",
         )
         .detail(
-            "The fin's height and width set the channel's effective width. The fins are patterned at a quarter of the litho pitch by SAQP.",
-            &[
-                "Weff = 2 x Hfin + Wfin per fin (textbook)",
-                "Fins patterned by SAQP, a quarter of the litho pitch (USPTO 10121785)",
-            ],
+            "Fins are patterned at a quarter of the litho pitch by SAQP.",
+            &["Fin ~7 nm wide, ~50 nm tall (textbook)", "Weff per fin = 2 x Hfin + Wfin"],
         ),
     Beat::new("wrap: the gate wraps the fin on three sides", BEAT_MS)
         .note(
-            "The gate drapes over the fin's top and both sidewalls, with a thin high-k dielectric between, so it touches the channel on three faces. The bottom stays ungated.",
-            "a grey cap over the fin, the gate wall behind it, and the glass front wall the fin shows through",
+            "The gate now drapes over the fins. Cut across it, every fin sits in an upside-down U: a yellow high-k skin, then bronze work-function metal, then fill metal. The gate touches the channel on its top and both sides, which gives it far tighter control.",
+            "The transistor cut two ways: on the left face the blue epi, on the cut across the gate three grey fins each wrapped in yellow and bronze, a teal cap above.",
         )
         .detail(
-            "Three gated faces give the gate more control of the channel, which suppresses short-channel effects such as drain-induced barrier lowering (textbook).",
-            &[
-                "Three gated faces against one planar face (textbook)",
-                "High-k dielectric and work-function metal over the top and sidewalls (textbook)",
-            ],
+            "Three gated faces suppress short-channel leakage.",
+            &["Three gated faces vs one planar (textbook)", "High-k: HfO2-based"],
         ),
     Beat::new("on: the channel fills the fin and current runs source to drain", BEAT_MS)
         .note(
-            "With the gate high, the channel forms through the whole height of the fin, and electrons run along it from the source to the drain.",
-            "the gate cap glowing orange, the channel glowing cyan under the gate, and dots running along the fin",
+            "With the gate high, the whole fin under the gate conducts. Electrons come down the source contact, through the source epi, along the fin under the gate and up the drain epi to the drain contact.",
+            "Cut along the middle fin: the fin under the gate glowing cyan, and white beads riding down the left contact, across through the fin and up the right side.",
         )
         .detail(
-            "Drive comes in whole fins, so a device is 1, 2 or 3 fins wide. TSMC's FinFlex on N3 lets each block pick its fin count.",
-            &[
-                "Width in whole fins: 1, 2 or 3 per device (textbook)",
-                "TSMC FinFlex on N3: 1, 2 or 3 fins per block (tsmc.com blog, 2022)",
-            ],
+            "Drive scales with fin count: 1, 2 or 3 fins per device.",
+            &["Width in whole fins (textbook)", "TSMC FinFlex on N3: fin count per block"],
         ),
     Beat::new("off: the three faces pinch the channel shut, so less leaks", BEAT_MS)
         .note(
-            "With the gate low, the wrapped channel is pinched shut from three sides, so less current leaks. The path left under the fin is blocked by a punch-through stop dopant.",
-            "the channel gone, the gate cap dark, the fin blue again, and the chip back to the hero's whole view",
+            "With the gate low, the three gated faces pinch the channel off, so far less current leaks than in a planar transistor of the same size. The camera pulls back out to the whole chip.",
+            "The whole chip again: wiring, bumps and silicon, with the FinFET at the NMOS spot under the wiring.",
         )
         .detail(
-            "Intel's 22 nm Tri-Gate was reported at more than 50% less power than planar at the same performance. Sub-fin leakage is the path left under the fin.",
-            &[
-                "Intel 22 nm: more than 50% less power at the same performance (press, 2011)",
-                "Sub-fin leakage blocked by punch-through stop doping (textbook)",
-            ],
+            "Less leakage at the same speed was the FinFET's selling point.",
+            &["Intel 22 nm: >50% less power at the same performance (press, 2011)"],
         ),
 ];
 
-// ---- zoom-ins a-e ----------------------------------------------------------------------------
+// ---- zoom-ins a-e ---------------------------------------------------------------------------
 
 const ZA_BEATS: &[Beat] = &[
     Beat::new("SAQP: masks at a quarter of the litho pitch", BEAT_MS)
         .note(
-            "Self-aligned quadruple patterning prints a mask, then splits each line into four with spacers, so the fins come out finer than lithography could print.",
-            "a row of thin grey mask stripes standing on the flat silicon, seen in cross-section across the fins",
+            "Fins are closer together than a scanner can print. So it prints wider lines, the mandrels, and deposits thin spacers on their sidewalls. Doing that twice (self-aligned quadruple patterning) turns one printed line into four spacer lines, one per fin.",
+            "Cut across the future fins: tan mandrels between teal spacer lines, on a teal-grey hard mask over a solid grey silicon block.",
         )
         .detail(
-            "The spacers are deposited and etched twice, so one printed line becomes four.",
-            &["SAQP fin patterning (USPTO 10121785)"],
+            "Pitch is set by the spacer thickness, not the scanner.",
+            &["SAQP fin patterning (USPTO 10121785)", "Fin pitch ~30 nm at N7 (est)"],
         ),
     Beat::new("FIN FORM: the silicon between the masks is etched", BEAT_MS)
         .note(
-            "Etching between the masks leaves silicon fins standing. The masks go, and the fins rise out of the surface to their full height.",
-            "the grey masks gone, the blue fins grown up from the silicon, each one as tall as the gate will wrap",
+            "The spacer pattern is transferred into the hard mask, and a deep, straight etch cuts trenches into the silicon. Tall thin fins are left standing under the hard-mask caps.",
+            "Four grey fins standing on the silicon, each topped by a teal hard-mask cap, with empty trenches between them.",
         )
         .detail(
-            "The fin is silicon tens of nm tall; its height and width set the channel's effective width.",
-            &["Hfin tens of nm, Wfin single-digit to about 10 nm (page text, section 2)"],
+            "Profile control matters: a tapered fin changes drive from fin to fin.",
+            &["Hfin tens of nm, Wfin single-digit to ~10 nm (textbook)"],
         ),
     Beat::new("FIN REVEAL: oxide fills and is etched back", BEAT_MS)
         .note(
-            "Oxide fills the gaps between the fins and is recessed to expose their tops. The oxide isolates the fins from one another below.",
-            "the see-through oxide sinking to about half the fin height, with the upper part of each fin standing clear",
+            "Oxide fills the trenches and is polished flat, then etched back to expose the top of each fin. The exposed height is the part the gate will wrap; the buried part stays isolated in the oxide.",
+            "Cream oxide filling the trenches to the fin tops, then sinking until only the upper part of each fin stands clear.",
         )
         .detail(
-            "The reveal height sets how much of each fin the gate can wrap.",
-            &["FIN REVEAL: oxide recessed to expose the fin tops (page text, section 1)"],
+            "The recess depth sets the electrical fin height.",
+            &["STI oxide recess sets Hfin (textbook)"],
         ),
 ];
 
 const ZB_BEATS: &[Beat] = &[
     Beat::new("high-k: the dielectric coats the top and both sidewalls", BEAT_MS)
         .note(
-            "A thin high-k dielectric coats the top and both sidewalls of the fin, between the silicon and the gate metal.",
-            "the pale high-k over the fin top and its two sidewalls, the fin's blue showing under it",
+            "The first layer of the gate is a high-k dielectric, a hafnium-oxide film only a nanometre or two thick. It coats the top and both sidewalls of every fin and the oxide between them.",
+            "Cut across the gate: three grey fins standing out of the cream oxide, each wrapped in a bright yellow skin.",
         )
         .detail(
-            "The dielectric is what lets the gate hold charge in the channel without leaking through.",
-            &["High-k dielectric, HfO2-based (page text, section 2)"],
+            "High-k lets the gate couple strongly without tunnelling leakage.",
+            &["High-k: HfO2-based, ~1-2 nm (drawn thick)"],
         ),
     Beat::new("gate metal: three sides, not four", BEAT_MS)
         .note(
-            "Work-function metal and fill metal drape over the top and both sidewalls. The gate touches the channel on three faces.",
-            "the grey gate cap on top, the back wall behind the fin, and the glass front wall with the fin showing through",
+            "Work-function metal goes on next and sets the threshold voltage, then fill metal closes the gaps. The gate now touches each fin on three faces. The bottom of the fin, inside the oxide, is never gated.",
+            "Each yellow-skinned fin inside a bronze work-function layer, dark fill metal over everything, a teal cap on top and the fin feet running down into the cream oxide.",
         )
         .detail(
-            "Each fin's gated width counts twice its height plus its width, so a taller fin is a wider device.",
-            &["Weff = 2 x Hfin + Wfin per fin (page text, section 2)"],
+            "Taller fins give more gated width per footprint.",
+            &["Weff = 2 x Hfin + Wfin per fin (textbook)"],
         ),
     Beat::new("on: current runs along the fin, the bottom stays ungated", BEAT_MS)
         .note(
-            "With the gate high the channel turns on through the fin's height, and electrons run from source to drain. The fin's bottom has no gate, so a path is left under it.",
-            "the gate cap and the channel glowing, electron dots along the fin, and faint dots along the fin base",
+            "Turned on, electrons ride from the source contact down through the epi, along the fin under the gate and up to the drain contact. A small leak can still flow under the gate through the fin's ungated foot.",
+            "Cut along the middle fin: the gated part glowing cyan, white beads riding contact to contact, and a few faint red beads crossing below the oxide line.",
         )
         .detail(
-            "The gate keeps control at short lengths; the path under the fin is blocked by a punch-through stop doping.",
-            &[
-                "Intel 22 nm tri-gate, 2011 (realworldtech.com/?p=1082)",
-                "Sub-fin leakage blocked by punch-through stop doping (page text, section 2)",
-            ],
+            "Punch-through-stop doping blocks most of the sub-fin path.",
+            &["Sub-fin leakage: blocked by punch-through-stop doping (textbook)"],
         ),
 ];
 
 const ZC_BEATS: &[Beat] = &[
     Beat::new("one fin: the smallest device", BEAT_MS)
         .note(
-            "The smallest FinFET is one fin wide. It is dense, but gives the least drive.",
-            "a single fin seen from above, its gate across it",
+            "A FinFET's width comes in whole fins. The smallest transistor is one fin under the gate: the densest, with the least drive current.",
+            "A one-fin transistor cut open: blue epi, the fin wrapped in yellow and bronze under the gate, white beads riding through it.",
         )
         .detail(
             "Width is quantised: one fin is the smallest step.",
-            &["Width in whole fins: 1, 2 or 3 per device (page text, section 1)"],
+            &["Width in whole fins: 1, 2 or 3 per device (textbook)"],
         ),
     Beat::new("two fins: twice the drive", BEAT_MS)
         .note(
-            "Two fins side by side under one gate double the drive. Two is the common logic width.",
-            "two fins side by side, their gate lines running across both",
+            "Two fins under the same gate carry about twice the current. The epi from the two fins merges into one source and one drain. Two fins is the common width for logic cells.",
+            "Two fins wrapped side by side in the gate cut, with merged blue epi in front.",
         )
         .detail(
-            "Drive comes in whole fins, not in steps of width.",
-            &["QUANTIZED W, FIN COUNT 1-3 (page text, section 1)"],
+            "Drive comes in steps of one fin, not in fine width.",
+            &["FinFlex base library: 2-fin cells (TSMC N3)"],
         ),
     Beat::new("three fins: for the fastest cells", BEAT_MS)
         .note(
-            "Three fins give the most drive of the three widths, for the fastest cells.",
-            "three fins side by side, the gate across all of them",
+            "Three fins give the most drive of the three widths, for the fastest cells, at the cost of area and gate capacitance. A designer who needs 2.5 fins of current has to pick 2 or 3.",
+            "Three fins wrapped in the gate, merged blue epi across all three, beads riding the current path.",
         )
         .detail(
-            "A device is 1, 2 or 3 fins wide, never a fraction of a fin.",
+            "Never a fraction of a fin.",
             &["FIN COUNT 1-3 (page text, section 1)"],
         ),
 ];
@@ -187,329 +170,349 @@ const ZC_BEATS: &[Beat] = &[
 const FINFLEX_BEATS: &[Beat] = &[
     Beat::new("FinFlex 3-2: speed", BEAT_MS)
         .note(
-            "Blocks built from three-fin and two-fin cells on one N3 die, for the fastest logic.",
-            "a block of three-fin cells beside a block of two-fin cells, seen from above",
+            "On N3, TSMC's FinFlex lets each block of a chip pick its fin count. A 3-2 block mixes tall 3-fin cells, which drive hardest, with the 2-fin base cell. More fins means more current but a taller cell.",
+            "Two standard cells from above: a tall 3-fin cell and a shorter 2-fin cell, blue n epi at the bottom, pink p epi at the top, copper power rails at the edges.",
         )
         .detail(
-            "FinFlex lets each block pick its fin count.",
-            &["FINFLEX on N3: 3-2, 2-2 or 2-1 fins per block (tsmc.com blog, 2022)"],
+            "Fast blocks such as CPU cores pay area for drive.",
+            &["FinFlex options: 3-2, 2-2, 2-1 (TSMC, 2022)"],
         ),
     Beat::new("FinFlex 2-2: balanced", BEAT_MS)
         .note(
-            "Two-fin cells throughout. Every FinFlex option uses two-fin cells as its base.",
-            "two blocks of two-fin cells of the same height",
+            "The 2-2 option uses the 2-fin cell everywhere: the base library and the middle ground between speed, power and area.",
+            "Two equal 2-fin cells, n fins at the bottom with blue epi and p fins at the top with pink epi, grey gates across them.",
         )
         .detail(
-            "The balanced option sits between speed and density.",
-            &["All options use 2-fin cells as the base (page text, section 5)"],
+            "Every FinFlex option builds on the 2-fin cell.",
+            &["2-fin library is the base (WikiChip on TSMC N3E)"],
         ),
     Beat::new("FinFlex 2-1: low power, dense", BEAT_MS)
         .note(
-            "Two-fin and one-fin cells for the densest, lowest-power blocks, at 0.64x to 0.85x of N5's 2-2 cell area.",
-            "a two-fin block beside a shorter one-fin block",
+            "A 2-1 block mixes in 1-fin cells. They are shorter, so more fit in the same area, and leak less, but switch more slowly. It suits always-on and low-power blocks.",
+            "A 2-fin cell beside a short 1-fin cell whose copper rails sit much closer together.",
         )
         .detail(
-            "The density range is TSMC's claim, not a measurement.",
-            &["0.64x to 0.85x of N5's 2-2 cell area (TSMC claim, page text, section 5)"],
+            "The density range is TSMC's claim.",
+            &["0.64x-0.85x of N5 2-2 cell area by option (TSMC claim)"],
         ),
 ];
 
 const ZE_BEATS: &[Beat] = &[
     Beat::new("fin limits: thinner and taller", BEAT_MS)
         .note(
-            "To shrink, fins get thinner and taller. Thin fins vary from device to device, and tall fins bend and taper.",
-            "one tall, thin fin, narrower and taller than the fins before it",
+            "To keep scaling, fins get taller and thinner at a tighter pitch. Past a point they taper during the etch, bend, and vary from one fin to the next, and every variation shifts how the transistor switches.",
+            "Cut across the gate: two fins of today's shape on the right, two taller, thinner, tapering fins on the left.",
         )
         .detail(
-            "Fin limits are textbook limits; no sourced figure is given here.",
-            &["FIN LIMITS: thin fins vary, tall fins bend and taper (textbook)"],
+            "Textbook limits; no sourced figure.",
+            &["Thin fins: more variability; tall fins: bending, taper (textbook)"],
         ),
     Beat::new("leakage: sub-fin, GIDL and tunnelling", BEAT_MS)
         .note(
-            "More leakage paths open as the fin shrinks: under the fin, at the gate-to-drain edge and through the thin oxide.",
-            "dots leaking along the silicon at the fin base, under the gate",
+            "Packing fins closer leaves less room for the gate stack in the gaps, while leakage grows: under the fin, at the gate-to-drain edge and through thin layers.",
+            "Three closely packed fins, bronze metal nearly closing the gaps, red glowing leakage in the fin feet below the oxide line.",
         )
         .detail(
-            "The bottom of the fin stays ungated, so the leak under it grows.",
-            &["LEAKAGE: sub-fin, GIDL and tunnelling grow (textbook)"],
+            "The ungated fin foot is the weak spot.",
+            &["Leakage: sub-fin, GIDL, tunnelling (textbook)"],
         ),
     Beat::new("nanosheets: the answer is gate on four sides", BEAT_MS)
         .note(
-            "The fin splits into stacked sheets wrapped on all four sides: gate-all-around, the industry's answer below 3 nm.",
-            "three sheets inside the glass gate wall, the gate round every face of each one",
+            "The industry's answer is gate-all-around: slice the fin into stacked horizontal sheets and fill the gaps with gate, so every channel is gripped on four sides. TSMC moves at N2; Samsung did at 3 nm.",
+            "A fin in its yellow and bronze U on the right, and on the left three grey sheets each ringed in yellow inside bronze metal.",
         )
         .detail(
-            "Nanosheets come at N2; Samsung already has its first GAA at 3 nm.",
-            &["Nanosheets (GAA) at N2 (page text, section 7)", "Samsung GAA at 3 nm (page text, section 7)"],
+            "Four gated faces instead of three.",
+            &["Nanosheets at TSMC N2 and Intel 18A (2025)", "Samsung GAA at 3 nm (2022)"],
         ),
 ];
 
 // ---- sections 1-10 --------------------------------------------------------------------------
+// Detailed close-ups (chip_finfet_detail.py): real fin, gate-stack and epi structure drawn to a
+// nanometre scale, cut away so the inside shows. Three beats each.
 
 const SEC1_BEATS: &[Beat] = &[
-    Beat::new("fins: the channel stands up", BEAT_MS)
+    Beat::new("fins: the channel stands up out of the oxide", BEAT_MS)
         .note(
-            "The channel is stood up as a fin, and the planar gate on top of it goes. The source and drain are raised at the fin's ends.",
-            "the blue fin rising from the silicon, with the raised source and drain blocks at either end",
+            "A FinFET etches the silicon into tall, thin walls called fins. Oxide fills the trenches between them and is etched back, so only the top of each fin sticks out. That exposed top is the channel, and it stands on its edge instead of lying flat.",
+            "Three grey silicon fins standing out of the cream STI oxide, on the darker silicon substrate.",
         )
         .detail(
-            "Planar ran out at 22 and 28 nm, where the flat channel lost control of the gate.",
-            &["FIN FORM: the channel stands up as a fin (page text, section 1)"],
+            "Standing the channel up lets the gate grip it from more sides.",
+            &[
+                "Fin ~7 nm wide, ~50 nm tall (textbook, N7/N5 class)",
+                "Fin pitch ~30 nm at N7 (WikiChip estimate)",
+            ],
         ),
-    Beat::new("gate wrap: three sides", BEAT_MS)
+    Beat::new("the gate wraps the top and both sides", BEAT_MS)
         .note(
-            "The high-k and gate metal wrap the top and both sidewalls of the fin, so the gate controls the channel from three faces.",
-            "the grey gate over the fin, its glass front wall with the fin showing through",
+            "Cut across the gate, every fin sits inside an upside-down U of gate stack: a thin high-k insulator, then a work-function metal that sets the switching voltage, then fill metal. The gate now controls the channel from three faces instead of one, so it can shut it off much more firmly.",
+            "Grey fin cores inside a yellow high-k skin and a bronze work-function metal, with dark fill metal over them and a teal nitride cap on top. Below the cream oxide line the fins carry on, ungated.",
         )
         .detail(
-            "Three gated faces against one for planar (textbook).",
-            &["GATE WRAP: three sides (page text, section 1)"],
+            "Three gated faces is what kept leakage down below 22 nm.",
+            &["Intel 22 nm Tri-Gate: announced 2011, shipped 2012", "High-k: HfO2-based"],
         ),
-    Beat::new("width: 1, 2 or 3 fins", BEAT_MS)
+    Beat::new("a whole transistor: source, gate, drain", BEAT_MS)
         .note(
-            "A device is one, two or three fins wide, so its drive steps in whole fins: one fin, then two, then three.",
-            "one fin, then two, then three fins side by side under the gate",
+            "Either side of the gate the fins are etched down and epitaxial silicon is grown back on them. The diamond-shaped epi from neighbouring fins merges into one source and one drain, and a tungsten trench contact lands on top. Drive current scales with the number of fins under the gate.",
+            "Blue merged diamond epi on the source side, the gate stack cut open in the middle, more blue epi on the drain side, grey trench contacts on top and teal nitride spacers either side of the gate.",
         )
         .detail(
-            "Width is quantised, so the fin count is the design choice.",
-            &["QUANTIZED W, FIN COUNT 1-3 (page text, section 1)"],
+            "Width is set in whole fins: 1, 2 or 3 per transistor.",
+            &["3 fins = ~3x the drive of 1 fin", "Weff per fin = 2 x Hfin + Wfin (textbook)"],
         ),
 ];
 
 const SEC2_BEATS: &[Beat] = &[
-    Beat::new("Hfin and Wfin: the fin is tens of nm tall", BEAT_MS)
+    Beat::new("Hfin, Wfin and the fin pitch", BEAT_MS)
         .note(
-            "The fin is silicon, tens of nanometres tall (Hfin) and single-digit to about 10 nm wide (Wfin). Cut across, it is a tall narrow bar.",
-            "one fin cut across, tall and narrow, with the labels on its height and its width",
+            "This is the classic TEM view, cut through the gate and across the fins. Each fin is a few nanometres wide and tens of nanometres tall. Current flows on both sidewalls and the top, so the height counts twice in the effective width.",
+            "Three tall grey fins in cross-section, each inside a yellow and bronze U, about 30 nm apart.",
         )
         .detail(
-            "The effective width per fin is 2 x Hfin + Wfin, so the height counts twice.",
+            "Taller fins give more current per footprint.",
             &[
-                "Hfin tens of nm, Wfin single-digit to about 10 nm (page text, section 2)",
-                "Weff = 2 x Hfin + Wfin per fin (page text, section 2)",
+                "Hfin ~50 nm, Wfin ~7 nm (textbook)",
+                "Weff = 2 x Hfin + Wfin per fin",
+                "Fin pitch: N7 ~30 nm (est), N5 28 nm (A15 SEM)",
             ],
         ),
-    Beat::new("high-k and gate metal wrap the fin", BEAT_MS)
+    Beat::new("the gate stack: high-k, work-function metal, fill", BEAT_MS)
         .note(
-            "The high-k dielectric (HfO2-based) and the gate metal wrap the top and both sidewalls of the fin, the gate ring around it.",
-            "the fin cut through its gate: the high-k and the gate ring around the fin, the front wall in glass",
+            "Closer in, the gate is three layers. The high-k insulator touches the silicon. The work-function metal over it sets the threshold voltage, and the fill metal carries the signal along the gate. Everything has to fit in the gap between two fins.",
+            "The middle fin's top: a yellow high-k line hugging the grey fin, a bronze work-function layer over it, and dark grey fill metal filling the rest.",
         )
         .detail(
-            "Planar had one gated face; the fin has three.",
-            &[
-                "High-k dielectric, HfO2-based (page text, section 2)",
-                "One gated face for planar, three for the fin (page text, section 2)",
-            ],
+            "Layer thickness, not just length, now sets how the transistor switches.",
+            &["High-k ~1-2 nm (drawn thick here)", "Work-function metals: TiN/TiAl family (textbook)"],
         ),
-    Beat::new("the bottom is not gated: sub-fin leakage", BEAT_MS)
+    Beat::new("the foot of the fin is not gated", BEAT_MS)
         .note(
-            "Below the fin the gate has no grip, so a path is left under it. Punch-through-stop doping under the STI oxide blocks most of the leak.",
-            "faint dots along the silicon at the fin base, the gate ring above and the fin standing up from the surface",
+            "Only the part of the fin above the oxide sees the gate. Below it, current can still sneak from source to drain under the gate: sub-fin leakage. Fabs block that path with a heavily doped punch-through stop near the fin's base.",
+            "The channel glowing cyan above the oxide, the sub-fin glowing red below it, and a purple punch-through stop band at the bottom of each fin.",
         )
         .detail(
-            "The bottom is the one face the gate does not reach.",
-            &["Sub-fin leakage blocked by punch-through stop doping under STI oxide (page text, section 2)"],
+            "The sub-fin is the face the gate can never reach.",
+            &["Sub-fin leakage: blocked by punch-through-stop doping (textbook)"],
         ),
 ];
 
 const SEC3_BEATS: &[Beat] = &[
-    Beat::new("INTEL 22 and TSMC 16: the FinFET goes to volume", BEAT_MS)
+    Beat::new("Intel 22 nm and TSMC N16: FinFETs go to volume", BEAT_MS)
         .note(
-            "Intel's 22 nm tri-gate was announced in 2011 and shipped in Ivy Bridge in 2012. TSMC's 16FF+ followed in 2015, with a 90 nm gate pitch.",
-            "a row of gates along one fin at the N16 spacing; the spacing is to scale in ratio, not in nanometres",
+            "Intel's 22 nm Tri-Gate, announced in 2011, was the first FinFET in volume. TSMC followed with 16FF+ in 2015 at a 90 nm contacted gate pitch. Every row in this section is drawn at the same scale.",
+            "A row of four gates (teal caps, dark fill) over fins, blue epi between them and a gold bar marking one gate pitch.",
         )
         .detail(
-            "The fin was stretched from 22 nm to N3E, not replaced.",
-            &[
-                "Intel 22 nm: 2011 tri-gate, Ivy Bridge (page text, section 3)",
-                "TSMC 16FF+ against 20 nm planar, 2015 (page text, section 3)",
-                "TSMC N16 contacted gate pitch 90 nm (page text, section 4)",
-            ],
+            "The FinFET was stretched from 22 nm to N3E, not replaced.",
+            &["Intel 22 nm: 2011 announcement, Ivy Bridge 2012", "TSMC N16 contacted gate pitch 90 nm (WikiChip)"],
         ),
-    Beat::new("TSMC N7 and N5: the gate pitch tightens", BEAT_MS)
+    Beat::new("N7 and N5: the pitch tightens", BEAT_MS)
         .note(
-            "N7 has a 57 nm gate pitch and N5 has 51 nm; the two rows are drawn together, the lower one the tighter.",
-            "two gate rows along their fins, the N5 row at the tighter spacing below the N7 row",
+            "Each node packs gates and fins closer. N7's contacted gate pitch is about 57 nm (an estimate); N5 measures 51 nm with a 28 nm fin pitch. At the same scale the row is much shorter.",
+            "The same four-gate row, now visibly shorter, the gold pitch bar about half its N16 length.",
         )
         .detail(
-            "The N7 pitch is a WikiChip estimate; the N5 figures come from an Apple A15 SEM.",
-            &[
-                "N7 gate pitch 57 nm and fin pitch 30 nm (est, WikiChip)",
-                "N5 gate pitch 51 nm and fin pitch 28 nm (A15 SEM, angstronomics.com)",
-            ],
+            "Pitch shrinks, the fin stays.",
+            &["N7: 57 nm gate, 30 nm fin pitch (est, WikiChip)", "N5: 51 nm gate, 28 nm fin pitch (A15 SEM)"],
         ),
-    Beat::new("TSMC N3: 45 nm gate pitch", BEAT_MS)
+    Beat::new("N3: 45 nm gate pitch, the last FinFET", BEAT_MS)
         .note(
-            "N3 has a 45 nm gate pitch, the tightest of the three rows. The fin was stretched to get here, not replaced.",
-            "one row at the N3 spacing, its gates the narrowest of the three",
+            "N3 brings the gate pitch to 45 nm, the tightest of the three rows. It is TSMC's last FinFET node; N2 moves to nanosheets. Samsung went to gate-all-around one node earlier, at 3 nm.",
+            "The shortest row of the three, the gold bar at its tightest.",
         )
         .detail(
-            "Samsung went from 14 nm FinFET to its first GAA at 3 nm.",
-            &[
-                "N3 gate pitch 45 nm (techinsights.com, semiengineering.com)",
-                "Samsung: 14 nm FinFET, first GAA at 3 nm (page text, section 3)",
-            ],
+            "Half the N16 pitch, about seven years later.",
+            &["N3 gate pitch 45 nm (TechInsights)", "Samsung: first GAA at 3 nm (2022)"],
         ),
 ];
 
 const SEC4_BEATS: &[Beat] = &[
     Beat::new("N7: about 91 million transistors per mm2 (est)", BEAT_MS)
         .note(
-            "A fixed square holds a grid of transistor tiles. N7 fits the fewest tiles of the three.",
-            "a 6-by-6 grid of tiles in a fixed frame, seen from above; the tile count is a picture, not a count",
+            "The window is a fixed patch of silicon seen from above, tiled with logic cells. Each cell has two gates crossing n and p fins, with source and drain epi between them. At N7 sixteen cells fit.",
+            "A gold frame on a dark floor, filled with a 4 x 4 grid of cells: grey gates, light fins, blue n epi and pink p epi.",
         )
         .detail(
-            "Density is a WikiChip estimate.",
-            &["N7 about 91.2 MTr/mm2 (est, WikiChip)"],
+            "Density is an estimate, not a TSMC disclosure.",
+            &["N7 ~91.2 MTr/mm2 (WikiChip estimate)"],
         ),
-    Beat::new("N5: about 138 million transistors per mm2", BEAT_MS)
+    Beat::new("N5: about 138 million per mm2", BEAT_MS)
         .note(
-            "N5 packs more tiles into the same square than N7 does.",
-            "a denser 7-by-8 grid in the same frame",
+            "N5 shrinks the same cell by roughly a third in area, so about half again as many fit in the window. The figure comes from measuring an Apple A15 die, not from TSMC.",
+            "The same frame now holding a 5 x 5 grid of smaller cells.",
         )
         .detail(
-            "The N5 figure is measured on an Apple A15 die.",
-            &["N5 about 137.6-138.2 MTr/mm2 (A15 SEM)"],
+            "The grid counts are a picture of the ratio, not a census.",
+            &["N5 ~137.6-138.2 MTr/mm2 (A15 SEM)", "~1.5x N7"],
         ),
-    Beat::new("N3: 1.6x N5", BEAT_MS)
+    Beat::new("N3E: about 1.6x N5 (TSMC claim)", BEAT_MS)
         .note(
-            "TSMC claims N3E packs about 1.6 times the density of N5, blending cell types. The grid is the densest of the three.",
-            "a 9-by-10 grid in the same frame, the most tiles of the three",
+            "TSMC claims N3E logic is about 1.6 times as dense as N5. The figure blends cell types, and SRAM barely shrank at N3E, so real chips gain less.",
+            "A 6 x 6 grid of the smallest cells in the same frame.",
         )
         .detail(
-            "This is a TSMC claim, not a measurement.",
-            &["N3E 1.6x N5 density (TSMC claim, blends cell types)"],
+            "A vendor claim on a logic mix.",
+            &["N3E ~1.6x N5 logic density (TSMC claim)"],
+        ),
+];
+
+const SEC5_BEATS: &[Beat] = &[
+    Beat::new("FinFlex 3-2: a tall cell for speed", BEAT_MS)
+        .note(
+            "On N3, TSMC's FinFlex lets each block of a chip pick its fin count. A 3-2 block mixes 3-fin cells, which drive hardest, with the 2-fin base cell. More fins means more current but a taller cell.",
+            "Two standard cells side by side: on the left a tall 3-fin cell (blue n epi below, pink p epi above), on the right a shorter 2-fin cell, both bounded by copper power rails.",
+        )
+        .detail(
+            "Fast blocks (CPU cores) pay area for drive.",
+            &["FinFlex options: 3-2, 2-2, 2-1 (TSMC, 2022)"],
+        ),
+    Beat::new("FinFlex 2-2: balanced", BEAT_MS)
+        .note(
+            "The 2-2 option uses the 2-fin cell everywhere. It is the base library and the middle ground between speed, power and area.",
+            "Two equal 2-fin cells, n fins at the bottom with blue epi and p fins at the top with pink epi, grey gates across them.",
+        )
+        .detail(
+            "All FinFlex options build on the 2-fin cell.",
+            &["2-fin library is the base (WikiChip on TSMC N3E)"],
+        ),
+    Beat::new("FinFlex 2-1: low power and dense", BEAT_MS)
+        .note(
+            "A 2-1 block mixes in 1-fin cells. They are shorter, so more fit per area, and leak less, but switch more slowly. It suits always-on and low-power blocks.",
+            "A 2-fin cell on the left and a short 1-fin cell on the right, its copper power rails much closer together.",
+        )
+        .detail(
+            "One die can mix blocks of different fin counts.",
+            &["0.64x-0.85x of N5 2-2 cell area by option (TSMC claim)"],
         ),
 ];
 
 const SEC6_BEATS: &[Beat] = &[
-    Beat::new("7 nm and below: 74% of 2025", BEAT_MS)
+    Beat::new("7 nm and below: 74% of TSMC's 2025 wafer revenue", BEAT_MS)
         .note(
-            "TSMC's FinFET nodes at 7 nm and below were 74% of its 2025 wafer revenue, up from 69% in 2024.",
-            "the tallest bar lit, 7 nm and below, beside two shorter bars for 5 nm and 3 nm",
+            "Each column is one quarter of 2025, stacked from 7 nm at the bottom to 3 nm on top, with a 100% guide behind. All three nodes are FinFET. Together they rose from 73% of revenue in Q1 to 77% in Q4.",
+            "Four columns of stacked wafers: grey 7 nm at the base, blue 5 nm in the middle, teal 3 nm on top, each below a thin 100% bar.",
         )
         .detail(
-            "The quarterly share ran from 73% to 77%.",
-            &["7 nm and below: 74% of 2025, 69% in 2024 (TSMC mix, page text, section 6)"],
+            "Leading-edge FinFET is most of TSMC's revenue.",
+            &["7 nm and below: 74% of 2025, 69% of 2024", "Q4 25: 3 nm 28%, 5 nm 35%, 7 nm 14%"],
         ),
-    Beat::new("5 nm: about 35 to 37%", BEAT_MS)
+    Beat::new("5 nm: the biggest single node", BEAT_MS)
         .note(
-            "5 nm was the largest single node, at 35 to 37% of revenue each quarter.",
-            "the middle bar lit, about half the height of the tallest",
+            "5 nm, which includes N4, was the largest single node all year at 35 to 37% of revenue. That is where most of today's AI accelerators are made, including Nvidia's Hopper and Blackwell.",
+            "The blue 5 nm band glowing amber in every column, about the same height each quarter.",
         )
         .detail(
-            "Q4 2025 was 35%.",
-            &["5 nm by quarter: 36, 36, 37, 35% (page text, section 6)"],
+            "Steady at about a third of revenue.",
+            &["5 nm by quarter: 36, 36, 37, 35%"],
         ),
-    Beat::new("3 nm: 28% in Q4, up from 22% in Q1", BEAT_MS)
+    Beat::new("3 nm: 22% in Q1, 28% in Q4", BEAT_MS)
         .note(
-            "3 nm rose through 2025, from 22% of revenue in Q1 to 28% in Q4.",
-            "the right-hand bar lit, the shortest of the three",
+            "3 nm grew through the year as Apple, and later others, moved to it. It is the last FinFET node; the growth after it goes to N2 nanosheets.",
+            "The teal 3 nm cap glowing cyan on each column, tallest in Q4.",
         )
         .detail(
-            "All of these are FinFET nodes.",
-            &["3 nm: Q1 22%, Q4 28% (page text, section 6)"],
+            "The newest FinFET node is still ramping.",
+            &["3 nm: Q1 22%, Q2 24%, Q3 23%, Q4 28%"],
         ),
 ];
 
 const SEC7_BEATS: &[Beat] = &[
-    Beat::new("fins bend and vary below 3 nm", BEAT_MS)
+    Beat::new("fins can't get much taller or thinner", BEAT_MS)
         .note(
-            "Thin fins vary from one device to the next, and tall fins bend and taper when they are etched.",
-            "one tall, thin fin, its profile narrowing toward the top",
+            "Scaling a FinFET means taller, thinner fins at a tighter pitch. Past a point, tall thin fins taper during the etch, bend and vary from one to the next, and each variation shifts how the transistor switches.",
+            "Cut across the gate: on the right two fins of today's shape, on the left two taller, thinner fins that taper toward the top.",
         )
         .detail(
-            "These are textbook limits; no sourced figure is given.",
-            &["FIN LIMITS: thin fins vary, tall fins bend and taper (textbook)"],
+            "Textbook limits; no sourced figure.",
+            &["Thin fins: more variability; tall fins: bending, taper (textbook)"],
         ),
-    Beat::new("leakage paths multiply", BEAT_MS)
+    Beat::new("leakage, and no room for the gate", BEAT_MS)
         .note(
-            "Sub-fin leakage, gate-induced drain leakage and tunnelling all grow as the fin shrinks.",
-            "dots leaking along the silicon at the fin base",
+            "Tighter fins leave less space between them, and the whole gate stack, high-k, work-function metal and fill, has to fit in that gap. Meanwhile sub-fin leakage, gate-induced drain leakage and tunnelling all grow.",
+            "Three fins packed close, the bronze metal almost filling the gaps between them, and red glowing sub-fin leakage below the oxide line.",
         )
         .detail(
-            "The bottom of the fin is the one place the gate cannot reach.",
-            &["LEAKAGE: sub-fin, GIDL and tunnelling grow (textbook)"],
+            "The gap between fins became the limit around N3.",
+            &["Leakage: sub-fin, GIDL, tunnelling (textbook)"],
         ),
-    Beat::new("nanosheets: gate on four sides", BEAT_MS)
+    Beat::new("the answer: nanosheets, gate on four sides", BEAT_MS)
         .note(
-            "The industry's answer is the nanosheet: the fin becomes stacked sheets with the gate on all four sides. It comes at N2.",
-            "three sheets inside the glass gate wall, the gate round each one",
+            "Gate-all-around turns the fin on its side and slices it into a stack of thin sheets. The gate fills the gaps between the sheets, so it grips each channel on all four sides. TSMC moves to it at N2; Samsung did at 3 nm.",
+            "On the right a fin inside its yellow and bronze U; on the left three grey sheets, each ringed by yellow high-k inside bronze metal.",
         )
         .detail(
-            "Samsung already has its first GAA at 3 nm.",
-            &["Nanosheets (GAA) at N2; Samsung GAA at 3 nm (page text, section 7)"],
+            "Four gated faces instead of three.",
+            &["Nanosheets at TSMC N2, Intel 18A (2025)", "Samsung GAA at 3 nm (2022)"],
         ),
 ];
 
 const SEC8_BEATS: &[Beat] = &[
-    Beat::new("TSMC: FinFET rows from N16 to N3", BEAT_MS)
+    Beat::new("TSMC and Samsung: FinFET rows", BEAT_MS)
         .note(
-            "TSMC makes FinFETs from N16 to N3, for NVIDIA, Apple and AMD. It is the volume leader.",
-            "a row of fins under one gate, the TSMC rows seen in three-quarter view",
+            "TSMC builds FinFETs from N16 to N3 for Nvidia, Apple, AMD and most of the industry, and is the volume leader. Samsung Foundry made FinFETs from 14 nm before moving to GAA at 3 nm.",
+            "A long row of five gates over three fins, cut open: teal spacers and caps, dark gate metal wrapping the fins, blue merged epi between gates, grey contacts.",
         )
         .detail(
-            "TSMC is the volume leader for the FinFET nodes.",
-            &["TSMC (TSM): N16 to N3 for NVIDIA, Apple and AMD (page text, section 8)"],
+            "Three companies make leading-edge FinFETs.",
+            &["TSMC (TSM): N16 to N3", "Samsung: 14 nm FinFET onward"],
         ),
-    Beat::new("Intel and Samsung: FinFETs too", BEAT_MS)
+    Beat::new("Intel: tapered fins at 22 nm", BEAT_MS)
         .note(
-            "Intel made FinFETs from 22 nm to Intel 3, and Samsung from 14 nm. Both are now moving to GAA.",
-            "a single fin under its gate, the other maker's FinFET",
+            "Intel's first fins at 22 nm had a sloped, trapezoid profile that later nodes straightened and stretched taller. Intel used FinFETs from 22 nm through Intel 3, then switched to RibbonFET nanosheets at 18A.",
+            "Three wide-based tapered fins cut across the gate, each inside the yellow and bronze stack.",
         )
         .detail(
-            "Both are now moving to gate-all-around.",
-            &["Intel from 22 nm to Intel 3; Samsung from 14 nm (page text, section 8)"],
+            "Intel's exact 22 nm fin dimensions were not confirmed for this page.",
+            &["Intel (INTC): 22 nm to Intel 3, then 18A RibbonFET"],
         ),
-    Beat::new("litho and etch tools", BEAT_MS)
+    Beat::new("SAQP: four fins per printed line", BEAT_MS)
         .note(
-            "SAQP and the fin etch run on litho and etch tools from ASML, Applied Materials, Lam Research and Tokyo Electron.",
-            "two grey tool cabinets either side of the fins; the cabinets stand for the tool makers",
+            "Fins are closer together than one exposure can print. A scanner prints mandrel lines, spacers are deposited on their sidewalls, the mandrels are removed, and the trick is repeated: self-aligned quadruple patterning. The spacers then mask the fin etch.",
+            "Tan mandrels between teal spacer lines, sitting on nitride hard-mask caps over grey fins etched into the silicon.",
         )
         .detail(
-            "The tool makers are named on the page; the cabinets are not drawn to any one tool.",
-            &["ASML, Applied Materials (AMAT), Lam Research (LRCX), Tokyo Electron (TEL) (page text, section 8)"],
+            "Pitch is set by spacer thickness, not by the scanner.",
+            &["Litho: ASML", "Deposition and etch: Applied Materials (AMAT), Lam (LRCX), Tokyo Electron"],
         ),
 ];
 
 const SEC9_BEATS: &[Beat] = &[
-    Beat::new("fins run out of room below 3 nm", BEAT_MS)
+    Beat::new("fins have run out of room", BEAT_MS)
         .note(
-            "Fins cannot get much thinner or taller below 3 nm, and moving to GAA resets the yields.",
-            "one tall, thin fin, the limit it is near",
+            "At the tightest pitches, the gap between two fins must hold the high-k, the work-function metal and the fill metal on both walls. Below 3 nm there is no room left to shrink, and the move to GAA resets yield learning.",
+            "Two fins close together, the bronze work-function metal nearly closing the gap between them.",
         )
         .detail(
-            "The move to GAA costs yield while the process is new.",
-            &["Fins have run out of room below 3 nm; the move to GAA resets yields (page text, section 9)"],
+            "The physical limit drives the switch to nanosheets.",
+            &["Fins out of room below 3 nm; GAA resets yields (page text)"],
         ),
-    Beat::new("cost per wafer rises with every FinFET node", BEAT_MS)
+    Beat::new("cost per wafer rises every node", BEAT_MS)
         .note(
-            "Each FinFET node costs more per wafer. TSMC does not publish prices, only rumoured ranges.",
-            "three wafer stacks, each taller than the last, with no figures on them",
+            "Every FinFET node adds patterning steps, more EUV layers and costlier tools, so each wafer costs more. TSMC does not publish prices; only press reports exist.",
+            "A 300 mm wafer seen from above, covered in a grid of dies, most green and a few red.",
         )
         .detail(
-            "The stacks are schematic: they show the trend, not a price.",
-            &[
-                "Cost per wafer keeps rising with every FinFET node (page text, section 9)",
-                "TSMC prices are not public; only labelled rumour ranges exist (page text, section 7)",
-            ],
+            "No public price list.",
+            &["Cost per wafer rises with every FinFET node", "TSMC prices: only labelled press reports"],
         ),
-    Beat::new("pitches marked est are estimates", BEAT_MS)
+    Beat::new("which numbers are measured and which are estimated", BEAT_MS)
         .note(
-            "Several pitches here are WikiChip estimates. The N5 numbers are Apple A15 SEM measurements, and the Intel 22 nm fin dimensions were not confirmed.",
-            "a fin cut across, with the estimate labels beside it",
+            "Several pitches on this page are estimates. The N5 numbers come from measuring an Apple A15 under an electron microscope; the N7 ones are WikiChip estimates.",
+            "The N5 gate row in three-quarter view, a gold bar spanning one 51 nm gate pitch.",
         )
         .detail(
-            "Read the numbers with care.",
-            &["est = WikiChip; N5 = Apple A15 SEM; Intel 22 nm fin dimensions not confirmed (page text, section 9)"],
+            "Read the 'est' marks.",
+            &["N5: A15 SEM (Angstronomics)", "N7: WikiChip estimate", "Intel 22 nm fin size: not confirmed"],
         ),
 ];
 
 const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 1 to 3: Intel 22 nm, TSMC 16FF+, SAQP", BEAT_MS)
         .note(
-            "The first sources cover the Intel 22 nm tri-gate, TSMC 16FF+ and the SAQP patent.",
-            "the whole chip, the camera pulling slowly back",
+            "The first sources cover the Intel 22 nm Tri-Gate announcement, TSMC's 16FF+ launch and the SAQP fin-patterning patent.",
+            "The finished FinFET row, cut open, the camera turning slowly round it.",
         )
         .detail(
             "The full list is on the page.",
@@ -521,8 +524,8 @@ const SEC10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources 4 to 6: WikiChip, N3 and FinFlex", BEAT_MS)
         .note(
-            "The next sources cover the WikiChip N7 and N5 pages, the N3 detail and the FinFlex announcement.",
-            "the whole chip, pulled back a little further",
+            "The next sources cover the WikiChip N7 and N5 pages, the N3 process details and the FinFlex announcement.",
+            "The same row from further round, the gate stack and epi on the cut faces.",
         )
         .detail(
             "Each figure on the page cites one of these.",
@@ -534,8 +537,8 @@ const SEC10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources 7 and 8: Samsung and the TSMC mix", BEAT_MS)
         .note(
-            "The last sources cover Samsung's 3 nm process and the 2025 TSMC revenue mix.",
-            "the whole chip, at its widest view",
+            "The last sources cover Samsung's 3 nm process and TSMC's 2025 revenue mix.",
+            "The row seen from its side, the fins running away from the camera.",
         )
         .detail(
             "Revenue shares are quarterly reports, not audited node data.",
@@ -633,7 +636,7 @@ const ZOOMS: &[Zoom] = &[
     },
 ];
 
-/// One picture per `# ` section of the page, in order. Section 5 shares the FinFlex beats.
+/// One picture per `# ` section of the page, in order.
 macro_rules! section {
     ($n:literal, $beats:ident) => {
         || {
@@ -655,7 +658,7 @@ pub const SECTIONS: [fn() -> Box<dyn Scene>; 10] = [
     section!(2, SEC2_BEATS),
     section!(3, SEC3_BEATS),
     section!(4, SEC4_BEATS),
-    section!(5, FINFLEX_BEATS),
+    section!(5, SEC5_BEATS),
     section!(6, SEC6_BEATS),
     section!(7, SEC7_BEATS),
     section!(8, SEC8_BEATS),

@@ -28,6 +28,8 @@ WL_Y = 110.0  # word line centre height over the channel
 VDD = 1000.0  # full rail: the gauge height
 GAUGE_X = -1520.0
 HALF_Y = VDD / 2  # VDD/2, the precharge level
+# where a tag on the capacitor pins: on its right flank, clear of the bit line above it
+CAP_TAG = (SRC_X + CAP_R, (CAP_Y0 + CAP_Y1) / 2 + 120, ZC + 60)
 
 
 def mats(m):
@@ -64,10 +66,19 @@ def mats(m):
     return m
 
 
+def switch(obj, intervals):
+    """Show `obj` only during `intervals`. A box's scale is its size, so `show` on the box itself
+    would shrink it to a 1 mm speck; the switch goes on an empty at the origin wrapped around it."""
+    e = empty(obj.name + "_sw", obj.parent)
+    obj.parent = e
+    show(e, intervals)
+    return e
+
+
 def overlay(parent, name, lo, hi, m, intervals):
     """A box in an emissive material over the same space, switched on for `intervals`."""
     o = box(name, lo, hi, m, parent)
-    show(o, intervals)
+    switch(o, intervals)
     return o
 
 
@@ -173,12 +184,18 @@ def cell(root, m, lit_wl=(), lit_sa=(), lit_pre=(), lit_bl=(), lit_wl_only=None)
 
 # ---- moving charge ------------------------------------------------------------------------
 
-# The storage node to the bit line: up the storage node out of the cap, left through the channel and
-# up the drain plug (offsets from the start point at the top of the storage node).
+# Dots run on a plane just in front of the cell (ZF), so the opaque plugs, the channel and the
+# capacitor don't hide them; the paths are offsets in x and y only.
+ZF = ZC + CAP_R + 40.0
+SHARE_START = (SRC_X, 600.0, ZF)  # inside the capacitor's height, in front of it
+RESTORE_START = (DRN_X, BL_Y, ZF)  # at the bit line, in front of the plug
+LEAK_START = (SRC_X - 150, 380.0, ZF)
+# The storage node to the bit line: down the storage node out of the cap, left under the channel
+# and up the drain plug to the bit line (offsets from SHARE_START).
 PATH_CAP_TO_BL = [(0, 0, 0), (0, -560, 0), (-740, -560, 0), (-740, 420, 0)]
-# The reverse: from the bit line down the plug, through the channel, and up the storage node.
-PATH_BL_TO_CAP = [(0, 0, 0), (-740, 0, 0), (-740, -560, 0), (0, -560, 0), (0, 40, 0)]
-# A leak path out of the capacitor's side and down into the substrate.
+# The reverse: from the bit line down the plug, right under the channel, and up the storage node
+# into the capacitor (offsets from RESTORE_START).
+PATH_BL_TO_CAP = [(0, 0, 0), (0, -960, 0), (740, -960, 0), (740, -400, 0)]
 PATH_LEAK = [(0, 0, 0), (-260, -120, 0), (-420, -330, 0)]
 
 
@@ -216,9 +233,9 @@ def rows_of_cells(root, m, nx, nz, pitch, lit_at=None):
 
 __all__ = [
     "END", "ZC", "DRN_X", "SRC_X", "BL_Y", "CAP_Y0", "CAP_Y1", "CAP_R", "DIE_R", "IN_R", "WL_Y",
-    "VDD", "GAUGE_X", "HALF_Y", "mats", "overlay", "substrate", "transistor", "bitline", "sense_amp",
+    "VDD", "GAUGE_X", "HALF_Y", "CAP_TAG", "mats", "switch", "overlay", "substrate", "transistor", "bitline", "sense_amp",
     "precharge", "capacitor", "gauge", "bit_level", "cell", "dots", "tag_pt", "wl_intervals",
-    "rows_of_cells", "PATH_CAP_TO_BL", "PATH_BL_TO_CAP", "PATH_LEAK",
+    "rows_of_cells", "ZF", "SHARE_START", "RESTORE_START", "LEAK_START", "PATH_CAP_TO_BL", "PATH_BL_TO_CAP", "PATH_LEAK",
 ]
 _unused = (math, key, P, OFF, END)
 

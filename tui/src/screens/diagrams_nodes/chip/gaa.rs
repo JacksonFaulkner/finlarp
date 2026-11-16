@@ -1,6 +1,7 @@
 // CHIP tab, GATE-ALL-AROUND: the overview is the whole-chip scene (tools/pbr3d/blender/chip_kit.py)
-// with the camera zooming in on this part (tools/pbr3d/blender/chip_gaa.py). Zoom-ins a-e and
-// sections 1-10 are Blender scenes from the same script, in the picture-and-panel template.
+// with a detailed nanosheet transistor drawn at the NMOS spot and the camera gliding in on it
+// (tools/pbr3d/blender/chip_gaa_detail.py). Zoom-ins a-e and sections 1-10 are detailed, cut-away
+// nanosheet close-ups from the same file, all in the picture-and-panel template.
 // Sources are section 10 of CHIP_GAA.txt.
 
 use super::super::blender::{page, Cell, Page, BEAT_MS};
@@ -10,46 +11,46 @@ use crate::ui::anim::{Beat, Scene, Zoom};
 const BEATS: &[Beat] = &[
     Beat::new("the whole chip: a gate-all-around transistor", BEAT_MS)
         .note(
-            "The same chip as the hero, with the NMOS replaced by a gate-all-around (GAA) transistor. Silicon, contacts, wiring and bumps are unchanged.",
-            "The highlighted block at the NMOS spot, between the silicon and the contacts.",
+            "This is the same chip as the hero, with its NMOS built as a gate-all-around (GAA) nanosheet transistor. GAA is the transistor of the newest nodes: Samsung's 3 nm, TSMC N2 and Intel 18A. The silicon, wiring and bumps around it are unchanged.",
+            "The cyan box at the left of the silicon under the wiring: a small transistor with blue epi, a teal gate cap and grey contacts.",
         )
-        .detail("GAA is the transistor of the 3 nm class and below.", &["Samsung 3GAA, 2022; TSMC N2, 4Q25"]),
+        .detail("GAA replaces the FinFET from the 3 nm class on.", &["Samsung 3GAA: 2022", "TSMC N2: 4Q25; Intel 18A: 2025"]),
     Beat::new("in on the stack of nanosheets", BEAT_MS)
         .note(
-            "The camera moves in. Thin silicon sheets are stacked one above another between two raised source and drain blocks.",
-            "Three pale sheets, each running source to drain, with grey gate metal in the gaps between them.",
+            "Cut along the channel, the transistor is a stack of three thin silicon sheets running from the source epi on the left to the drain epi on the right. Gate metal fills the gaps between the sheets, above and below each one.",
+            "Tall blue epi on both sides, three grey sheets between them, yellow and bronze gate layers in the gaps, teal spacers and cap, grey contacts on top.",
         )
-        .detail("3-4 Si/SiGe pairs in the stack, about 1 nm thickness control.", &["SUPERLATTICE (textbook)"]),
+        .detail("Three sheets ~5-6 nm thick, ~10 nm apart (textbook).", &["~3 sheets per stack", "Gaps ~10 nm (page text)"]),
     Beat::new("the gate wraps every side of each sheet", BEAT_MS)
         .note(
-            "High-k dielectric and work-function metal, put down by ALD, wrap the top, bottom and both faces of each sheet. The gate turns on.",
-            "Amber gate metal and a translucent shell round each sheet.",
+            "Cut across the gate as well, you can see each sheet ringed completely: yellow high-k on all four faces, then bronze work-function metal filling the gaps. A FinFET gate touches three faces; this one touches four, so it shuts the channel off more firmly.",
+            "The transistor cut two ways: blue epi on the left, and on the cut across the gate three grey sheets each inside a yellow ring, embedded in bronze metal.",
         )
-        .detail("The gaps are about 10 nm and the whole stack must fit in them.", &["HK/METAL GATE (textbook)"]),
+        .detail("Four gated faces per sheet.", &["Gate-all-around: 4 faces vs 3 for a fin"]),
     Beat::new("current through every sheet", BEAT_MS)
         .note(
-            "With the gate on, every sheet conducts. Carriers stream from source to drain through all the sheets at once.",
-            "Glowing sheets, with dots moving from the left block through each sheet to the right block.",
+            "Turned on, electrons come down the source contact, through the source epi, along all three sheets at once and up the drain epi to the drain contact. Stacking sheets adds current without adding chip area.",
+            "The three sheets glowing cyan, white beads riding down the left contact, across each sheet and up the right side.",
         )
-        .detail("TSMC N2 vs N3E: +10-15% speed or -25-30% power.", &["TSMC N2, IEEE Spectrum 2024"]),
+        .detail("Three channels in one footprint.", &["Current ~ sheets x (width + thickness) (textbook)"]),
     Beat::new("a wide sheet: more drive current", BEAT_MS)
         .note(
-            "Sheet width is a drawn dimension. A wider sheet has more channel area under the gate, so more current: faster, but larger.",
-            "The view turns to the side; the shell along the sheet depth is wide.",
+            "Unlike a fin, a sheet's width is drawn on the mask and can be set per transistor. A wide sheet has more gated perimeter, so it carries more current for fast logic. The stack height does not change.",
+            "Cut across the gate: three wide grey sheets, each ringed in yellow, inside a wide bronze gate block.",
         )
-        .detail("Effective width is about N sheets x (W + 2T).", &["SHEET WIDTH (textbook)"]),
+        .detail("A design knob FinFET did not have.", &["N2 mixes sheet widths on one chip (TSMC)"]),
     Beat::new("a narrow sheet: less leakage, less area", BEAT_MS)
         .note(
-            "A narrow sheet gives less drive current but takes less area and leaks less. Designers choose the width per cell.",
-            "The same view, with a thinner shell along the sheet depth.",
+            "A narrow sheet carries less current but leaks less and fits in a shorter cell, which suits dense or low-power blocks. Both widths can sit on the same chip.",
+            "The same three-sheet stack, now narrow, in a much thinner gate block.",
         )
-        .detail("TSMC says N2 allows cells with different sheet widths on one chip.", &["TSMC N2, IEEE Spectrum 2024"]),
+        .detail("Width per device.", &["Sheet width ~15-50 nm in this picture (estimate)"]),
     Beat::new("back out to the whole chip", BEAT_MS)
         .note(
-            "The GAA transistor is one device among many. The wiring and bumps around it are the same as in the hero.",
-            "The whole chip again, with the GAA transistor highlighted.",
+            "Back out at the whole chip. The GAA transistor sits where the planar NMOS sat; everything above it, the contacts, wiring and bumps, is built the same way.",
+            "The whole chip again, the nanosheet transistor at the NMOS spot under the wiring.",
         )
-        .detail("Backside power: Intel PowerVia on 18A; TSMC Super Power Rail on A16.", &["Intel 18A; TSMC A16"]),
+        .detail("Same chip, new transistor.", &["Samsung SF3E 2022; TSMC N2 4Q25; Intel 18A 2025"]),
 ];
 
 static OVERVIEW: Cell = std::sync::OnceLock::new();
@@ -68,133 +69,112 @@ fn build() -> Box<dyn Scene> {
 const ZA_BEATS: &[Beat] = &[
     Beat::new("superlattice: Si and SiGe layers in the fin", BEAT_MS)
         .note(
-            "Alternating silicon and SiGe layers are grown; the SiGe is sacrificial and is removed later.",
-            "a block of purple SiGe bands between grey silicon sheets, at the transistor spot",
+            "The process starts by growing alternating silicon and silicon-germanium layers on the wafer, then etching them into fins. The silicon layers will be the channels; the SiGe layers only hold the gaps open.",
+            "A striped fin cut open on two faces: grey silicon bands, purple SiGe bands, a teal hard mask on top, standing in cream oxide.",
         )
-        .detail("3-4 Si/SiGe pairs with about 1 nm thickness control.", &["SUPERLATTICE (page text, section 4)"]),
+        .detail("Layer thickness is controlled to about a nanometre.", &["~3 Si/SiGe pairs", "~1 nm thickness control (page text)"]),
     Beat::new("dummy gate, inner spacer and S/D epi", BEAT_MS)
         .note(
-            "A placeholder gate goes on, the SiGe ends are recessed and filled with nitride, and the source and drain grow from the sheet edges.",
-            "a translucent dummy gate over the stack, the SiGe pulled back to the middle, pale spacers at its ends and blue epi blocks either side",
+            "A placeholder poly gate goes on. The stack beside it is etched away, the SiGe ends are recessed and filled with nitride inner spacers, and the source and drain are grown from the exposed sheet ends.",
+            "A tan dummy gate with teal spacers, purple SiGe stopping short of the stack ends, teal inner spacers in the pockets and blue epi either side.",
         )
-        .detail(
-            "Spacers isolate the gate from the source and drain at every level.",
-            &["INNER SPACER, S/D EPI (page text, section 2)"],
-        ),
+        .detail("Inner spacers are the step FinFETs never needed.", &["S/D epi: SiP for NMOS, SiGe:B for PMOS"]),
     Beat::new("release and the real gate: HK/metal fills the gaps", BEAT_MS)
         .note(
-            "The dummy gate and the SiGe come out; high-k and metal fill every gap and wrap each sheet.",
-            "grey gate metal in the gaps between the three sheets, with the high-k skin and pale spacers at the ends",
+            "The dummy gate is removed, the SiGe is etched out sideways, and high-k and metal are deposited into every gap. The sheets end up wrapped on all four sides, with contacts landing on the epi.",
+            "Grey sheets each ringed in yellow high-k inside bronze metal, dark fill on top, grey trench contacts on the blue epi.",
         )
-        .detail(
-            "The gaps are about 10 nm and the whole stack must fit in them.",
-            &["RELEASE, HK/METAL GATE (page text, section 4)"],
-        ),
+        .detail("Every layer has to fit a ~10 nm gap.", &["HK/metal by ALD (page text)"]),
 ];
 
 const ZB_BEATS: &[Beat] = &[
     Beat::new("before release: sheets with SiGe between", BEAT_MS)
         .note(
-            "Silicon sheets stacked with the sacrificial SiGe between them; the source and drain are already grown.",
-            "purple SiGe layers between grey silicon sheets, with blue epi blocks either side",
+            "Cut along the channel before release: purple SiGe still fills the gaps between the silicon sheets under the dummy gate. Nitride inner spacers already cap the SiGe ends, and the source and drain have been grown.",
+            "Purple SiGe between grey sheets under a tan dummy gate, teal inner spacers at the gap ends, blue epi either side.",
         )
-        .detail(
-            "SiGe sets the gap height: silicon, SiGe, silicon, SiGe, silicon, SiGe.",
-            &["Before release (page text, section 3)"],
-        ),
+        .detail("The SiGe thickness sets the gap the gate will fill.", &["Gap ~10 nm (page text)"]),
     Beat::new("SiGe etched sideways", BEAT_MS)
         .note(
-            "A selective etch removes the SiGe from its sides and must leave the silicon alone.",
-            "the SiGe layers pulled in from both ends, shrinking to short purple pieces in the middle while the sheets stand clear",
+            "With the dummy gate gone, a selective etch eats the SiGe from both ends of each gap. It must remove SiGe and leave silicon almost untouched; any silicon lost thins the sheets and shifts the threshold voltage.",
+            "The purple SiGe shrinking to nothing in each gap, the grey sheets left hanging between the teal spacers.",
         )
-        .detail(
-            "Any silicon lost thins the sheet and shifts the threshold voltage.",
-            &["Release: Si:SiGe selectivity (page text, section 3)"],
-        ),
+        .detail("The key spec is Si:SiGe selectivity.", &["Lam Akara (2025) targets GAA etch", "Dry selective SiGe etch (IBM research)"]),
     Beat::new("gate metal takes its place", BEAT_MS)
         .note(
-            "The SiGe is gone; high-k and metal fill the gaps, wrapping each sheet on all four sides.",
-            "grey gate metal in each gap between the sheets, with no purple left",
+            "The empty gaps are lined with high-k and filled with work-function metal by atomic layer deposition, one atomic layer at a time, so the gate surrounds every sheet.",
+            "Yellow high-k lining each gap, bronze metal filling it, dark fill metal above the top sheet.",
         )
-        .detail("ALD into gaps of about 10 nm (page text, section 4).", &["HK/METAL GATE"]),
+        .detail("ALD is the only way into ~10 nm gaps.", &["HK/METAL GATE (page text, section 4)"]),
 ];
 
 const ZC_BEATS: &[Beat] = &[
     Beat::new("FinFET: width in whole fins", BEAT_MS)
         .note(
-            "A FinFET can only add whole fins, so its width steps one fin at a time.",
-            "three narrow fins side by side under one gate, seen from the side",
+            "Cut across the gate, a FinFET is one or more fins, each wrapped on three sides. Its width only comes in whole fins: a designer wanting 1.5 fins of current has to pick 1 or 2.",
+            "Two grey fins in the cream oxide, each inside a yellow and bronze U, dark fill metal above.",
         )
-        .detail("Discrete steps (page text, section 5).", &["FINFET"]),
+        .detail("Quantised width.", &["Fin ~7 nm wide (textbook)"]),
     Beat::new("wide sheet: drive and speed", BEAT_MS)
         .note(
-            "A sheet can be drawn any width. A wide one has more channel under the gate: more drive current, faster, but larger.",
-            "three wide sheets with the gate behind each, turned to show the width in depth",
+            "A nanosheet's width is drawn on the mask, so each transistor can have its own. Wide sheets have more gated perimeter and carry more current, for fast logic. The stack height stays the same.",
+            "Three wide grey sheets, each ringed in yellow, inside a wide bronze gate block.",
         )
-        .detail("Effective width is about N sheets x (W + 2T).", &["SHEET WIDTH (page text, section 5)"]),
+        .detail("A continuous knob, not whole steps.", &["Sheet width ~15-50 nm here (estimate)", "N2 mixes widths on one chip (TSMC)"]),
     Beat::new("narrow sheet: less leakage, less area", BEAT_MS)
         .note(
-            "A narrow sheet gives less drive but takes less area and leaks less. Cells on one chip can mix widths.",
-            "three thin sheets in the same stack, with a shorter gate shell along the depth",
+            "Narrow sheets carry less current but leak less and fit shorter cells, for dense or low-power blocks.",
+            "The same three-sheet stack, narrow, in a much thinner gate block.",
         )
-        .detail("TSMC says N2 allows cells with different sheet widths on one chip.", &["TSMC N2 (source 3)"]),
+        .detail("Gated perimeter per sheet is 2 x (W + T).", &["Narrow: less leakage, less area"]),
 ];
 
 const ZD_BEATS: &[Beat] = &[
     Beat::new("front-side power: shared, crowded metal", BEAT_MS)
         .note(
-            "Power and signals share the front metal: the power path climbs from the bumps through the stacked wiring, long and thin.",
-            "dots running down from the VDD bump through the thin, mid and top wiring to the transistor",
+            "Normally power comes down from the top through the same metal layers as the signals. The thick power rails crowd the signal wires, and the long path down to the transistors loses voltage.",
+            "Three nanosheet transistors under the wiring; a gold power rail on top feeds a via down to the left source past the copper signal wires; grey substrate below.",
         )
-        .detail(
-            "Conventional chips route power and signals through the same front-side metal.",
-            &["Frontside power (page text, section 6)"],
-        ),
+        .detail("Power and signals compete for the same layers.", &["Front-side power delivery (conventional)"]),
     Beat::new("rails move under the substrate", BEAT_MS)
         .note(
-            "The wafer is thinned and power rails are built beneath it, reached through nano-TSVs.",
-            "a copper VDD rail and a grey VSS rail under the silicon, with dots rising up the TSVs to the transistor",
+            "With backside power, the wafer is flipped and thinned almost to the transistors, and power rails are built on the back. Nano-TSVs reach up to the devices; TSMC's A16 contacts the source directly.",
+            "The substrate gone, a gold rail under the device and a gold nano-TSV rising into the left source epi, power dots climbing it.",
         )
-        .detail(
-            "Backside power shortens the power path.",
-            &["Intel PowerVia on 18A; TSMC Super Power Rail on A16 (sources 2 and 4)"],
-        ),
+        .detail("A shorter, fatter power path.", &["Intel PowerVia: 18A (2025)", "TSMC Super Power Rail: A16 (2026+)"]),
     Beat::new("the front metal is all signals", BEAT_MS)
         .note(
-            "Signals get the front metal to themselves; the power has moved below.",
-            "signal dots running along the thin wiring, with the rails still under the silicon",
+            "With power underneath, the front-side metal carries only signals, so wires can be spaced for speed and cells packed tighter.",
+            "The front copper lines glowing cyan with signal dots running along them, the gold rail and nano-TSV underneath.",
         )
-        .detail(
-            "Less congestion on the front metal.",
-            &["PowerVia (18A), Super Power Rail (A16) (sources 2 and 4)"],
-        ),
+        .detail("Vendor claim.", &["A16 vs N2P: up to 8-10% density (TSMC claim)"]),
 ];
 
 const ZE_BEATS: &[Beat] = &[
     Beat::new("FinFET: three gated sides", BEAT_MS)
         .note(
-            "A FinFET gate wraps three sides of each fin; the bottom stays ungated.",
-            "one fin under a gate, with metal on the top and both sides",
+            "Cut across the gate, a FinFET channel is a fin gated on its top and two sides. The foot of the fin, inside the oxide, is never gated.",
+            "One grey fin inside a yellow and bronze U, its foot running down into the cream oxide.",
         )
-        .detail("Fins run out of room below 3 nm (page text, section 8).", &["FINFET to about 3 nm class"]),
+        .detail("Three faces.", &["FinFET: ~2012 to N3 (Intel 22 nm to TSMC N3)"]),
     Beat::new("nanosheet: gate on four sides", BEAT_MS)
         .note(
-            "The sheets are stacked and the gate wraps all four sides of each one, as in N2, 18A and SF2.",
-            "three sheets with a translucent gate shell round each and gate metal in the gaps",
+            "A nanosheet transistor slices the channel into stacked sheets and fills the gaps with gate, so each sheet is gripped on four sides.",
+            "Three grey sheets, each ringed in yellow, inside a bronze gate block on a silicon mesa.",
         )
-        .detail("Nanosheets are the current node class (page text, section 8).", &["NANOSHEET at N2, 18A, SF2"]),
+        .detail("Four faces.", &["Samsung SF3 (2022), TSMC N2, Intel 18A (2025)"]),
     Beat::new("forksheet: a wall between n and p", BEAT_MS)
         .note(
-            "A forksheet puts a dielectric wall between the NMOS and PMOS sheets so they can sit closer.",
-            "two devices with a grey wall between them, the wall as tall as the gates",
+            "A forksheet puts a thin dielectric wall between the n and p sheet stacks so they can sit almost touching, shrinking the cell. The gate then wraps three sides of each sheet.",
+            "A teal wall through the middle of the gate block, wide sheets butting against it on both sides.",
         )
-        .detail("imec extends nanosheets to A10 with the forksheet (page text, section 8).", &["FORKSHEET (source 5)"]),
+        .detail("imec roadmap.", &["imec: forksheet to ~A10"]),
     Beat::new("CFET: NMOS over PMOS", BEAT_MS)
         .note(
-            "A CFET stacks an NMOS sheet stack over a PMOS one on the same footprint; imec puts monolithic CFET at A7, after 2030.",
-            "two devices stacked: the NMOS below, the PMOS above it, each with blue epi either side",
+            "A complementary FET stacks the nFET sheets directly on top of the pFET sheets under one gate, so a cell needs much less area. imec expects monolithic CFET after 2030.",
+            "Six sheets in one tall gate: three pFET sheets at the bottom, three nFET sheets on top, with a taller gap between the two stacks.",
         )
-        .detail("The CFET is on the imec roadmap beyond 2030 (page text, section 8).", &["CFET (source 5)"]),
+        .detail("Roadmap, not product.", &["imec: monolithic CFET ~A7, after 2030"]),
 ];
 
 static ZA: Cell = std::sync::OnceLock::new();
@@ -268,230 +248,286 @@ const ZOOMS: &[Zoom] = &[
 ];
 
 // ---- sections 1-10, one picture per `# ` heading of CHIP_GAA.txt ----
+// Detailed close-ups (chip_gaa_detail.py): nanosheets, inner spacers, the gate between the sheets,
+// epi, backside power, forksheet and CFET, drawn to a nanometre scale and cut away.
 
 const SEC1: &[Beat] = &[
-    Beat::new("stack the sheets: Si and SiGe", BEAT_MS)
+    Beat::new("stack the layers: Si and SiGe", BEAT_MS)
         .note(
-            "Si and SiGe layers are grown in each fin: silicon sheets with purple SiGe between.",
-            "the stack of grey silicon bands alternating with purple SiGe, blue epi either side",
+            "A gate-all-around transistor starts as a stack of alternating silicon and silicon-germanium layers, etched into a fin. The silicon layers become the channels. The SiGe layers are only placeholders that set the gaps.",
+            "A fin cut open on two faces: grey silicon bands alternating with purple SiGe, a teal hard mask on top, standing in the cream oxide.",
         )
         .detail(
-            "3-4 Si/SiGe pairs in the stack, about 1 nm thickness control.",
-            &["SUPERLATTICE (textbook)"],
+            "Three sheets is the usual count.",
+            &["~3 Si/SiGe pairs (textbook)", "Thickness control ~1 nm"],
         ),
-    Beat::new("release them: SiGe out", BEAT_MS)
+    Beat::new("release: the SiGe is etched out", BEAT_MS)
         .note(
-            "The SiGe is etched sideways out of the gaps, leaving the silicon sheets suspended between the source and drain.",
-            "the purple SiGe pulled in to short pieces, the three sheets bridging the blue epi blocks",
+            "Later in the flow the SiGe is etched away sideways, leaving the silicon sheets hanging between the source and drain like rungs of a ladder. Nitride inner spacers at each end keep the future gate away from the source and drain.",
+            "Grey sheets floating in empty gaps, held at their ends by the blue source/drain epi, with teal inner spacers between the gaps and the epi.",
         )
         .detail(
-            "The etch needs high Si:SiGe selectivity; any lost silicon thins the sheet.",
-            &["RELEASE (page text, section 4)"],
+            "The etch must remove SiGe and leave the silicon untouched.",
+            &["Needs high Si:SiGe etch selectivity"],
         ),
-    Beat::new("wrap the gate", BEAT_MS)
+    Beat::new("wrap: the gate fills every gap", BEAT_MS)
         .note(
-            "High-k and metal wrap every side of each sheet. The gate turns on.",
-            "amber gate metal and a translucent shell round each sheet",
+            "High-k and metal are then deposited into the gaps, so each sheet is surrounded on all four sides. That full wrap shuts the channel off better than a fin's three sides, which lets the gate get shorter.",
+            "Yellow high-k ringing each grey sheet, bronze metal filling the gaps between them, dark fill metal above, grey trench contact on the epi.",
         )
         .detail(
-            "The gaps are about 10 nm; the whole stack must fit in them.",
-            &["HK/METAL GATE (page text, section 4)"],
+            "Gate on four sides, three channels per transistor.",
+            &["Gaps ~10 nm, filled by ALD (page text)", "Samsung first in production, 2022"],
         ),
 ];
 
 const SEC2: &[Beat] = &[
-    Beat::new("source and drain epi", BEAT_MS)
+    Beat::new("along the channel: source, sheets, drain", BEAT_MS)
         .note(
-            "Raised n+ blocks at either end, grown from the sheet edges for strain and low contact resistance.",
-            "the two blue epi blocks either side of the stack, the sheets between them dim",
+            "Cut along the channel, a nanosheet transistor reads left to right: source epi, a stack of three silicon sheets under the gate, drain epi. The epi is phosphorus-doped silicon for NMOS and boron-doped SiGe for PMOS.",
+            "Three gates in a row, each with three grey sheets, bronze and yellow gate layers between them, teal spacers either side and tall blue epi between the gates.",
         )
         .detail(
-            "SiP for NMOS, grown from the sheet edges.",
-            &["S/D EPI (page text, section 2)"],
+            "Each gate drives three channels in parallel.",
+            &["NMOS epi: SiP; PMOS epi: SiGe:B"],
         ),
-    Beat::new("carriers through every sheet", BEAT_MS)
+    Beat::new("electrons run through every sheet", BEAT_MS)
         .note(
-            "With the gate on, current flows from source to drain through each silicon sheet.",
-            "the three sheets glow cyan and dots run from the left block through each one to the right",
+            "With the gate on, electrons cross from the source to the drain through all three sheets at once. Stacking sheets vertically adds drive current without taking more chip area.",
+            "The middle gate's three sheets glowing cyan, white dots streaming through each from the left epi to the right.",
         )
         .detail(
-            "Current flows through each sheet to the drain epi.",
-            &["Along the channel (page text, section 2)"],
+            "Three channels in one footprint.",
+            &["Current scales with sheets x (width + thickness) (textbook)"],
         ),
-    Beat::new("gate and inner spacers", BEAT_MS)
+    Beat::new("inner spacers and the punch-through stop", BEAT_MS)
         .note(
-            "High-k and metal wrap each sheet; inner spacers isolate the gate from the source and drain.",
-            "the gate lit amber around the sheets, pale spacers between the gate and the epi",
+            "Between the gate and the epi at every level sits a small nitride inner spacer that cuts capacitance and prevents shorts. Below the stack, a doped punch-through stop blocks a parasitic channel through the silicon underneath.",
+            "Teal inner spacers at both ends of each gap, bronze gate metal filling the gaps, and a purple band across the silicon below the stack.",
         )
         .detail(
-            "SiN or SiOCN spacers isolate the gate from the S/D at every level.",
-            &["INNER SPACER (page text, section 2)"],
+            "Inner spacers are new with GAA.",
+            &["Inner spacer: SiN or SiOCN"],
         ),
 ];
 
 const SEC3: &[Beat] = &[
-    Beat::new("before release", BEAT_MS)
+    Beat::new("before release: SiGe between the sheets", BEAT_MS)
         .note(
-            "Silicon sheets with sacrificial SiGe between, the source and drain already grown.",
-            "purple SiGe layers between grey sheets, blue epi either side",
+            "Before release, the gaps between the silicon sheets are still filled with SiGe under a placeholder poly gate. The SiGe ends were already recessed and replaced by nitride inner spacers, and the source and drain have been grown.",
+            "Purple SiGe between grey sheets, a tan dummy gate on top, teal inner spacers at the gap ends and blue epi either side.",
         )
         .detail(
-            "SiGe sets the gap height.",
-            &["Before release (page text, section 3)"],
+            "The SiGe sets the gap height the gate will fill.",
+            &["Gap ~10 nm (page text)"],
         ),
-    Beat::new("SiGe recessed, nitride in", BEAT_MS)
+    Beat::new("release: SiGe etched sideways", BEAT_MS)
         .note(
-            "The SiGe ends are recessed and filled with nitride: the inner spacers.",
-            "the SiGe pulled back to the middle, pale spacers at both ends",
+            "The dummy gate is removed and a selective etch eats the SiGe sideways from both ends. Any silicon it takes thins the sheets and shifts the threshold voltage, so the etch has to be very selective.",
+            "The purple SiGe shrinking to nothing in each gap, the grey sheets left hanging between the teal spacers.",
         )
         .detail(
-            "Recess, fill, etch back: a source of variation in the process.",
-            &["INNER SPACER (page text, section 4)"],
+            "Lam's Akara (2025) and dry selective etch target this step.",
+            &["Key spec: Si:SiGe selectivity (page text)"],
         ),
-    Beat::new("after release: gate metal", BEAT_MS)
+    Beat::new("after release: high-k and metal in the gaps", BEAT_MS)
         .note(
-            "The SiGe is gone; gate metal fills every gap and wraps each sheet.",
-            "grey gate metal in each gap, no purple left",
+            "The empty gaps are then coated with high-k and filled with work-function metal, layer by layer, by atomic layer deposition. The gate now surrounds each sheet.",
+            "Yellow high-k lining each gap above and below the sheets, bronze metal filling them, dark fill metal above the top sheet.",
         )
         .detail(
-            "Any silicon lost to the etch shifts the threshold voltage.",
-            &["Selectivity (page text, section 3)"],
+            "Every layer has to fit inside a ~10 nm gap.",
+            &["HK/metal gate by ALD (page text)"],
         ),
 ];
 
 const SEC4: &[Beat] = &[
-    Beat::new("SUPERLATTICE: Si and SiGe pairs", BEAT_MS)
+    Beat::new("SUPERLATTICE and FIN PATTERN", BEAT_MS)
         .note(
-            "Alternating silicon and SiGe layers are grown in the fin; the SiGe is sacrificial.",
-            "purple SiGe bands between grey silicon sheets, a block at the transistor spot",
+            "Alternating Si and SiGe layers are grown by epitaxy, then etched into fins under a hard mask. The layer thicknesses become the sheet thickness and the gap.",
+            "The striped grey and purple fin, cut open, under its teal hard mask.",
         )
-        .detail("3-4 pairs, about 1 nm thickness control.", &["SUPERLATTICE (page text, section 4)"]),
-    Beat::new("INNER SPACER: SiGe recessed, nitride in", BEAT_MS)
+        .detail("3-4 pairs, ~1 nm thickness control.", &["SUPERLATTICE (page text, section 4)"]),
+    Beat::new("DUMMY GATE and INNER SPACER", BEAT_MS)
         .note(
-            "The SiGe ends are recessed, then filled with nitride so the gate and the epi cannot touch.",
-            "the purple SiGe shortened to the middle, pale spacers at both ends",
+            "A poly placeholder gate goes on. The stack is etched away beside it, the SiGe is recessed at its exposed ends, and the pockets are filled with nitride.",
+            "A tan dummy gate with teal spacers, the purple SiGe stopping short of the stack's ends, teal inner spacers filling the pockets.",
         )
-        .detail("Spacers isolate the gate from S/D at every level.", &["INNER SPACER (page text, section 4)"]),
-    Beat::new("S/D EPI: grown from the sheet edges", BEAT_MS)
+        .detail("New with GAA; a source of variation.", &["Isotropic SiGe recess, fill, etch back"]),
+    Beat::new("S/D EPI", BEAT_MS)
         .note(
-            "The source and drain grow from the sheet edges, after the spacers.",
-            "blue epi blocks rise either side, past the top sheet",
+            "Source and drain are grown epitaxially from the exposed sheet ends. The epi strains the channel for speed and gives the contacts a large landing area.",
+            "Blue faceted epi blocks on each side of the stack.",
         )
-        .detail("Strain and low contact resistance (page text, section 2).", &["S/D EPI"]),
-    Beat::new("RELEASE: SiGe out", BEAT_MS)
+        .detail("Grown from the sheet edges.", &["NMOS SiP, PMOS SiGe:B"]),
+    Beat::new("RELEASE", BEAT_MS)
         .note(
-            "The SiGe is etched away sideways; the sheets are left standing between the epi.",
-            "the sheets bridging the epi with no SiGe between them",
+            "The dummy gate is pulled out and the SiGe etched away, leaving free-standing silicon sheets held by the epi.",
+            "Grey sheets bridging the epi with empty dark gaps where the SiGe was.",
         )
-        .detail("Needs high Si:SiGe etch selectivity (page text, section 3).", &["RELEASE"]),
-    Beat::new("HK/METAL GATE: wrap every sheet", BEAT_MS)
+        .detail("Needs Si:SiGe selectivity.", &["Lateral SiGe removal"]),
+    Beat::new("HK/METAL GATE", BEAT_MS)
         .note(
-            "High-k and metal go into the gaps by ALD and wrap every sheet on four sides.",
-            "amber gate on the metal and the translucent shell round each sheet",
+            "High-k and metal fill every gap by atomic layer deposition, closing the gate round all four sides of each sheet.",
+            "Yellow high-k round each sheet, bronze metal in the gaps, dark fill metal on top.",
         )
-        .detail("Gaps of about 10 nm must fit the whole stack.", &["HK/METAL GATE"]),
+        .detail("Five new or harder modules than FinFET.", &["ALD into ~10 nm gaps"]),
+];
+
+const SEC5: &[Beat] = &[
+    Beat::new("FinFET: width in whole fins", BEAT_MS)
+        .note(
+            "A FinFET's width comes in whole fins: one, two or three. A designer who wants 1.5 fins of current has to pick 1 or 2.",
+            "Two fins cut across the gate, each in its yellow and bronze U, standing in the cream oxide.",
+        )
+        .detail("Quantised width.", &["Fin ~7 nm wide (textbook)"]),
+    Beat::new("wide sheets: more drive", BEAT_MS)
+        .note(
+            "A nanosheet's width is drawn on the mask, so it can be anything in a range. Wide sheets carry more current for fast logic. The stack height stays the same.",
+            "Three wide grey sheets, each ringed by yellow high-k, embedded in bronze gate metal.",
+        )
+        .detail(
+            "A new knob FinFET did not have.",
+            &["Sheet width: ~15-50 nm drawn here (estimate)", "N2 mixes sheet widths on one chip (TSMC)"],
+        ),
+    Beat::new("narrow sheets: less leakage, smaller cell", BEAT_MS)
+        .note(
+            "Narrow sheets leak less and fit in shorter cells, for dense or low-power blocks. Both widths can sit on the same chip.",
+            "The same three-sheet stack, now narrow, with a much thinner gate block around it.",
+        )
+        .detail(
+            "Width per device, not per chip.",
+            &["Gated perimeter per sheet: 2 x (W + T)"],
+        ),
+];
+
+const SEC6: &[Beat] = &[
+    Beat::new("front-side power: wires share the space", BEAT_MS)
+        .note(
+            "In a normal chip, power comes down from the top through the same metal layers as the signals. Thick power rails take room the signal wires need, and the long thin path down loses voltage.",
+            "Three transistors under the wiring; a gold power rail on top feeds a via down to the left source, past copper signal wires; grey substrate below.",
+        )
+        .detail(
+            "Power and signals compete for the same layers.",
+            &["Front-side power delivery (conventional)"],
+        ),
+    Beat::new("backside power: rails under the device", BEAT_MS)
+        .note(
+            "With backside power, the wafer is flipped and thinned almost to the transistors. Power rails are built on the back and reach up through nano-TSVs. TSMC's A16 Super Power Rail contacts the source directly.",
+            "The substrate gone, a gold rail under the device, and a gold nano-TSV rising to the left source epi with power dots climbing it.",
+        )
+        .detail(
+            "Shorter power path, less voltage droop.",
+            &["Intel PowerVia: 18A (2025)", "TSMC Super Power Rail: A16 (2026+)"],
+        ),
+    Beat::new("front metal: signals only", BEAT_MS)
+        .note(
+            "With power moved underneath, the front-side metal is left to signals. Wires can be spaced for speed and cells packed tighter.",
+            "The front copper lines glowing cyan with signal dots, the gold rail and nano-TSV underneath.",
+        )
+        .detail(
+            "Intel reported its PowerVia test chip gave better cell use and frequency.",
+            &["A16 vs N2P: up to 8-10% density (TSMC claim)"],
+        ),
 ];
 
 const SEC7: &[Beat] = &[
     Beat::new("Samsung SF3E: first GAA (2022)", BEAT_MS)
         .note(
-            "vs 5 nm: -45% power, +23% performance, -16% area (vendor claim).",
-            "the nanosheet stack with the gate on and the sheets lit",
+            "Samsung shipped the first gate-all-around process in 2022 and calls its version MBCFET, using wide sheets. Against its 5 nm it claimed 45% less power, 23% more performance and 16% less area.",
+            "A nanosheet transistor cut open on two faces, three wide grey sheets ringed in yellow and bronze, blue epi either side.",
         )
-        .detail("Vendor claims under different conditions.", &["Samsung 3GAA (source 1)"]),
+        .detail("Vendor claims under different conditions.", &["SF3E vs 5 nm: -45% power, +23% perf, -16% area"]),
     Beat::new("TSMC N2 and Intel 18A (2025)", BEAT_MS)
         .note(
-            "N2 vs N3E: +10-15% speed or -25-30% power. 18A vs Intel 3: about 25% frequency or -36% power at 1.1 V.",
-            "the same stack with the sheets conducting, dots moving through every sheet",
+            "TSMC N2 entered volume production in 4Q25 with stacked nanosheets. Intel's 18A RibbonFET, shown here with four ribbons, adds PowerVia backside power. Each claims a big step over its own previous node.",
+            "Two stacks cut across the gate: on the left Intel's four ribbons over a gold backside rail, on the right TSMC's three sheets on bulk silicon.",
         )
-        .detail("Vendor claims, not equal conditions.", &["TSMC N2 (source 3); Intel 18A (source 2)"]),
-    Beat::new("TSMC A16 (2026+): backside power", BEAT_MS)
+        .detail(
+            "Vendor claims, not equal conditions.",
+            &["N2 vs N3E: +10-15% speed or -25-30% power", "18A vs Intel 3: ~25% frequency or -36% power"],
+        ),
+    Beat::new("TSMC A16 (2026+): Super Power Rail", BEAT_MS)
         .note(
-            "Adds backside power: +8-10% speed and -15-20% power vs N2P, up to 8-10% density (vendor claim).",
-            "the stack with copper and grey rails under the silicon, dots rising through the TSVs",
+            "A16 keeps N2's nanosheets and adds backside power that contacts the source and drain directly from below, one step more direct than PowerVia.",
+            "One transistor cut along its channel, a gold contact rising from the backside rail straight into the blue source epi, power dots climbing it.",
         )
-        .detail("Super Power Rail contacts the source and drain directly.", &["TSMC A16 (source 4)"]),
+        .detail("Vendor claim.", &["A16 vs N2P: +8-10% speed, -15-20% power"]),
 ];
 
 const SEC8: &[Beat] = &[
-    Beat::new("NODES: SF3, N2, 18A, A16", BEAT_MS)
+    Beat::new("today: n and p nanosheets side by side", BEAT_MS)
         .note(
-            "Samsung, TSMC and Intel all ship nanosheets, under different names.",
-            "the gate-on stack with the sheets conducting and the node names in the tags",
-        )
-        .detail("Different names, same idea (page text, section 8).", &["NODES"]),
-    Beat::new("TOOLS: epi, ALD, selective etch", BEAT_MS)
-        .note(
-            "GAA raises tool spend: about $7B per 100K wafer starts a month vs $6B for FinFET (Applied).",
-            "the epi blocks, the gate shell and the stack; the tags name the process steps",
+            "In a logic cell, the n and p nanosheet stacks sit side by side under a shared gate with a gap between them. That gap is width the cell pays for but cannot use.",
+            "Two three-sheet stacks cut across the gate, inside one bronze gate block, a wide gap of metal between them.",
         )
         .detail(
-            "Applied, Lam, TEL and ASML sell the tools.",
-            &["Applied Materials Q2 FY2024 call (source 7); Lam Akara (source 8)"],
+            "N2, 18A and SF2 all build it this way.",
+            &["Nanosheet nodes: Samsung SF3, TSMC N2, Intel 18A, TSMC A16"],
         ),
-    Beat::new("forksheet, then CFET", BEAT_MS)
+    Beat::new("forksheet: a wall between n and p", BEAT_MS)
         .note(
-            "Forksheet puts a wall between n and p sheets (to A10); CFET stacks NMOS over PMOS (A7, after 2030).",
-            "the NMOS below and the PMOS above, on one footprint",
+            "A forksheet puts a thin dielectric wall between the n and p sheets so they can sit almost touching. The gate then wraps three sides of each sheet. imec sees it extending nanosheets to about the A10 node.",
+            "A teal wall rising through the middle of the gate, the sheets on each side butting against it.",
         )
-        .detail("imec roadmap (page text, section 8).", &["imec (source 5)"]),
+        .detail(
+            "Tools: Applied puts GAA module spend at ~$7B per 100K wafer starts a month vs ~$6B for FinFET.",
+            &["imec: forksheet to ~A10", "Applied GAA revenue ~$2.5B in FY2024"],
+        ),
+    Beat::new("CFET: nFET stacked on pFET", BEAT_MS)
+        .note(
+            "A complementary FET stacks the nFET sheets directly on top of the pFET sheets under one gate, so a cell needs much less area. imec expects monolithic CFET around A7, after 2030.",
+            "Six sheets in one tall gate: three pFET sheets at the bottom and three nFET sheets at the top, with a taller gap between the two stacks.",
+        )
+        .detail("Roadmap, not product.", &["imec: monolithic CFET ~A7, after 2030"]),
 ];
 
 const SEC9: &[Beat] = &[
-    Beat::new("Samsung SF3E: yield 50-60%", BEAT_MS)
+    Beat::new("Samsung SF3E: ~50-60% yield (reports)", BEAT_MS)
         .note(
-            "Reported SF3E yields: 50-60% (2024), SF3 about 20%, SF2 test about 30% (Feb 2025).",
-            "the gate-on stack with the sheets lit and a short gate",
+            "Press reports put Samsung's first GAA yields at about 50 to 60% in 2024, with its second-generation SF3 and SF2 trials lower. These are secondary reports, not audited figures.",
+            "A wafer seen from above, its dies split roughly half green (good) and half red (failed).",
         )
-        .detail(
-            "Secondary reports, not audited.",
-            &["Samsung yields (reports, source 6)"],
-        ),
-    Beat::new("N3E FinFET: about 82-86%", BEAT_MS)
+        .detail("Secondary reports.", &["SF3E 50-60% (2024)", "SF3 ~20%, SF2 test ~30% (Feb 2025)"]),
+    Beat::new("TSMC N3E FinFET: ~82-86% (reports)", BEAT_MS)
         .note(
-            "The FinFET it replaces yields far better (N3E about 82-86%, report).",
-            "a single FinFET block with its three fins",
+            "The mature FinFET it replaces yields far better, at a reported 82 to 86%. A new transistor architecture resets the yield learning curve.",
+            "The same wafer, now mostly green with a scattering of red dies.",
         )
-        .detail(
-            "GAA resets the learning curve.",
-            &["N3E 82-86% (report, source 6)"],
-        ),
-    Beat::new("wafer price: over $30,000 (reported)", BEAT_MS)
+        .detail("Report.", &["N3E ~82-86% (report)"]),
+    Beat::new("N2 wafers: over $30,000 (reported)", BEAT_MS)
         .note(
-            "N2 wafers are reported above $30,000 vs about $18,000 for N3 (unconfirmed).",
-            "a wafer under the chip, with the wiring above it",
+            "Reports put an N2 wafer above $30,000 against about $18,000 for N3. TSMC does not confirm prices. Combined with lower early yields, cost per good die rises steeply.",
+            "Two wafers with a stack of gold coins behind each, one coin per $1,000: 18 for N3, 30 for N2.",
         )
-        .detail(
-            "Cost per good die rises when yield is low.",
-            &["N2 wafer price (report, source 6)"],
-        ),
+        .detail("Unconfirmed press reports.", &["N3 ~$18k, N2 >$30k per wafer (reports)"]),
 ];
 
 const SEC10: &[Beat] = &[
     Beat::new("Samsung 3GAA and Intel 18A", BEAT_MS)
         .note(
-            "Samsung's first GAA production and Intel's 18A PowerVia and performance figures.",
-            "the first card lit on the plinth",
+            "Samsung's announcement of the first GAA production, and Intel's 18A performance figures and PowerVia results.",
+            "The finished nanosheet row cut open, the camera starting to turn.",
         )
         .detail("Vendor announcements.", &["Samsung news; Intel newsroom and Tom's Hardware (sources 1, 2)"]),
-    Beat::new("TSMC N2 and A16", BEAT_MS)
+    Beat::new("TSMC N2, A16 and imec", BEAT_MS)
         .note(
-            "TSMC's N2 volume production and the A16 backside power plan.",
-            "the second card lit",
+            "TSMC's N2 and A16 announcements and coverage, and imec's forksheet and CFET roadmap.",
+            "The row from further round, the sheets and gate metal on the cut faces.",
         )
-        .detail("TSMC research pages and press (sources 3, 4).", &["IEEE Spectrum; AnandTech (sources 3, 4)"]),
-    Beat::new("imec and press reports", BEAT_MS)
+        .detail("Sources 3 to 5.", &["TSMC research; IEEE Spectrum; AnandTech; imec articles"]),
+    Beat::new("yields, prices and tool spend", BEAT_MS)
         .note(
-            "imec's forksheet and CFET roadmap; press reports on yields and wafer prices.",
-            "the third card lit",
+            "Press reports on yields and wafer prices, and Applied Materials' figures on GAA tool spending.",
+            "The row seen more from the side, the epi and contacts in view.",
         )
-        .detail("Roadmap and reports (sources 5, 6).", &["imec articles; TechSpot, NotebookCheck (sources 5, 6)"]),
-    Beat::new("Applied, Lam and IBM", BEAT_MS)
+        .detail("Sources 6 and 7.", &["TechSpot, NotebookCheck, Tom's Hardware; Applied Q2 FY2024 call"]),
+    Beat::new("Lam Akara and selective SiGe etch", BEAT_MS)
         .note(
-            "Applied Materials' GAA tool spend, Lam's Akara etch tool, and IBM's dry selective SiGe etch paper.",
-            "the fourth card lit",
+            "Lam's Akara etch tool and the research on dry selective SiGe etch for releasing stacked nanosheets.",
+            "The row from above, the gaps between the sheets in view.",
         )
-        .detail("Tool makers and research (sources 7, 8, 9).", &["Applied call; Lam Akara; PMC and IBM research (sources 7, 8, 9)"]),
+        .detail("Sources 8 and 9.", &["StorageNewsletter (Lam Akara); PMC and IBM research"]),
 ];
 
 static SEC: [Cell; 10] = [const { std::sync::OnceLock::new() }; 10];
@@ -512,15 +548,14 @@ macro_rules! section {
     };
 }
 
-/// One picture per `# ` heading of the page, in order. Sections 5 and 6 reuse the zoom-in
-/// beats of c and d, as the scenes do.
+/// One picture per `# ` heading of the page, in order.
 pub const SECTIONS: [fn() -> Box<dyn Scene>; 10] = [
     section!(1, SEC1),
     section!(2, SEC2),
     section!(3, SEC3),
     section!(4, SEC4),
-    section!(5, ZC_BEATS),
-    section!(6, ZD_BEATS),
+    section!(5, SEC5),
+    section!(6, SEC6),
     section!(7, SEC7),
     section!(8, SEC8),
     section!(9, SEC9),

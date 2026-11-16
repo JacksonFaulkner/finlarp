@@ -1,0 +1,16 @@
+# 1. The zHBM roadmap
+
+Samsung's roadmap, shown at Hot Chips 2026, moves logic into the memory in three phases. Phase one puts compute inside the stack. The final phase stacks DRAM directly on the processor, with no interposer between them.
+
+# 2. Bonding
+
+Wafer-on-wafer bonding and hybrid copper bonding are needed to get the I/O density zHBM requires. Hybrid bonding joins copper pads directly, with no bump, so the stack gets shorter.
+
+# 3. Timing
+
+The JEDEC HBM5 spec is not final. Commercialization of zHBM is expected around 2028.
+
+# 4. Sources
+
+- Tom's Hardware, Hot Chips 2026: Samsung three-phase HBM roadmap (zHBM):
+  https://www.tomshardware.com/tech-industry/semiconductors/hot-chips-2026-samsung-reveals-a-three-phase-hbm-roadmap-that-puts-logic-and-compute-inside-memory-zhbm-ultimately-stacks-dram-directly-on-top-of-the-processor?type=Event

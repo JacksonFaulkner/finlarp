@@ -29,7 +29,7 @@ use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_mol::{Mol, mol_for};
 use super::diagrams_jar_3d::bell_jar_anim;
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
-use crate::app::{Action, Ctx, Screen};
+use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::anim::Player;
 use crate::ui::help::{Key, key, render_footer, render_overlay};
 use crate::ui::text;
@@ -85,6 +85,8 @@ enum PopupView {
     Full,
     Menu,
     Pane,
+    /// A page's sandbox (diagrams_lab): change the design with keys, the pictures follow.
+    Lab,
 }
 
 pub struct Diagrams {
@@ -99,6 +101,8 @@ pub struct Diagrams {
     popup_scroll: u16,
     view: PopupView,
     menu_sel: usize,
+    /// Each page's sandbox, made on first open; kept while the app runs so coming back keeps it.
+    labs: std::collections::HashMap<&'static str, Box<dyn super::diagrams_lab::Lab>>,
     /// Asking Claude about the open node (`<space>aw`), and the node its notes belong to.
     chat: Chat,
     note_page: Option<String>,
@@ -518,7 +522,12 @@ fn kitty_protocol(picker: &Picker, img: DynamicImage, font: FontSize, id: u32) -
         img,
         font,
         None,
-        StatefulProtocolType::Kitty(StatefulKitty::new(id, picker.tmux_detected(), compress, smo)),
+        StatefulProtocolType::Kitty(StatefulKitty::new(
+            id,
+            picker.tmux_detected(),
+            compress,
+            smo,
+        )),
     )
 }
 
@@ -858,6 +867,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         popup_scroll: 0,
         view: PopupView::Pane,
         menu_sel: 0,
+        labs: std::collections::HashMap::new(),
         chat: Chat::new(),
         note_page: None,
         queue: std::collections::VecDeque::new(),
@@ -1213,6 +1223,11 @@ impl Diagrams {
                     format!("zoom-in {k}: {l}")
                 }
             }
+            PopupView::Lab => self
+                .player
+                .as_ref()
+                .and_then(|(page, _)| self.labs.get(page))
+                .map_or_else(|| "a sandbox".to_string(), |l| l.summary()),
             PopupView::Pane => {
                 format!(
                     "section text {}",
@@ -1312,7 +1327,7 @@ impl Diagrams {
             }
             // the preview beside the menu plays while an animation row is highlighted
             PopupView::Menu => self.browse && self.menu_has_anim(),
-            PopupView::Pane => false,
+            PopupView::Pane | PopupView::Lab => false,
         }
     }
 
@@ -1401,9 +1416,30 @@ impl Diagrams {
         }
     }
 
-    /// Menu index of the first section: the overview and the zoom-ins come first.
+    /// Menu index of the first section: the overview, the zoom-ins and the sandbox come first.
     fn menu_sections(&self) -> usize {
-        1 + self.zoom_list().len()
+        1 + self.zoom_list().len() + usize::from(self.has_lab())
+    }
+
+    /// The open page has a sandbox (diagrams_lab).
+    fn has_lab(&self) -> bool {
+        self.player
+            .as_ref()
+            .is_some_and(|(page, _)| super::diagrams_lab::has_lab(page))
+    }
+
+    /// The open page's sandbox, made on first use.
+    fn lab(&mut self) -> Option<&mut Box<dyn super::diagrams_lab::Lab>> {
+        let page = self.player.as_ref()?.0;
+        if !self.labs.contains_key(page) {
+            self.labs.insert(page, super::diagrams_lab::new_lab(page)?);
+        }
+        self.labs.get_mut(page)
+    }
+
+    /// Menu row of the sandbox, right after the zoom-ins, when the page has one.
+    fn lab_row(&self) -> Option<usize> {
+        self.has_lab().then(|| 1 + self.zoom_list().len())
     }
 
     fn open_zoom(&mut self, i: usize) {
@@ -1701,12 +1737,18 @@ impl Diagrams {
     /// Whether the menu's highlighted row has an animation to preview.
     fn menu_has_anim(&self) -> bool {
         let s0 = self.menu_sections();
+        if self.lab_row() == Some(self.menu_sel) {
+            return false;
+        }
         self.menu_sel < s0 || self.section_build(self.menu_sel - s0).is_some()
     }
 
     /// The animation behind menu row `sel` (not the overview), if any.
     fn preview_build(&self, sel: usize) -> Option<fn() -> Box<dyn Scene>> {
         let s0 = self.menu_sections();
+        if self.lab_row() == Some(sel) {
+            return None;
+        }
         if sel < s0 {
             let (_, p) = self.player.as_ref()?;
             let z = p.as_ref()?.zooms().get(sel.checked_sub(1)?).copied()?;
@@ -1738,6 +1780,9 @@ impl Diagrams {
     fn preview_clip(&self, sel: usize) -> Option<(&'static str, String)> {
         let page = self.clip_page()?;
         let s0 = self.menu_sections();
+        if self.lab_row() == Some(sel) {
+            return None;
+        }
         let clip = if sel == 0 {
             "overview".to_string()
         } else if sel < s0 {
@@ -1756,7 +1801,11 @@ impl Diagrams {
 
     /// The number keys that open sections: 1-9, and 0 as a tenth when the page has one.
     fn section_keys(&self) -> &'static str {
-        if self.section_build(9).is_some() { "1-0" } else { "1-9" }
+        if self.section_build(9).is_some() {
+            "1-0"
+        } else {
+            "1-9"
+        }
     }
 
     /// Menu index of the zoom bound to `key`.
@@ -2012,10 +2061,13 @@ impl Diagrams {
     /// item on the right.
     fn draw_menu(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         frame.render_widget(Clear, r);
+        let lab_hint = if self.has_lab() { "x sandbox  " } else { "" };
         let hint = if self.browse {
-            " j/k move  enter open  a-d zoom  1-9 sections  m list  esc close "
+            format!(" j/k move  enter open  a-d zoom  {lab_hint}1-9 sections  m list  esc close ")
         } else {
-            " j/k move  enter open  a-d zoom  1-9 sections  m preview  esc close "
+            format!(
+                " j/k move  enter open  a-d zoom  {lab_hint}1-9 sections  m preview  esc close "
+            )
         };
         let block = Block::new()
             .borders(Borders::ALL)
@@ -2055,6 +2107,18 @@ impl Diagrams {
             }
             lines.push(item(1 + i, format!("{k}  {l}"), self.menu_sel, t));
         }
+        if let Some(row) = self.lab_row() {
+            let menu = self.lab().map_or("sandbox", |l| l.menu());
+            lines.push(Line::default());
+            lines.push(Line::from(Span::styled(
+                "EXPLORE \u{00B7} change the design yourself",
+                t.accent(),
+            )));
+            if row == self.menu_sel {
+                sel_line = lines.len();
+            }
+            lines.push(item(row, format!("x  {menu}"), self.menu_sel, t));
+        }
         lines.push(Line::default());
         lines.push(Line::from(Span::styled(
             "SECTIONS \u{00B7} the full write-up",
@@ -2090,6 +2154,12 @@ impl Diagrams {
         let rule = vec![Line::from(Span::styled(" \u{2502}", t.dim())); gap_r.height as usize];
         frame.render_widget(Paragraph::new(rule), gap_r);
 
+        if self.lab_row() == Some(self.menu_sel) {
+            if let Some(lab) = self.lab() {
+                super::diagrams_lab::draw(frame, prev_r, label, lab.as_ref(), t);
+            }
+            return;
+        }
         let name = match self.menu_sel {
             0 => "overview".to_string(),
             i if i < s0 => zooms.get(i - 1).map_or("", |z| z.1).to_string(),
@@ -2193,6 +2263,12 @@ impl Diagrams {
             }
             PopupView::Full if self.has_scene() => return self.draw_full(frame, area, t),
             PopupView::Menu => return self.draw_menu(frame, area, &label, t),
+            PopupView::Lab => {
+                if let Some(lab) = self.lab() {
+                    super::diagrams_lab::draw(frame, area, &label, lab.as_ref(), t);
+                }
+                return;
+            }
             _ => {}
         }
         let text = describe(&n.label).unwrap_or("No description yet.");
@@ -2724,9 +2800,24 @@ impl Screen for Diagrams {
         {
             return Action::None;
         }
+        if self.popup && self.view == PopupView::Lab {
+            match key.code {
+                KeyCode::Char('q') | KeyCode::Esc | KeyCode::Char('m') => {
+                    self.menu_sel = self.lab_row().unwrap_or(0);
+                    self.view = PopupView::Menu;
+                }
+                code => {
+                    if let Some(lab) = self.lab() {
+                        lab.key(code);
+                    }
+                }
+            }
+            return Action::None;
+        }
         if self.popup && self.view == PopupView::Overview && self.has_scene() {
             match key.code {
                 KeyCode::Char('q') => self.popup = false,
+                KeyCode::Char('x') if self.has_lab() => self.view = PopupView::Lab,
                 // HJKL turn the 3D overview, +/- zoom, 0 resets the camera
                 KeyCode::Char('0') if self.overview_orbits() => {
                     self.orbit = poly3d::View::default()
@@ -2801,8 +2892,10 @@ impl Screen for Diagrams {
                 KeyCode::Char('g') | KeyCode::Home => self.menu_sel = 0,
                 KeyCode::Char('G') | KeyCode::End => self.menu_sel = last,
                 KeyCode::Char('m') => self.browse = !self.browse,
+                KeyCode::Char('x') if self.has_lab() => self.view = PopupView::Lab,
                 KeyCode::Enter | KeyCode::Char(' ') => match self.menu_sel {
                     0 => self.view = PopupView::Overview,
+                    i if self.lab_row() == Some(i) => self.view = PopupView::Lab,
                     i if i < s0 => self.open_zoom(i - 1),
                     i => self.open_section_or_pane(i - s0),
                 },
@@ -2922,7 +3015,16 @@ impl Screen for Diagrams {
             KeyCode::Char('H') | KeyCode::Char('[') => self.goto(self.tab + DIAGRAMS.len() - 1),
             KeyCode::Char('l') | KeyCode::Right | KeyCode::Tab => self.step_node(1),
             KeyCode::Char('h') | KeyCode::Left | KeyCode::BackTab => self.step_node(-1),
-            KeyCode::Enter => self.open_popup(),
+            KeyCode::Enter => {
+                // memory R&D companies open their sourced data page (py/derive/memory_page.py)
+                if let Some(t) = self.cur_label().and_then(|l| memory_page_ticker(&l)) {
+                    return Action::Route(Route::Screen {
+                        screen: "memory".into(),
+                        arg: Some(t.into()),
+                    });
+                }
+                self.open_popup()
+            }
             KeyCode::Char('j') | KeyCode::Down => {
                 if !self.step_row(1) {
                     self.scroll = self.scroll.saturating_add(1)
@@ -3186,6 +3288,20 @@ pub fn export_pdfs(dir: &Path, t: &Theme) -> io::Result<Vec<String>> {
     Ok(out)
 }
 
+/// Memory R&D node -> ticker of its data page (built by py/derive/memory_page.py). Nodes
+/// without one keep the text popup.
+fn memory_page_ticker(label: &str) -> Option<&'static str> {
+    match label {
+        "SANDISK" => Some("SNDK"),
+        "SK HYNIX" => Some("000660.KS"),
+        "SAMSUNG" => Some("005930.KS"),
+        "MICRON" => Some("MU"),
+        "CXMT" => Some("688825.SS"),
+        "YMTC" => Some("YMTC"),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::super::diagrams_chat::Target;
@@ -3211,7 +3327,9 @@ mod tests {
         while let Some(p) = rest.find("i=") {
             out.push_str(&rest[..p + 2]);
             rest = &rest[p + 2..];
-            let end = rest.find(|c: char| !c.is_ascii_digit()).unwrap_or(rest.len());
+            let end = rest
+                .find(|c: char| !c.is_ascii_digit())
+                .unwrap_or(rest.len());
             rest = &rest[end..];
         }
         out.push_str(rest);
@@ -3941,74 +4059,6 @@ mod tests {
     }
 
     #[test]
-    fn full_view_draws_kitty_frames_and_rebuilds_on_camera_moves() {
-        let ctx = Ctx {
-            db_path: Default::default(),
-            theme: Theme::default(),
-        };
-        let mut d = open(&ctx, Some("fab".into())).unwrap();
-        d.sel = d.nodes[d.tab]
-            .iter()
-            .position(|n| n.label == "POLYSILICON")
-            .expect("POLYSILICON node");
-        press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Char('c'));
-        press(&mut d, KeyCode::Char('F'));
-        let mut picker = Picker::halfblocks();
-        picker.set_protocol_type(ProtocolType::Kitty);
-        d.picker = picker;
-        let _ = screen_text(&mut d, 175, 48);
-        assert!(matches!(
-            d.full.as_ref().map(|f| &f.shown),
-            Some(Shown::Graphics(_))
-        ));
-        let before = d.full.as_ref().map(|f| f.key);
-        d.full_key(KeyCode::Char('L'), Instant::now());
-        let _ = screen_text(&mut d, 175, 48);
-        assert_ne!(
-            d.full.as_ref().map(|f| f.key),
-            before,
-            "a pan redraws the frame"
-        );
-        assert!(matches!(
-            d.full.as_ref().map(|f| &f.shown),
-            Some(Shown::Graphics(_))
-        ));
-    }
-
-    #[test]
-    fn zoom_hjkl_turn_the_model_and_lowercase_keep_the_beats() {
-        let ctx = Ctx {
-            db_path: Default::default(),
-            theme: Theme::default(),
-        };
-        let mut d = open(&ctx, Some("fab".into())).unwrap();
-        d.sel = d.nodes[d.tab]
-            .iter()
-            .position(|n| n.label == "POLYSILICON")
-            .expect("POLYSILICON node");
-        press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Char('c'));
-        assert_eq!(d.view, PopupView::Zoom);
-        let start = d.orbit;
-        press(&mut d, KeyCode::Char('L'));
-        assert!(d.orbit.yaw > start.yaw, "L turns right");
-        press(&mut d, KeyCode::Char('K'));
-        assert!(d.orbit.pitch > start.pitch, "K tilts up");
-        press(&mut d, KeyCode::Char('0'));
-        assert_eq!(d.orbit, poly3d::View::default(), "0 resets the turn");
-
-        // lowercase still steps the beat, and does not turn the model
-        let beat = |d: &mut Diagrams| d.zoom.as_mut().unwrap().1.shot().beat;
-        let before = beat(&mut d);
-        press(&mut d, KeyCode::Char('l'));
-        assert_eq!(beat(&mut d), before + 1, "l steps the beat");
-        assert_eq!(d.orbit, poly3d::View::default(), "l leaves the model alone");
-    }
-
-    #[test]
     fn halfblocks_sample_top_and_bottom_pixels_per_cell() {
         // top sub-row red, the rest black: cell row 0 is red over black
         let mut img = RgbaImage::from_pixel(4, 4, image::Rgba([0, 0, 0, 255]));
@@ -4021,6 +4071,30 @@ mod tests {
         assert_eq!(buf[(0, 0)].fg, Color::Rgb(255, 0, 0));
         assert_eq!(buf[(0, 0)].bg, Color::Rgb(0, 0, 0));
         assert_eq!(buf[(0, 1)].fg, Color::Rgb(0, 0, 0));
+    }
+
+    /// No page has a 3D model to turn any more (the old rigs are Blender pictures now), so the
+    /// full view and hjkl orbit do not open on GRID or any other page: its zoom-ins are pictures.
+    #[test]
+    fn grid_zooms_are_pictures_not_models() {
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        for key in ['a', 'b', 'c', 'd', 'e'] {
+            let mut d = open(&ctx, Some("power".into())).unwrap();
+            d.sel = d.nodes[d.tab]
+                .iter()
+                .position(|n| n.label == "GRID")
+                .expect("GRID node");
+            press(&mut d, KeyCode::Enter);
+            press(&mut d, KeyCode::Enter);
+            press(&mut d, KeyCode::Char(key));
+            assert_eq!(d.view, PopupView::Zoom, "{key}");
+            assert!(!d.can_orbit(), "{key}: zoom-ins do not orbit");
+            press(&mut d, KeyCode::Char('F'));
+            assert_eq!(d.view, PopupView::Zoom, "{key}: F has no full view");
+        }
     }
 
     #[test]
@@ -4089,56 +4163,6 @@ mod tests {
         press(&mut d, KeyCode::Enter);
         assert_eq!(d.view, PopupView::Zoom);
         assert_eq!(d.zoom.as_ref().map(|(i, _)| *i), Some(9));
-    }
-
-    #[test]
-    fn bell_jar_full_view_orbits_with_hjkl() {
-        let ctx = Ctx {
-            db_path: Default::default(),
-            theme: Theme::default(),
-        };
-        let mut d = open(&ctx, Some("fab".into())).unwrap();
-        d.sel = d.nodes[d.tab]
-            .iter()
-            .position(|n| n.label == "POLYSILICON")
-            .expect("POLYSILICON node");
-        press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Enter);
-        press(&mut d, KeyCode::Char('c'));
-        press(&mut d, KeyCode::Char('F'));
-        assert_eq!(d.view, PopupView::Full);
-        let all = screen_text(&mut d, 175, 48);
-        assert!(
-            all.contains("full view") && all.contains("hjkl orbit"),
-            "{all}"
-        );
-        assert!(d.animating(), "the 3D view keeps its clock running");
-
-        let start = d.orbit;
-        press(&mut d, KeyCode::Char('l'));
-        assert!(d.orbit.yaw > start.yaw, "l orbits right");
-        press(&mut d, KeyCode::Char('h'));
-        press(&mut d, KeyCode::Char('h'));
-        assert!(d.orbit.yaw < start.yaw, "h orbits left");
-        press(&mut d, KeyCode::Char('k'));
-        assert!(d.orbit.pitch > start.pitch, "k tilts up");
-        press(&mut d, KeyCode::Char('L'));
-        assert!(d.orbit.pan[0] > 0.0, "L pans right");
-        press(&mut d, KeyCode::Char('+'));
-        assert!(d.orbit.zoom > 1.0, "+ zooms in");
-        let _ = screen_text(&mut d, 175, 48);
-        assert!(d.full.is_some(), "the frame rendered");
-
-        press(&mut d, KeyCode::Char('0'));
-        assert_eq!(d.orbit, poly3d::View::default(), "0 resets the camera");
-
-        press(&mut d, KeyCode::Char('q'));
-        assert_eq!(d.view, PopupView::Zoom, "q returns to the zoom");
-
-        // a zoom without a 3D model ignores F
-        press(&mut d, KeyCode::Char('a'));
-        press(&mut d, KeyCode::Char('F'));
-        assert_eq!(d.view, PopupView::Zoom);
     }
 
     #[test]

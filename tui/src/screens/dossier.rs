@@ -130,6 +130,8 @@ pub struct Dossier {
     db_path: std::path::PathBuf,
     /// Inner areas from the last draw (tests read the source bar from it).
     panes: Panes,
+    /// Memory pages: the 3D picture above the selected tab's blocks (the tab's `scene`).
+    scene: crate::screens::memory_scene::MemoryScene,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
@@ -152,7 +154,14 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
         Err(msg) => Dossier::empty(&symbol, msg, ctx.theme),
     };
     d.db_path = ctx.db_path.clone();
-    if !symbol.is_empty() {
+    if is_memory_page(&symbol) {
+        d.scene = crate::screens::memory_scene::MemoryScene::query();
+    }
+    if let Some(ticker) = symbol.strip_prefix("MEM:") {
+        // memory pages rebuild from data/memory_facts in well under a second
+        d.refresh = Some(crate::pyrun::spawn_script("py/derive/memory_page.py", &[ticker]));
+        d.flash = Some("refreshing…".into());
+    } else if !symbol.is_empty() {
         // --if-stale: the script skips the rebuild when the cache is current.
         d.refresh = Some(crate::pyrun::spawn_script(
             "py/derive/dossier.py",
@@ -161,6 +170,11 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
         d.flash = Some("refreshing…".into());
     }
     Ok(d)
+}
+
+/// Keys of memory R&D company pages in dossier_cache ("MEM:SNDK").
+fn is_memory_page(symbol: &str) -> bool {
+    symbol.starts_with("MEM:")
 }
 
 fn load_json(db_path: &Path, symbol: &str) -> Result<Option<String>, String> {
@@ -198,6 +212,7 @@ impl Dossier {
             refresh: None,
             db_path: std::path::PathBuf::new(),
             panes: Panes::default(),
+            scene: Default::default(),
         }
     }
 
@@ -215,7 +230,13 @@ impl Dossier {
             }
         };
         let today = chrono::Local::now().date_naive();
-        let mut sections = vec![latest_section(&doc.sections, today)];
+        // Memory R&D pages ("MEM:SNDK", py/derive/memory_page.py) are exactly their own ten
+        // tabs; the synthesized "Latest" section is for ticker dossiers only.
+        let mut sections = if is_memory_page(symbol) {
+            Vec::new()
+        } else {
+            vec![latest_section(&doc.sections, today)]
+        };
         sections.extend(doc.sections.iter().cloned());
         let (audit_sections, audit_notes) = sections.iter().map(audit_section).unzip();
         let mut s = Self::empty(symbol, String::new(), theme);
@@ -373,6 +394,15 @@ impl Dossier {
 }
 
 impl Screen for Dossier {
+    /// A memory page's 3D scene animates, so keep drawing frames while it plays.
+    fn poll_interval(&self) -> std::time::Duration {
+        if self.scene.playing() {
+            self.scene.frame_interval()
+        } else {
+            std::time::Duration::from_millis(100)
+        }
+    }
+
     fn claude_context(&self) -> Option<String> {
         self.selected_source().map(|s| s.to_context())
     }
@@ -429,12 +459,26 @@ impl Screen for Dossier {
             .get(sel)
             .map(|s| s.blocks.as_slice())
             .unwrap_or(&[]);
+        // Memory pages: the tab's 3D diagram plays in the top half, its data below.
+        let scene_page = sections
+            .get(sel)
+            .map(|s| s.scene.as_str())
+            .filter(|s| !s.is_empty() && !self.view.audit);
+        self.scene.set_page(scene_page);
+        let detail = if self.scene.playing() && p.detail.height >= 16 {
+            let [top, rest] =
+                Layout::vertical([Constraint::Percentage(50), Constraint::Min(6)]).areas(p.detail);
+            self.scene.draw(frame, top);
+            rest
+        } else {
+            p.detail
+        };
         if p.nav.width == 0 && self.focus == Focus::Nav {
             self.nav.render(frame, p.detail, sections, &theme, true);
         } else if grid {
-            self.grid.render_in_frame(frame, p.detail, blocks, &theme);
+            self.grid.render_in_frame(frame, detail, blocks, &theme);
         } else {
-            self.view.render(frame, p.detail, blocks, &theme);
+            self.view.render(frame, detail, blocks, &theme);
         }
         render_source_bar(frame, p.source, self.selected_source(), &theme);
         let status = match &self.filter {
@@ -598,7 +642,9 @@ impl Screen for Dossier {
                     Ok(Some(j)) => {
                         let (db_path, focus_nav) = (self.db_path.clone(), self.focus);
                         let sel = self.nav.selected_in(self.sections.len());
+                        let scene = std::mem::take(&mut self.scene);
                         *self = Dossier::from_json(&self.symbol.clone(), &j, self.theme);
+                        self.scene = scene;
                         self.db_path = db_path;
                         self.focus = focus_nav;
                         if let Some(i) = sel.filter(|i| *i < self.sections.len()) {
@@ -701,6 +747,7 @@ fn latest_section(sections: &[Section], today: NaiveDate) -> Section {
         id: "latest".into(),
         title: "Latest".into(),
         short: String::new(),
+        scene: String::new(),
         new: n_new > 0,
         badge: if n_new > 0 {
             n_new.to_string()
@@ -780,6 +827,7 @@ fn audit_section(sec: &Section) -> (Section, String) {
         id: sec.id.clone(),
         title: sec.title.clone(),
         short: sec.short.clone(),
+        scene: sec.scene.clone(),
         blocks,
         new: sec.new,
         badge: sec.badge.clone(),
@@ -920,6 +968,59 @@ mod tests {
 
     fn screen() -> Dossier {
         Dossier::from_json("MRVL", MRVL, Theme::default())
+    }
+
+    const SNDK_PAGE: &str = include_str!("fixtures/memory_SNDK.json");
+
+    /// Every memory R&D page (py/derive/memory_page.py --json), as the diagrams Memory tab opens them.
+    const MEMORY_PAGES: &[(&str, &str)] = &[
+        ("SNDK", SNDK_PAGE),
+        ("000660.KS", include_str!("fixtures/memory_000660_KS.json")),
+        ("005930.KS", include_str!("fixtures/memory_005930_KS.json")),
+        ("MU", include_str!("fixtures/memory_MU.json")),
+        ("688825.SS", include_str!("fixtures/memory_688825_SS.json")),
+        ("YMTC", include_str!("fixtures/memory_YMTC.json")),
+    ];
+
+    #[test]
+    fn memory_page_has_its_ten_tabs_and_no_latest() {
+        for (t, json) in MEMORY_PAGES {
+            let d = Dossier::from_json(&format!("MEM:{t}"), json, Theme::default());
+            assert!(d.doc.is_some(), "{t}: page parses");
+            assert_eq!(d.sections.len(), 10, "{t}: ten tabs, no synthesized Latest");
+            assert_eq!(d.sections[0].title, "Snapshot", "{t}");
+            for s in &d.sections {
+                assert!(s.title != "Latest", "{t}");
+                assert!(!s.blocks.is_empty(), "{t}: tab {} has data", s.title);
+                assert!(s.title.chars().count() <= 20, "{t}: tab title {:?} fits the nav", s.title);
+            }
+            // draws at a normal terminal size without panicking
+            let mut d = d;
+            for i in 0..d.sections.len() {
+                d.nav.select(i, d.sections.len());
+                render(&mut d, 150, 44);
+            }
+        }
+    }
+
+    /// `FL_DUMP=1 cargo test memory_page_dump -- --nocapture` prints each tab as drawn;
+    /// FL_PAGE=<path to a memory_page.py --json file> dumps that page instead of SanDisk.
+    #[test]
+    fn memory_page_dump() {
+        if std::env::var("FL_DUMP").is_err() {
+            return;
+        }
+        let json = match std::env::var("FL_PAGE") {
+            Ok(p) => std::fs::read_to_string(p).expect("FL_PAGE file"),
+            Err(_) => SNDK_PAGE.to_string(),
+        };
+        let mut d = Dossier::from_json("MEM:PAGE", &json, Theme::default());
+        for i in 0..d.sections.len() {
+            d.nav.select(i, d.sections.len());
+            let term = render(&mut d, 150, 44);
+            let area = Rect::new(0, 0, 150, 44);
+            println!("===== tab {i} =====\n{}", rows_text(&term, area));
+        }
     }
 
     #[test]

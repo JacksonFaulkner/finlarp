@@ -1,7 +1,7 @@
-// CHIP tab, TOP METAL: the node's overview is the whole-chip scene (tools/pbr3d/blender/chip_kit.py)
-// with the camera zooming in on this part (tools/pbr3d/blender/chip_top_metal.py): the M10-M14
-// power grid, clock trunk and bump pads, then the bumps above them. Six beats, one loop.
-// Zoom-ins a-e (3 beats each) and sections 1-10 are the same chip, closer or whole, from the same script.
+// CHIP tab, TOP METAL (tools/pbr3d/blender/chip_top_metal.py). The overview opens and closes on the
+// whole-chip scene (chip_kit.py) and in between works on a detailed cut-away of M10-M14, the pad and
+// the bump (chip_top_metal_detail.py), with beads riding the copper. Zoom a builds the M14 loop step
+// by step; zooms b-e and sections 1-10 are cut-aways of the same parts.
 //
 // Sources: CHIP_TOP_METAL.txt sections 2-4, CHIP_TOP_METAL.details.txt (POWER GRID, CLOCK TRUNK,
 // LONG WIRES, IR DROP, C4 BUMP), with the citations kept in each beat's `detail`.
@@ -11,377 +11,208 @@ use super::super::Node;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[
-    Beat::new("the thick top: M10-M14, lit", BEAT_MS)
+    Beat::new("the thick top: M10-M14", BEAT_MS)
         .note(
-            "The top three levels, M10-M14, are the thickest and widest copper on the chip. They carry power and clock across the whole die, and the package bumps sit on top of them.",
-            "the three top levels lit in amber across the top of the chip, the row of bumps above them, and the thin wiring and transistors below",
+            "The top levels, M10-M14, are the thickest and widest copper on the chip. They carry power and the clock across the whole die, and the package bumps sit on top of them.",
+            "The whole chip: the top tier lit amber across the top, the row of bumps above it, the thin wiring and transistors below.",
         )
         .detail(
-            "Wires get wider going up, because the resistance of a wire falls with its cross-section.",
-            &[
-                "M10-M14 thick, wide copper for the power grid and clock trunk (CHIP_TOP_METAL.txt, section 2)",
-                "Long cross-block wires use M10-M14-class layers (LONG WIRES, textbook)",
-            ],
+            "Wires get fatter going up, because a wire's resistance falls with its cross-section.",
+            &["M10-M14: thick, wide copper for the power grid and clock trunk (CHIP_TOP_METAL.txt, section 2)"],
         ),
     Beat::new("power comes in through a bump", BEAT_MS)
         .note(
-            "VDD arrives from the package through a bump, then down through a bond pad onto the thick top rail. Bumps alternate power, ground and signal across the die, so power enters right above the logic that needs it.",
-            "the VDD bump lit, amber dots falling from it through the square pad onto the top rail, and the rail glowing where the current lands",
+            "Inside the top of the stack: supply current comes from the package substrate through a C4 solder bump, down through the aluminium bond pad and two thick vias, and onto an M14 VDD stripe. Bumps are spread over the whole die, so power enters right above the logic that uses it.",
+            "Amber beads falling from the green substrate through the cut solder ball, the grey UBM and Al pad, and down the vias into the copper M14 stripe.",
         )
         .detail(
-            "Flip-chip bumps spread power over the whole die, not only at the edge.",
+            "Flip-chip bumps feed power over the whole die, not only at the edge.",
             &[
-                "Bumps alternate power, ground and signal across the whole die (C4 BUMP, textbook)",
-                "C4 bumps at about 150 um pitch, one patent example (image-ppubs.uspto.gov, patent 8896118)",
+                "C4 bumps at about 150 um pitch, alternating power, ground and signal (patent 8896118)",
+                "The bump is drawn far smaller than life next to the wiring",
             ],
         ),
-    Beat::new("the grid spreads it both ways", BEAT_MS)
+    Beat::new("the grid spreads it out", BEAT_MS)
         .note(
-            "The Vdd stripes on the thick levels run across the chip and feed current out to every cell. Current spreads along the rail in both directions from where it enters.",
-            "amber dots running along the full-width top rail away from the bump, toward both ends of the chip, with the rails' thickness standing out against the thin wiring below",
+            "The M14 stripes alternate VDD and VSS across the die. The M13 rail under them ties the VDD stripes together, and current spreads along it both ways and drops through vias toward every cell.",
+            "Orange VDD and blue VSS stripes across M14, the M13 rail glowing orange, and amber beads running out both ways and down the vias.",
         )
         .detail(
-            "Thick, wide rails keep the drop along the grid small, so the cells see close to the full supply.",
-            &[
-                "A modern CPU or GPU pulls tens to hundreds of amps at about 1 V or less (textbook)",
-                "Vdd and Vss stripes alternate and meet bumps from above (POWER GRID, patent 11681854)",
-                "Every stage drops V = I x R; designers tolerate roughly 10% total droop (IR DROP, secondary)",
-            ],
+            "A wide, thick mesh keeps the grid's resistance low.",
+            &["Power on thick upper layers; drop bounded by top-layer thickness (patent 11681854)"],
         ),
-    Beat::new("the clock trunk fans out", BEAT_MS)
+    Beat::new("the clock spine", BEAT_MS)
         .note(
-            "The clock tree's top trunk sits on the middle top level and fans out from one point toward both sides of the chip. Local trees below it drive the flip-flops.",
-            "a green clock source dot in the gap of the middle top level, and green dots splitting left and right along the lit green band",
+            "The clock trunk runs on low-resistance upper metal so it reaches every block at nearly the same moment. Taps drop from it to the local clock trees in the levels below.",
+            "A green spine along an M11 wire, short green taps down to M10, and green beads spreading out from the middle.",
         )
         .detail(
-            "The clock must reach millions of flip-flops at nearly the same time, so the trunk uses low-resistance upper metal.",
-            &[
-                "The top-level trunk is an H-tree or mesh on low-resistance upper metal (CLOCK TRUNK, textbook)",
-                "Inherent H-tree skew from process variation about 150-200 ps, one patent-derived source (CLOCK TRUNK sources: semiconductor-digest.com/?p=6892, patent US6037822)",
-            ],
+            "Low skew needs low resistance.",
+            &["H-tree or mesh on low-resistance upper metal (CLOCK TRUNK, textbook)"],
         ),
     Beat::new("thick wire, low resistance", BEAT_MS)
         .note(
-            "Both wires are the same length. R = rho x L / (W x T): the thin wire's small cross-section gives high resistance, and the top rail's wide, tall cross-section gives low resistance. The picture is schematic, not to scale in its proportions.",
-            "a short thin copper stub below and a taller, thicker top rail above, both the same length, amber dots moving through each, and the formula tagged between them",
+            "Resistance is R = rho x L / (W x T): for the same length, a wider, thicker wire has far less. Signals and current cross the fat M13 rail much faster than the narrower M11 wire below it.",
+            "The same length of M11 wire glowing orange with beads crawling along it, and the M13 rail above glowing green with beads racing across.",
         )
         .detail(
-            "Resistance falls as the cross-section grows, so the top levels carry current with the least drop.",
+            "Thickness and width are the levers.",
             &[
-                "R = rho L / (W T), resistance from resistivity, length, width and thickness (textbook)",
-                "Wide, thick upper-layer wires cut R, so buses cross a large die with repeaters far apart (LONG WIRES, textbook)",
-                "Thick top metal is treated as nearly zero resistance in simplified patent calculations (IR DROP, secondary)",
+                "R = rho x L / (W x T) (CHIP_TOP_METAL.txt, section 3)",
+                "Top-metal pitch and thickness are foundry-confidential",
             ],
         ),
-    Beat::new("back out: the return to the VSS bump", BEAT_MS)
+    Beat::new("the return path: VSS", BEAT_MS)
         .note(
-            "VSS climbs the top levels back up to its bump, and the whole chip is in view again. Power goes in through one bump, spreads over the top rails and returns through another.",
-            "blue-white dots rising from the top rail through the VSS pad to the lit VSS bump, with the whole chip in view and the top tier lit",
+            "Every amp that comes in on VDD goes back out on VSS. Back on the whole chip, the return current climbs the ground grid to its own bumps.",
+            "The whole chip again, the top tier lit and blue beads climbing to a VSS bump.",
         )
         .detail(
-            "The loop closes at the package: power in on one bump, return on another.",
-            &[
-                "Current flows from the regulator through package planes and the bump array into the top metal (CHIP_TOP_METAL.txt, section 4; textbook)",
-                "Bumps alternate power, ground and signal across the whole die (C4 BUMP, textbook)",
-            ],
+            "Power and ground bumps alternate across the die.",
+            &["Bumps alternate power, ground and signal across the die (C4 BUMP, textbook)"],
         ),
 ];
 
 const ZA_BEATS: &[Beat] = &[
     Beat::new("trench, barrier and seed", BEAT_MS)
         .note(
-            "A trench is etched into the dielectric, then lined with a barrier and a thin copper seed. The barrier keeps copper from reaching the transistors.",
-            "a pale barrier layer over the middle top level, the top rails lit amber round it, and the trench label tagged above",
+            "M14 is made like every other level, only bigger. Plasma etches wide trenches and via holes into the dielectric, then a thin TaN barrier and a copper seed coat every wall so the copper can neither escape nor fail to stick.",
+            "The purple plasma in the openings, then empty trenches lined with dark blue barrier shells, and the via openings down to M13.",
         )
         .detail(
-            "Copper diffuses fast into silicon and oxide, so each trench gets a conformal liner before the fill.",
+            "The same damascene loop as the thin levels.",
+            &["TRENCH ETCH, BARRIER + SEED (TaN plus Cu PVD) (CHIP_TOP_METAL.txt, section 1)"],
+        ),
+    Beat::new("plate copper, then polish", BEAT_MS)
+        .note(
+            "Copper electroplates into the trenches and vias and keeps going past the top. The CMP pad then grinds the excess away down to the dielectric, leaving separate thick stripes, and a SiCN cap seals them.",
+            "A copper slab growing over M14, the dark CMP pad sweeping across, and the pale green cap left on the polished stripes.",
+        )
+        .detail(
+            "Plate, polish, cap.",
             &[
-                "Copper cannot be plasma-etched into lines, so the trench is etched into the dielectric (TRENCH ETCH, UMD damascene slides)",
-                "Barrier typically Ta, TaN, TiN or TiW, about 2 to 10 nm (BARRIER + SEED, damascene explainers)",
+                "CU PLATE, then CMP (CHIP_TOP_METAL.txt, section 1)",
+                "Top-metal thickness is foundry-confidential",
             ],
         ),
-    Beat::new("copper plate, then CMP", BEAT_MS)
+    Beat::new("pad, passivation and bump", BEAT_MS)
         .note(
-            "Copper is electroplated bottom-up into the trench, then CMP polishes the excess flat so only the metal in the trench remains.",
-            "the trench glowing amber as the copper fills it, the surface level with the rail afterwards",
+            "Vias lift the top copper to an aluminium bond pad. SiN and polyimide seal the die, open only over the pad, and under-bump metal plus a solder ball turn the pad into a C4 bump.",
+            "The grey Al pad on two vias, lilac SiN and amber polyimide around it, and the solder ball dropping onto the UBM.",
         )
         .detail(
-            "Each metal level needs its own CMP, so the polishing steps add up with stack height.",
-            &[
-                "Electroplated superfill from a copper sulfate bath with organic additives (CU PLATE, textbook)",
-                "Copper tolerates roughly 5x the current density of aluminium (CU PLATE, Synopsys glossary)",
-                "Each metal level needs its own CMP (CMP, textbook)",
-            ],
-        ),
-    Beat::new("passivation, the bond pad and the bump", BEAT_MS)
-        .note(
-            "Bond pads sit over the last copper level, under a passivation stack with openings over them. A solder bump sits on each pad and joins the chip to the package.",
-            "the blue passivation over the pads, a pad under it, and the VDD bump glowing amber above",
-        )
-        .detail(
-            "Passivation blocks moisture and ions, and the bump carries power into the package.",
-            &[
-                "Pads usually aluminium or aluminium-copper, passivation of oxide, nitride and polyimide with openings over the pads (PAD + PASSIV, patents 11189538 and 12040293)",
-                "C4 bumps at about 150 um pitch, one patent example (BUMP, patent 8896118)",
-            ],
+            "The chip's last steps before packaging.",
+            &["PAD + PASSIV, BUMP (patents 11189538, 12040293; C4 ~150 um pitch, patent 8896118)"],
         ),
 ];
 
-const ZB_BEATS: &[Beat] = &[
-    Beat::new("power grid: Vdd stripes on the thick levels", BEAT_MS)
-        .note(
-            "Vdd and Vss stripes on the thick levels feed current from the bumps out to every cell. Current spreads along the rail both ways from where it enters.",
-            "the top tier lit, amber dots running along the full-width rail away from the VDD bump toward both ends",
-        )
-        .detail(
-            "Thick, wide rails keep the drop along the grid small, so the cells see close to the full supply.",
-            &[
-                "A modern CPU or GPU pulls tens to hundreds of amps at about 1 V or less (textbook)",
-                "Power is carried on thick upper layers; the drop is bounded by top-layer thickness (POWER GRID, patent 11681854)",
-            ],
-        ),
-    Beat::new("clock trunk and long wires", BEAT_MS)
-        .note(
-            "The clock trunk sits on the middle top level and fans out from one point. Long buses cross the die on the same low-resistance upper metal.",
-            "a green clock source in the gap of the middle level, green dots splitting left and right, and purple dots running along the top rail",
-        )
-        .detail(
-            "The clock must reach millions of flip-flops at nearly the same time, so the trunk uses low-resistance upper metal.",
-            &[
-                "H-tree or mesh on low-resistance upper metal, with local trees below (CLOCK TRUNK, textbook)",
-                "Inherent H-tree skew from process variation about 150-200 ps (CLOCK TRUNK, semiconductor-digest.com/?p=6892)",
-                "Wide, thick upper-layer wires cut R, so repeaters sit far apart (LONG WIRES, textbook)",
-            ],
-        ),
-    Beat::new("RDL and underfill", BEAT_MS)
-        .note(
-            "A redistribution layer re-routes a pad to a new bump position. Epoxy underfill fills the gap round the bumps.",
-            "a purple trace leaving the VDD pad, and a translucent band of underfill between the bumps, with the VDD and VSS bumps lit",
-        )
-        .detail(
-            "The RDL moves pads to the bump pattern; underfill keeps the solder joints from cracking in thermal cycling.",
-            &[
-                "RDL re-routes pads to a coarser bump pitch, copper RDL by damascene (RDL, patent 11798904)",
-                "Underfill improved flip-chip fatigue life by more than an order of magnitude (UNDERFILL, Semiconductor History Museum of Japan)",
-            ],
-        ),
-];
-
-const ZC_BEATS: &[Beat] = &[
-    Beat::new("from the bump, down the stack", BEAT_MS)
-        .note(
-            "Current enters through a bump, runs down the VDD via column through the stack, and reaches the PMOS source.",
-            "amber dots falling from the VDD bump down the via column to the transistor at the bottom",
-        )
-        .detail(
-            "Every stage between the bump and the transistor adds resistance, so the path is long.",
-            &[
-                "Current runs from the VRM through package planes and the bump array, then M14 down to the cell (CHIP_TOP_METAL.txt, section 4)",
-                "0.9 V is an illustrative supply (CHIP_TOP_METAL.txt, section 4)",
-            ],
-        ),
-    Beat::new("IR drop along the top rail", BEAT_MS)
-        .note(
-            "Each stage drops V = I x R. The top rail heats where the current flows, and the voltage the cells see falls with distance from the bump.",
-            "the rail lit orange-red from the bump outward, and orange dots slowing along it",
-        )
-        .detail(
-            "The die sees what is left after the drop, so the top levels are kept low in resistance.",
-            &[
-                "Every stage drops V = I x R; designers tolerate roughly 10% total droop (IR DROP, secondary)",
-                "Top thick layers treated as nearly zero resistance in simplified patent calculations (IR DROP, patent 11681854)",
-            ],
-        ),
-    Beat::new("electromigration in the via", BEAT_MS)
-        .note(
-            "Too much current through a thin via pushes copper atoms along, and over years the via can open up.",
-            "the VDD via lit orange-red and hot dots climbing it",
-        )
-        .detail(
-            "Copper tolerates more current than aluminium, but thin wires and vias are the weak points.",
-            &[
-                "Copper about 5x the current density of aluminium (EM LIMIT, Synopsys glossary)",
-                "Damascene copper about 1-3e6 A/cm2 (EM LIMIT, secondary; rfessentials.com)",
-            ],
-        ),
-];
-
-const ZD_BEATS: &[Beat] = &[
-    Beat::new("C4 bumps, about 150 um", BEAT_MS)
-        .note(
-            "C4 solder bumps join the die to the package at about 150 um pitch, alternating power, ground and I/O.",
-            "the row of bumps across the top, the VDD and VSS bumps lit amber",
-        )
-        .detail(
-            "Bumps spread over the whole die, so power enters above the logic that needs it.",
-            &[
-                "C4 bumps at about 150 um pitch, one patent example (C4 BUMP, patent 8896118)",
-                "Bumps alternate power, ground and signal across the die (C4 BUMP, textbook)",
-            ],
-        ),
-    Beat::new("microbumps, about 40 um", BEAT_MS)
-        .note(
-            "Microbumps are solder-capped copper pillars at about 40 um pitch, used to stack chiplets and dies.",
-            "a close row of fine pillars standing on the top rail",
-        )
-        .detail(
-            "Finer pitch means more connections per mm2, but solder can bridge at fine pitch.",
-            &[
-                "40 um pitch = 20-25 um bumps with 15 um spacing (MICROBUMP, semiengineering.com/scaling-bump-pitches-in-advanced-packaging)",
-                "Solder bridging at fine pitch (MICROBUMP, Onto Innovation yearbook)",
-            ],
-        ),
-    Beat::new("hybrid bond, copper to copper", BEAT_MS)
-        .note(
-            "Hybrid bonding joins flat copper pads directly, with no solder, at 10 um pitch and below.",
-            "a row of flat copper pads lying on the top rail, with nothing between them",
-        )
-        .detail(
-            "Smaller pitch means more connections per mm2; the surface must be flat and clean.",
-            &[
-                "Direct Cu-Cu and oxide-oxide bonding, 10 um pitch and below (HYBRID BOND, semiengineering.com/hybrid-bonding-basics-what-is-hybrid-bonding)",
-                "Copper recess must be nanometers (HYBRID BOND, textbook)",
-            ],
-        ),
-];
-
-const ZE_BEATS: &[Beat] = &[
-    Beat::new("front-side power: a shared stack", BEAT_MS)
-        .note(
-            "Today power and signals share the front stack, M0 to M14, so the power network competes with the signal wires for space.",
-            "power dots falling down the VDD column and signal dots crossing a medium level, on the same stack",
-        )
-        .detail(
-            "Shared wiring causes congestion and droop; moving power off the front is the fix.",
-            &[
-                "Today power and signals share the front stack (BSPDN, Intel PowerVia, secondary)",
-                "Congestion and droop (CHIP_TOP_METAL.details.txt, BSPDN)",
-            ],
-        ),
-    Beat::new("backside power: rails under the silicon", BEAT_MS)
-        .note(
-            "Backside metals (BM0-BM5) sit under the thinned silicon. Nano-TSVs carry power up to the transistors.",
-            "copper rails under the chip, the TSVs rising through the silicon, and amber dots climbing them",
-        )
-        .detail(
-            "Power on the back leaves the front free for signals.",
-            &[
-                "Intel PowerVia on 18A routes power through backside metals to nano-TSVs (BSPDN, intel.com 18A)",
-                "TSMC A16 Super Power Rail contacts source and drain directly (BSPDN, tomshardware.com)",
-            ],
-        ),
-    Beat::new("the gains: signals on the front", BEAT_MS)
-        .note(
-            "With power behind, the front carries signals only, and droop falls.",
-            "cyan signal dots on the front stack, and amber power dots coming up from the rails",
-        )
-        .detail(
-            "The test chip shows the droop gain; the other figures are the vendors' own claims.",
-            &[
-                "PowerVia test chip: more than 30% lower droop, more than 6% performance (BSPDN, Intel 4 test chip)",
-                "Intel 2026 18A brief claims about 10x lower worst-case dynamic droop (BSPDN, vendor claim)",
-            ],
-        ),
-];
+// b-e play sections 3-6 seen from the other side, so they share those beats.
+const ZB_BEATS: &[Beat] = S3_BEATS;
+const ZC_BEATS: &[Beat] = S4_BEATS;
+const ZD_BEATS: &[Beat] = S5_BEATS;
+const ZE_BEATS: &[Beat] = S6_BEATS;
 
 const S1_BEATS: &[Beat] = &[
-    Beat::new("the top tier: M10-M14 copper", BEAT_MS)
+    Beat::new("M14: the thick copper loop", BEAT_MS)
         .note(
-            "The top three levels, M10-M14, are the thick, wide copper of the stack. They are built with the same damascene loop as the thin levels, only bigger.",
-            "the top tier lit amber across the whole chip, the transistors and thin wiring below",
+            "The top levels are built with the same damascene loop as the thin ones, only wider and thicker: etch the trench, line it with a TaN barrier and copper seed, electroplate, then polish. Copper overfills the trenches and the CMP pad grinds it back to the dielectric.",
+            "M13 and M14 copper in cut-away, a copper slab growing over the top, the grey CMP pad sweeping it off, and the pale green cap left on M14.",
         )
         .detail(
-            "Wires get wider going up, because resistance falls with cross-section.",
+            "Same loop, bigger wires.",
             &[
-                "The top levels use the same copper damascene loop, only wider and taller (CHIP_TOP_METAL.txt, section 1)",
-                "M10-M14 thick, wide copper with big vias between (CHIP_TOP_METAL.txt, section 2)",
+                "TRENCH ETCH, BARRIER + SEED (TaN plus Cu PVD), CU PLATE, CMP (CHIP_TOP_METAL.txt, section 1)",
+                "Top-metal pitch and thickness are foundry-confidential",
             ],
         ),
-    Beat::new("bumps and pads on the top", BEAT_MS)
+    Beat::new("bond pad and passivation", BEAT_MS)
         .note(
-            "Bond pads sit on the top metal, and a C4 bump sits on each pad. The bumps carry power and I/O from the package into the top metal.",
-            "the row of bumps lit across the top, with the camera in on the top of the chip",
+            "Thick vias carry the top copper up to an aluminium bond pad. Silicon nitride and then polyimide cover the whole die to seal it against moisture and scratches, with an opening left over each pad.",
+            "Two thick vias from an M14 stripe up to the grey Al pad, the lilac SiN round it, and the amber polyimide with a gap over the pad.",
         )
         .detail(
-            "The bumps are the link between the chip and the package.",
-            &[
-                "C4 bumps at about 150 um pitch, alternating power, ground and I/O (CHIP_TOP_METAL.txt, section 5)",
-                "Passivation with openings over the pads (PAD + PASSIV, patents 11189538 and 12040293)",
-            ],
+            "The chip is sealed except at its pads.",
+            &["PAD + PASSIV: bond pads, SiN and polyimide with openings (patents 11189538 and 12040293)"],
         ),
-    Beat::new("finished: ready for the package", BEAT_MS)
+    Beat::new("UBM and the C4 bump", BEAT_MS)
         .note(
-            "The finished top of the stack: the bumps are what the package sees.",
-            "the whole chip, the bumps above the top tier",
+            "Under-bump metal (titanium, copper, nickel) fills the opening so solder can wet it without eating the pad. A solder ball goes on top: the C4 bump that joins the die to the package.",
+            "The grey UBM plug and silver nickel cap filling the opening, and the solder ball dropping onto it, shown cut in half.",
         )
         .detail(
-            "Pads and bumps are the last steps before packaging.",
-            &["PAD + PASSIV and BUMP, the last steps before packaging (CHIP_TOP_METAL.txt, section 1)"],
+            "The last steps before packaging.",
+            &[
+                "C4 bumps at about 150 um pitch (patent 8896118)",
+                "The bump is drawn far smaller than life next to the wiring",
+            ],
         ),
 ];
 
 const S2_BEATS: &[Beat] = &[
     Beat::new("transistors, contacts and M1-M4", BEAT_MS)
         .note(
-            "Transistors, tungsten contacts and M1-M4 thin copper for cell wiring sit at the bottom of the stack.",
-            "the thin tier lit cyan, the transistors below it",
+            "At the bottom of the stack sit the transistors in the silicon, tungsten contacts down to their sources and drains, and the thin M1-M4 copper that wires up each logic cell. These are the densest wires on the chip.",
+            "Pink and blue source/drain blocks and grey gates in the dark silicon, thin tungsten plugs above them, and rows of tiny copper lines.",
         )
         .detail(
-            "Thin wires give density for the cells.",
-            &["M1-M4 thin copper for cell wiring (CHIP_TOP_METAL.txt, section 2)"],
+            "Thin wires for density.",
+            &[
+                "M1-M4 thin copper for cell wiring (CHIP_TOP_METAL.txt, section 2)",
+                "Intel 4 M0 pitch: 30 nm (WikiChip)",
+            ],
         ),
-    Beat::new("M5-M9 medium copper", BEAT_MS)
+    Beat::new("M5-M9: block wiring", BEAT_MS)
         .note(
-            "Medium copper, M5-M9, carries block signals between the cells.",
-            "the medium tier lit violet in the middle of the stack",
+            "The middle levels are about twice as wide and tall and carry signals between blocks. Each level runs at right angles to the one below, and vias join them.",
+            "The cut-away alternating between rows of copper cross-sections and long copper bars, joined by vertical vias.",
+        )
+        .detail("Medium wires for reach.", &["M5-M9 medium copper for block signals (CHIP_TOP_METAL.txt, section 2)"]),
+    Beat::new("M10-M14, pad and bump", BEAT_MS)
+        .note(
+            "The top levels are the widest and thickest: M10-M12 for long wires and the clock, M13-M14 for the power grid. The pad and the C4 bump sit on top, and every transistor below gets its power through them.",
+            "A few big copper lines at the top of the column, the amber polyimide and grey UBM, and the solder ball cut in half.",
         )
         .detail(
-            "Wires get fatter going up: thin for density, thick for current and reach.",
-            &["M5-M9 medium copper for block signals (CHIP_TOP_METAL.txt, section 2)"],
-        ),
-    Beat::new("M10-M14 thick copper and bumps", BEAT_MS)
-        .note(
-            "M10-M14 are the fattest wires, below the pads and the C4 bumps.",
-            "the top tier lit amber and the bumps lit above it",
-        )
-        .detail(
-            "The fattest wires carry power and clock with the least resistance.",
-            &["M10-M14 thick, wide copper for the power grid and clock trunk (CHIP_TOP_METAL.txt, section 2)"],
+            "Thick wires for current.",
+            &[
+                "M10-M14 thick, wide copper for power grid and clock trunk (CHIP_TOP_METAL.txt, section 2)",
+                "C4 bumps at about 150 um pitch",
+            ],
         ),
 ];
 
 const S3_BEATS: &[Beat] = &[
     Beat::new("POWER GRID", BEAT_MS)
         .note(
-            "Vdd and Vss stripes on the thick levels feed every cell. Current spreads along the top rails from the bump.",
-            "amber dots along the full-width top rails, away from the VDD bump",
+            "Power enters at the bump, runs along the redistribution layer to the pad and down into the grid. The thick M14 stripes alternate VDD and VSS; the M13 rail under them ties the VDD stripes together and feeds the vias down to every cell.",
+            "Orange VDD and blue VSS stripes across M14, the M13 rail glowing orange, and amber dots running down from the bump and out both ways along the rail.",
         )
         .detail(
             "Wide, thick rails keep the grid's resistance low.",
-            &["Power on thick upper layers, drop bounded by top-layer thickness (POWER GRID, patent 11681854)"],
+            &[
+                "Power on thick upper layers; drop bounded by top-layer thickness (patent 11681854)",
+                "R = rho x L / (W x T): thicker, wider wires cut R",
+            ],
         ),
-    Beat::new("CLOCK TRUNK and LONG WIRES", BEAT_MS)
+    Beat::new("CLOCK spine and LONG WIRES", BEAT_MS)
         .note(
-            "The clock's low-skew trunk fans out from one point, and buses cross blocks on the same upper metal.",
-            "a green clock source in the middle top level, green dots splitting left and right, purple dots along the top rail",
+            "The clock trunk runs on low-resistance upper metal so it reaches every block with little skew; taps drop down to the local clock trees. Long buses crossing the die use the same thick levels.",
+            "A green spine along the M11 wire with taps glowing down to M10, green dots spreading out from the middle, and cyan dots along an M12 bus.",
         )
         .detail(
             "Reach and skew both need low resistance.",
-            &[
-                "H-tree or mesh on low-resistance upper metal (CLOCK TRUNK, textbook)",
-                "Wide, thick upper-layer wires cut R (LONG WIRES, textbook)",
-            ],
+            &["H-tree or mesh on low-resistance upper metal (CLOCK TRUNK, textbook)"],
         ),
     Beat::new("RDL and UNDERFILL", BEAT_MS)
         .note(
-            "A redistribution layer re-routes pads to bumps; underfill epoxy spreads the stress.",
-            "a purple trace leaving the VDD pad and the underfill band round the bumps",
+            "A redistribution layer is a copper trace on the polyimide that moves a connection from the pad to wherever the bump pattern needs it. Underfill epoxy then fills the gap between die and substrate and shares the strain, so the joints last.",
+            "The copper RDL trace running right from the pad to the bump, olive underfill round the cut solder ball, and the green package substrate above.",
         )
         .detail(
-            "The package side: pad re-routing and stress relief.",
+            "The package side.",
             &[
-                "RDL re-routes pads to the bump pattern (RDL, patent 11798904)",
-                "Underfill improved flip-chip fatigue life by more than 10x (UNDERFILL, Semiconductor History Museum of Japan)",
+                "RDL re-routes pads to the bump pattern (patent 11798904)",
+                "Underfill: >10x flip-chip fatigue life (Semiconductor History Museum of Japan)",
             ],
         ),
 ];
@@ -389,188 +220,218 @@ const S3_BEATS: &[Beat] = &[
 const S4_BEATS: &[Beat] = &[
     Beat::new("from the VRM to the transistor", BEAT_MS)
         .note(
-            "Current enters through a bump, runs down the VDD via column through the stack, and reaches the transistor.",
-            "amber dots falling from the VDD bump through the via column to the transistor",
+            "Current comes from the voltage regulator on the board through the package, into the bump and pad, then down the via stack through M14, M13, M12 and below to the cell rails and the transistors. Every stage has resistance.",
+            "Amber dots falling from the green substrate through the solder ball, the pad and the vias, down the column at the centre of the block.",
         )
         .detail(
-            "Each stage between the regulator and the transistor adds resistance.",
-            &["Current runs from the VRM through package planes and the bump array, then down M14 to the cell (CHIP_TOP_METAL.txt, section 4)"],
+            "A long path, every step resistive.",
+            &[
+                "VRM, package planes, bumps, M14 down to M1, cell rail (CHIP_TOP_METAL.txt, section 4)",
+                "0.9 V is an illustrative supply",
+            ],
         ),
-    Beat::new("IR DROP at every stage", BEAT_MS)
+    Beat::new("IR DROP along the rail", BEAT_MS)
         .note(
-            "V = I x R drops the voltage at each stage. The top rail heats where the current flows.",
-            "the top rail lit orange-red from the bump outward, and orange dots slowing along it",
+            "Every stage loses V = I x R. Along the M13 rail the voltage is highest under the bump and falls with distance from it. Designers tolerate roughly 10% total droop from supply to transistor.",
+            "The M13 rail coloured pale yellow under the bump, fading to red at both ends, with amber dots flowing outward.",
         )
         .detail(
-            "The die sees what is left after the drop; designers tolerate roughly 10%.",
-            &["Every stage drops V = I x R; roughly 10% total droop tolerated (IR DROP, secondary)"],
+            "The die sees what is left.",
+            &["Roughly 10% total droop tolerated (IR DROP, secondary)"],
         ),
-    Beat::new("EM LIMIT", BEAT_MS)
+    Beat::new("EM LIMIT at the vias", BEAT_MS)
         .note(
-            "Copper carries a high current density before electromigration bites. The VDD via is where the current is densest.",
-            "the VDD via lit orange-red and hot dots climbing it",
+            "The vias under the bump carry the most current per area. Copper takes only so much current density before electromigration opens a void, so designers widen wires and put many vias in parallel.",
+            "The via stack glowing orange-red with dense dots, and a black void growing at the foot of the M14 via.",
         )
         .detail(
             "Wider wires and redundant vias are the fix.",
-            &["Copper about 5x the current density of aluminium (EM LIMIT, Synopsys glossary)"],
+            &[
+                "Damascene Cu about 1-3e6 A/cm2 (secondary)",
+                "Copper about 5x aluminium's limit (Synopsys glossary)",
+            ],
         ),
 ];
 
 const S5_BEATS: &[Beat] = &[
     Beat::new("C4 BUMP: about 150 um", BEAT_MS)
         .note(
-            "Solder bumps connect the chip to the package substrate, at about 150 um pitch.",
-            "the row of bumps across the top of the chip, the VDD and VSS bumps lit",
+            "A C4 bump is a solder ball joining the die to an organic package substrate, at about 150 um pitch. It is cheap and robust, but only a few dozen fit in each square millimetre.",
+            "Two grey solder balls, cut in half, between the dark die above and the green layered substrate below.",
         )
         .detail(
-            "Bumps spread power over the die.",
-            &["C4 bumps at about 150 um pitch, one patent example (C4 BUMP, patent 8896118)"],
+            "The classic flip-chip joint.",
+            &[
+                "C4 about 150 um pitch (patent 8896118)",
+                "About 44 per mm2 at 150 um pitch",
+            ],
         ),
     Beat::new("MICROBUMP: about 40 um", BEAT_MS)
         .note(
-            "Solder-capped copper pillars join chiplets to an interposer, at about 40 um pitch.",
-            "a close row of fine pillars on the top rail",
+            "Chiplets sit on a silicon interposer on copper pillars with a solder cap, at about 40 um pitch: 20-25 um bumps with 15 um gaps. The pitch is expected to hit a wall near 10 um.",
+            "A row of copper pillars with grey solder caps between the chiplet above and the grey interposer below, at the same scale as the C4 balls.",
         )
         .detail(
-            "20-25 um bumps with 15 um spacing; a wall is expected near 10 um.",
-            &["40 um pitch = 20-25 um bump + 15 um space (MICROBUMP, semiengineering.com/scaling-bump-pitches-in-advanced-packaging)"],
+            "Over ten times the density of C4.",
+            &[
+                "40 um pitch = 20-25 um bump + 15 um space (SemiEngineering)",
+                "About 625 per mm2 at 40 um pitch",
+            ],
         ),
     Beat::new("HYBRID BOND: 10 um and below", BEAT_MS)
         .note(
-            "Direct copper-to-copper and oxide-to-oxide bonds join the dies with no solder.",
-            "a row of flat copper pads lying on the top rail",
+            "In hybrid bonding two dies are polished flat and pressed face to face. Copper pads bond straight to copper and oxide to oxide, with no solder, at 10 um pitch and below.",
+            "Two dies face to face, a thin band of copper pads alternating with pale oxide where they meet.",
         )
         .detail(
-            "More connections per mm2 at smaller pitch.",
-            &["Direct Cu-Cu, 10 um pitch and below (HYBRID BOND, semiengineering.com/hybrid-bonding-basics-what-is-hybrid-bonding)"],
+            "Smaller pitch, more connections per mm2.",
+            &[
+                "Direct Cu-Cu, 10 um pitch and below (SemiEngineering)",
+                "About 10,000 per mm2 at 10 um pitch",
+            ],
         ),
 ];
 
 const S6_BEATS: &[Beat] = &[
-    Beat::new("front-side power: a shared stack", BEAT_MS)
+    Beat::new("front-side power: one shared stack", BEAT_MS)
         .note(
-            "Today power and signals share the front stack, M0 to M14.",
-            "power dots down the VDD column and signal dots across a medium level",
+            "Today power and signals share the front stack. Power enters at bumps on top and must travel down every level to reach the transistors, taking routing tracks from signals and losing voltage on the way.",
+            "The left column: solder bumps on top, amber dots falling through the whole wiring stack to the devices, cyan signal dots on a thin level.",
         )
         .detail(
-            "Congestion and droop come from sharing the stack.",
-            &["Today power and signals share the front stack (BSPDN, secondary)"],
+            "Congestion and droop come from sharing.",
+            &["Today power and signals share the front stack (CHIP_TOP_METAL.txt, section 6)"],
         ),
     Beat::new("BSPDN: power from behind", BEAT_MS)
         .note(
-            "Backside metals (BM0-BM5) sit under the thinned silicon, with nano-TSVs up to the devices.",
-            "copper rails under the chip and TSVs rising through the silicon, with amber dots climbing them",
+            "With backside power the wafer is bonded face down to a carrier and its silicon thinned from the back. Backside metal levels are built there, nano-TSVs pass up through the thin silicon to the devices, and the bumps go on the back.",
+            "The right column: the grey carrier wafer on top, copper nano-TSVs through the thin silicon, the BM levels and bumps underneath, and amber dots rising from below.",
         )
         .detail(
             "Intel PowerVia and TSMC A16 both move power to the back.",
-            &["Intel PowerVia (18A) and TSMC A16 Super Power Rail (BSPDN, intel.com and tomshardware.com)"],
+            &[
+                "Intel PowerVia (18A): nano-TSVs; TSMC A16: contacts to source/drain (intel.com, tomshardware.com)",
+                "Drawn: BM0-BM2; Intel lists BM0-BM5",
+            ],
         ),
     Beat::new("the gains", BEAT_MS)
         .note(
-            "With power on the back the front carries signals only, and droop falls.",
-            "cyan signal dots on the front and amber power dots from the rails",
+            "With power on the back, the front levels carry signals only and the power path is short and fat. Intel's PowerVia test chip showed over 30% lower droop and over 6% higher speed.",
+            "Both columns side by side: power falling the length of the left one, rising a short way in the right one, signals on the front of each.",
         )
         .detail(
-            "The PowerVia test chip shows more than 30% lower droop.",
-            &["PowerVia test chip: more than 30% lower droop, more than 6% performance (BSPDN, Intel 4 test chip)"],
+            "Less droop, more room for signals.",
+            &[
+                "PowerVia test chip: >30% lower droop, >6% performance (Intel 4 test chip)",
+                "Intel 18A brief: about 10x lower worst-case dynamic droop (vendor claim)",
+            ],
         ),
 ];
 
 const S7_BEATS: &[Beat] = &[
     Beat::new("pitches: C4 to hybrid", BEAT_MS)
         .note(
-            "The bump pitches step down: C4 about 150 um, microbump 40 um, hybrid 10 um and below.",
-            "the bump row with the three pitches tagged along the top",
+            "The same width of die edge, three ways to connect it: one C4 ball at about 150 um pitch, a few microbumps at 40 um, a dense row of hybrid-bonded pads at 10 um and below.",
+            "Three windows at one scale: one solder ball on green substrate, a row of copper pillars, and a fine stripe of copper pads between two dies.",
         )
         .detail(
-            "Smaller pitch means more connections per mm2.",
-            &["C4 ~150 um, microbump 40 um, hybrid bond 10 um and below (patents, SemiEngineering)"],
+            "Smaller pitch, more connections per mm2.",
+            &["C4 ~150 um, microbump 40 um, hybrid bond 10 um and below (patent 8896118, SemiEngineering)"],
         ),
-    Beat::new("Intel stacks", BEAT_MS)
+    Beat::new("Intel 4: 16 metal layers", BEAT_MS)
         .note(
-            "Intel 4 has a 30 nm M0 pitch and 16 metal layers. The tiers come apart here to show the stack.",
-            "the tiers sliding apart, the top tier and the bumps lifted above the rest",
+            "Intel 4 stacks 16 metal layers, from M0 at 30 nm pitch up to thick top levels. Each level is another pass of the damascene loop, so the layer count drives the number of etch, plating and CMP steps.",
+            "One cut-away column of sixteen copper levels, tiny lines at the bottom widening to a few thick bars at the top.",
         )
         .detail(
-            "The layer count grows the etch and CMP steps.",
-            &["Intel 4: M0 30 nm, 16 metal layers (WikiChip); PowerVia moves M0 to 36 nm (SemiAnalysis)"],
+            "Pitches between M0 and the top are drawn schematically.",
+            &[
+                "Intel 4: M0 pitch 30 nm, 16 metal layers (WikiChip)",
+                "PowerVia relaxes M0 from 30 to 36 nm (SemiAnalysis)",
+            ],
         ),
     Beat::new("money", BEAT_MS)
         .note(
-            "Revenue: Intel 2025 $52.9B, TSMC about US$122B in 2025. Synopsys FY2025 $7.1B and Cadence 2025 $5.3B are the tool makers.",
-            "the stack back together, with the company labels tagged round it",
+            "The foundries that build these stacks dwarf the companies whose software checks them: TSMC took about US$122B in 2025 and Intel $52.9B, while Synopsys and Cadence took $7.1B and $5.3B.",
+            "Four bars on one scale: TSMC tallest, Intel about half its height, and two small blue bars for Synopsys and Cadence.",
         )
         .detail(
-            "Different scales: foundries against tool vendors.",
-            &["Intel FY2025 $52.9B, Synopsys FY2025 $7.1B, Cadence 2025 $5.3B, TSMC about US$122B (revenue, sources in section 10)"],
+            "Foundries against tool vendors.",
+            &["Intel FY2025 $52.9B; TSMC 2025 about US$122B; Synopsys FY2025 $7.1B; Cadence 2025 $5.3B (filings, section 10)"],
         ),
 ];
 
 const S8_BEATS: &[Beat] = &[
-    Beat::new("TSMC and Intel: backside power", BEAT_MS)
+    Beat::new("TSMC and Intel: backside contacts", BEAT_MS)
         .note(
-            "TSMC's A16 has backside power due late 2026; Intel ships PowerVia on 18A in Panther Lake.",
-            "the backside rails under the chip, lit",
+            "Both big foundries now offer backside power, wired differently. Intel's PowerVia runs a nano-TSV up beside the transistor to its front contact. TSMC's A16 Super Power Rail goes further and contacts the source directly from the back.",
+            "Top: Intel, a copper nano-TSV rising beside the transistor to the front contact. Bottom: TSMC, a short copper contact straight up into the pink source. Amber dots climb both.",
         )
         .detail(
             "TSMC (TSM) and Intel (INTC) are the two fabs.",
-            &["TSMC A16 late 2026; Intel PowerVia on 18A in Panther Lake (per teardown)"],
+            &[
+                "Intel PowerVia on 18A in Panther Lake (SemiAnalysis teardown)",
+                "TSMC A16: volume ~Q4 2026; +8-10% speed or -15-20% power vs N2P",
+            ],
         ),
-    Beat::new("NVIDIA, AMD, Arm", BEAT_MS)
+    Beat::new("NVIDIA, AMD, Arm: huge currents", BEAT_MS)
         .note(
-            "Large GPUs and CPUs draw huge supply currents, with microbump 2.5D and 3D parts. Arm core IP has to fit the foundry's grid.",
-            "a thick stream of amber dots coming up the VDD column",
+            "The biggest GPUs and CPUs set the current the grid must carry: around a kilowatt at under a volt is over a thousand amps. NVIDIA and AMD build them on TSMC; Arm core IP has to fit each foundry's power grid.",
+            "Three thick streams of amber dots pouring down the via stack under the bump, the VDD and VSS stripes lit.",
         )
         .detail(
-            "The designers set the current the grid must carry.",
-            &["NVIDIA, AMD and Arm build the big supply-current parts (textbook, names not sourced this run)"],
+            "Designers set the load.",
+            &["~1 kW at under 1 V means over 1,000 A (estimate)"],
         ),
     Beat::new("Synopsys, Cadence: sign-off", BEAT_MS)
         .note(
-            "Synopsys and Cadence sell the IR-drop and electromigration sign-off tools that check the top metal.",
-            "the top rail lit orange-red for the droop check",
+            "Before tape-out the whole grid is simulated for IR drop and electromigration. Synopsys (which now owns Ansys RedHawk-SC) and Cadence (Voltus) sell the sign-off tools that produce maps like this one.",
+            "Looking down on the top of the grid: a map of tiles, pale near the two bump sites and red where they are furthest from both.",
         )
         .detail(
-            "Sign-off checks the grid against droop and EM limits.",
-            &["Synopsys FY2025 $7.1B, Cadence 2025 $5.3B; sign-off tools (textbook)"],
+            "Software checks every rail.",
+            &["Synopsys FY2025 $7.1B; Cadence 2025 $5.3B (filings)"],
         ),
 ];
 
 const S9_BEATS: &[Beat] = &[
     Beat::new("IR drop and electromigration", BEAT_MS)
         .note(
-            "Droop runs from the grid to the cell rail, and EM slowly opens thin wires and vias.",
-            "the top rail lit orange-red, dots slowing along it",
+            "Droop builds from the grid down to the cell rail, worse with fast changes in current. Meanwhile electromigration slowly opens voids in the vias and thin wires that carry the most current.",
+            "The M13 rail fading from pale yellow to red at its ends, and a black void growing at the foot of a via on the right.",
         )
         .detail(
-            "Wider grids and redundant vias are the fixes.",
-            &["Every stage drops V = I x R (IR DROP, secondary); EM in thin wires and vias (EM LIMIT, Synopsys glossary)"],
+            "Wider grids, more bumps, capacitors, redundant vias.",
+            &["Every stage drops V = I x R (IR DROP, secondary); EM in wires and vias (Synopsys glossary)"],
         ),
-    Beat::new("voids and bridging", BEAT_MS)
+    Beat::new("bridging at fine pitch", BEAT_MS)
         .note(
-            "Voids form in copper vias and barriers during damascene; at fine bump pitch the solder can bridge.",
-            "the VDD via lit orange-red with hot dots climbing it",
+            "At microbump pitch there is little room between joints. If too much solder flows, two neighbouring caps run together and short. Copper pillars and then hybrid bonds, with no solder, are the fix.",
+            "Four copper pillars on their solder caps, two of the caps merging into one red-glowing bridge.",
         )
         .detail(
-            "Process control and copper pillars are the fixes.",
-            &["Via and barrier voids in damascene; bridging at fine pitch (CHIP_TOP_METAL.txt, section 9; MICROBUMP, Onto Innovation)"],
+            "Less solder, smaller pitch.",
+            &["Bump bridging at fine pitch: Cu pillars, hybrid bonds (CHIP_TOP_METAL.txt, section 9)"],
         ),
     Beat::new("thermal-cycle fatigue", BEAT_MS)
         .note(
-            "The C4 joints crack when the die and the substrate expand by different amounts. Underfill gives over ten times the life.",
-            "the bumps lit across the top of the chip",
+            "Silicon and the organic substrate expand by different amounts as the chip heats and cools, so every cycle shears the C4 joints. Cracks start at the neck by the die. Underfill shares the load and gives over ten times the life.",
+            "The green substrate sliding back and forth under the die, a red crack spreading at the top of the solder ball, then olive underfill filling the gap.",
         )
         .detail(
             "Underfill is the standard fix.",
-            &["Underfill improved flip-chip fatigue life by more than an order of magnitude (UNDERFILL, Semiconductor History Museum of Japan)"],
+            &[
+                "Si ~3 ppm/K vs organic substrate ~15 ppm/K (typical values)",
+                "Underfill: over 10x fatigue life (Semiconductor History Museum of Japan)",
+            ],
         ),
 ];
 
 const S10_BEATS: &[Beat] = &[
     Beat::new("sources: backside power, Intel and TSMC", BEAT_MS)
         .note(
-            "The backside power and TSMC A16 claims in sections 6 and 8 come from these pages.",
-            "the whole chip, the top tier lit",
+            "The sources behind this page, in four groups. The first cover backside power and the TSMC A16 claims in sections 6 and 8.",
+            "The top of the stack from the front right: M10-M14 in cut-away, the pad, the bump and the substrate.",
         )
         .detail(
             "Vendor pages and tech press.",
@@ -581,8 +442,8 @@ const S10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources: bump pitch and power delivery", BEAT_MS)
         .note(
-            "The bump pitch and power-delivery claims in sections 4 and 5 come from these patents and articles.",
-            "the backside rails lit under the chip",
+            "These cover the bump pitches and the power-delivery claims in sections 4 and 5.",
+            "Close on the C4 bump, the UBM and the pad.",
         )
         .detail(
             "Patents and SemiEngineering.",
@@ -592,10 +453,10 @@ const S10_BEATS: &[Beat] = &[
                 "[5] semiengineering.com/current-problems-grow-for-power-delivery/; patsnap.com/resources/blog/articles/back-side-power-delivery-networks-cut-ir-drop-by-10/",
             ],
         ),
-    Beat::new("sources: stacks, EM, bonding, revenue", BEAT_MS)
+    Beat::new("sources: stacks, EM, bonding", BEAT_MS)
         .note(
-            "The Intel stack, the electromigration limits, the Intel 4 pitch and the TSMC stage come from these pages.",
-            "the bumps lit across the top, with the tiers in view",
+            "These cover the Panther Lake teardown, TSMC's power rail, the Intel 4 stack, imec's backside work and the electromigration limits.",
+            "The power grid seen from above and to the left: the thick M14 stripes and the M13 rail.",
         )
         .detail(
             "Teardowns, process pages and EM references.",
@@ -609,8 +470,8 @@ const S10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources: revenue, C4 history, EDA", BEAT_MS)
         .note(
-            "The revenue figures, the C4 history and the EDA tool names come from these filings and references.",
-            "the whole chip, slowly pulled back",
+            "The last group covers the revenue figures, the C4 and underfill history and the EDA tools.",
+            "The whole top of the stack nearly face on, substrate to M10.",
         )
         .detail(
             "Filings and history.",

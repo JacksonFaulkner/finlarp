@@ -93,13 +93,13 @@ def base():
     K.dots(root, m, "phy", [(205, 45, 0.0), (440, 110, 0.0)], 3, "data", 1, 0.1, 0.6, 60, size=12.0)
     test = gbox("test_logic", (-130, 71, -150), (130, 76, -20), m["read"], root)
     show(test, [(F(3, 0.0), END)])
-    label("PHY: 1024 bits to the GPU", (300, 40, 0.0), root, [(F(1, 0.0), F(2, 0))])
+    label("PHY: 1024 bits to the GPU", (193, 40, -60), root, [(F(1, 0.0), F(2, 0))])
     label("HBM4: foundry logic die (reported)", (-120, 95, 0.0), root, [(F(2, 0.0), F(3, 0))])
     label("base logic die: test logic", (-120, 74, -20), root, [(F(3, 0.0), END)])
     label("copper landing pads", (-150, 70, 0.0), root, beat(0))
     camera(root, [
         ((0.0, 70.0, 0.0), 800.0, 0.45, 0.20),
-        ((120.0, 90.0, 0.0), 1000.0, 0.45, 0.20),
+        ((330.0, 150.0, 0.0), 1500.0, 0.30, 0.16),
         ((0.0, 90.0, 0.0), 900.0, 0.40, 0.18),
         ((0.0, 90.0, 0.0), 800.0, 0.40, 0.18),
     ])
@@ -166,9 +166,9 @@ def bond():
     limit_new = K.limit_plane(root, m, -1200.0, 1200.0, K.LIMIT_NEW_Y, z0=-900.0, name="limit_775",
                               intervals=[(F(2, 0.5), END)])
     label("microbumps: a gap per joint", (-500.0, 150.0, 0.0), root, beat(0))
-    label("hybrid bonding: no gap", (900.0, 400.0, 0.0), root, beat(1))
+    label("hybrid bonding: no gap", (860.0, 400.0, 0.0), root, beat(1))
     label("height limit 720 -> 775 um", (-300.0, K.LIMIT_NEW_Y + 60, 0.0), root, [(F(2, 0.0), END)])
-    label("16-high under the raised limit", (900.0, 1000.0, 0.0), root, beat(3))
+    label("16-high under the raised limit", (860.0, 700.0, 0.0), root, beat(3))
     camera(root, [
         ((0.0, 560.0, 0.0), 3300.0, 0.25, 0.10),
         ((0.0, 560.0, 0.0), 3300.0, 0.25, 0.10),
@@ -179,6 +179,9 @@ def bond():
 
 
 # ---- e: CoWoS -----------------------------------------------------------------------------
+
+
+WZ = 4000.0  # the wafer sits well behind the package so the top-down beat sees only it
 
 
 def cowos():
@@ -200,13 +203,14 @@ def cowos():
         show(s.g, [(F(1, 0.2), END)])
         extra.append(s)
     # beat 2: a wafer of interposers, many small ones and then fewer large ones
-    wafer = disc("wafer", (0.0, -700.0, -2000.0), 1800.0, 20.0, m["wafer"], root)
+    wafer = disc("wafer", (0.0, -700.0, -WZ), 1800.0, 20.0, m["wafer"], root)
+    show(wafer, beat(2))
     small, big = [], []
     for i, x in enumerate((-800.0, -400.0, 0.0, 400.0, 800.0)):
-        for j, z in enumerate((-1500.0, -1750.0, -2000.0, -2250.0, -2500.0)):
+        for j, z in enumerate((-WZ + 500.0, -WZ + 250.0, -WZ, -WZ - 250.0, -WZ - 500.0)):
             small.append(gbox(f"sm{i}{j}", (x - 150, -690, z - 90), (x + 150, -680, z + 90), m["interposer"], root))
     for i, x in enumerate((-600.0, 0.0, 600.0)):
-        for j, z in enumerate((-1600.0, -2400.0)):
+        for j, z in enumerate((-WZ + 400.0, -WZ - 400.0)):
             big.append(gbox(f"bg{i}{j}", (x - 250, -690, z - 190), (x + 250, -680, z + 190), m["interposer"], root))
     for g in small:
         show(g, [(F(2, 0.0), F(2, 0.5))])
@@ -215,15 +219,15 @@ def cowos():
     # beat 3: from the side, the package on its substrate
     label("GPU", (0.0, 420.0, 40.0), root, beat(0))
     label("HBM stacks", (-850.0, 600.0, 0.0), root, beat(0))
-    label("one interposer for all", (1900.0, -60.0, 0.0), root, beat(0))
+    label("one interposer for all", (1150.0, -60.0, 0.0), root, beat(0))
     label("4 more stacks, wider interposer", (2100.0, 720.0, 0.0), root, beat(1))
-    label("fewer per wafer as they grow", (0.0, -640.0, -1100.0), root, beat(2))
-    label("on a package substrate", (2300.0, -200.0, 0.0), root, beat(3))
+    label("fewer per wafer as they grow", (0.0, -680.0, -WZ + 900.0), root, beat(2))
+    label("on a package substrate", (1700.0, -220.0, 0.0), root, beat(3))
     camera(root, [
         ((0.0, 260.0, 0.0), 5200.0, 0.30, 0.40),
-        ((0.0, 300.0, 0.0), 6200.0, 0.30, 0.40),
-        ((0.0, -700.0, -2000.0), 4200.0, 0.10, 0.95),
-        ((0.0, 150.0, 0.0), 5000.0, 1.57, 0.05),
+        ((700.0, 250.0, 0.0), 7000.0, 0.12, 0.35),
+        ((0.0, -700.0, -WZ), 4200.0, 0.10, 0.95),
+        ((1500.0, 100.0, 0.0), 4000.0, 0.15, 0.08),
     ])
     finish("cowos", page="hbm")
 

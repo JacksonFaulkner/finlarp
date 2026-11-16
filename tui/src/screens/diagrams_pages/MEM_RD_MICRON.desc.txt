@@ -1,0 +1,1 @@
+Micron's HBM4 entered volume in 2026 on its own base die. Next is HBM4E (2027-28) with a custom logic base die made by TSMC, then vertical HBM (vHBM), which puts DRAM directly on the processor, targeted for 2028. Ticker: MU.

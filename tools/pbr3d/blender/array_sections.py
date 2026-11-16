@@ -61,6 +61,11 @@ def base(root, m, rows=ROWS, cols=COLS, r0=R0, bits=BITS):
     d["hl"], d["bar"] = K.row_bar(root, m, rows, cols, r0)
     d["selA"] = select(root, m, cols, SEL_A, name="col_selA")
     d["selB"] = select(root, m, cols, SEL_B, name="col_selB")
+    # every overlay starts switched off; a section's own show() call switches it on. Without this
+    # an overlay a section never uses (selB, cells_on) stays lit all the way through.
+    for k in ("ones", "zeros", "blon", "cells_on", "bar", "selA", "selB"):
+        if d[k] is not None:
+            show(d[k], [])
     return d
 
 
@@ -120,7 +125,7 @@ def sec2():
     label("cell: 1 transistor, 1 capacitor", (cx(COLS - 1) + 90, cy(4), 0), root, beat(0))
     label("row decoder: one word line high", (-300, cy(R0) + 70, 0), root, beat(1))
     label("bit lines and sense amps", (cx(COLS - 1) + 120, K.SA_Y - 40, 0), root, beat(2))
-    label("column decoder: picks columns", (-20, K.SEL_Y - 50, 0), root, beat(3))
+    label("column decoder: picks columns", (-20, K.SEL_Y - 130, 0), root, beat(3))
     label("I/O: a burst off the chip", (IO_X + 40, -360, 0), root, beat(3))
     camera(root, [OVERVIEW_POSES, OVERVIEW_POSES, SENSE_POSES, SENSE_POSES])
     finish("sec2", page="array")
@@ -217,7 +222,7 @@ def sec5():
     camera(root, [
         ((200.0, 150.0, 0.0), 1100.0, 0.10, 0.06),
         ((400.0, 150.0, 0.0), 1400.0, 0.08, 0.06),
-        ((800.0, 220.0, 0.0), 1500.0, 0.06, 0.06),
+        ((800.0, 300.0, 0.0), 1650.0, 0.06, 0.04),
         ((585.0, 150.0, 0.0), 3400.0, 0.04, 0.08),
     ])
     finish("sec5", page="array")
@@ -259,8 +264,8 @@ def sec6():
     Z.make_lane(root, m, "trp", -60.0, [("pink", 13.75)], "tRP = 13.75 ns", beat(3))
     Z.make_lane(root, m, "tras", -240.0, [("grey", 32.5)], "tRAS = 32.5 ns", beat(3))
     pose_grid = ((370.0, 360.0, 0.0), 2750.0, 0.10, 0.10)
-    pose_row = ((870.0, 60.0, 0.0), 3000.0, 0.0, 0.05)
-    pose_burst = ((240.0, 0.0, 0.0), 1000.0, 0.0, 0.05)
+    pose_row = ((850.0, 60.0, 0.0), 3500.0, 0.0, 0.05)
+    pose_burst = ((315.0, -20.0, 0.0), 1450.0, 0.0, 0.05)
     pose_time = ((200.0, 0.0, 0.0), 1800.0, 0.0, 0.0)
     camera(root, [pose_grid, pose_row, pose_burst, pose_time])
     finish("sec6", page="array")
@@ -304,7 +309,8 @@ def sec7():
     label("a laser blows the fuse", (fx - 120, 900.0, 0), root, beat(1))
     label("decoder sends it to a spare", (cx(1), spare_y + 60, 0), root, beat(2))
     pose = ((330.0, 330.0, 0.0), 2300.0, 0.05, 0.08)
-    camera(root, [pose, pose, pose])
+    pose_fuse = ((640.0, 780.0, 0.0), 1100.0, 0.05, 0.06)
+    camera(root, [pose, pose_fuse, pose])
     finish("sec7", page="array")
 
 
@@ -351,12 +357,15 @@ def sec9():
     show(g, [(F(1, 0.0), END)])
     # beat 1: RowHammer: the neighbours of the hammered row leak
     hl, bar = K.row_bar(root, m, rows, cols, 3)
-    show(bar, [(F(1, 0.0), F(1, 0.2)), (F(1, 0.4), F(1, 0.6)), (F(1, 0.8), F(2, 0.0))])
+    show(bar, [(F(1, 0.0), F(1, 0.24)), (F(1, 0.27), F(1, 0.51)), (F(1, 0.54), F(1, 0.78)), (F(1, 0.80), F(2, 0.0))])
     neigh = [((cx(j) - 26, cy(i) - 26, -64.0), (cx(j) + 26, cy(i) + 26, -26.0)) for i in (2, 4) for j in range(cols)]
     show(slabs("neighbours_red", neigh, m["red"], root), beat(1))
     label("RowHammer: neighbours leak", (cx(cols - 1) + 90, cy(4), 0), root, beat(1))
     # beat 2: the periphery: decoders and sense amp stripes take area around the cells
-    show(K.sense_amps(root, m, cols, mat_key="sa_on", name="sa_on9"), beat(2))
+    peri = [((cx(j) - 26, K.SA_Y - 34, -44.0), (cx(j) + 26, K.SA_Y + 14, -14.0)) for j in range(cols)]
+    peri.append(((-206.0, -46.0, -54.0), (-124.0, cy(rows - 1) + 66.0, -14.0)))  # row decoder
+    peri.append(((-26.0, K.SEL_Y - 22, -44.0), (K.col_span(cols) + 26.0, K.SEL_Y + 22, -14.0)))  # column decoder
+    show(slabs("periphery_on9", peri, m["sa_on"], root), beat(2))
     label("periphery takes area from cells", (cx(cols - 1) + 120, K.SA_Y - 60, 0), root, beat(2))
     # beat 3: refresh walks every row, one at a time
     hl3, bar3 = K.row_bar(root, m, rows, cols, 0)
@@ -387,7 +396,7 @@ def sec10():
     pos = [(-1500.0, 600.0), (0.0, 600.0), (1500.0, 600.0), (-1500.0, -500.0), (0.0, -500.0), (1500.0, -500.0)]
     for (text, b), (x, y) in zip(SOURCES, pos):
         card(root, m, x, y, text, b, lit_from=0.15)
-    pose = ((0.0, 150.0, 0.0), 7200.0, 0.0, 0.0)
+    pose = ((0.0, 120.0, 0.0), 8300.0, 0.0, 0.0)
     camera(root, [pose, pose, pose, pose])
     finish("sec10", page="array")
 

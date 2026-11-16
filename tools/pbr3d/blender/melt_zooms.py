@@ -128,7 +128,7 @@ def neck():
     label("remelt: back into the pool", (XTAL_R, MELT_Y + 40, 10), root, [(F(3, 0.55), F(4, 0))])
 
     camera(root, [
-        ((0.0, MELT_Y + 40, 0.0), 650.0, 0.30, 0.10),
+        ((0.0, MELT_Y + 150, 0.0), 820.0, 0.30, 0.10),  # the seed is in frame as it comes down
         ((0.0, MELT_Y + 50, 0.0), 700.0, 0.30, 0.10),
         ((0.0, MELT_Y + 380, 0.0), 2300.0, 0.28, 0.10),
         ((0.0, MELT_Y + 300, 0.0), 2100.0, 0.28, 0.10),
@@ -194,7 +194,8 @@ def conv():
     label("about 1e18 oxygen atoms per cm3", (XTAL_R, MELT_Y + 120, 60), root, [(F(3, 0.5), F(4, 0))])
 
     camera(root, [
-        ((0.0, 700.0, 0.0), 1650.0, 0.22, 0.10),
+        # beat 0: yawed so the crystal stands to one side and the melt surface reads across it
+        ((0.0, 650.0, 0.0), 1650.0, 0.95, 0.30),
         ((0.0, 750.0, 0.0), 3900.0, 0.22, 0.12),
         ((0.0, 740.0, 0.0), 1500.0, 0.22, 0.16),
         ((0.0, 720.0, 0.0), 1650.0, 0.22, 0.10),
@@ -240,9 +241,12 @@ def hot():
     label("SiO and CO out the base", (SHELL_R + 200, 120, -200), root, [(F(3, 0.35), F(4, 0))])
 
     camera(root, [
-        ((0.0, 850.0, 0.0), 3700.0, 0.24, 0.14),
+        # beat 0: higher and pitched down so the heater and felt read round the crucible, not
+        # hidden behind the crystal's cone
+        ((0.0, 950.0, 0.0), 3900.0, 0.24, 0.34),
         ((0.0, 1300.0, 0.0), 4200.0, 0.24, 0.10),
-        ((0.0, 950.0, 0.0), 2100.0, 0.24, 0.12),
+        # beat 2: yawed off the crystal so the melt and shield both show
+        ((0.0, 900.0, 0.0), 2300.0, 0.95, 0.22),
         ((0.0, 1500.0, 0.0), 6200.0, 0.24, 0.10),
     ])
     finish("hot", page="melt")

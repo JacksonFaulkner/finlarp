@@ -1,0 +1,18 @@
+# 1. HBM4 now
+
+Micron's HBM4 uses a 2048-bit interface on its 1-beta DRAM. Micron has said HBM4 (36 GB, 12-high) entered high-volume manufacturing in March 2026. Its base die is Micron's own.
+
+# 2. HBM4E: custom base die
+
+HBM4E (2027-28) moves the base die to foundry logic. The logic die for standard and custom HBM4E is expected from TSMC, and DRAM moves from 1-beta to 1-gamma.
+
+# 3. vHBM: DRAM on the processor
+
+Micron's vertical HBM (vHBM) places the DRAM stack directly on the processor rather than beside it. Both new lines target volume in 2028, with three generations on the roadmap through 2030.
+
+# 4. Sources
+
+- TechRadar, Micron HBM4 and HBM4E (2026 plans):
+  https://techradar.com/pro/micron-wants-a-bigger-slice-of-the-usd100-billion-hbm-market-with-its-2026-bound-hbm4-and-hbm4e-memory-solutions
+- TrendForce, Micron flags HBM4E as the start of the custom HBM era:
+  https://www.trendforce.com/news/2026/08/12/news-micron-flags-hbm4e-as-start-of-custom-hbm-era-hbm-market-could-tilt-toward-dual-or-single-suppliers/

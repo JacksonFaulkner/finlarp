@@ -266,6 +266,17 @@ def _views(con: duckdb.DuckDBPyConnection) -> dict[str, str]:
         "filings": (f"'{D}/events/filings.parquet'", "every EDGAR filing per ticker (form, filed, accn, items...)"),
         "events": (f"'{D}/events/events.parquet'", "8-K/6-K events, one row per item code, with label and signal tier"),
         "insider_tx": (sec_insiders.tx_sql(), "Form 3/4/5 transactions (code P=open-market buy, S=sale; is_10b5_1)"),
+        "dart_facts": (f"'{D}/dart/facts.parquet'",
+                       "Korean filers from OpenDART (000660.KS SK hynix, 005930.KS Samsung): quarterly revenue / "
+                       "operating_income / net_income in KRW; quarter 0 = full year, Q4 derived (basis, formula); url = DART filing"),
+        "memory_facts": ("(SELECT * FROM read_json('" + str(D) + "/memory_facts/*.jsonl', format='newline_delimited', "
+                         "union_by_name=true, columns={'company':'VARCHAR','ticker':'VARCHAR','period':'VARCHAR',"
+                         "'metric':'VARCHAR','value':'DOUBLE','unit':'VARCHAR','basis':'VARCHAR','source_name':'VARCHAR',"
+                         "'source_url':'VARCHAR','published':'VARCHAR','quote':'VARCHAR','notes':'VARCHAR','agent':'VARCHAR'}) "
+                         "QUALIFY row_number() OVER (PARTITION BY company, period, metric, source_url ORDER BY agent) = 1)",
+                         "web-sourced memory-industry numbers (SK hynix, Samsung, Micron, CXMT, YMTC, SanDisk, market): one row per "
+                         "(company, period, metric) with verbatim quote and source_url; basis = reported|company_stated|estimate|"
+                         "market_share|guidance|forecast"),
         "earnings": (f"read_parquet('{D}/earnings/releases/*.parquet', union_by_name=true)",
                      "earnings press releases (text, guidance VARCHAR[], headline JSON)"),
         "annual_reports": (f"'{D}/filing_text/filings.parquet'",

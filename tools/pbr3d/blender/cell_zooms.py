@@ -94,8 +94,8 @@ def read():
         (F(1, 0.90), (1, 1, 1.0)),
         (F(3, 0.00), (1, 1, 0.05)),
     ])
-    stream_of(root, "share", 6, (SRC_X, 600.0, ZC), K.PATH_CAP_TO_BL, 28, m["cyan_dot"], 0, 0.20, 0.60, 60)
-    stream_of(root, "restore", 6, (DRN_X, BL_Y, ZC), K.PATH_BL_TO_CAP, 28, m["violet_dot"], 1, 0.10, 0.50, 60)
+    stream_of(root, "share", 6, K.SHARE_START, K.PATH_CAP_TO_BL, 28, m["cyan_dot"], 0, 0.20, 0.60, 60)
+    stream_of(root, "restore", 6, K.RESTORE_START, K.PATH_BL_TO_CAP, 28, m["violet_dot"], 1, 0.10, 0.50, 60)
     label("charge sharing: cell to bit line", (DRN_X, BL_Y + 130, ZC), root, [(F(0, 0), F(1, 0))])
     label("sense amp restores the cell", (-1340, BL_Y + 210, ZC), root, [(F(1, 0), F(2, 0))])
     label("precharge to VDD/2", (1150, BL_Y + 210, ZC), root, [(F(2, 0), F(3, 0))])
@@ -121,7 +121,7 @@ def rows():
     cells = K.rows_of_cells(root, m, 1, ROWS, PITCH)
     t0, t1 = F(0, 0), F(2, 0.9)
     ptr = empty("pointer", root)
-    box("pointer_m", (-330, 820, -22), (330, 850, 22), m["pointer"], ptr)
+    box("pointer_m", (-200, 820, -110), (200, 850, 110), m["pointer"], ptr)
     key(ptr, t0, "location", P(0, 0, Z_LO), linear=True)
     key(ptr, t1, "location", P(0, 0, Z_HI), linear=True)
     for j, (g, pv) in enumerate(cells):
@@ -134,10 +134,10 @@ def rows():
     label("every row inside 64 ms", (0, 900, 300), root, [(F(2, 0), F(3, 0))])
     label("the cycle starts again", (0, 900, -300), root, [(F(3, 0), F(4, 0))])
     camera(root, [
-        ((0.0, 400.0, -700.0), 3000.0, 0.55, 0.22),
-        ((0.0, 400.0, 0.0), 3000.0, 0.55, 0.22),
-        ((0.0, 400.0, 500.0), 3000.0, 0.55, 0.22),
-        ((0.0, 400.0, 0.0), 3800.0, 0.55, 0.22),
+        ((0.0, 420.0, 0.0), 4300.0, 1.25, 0.24),
+        ((0.0, 420.0, 0.0), 4200.0, 1.25, 0.24),
+        ((0.0, 420.0, 0.0), 4300.0, 1.25, 0.24),
+        ((0.0, 420.0, 0.0), 4500.0, 1.25, 0.24),
     ])
     finish("rows", page="cell")
 
@@ -198,13 +198,13 @@ def layout():
     key(sig, F(2, 0.65), "location", P(0, 0, 0), linear=True)
     key(ref, F(2, 0.65), "location", P(-1800, 0, 120), linear=True)
     band = box("noise_band", (-1500, 250, -380), (-420, 350, 380), m["pink_band"] if "pink_band" in m else m["red"], root)
-    show(band, [(F(2, 0.25), F(2, 0.75))])
-    diff = box("difference_line", (-1200, 1, -420), (-600, 14, -380), m["gold_glow"], root)
-    show(diff, [(F(3, 0.0), F(4, 0.0))])
+    K.switch(band, [(F(2, 0.25), F(2, 0.75))])
+    diff = box("difference_line", (-1200, 42, 280), (-600, 58, 330), m["gold_glow"], root)
+    K.switch(diff, [(F(3, 0.0), F(4, 0.0))])
     label("open: reference in the other array", (0, 620, 0), root, [(F(0, 0), F(1, 0))])
     label("folded: the pair sits side by side", (-900, 520, 150), root, [(F(1, 0), F(2, 0))])
     label("noise hits both lines", (-900, 480, 0), root, [(F(2, 0), F(3, 0))])
-    label("difference stays flat", (-900, 120, 0), root, [(F(3, 0), F(4, 0))])
+    label("difference stays flat", (-900, 58, 305), root, [(F(3, 0), F(4, 0))])
     camera(root, [
         ((0.0, 250.0, 0.0), 4200.0, 0.10, 0.25),
         ((-400.0, 250.0, 60.0), 3600.0, 0.10, 0.25),

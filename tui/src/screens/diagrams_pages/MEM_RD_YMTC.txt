@@ -1,0 +1,24 @@
+# 1. Xtacking: NAND on a separate logic wafer
+
+YMTC's Xtacking bonds the NAND array onto a separate logic wafer, so the circuits under the array do not limit the stack. Reports put mass production at about 267-270 layers on Xtacking 4.0, with 300+ layers in development. Layer counts differ across sources.
+
+# 2. Beyond 300 layers
+
+The X5-9080 line is reported to pass 300 layers by bonding three decks, trading some throughput for more bits per wafer.
+
+# 3. The DRAM pivot
+
+Reports say the Phase 3 Wuhan fab splits output roughly evenly between NAND and DRAM. TweakTown reports a plan for 9,600 MT/s low-power DRAM on 4F2 cells, with no announced timeline. Treat the DRAM plan as early and unconfirmed.
+
+# 4. Position
+
+Counterpoint Research puts YMTC at about 14% of NAND bits, ahead of Kioxia and Micron. YMTC is private; no ticker here.
+
+# 5. Sources
+
+- Domain-b, YMTC accelerates China's memory expansion (2026):
+  https://www.domain-b.com/technology/electronics/ymtc-china-nand-expansion-2026
+- TweakTown, YMTC reportedly targets 4F2 cells for 9,600 MT/s DRAM:
+  https://www.tweaktown.com/news/114259/ymtc-reportedly-targets-4f2-cells-for-9600-mt-s-dram-mass-production/index.html
+- Korea Herald, YMTC Wuhan NAND plant:
+  https://www.koreaherald.com/article/10711815

@@ -15,6 +15,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sand_overview import F, P, box, empty, key, label, mat, pivot, rel, show, tube, ball  # noqa: E402
 from sand_zooms import scale_keys, stream_of  # noqa: E402
+from mathutils import Vector  # noqa: E402
 
 HALF = 1500.0  # the chip's half-width in x
 DEPTH = 700.0  # how far the slab runs behind the cut plane
@@ -172,7 +173,10 @@ def bumps(root, m, lit=()):
 
 
 def chip(root, m, **lit):
-    """The whole chip. `lit` keys: gate (intervals for the NMOS gate on), thin, mid, top, bumps."""
+    """The whole chip. `lit` keys: gate (intervals for the NMOS gate on), thin, mid, top, bumps.
+    Records the objects it made in BASE, so focus_camera can tell them from a scene's additions."""
+    import bpy
+    before = set(bpy.data.objects.keys())
     parts = {}
     silicon(root, m)
     parts["nmos"] = transistor(root, m, NMOS_X, True, lit=lit.get("gate", ()))
@@ -180,20 +184,31 @@ def chip(root, m, **lit):
     parts["contacts"] = contacts(root, m)
     parts.update(wiring(root, m, lit.get("thin", ()), lit.get("mid", ()), lit.get("top", ())))
     parts["bumps"] = bumps(root, m, lit.get("bumps", ()))
+    BASE.clear()
+    BASE.update(set(bpy.data.objects.keys()) - before)
     return parts
 
 
-def glide_camera(root, poses, glide=0.3):
+BASE = set()  # names of the objects the last chip() call made
+
+
+def glide_camera(root, poses, glide=0.3, lead=None):
     """One (target, distance, yaw, pitch) pose per beat. Unlike sand_zooms.camera this does not
     cut at the beat boundary: the camera eases from the last pose to the next over the first
     `glide` of the beat, then holds with a slow push-in. Beat 0 is usually WHOLE (the full chip),
-    so a node's overview starts wide and zooms in. End on the same pose as the start to loop."""
+    so a node's overview starts wide and zooms in. End on the same pose as the start to loop.
+    `lead`, a pose, starts beat 0 there and glides from it into the first pose."""
     import math
     target = empty("CamTarget", root)
     eye = empty("CamEye", root)
+    if lead is not None:
+        t, dist, yaw, pitch = lead
+        cp, sp = math.cos(pitch), math.sin(pitch)
+        key(target, F(0, 0), "location", P(*t))
+        key(eye, F(0, 0), "location", P(t[0] + dist * cp * math.sin(yaw), t[1] + dist * sp, t[2] + dist * cp * math.cos(yaw)))
     for i, (t, dist, yaw, pitch) in enumerate(poses):
         cp, sp = math.cos(pitch), math.sin(pitch)
-        a = F(i, 0) if i == 0 else F(i, glide)
+        a = F(i, 0) if (i == 0 and lead is None) else F(i, glide)
         b = F(i + 1, 0) - 1
         for f, d in ((a, dist * 1.03), (b, dist * 0.98)):
             e = (t[0] + d * cp * math.sin(yaw), t[1] + d * sp, t[2] + d * cp * math.cos(yaw))
@@ -203,8 +218,102 @@ def glide_camera(root, poses, glide=0.3):
 
 WHOLE = ((0.0, 620.0, 0.0), 5800.0, 0.0, 0.10)  # the whole chip, as in chip_hero.py
 
+PANE = 0.53  # the left pane shows about this fraction of the camera distance across
+FOCUS_PAD = 220.0  # chip mm kept round the framed parts (tags draw a little past their pin)
+MIN_DIST, MAX_DIST = 1500.0, 4800.0  # 4800 still shows tags pinned at x = +-1000
+TAG_ONLY_DIST = 2600.0  # a beat that adds only tags: far enough back to show what they name
+SAMPLES = (0.12, 0.3, 0.5, 0.7, 0.9)
+
+
+def _hidden(o):
+    """Switched off with show(): it or a parent sits at OFF scale. (World scale cannot tell: a
+    box bakes its size into its scale, so a hidden 2900 mm rail still has world scale 0.03.)"""
+    while o is not None:
+        if max(abs(v) for v in o.scale) < 1e-3:
+            return True
+        o = o.parent
+    return False
+
+
+BAND = 2000.0  # a lit part wider than this spans the chip: it sets the height, not the width
+
+
+def focus_box(beat):
+    """The (x0, y0, x1, y1, tags_only) box, in chip mm, round everything a scene added on top of the chip
+    that is on screen during `beat`: lit overlays, dot streams, extra parts and tag pins.
+    A chip-wide group (a lit tier, a row of bumps) adds only its height, so a tier lit end to end does not pull the camera
+    back out to the whole chip. None when the beat adds nothing."""
+    import bpy
+    scene = bpy.context.scene
+    xs, ys, band_ys, groups, meshes = [], [], [], {}, []
+    objs = [o for o in bpy.data.objects if o.name not in BASE and o.name not in ("CamTarget", "CamEye")]
+    for u in SAMPLES:
+        scene.frame_set(F(beat, u))
+        for o in objs:
+            if _hidden(o):
+                continue
+            mw = o.matrix_world
+            if o.type == "MESH":
+                pts = [mw @ Vector(c) for c in o.bound_box]
+            elif o.name.startswith("label:"):
+                pts = [mw.translation]
+            else:
+                continue
+            top = o
+            while top.parent is not None and top.parent.parent is not None:
+                top = top.parent  # the scene's own group, a direct child of the root
+            groups.setdefault(top.name, []).extend(pts)
+            meshes.append(o.type == "MESH")
+    for pts in groups.values():
+        if max(p.x for p in pts) - min(p.x for p in pts) > BAND:
+            band_ys += [p.z for p in pts]
+        else:
+            xs += [p.x for p in pts]
+            ys += [p.z for p in pts]  # Blender Z is chip Y
+    if not xs and not band_ys:
+        return None
+    tags_only = not any(meshes)
+    if not xs:  # only chip-wide bands: their middle, as tall as they are
+        h = max(band_ys) - min(band_ys)
+        return -h / 2, min(band_ys), h / 2, max(band_ys), False
+    ys += band_ys
+    return min(xs), min(ys), max(xs), max(ys), tags_only
+
+
+def focus_pose(box_, yaw=0.0, pitch=0.10):
+    """The pose that frames `box_` in the left pane, WHOLE when there is no box."""
+    if box_ is None:
+        return WHOLE
+    x0, y0, x1, y1, tags_only = box_
+    span = max(x1 - x0, y1 - y0) + 2 * FOCUS_PAD
+    dist = min(MAX_DIST, max(TAG_ONLY_DIST if tags_only else MIN_DIST, span / PANE))
+    return (((x0 + x1) / 2, (y0 + y1) / 2, 0.0), dist, yaw, pitch)
+
+
+def focus_camera(root, beats=None, lead=WHOLE, over=None):
+    """The section camera: each beat frames the parts that beat adds (focus_box), gliding in from
+    the whole chip on beat 0 the way the overview and zoom-ins do. `over`, {beat: pose}, replaces
+    the auto pose for those beats (a beat whose only additions are tags off to one side, say)."""
+    import bpy
+    if beats is None:
+        beats = round(bpy.context.scene.frame_end / F(1, 0))
+    over = over or {}
+    poses, kinds = [], []
+    for b in range(beats):
+        if b in over:
+            poses.append(over[b])
+            kinds.append("over")
+        else:
+            bx = focus_box(b)
+            poses.append(focus_pose(bx))
+            kinds.append("TAGS" if bx and bx[4] else "")
+    bpy.context.scene.frame_set(0)
+    glide_camera(root, poses, lead=lead)
+    print("focus", root.name, [(tuple(round(v) for v in t[:2]), round(d), k) for (t, d, _, _), k in zip(poses, kinds)])
+    return poses
+
 __all__ = [
-    "glide_camera", "WHOLE",
+    "glide_camera", "focus_camera", "focus_box", "focus_pose", "WHOLE",
     "F", "P", "box", "empty", "key", "label", "pivot", "rel", "show", "tube", "ball", "scale_keys",
     "stream_of", "mats", "chip", "route", "stack_down", "level_y", "bump_x", "overlay",
     "HALF", "DEPTH", "SUB", "CONTACT", "THIN", "MID", "TOP", "BUMP_Y", "NMOS_X", "PMOS_X", "SD",

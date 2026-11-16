@@ -11,7 +11,8 @@ Writes blender/chip_pmos[_<key>].blend and assets/chip_pmos[_<key>].glb. One bea
 
 The PMOS is a p+ source and drain in n-type silicon. It switches ON when its gate is LOW: holes
 form a channel under the gate and flow from the VDD side, across the channel, to the output side.
-chip_kit only lights the NMOS, so the PMOS gate, channel and holes are built here.
+Every scene uses the detailed transistors of chip_mos_detail.py; the overview swaps them into the
+whole chip in place of chip_kit's plain ones.
 
 Overview beats:
   0 whole     the whole chip, the PMOS picked out, gate low
@@ -33,433 +34,437 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sand_zooms import finish, start  # noqa: E402
 import chip_kit as C  # noqa: E402
-from chip_kit import F, ball, box, empty, label, mat, overlay, route, show, stream_of, tube  # noqa: E402
+import chip_mos_detail as D  # noqa: E402
+from chip_kit import F, empty, label, show  # noqa: E402
 
 BEATS = 6
-
-GATE_HIGH = [(F(3, 0), F(5, 0.2))]  # the shared gate is high: orange on both gates
-CHANNEL = [(F(1, 0.35), F(3, 0.05))]  # the hole channel exists while the PMOS is on
-HIGHLIGHT = [(F(0, 0), F(1, 0.1)), (F(5, 0.1), F(6, 0))]
-WHOLE_TAGS = [(F(0, 0), F(1, 0)), (F(5, 0), F(6, 0))]
-ZOOMED = [(F(1, 0.3), F(4, 0))]
-PAIR_TAGS = [(F(4, 0.3), F(5, 0))]
-
 WHOLE = C.WHOLE
-ZOOM = ((C.PMOS_X, 150.0, 0.0), 1250.0, 0.0, 0.08)
-PAIR = ((0.0, 120.0, 0.0), 3800.0, 0.0, 0.08)
-POSES = [WHOLE, ZOOM, ZOOM, ZOOM, PAIR, WHOLE]
-
-# the PMOS: its drain-side contact (x = 510) is the output, its source-side contact (x = 890) is VDD
-VDD_SIDE = C.PMOS_X + C.SD
-OUT_SIDE = C.PMOS_X - C.SD
-
-# shared camera poses for the close-ups: (target, distance, yaw, pitch)
-PMOS_CAM = ((C.PMOS_X, 80.0, 0.0), 1500.0, 0.0, 0.08)
-PAIR_CAM = ((0.0, 120.0, 0.0), 3800.0, 0.0, 0.08)
-HOLE_PATH = [(VDD_SIDE, 440, 12), (VDD_SIDE, -4, 12), (OUT_SIDE, -4, 12), (OUT_SIDE, 410, 12), (380, 410, 12)]
 
 
 def build():
+    """The overview: the whole chip, in on the detailed PMOS (gate low and the hole channel,
+    holes flowing, gate high and off), out to the pair (NMOS on, PMOS off), out to the chip."""
     m, root = start("pmos", BEATS, page="chip")
     C.mats(m)
-    m["pm_hl"] = mat("chip_pmos_hl", (1.0, 0.45, 0.62), emit=(1.0, 0.40, 0.60), strength=1.0, alpha=0.16)
-    m["pm_chan"] = mat("chip_pmos_chan", (1.0, 0.55, 0.20), emit=(1.0, 0.55, 0.20), strength=3.0, alpha=0.75)
-
-    # the whole chip; the NMOS gate follows the same high/low input, as in an inverter
-    C.chip(root, m, gate=GATE_HIGH)
-
-    # the PMOS gate: orange while driven high, the same colour the NMOS gate uses
-    overlay(root, "pmos_gate_on", (C.PMOS_X - C.GATE_HALF - 6, 14, -246),
-            (C.PMOS_X + C.GATE_HALF + 6, 126, 6), m["c_gate_on"], GATE_HIGH)
-    # the hole channel: a glowing strip at the silicon surface, in front of the cut, between the S/D
-    overlay(root, "pmos_channel", (OUT_SIDE + 70, -6, -236), (VDD_SIDE - 70, 10, 10),
-            m["pm_chan"], CHANNEL)
-    # the whole-chip highlight around the PMOS
-    overlay(root, "pmos_hl", (C.PMOS_X - 330, -140, -250), (C.PMOS_X + 330, 150, 14),
-            m["pm_hl"], HIGHLIGHT)
-
-    # holes: from the VDD side down into the source, across the channel, up the drain to the output
-    s, p = route([(VDD_SIDE, 440, 12), (VDD_SIDE, -4, 12), (OUT_SIDE, -4, 12),
-                  (OUT_SIDE, 410, 12), (380, 410, 12)])
-    stream_of(root, "holes", 9, s, p, 40, m["c_dot_vdd"], 2, 0.05, 0.40, 110)
-
-    label("PMOS", (C.PMOS_X, -150.0, 0), root, WHOLE_TAGS)
-    label("VDD in", (C.VDD_X, C.BUMP_Y + 110, -60), root, WHOLE_TAGS)
-    label("p+ source", (VDD_SIDE, -170.0, 0), root, ZOOMED)
-    label("p+ drain", (OUT_SIDE, -170.0, 0), root, ZOOMED)
-    label("gate low: PMOS on", (C.PMOS_X, 230.0, 0), root, [(F(1, 0.3), F(2, 0))])
-    label("channel: holes", (C.PMOS_X, -60.0, 0), root, CHANNEL)
-    label("from VDD", (VDD_SIDE, 480.0, 0), root, [(F(2, 0), F(3, 0))])
-    label("holes: VDD to output", (C.PMOS_X, 230.0, 0), root, [(F(2, 0), F(3, 0))])
-    label("to the output", (420.0, 470.0, 0), root, [(F(2, 0.2), F(3, 0))])
-    label("gate high: PMOS off", (C.PMOS_X, 230.0, 0), root, [(F(3, 0), F(4, 0))])
-    label("channel gone", (C.PMOS_X, -60.0, 0), root, [(F(3, 0.1), F(4, 0))])
-    label("PMOS off", (C.PMOS_X, -330.0, 0), root, PAIR_TAGS)
-    label("NMOS on", (C.NMOS_X, -330.0, 0), root, PAIR_TAGS)
-    label("shared gate: high", (0.0, 520.0, 0), root, PAIR_TAGS)
-    label("one is always off", (0.0, -560.0, 0), root, PAIR_TAGS)
-
-    C.glide_camera(root, POSES)
-
-
-# ---- shared pieces for the zooms and sections ---------------------------------------------
+    D.mats(m)
+    dn, d = D.in_chip(m, root)
+    cx = d.cx
+    D.outline(root, m, "pmos_pick", (cx - d.half - 30, -350.0), (cx + d.half + 30, d.ct_top + 40),
+              [(F(0, 0), F(1, 0.2)), (F(5, 0.2), F(6, 0))], t=22.0, z=12.0)
+    whole = [(F(0, 0), F(1, 0)), (F(5, 0), F(6, 0))]
+    label("PMOS", (cx, d.ct_top + 60, 12), root, whole)
+    label("VDD in", (C.VDD_X, C.BUMP_Y + 60, -60), root, whole)
+    D.channel(root, m, d, [(F(0, 0), F(1, 0)), (F(1, 0.35), F(3, 0.05)), (F(5, 0), F(6, 0))])
+    D.majority_dots(root, m, d, D.beats(1, 5), [(F(3, 0.2), F(5, 0))])
+    # 1 gate low: the channel forms
+    label("p+ source: VDD", (cx + d.ct_x, -70.0, 0), root, D.beats(1))
+    label("p+ drain: output", (cx - d.ct_x, -70.0, 0), root, D.beats(1))
+    label("gate 0 V: on", (cx, 120.0, 0), root, D.beats(1))
+    label("n-well: electrons", (cx - 230.0, -180.0, D.CZ), root, D.beats(1))
+    label("hole channel", (cx - 20, -8.0, 2), root, [(F(1, 0.35), F(2, 0))])
+    # 2 holes ride down the VDD contact, across, and up to the output
+    D.beads(root, "holes", D.carrier_path(d), 12, 10.0, m["mos_hole"], 2, 0.03, 0.8, 140)
+    label("holes from VDD", (cx + d.ct_x, 300.0, D.CZ), root, D.beats(2))
+    label("across the channel", (cx, -8.0, 2), root, D.beats(2))
+    label("up to the output", (cx - d.ct_x, 300.0, D.CZ), root, D.beats(2))
+    # 3 gate high: the PMOS is off (and in the pair, the NMOS is on)
+    hi = [(F(3, 0), F(5, 0.2))]
+    D.gate_glow(root, m, d, hi)
+    D.gate_glow(root, m, dn, hi)
+    label("gate high ~0.75 V: off", (cx, 120.0, 0), root, D.beats(3))
+    label("channel gone", (cx, -8.0, 2), root, D.beats(3))
+    label("electrons back under the gate", (cx + 60, -88.0, D.CZ), root, D.beats(3))
+    # 4 the pair: NMOS on pulling the output down, PMOS off
+    D.channel(root, m, dn, D.beats(4))
+    D.beads(root, "elec", D.carrier_path(dn), 12, 10.0, m["mos_elec"], 4, 0.03, 0.8, 110)
+    label("NMOS on", (dn.cx, 120.0, 0), root, D.beats(4))
+    label("PMOS off", (cx, 120.0, 0), root, D.beats(4))
+    label("shared input: high", (0.0, 300.0, 0), root, D.beats(4))
+    label("one is always off", (0.0, -420.0, 0), root, D.beats(4))
+    label("gate low again: PMOS on", (cx, -420.0, 0), root, D.beats(5))
+    zoom = D.frame_dev(d, bottom=-300, pad=1.16)
+    pair = D.frame((dn.cx - dn.half, -330.0, -40.0), (cx + d.half, 460.0, 0.0), pitch=0.10, pad=1.04)
+    C.glide_camera(root, [WHOLE, zoom, zoom, zoom, pair, WHOLE])
 
 
-def mats_extra(m):
-    """Materials the zooms and sections add on top of chip_kit's, all prefixed chip_pmos_."""
-    m["pm_hl"] = mat("chip_pmos_hl", (1.0, 0.45, 0.62), emit=(1.0, 0.40, 0.60), strength=1.0, alpha=0.16)
-    m["pm_chan"] = mat("chip_pmos_chan", (1.0, 0.55, 0.20), emit=(1.0, 0.55, 0.20), strength=3.0, alpha=0.75)
-    m["nwell"] = mat("chip_pmos_nwell", (0.35, 0.55, 1.0), emit=(0.30, 0.50, 1.0), strength=0.8, alpha=0.30)
-    m["sige"] = mat("chip_pmos_sige", (1.0, 0.62, 0.55), emit=(1.0, 0.50, 0.45), strength=1.2)
-    m["boron"] = mat("chip_pmos_boron", (1.0, 0.85, 0.50), emit=(1.0, 0.80, 0.40), strength=3.0)
-    m["si_bar"] = mat("chip_pmos_si", (0.80, 0.82, 0.86), metal=0.1, rough=0.4)
-    m["ge"] = mat("chip_pmos_ge", (0.30, 0.90, 0.80), emit=(0.25, 0.90, 0.78), strength=1.5)
-    m["wrap"] = mat("chip_pmos_wrap", (0.62, 0.64, 0.74), metal=0.6, rough=0.3, alpha=0.30)
-    m["arrow"] = mat("chip_pmos_arrow", (1.0, 0.90, 0.60), emit=(1.0, 0.85, 0.50), strength=3.0)
-
-
-def pmos_parts(root, m, gate=(), chan=(), hl=()):
-    """The PMOS gate (orange while high), its channel (while on) and an optional highlight box."""
-    overlay(root, "pmos_gate_on", (C.PMOS_X - C.GATE_HALF - 6, 14, -246),
-            (C.PMOS_X + C.GATE_HALF + 6, 126, 6), m["c_gate_on"], list(gate))
-    overlay(root, "pmos_channel", (OUT_SIDE + 70, -6, -236), (VDD_SIDE - 70, 10, 10),
-            m["pm_chan"], list(chan))
-
-
-def flow(root, name, pts, mat_, b, u0, u1, life, size=40, n=9):
-    """`n` dots along the polyline `pts` (absolute poly points), launched in beat b."""
-    s, p = route(pts)
-    return stream_of(root, name, n, s, p, size, mat_, b, u0, u1, life)
-
-
-def arrow(root, m, name, tail, head, intervals):
-    """A push arrow: a shaft from `tail` to `head` with a ball tip, shown for `intervals`."""
-    g = empty(name, root)
-    tube(name + "_shaft", tail, head, 9, m["arrow"], g, verts=10)
-    ball(name + "_tip", head, 22, m["arrow"], g, 10)
-    show(g, list(intervals))
-    return g
-
-
-def device(root, m, cx, nmos, wf=1.0, sd=None, gate_lit=(), chan_lit=(), name=None):
-    """One transistor on its own, drawn as chip_kit does (source and drain, oxide, gate). `wf`
-    widens it (more fins or sheets): the source and drain move out by SD * wf."""
-    g = empty(name or f"{'nmos' if nmos else 'pmos'}_{cx:.0f}_{wf:.1f}", root)
-    half = C.SD * wf
-    sdw = 70.0 * wf
-    gh = C.GATE_HALF * wf
-    sdm = sd or (m["c_nplus"] if nmos else m["c_pplus"])
-    for sgn in (-1, 1):
-        x = cx + sgn * half
-        box(f"sd{sgn}", (x - sdw, -90, -240), (x + sdw, 6, 0), sdm, g)
-    box("hik", (cx - gh - 8, 0, -240), (cx + gh + 8, 14, 0), m["c_oxide"], g)
-    box("gate", (cx - gh, 14, -240), (cx + gh, 120, 0), m["c_gate"], g)
-    if gate_lit:
-        overlay(g, "gate_on", (cx - gh - 6, 14, -246), (cx + gh + 6, 126, 6), m["c_gate_on"], list(gate_lit))
-    if chan_lit:
-        inner = half - sdw
-        chan = m["c_chan"] if nmos else m["pm_chan"]
-        overlay(g, "chan_on", (cx - inner, -8, -20), (cx + inner, 10, 10), chan, list(chan_lit))
-    return g
-
-
-def highlight(root, m, name, lo, hi, intervals):
-    overlay(root, name, lo, hi, m["pm_hl"], list(intervals))
-
-
-# ---- zoom-ins ---------------------------------------------------------------------------------
-
-ZA_POSES = [
-    ((C.PMOS_X + 200.0, 80.0, 0.0), 1500.0, 0.0, 0.08),
-    ((1000.0, 80.0, 0.0), 1800.0, 0.0, 0.08),
-    ((C.PMOS_X + 200.0, 80.0, 0.0), 1500.0, 0.0, 0.08),
-]
-
+# ---- zoom-ins a-e ---------------------------------------------------------------------------------
+# Close-ups of the detailed PMOS (chip_mos_detail), like the sections. Zooms b, d and e show the
+# same pictures as sections 6, 5 and 7; a and c are their own. Each returns one pose per beat.
 
 def zoom_a(m, root):
-    """a the n-well and its tap: the well around the PMOS, tied to VDD, and the channel only."""
-    C.silicon(root, m)
-    overlay(root, "nwell", (C.PMOS_X - 330, -260, -240), (C.PMOS_X + 560, -2, 8), m["nwell"],
-            [(F(0, 0), F(3, 0))])
-    device(root, m, C.PMOS_X, False, chan_lit=[(F(2, 0.2), F(3, 0))])
-    # the n+ tap at the right-hand edge of the well, plugged up to thin metal (VDD)
-    box("tap_n", (1150, -90, -240), (1250, 6, 0), m["c_nplus"], root)
-    tube("tap_plug", (1200, 6, -60), (1200, C.level_y("thin", 0), -60), 28, m["c_w"], root, verts=10)
-    label("n-well under the PMOS", (C.PMOS_X - 200.0, 200.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("tap ties the well to VDD", (1200.0, 200.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("n+ tap", (1200.0, -130.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("only the channel conducts", (C.PMOS_X, 200.0, 0), root, [(F(2, 0), F(3, 0))])
-
-
-ZB_POSES = [PMOS_CAM, PMOS_CAM, PMOS_CAM]
-
-
-def sige_strain(m, root, b_beat=0):
-    """SiGe source and drain, the squeeze arrows and holes moving faster. Used by zoom b and
-    section 6."""
-    C.silicon(root, m)
-    cx = C.PMOS_X
-    half, sdw = C.SD, 70.0
-    device(root, m, cx, False, sd=m["sige"], chan_lit=[(F(1, 0.3), F(3, 0))])
-    # boron atoms in front of the regrown source and drain, shown while they are grown in
-    g = empty("boron", root)
-    for x in (cx - half - 30, cx - half + 30, cx + half - 30, cx + half + 30):
-        for y in (-70.0, -30.0):
-            ball(f"boron_{x:.0f}_{y:.0f}", (x, y, 25.0), 14, m["boron"], g, 8)
-    show(g, [(F(0, 0), F(2, 0))])
-    # squeeze arrows pressing in from both sides, in front of the source and drain
-    for side in (-1, 1):
-        outer = cx + side * (half + sdw)
-        for y in (-60.0, -20.0):
-            arrow(root, m, f"squeeze_{side}_{y:.0f}", (outer + side * 90.0, y, 30.0),
-                  (outer - side * 60.0, y, 30.0), [(F(1, 0), F(2, 0))])
-    label("SiGe:B source and drain", (cx, 200.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("SiGe squeezes the channel", (cx, 200.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("faster holes", (cx, 200.0, 0), root, [(F(2, 0), F(3, 0))])
-    flow(root, "holes_fast", [(cx + half, 200, 12), (cx + half, -4, 12), (cx - half, -4, 12),
-                              (cx - half, 200, 12)], m["c_dot_vdd"], 2, 0.05, 0.5, 60)
+    """a the n-well and its tap: the well round the PMOS, the tap wired to VDD, only the channel
+    conducts."""
+    d = _dev(m, root, tap=True)
+    D.outline(root, m, "well_hl", (-d.half + 70, -228.0), (d.half + 120, -118.0), D.beats(0))
+    D.majority_dots(root, m, d, D.beats(0, 3), D.beats(0, 2))
+    label("n-well (phosphorus)", (-200.0, -170.0, 0), root, D.beats(0))
+    label("electrons: majority carrier", (130.0, -150.0, D.CZ), root, D.beats(0))
+    label("p substrate", (0.0, -285.0, 0), root, D.beats(0))
+    tap_x = d.half + 65
+    rail = D.arch((d.ct_x, d.ct_top, -60.0), (tap_x, d.ct_top, -60.0), 70.0, 10)
+    D.wire("vdd_rail", rail, 12.0, m["mos_vdd"], root, D.beats(1, 3))
+    D.hl(root, m, d, "tap", D.beats(1), pad=6.0)
+    D.hl(root, m, d, "tap_ct", D.beats(1), pad=4.0)
+    label("n+ tap", (tap_x, -50.0, 0), root, D.beats(1))
+    label("wired to VDD", (0.5 * (d.ct_x + tap_x), d.ct_top + 70, -60), root, D.beats(1))
+    label("well at VDD", (150.0, -170.0, 0), root, D.beats(1))
+    D.depletion(root, m, d, D.beats(2), under_gate=False)
+    D.channel(root, m, d, D.beats(2))
+    D.flow(root, m, d, 2, n=10, life=140)
+    label("only the channel conducts", (0.0, -8.0, 2), root, D.beats(2))
+    label("blocked junction", (-d.ct_x, -128.0, 0), root, D.beats(2))
+    return [D.frame_dev(d, x0=-440, x1=d.half + 130, bottom=-330),
+            D.frame_dev(d, x0=-260, x1=d.half + 140, bottom=-240, top=d.ct_top + 90),
+            D.frame_dev(d, x0=-440, x1=d.half + 130, bottom=-200)]
 
 
 def zoom_b(m, root):
-    """b SiGe strain: the regrown source and drain squeeze the channel, and holes move faster."""
-    sige_strain(m, root)
-
-
-ZC_POSES = [PAIR_CAM, PAIR_CAM, PAIR_CAM]
-
-
-def inverter(m, root, idle_tags=True):
-    """The CMOS pair: the PMOS (pull-up) and NMOS (pull-down) with the shared input. Beat 0 is
-    idle, beat 1 input low (PMOS on, output high), beat 2 input high (NMOS on, output low)."""
-    hi2 = [(F(2, 0), F(3, 0))]
-    C.chip(root, m, gate=hi2)
-    pmos_parts(root, m, gate=hi2, chan=[(F(1, 0.3), F(2, 0))])
-    flow(root, "holes_out", HOLE_PATH, m["c_dot_vdd"], 1, 0.05, 0.4, 110)
-    flow(root, "electrons_out", [(-510, 410, 12), (-510, -4, 12), (-890, -4, 12), (-890, 440, 12)],
-         m["c_dot_gnd"], 2, 0.1, 0.6, 100)
-    if idle_tags:
-        label("PMOS: pull-up to VDD", (C.PMOS_X, -330.0, 0), root, [(F(0, 0), F(1, 0))])
-        label("NMOS: pull-down to ground", (C.NMOS_X, -330.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("input 0: PMOS on", (C.PMOS_X, 230.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("output high", (420.0, 470.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("input 1: NMOS on", (C.NMOS_X, 230.0, 0), root, [(F(2, 0), F(3, 0))])
-    label("output low", (-420.0, 470.0, 0), root, [(F(2, 0), F(3, 0))])
+    """b SiGe strain: the regrown SiGe:B, the squeeze, faster holes (as section 6)."""
+    return sec6(m, root)
 
 
 def zoom_c(m, root):
-    """c the CMOS inverter: PMOS pulls up, NMOS pulls down, one of them on at a time."""
-    inverter(m, root)
+    """c the CMOS inverter: an arched output wire to the next gate's input, charged through the
+    PMOS (input 0) and discharged through the NMOS (input 1)."""
+    D.mats(m)
+    dn, dp, _ = D.inverter(m, root, D.beats(0, 3), name="zc", wires=False)
+    top = dn.ct_top
+    zw = D.CZ - 6
+    xn, xp = dn.src(1), dp.src(-1)
+    out = D.arch((xn, top, zw), (xp, top, zw), 120.0, 12)
+    apex = out[6]
+    load_y = apex[1] + 120
+    D.wire("out_arch", out, 9.0, m["mos_cu"], root)
+    D.wire("out_up", [apex, (apex[0], load_y, zw)], 9.0, m["mos_cu"], root)
+    D.box_on(root, "load_a", (-80, load_y, -40), (80, load_y + 12, zw), m["mos_cu"], D.beats(0, 3))
+    D.box_on(root, "load_b", (-80, load_y + 36, -40), (80, load_y + 48, zw), m["mos_cu"], D.beats(0, 3))
+    g = empty("zc_in", root)
+    for i, d in enumerate((dn, dp)):
+        D.box(f"zc_gct{i}", (d.cx - 18, d.ytop, -240), (d.cx + 18, 290, -200), m["mos_w"], g)
+    D.box("zc_inbar", (dn.cx - 30, 270, -240), (dp.cx + 30, 300, -200), m["mos_cu"], g)
+    D.box("zc_gnd", (dn.src(-1) - 50, top, -120), (dn.src(-1) + 50, top + 30, 0), m["mos_gnd"], g)
+    D.box("zc_vdd", (dp.src(1) - 50, top, -120), (dp.src(1) + 50, top + 30, 0), m["mos_vdd"], g)
+    label("PMOS: pull-up to VDD", (dp.cx, -150.0, 0), root, D.beats(0))
+    label("NMOS: pull-down to ground", (dn.cx, -150.0, 0), root, D.beats(0))
+    label("output wire", (out[3][0], out[3][1], zw), root, D.beats(0))
+    label("load: the next gate", (0.0, load_y + 24, zw), root, D.beats(0, 3))
+    label("input (both gates)", (0.0, 285.0, -200), root, D.beats(0))
+    label("VDD", (dp.src(1), top + 15, 0), root, D.beats(0, 3))
+    label("ground", (dn.src(-1), top + 15, 0), root, D.beats(0, 3))
+    # input 0: the PMOS conducts, holes ride from VDD to the output and up to the load
+    D.channel(root, m, dp, D.beats(1))
+    hp = D.carrier_path(dp)[:3] + [(xp, top, D.CZ)] + [(p[0], p[1], D.CZ) for p in out[6:][::-1]] + [(apex[0], load_y, D.CZ)]
+    D.beads(root, "zc_holes", hp, 12, 10.0, m["mos_hole"], 1, 0.03, 0.7, 150)
+    label("input 0 V: PMOS on", (dp.cx, 120.0, 0), root, D.beats(1))
+    label("output charges to VDD", (out[9][0], out[9][1], zw), root, D.beats(1))
+    # input 1: the NMOS conducts, electrons ride from ground to the output: the load discharges
+    D.gate_glow(root, m, dn, D.beats(2))
+    D.gate_glow(root, m, dp, D.beats(2))
+    D.channel(root, m, dn, D.beats(2))
+    hn = D.carrier_path(dn)[:3] + [(xn, top, D.CZ)] + [(p[0], p[1], D.CZ) for p in out[:7]] + [(apex[0], load_y, D.CZ)]
+    D.beads(root, "zc_elec", hn, 14, 10.0, m["mos_elec"], 2, 0.03, 0.7, 130)
+    label("input high: NMOS on", (dn.cx, 120.0, 0), root, D.beats(2))
+    label("output pulled to ground", (out[3][0], out[3][1], zw), root, D.beats(2))
+    p = D.frame((dn.cx - dn.half, -240.0, -40.0), (dp.cx + dp.half, load_y + 60, 0.0), pitch=0.10, pad=1.05)
+    return [p, p, p]
 
 
-ZD_POSES = [((190.0, 80.0, 0.0), 3500.0, 0.0, 0.08)] * 3
+def zoom_d(m, root):
+    """d width ratio: slow holes, a wider PMOS, more fins (as section 5)."""
+    return sec5(m, root)
 
 
-def width_ratio(m, root):
-    """d (and section 5) width ratio: holes are slow, so the PMOS is drawn wider (more fins)."""
-    C.silicon(root, m)
-    cx_n, cx_p = C.NMOS_X, C.PMOS_X
-    device(root, m, cx_n, True, name="nmos_narrow")
-    narrow = device(root, m, cx_p, False, wf=1.0, name="pmos_narrow")
-    show(narrow, [(F(0, 0), F(1, 0))])
-    wide = device(root, m, cx_p, False, wf=2.2, chan_lit=[(F(1, 0), F(3, 0))], name="pmos_wide")
-    show(wide, [(F(1, 0), F(3, 0))])
-    # fins: the NMOS has 2, the PMOS 3 once it is wide
-    fins = empty("fins", root)
-    for x in (cx_n - 100, cx_n + 100):
-        box(f"fin_n_{x:.0f}", (x - 22, 0, 20), (x + 22, 150, 50), m["si_bar"], fins)
-    for x in (cx_p - 200, cx_p, cx_p + 200):
-        box(f"fin_p_{x:.0f}", (x - 22, 0, 20), (x + 22, 150, 50), m["si_bar"], fins)
-    show(fins, [(F(2, 0), F(3, 0))])
-    label("mu_p ~450: holes slow", (cx_p, 230.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("mu_n ~1400: electrons fast", (cx_n, 230.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("PMOS made 2.2x wider", (cx_p, 230.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("Wp/Wn ~2-2.5", (190.0, 330.0, 0), root, [(F(1, 0), F(3, 0))])
-    label("fins: 2 NMOS, 3 PMOS", (190.0, 330.0, 0), root, [(F(2, 0), F(3, 0))])
-    flow(root, "holes_slow", [(cx_p + C.SD, 200, 12), (cx_p + C.SD, -4, 12), (cx_p - C.SD, -4, 12),
-                              (cx_p - C.SD, 200, 12)], m["c_dot_vdd"], 0, 0.05, 0.5, 220)
-    flow(root, "electrons_fast", [(cx_n + C.SD, 200, 12), (cx_n + C.SD, -4, 12), (cx_n - C.SD, -4, 12),
-                                  (cx_n - C.SD, 200, 12)], m["c_dot_gnd"], 0, 0.1, 0.6, 60)
-    flow(root, "holes_wide", [(cx_p + 418, 200, 12), (cx_p + 418, -4, 12), (cx_p - 418, -4, 12),
-                              (cx_p - 418, 200, 12)], m["c_dot_vdd"], 1, 0.05, 0.5, 110)
+def zoom_e(m, root):
+    """e GAA PFET and germanium: silicon, SiGe and germanium sheets (as section 7)."""
+    return sec7(m, root)
 
 
-ZE_POSES = [((C.PMOS_X, 150.0, 0.0), 1400.0, 0.0, 0.08)] * 3
-SHEET_Y = (40.0, 120.0, 200.0)
-
-
-def sheet_group(root, cx, name, mat_, intervals):
-    g = empty(name, root)
-    for y0 in SHEET_Y:
-        box(f"{name}_{y0:.0f}", (cx - 250, y0, -150), (cx + 250, y0 + 36, -60), mat_, g)
-    show(g, list(intervals))
-    return g
-
-
-def gaa(m, root):
-    """e (and section 7) GAA PFET and germanium: a stack of sheets wrapped by the gate, first
-    silicon, then SiGe under strain, then germanium with holes running along the sheets."""
-    C.silicon(root, m)
-    cx = C.PMOS_X
-    for sgn in (-1, 1):
-        x = cx + sgn * 300.0
-        box(f"sd{sgn}", (x - 40, -90, -240), (x + 40, 260, 0), m["c_pplus"], root)
-    sheet_group(root, cx, "sheets_si", m["si_bar"], [(F(0, 0), F(1, 0))])
-    sheet_group(root, cx, "sheets_sige", m["sige"], [(F(1, 0), F(2, 0))])
-    sheet_group(root, cx, "sheets_ge", m["ge"], [(F(2, 0), F(3, 0))])
-    box("gate_wrap", (cx - 170, 20, -170), (cx + 170, 250, -40), m["wrap"], root)
-    for y0 in SHEET_Y:
-        arrow(root, m, f"press_{y0:.0f}", (cx + 340, y0 + 18, 20), (cx + 270, y0 + 18, 20),
-              [(F(1, 0), F(2, 0))])
-        flow(root, f"holes_sheet_{y0:.0f}", [(cx - 250, y0 + 18, 20), (cx + 250, y0 + 18, 20)],
-             m["c_dot_vdd"], 2, 0.05, 0.6, 80, size=30, n=9)
-    label("PMOS sheets, gate wraps them", (cx, 300.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("SiGe sheets: ~1 GPa", (cx, 300.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("Ge: ~1900 cm2/Vs", (cx, 300.0, 0), root, [(F(2, 0), F(3, 0))])
+def _dev(m, root, iv=None, **kw):
+    D.mats(m)
+    return D.planar(m, root, "p", 0.0, name="pm", iv=iv, **kw)
 
 
 # ---- numbered sections --------------------------------------------------------------------------
+# The sections are close-ups of one detailed PMOS in cut-away (chip_mos_detail): SiGe:B source
+# and drain in an n-well, the source on the right (the VDD side), holes flowing right to left.
+# Each section function builds its pieces and returns one camera pose per beat.
 
-S1_POSES = [PMOS_CAM, PMOS_CAM, PAIR_CAM]
+
+def _inv_pose(e, pad=1.06):
+    return D.frame(e[0], e[1], pitch=0.10, pad=pad)
+
+
+CELL_W, CELL_H = 420.0, 600.0
 
 
 def sec1(m, root):
     """1 what happens: the PMOS off (gate high), on (gate low, holes flow), then paired."""
-    hi0 = [(F(0, 0), F(1, 0))]
-    C.chip(root, m, gate=hi0)
-    pmos_parts(root, m, gate=hi0, chan=[(F(1, 0), F(2, 0))])
-    flow(root, "holes_s1", HOLE_PATH, m["c_dot_vdd"], 1, 0.05, 0.4, 110)
-    label("PMOS: gate high, off", (C.PMOS_X, 230.0, 0), root, hi0)
-    label("gate low: holes flow", (C.PMOS_X, 230.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("paired with an NMOS", (0.0, 520.0, 0), root, [(F(2, 0), F(3, 0))])
-
-
-S2_POSES = [PMOS_CAM] * 5
+    d = _dev(m, root, iv=D.beats(0, 2))
+    D.majority_dots(root, m, d, D.beats(0, 2), D.beats(0, 2))
+    D.gate_glow(root, m, d, D.beats(0))
+    label("p+ source: VDD", (d.ct_x, -60.0, 0), root, D.beats(0))
+    label("p+ drain: output", (-d.ct_x, -60.0, 0), root, D.beats(0))
+    label("gate ~0.75 V: off", (0.0, 120.0, 0), root, D.beats(0))
+    label("n-well: electrons", (-230.0, -180.0, D.CZ), root, D.beats(0))
+    D.channel(root, m, d, D.beats(1))
+    D.flow(root, m, d, 1, n=10, life=150)
+    label("gate 0 V: on", (0.0, 120.0, 0), root, D.beats(1))
+    label("hole channel", (-20.0, -8.0, 2), root, D.beats(1))
+    label("holes: source to drain", (d.ct_x, 200.0, D.CZ), root, D.beats(1))
+    dn, dp, e = D.inverter(m, root, D.beats(2))
+    label("NMOS: pull-down", (dn.cx, -150.0, 0), root, D.beats(2))
+    label("PMOS: pull-up", (dp.cx, -150.0, 0), root, D.beats(2))
+    label("gates tied: input", (0.0, dn.ct_top + 127, 0), root, D.beats(2))
+    label("drains tied: output", (0.0, dn.ct_top + 17, 0), root, D.beats(2))
+    whole = D.frame_dev(d)
+    return [whole, whole, _inv_pose(e)]
 
 
 def sec2(m, root):
-    """2 the parts: source, channel, drain, gate and the n-well, each lit in turn."""
-    C.chip(root, m)
-    pmos_parts(root, m, gate=[(F(3, 0), F(4, 0))], chan=[(F(1, 0), F(2, 0))])
-    highlight(root, m, "hl_source", (VDD_SIDE - 90, -100, -250), (VDD_SIDE + 90, 14, 10), [(F(0, 0), F(1, 0))])
-    label("p+ source: SiGe:B", (VDD_SIDE, -170.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("PMOS channel: holes", (C.PMOS_X, 230.0, 0), root, [(F(1, 0), F(2, 0))])
-    highlight(root, m, "hl_drain", (OUT_SIDE - 90, -100, -250), (OUT_SIDE + 90, 14, 10), [(F(2, 0), F(3, 0))])
-    label("p+ drain: the output", (OUT_SIDE, -170.0, 0), root, [(F(2, 0), F(3, 0))])
-    label("PMOS gate: high-k metal", (C.PMOS_X, 230.0, 0), root, [(F(3, 0), F(4, 0))])
-    overlay(root, "nwell_s2", (C.PMOS_X - 330, -260, -240), (C.PMOS_X + 560, -2, 8), m["nwell"],
-            [(F(4, 0), F(5, 0))])
-    label("n-well tied to VDD", (C.PMOS_X + 200.0, 230.0, 0), root, [(F(4, 0), F(5, 0))])
-
-
-S3_POSES = ZC_POSES
+    """2 the parts: source, channel, drain, gate stack, then the n-well and its tap."""
+    d = _dev(m, root, tap=True)
+    D.hl(root, m, d, "source", D.beats(0), pad=6.0)
+    label("p+ source (VDD side)", (d.ct_x, -70.0, 0), root, D.beats(0))
+    label("SiGe:B raised epitaxy", (d.ct_x + 60, 22.0, 0), root, D.beats(0))
+    label("silicide", (d.ct_x - 60, 48.0, 0), root, D.beats(0))
+    D.channel(root, m, d, D.beats(1))
+    D.flow(root, m, d, 1, n=10, life=150, contacts=False)
+    label("hole channel", (0.0, -8.0, 2), root, D.beats(1))
+    label("gate 0 V", (0.0, 120.0, 0), root, D.beats(1))
+    D.hl(root, m, d, "drain", D.beats(2), pad=6.0)
+    label("p+ drain: the output", (-d.ct_x, -70.0, 0), root, D.beats(2))
+    label("contact to the output", (-d.ct_x, 250.0, 0), root, D.beats(2))
+    label("fill metal", (0.0, 120.0, 0), root, D.beats(3))
+    label("p-type work-function metal", (d.gh - 15, 90.0, 0), root, D.beats(3))
+    label("high-k HfO2", (-d.gh + 4, 60.0, 0), root, D.beats(3))
+    label("SiO2 interlayer", (-30.0, 3.0, 0), root, D.beats(3))
+    label("nitride spacer", (d.gh + 19, 150.0, 0), root, D.beats(3))
+    D.outline(root, m, "well_hl", (-d.half + 70, -228.0), (d.half + 120, -118.0), D.beats(4))
+    D.hl(root, m, d, "tap", D.beats(4), pad=6.0)
+    D.majority_dots(root, m, d, D.beats(4), D.beats(4))
+    label("n-well: phosphorus", (-200.0, -170.0, 0), root, D.beats(4))
+    label("n+ tap to VDD", (d.half + 65, 200.0, 0), root, D.beats(4))
+    label("electrons: majority", (130.0, -150.0, D.CZ), root, D.beats(4))
+    label("p substrate", (0.0, -285.0, 0), root, D.beats(4))
+    gate = D.frame((-230.0, -90.0, -40.0), (230.0, 210.0, 0.0), pitch=0.10, pad=1.12)
+    return [D.frame_dev(d, x0=-40, x1=470, bottom=-150, top=350), D.frame_dev(d, x0=-330, x1=330, bottom=-190, top=230),
+            D.frame_dev(d, x0=-470, x1=40, bottom=-150, top=350), gate,
+            D.frame_dev(d, x0=-440, x1=d.half + 130, bottom=-330)]
 
 
 def sec3(m, root):
-    """3 CMOS pairing: the inverter at rest, input low, input high."""
-    inverter(m, root)
-
-
-S4_POSES = [PAIR_CAM, PAIR_CAM, WHOLE]
+    """3 CMOS pairing: the inverter at rest, input low (PMOS on), input high (NMOS on)."""
+    D.mats(m)
+    dn, dp, e = D.inverter(m, root, D.beats(0, 3))
+    label("PMOS: pull-up to VDD", (dp.cx, -150.0, 0), root, D.beats(0))
+    label("NMOS: pull-down to ground", (dn.cx, -150.0, 0), root, D.beats(0))
+    label("VDD", (dp.src(1), dp.ct_top + 17, 0), root, D.beats(0, 3))
+    label("ground", (dn.src(-1), dn.ct_top + 17, 0), root, D.beats(0, 3))
+    label("input", (0.0, dn.ct_top + 127, 0), root, D.beats(0))
+    label("output", (0.0, dn.ct_top + 17, 0), root, D.beats(0))
+    # input 0: PMOS on, holes from VDD to the output
+    D.channel(root, m, dp, D.beats(1))
+    D.flow(root, m, dp, 1, n=10, life=130)
+    label("input 0 V: PMOS on", (dp.cx, 120.0, 0), root, D.beats(1))
+    label("NMOS off", (dn.cx, 120.0, 0), root, D.beats(1))
+    label("output charged to VDD", (0.0, dn.ct_top + 17, 0), root, D.beats(1))
+    # input 1: NMOS on, electrons from ground to the output; both gates high
+    D.gate_glow(root, m, dn, D.beats(2))
+    D.gate_glow(root, m, dp, D.beats(2))
+    D.channel(root, m, dn, D.beats(2))
+    D.flow(root, m, dn, 2, n=12, life=100)
+    label("input high: NMOS on", (dn.cx, 120.0, 0), root, D.beats(2))
+    label("PMOS off", (dp.cx, 120.0, 0), root, D.beats(2))
+    label("output pulled to ground", (0.0, dn.ct_top + 17, 0), root, D.beats(2))
+    return [_inv_pose(e), _inv_pose(e), _inv_pose(e)]
 
 
 def sec4(m, root):
-    """4 standard cell layout: the pair as one cell, its rails along the thin metal, then tap
-    cells and rows across the chip."""
-    C.chip(root, m)
-    label("standard cell: PMOS over NMOS", (0.0, -330.0, 0), root, [(F(0, 0), F(1, 0))])
-    overlay(root, "rails_hl", (-1450, C.THIN[0] + 10, -110), (1450, C.THIN[1] - 10, -20), m["pm_hl"],
-            [(F(1, 0), F(2, 0))])
-    label("rails: Vdd and ground", (-300.0, C.THIN[1] + 90.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("tap cells tie the wells to rails", (0.0, C.BUMP_Y + 150.0, 0), root, [(F(2, 0), F(3, 0))])
-
-
-S5_POSES = ZD_POSES
+    """4 standard cell layout: one inverter cell from above, its rails, then rows with tap cells."""
+    D.mats(m)
+    g = empty("rows", root)
+    for r in range(2):
+        for k in range(5):
+            D.cell(m, g, k * CELL_W, f"cell_{r}_{k}", w=CELL_W, h=CELL_H, flip=bool(r), tap=k in (0, 4))
+    # the flipped row goes on top, sharing the VDD rail: move its cell groups up one cell height
+    for o in list(g.children):
+        if o.name.startswith("cell_1_"):
+            o.location = C.P(0.0, CELL_H, 0.0)
+    W = 5 * CELL_W
+    c0 = 2 * CELL_W  # the middle cell is the inverter shown first
+    D.outline(root, m, "cell_hl", (c0, 0.0), (c0 + CELL_W, CELL_H), D.beats(0), t=8.0, z=40.0)
+    label("PMOS in the n-well", (c0 + 0.5 * CELL_W, CELL_H * 0.72, 10), root, D.beats(0))
+    label("NMOS in the p-well", (c0 + 0.5 * CELL_W, CELL_H * 0.22, 10), root, D.beats(0))
+    label("shared gate", (c0 + 0.33 * CELL_W, CELL_H * 0.5, 14), root, D.beats(0))
+    label("M1 output", (c0 + 0.5 * CELL_W, CELL_H * 0.4, 24), root, D.beats(0))
+    D.outline(root, m, "rail_v", (0.0, CELL_H - 40), (W, CELL_H + 40), D.beats(1), t=8.0, z=40.0)
+    D.outline(root, m, "rail_g", (0.0, -40.0), (W, 40.0), D.beats(1), t=8.0, z=40.0)
+    label("VDD rail", (c0 + 0.7 * CELL_W, CELL_H, 30), root, D.beats(1))
+    label("ground rail", (c0 + 0.7 * CELL_W, 0.0, 30), root, D.beats(1))
+    label("height: 7.5-12 tracks", (c0 + CELL_W + 20, CELL_H * 0.5, 30), root, D.beats(1))
+    for k in (0, 4):
+        D.outline(root, m, f"tap_hl{k}", (k * CELL_W, 0.0), ((k + 1) * CELL_W, 2 * CELL_H), D.beats(2), t=8.0, z=40.0)
+    label("tap cell", (0.5 * CELL_W, CELL_H * 0.82, 10), root, D.beats(2))
+    label("tap cell", (4.5 * CELL_W, CELL_H * 1.18, 10), root, D.beats(2))
+    label("rows share the VDD rail", (2.5 * CELL_W, CELL_H, 30), root, D.beats(2))
+    cell = D.frame((c0 - 60, -60.0, -10.0), (c0 + CELL_W + 60, CELL_H + 60, 40.0), pitch=0.0, pad=1.1)
+    row = D.frame((0.0, -60.0, -10.0), (W, 2 * CELL_H + 60, 40.0), pitch=0.0, pad=1.05)
+    return [cell, cell, row]
 
 
 def sec5(m, root):
-    """5 NMOS vs PMOS balance: width ratio, fins."""
-    width_ratio(m, root)
-
-
-S6_POSES = ZB_POSES
+    """5 NMOS vs PMOS balance: slow holes, the PMOS drawn wider, then fins: 2 NMOS, 3 PMOS."""
+    D.mats(m)
+    dn, dp, e = D.inverter(m, root, D.beats(0), name="a", wires=False)
+    D.gate_glow(root, m, dn, D.beats(0))
+    D.channel(root, m, dn, D.beats(0))
+    D.channel(root, m, dp, D.beats(0))
+    D.flow(root, m, dn, 0, n=14, life=60, u1=0.85)
+    D.flow(root, m, dp, 0, n=8, life=170, u1=0.7)
+    label("electrons ~1400 cm2/Vs", (dn.cx, 250.0, 0), root, D.beats(0))
+    label("holes ~450 cm2/Vs", (dp.cx, 250.0, 0), root, D.beats(0))
+    label("same size, ~1/3 the current", (dp.cx, -150.0, 0), root, D.beats(0))
+    bn, bp, eb = D.inverter(m, root, D.beats(1), name="b", wires=False, depth_n=260.0, depth_p=600.0)
+    D.channel(root, m, bp, D.beats(1))
+    D.flow(root, m, bp, 1, n=14, life=150, u1=0.8)
+    label("NMOS width W", (bn.cx, 120.0, 0), root, D.beats(1))
+    label("PMOS ~2-2.5x wider", (bp.cx, 120.0, -300), root, D.beats(1))
+    label("equal pull-up and pull-down", (bp.cx, -150.0, 0), root, D.beats(1))
+    _, zn, en = D.finfet(m, root, "n", nfins=2, z0=-260.0, name="fn", iv=D.beats(2), lit=D.beats(2), length=300.0)
+    _, zp, ep = D.finfet(m, root, "p", nfins=3, z0=260.0, name="fp", iv=D.beats(2), lit=D.beats(2), length=300.0)
+    label("NMOS: 2 fins", (-4.0, D.FIN_H + 100, -260.0), root, D.beats(2))
+    label("PMOS: 3 fins", (-4.0, D.FIN_H + 100, 260.0), root, D.beats(2))
+    label("width comes in whole fins", (-4.0, -100.0, 0.0), root, D.beats(2))
+    lo = (0.0, -170.0, en[0][2])
+    hi = (300.0, D.FIN_H + 86, ep[1][2])
+    eb2 = ((eb[0][0], eb[0][1], -600.0), eb[1])
+    return [_inv_pose(e), D.frame(eb2[0], eb2[1], yaw=0.45, pitch=0.30, pad=1.06),
+            D.frame(lo, hi, yaw=-0.95, pitch=0.25, pad=1.06)]
 
 
 def sec6(m, root):
-    """6 strain and doping: SiGe source and drain, squeezed channel, boron."""
-    sige_strain(m, root)
-
-
-S7_POSES = ZE_POSES
+    """6 strain and doping: SiGe:B source and drain with boron, the squeeze, faster holes."""
+    d = _dev(m, root)
+    D.dopants(root, m, d, D.beats(0))
+    D.hl(root, m, d, "epi-1", D.beats(0), pad=4.0)
+    D.hl(root, m, d, "epi1", D.beats(0), pad=4.0)
+    label("SiGe:B grown in place", (d.ct_x, 22.0, D.CZ), root, D.beats(0))
+    label("boron atoms", (-d.ct_x, -60.0, D.CZ), root, D.beats(0))
+    D.strain(root, m, d, D.beats(1, 3))
+    D.channel(root, m, d, D.beats(1, 3))
+    label("Ge is bigger: SiGe pushes in", (d.sd_in + 40, -60.0, D.CZ), root, D.beats(1))
+    label("compressive channel", (0.0, -22.0, D.CZ), root, D.beats(1))
+    D.flow(root, m, d, 2, n=14, life=85)
+    label("faster holes", (d.ct_x, 200.0, D.CZ), root, D.beats(2))
+    label("+25% drive at 90 nm (Intel)", (0.0, 120.0, 0), root, D.beats(2))
+    close = D.frame_dev(d, x0=-420, x1=420, bottom=-180, top=200)
+    return [close, close, D.frame_dev(d)]
 
 
 def sec7(m, root):
-    """7 germanium channels and GAA PMOS: sheets, SiGe, germanium."""
-    gaa(m, root)
-
-
-S8_POSES = [WHOLE, PAIR_CAM, PAIR_CAM]
+    """7 germanium and GAA: stacked sheets of silicon, then SiGe, then germanium."""
+    D.mats(m)
+    _, e = D.gaa(m, root, "p", sheet_ivs={"mos_si": D.beats(0), "mos_sige": D.beats(1), "mos_ge": D.beats(2)},
+                 lit=D.beats(2), name="g7")
+    top = D.SHEET_Y[-1] + D.SHEET_T
+    label("silicon sheets", (-4.0, D.SHEET_Y[1] + 15, -40.0), root, D.beats(0))
+    label("gate all round each", (-4.0, D.SHEET_Y[0] - 8, 100.0), root, D.beats(0))
+    label("SiGe:B source/drain", (300.0, top + 10, 60.0), root, D.beats(0))
+    label("SiGe sheets: ~1 GPa squeeze", (-4.0, D.SHEET_Y[1] + 15, -40.0), root, D.beats(1))
+    label("peak hole mobility +100%", (-4.0, top + 50, 0.0), root, D.beats(1))
+    label("germanium: ~1900 cm2/Vs", (-4.0, D.SHEET_Y[1] + 15, -40.0), root, D.beats(2))
+    label("hole channel on each sheet", (-4.0, D.SHEET_Y[0] - 8, 100.0), root, D.beats(2))
+    p = D.frame(e[0], e[1], yaw=-0.75, pitch=0.25, pad=1.05)
+    return [p, p, p]
 
 
 def sec8(m, root):
-    """8 who makes it: the foundries, the epi tools, the design tools."""
-    C.chip(root, m)
-    label("TSMC, Intel, Samsung", (0.0, C.BUMP_Y + 150.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("epitaxy: Applied Materials", (C.PMOS_X, 230.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("cells: Synopsys, Cadence, Arm", (0.0, 470.0, 0), root, [(F(2, 0), F(3, 0))])
-
-
-S9_POSES = [PMOS_CAM, PMOS_CAM, PMOS_CAM]
+    """8 who makes it: the foundries, the epi tools, the cell and layout tools."""
+    D.mats(m)
+    e = D.makers_row(m, root, "p", D.beats(0))
+    label("TSMC: FinFET, then N2 GAA", (-4.0, 250.0, D.ROW_Z[0]), root, D.beats(0))
+    label("Intel: 18A RibbonFET", (-4.0, 250.0, D.ROW_Z[1]), root, D.beats(0))
+    label("Samsung: GAA", (-4.0, 250.0, D.ROW_Z[2]), root, D.beats(0))
+    d = D.planar(m, root, "p", 0.0, name="pm", iv=D.beats(1))
+    D.hl(root, m, d, "epi-1", D.beats(1), pad=4.0)
+    D.hl(root, m, d, "epi1", D.beats(1), pad=4.0)
+    label("SiGe epi: Applied, ASM", (d.ct_x, 22.0, D.CZ), root, D.beats(1))
+    label("grown in an epi reactor", (-d.ct_x, 22.0, D.CZ), root, D.beats(1))
+    g = empty("rows8", root)
+    for k in range(5):
+        D.cell(m, g, k * CELL_W, f"c8_{k}", w=CELL_W, h=CELL_H, tap=k in (0, 4))
+    show(g, D.beats(2))
+    label("cell libraries: Arm", (2.5 * CELL_W, CELL_H * 0.72, 10), root, D.beats(2))
+    label("place and route: Synopsys, Cadence", (1.5 * CELL_W, CELL_H * 0.22, 24), root, D.beats(2))
+    row = D.frame((0.0, -60.0, -10.0), (5 * CELL_W, CELL_H + 60, 40.0), pitch=0.0, pad=1.05)
+    return [D.row_pose(e), D.frame_dev(d), row]
 
 
 def sec9(m, root):
-    """9 chokepoints and risks: slow holes, boron into the channel, few epi tool vendors."""
-    C.chip(root, m)
-    pmos_parts(root, m, chan=[(F(0, 0), F(1, 0))])
-    flow(root, "holes_slow9", HOLE_PATH, m["c_dot_vdd"], 0, 0.05, 0.5, 220)
-    label("holes: the weaker carrier", (C.PMOS_X, 230.0, 0), root, [(F(0, 0), F(1, 0))])
-    flow(root, "boron_drift", [(OUT_SIDE, 60, 12), (OUT_SIDE, -4, 12), (C.PMOS_X, -4, 12)],
-         m["boron"], 1, 0.05, 0.6, 110, size=30, n=9)
-    label("boron drifts into the channel", (C.PMOS_X, 230.0, 0), root, [(F(1, 0), F(2, 0))])
-    highlight(root, m, "hl_epi", (VDD_SIDE - 90, -100, -250), (OUT_SIDE + 90, 14, 10), [(F(2, 0), F(3, 0))])
-    label("few epi tool vendors", (C.PMOS_X, 230.0, 0), root, [(F(2, 0), F(3, 0))])
-
-
-S10_POSES = [
-    ((0.0, 620.0, 0.0), 5000.0, 0.0, 0.10),
-    ((0.0, 620.0, 0.0), 5800.0, 0.0, 0.10),
-    ((0.0, 700.0, 0.0), 6600.0, 0.0, 0.10),
-    WHOLE,
-]
+    """9 chokepoints and risks: slow holes, boron drifting into the channel, few epi vendors."""
+    d = _dev(m, root)
+    D.channel(root, m, d, D.beats(0))
+    D.flow(root, m, d, 0, n=6, life=220, u1=0.6)
+    label("holes: the weaker carrier", (0.0, -8.0, 2), root, D.beats(0))
+    label("needs new strain each node", (0.0, 120.0, 0), root, D.beats(0))
+    D.dopants(root, m, d, D.beats(1))
+    for s in (-1, 1):
+        st = (s * (d.sd_in + 10), -30.0, D.CZ)
+        D.stream_of(root, f"bdrift{s}", 6, st, [(0, 0, 0), (-s * (d.sd_in - 10), -10.0, 0)], 8.0, m["mos_atom_b"], 1, 0.05, 0.7, 110)
+    D.box_on(root, "chan_warn", (-d.ext_in, -60, -40), (d.ext_in, -1, 3.0), m["mos_warn"], D.beats(1))
+    label("boron diffuses inward", (-d.sd_in, -30.0, D.CZ), root, D.beats(1))
+    label("shifts Vt, leaks", (0.0, -60.0, 3), root, D.beats(1))
+    for k in ("epi-1", "epi1"):
+        D.hl(root, m, d, k, D.beats(2), pad=4.0, mt="mos_warn")
+    label("epi tools: few vendors", (d.ct_x, 22.0, D.CZ), root, D.beats(2))
+    label("current shares not public", (-d.ct_x, 22.0, D.CZ), root, D.beats(2))
+    close = D.frame_dev(d, x0=-420, x1=420, bottom=-180, top=230)
+    return [close, close, close]
 
 
 def sec10(m, root):
-    """10 sources: the whole chip pulls back while each beat names its sources."""
-    C.chip(root, m)
-    label("[1][2] Intel 90 nm, VLSI 2004", (0.0, C.BUMP_Y + 150.0, 0), root, [(F(0, 0), F(1, 0))])
-    label("[3] IBM SiGe nanosheet pFET", (0.0, C.BUMP_Y + 150.0, 0), root, [(F(1, 0), F(2, 0))])
-    label("[4][5] UCSB lecture, Applied", (0.0, C.BUMP_Y + 150.0, 0), root, [(F(2, 0), F(3, 0))])
-    label("[6][7][8] USPTO, ASAP7, cells", (0.0, C.BUMP_Y + 150.0, 0), root, [(F(3, 0), F(4, 0))])
+    """10 sources: each beat lights the part its sources back."""
+    d = _dev(m, root, iv=D.beats(0))
+    D.strain(root, m, d, D.beats(0))
+    D.channel(root, m, d, D.beats(0))
+    label("[1][2] Intel 90 nm, VLSI 2004", (0.0, 120.0, 0), root, D.beats(0))
+    _, e1 = D.gaa(m, root, "p", sheet_ivs={"mos_sige": None}, iv=D.beats(1), name="g10")
+    label("[3] IBM SiGe nanosheet pFET", (-4.0, D.SHEET_Y[1] + 15, -40.0), root, D.beats(1))
+    label("[6] GAA SiGe S/D patent", (300.0, D.SHEET_Y[-1] + D.SHEET_T + 10, 60.0), root, D.beats(1))
+    dn, dp, e2 = D.inverter(m, root, D.beats(2), name="i10")
+    D.hl(root, m, dp, "epi1", D.beats(2), pad=4.0)
+    label("[4] UCSB inverter sizing", (0.0, dn.ct_top + 127, 0), root, D.beats(2))
+    label("[5] Applied epi release", (dp.src(1), 22.0, D.CZ), root, D.beats(2))
+    g = empty("rows10", root)
+    for k in range(5):
+        D.cell(m, g, k * CELL_W, f"c10_{k}", w=CELL_W, h=CELL_H, tap=k in (0, 4))
+    show(g, D.beats(3))
+    label("[7] ASAP7 cells", (2.5 * CELL_W, CELL_H * 0.72, 10), root, D.beats(3))
+    label("[8] cell library lecture", (1.5 * CELL_W, CELL_H * 0.22, 24), root, D.beats(3))
+    row = D.frame((0.0, -60.0, -10.0), (5 * CELL_W, CELL_H + 60, 40.0), pitch=0.0, pad=1.05)
+    return [D.frame_dev(d, x0=-420, x1=420, bottom=-180, top=230), D.frame(e1[0], e1[1], yaw=-0.75, pitch=0.25, pad=1.05),
+            _inv_pose(e2), row]
 
 
 # ---- registry and entry point ----------------------------------------------------------------
 
 # key -> (beats, camera poses, builder)
 SCENES = {
-    "zoom_a": (3, ZA_POSES, zoom_a),
-    "zoom_b": (3, ZB_POSES, zoom_b),
-    "zoom_c": (3, ZC_POSES, zoom_c),
-    "zoom_d": (3, ZD_POSES, width_ratio),
-    "zoom_e": (3, ZE_POSES, gaa),
-    "sec1": (3, S1_POSES, sec1),
-    "sec2": (5, S2_POSES, sec2),
-    "sec3": (3, S3_POSES, sec3),
-    "sec4": (3, S4_POSES, sec4),
-    "sec5": (3, S5_POSES, sec5),
-    "sec6": (3, S6_POSES, sec6),
-    "sec7": (3, S7_POSES, sec7),
-    "sec8": (3, S8_POSES, sec8),
-    "sec9": (3, S9_POSES, sec9),
-    "sec10": (4, S10_POSES, sec10),
+    "zoom_a": (3, None, zoom_a),
+    "zoom_b": (3, None, zoom_b),
+    "zoom_c": (3, None, zoom_c),
+    "zoom_d": (3, None, zoom_d),
+    "zoom_e": (3, None, zoom_e),
+    "sec1": (3, None, sec1),
+    "sec2": (5, None, sec2),
+    "sec3": (3, None, sec3),
+    "sec4": (3, None, sec4),
+    "sec5": (3, None, sec5),
+    "sec6": (3, None, sec6),
+    "sec7": (3, None, sec7),
+    "sec8": (3, None, sec8),
+    "sec9": (3, None, sec9),
+    "sec10": (4, None, sec10),
 }
 
 
@@ -468,9 +473,9 @@ def scene(key):
     name = f"pmos_{key}"
     m, root = start(name, beats, page="chip")
     C.mats(m)
-    mats_extra(m)
-    fn(m, root)
-    C.glide_camera(root, poses)
+    D.mats(m)
+    out = fn(m, root)
+    C.glide_camera(root, out if poses is None else poses)
     finish(name, page="chip")
 
 

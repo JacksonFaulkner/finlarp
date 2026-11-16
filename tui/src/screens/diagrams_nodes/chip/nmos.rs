@@ -12,59 +12,59 @@ use super::super::Node;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[
-    Beat::new("whole chip: one NMOS, the pull-down switch, picked out in cyan", BEAT_MS)
+    Beat::new("whole chip: one NMOS, the pull-down switch", BEAT_MS)
         .note(
-            "The whole chip in cut-away: silicon at the bottom, copper wiring above, package bumps on top. One transistor, the NMOS of the inverter, is picked out in cyan.",
-            "a cyan box around the NMOS at the silicon surface, with the wiring tiers and bumps above it",
+            "The whole chip in cut-away: silicon at the bottom, layers of copper wiring above it, package bumps on top. Down in the silicon sit the transistors. The one outlined in yellow is an NMOS, the switch that pulls a signal down to 0 V.",
+            "The chip as a slab: tan silicon at the bottom with two transistors (blue NMOS on the left, pink PMOS on the right), grey and copper wiring tiers above, silver bumps on top. A yellow box marks the NMOS.",
         )
         .detail(
-            "Every switch in the chip is an NMOS or a PMOS, and billions of them make a modern GPU.",
-            &["NVIDIA B200: 208 billion transistors (anandtech.com/show/21310)", "AMD MI300X: 153 billion (tweaktown.com/news/94342)"],
+            "Every switch in a chip is an NMOS or a PMOS.",
+            &["NVIDIA B200: 208 billion transistors (CHIP_NMOS.txt, section 7)", "AMD MI300X: 153 billion (CHIP_NMOS.txt, section 7)"],
         ),
-    Beat::new("off: gate low, no channel between the two n+ islands", BEAT_MS)
+    Beat::new("off: gate at 0 V, nothing joins source and drain", BEAT_MS)
         .note(
-            "Zoomed in: two n+ islands, the source and the drain, sit in p-type silicon. With the gate at 0 V there is no channel between them, so no current flows.",
-            "the blue n+ source and drain blocks in the tan silicon, the grey gate low, and no glow under it",
+            "Up close the NMOS is two n+ islands, the source (tied to ground) and the drain (the output), in a p-type well full of holes. With the gate at 0 V both islands meet the well in reverse-biased junctions, so no current can cross.",
+            "Blue n+ source and drain under light-blue raised epitaxy, grey contact pillars up to the first copper wire, the green-capped gate between them, gold dots (holes) through the tan well, and thin violet depletion bands round the junctions.",
         )
         .detail(
-            "In the off state the junctions block current; only leakage flows.",
-            &["n+ source/drain about 1e20-1e21 /cm3 (textbook)", "p-well about 1e15-1e18 /cm3 (textbook)"],
+            "Off, the switch passes only leakage.",
+            &["Gate 0 V: junctions block current (CHIP_NMOS.txt, section 3)", "n+ ~1e20-1e21 /cm3 (CHIP_NMOS.txt, section 2)"],
         ),
-    Beat::new("gate up: the gate rises and a channel forms under it", BEAT_MS)
+    Beat::new("gate up: the field pulls a channel of electrons", BEAT_MS)
         .note(
-            "The gate voltage rises above the threshold. The gate draws no current; its field pulls electrons to the surface, and a thin n-type channel joins source to drain.",
-            "the gate glowing amber, then a cyan sheet on the silicon surface between the n+ islands",
+            "The gate rises to the supply, about 0.75 V. Its field reaches through the thin high-k dielectric, pushes the holes away and draws electrons into a sheet a few nanometres thick under the gate. That sheet, the channel, joins source and drain.",
+            "The gate's fill metal glows amber, pink arrows point down through the teal high-k, the gold holes under the gate disappear, and a bright cyan strip appears on the surface.",
         )
         .detail(
-            "The threshold voltage sets when the switch turns on.",
-            &["Inversion above Vt (textbook)", "Gate draws no current: only its field reaches the silicon (CHIP_NMOS.txt, section 1)"],
+            "Only the gate's field reaches the silicon; no current enters the gate.",
+            &["Vt ~0.2-0.4 V at leading nodes (typical)", "Supply ~0.7-0.8 V (typical)"],
         ),
-    Beat::new("flow: electrons run from the source, through the channel, to the drain", BEAT_MS)
+    Beat::new("flow: electrons ride from ground, through the channel, to the drain", BEAT_MS)
         .note(
-            "With the channel open, electrons leave the grounded source, cross the channel and climb the drain contact. Conventional current runs the other way, from drain to source.",
-            "cyan dots running from the left n+ block along the surface, across the channel and up the right contact",
+            "With the channel open, electrons come in from ground through the source contact, cross under the gate and leave up the drain contact. That current pulls the output node down to 0 V.",
+            "Cyan beads ride down the left contact pillar, along the cyan channel under the amber gate, and up the right pillar toward the copper wire.",
         )
         .detail(
-            "Electrons carry the current: they move about 2-3 times faster than holes, so an NMOS drives more current per width than a PMOS.",
-            &["Electron mobility about 2-3x that of holes (textbook)", "Saturation velocity about 1e7 cm/s (textbook)"],
+            "Electrons are the fast carrier, which is why the NMOS is the stronger switch.",
+            &["Electron mobility ~2-3x hole mobility in bulk Si (textbook)"],
         ),
-    Beat::new("gate down: the gate falls, the channel closes and the flow stops", BEAT_MS)
+    Beat::new("gate down: the channel empties and the flow stops", BEAT_MS)
         .note(
-            "The gate drops back to 0 V. The glow goes out, the channel empties and the electrons stop; a small leakage current remains.",
-            "the amber glow and the cyan sheet go out together, and no dots are left on the path",
+            "The gate falls back to 0 V. The amber glow and the channel fade, the holes return under the gate, and the switch is off again. A trickle of leakage still crosses below the surface.",
+            "The gate goes dark grey, the cyan strip fades out, gold holes reappear under the gate, and a few violet dots drift from source to drain.",
         )
         .detail(
-            "The switch cannot turn off perfectly: below threshold, leakage falls only about 10x per 60-100 mV.",
-            &["S >= 60 mV/decade at 300 K (textbook)", "Real S about 70-90 mV/dec (CHIP_NMOS.txt, section 4)"],
+            "No switch turns off perfectly; leakage across billions of them adds up.",
+            &["Swing >= 60 mV/decade at 300 K (CHIP_NMOS.txt, section 4)"],
         ),
-    Beat::new("whole chip again: one switch of billions, wired by contacts and metal", BEAT_MS)
+    Beat::new("whole chip again: one switch of billions", BEAT_MS)
         .note(
-            "Back out to the whole chip. The NMOS is one of billions of switches, wired to its neighbours by tungsten contacts and copper metal.",
-            "the chip in cut-away again, the cyan box around the NMOS fading back in",
+            "Back out to the whole chip. This NMOS is one of billions, joined to its PMOS partner and its neighbours by tungsten contacts and copper wiring.",
+            "The whole chip in cut-away again, the yellow box back round the NMOS.",
         )
         .detail(
-            "The count grows with each node, and every switch is built the same way.",
-            &["NVIDIA H100/H200: 80 billion transistors (anandtech.com/show/21310)", "Apple M4: 28 billion (en.wikipedia.org/wiki/Apple_M4)"],
+            "Every switch on the chip is built this same way.",
+            &["NVIDIA H100/H200: 80 billion (CHIP_NMOS.txt, section 7)", "Apple M4: 28 billion (CHIP_NMOS.txt, section 7)"],
         ),
 ];
 
@@ -73,419 +73,452 @@ const BEATS: &[Beat] = &[
 const ZA_BEATS: &[Beat] = &[
     Beat::new("the gate stack, cut open: metal on high-k over the silicon", BEAT_MS)
         .note(
-            "Cut through the gate: a metal gate on a thin high-k dielectric over the silicon. The gate is the switch's input.",
-            "the grey metal gate block on a pale high-k strip, the tan silicon below, and the blue n+ blocks either side",
+            "The gate is a stack of layers. A thin SiO2 interlayer sits on the silicon, a hafnium-oxide high-k layer lines a U-shaped trench, a work-function metal inside it sets the threshold voltage, and a fill metal carries the signal. Nitride spacers flank it.",
+            "Close on the gate: a white line at the bottom (SiO2), a teal U (high-k), a brass U inside it (work-function metal), the grey fill in the middle, green nitride all round; gold holes in the tan silicon below.",
         )
         .detail(
-            "The gate and its thin dielectric set how strongly the field reaches the silicon.",
-            &["Metal gate + high-k (HfO2) + thin SiO2 (CHIP_NMOS.txt, section 2)", "GATE STACK about 1 nm EOT class (CHIP_NMOS.txt, section 2)"],
+            "The high-k metal gate has been standard since the 45 nm node.",
+            &["Metal + high-k (HfO2) + thin SiO2 (CHIP_NMOS.txt, section 2)", "EOT ~1 nm class (CHIP_NMOS.txt, section 2)"],
         ),
     Beat::new("gate voltage on: the field reaches through the oxide", BEAT_MS)
         .note(
-            "A gate voltage sets up a field across the dielectric that controls the silicon below. No current flows into the gate, only its field.",
-            "the gate glowing amber, and two pink field lines running down from the gate into the silicon",
+            "Raise the gate to ~0.75 V and an electric field crosses the dielectric into the silicon. The dielectric is an insulator, so no current flows into the gate: it works like one plate of a capacitor.",
+            "The fill metal glowing amber and three pink arrows running down through the high-k into the silicon.",
         )
         .detail(
-            "The gate's field is the only thing that reaches the silicon.",
-            &["Gate draws no current: only its field reaches the silicon (CHIP_NMOS.txt, section 1)", "Capacitive control (textbook)"],
+            "Capacitive control is why a gate draws power only when it switches.",
+            &["Gate draws no DC current (CHIP_NMOS.txt, section 1)"],
         ),
     Beat::new("the channel: electrons gather at the surface", BEAT_MS)
         .note(
-            "Above the threshold the field pulls electrons up to the surface, and a thin n-type layer joins source to drain.",
-            "a cyan sheet on the silicon surface between the n+ blocks, under the amber gate",
+            "The field pushes the holes down into the well and pulls electrons up to the surface. Above the threshold they form a thin inversion layer: the channel.",
+            "A bright cyan strip under the gate, the gold holes gone from just beneath it, the pink field arrows still lit.",
         )
         .detail(
-            "The threshold voltage sets when this layer forms.",
-            &["INVERSION: above the threshold voltage, electrons gather into a channel (CHIP_NMOS.txt, section 3)"],
+            "Inversion turns the p-type surface n-type, joining source and drain.",
+            &["Inversion above Vt (CHIP_NMOS.txt, section 3)", "Vt ~0.2-0.4 V (typical)"],
         ),
     Beat::new("high-k: thick but electrically thin", BEAT_MS)
         .note(
-            "High-k material lets the layer stay physically thick enough to stop tunnelling while acting electrically thin. The gate stays lit and the channel is still on.",
-            "the pale high-k strip brightened, the amber gate and the cyan channel both still lit",
+            "Plain SiO2 thin enough for today's transistors would be only a few atoms thick and leak badly by tunnelling. Hafnium oxide has a dielectric constant several times higher, so a physically thicker layer gives the same pull on the channel with far less leakage.",
+            "Yellow outlines on the teal high-k layer: along the bottom of the gate and up its side.",
         )
         .detail(
-            "More control from the gate, and less leakage through the dielectric.",
-            &["High-k replaced SiO2 gates (textbook)", "Gate stack: high-k over thin SiO2 (CHIP_NMOS.txt, section 2)"],
+            "High-k is what let gate scaling continue past ~1 nm of SiO2.",
+            &["HfO2 k ~20-25 vs SiO2 3.9 (textbook)", "EOT ~1 nm class (CHIP_NMOS.txt, section 2)"],
         ),
 ];
 
 const ZB_BEATS: &[Beat] = &[
     Beat::new("below threshold: leakage only", BEAT_MS)
         .note(
-            "Below the threshold a weak current still flows, rising exponentially with gate voltage. The gate is dark and a few faint dots cross under the surface.",
-            "faint dots crossing under the surface between the n+ blocks, the gate dark",
+            "Below the threshold the surface is depleted but not inverted, and electrons from the source face an energy barrier. Only the few with enough thermal energy get over it. This subthreshold current is the off-state leakage.",
+            "The gate faintly amber, a violet depletion block under it, a few violet dots crossing just under the surface, and the gauge at the right showing a short bar.",
         )
         .detail(
-            "This is the off-state leakage. It sets how far the threshold can be lowered.",
-            &["S >= 60 mV/decade at 300 K (CHIP_NMOS.txt, section 4)", "Real S about 70-90 mV/decade (CHIP_NMOS.txt, section 4)"],
+            "The current rises about 10x for every 60-90 mV of gate voltage here.",
+            &["Swing >= 60 mV/decade at 300 K (CHIP_NMOS.txt, section 4)", "Real swing ~70-90 mV/decade (CHIP_NMOS.txt, section 4)"],
         ),
     Beat::new("threshold: inversion starts and the channel forms", BEAT_MS)
         .note(
-            "At the threshold voltage strong inversion starts: the gate glows, the cyan sheet forms on the surface and the current climbs steeply.",
-            "the amber gate and the cyan sheet forming on the silicon surface; no dots yet",
+            "At the threshold voltage the surface inverts and a thin electron layer forms. The current has climbed several decades from leakage and keeps climbing steeply.",
+            "A faint cyan strip under the dim amber gate, a sparse line of cyan electrons, and the gauge bar halfway up.",
         )
         .detail(
-            "The threshold is where the switch turns on.",
-            &["Threshold: the inversion layer forms (CHIP_NMOS.txt, section 4)"],
+            "Lower Vt is faster but leaks more, so chips offer several Vt choices.",
+            &["Vt ~0.2-0.4 V at leading nodes (typical)", "~10x leakage per 60-100 mV lower Vt (CHIP_NMOS.txt, section 4)"],
         ),
     Beat::new("above threshold: full current", BEAT_MS)
         .note(
-            "Well above threshold the current grows more slowly, because the electrons reach their velocity limit. A dense stream of dots runs source to drain.",
-            "bright dots streaming along the surface from the source to the drain, the gate and the sheet lit",
+            "At the full supply the channel is strong and the current is limited mostly by how fast the electrons can move. On-current is roughly five to six decades above the leakage, which is what makes this a good switch.",
+            "The gate bright amber, a solid cyan channel, a dense stream of electrons, and the gauge bar near the top.",
         )
         .detail(
-            "Each 60-100 mV of threshold reduction gives about 10x more off-state leakage, so Vt cannot be scaled freely.",
-            &["Rule: about 10x more off-state leakage per 60-100 mV (CHIP_NMOS.txt, section 4)"],
+            "Ion/Ioff is the figure of merit for a logic transistor.",
+            &["Ion/Ioff ~1e5-1e6 (typical, estimate)", "Supply ~0.7-0.8 V (typical)"],
         ),
 ];
 
 const ZC_BEATS: &[Beat] = &[
     Beat::new("low drain voltage: an even channel", BEAT_MS)
         .note(
-            "With a small drain voltage the channel is the same thickness end to end, and the current rises with the drain voltage.",
-            "a full cyan sheet between the n+ blocks under the amber gate, with dots flowing evenly",
+            "With the gate on and only a small drain voltage, the channel is the same thickness from source to drain. It behaves like a resistor: double the drain voltage and the current roughly doubles (the linear region).",
+            "The amber gate over an even cyan strip, with cyan electrons moving steadily along it.",
         )
         .detail(
-            "At a small drain voltage the channel acts like a resistor.",
+            "The linear region is where a switch sits once it has nearly finished pulling its output down.",
             &["Linear region at small drain voltage (CHIP_NMOS.txt, section 3)"],
         ),
     Beat::new("the drain end thins: the drain weakens the gate's pull", BEAT_MS)
         .note(
-            "The drain voltage reduces the gate's pull near the drain, so the channel thins there and the sheet tapers towards the drain.",
-            "the cyan sheet shortened on the drain side, the dots still flowing",
+            "As the drain voltage rises, the voltage between gate and channel shrinks toward the drain end, so fewer electrons gather there. The channel tapers, and the current grows more slowly.",
+            "The cyan channel in steps: thick at the source end, thinner toward the drain; electrons still flowing.",
         )
         .detail(
-            "This is where pinch-off begins: saturation starts when VD > VG - Vt.",
-            &["Saturation: VD > VG - Vt (CHIP_NMOS.txt, section 3)"],
+            "Current stops rising in proportion to the drain voltage.",
+            &["Channel charge falls toward the drain (textbook)"],
         ),
     Beat::new("pinch-off at the drain: current levels out", BEAT_MS)
         .note(
-            "At high drain voltage the channel stops short of the drain. The electrons race across the gap, and current barely rises with more drain voltage.",
-            "the sheet stopping short of the drain, the dots running across the gap",
+            "Once the drain voltage exceeds gate voltage minus threshold, the channel pinches off short of the drain. Electrons cross the last gap pulled by the drain's field, and the current hardly rises any more: saturation. The transistor now acts like a current source set by the gate.",
+            "The cyan channel stopping short of the drain, a violet depletion region reaching out from the drain, and electrons still crossing to it.",
         )
         .detail(
-            "Digital switching happens in saturation, where the current is nearly flat in drain voltage.",
-            &["Current levels out in saturation (CHIP_NMOS.txt, section 3)"],
+            "Logic gates switch most of their charge in saturation.",
+            &["Saturation when VD > VG - Vt (CHIP_NMOS.txt, section 3)"],
         ),
 ];
 
 const ZD_BEATS: &[Beat] = &[
     Beat::new("a long gate: the gate owns the barrier", BEAT_MS)
         .note(
-            "In a long device the gate alone sets the barrier between source and drain. The gate glows, the channel is even, and nothing leaks.",
-            "the amber gate glowing over a cyan sheet, with no dots under the surface",
+            "In a long transistor the depletion under the gate is far from the drain. The gate alone sets the barrier that keeps electrons in the source, so the threshold does not depend on the drain voltage.",
+            "A wide gate over a violet depletion block, with the drain's own depletion bands staying near the drain.",
         )
         .detail(
-            "With a long gate the threshold is steady.",
-            &["Long channel: the gate sets the barrier (textbook)"],
+            "Long-channel behaviour is what the textbook equations assume.",
+            &["Long channel: Vt independent of drain voltage (textbook)"],
         ),
     Beat::new("the drain field reaches the source: DIBL", BEAT_MS)
         .note(
-            "In a short channel the drain's field reaches the source side and lowers the barrier: drain-induced barrier lowering (DIBL). Three pink field lines run from the drain toward the channel.",
-            "three pink field lines running from the drain toward the channel, and the channel still lit",
+            "Shrink the gate and the drain's depletion region reaches across under it. The drain now helps lower the source barrier (drain-induced barrier lowering), so the threshold falls and some electrons leak across while the gate is off.",
+            "A narrow gate, violet depletion stretching from the drain toward the source, a pink arrow pointing from the drain side to the source side, and violet leakage dots crossing.",
         )
         .detail(
-            "The threshold falls as the channel shrinks, and the falling threshold lets leakage start.",
-            &["DIBL: the drain lowers the source barrier and Vt falls with drain voltage (CHIP_NMOS.txt, section 5)", "Vt roll-off as the channel shrinks (textbook)"],
+            "DIBL and Vt roll-off are the classic short-channel effects.",
+            &["DIBL: the drain lowers the source barrier (CHIP_NMOS.txt, section 5)", "Vt roll-off as the channel shrinks (textbook)"],
         ),
     Beat::new("higher drain voltage: more leakage", BEAT_MS)
         .note(
-            "A higher drain voltage lowers the barrier further, so more dots cross under the surface while the gate is dark.",
-            "more faint dots crossing under the surface, and the gate dark",
+            "Raise the drain voltage and the effect grows: the depletion reaches further, the barrier drops more and leakage climbs steeply. Wrapping the gate round the channel (FinFET, gate-all-around) is the cure.",
+            "Wider violet depletion from the drain, two pink arrows reaching past the gate, and a denser stream of violet leakage dots.",
         )
         .detail(
-            "Wrapping the gate around the channel fights this, which is what FinFET and GAA do.",
-            &["Leakage under the channel (CHIP_NMOS.txt, section 5)", "FinFET and GAA gates surround the channel (CHIP_NMOS.txt, section 5)"],
+            "This is why planar transistors gave way to fins at 22/16 nm.",
+            &["FinFET and GAA gates surround the channel (CHIP_NMOS.txt, section 5)"],
         ),
 ];
 
-const ZE_BEATS: &[Beat] = &[
-    Beat::new("dopants in the source and drain: arsenic or phosphorus", BEAT_MS)
-        .note(
-            "Arsenic or phosphorus atoms make the source and drain n-type. Arsenic diffuses slowly and gives sharp junctions; phosphorus activates better but spreads deeper.",
-            "the n+ source and drain glowing gold, with dopant atoms in their faces",
-        )
-        .detail(
-            "The two dopants trade activation against depth.",
-            &["N+ SOURCE: arsenic or phosphorus, about 1e20-1e21 /cm3 (CHIP_NMOS.txt, section 2)", "Arsenic shallow and abrupt; phosphorus deeper (CHIP_NMOS.txt, section 6)"],
-        ),
-    Beat::new("Si:P epitaxy and halo pockets", BEAT_MS)
-        .note(
-            "Phosphorus-doped silicon grown in place reaches about 1.2e21 /cm3. Halo pockets of the opposite type sit beside the channel ends and stop punch-through.",
-            "the source and drain still gold, with lilac halo pockets beside the channel ends",
-        )
-        .detail(
-            "The halos keep the depletion region from reaching through the channel.",
-            &["Si:P grown in place reaches about 1.2e21 /cm3 and 0.3 mOhm.cm (CHIP_NMOS.txt, section 6)", "Halo pockets stop punch-through (CHIP_NMOS.txt, section 2)"],
-        ),
-    Beat::new("tensile strain: faster electrons", BEAT_MS)
-        .note(
-            "Si:P stretches the channel: tensile strain raises electron mobility, so the switch drives more current. The gold strain bar pulls outward along the channel and the dots flow faster.",
-            "a gold strain bar pulling outward along the channel, the channel lit and the dots streaming faster",
-        )
-        .detail(
-            "PMOS uses compressive strain instead.",
-            &["Si:P stretches the channel (tensile strain), speeding electrons (CHIP_NMOS.txt, section 6)", "PMOS uses compressive strain (textbook)"],
-        ),
-];
+// The same picture as section 6, so the same beats.
+const ZE_BEATS: &[Beat] = SEC6;
 
 // ---- sections 1-10 ----------------------------------------------------------------------------
+// Each section is a close-up of one detailed NMOS in cut-away (chip_mos_detail.py): blue n+
+// source and drain under light-blue Si:P epitaxy, dark silicide and grey tungsten contacts, the
+// gate stack (white SiO2, teal high-k, brass work-function metal, grey fill, green nitride cap and
+// spacers), orange-brown halo pockets, the tan p-well over a darker p substrate, white STI walls.
 
 const SEC1: &[Beat] = &[
-    Beat::new("off: gate low, no channel", BEAT_MS)
+    Beat::new("off: gate at 0 V, nothing joins source and drain", BEAT_MS)
         .note(
-            "With the gate at 0 V the junctions block current, so the switch is off. The two blue n+ blocks sit in tan silicon with nothing joining them.",
-            "the two blue n+ blocks in tan silicon, the gate dark, and no channel between them",
+            "An NMOS is a switch made of doped silicon. Two blue n+ islands, the source and the drain, sit in a tan p-type well full of holes. With the gate at 0 V each island meets the p-well in a reverse-biased junction, so almost no current can cross from one to the other.",
+            "The cut face of one transistor: the two blue n+ blocks under their light-blue raised epitaxy and grey contact pillars, the green-capped gate between them, the white STI walls at both ends, and gold dots (holes) spread through the tan p-well.",
         )
         .detail(
-            "With the gate at 0 V the switch is off.",
-            &["OFF STATE: gate at 0 V; the junctions block current (CHIP_NMOS.txt, section 3)"],
+            "Off means only leakage flows, which is what lets billions of these sit idle on one chip.",
+            &["Gate 0 V: junctions reverse-biased, only leakage (CHIP_NMOS.txt, section 3)", "Supply at leading nodes ~0.7-0.8 V (typical)"],
         ),
-    Beat::new("gate high: an electron channel forms", BEAT_MS)
+    Beat::new("gate high: its field pulls an electron channel", BEAT_MS)
         .note(
-            "The gate goes high and the field pulls electrons to the surface. No current enters the gate; the field does the work.",
-            "the gate glowing amber and the cyan channel on the surface between the blue blocks",
+            "Raising the gate to the supply (~0.75 V) puts an electric field across the thin dielectric. The field pushes the holes away from the surface and draws electrons into a sheet a few nanometres thick right under the gate: the channel. No current flows into the gate; only its field reaches the silicon.",
+            "The camera closes on the gate. The gate's fill metal glows amber, three pink arrows (the field) point down through the teal high-k, and a thin bright cyan strip (the channel) appears on the silicon surface between the extensions.",
         )
         .detail(
-            "Only the gate's field reaches the silicon.",
-            &["Gate draws no current (CHIP_NMOS.txt, section 1)", "INVERSION above threshold (CHIP_NMOS.txt, section 3)"],
+            "Field control with no gate current is why CMOS logic burns so little power at rest.",
+            &["Threshold voltage ~0.2-0.4 V at leading nodes (typical)", "Gate draws no DC current (CHIP_NMOS.txt, section 1)"],
         ),
-    Beat::new("current flows: electrons run source to drain", BEAT_MS)
+    Beat::new("on: electrons run from source to drain", BEAT_MS)
         .note(
-            "The drain voltage pulls electrons across the channel from the source. Cyan dots run along the surface from the left block to the right.",
-            "cyan dots running along the surface from the left block to the right, through the channel",
+            "With the drain at the supply, electrons leave the grounded source, cross the channel and leave through the drain. This is the switch conducting: in an inverter it pulls the output down to 0 V. Electrons move about two to three times faster than holes, so an NMOS of a given size is the stronger switch.",
+            "Cyan dots (electrons) come down the left contact pillar, run along the bright channel under the amber gate, and climb the right contact. The gold holes stay deeper in the tan well.",
         )
         .detail(
-            "Electrons carry more current per width than holes, so an NMOS is the stronger switch.",
-            &["Electron mobility about 2-3x that of holes (textbook)"],
+            "NMOS pulls outputs low; its PMOS partner pulls them high.",
+            &["Electron mobility ~2-3x hole mobility in bulk Si (textbook)", "Bulk Si: electrons ~1400, holes ~450 cm2/Vs (textbook)"],
         ),
 ];
 
 const SEC2: &[Beat] = &[
-    Beat::new("N+ SOURCE", BEAT_MS)
+    Beat::new("N+ SOURCE: where the electrons come from", BEAT_MS)
         .note(
-            "Heavily doped n-type silicon, usually grounded. The source block is lit and the rest of the chip is dim.",
-            "the source block lit cyan, the rest of the picture dimmed",
+            "The source is silicon doped so heavily with arsenic or phosphorus that it is full of free electrons. On top sits a raised layer of phosphorus-doped silicon grown in place (Si:P epitaxy), then a thin metal silicide that lets the tungsten contact connect with low resistance. The source is usually tied to ground.",
+            "A yellow outline round the left side: the blue n+ block, the light-blue raised epitaxy on it, the dark silicide strip, and the grey tungsten contact pillar rising from it.",
         )
         .detail(
-            "Arsenic or phosphorus at about 1e20-1e21 /cm3.",
-            &["N+ SOURCE: arsenic or phosphorus, about 1e20-1e21 /cm3 (CHIP_NMOS.txt, section 2)"],
+            "Every ohm in the source path subtracts from drive current.",
+            &["n+ doping ~1e20-1e21 /cm3 (CHIP_NMOS.txt, section 2)", "Si:P epitaxy ~1.2e21 /cm3 (CHIP_NMOS.txt, section 6)"],
         ),
-    Beat::new("GATE STACK", BEAT_MS)
+    Beat::new("GATE STACK: metal on high-k on a thin oxide", BEAT_MS)
         .note(
-            "A metal gate on a high-k dielectric over a thin SiO2 layer is the switch's input. The gate block is lit.",
-            "the gate block lit cyan above the thin dielectric",
+            "The gate is a sandwich. A thin SiO2 interlayer sits on the silicon, then a hafnium-oxide high-k layer, then a work-function metal that sets the threshold voltage, then a fill metal, capped with silicon nitride. High-k lets the dielectric stay physically thicker (less tunnelling) while acting electrically like ~1 nm of SiO2.",
+            "Close on the gate: the white interlayer at the bottom, the teal high-k lining a U-shaped trench, the brass work-function metal inside it, the grey fill metal in the middle and the green nitride cap and spacers round it.",
         )
         .detail(
-            "About 1 nm EOT class.",
-            &["GATE STACK: metal on high-k over thin SiO2, about 1 nm EOT class (CHIP_NMOS.txt, section 2)"],
+            "The high-k metal gate (HKMG) has been standard since 45 nm.",
+            &["EOT ~1 nm class (CHIP_NMOS.txt, section 2)", "HfO2 k ~20-25 vs SiO2 3.9 (textbook)", "Work-function metal sets Vt (textbook)"],
         ),
-    Beat::new("N+ DRAIN", BEAT_MS)
+    Beat::new("N+ DRAIN: the output", BEAT_MS)
         .note(
-            "The output node, tied to the load or to VDD. The drain block is lit.",
-            "the drain block lit cyan",
+            "The drain is built the same way as the source, but it is the output: it connects to the node the switch pulls down. The two ends are physically symmetric; which one is the drain depends on which is at the higher voltage.",
+            "A yellow outline round the right side: blue n+ block, light-blue epitaxy, dark silicide and the grey contact pillar that carries the output.",
         )
         .detail(
-            "Same doping as the source.",
-            &["N+ DRAIN: the output node, tied to the load or VDD (CHIP_NMOS.txt, section 2)"],
+            "The drain junction also adds capacitance the circuit must charge every cycle.",
+            &["Drain: the output node (CHIP_NMOS.txt, section 2)", "Same n+ doping as the source (textbook)"],
         ),
-    Beat::new("P-WELL", BEAT_MS)
+    Beat::new("P-WELL: the body, full of holes", BEAT_MS)
         .note(
-            "The p-type body the device sits in; holes are the majority carrier. The well is lit in violet below and around the device.",
-            "the substrate lit violet below and around the device",
+            "The transistor sits in a p-type well doped with boron, on a lightly doped p-type wafer. In p-type silicon the free carriers are holes. The well's doping helps set the threshold and keeps neighbouring devices from talking to each other through the silicon.",
+            "A yellow outline round the tan p-well below the device, with the gold dots (holes) through it; the darker tan band underneath is the p substrate.",
         )
         .detail(
-            "Boron-doped, about 1e15-1e18 /cm3.",
-            &["P-WELL: boron-doped, about 1e15-1e18 /cm3 (CHIP_NMOS.txt, section 2)"],
+            "The well is a fourth terminal: biasing it shifts the threshold (section 5).",
+            &["P-well boron ~1e15-1e18 /cm3 (CHIP_NMOS.txt, section 2)", "Holes: the majority carrier (CHIP_NMOS.txt, section 2)"],
         ),
     Beat::new("halo pockets, spacers, STI", BEAT_MS)
         .note(
-            "Halo pockets beside the channel ends stop punch-through; spacers set the extension spacing; the oxide wall at the right is STI, which isolates neighbours.",
-            "the violet halo pockets beside the channel ends, and an oxide wall at the right",
+            "Small parts with a big effect. Shallow extensions carry current under the gate edge. Halo pockets, extra boron just below the extension tips, stop the source and drain depletion regions from merging (punch-through). Nitride spacers set how far the deep source and drain sit from the gate. STI oxide walls isolate neighbours.",
+            "Yellow outlines on the two orange-brown halo pockets under the extension tips; tags on the green spacer beside the gate, the thin blue extension, and the white STI wall at the right.",
         )
         .detail(
-            "Small parts, big effect on leakage.",
-            &["Halo pockets stop punch-through; spacers set the extension spacing; STI isolates neighbours (CHIP_NMOS.txt, section 2)"],
+            "Halos trade a little speed for much less short-channel leakage.",
+            &["Halos stop punch-through (CHIP_NMOS.txt, section 2)", "Spacers set extension spacing; STI isolates (CHIP_NMOS.txt, section 2)"],
         ),
 ];
 
 const SEC3: &[Beat] = &[
     Beat::new("1. OFF STATE: gate at 0 V", BEAT_MS)
         .note(
-            "The device at rest. The gate is at 0 V and the junctions block current, so nothing glows and no dots move.",
-            "the device at rest with the gate dark and no glow or dots",
+            "At rest the gate is at 0 V. The source and drain junctions with the p-well are reverse-biased, so each is wrapped in a thin depletion layer with no free carriers, and no channel joins them.",
+            "Violet bands under and beside the blue source and drain (the junction depletion), the gate dark, and gold holes everywhere in the well including right under the gate.",
         )
         .detail(
-            "Only leakage flows at rest.",
-            &["VG = 0; the junctions block current (CHIP_NMOS.txt, section 3)"],
+            "The off state still leaks a little; section 4 shows why.",
+            &["VG = 0: junctions block current (CHIP_NMOS.txt, section 3)"],
         ),
     Beat::new("2. DEPLETION: holes pushed away", BEAT_MS)
         .note(
-            "A small gate voltage pushes the holes away from the surface, leaving a depletion region under the gate. No channel forms yet.",
-            "a violet band under the gate in the silicon, where the holes have been pushed away",
+            "A small positive gate voltage repels the holes from the surface under the gate. That leaves a depletion region: fixed, ionised boron atoms but no free carriers. Nothing conducts yet.",
+            "Close on the gate: the fill metal faintly amber, a violet block under the gate where the gold holes have gone, and holes still in the rest of the well.",
         )
         .detail(
-            "Depletion comes before any channel forms.",
-            &["0 < VG < Vt: holes pushed away from the surface (CHIP_NMOS.txt, section 3)"],
+            "Depletion charge has to be built before any channel can form.",
+            &["0 < VG < Vt: holes pushed away (CHIP_NMOS.txt, section 3)"],
         ),
-    Beat::new("3. INVERSION: electron channel", BEAT_MS)
+    Beat::new("3. INVERSION: an electron channel", BEAT_MS)
         .note(
-            "Above the threshold, electrons gather into a channel and the switch is on. The gate glows and the cyan sheet forms on the surface.",
-            "the gate glowing amber and the cyan sheet on the surface between the blocks",
+            "Above the threshold voltage the surface inverts: electrons from the source and drain gather in a thin sheet under the gate, so the p-type surface now behaves like n-type. That sheet is the channel.",
+            "The gate glowing amber, pink field arrows down through the high-k, and a bright cyan strip on the surface above the violet depletion region.",
         )
         .detail(
-            "The switch is on once the gate is above threshold.",
-            &["VG > Vt (CHIP_NMOS.txt, section 3)"],
+            "Inversion is what 'on' means in a MOSFET.",
+            &["VG > Vt (CHIP_NMOS.txt, section 3)", "Vt ~0.2-0.4 V at leading nodes (typical)"],
         ),
     Beat::new("4. LINEAR, then SATURATION", BEAT_MS)
         .note(
-            "The drain voltage drives the electrons: first the channel is even and the dots flow, then at high drain voltage the sheet pinches off at the drain.",
-            "cyan dots flowing source to drain; the sheet full at first, then shortened at the drain end",
+            "With a small drain voltage the channel is even from end to end and acts like a resistor (linear region). Raising the drain voltage thins the channel at the drain end until it pinches off; the current then levels out and depends mostly on the gate (saturation).",
+            "Cyan electrons run source to drain. First half of the beat: an even cyan strip. Second half: the strip stepping thinner toward the drain and stopping short of it.",
         )
         .detail(
-            "Current levels out once the channel pinches off.",
-            &["VD > VG - Vt for saturation (CHIP_NMOS.txt, section 3)"],
+            "Logic gates switch through both regions on every transition.",
+            &["Saturation when VD > VG - Vt (CHIP_NMOS.txt, section 3)"],
         ),
-    Beat::new("5. TURN-OFF: channel empties", BEAT_MS)
+    Beat::new("5. TURN-OFF: the channel empties", BEAT_MS)
         .note(
-            "The gate drops back to 0 V. The glow and the sheet go out, and only a few faint dots remain under the surface.",
-            "the gate dark, the sheet gone, and only a few faint dots under the surface",
+            "The gate drops back to 0 V. The channel's electrons drain back into the source and drain almost at once, and the holes return under the gate. A trickle of leakage remains.",
+            "The amber glow and cyan strip fade, the gold holes reappear under the gate, and a few violet dots (leakage) still drift under the surface from source to drain.",
         )
         .detail(
-            "The switch cannot turn off perfectly: leakage remains below threshold.",
-            &["VG -> 0 (CHIP_NMOS.txt, section 3)", "S >= 60 mV/decade at 300 K (CHIP_NMOS.txt, section 4)"],
+            "A switch cannot turn fully off; the swing limit sets how close it gets.",
+            &["VG -> 0 (CHIP_NMOS.txt, section 3)", "Swing >= 60 mV/decade at 300 K (CHIP_NMOS.txt, section 4)"],
         ),
 ];
 
-const SEC4: &[Beat] = ZB_BEATS;
+const SEC4: &[Beat] = &[
+    Beat::new("below threshold: a barrier, and a leak", BEAT_MS)
+        .note(
+            "Below the threshold the surface is depleted but not inverted. Electrons from the source face an energy barrier; only the few with enough thermal energy hop over it. That subthreshold current rises about 10x for every 60-90 mV of gate voltage, and at 0 V it is the off-state leakage.",
+            "The gate faintly amber, a violet depletion block under it, and a few violet dots crossing just under the surface from source to drain.",
+        )
+        .detail(
+            "Leakage times billions of transistors is a large share of chip power.",
+            &["Swing >= 60 mV/decade at 300 K (CHIP_NMOS.txt, section 4)", "Real swing ~70-90 mV/decade (CHIP_NMOS.txt, section 4)"],
+        ),
+    Beat::new("at threshold: the channel just forms", BEAT_MS)
+        .note(
+            "At the threshold voltage the surface inverts and a thin electron layer appears. Current climbs steeply from here. Designers pick Vt as a trade: lower Vt is faster but leaks more.",
+            "A faint, half-transparent cyan strip under the dim amber gate, and a sparse line of cyan electrons moving source to drain.",
+        )
+        .detail(
+            "Chips offer several Vt flavours so designers can mix fast and low-leakage cells.",
+            &["Vt ~0.2-0.4 V at leading nodes (typical)", "Each 60-100 mV lower Vt: ~10x more leakage (CHIP_NMOS.txt, section 4)"],
+        ),
+    Beat::new("above threshold: fully on", BEAT_MS)
+        .note(
+            "At the full supply the channel is strong and the current is limited mainly by how fast electrons can move (their velocity saturates near ~1e7 cm/s). The ratio of on-current to off-current, roughly a million to one or more, is what makes a good switch.",
+            "The gate bright amber, a solid cyan channel, and a dense stream of cyan electrons from the left contact to the right.",
+        )
+        .detail(
+            "Ion/Ioff is the figure of merit for a logic transistor.",
+            &["Supply ~0.7-0.8 V (typical)", "Ion/Ioff ~1e5-1e6 or more (typical, estimate)"],
+        ),
+];
 
 const SEC5: &[Beat] = &[
-    Beat::new("DIBL: a short channel leaks more", BEAT_MS)
+    Beat::new("DIBL: the drain lowers the source barrier", BEAT_MS)
         .note(
-            "In a short device the drain lowers the barrier: the threshold falls and leakage rises. Faint dots cross under the surface while the gate is dark.",
-            "faint dots crossing under the surface, and the gate dark",
+            "In a short channel the drain is close enough that its field reaches under the gate and lowers the barrier at the source (drain-induced barrier lowering). The threshold falls as drain voltage rises, and leakage climbs.",
+            "Pink arrows pointing from the drain side toward the source under the dark gate, a violet depletion region stretching out from the drain, and violet leakage dots crossing below the surface.",
         )
         .detail(
-            "The drain lowers the source barrier, so the threshold falls with drain voltage.",
-            &["DIBL: drain-induced barrier lowering (CHIP_NMOS.txt, section 5)"],
+            "DIBL and Vt roll-off are why planar transistors stopped scaling below ~20 nm.",
+            &["DIBL: drain-induced barrier lowering (CHIP_NMOS.txt, section 5)", "Planar bulk gave way to FinFET at 22/16 nm (textbook)"],
         ),
-    Beat::new("body bias: the well shifts the threshold", BEAT_MS)
+    Beat::new("body bias: the well is a fourth terminal", BEAT_MS)
         .note(
-            "Biasing the well raises or lowers the threshold, trading speed against leakage. The violet well is lit beneath the device.",
-            "the violet p-well lit beneath the device",
+            "A p+ tap past the STI wall connects the p-well to a voltage. Driving the well negative (reverse body bias) widens the depletion under the gate and raises the threshold, cutting leakage; forward bias lowers it for speed. The shift follows a square-root law.",
+            "A yellow outline on the p+ tap and its contact at the right, a pink arrow from the tap into the well, and a deeper violet depletion block under the gate.",
         )
         .detail(
-            "The threshold moves with the square root of the well bias.",
-            &["BODY BIAS: a square-root law (CHIP_NMOS.txt, section 5)"],
+            "Body bias works best on planar and FD-SOI; fins weaken it.",
+            &["Body bias: square-root law (CHIP_NMOS.txt, section 5)", "Speed vs leakage knob (CHIP_NMOS.txt, section 5)"],
         ),
-    Beat::new("the gate wraps the channel: FinFET and GAA", BEAT_MS)
+    Beat::new("wrap the gate round the channel: FinFET", BEAT_MS)
         .note(
-            "FinFET and nanosheet gates surround the channel, so the gate, not the drain, owns the barrier. A cyan fin rises through the lit gate.",
-            "a cyan fin rising through the amber gate on the silicon",
+            "The fix for short channels is geometry. Here the device is cut across the gate: the silicon is a thin vertical fin, and the gate wraps its top and both sides, so the gate, not the drain, controls the barrier. The channel forms on all three faces.",
+            "Three-quarter view of two grey silicon fins in cross-section, each lined with teal high-k and brass work-function metal inside the grey gate, with bright cyan channels on three faces; blue n+ epitaxy past the green spacer.",
         )
         .detail(
-            "Gate control is what the wrap buys.",
-            &["FinFET and nanosheet gates surround the channel (CHIP_NMOS.txt, section 5)"],
+            "FinFETs carried the industry from 22 nm to 3 nm; gate-all-around sheets come next.",
+            &["FinFET and nanosheet gates surround the channel (CHIP_NMOS.txt, section 5)", "Fin width ~5-7 nm at N5/N3 class (estimate)"],
         ),
 ];
 
-const SEC6: &[Beat] = ZE_BEATS;
+const SEC6: &[Beat] = &[
+    Beat::new("dopants: arsenic shallow, phosphorus deep", BEAT_MS)
+        .note(
+            "The n+ regions are made by adding donor atoms. Arsenic diffuses slowly, so it makes the shallow, abrupt extensions under the gate edge. Phosphorus activates more fully but spreads faster, so it goes in the deep source and drain.",
+            "White dots (dopant atoms) through the blue source, drain and their raised epitaxy; yellow outlines on the two thin extensions at the gate edges.",
+        )
+        .detail(
+            "Abrupt junctions keep the channel short without leaking.",
+            &["n+ ~1e20-1e21 /cm3 (CHIP_NMOS.txt, section 2)", "As shallow and abrupt; P deeper (CHIP_NMOS.txt, section 6)"],
+        ),
+    Beat::new("Si:P epitaxy and halo pockets", BEAT_MS)
+        .note(
+            "Modern NMOS source and drain are not implanted but grown: silicon with phosphorus built in (Si:P), which reaches very high active doping and low resistance. Below the extension tips, boron halo pockets hold the barrier against punch-through.",
+            "Yellow outlines on the light-blue raised epitaxy on both sides and on the two orange-brown halo pockets beneath the extension tips; the dopant dots stay lit.",
+        )
+        .detail(
+            "Grown-in doping beats implants at these sizes.",
+            &["Si:P ~1.2e21 /cm3, ~0.3 mOhm.cm (CHIP_NMOS.txt, section 6)", "Contact resistivity to 1.5e-9 Ohm.cm2 reported (CHIP_NMOS.txt, section 6)"],
+        ),
+    Beat::new("tensile strain: faster electrons", BEAT_MS)
+        .note(
+            "Phosphorus and carbon atoms are smaller than silicon, so Si:P source and drain pull the channel lattice apart (tensile strain). Stretched silicon lets electrons move faster, raising drive current without shrinking anything.",
+            "Pale yellow arrows pointing outward from the channel centre toward the source and drain, the gate amber, the cyan channel lit, and a quick stream of cyan electrons.",
+        )
+        .detail(
+            "Strain has been a free speed-up since the 90 nm node.",
+            &["Si:P stretches the channel, speeding electrons (CHIP_NMOS.txt, section 6)", "Intel 90 nm strain: NMOS ~+10% drive (CHIP_PMOS.txt, section 6)"],
+        ),
+];
 
 const SEC7: &[Beat] = &[
     Beat::new("one NMOS: one switch", BEAT_MS)
         .note(
-            "Each switch is one NMOS or PMOS. This one is picked out in cyan, with the rest of the chip dimmed.",
-            "the NMOS picked out in cyan, the rest of the chip dim",
+            "Everything so far is one transistor, switched on with electrons flowing. At a leading node a transistor like this is roughly a tenth of a micron across. Every logic gate on a chip is built from NMOS and PMOS pairs like it.",
+            "The whole cut-away device, gate amber, cyan channel lit and cyan electrons running from the left contact to the right.",
         )
         .detail(
-            "Every transistor on the chip is an NMOS or a PMOS.",
-            &["TRANSISTOR COUNT: every one is an NMOS or a PMOS (CHIP_NMOS.txt, section 7)"],
+            "Transistor count is the simplest measure of how much a chip can do.",
+            &["Contacted gate pitch ~50 nm at N3 class (estimate)", "Every transistor is an NMOS or a PMOS (CHIP_NMOS.txt, section 7)"],
         ),
-    Beat::new("billions of switches like this one", BEAT_MS)
+    Beat::new("billions of them, in rows", BEAT_MS)
         .note(
-            "The whole chip, with the NMOS in the middle of the billions of switches like it.",
-            "the whole chip in cut-away, the NMOS tagged among the many switches",
+            "Seen from above, transistors are laid out in rows: strips of active silicon crossed by gate lines, each crossing a transistor. Blue NMOS rows alternate with pink PMOS rows. A big AI GPU holds hundreds of billions.",
+            "A top-down tile: blue and pink active strips across the picture, crossed by many grey vertical gate lines, on tan and slate wells.",
         )
         .detail(
-            "The count grows with die area and density.",
-            &["NVIDIA B200: 208 billion (CHIP_NMOS.txt, section 7 [1])", "AMD MI300X: 153 billion (CHIP_NMOS.txt, section 7 [3])"],
+            "Counts grow with die area, density and the number of dies in a package.",
+            &["NVIDIA B200: 208 billion (CHIP_NMOS.txt, section 7)", "AMD MI300X: 153 billion; H100: 80 billion (CHIP_NMOS.txt, section 7)"],
         ),
-    Beat::new("contacts and copper wiring", BEAT_MS)
+    Beat::new("wired into a chip", BEAT_MS)
         .note(
-            "The switches are wired by tungsten contacts and copper metal. The copper wiring is lit so the metal tiers are visible.",
-            "the copper wiring tiers lit, with the contacts and vias below them",
+            "Contacts drop onto every source, drain and gate, and copper wires above them connect the transistors into gates, cells and whole processors. Wiring now limits density as much as the transistors do.",
+            "Copper-coloured horizontal and vertical straps laid over the rows of transistors.",
         )
         .detail(
-            "Contacts and metal turn billions of switches into one chip.",
-            &["NVIDIA H100/H200: 80 billion (CHIP_NMOS.txt, section 7 [2])", "Apple M4: 28 billion (CHIP_NMOS.txt, section 7 [11])"],
+            "Billions of switches only become a chip once they are wired.",
+            &["Apple M4: 28 billion; Apple M1: 16 billion (CHIP_NMOS.txt, section 7)"],
         ),
 ];
 
 const SEC8: &[Beat] = &[
-    Beat::new("TSMC: FinFET, N3/N5", BEAT_MS)
+    Beat::new("TSMC: FinFET at N3", BEAT_MS)
         .note(
-            "TSMC makes the transistors for most leading chips. This is a FinFET: a cyan fin rises through the gate.",
-            "a cyan fin rising through the gate on the silicon",
+            "TSMC (TSM) builds the transistors for NVIDIA, AMD and Apple. Its N3 family still uses fins: the gate wraps three sides of each thin silicon fin. Its N2 node moves to nanosheets.",
+            "Two grey fins cut across the gate, wrapped in teal high-k and brass metal inside the grey gate, cyan channels glowing on three faces.",
         )
         .detail(
-            "TSMC's 2025 wafer revenue was about NT$3,809B, 74% from 7 nm and below.",
-            &["TSMC 2025: NT$3,809B; 3 nm 24%, 7 nm and below 74% (CHIP_NMOS.txt, section 8 [8])"],
+            "Most leading-edge NMOS in AI chips come out of TSMC fabs.",
+            &["TSMC 2025: 3 nm 24%, 7 nm and below 74% of wafer revenue (CHIP_NMOS.txt, section 8)", "2025 revenue NT$3,809B (~US$122B) (CHIP_NMOS.txt, section 8)"],
         ),
     Beat::new("Intel 18A: RibbonFET, stacked sheets", BEAT_MS)
         .note(
-            "Intel builds gate-all-around NMOS and PMOS on 18A. The channel splits into stacked cyan sheets, all surrounded by the gate.",
-            "three cyan sheets stacked through the gate",
+            "Intel (INTC) makes gate-all-around transistors on 18A: the channel is a stack of thin silicon ribbons, and the gate surrounds every one on all four sides, for even tighter control than a fin.",
+            "Three grey silicon sheets stacked in the cut face, each ringed by teal high-k and brass metal with a cyan channel on all four sides, inside the grey gate.",
         )
         .detail(
-            "18A has four NMOS threshold options over a 180 mV range; 18A-P adds about +5% NMOS drive.",
-            &["4 NMOS Vt options, 180 mV range; 18A-P about +5% NMOS drive (CHIP_NMOS.txt, section 8 [7])"],
+            "Gate-all-around is the next step after FinFET for every leading foundry.",
+            &["18A: 4 NMOS Vt options over 180 mV (CHIP_NMOS.txt, section 8)", "18A-P: ~+5% NMOS drive (CHIP_NMOS.txt, section 8)"],
         ),
-    Beat::new("Synopsys, Cadence: device equations", BEAT_MS)
+    Beat::new("Synopsys, Cadence: simulating the device", BEAT_MS)
         .note(
-            "Device and circuit simulators model these equations before anything is built. A thin grid lies over the device as a simulator would see it.",
-            "a thin grid over the device, the model laid on the cut face",
+            "Before anything is built, process and device simulators (TCAD) split the transistor into a mesh and solve for the potential and current in each cell. Circuit simulators then use compact models fitted to the results. Synopsys (SNPS) and Cadence (CDNS) sell these tools.",
+            "A glowing blue grid laid over the cut-away device, and a violet block under the amber gate showing the solved potential region.",
         )
         .detail(
-            "Synopsys and Cadence sell the simulators that model these equations.",
-            &["FY25 revenue: Synopsys $7.054B, Cadence $5.297B (CHIP_NMOS.txt, section 8 [10])"],
+            "No chip is taped out without simulating its transistors first.",
+            &["FY25 revenue: Synopsys $7.054B, Cadence $5.297B (CHIP_NMOS.txt, section 8)"],
         ),
 ];
 
 const SEC9: &[Beat] = &[
     Beat::new("leakage and Vt variability", BEAT_MS)
         .note(
-            "At 2 nm-class nodes leakage and threshold variation grow. Faint dots leak under the dark gate.",
-            "faint dots leaking under the device, the gate dark",
+            "Small transistors leak in more ways: under the gate (subthreshold), through the thin gate dielectric (tunnelling), and at the junctions. And with only a few dopant atoms in the channel, exactly where they land shifts each device's threshold.",
+            "Violet leakage dots crossing under the gate and rising through the gate dielectric, and a few bright yellow dopant atoms scattered in the channel region.",
         )
         .detail(
-            "Every switch leaks a little, and billions of them add up.",
-            &["Leakage and threshold variability grow at 2 nm-class nodes (CHIP_NMOS.txt, section 9)"],
+            "Variability forces designers to add margin, which costs speed or power.",
+            &["Leakage and Vt variability grow at 2 nm-class nodes (CHIP_NMOS.txt, section 9)"],
         ),
-    Beat::new("contact resistance limits drive current", BEAT_MS)
+    Beat::new("contact resistance limits drive", BEAT_MS)
         .note(
-            "Strain and contact resistance limit drive current as devices shrink. The contact plugs to the source, drain and gate are lit gold.",
-            "the contact plugs to source, drain and gate lit gold",
+            "As everything shrinks, the contacts get smaller but the current through them does not, so the resistance at the metal-to-silicon interface becomes a large part of the total. Better silicide and higher doping help, but it remains a limit.",
+            "The two contact pillars tinted red, a red-hot line where each meets the silicide, and cyan electrons crawling through.",
         )
         .detail(
-            "Contacts and silicide on the source and drain limit the drive current.",
-            &["Strain and contact resistance limit drive current (CHIP_NMOS.txt, section 9)", "Contact resistivity down to 1.5e-9 Ohm.cm2 reported (CHIP_NMOS.txt, section 6)"],
+            "Contact resistance is one of the main brakes on drive current today.",
+            &["Strain and contact resistance limit drive (CHIP_NMOS.txt, section 9)", "1.5e-9 Ohm.cm2 reported on Si:P (CHIP_NMOS.txt, section 6)"],
         ),
-    Beat::new("very few leading fabs", BEAT_MS)
+    Beat::new("very few fabs can make them", BEAT_MS)
         .note(
-            "The most advanced transistors come from very few fabs. The NMOS is flagged in red on the whole chip.",
-            "the NMOS flagged red on the whole chip",
+            "Only three companies make leading-edge logic transistors: TSMC, Intel and Samsung. TSMC makes most of the AI chips, so a disruption at its fabs would hit almost every AI accelerator at once.",
+            "Three transistor cross-sections side by side, cut across the gate: a FinFET (two fins) and two gate-all-around stacks, each tagged with its maker.",
         )
         .detail(
-            "Concentration in a few makers is a supply risk.",
-            &["TSMC, Intel, Samsung (CHIP_NMOS.txt, section 9)"],
+            "Concentration in a few fabs is a supply risk for the whole AI stack.",
+            &["Leading-edge makers: TSMC, Intel, Samsung (CHIP_NMOS.txt, section 9)", "TSMC 7 nm and below: 74% of its 2025 wafer revenue (CHIP_NMOS.txt, section 8)"],
         ),
 ];
 
 const SEC10: &[Beat] = &[
     Beat::new("transistor counts: NVIDIA, AMD, Apple", BEAT_MS)
         .note(
-            "The whole chip, the NMOS highlighted, pulling back slowly. These counts are company and press figures.",
-            "the NMOS highlighted on the whole chip, the camera drawing back slowly",
+            "The transistor counts come from launch coverage and company statements; they are company or press figures, not independent counts.",
+            "The top-down rows of transistors, tagged with the source numbers.",
         )
         .detail(
             "Counts come from launch coverage and company statements.",
@@ -497,8 +530,8 @@ const SEC10: &[Beat] = &[
         ),
     Beat::new("dopants and Si:P: patents and an ECS paper", BEAT_MS)
         .note(
-            "The source and drain are highlighted: the arsenic and phosphorus trade-off and the Si:P strain come from these sources.",
-            "the source and drain highlighted",
+            "The arsenic and phosphorus trade-off and the Si:P doping, resistivity and contact figures come from these patents and conference paper.",
+            "The cut-away device with yellow outlines on the source and drain and white dopant atoms through them.",
         )
         .detail(
             "The dopant and Si:P figures are taken from these.",
@@ -509,8 +542,8 @@ const SEC10: &[Beat] = &[
         ),
     Beat::new("swing and DIBL: UCSB lecture and arXiv", BEAT_MS)
         .note(
-            "The gate is highlighted: the swing and DIBL equations come from these sources.",
-            "the gate highlighted on the chip",
+            "The swing equation and the DIBL description come from a UCSB device lecture and an arXiv paper.",
+            "Close on the gate: a yellow outline on the gate stack, its fill faintly amber, and violet depletion reaching out from the drain.",
         )
         .detail(
             "The swing and DIBL equations are from these sources.",
@@ -518,8 +551,8 @@ const SEC10: &[Beat] = &[
         ),
     Beat::new("makers and simulators: TSMC, Intel, Synopsys, Cadence", BEAT_MS)
         .note(
-            "The whole chip, pulled back. The makers and simulators come from these filings and articles.",
-            "the whole chip, pulled back",
+            "The 18A options, TSMC's revenue mix, NVIDIA's results and the Synopsys and Cadence revenue come from these filings and articles.",
+            "The three transistor cross-sections side by side, each tagged with its source numbers.",
         )
         .detail(
             "Company filings and press coverage for the makers and simulators.",

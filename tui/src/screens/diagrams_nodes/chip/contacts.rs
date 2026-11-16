@@ -1,8 +1,9 @@
 // CHIP tab, CONTACTS: the node's overview is the whole-chip scene (tools/pbr3d/blender/chip_kit.py)
 // with the camera zooming in on the contact layer (tools/pbr3d/blender/chip_contacts.py): the
 // tungsten plugs from source, drain and gate up to thin metal, the silicide under them, and the
-// current squeezing down a narrow plug. Zoom-ins a-e and sections 1-10 are Blender scenes from the
-// same script, one per beat group.
+// current squeezing down a narrow plug, shown on a detailed cut-away of one transistor that replaces
+// the schematic after beat 0. Zoom-ins a-e and sections 1-10 are detailed cut-aways too
+// (chip_contacts_detail.py).
 
 use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
@@ -11,57 +12,67 @@ use crate::ui::anim::{Beat, Scene, Zoom};
 const BEATS: &[Beat] = &[
     Beat::new("Contacts: the plugs from each transistor up to the first metal", BEAT_MS)
         .note(
-            "The whole chip, with the contact layer lit: tungsten plugs stand over each transistor's source, drain and gate, rising to the thin metal.",
-            "A cyan glow over the two transistor bases, with the plug columns rising to the thin wire above.",
+            "Contacts are the short vertical plugs between each transistor and the first wiring level, the middle of line. Their resistance sits in series with every transistor on the chip.",
+            "The whole chip, with the contact layer lit cyan over the two transistors.",
         )
         .detail(
-            "Contacts are the middle of line, between the silicon and the wiring; their resistance sits in series with every transistor.",
-            &["W mean free path 19.1 nm"],
+            "Contacts limit every device on the chip.",
+            &["PRE-CLEAN, SILICIDE, LINER, W FILL, CMP, VIA0/M1 (page text, section 1)"],
         ),
     Beat::new("Three plugs per transistor: source, gate and drain", BEAT_MS)
         .note(
-            "In close, each transistor has three plugs, one on the source, one on the gate and one on the drain. Each runs from the silicon up to M1, the first metal, which wires them into the circuit.",
-            "Three columns per transistor, each with a grey liner ring around a see-through tungsten core, and M1 across the top.",
+            "The camera moves into the NMOS transistor and the schematic gives way to a real cross-section. Tungsten plugs in Ti/TiN liners land on the source and drain, a third plug reaches the gate through its SiN cap, and M1 copper lines sit on top.",
+            "Grey tungsten plugs in gold liners between the violet gates, the green source and drain below, brown M1 cut ends along the top.",
         )
         .detail(
-            "The plug-to-wire interface adds resistance on top of the plug body, so every plug counts.",
-            &["Contact + via0 + M1 RC dominate local delay (textbook)"],
+            "Every transistor needs all three.",
+            &["Plugs ~15-20 nm wide (page text, section 4)", "M1 at 30-40 nm pitch (page text, section 2)"],
         ),
     Beat::new("Silicide: the metal-silicon bridge under each source and drain plug", BEAT_MS)
         .note(
-            "A thin silicide layer, NiSi in modern processes (TiSi2 in older work), sits between each source and drain plug and the doped silicon.",
-            "The silver caps on the source and drain blocks, under their plugs, lit in this beat.",
+            "Where the plug meets the doped silicon, titanium has reacted with the silicon to form a silicide a few nm thick. Metal on silicon forms a Schottky barrier; the silicide and heavy doping (above 1e20 per cm3) keep it thin enough for electrons to tunnel through.",
+            "The pale silicide strip between the grey plug and the green drain epi.",
         )
         .detail(
-            "Its barrier height to silicon sets how easily current crosses into the plug; NiSi went in around 65 nm because it stays low-resistance at small widths.",
-            &["NiSi Schottky barrier 0.65-0.7 eV (patent)", "TiSi2 barrier 0.58 eV (patent)"],
+            "Its barrier height to silicon sets the contact resistance.",
+            &[
+                "NiSi 0.65-0.7 eV; TiSi2 0.58 eV (patents, source [4])",
+                "Dopant above 1e20 /cm3 (page text, section 2)",
+            ],
         ),
     Beat::new("Current squeezes down a small plug", BEAT_MS)
         .note(
-            "Current from the thin metal runs down the drain plug. The plug is only about 15-20 nm wide, so all of the flow goes through a narrow column into the silicide.",
-            "Small cyan dots dropping down the narrow column from M1 to the drain silicide.",
+            "Current from M1 drops through via0 into the plug, a column only about 15-20 nm wide, then into the drain. One calculation puts tungsten's electron mean free path at 19.1 nm, wider than the plug's core, so the walls scatter electrons and resistance rises.",
+            "Cyan beads dropping from the M1 line through via0 and down the grey plug into the green drain.",
         )
         .detail(
-            "The liner takes a few nm of each side, and tungsten's 19.1 nm electron mean free path means the thin core scatters electrons at its surfaces.",
-            &["W mean free path 19.1 nm", "liner takes a few nm per side (textbook)"],
+            "Surface scattering and the liner both raise the plug's resistance.",
+            &[
+                "W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])",
+                "Plugs ~15-20 nm wide (page text, section 4)",
+            ],
         ),
     Beat::new("Silicide lowers the contact resistance", BEAT_MS)
         .note(
-            "The silicide lowers the barrier, so current crosses from the silicon into the plug more easily. With the barrier lower, the contact resistance falls.",
-            "The silicide lights on the source as dots cross it from the source plug; the tag names the lower barrier.",
+            "The contact resistance is rho_c, the specific contact resistivity, divided by the contact area, and rho_c falls steeply as the Schottky barrier drops. A good silicide on heavily doped epi lets current cross the metal-silicon junction easily.",
+            "The silicide strips glowing amber under both plugs, with beads streaming fast across them into the epi.",
         )
         .detail(
-            "Contact resistance is roughly rho_c over contact area; a lower barrier cuts rho_c. One patent reports dopant segregation cutting the n-type barrier from 0.7 to 0.34 eV.",
-            &["N2+ pre-silicide implant 0.7 -> 0.34 eV (patent summary)", "contact rho_c pFET ~3e-9, nFET ~1e-8 ohm-cm2 (patent background)"],
+            "A lower barrier and heavier doping cut rho_c.",
+            &[
+                "R = rho_c / A (page text, section 4)",
+                "rho_c pFET ~3e-9, nFET ~1e-8 ohm-cm2 (older patent background)",
+                "Dopant segregation: 0.7 -> 0.34 eV (source [4])",
+            ],
         ),
     Beat::new("Back out to the whole chip", BEAT_MS)
         .note(
-            "Out to the whole chip: a set of contacts in every transistor. Their resistance adds up, and it erodes each node's gains as the plugs shrink.",
-            "The contact layer lit again over the two transistors, as in the first beat, with the chip's wiring around it.",
+            "Back out to the whole chip. Every transistor connects to the wiring through plugs like these, so their resistance matters on every path.",
+            "The whole chip, the contact layer lit again.",
         )
         .detail(
-            "Contact area falls with the square of pitch, so the resistance per plug rises fast as the chip shrinks.",
-            &["Applied Volta W up to 90% lower contact R (vendor claim)"],
+            "Contact RC erodes node-to-node gains.",
+            &["Contact RC erodes node-to-node gains (page text, section 9)"],
         ),
 ];
 
@@ -70,409 +81,438 @@ const BEATS: &[Beat] = &[
 const ZA_BEATS: &[Beat] = &[
     Beat::new("PRE-CLEAN and SILICIDE on the source and drain", BEAT_MS)
         .note(
-            "The native oxide is etched off, then a few nm of NiSi forms on the source and drain, under their plugs.",
-            "the two silicide caps lit cyan on the source and drain, under the plug columns",
+            "A hole is etched through the oxide down to the drain epi, and a pre-clean strips the thin native oxide that grows on bare silicon. Titanium deposited in the hole reacts with the silicon when annealed and forms a thin TiSi silicide.",
+            "Close on the drain: a dark native-oxide film on the green epi disappears, then the silicide strip forms and glows amber at the bottom of the open hole.",
         )
         .detail(
-            "The silicide's barrier height to silicon sets how easily current crosses into the plug.",
-            &["NiSi Schottky barrier 0.65-0.7 eV (patent)", "PRE-CLEAN, then Ni anneal into NiSi (page text, section 1)"],
+            "Any oxide left at the bottom would add resistance.",
+            &["PRE-CLEAN, SILICIDE (page text, section 1)", "Silicide a few nm (page text, section 2)"],
         ),
     Beat::new("LINER/BARRIER and W FILL", BEAT_MS)
         .note(
-            "A few nm of Ti/TiN liner, by ALD or CVD, lines each hole. Tungsten from WF6 and H2 then fills it, on the source, drain and gate.",
-            "the three plugs of the transistor lit, each with its liner ring around the tungsten core",
+            "A Ti/TiN liner a few nm thick coats the hole so the tungsten sticks and the fluorine in its precursor can't attack the silicon. Tungsten is then grown from WF6 and hydrogen until the hole is full.",
+            "Gold liner walls appear in the hole, cyan beads (the WF6 precursor) fall into it, then the grey tungsten core fills it.",
         )
         .detail(
-            "The liner takes width that carries no current, so less of the 15-20 nm hole is conductor.",
-            &["Liner and TiN take a few nm per side of a 15 nm hole (page text, section 4)", "W fill from WF6 and H2 (page text, section 1)"],
+            "The liner takes width the tungsten can't use.",
+            &["LINER/BARRIER: Ti/TiN by ALD or CVD; W FILL from WF6 and H2 (page text, section 1)"],
         ),
     Beat::new("CMP and VIA0 / M1: the first metal lands", BEAT_MS)
         .note(
-            "Chemical-mechanical polish stops on the dielectric, leaving flat plugs. The first via and the M1 metal land on them.",
-            "the thin metal M1 band lit cyan across the tops of the plugs",
+            "CMP polishes the tungsten flat, stopping on the oxide. An SiN etch stop goes on, then via0 and the M1 copper lines land on the plugs, and the transistor is wired to the rest of the chip.",
+            "The whole device: plug tops polished flat, then the pale etch stop, brown via0 and M1 above, and cyan beads running from the drain up the plug to M1.",
         )
         .detail(
-            "M1 wires at a 30-40 nm pitch, and via0 lands on a plug.",
-            &["M1 wires at 30-40 nm pitch (page text, section 2)", "CMP stops on the ILD (page text, section 1)"],
+            "From here up, the wiring is copper.",
+            &["CMP stops on the ILD; VIA0 / M1 land on the plug (page text, section 1)"],
         ),
 ];
 
 const ZB_BEATS: &[Beat] = &[
     Beat::new("TRENCH CONTACT (TS): one bar straps source and drain", BEAT_MS)
         .note(
-            "A long bar runs across the source and drain of the transistor, so the epi is contacted along its length instead of at single holes.",
-            "the tungsten bar lit across the tops of the source and drain silicide, with the plugs rising from it",
+            "Seen from above, a trench contact is a long tungsten bar running the full width of the transistor, strapping its whole source or drain in one piece. Older nodes etched one hole per plug.",
+            "From above: two long grey bars in gold liners with cyan beads running along them, and the short gate plug between.",
         )
         .detail(
-            "Trench contacts replaced one hole per plug, which older nodes etched.",
-            &["TS: a long bar strapping the source/drain epi (page text, section 3)", "older nodes etched one hole per plug (page text, section 3)"],
+            "Trench contacts now use self-aligned etch stops.",
+            &["TS: a long bar strapping the source/drain epi (page text, section 3)"],
         ),
     Beat::new("GATE CONTACT: a plug on the gate metal", BEAT_MS)
         .note(
-            "The gate plug stands on the gate metal, which used to sit off the active area.",
-            "the gate plug lit cyan, rising from the gate block to M1",
+            "The gate is reached by a separate plug that passes through the gate's SiN cap to land on the gate metal. Via0 and M1 connect it to the wiring above.",
+            "Cyan beads running down from M1 through via0 and the gate plug into the violet gate metal.",
         )
         .detail(
-            "Moving the gate contact over the active area is the COAG step in zoom c.",
+            "The gate contact used to sit off the active area.",
             &["GATE CONTACT: a plug on the gate metal (page text, section 3)"],
         ),
     Beat::new("SELECTIVE W: bottom-up fill, no seam", BEAT_MS)
         .note(
-            "Tungsten grows from the bottom of the hole up, so it fills without a seam and with less barrier metal.",
-            "dots rising up the drain plug from the silicide to M1, the plug filling as they go",
+            "Conventional CVD tungsten grows inward from the walls of a lined hole, so the two fronts meet in a seam. Selective tungsten grows only from the bottom up, needs less liner and leaves no seam.",
+            "Left: a grey plug in a gold liner with a dark seam down the middle. Right: an empty hole filling with grey tungsten from the bottom as cyan beads fall in.",
         )
         .detail(
-            "Vendor claim: Applied's selective W cuts contact resistance by more than 40% against conventional W.",
-            &["Applied selective W: over 40% contact-resistance drop vs conventional W (vendor)", "Co, Ru, Mo are the tungsten alternatives (page text, section 5)"],
+            "Applied's figure is a vendor claim.",
+            &["Applied selective W: over 40% lower contact R vs conventional W (vendor claim, source [5])"],
         ),
 ];
 
 const ZC_BEATS: &[Beat] = &[
     Beat::new("SAC CAP: a cap that forgives misalignment", BEAT_MS)
         .note(
-            "A SiN cap sits on the gate, so a source or drain contact can land close to it without shorting.",
-            "the pale SiN cap on top of the gate block",
+            "Each gate carries a self-aligned SiN cap, with SiN spacers on its sides. A contact that lands off target hits SiN, which the contact etch doesn't remove, instead of shorting to the gate metal.",
+            "An amber shape marks a misaligned contact overlapping a spacer, with a green glow where the SiN stops it, beside a gate's pale cap.",
         )
         .detail(
-            "The cap is what lets the contact land by the gate without a short.",
-            &["SAC CAP: a SiN cap on the gate that tolerates misalignment (page text, section 3)"],
+            "The cap tolerates misalignment.",
+            &["SAC CAP: a SiN cap on the gate (page text, section 3)"],
         ),
     Beat::new("COAG: contact over active gate", BEAT_MS)
         .note(
-            "The gate contact lands right over the channel instead of beside it, so the gate plug sits over the active area.",
-            "the gate block and the channel under it lit, with the gate plug lit above them",
+            "Because the cap protects the gate, the gate contact can land right over the active channel instead of off at the end of the gate. Intel introduced this at 10 nm.",
+            "Cyan beads running down the gate plug into the gate, with the channel under it glowing cyan.",
         )
         .detail(
-            "Intel moved to COAG at 10 nm, which shrinks the standard cell.",
-            &["COAG: contact over active gate, Intel 10 nm (page text, section 3)", "COAG: en.wikichip.org/wiki/COAG (source [7])"],
+            "Intel was first with COAG at 10 nm.",
+            &["COAG: contact over active gate (page text, section 3)", "Intel 10 nm COAG (wikichip, source [7])"],
         ),
     Beat::new("a smaller standard cell", BEAT_MS)
         .note(
-            "With the gate contact over the channel, the standard cell can be shorter: Intel reported about 10% less cell height.",
-            "the whole chip pulled back, with the contact layer lit under both transistors",
+            "Moving the gate contact over the channel frees the space it used to need beside the active area, so the whole cell can be shorter. Intel credited COAG with roughly a 10% cut in cell height at 10 nm.",
+            "Two standard cells from above, each with an amber gate-contact marker: on the left near the rail, on the right over the gates in a cell about 10% shorter.",
         )
         .detail(
-            "Intel's claim, and a secondary one: an area win, not measured here.",
-            &["COAG cut standard-cell height by about 10% (Intel claim, secondary; source [7])"],
+            "A secondary-source claim.",
+            &["Intel 10 nm COAG: ~10% cell height cut (Intel claim, secondary; source [7])"],
         ),
 ];
 
 const ZD_BEATS: &[Beat] = &[
     Beat::new("CONTACT RESISTANCE: rho_c / A", BEAT_MS)
         .note(
-            "Current crosses from the silicide into the plug through a contact resistance rho_c over area A. Area falls with pitch squared, so rho_c / A climbs fast.",
-            "the silicide under the source plug lit, with its plug above",
+            "Contact resistance is the specific contact resistivity rho_c divided by the contact area. A square contact half as wide has a quarter of the area and about four times the resistance, unless rho_c falls too.",
+            "A 20 nm and a 10 nm plug with beads crossing each, slower in the small one, and two red bars, the second four times taller.",
         )
         .detail(
-            "Contact area falls with the square of pitch, so the resistance per plug rises fast as the chip shrinks.",
-            &["Contact R = rho_c / A plus plug body plus liner (page text, section 4)", "pFET rho_c ~3e-9, nFET ~1e-8 ohm-cm2 (older patent background)"],
+            "Contact area falls with the square of the pitch.",
+            &[
+                "R = rho_c / A (page text, section 4)",
+                "rho_c pFET ~3e-9, nFET ~1e-8 ohm-cm2 (older patent background)",
+            ],
         ),
     Beat::new("LINER SQUEEZE", BEAT_MS)
         .note(
-            "The liner does not shrink with the plug, so in a 15 nm hole much of the width is liner, not conductor.",
-            "the drain plug with its liner ring lit and its tungsten core, with dots passing down the core",
+            "The Ti/TiN liner is a few nm thick whatever the hole size. In a 40 nm square hole a 3 nm liner leaves about 72% of the area as tungsten; in a 15 nm hole it leaves about 36%.",
+            "Two plugs seen at an angle from above: a big one with a thin gold ring round a wide grey core, and a small one where the gold ring takes much of the hole.",
         )
         .detail(
-            "Plug body resistance rises as the liner takes more of the hole.",
-            &["Liner and TiN take a few nm per side of a 15 nm hole (page text, section 4)"],
+            "TiN doesn't shrink, so plug body resistance rises.",
+            &[
+                "Liner and TiN take a few nm per side (page text, section 4)",
+                "3 nm liner: 40 nm hole ~72% W, 15 nm hole ~36% W (geometry)",
+            ],
         ),
     Beat::new("BARRIER TUNING: dopant segregation", BEAT_MS)
         .note(
-            "A pre-silicide N2+ implant segregates dopant to the interface and lowers the Schottky barrier from 0.7 to 0.34 eV.",
-            "the drain silicide lit, with dots crossing it from the plug",
+            "Where silicide meets silicon, electrons must cross the Schottky barrier. Implanting dopants before silicidation so they pile up at the interface cut it from about 0.7 to 0.34 eV in one patent, so more current gets through.",
+            "The red bar beside the device drops to about half its height; afterwards more cyan beads pour down the plug into the drain.",
         )
         .detail(
-            "A lower barrier cuts rho_c, so the contact conducts more easily.",
-            &["N2+ pre-silicide implant 0.7 -> 0.34 eV (patent summary)", "Silicide/SBH patents: uspto 10546856 (source [4])"],
+            "A lower barrier cuts rho_c.",
+            &["N2+ pre-silicide implant: 0.7 -> 0.34 eV (patent summary, source [4])"],
         ),
 ];
 
 const ZE_BEATS: &[Beat] = &[
     Beat::new("tungsten: the old standard", BEAT_MS)
         .note(
-            "Tungsten fills the plugs. Its bulk resistivity is low, but its 19.1 nm electron mean free path is longer than the plug, so the surfaces scatter the electrons.",
-            "the tungsten cores in the three plugs lit",
+            "Tungsten fills the plugs. One calculation gives it an electron mean free path of 19.1 nm, wider than the ~14 nm core of a plug like this, so electrons hit the walls and the metal acts more resistive than in bulk.",
+            "Close on a plug: a glowing yellow bar (the 19.1 nm mean free path) wider than the grey core between the gold liner walls, and beads zigzagging down.",
         )
         .detail(
-            "The plug is narrower than tungsten's mean free path, so surface scattering dominates.",
-            &["W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])", "W bulk resistivity ~5.6 uOhm-cm (approximate)"],
+            "Surface scattering in a narrow plug pushes the industry to new fills.",
+            &["W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])"],
         ),
     Beat::new("cobalt: Intel 10 nm (2017)", BEAT_MS)
         .note(
-            "Intel moved local interconnect to cobalt at 10 nm in 2017.",
-            "the M1 wires lit cyan, with the plugs below them",
+            "Intel moved its lowest local wiring to cobalt at 10 nm in 2017. Cobalt gets by with a thinner liner than tungsten and resists electromigration well, so more of the hole carries current.",
+            "A grey tungsten plug with a thick gold liner and a seam, a lilac-grey cobalt plug with a thinner liner, and an empty hole; beads running down both plugs.",
         )
         .detail(
-            "Intel reports 2x via resistance and 5-10x electromigration. These are claims, not like-for-like tests.",
-            &["Intel 10 nm cobalt: 2x via resistance, 5-10x electromigration (source [6])"],
+            "Intel's claims for cobalt are 2x lower via resistance and 5-10x electromigration.",
+            &["Intel 10 nm cobalt (source [6])", "W ~5.6, Co ~6.2 uOhm-cm bulk (approximate)"],
         ),
     Beat::new("Co, Ru, Mo: the next fills", BEAT_MS)
         .note(
-            "Ruthenium and molybdenum are the other candidates. Their bulk resistivities are close to tungsten's, and they need thinner or no barrier.",
-            "the row of wires lit with the plugs and M1 above the transistors",
+            "Molybdenum and ruthenium can go in with little or no barrier, so the whole hole is metal. Their bulk resistivity is no better than tungsten's, but in a hole this narrow the liner they save matters more.",
+            "The third hole fills with gold-grey molybdenum right out to the oxide walls, with beads running down it.",
         )
         .detail(
-            "They need new tools and qualification before a fab can use them.",
-            &["Bulk: Ru ~7.1, Mo ~5.3 uOhm-cm (approximate)", "New metals need new tools and qualification (page text, section 9)"],
+            "Less barrier raises adhesion and diffusion risk.",
+            &["Bulk: Mo ~5.3, Ru ~7.1 uOhm-cm (approximate)", "New metals need new tools and qualification (page text, section 9)"],
         ),
 ];
 
 // ---- sections 1-10, in the page's order: 3 beats each except sections 4 and 5 ----
+// The pictures are detailed cut-aways of one transistor's contacts (chip_contacts_detail.py).
 
 const SEC1_BEATS: &[Beat] = &[
-    Beat::new("the contact layer: silicide and plugs under the transistors", BEAT_MS)
+    Beat::new("the transistor before its contacts", BEAT_MS)
         .note(
-            "Contacts are the plugs from the silicon up to the first metal, the middle of line. Silicide sits under each source and drain plug.",
-            "the contact layer lit over both transistors, with the whole chip around it",
+            "Contacts are the vertical plugs that connect each transistor to the first wiring level, the middle of line. Before they are made, the transistor's raised source and drain and its metal gates sit buried in oxide.",
+            "A cut through three metal gates (dark violet, edged in yellow high-k, with pale SiN caps and teal spacers), green n+ source and drain blocks between them, all under sand-coloured oxide.",
         )
         .detail(
-            "Contacts are the middle of line between transistor and wiring, and their resistance is in series with every device.",
-            &["PRE-CLEAN, SILICIDE, LINER, W FILL, CMP, VIA0/M1 (page text, section 1)"],
+            "Contacts sit between the transistor and the wiring, in series with every device.",
+            &["Contacts are the middle of line (page text, section 1)", "Gate pitch drawn ~60 nm (illustrative)"],
         ),
-    Beat::new("W plugs over the source, drain and gate", BEAT_MS)
+    Beat::new("the contact module, step by step", BEAT_MS)
         .note(
-            "Tungsten plugs with liners stand over the source, drain and gate of the NMOS. M1 is the next layer up.",
-            "the three NMOS plugs lit, each with its liner ring and tungsten core",
+            "A hole is etched through the oxide down to the source or drain and the native oxide is cleaned off. Titanium reacts with the silicon to form a thin silicide, a Ti/TiN liner coats the hole, and tungsten made from WF6 and hydrogen fills it.",
+            "Close on the drain: the hole opens, a pale silicide strip appears at its floor, gold liner walls appear, then a grey tungsten core fills the hole.",
         )
         .detail(
-            "The plugs are about 15-20 nm wide here.",
-            &["Plugs are about 15-20 nm wide (page text, section 4)"],
+            "Each layer solves one problem: silicide for the barrier to silicon, liner for adhesion, tungsten for fill.",
+            &[
+                "PRE-CLEAN, SILICIDE, LINER/BARRIER, W FILL (page text, section 1)",
+                "Ti/TiN liner a few nm (page text, section 1)",
+            ],
         ),
-    Beat::new("M1 lands on the plugs", BEAT_MS)
+    Beat::new("CMP, via0 and M1", BEAT_MS)
         .note(
-            "CMP polishes the plugs flat, and the first via and M1 metal land on them.",
-            "the thin metal M1 band lit cyan across the plug tops",
+            "CMP polishes the tungsten flat, stopping on the oxide. An SiN etch stop goes on top, then via0 and the first copper lines (M1) land on the plugs. Every transistor's current now passes through these plugs.",
+            "The full stack: grey tungsten plugs under a thin pale etch stop, with brown copper vias and M1 lines above.",
         )
         .detail(
-            "M1 wires at a 30-40 nm pitch.",
-            &["M1 at 30-40 nm pitch (page text, section 2)", "CMP stops on the ILD (page text, section 1)"],
+            "The plug is now the only path from the transistor to the wiring.",
+            &["CMP stops on the ILD (page text, section 1)", "VIA0 / M1 land on the plug (page text, section 1)"],
         ),
 ];
 
 const SEC2_BEATS: &[Beat] = &[
-    Beat::new("M1 and via0: the first wiring", BEAT_MS)
+    Beat::new("M1 and via0", BEAT_MS)
         .note(
-            "M1 wires run at a 30-40 nm pitch, and via0 drops from them onto a plug.",
-            "the M1 band lit, with its via column down to a plug",
+            "At the top, M1 copper lines run into the picture at about a 30-40 nm pitch. A via0 drops from an M1 line through the SiN etch stop onto the tungsten plug below.",
+            "Brown M1 cut ends with blue skins along the top, brown via0 columns under them, and the thin pale etch stop.",
         )
         .detail(
-            "This is the first layer of wiring over the transistors.",
-            &["M1 wires at 30-40 nm pitch; via0 lands on a plug (page text, section 2)"],
+            "This is the first wiring over the transistors.",
+            &["M1 at 30-40 nm pitch; via0 lands on a plug (page text, section 2)"],
         ),
-    Beat::new("plugs and the SiN gate cap", BEAT_MS)
+    Beat::new("plugs, caps and spacers", BEAT_MS)
         .note(
-            "Tungsten plugs with liners sit in the dielectric. A SiN cap on the gate is self-aligned, so contacts can land beside it.",
-            "the SiN cap lit on the gate, and the plugs lit beside it",
+            "The trench contact is a tungsten core inside a Ti/TiN liner, squeezed between two gates. The SiN cap on each gate and the spacers on its sides keep the contact from shorting to the gate, even if it is slightly misplaced.",
+            "A grey tungsten plug in a gold liner, next to a gate's teal spacer and pale SiN cap.",
         )
         .detail(
-            "A self-aligned cap lets the contact land close without shorting.",
-            &["SiN cap on the gate, self-aligned (page text, section 2)"],
+            "The self-aligned cap lets the contact land close to the gate without shorting.",
+            &["SiN cap on the gate, self-aligned (page text, section 2)", "Plugs ~15-20 nm wide (page text, section 4)"],
         ),
-    Beat::new("silicide between the plug and the epi", BEAT_MS)
+    Beat::new("silicide on the doped epi", BEAT_MS)
         .note(
-            "NiSi or TiSi, a few nm thick, sits between each plug and the doped epi, where dopant is above 1e20 per cm3.",
-            "the silicide caps on the source and drain lit under their plugs",
+            "At the bottom, the plug lands on a few nanometres of silicide (TiSi or NiSi) on the source/drain epi, which is doped above 1e20 atoms per cm3. Heavy doping thins the Schottky barrier between metal and silicon so electrons can tunnel through it.",
+            "The pale silicide strip on the green epi at the foot of the plug, the dark silicon below and the channel under the next gate.",
         )
         .detail(
-            "Its barrier height to silicon sets the contact resistance.",
-            &["Silicide a few nm, dopant above 1e20 /cm3 (page text, section 2)", "NiSi 0.65-0.7 eV; TiSi2 0.58 eV (patents, source [4])"],
+            "The silicide's barrier height to silicon sets the contact resistance.",
+            &[
+                "Silicide a few nm, dopant above 1e20 /cm3 (page text, section 2)",
+                "NiSi 0.65-0.7 eV; TiSi2 0.58 eV (patents, source [4])",
+            ],
         ),
 ];
 
 const SEC3_BEATS: &[Beat] = &[
-    Beat::new("trench and gate contacts", BEAT_MS)
+    Beat::new("trench contacts and gate contacts", BEAT_MS)
         .note(
-            "A trench contact is a long bar strapping the source and drain epi. A gate contact is a plug on the gate metal.",
-            "the tungsten bar lit across the source and drain, and the gate plug lit above the gate",
+            "Seen from above, a trench contact (TS) is a long bar strapping the whole source or drain, and a gate contact is a single plug through the gate's cap. Older nodes etched one hole per plug.",
+            "From above: two long grey tungsten bars in gold liners running back through the oxide, and one short plug on the middle gate.",
         )
         .detail(
-            "Trench contacts use self-aligned etch stops.",
-            &["TS: a long bar strapping the source/drain epi; GATE CONTACT: a plug on the gate metal (page text, section 3)"],
+            "Trench contacts now use self-aligned etch stops.",
+            &["TS: a long bar on the S/D epi; GATE CONTACT: a plug on the gate metal (page text, section 3)"],
         ),
-    Beat::new("COAG and the SAC cap", BEAT_MS)
+    Beat::new("SAC cap and COAG", BEAT_MS)
         .note(
-            "The SAC cap lets source and drain contacts land near the gate. COAG lets the gate contact land over the channel.",
-            "the SiN cap on the gate, and the gate plug and channel lit together",
+            "The SiN cap and spacers act as a self-aligned etch stop: a contact that lands off target hits SiN, not gate metal. That margin also lets the gate contact sit right over the active channel (contact over active gate, COAG) instead of off to the side, which saves cell area.",
+            "An amber shape marks a misaligned contact overlapping a spacer, with a green glow where the SiN stops it; the gate contact plug sits on the middle gate.",
         )
         .detail(
             "Intel first used COAG at 10 nm.",
-            &["COAG and SAC cap (page text, section 3)", "Intel 10 nm COAG (wikichip, source [7])"],
+            &[
+                "COAG and SAC cap (page text, section 3)",
+                "Intel 10 nm COAG: ~10% cell height cut (Intel claim, secondary; source [7])",
+            ],
         ),
-    Beat::new("selective W and the new metals", BEAT_MS)
+    Beat::new("selective tungsten: bottom-up, no seam", BEAT_MS)
         .note(
-            "Tungsten grown bottom-up has no seam and needs less barrier. Cobalt, ruthenium and molybdenum are the other fills.",
-            "dots rising up the drain plug as it fills, the plug lit",
+            "Conventional CVD tungsten grows inward from the walls of a lined hole, so the two fronts meet in a seam. Selective tungsten grows only from the bottom up, needs less liner and leaves no seam.",
+            "Left: a grey plug in a gold liner with a dark seam down the middle. Right: an empty hole filling with grey tungsten from the bottom.",
         )
         .detail(
-            "Applied's selective W is a vendor claim of more than 40% lower contact R.",
-            &["Applied selective W: over 40% contact-resistance drop (vendor claim, source [5])"],
+            "Applied's figure is a vendor claim.",
+            &["Applied selective W: over 40% lower contact R vs conventional W (vendor claim, source [5])"],
         ),
 ];
 
 const SEC4_BEATS: &[Beat] = &[
-    Beat::new("the path: contact R sits in series", BEAT_MS)
+    Beat::new("contact resistance sits in series", BEAT_MS)
         .note(
-            "Total resistance is the channel, the source and drain epi, the contact and the local wire, all in series. The contact is one of them.",
-            "the whole chip, with dots running from M1 down the drain plug to the silicide",
+            "Current from M1 goes down a via and a plug, across the silicide into the drain, through the channel under the gate and back up the source side. Every one of those resistances adds, and as transistors shrink the contact pieces become a growing share.",
+            "Cyan dots running from M1 down the right plug, through the green drain, under the middle gate and up the left plug, with tags on wire, plug, contact and channel.",
         )
         .detail(
-            "Contact resistance adds to every device, and it grows as the plugs shrink.",
-            &["Total resistance = channel + S/D epi + contact + local wire (page text, section 4)"],
+            "Contact resistance adds to every device.",
+            &["Total R = channel + S/D epi + contact + local wire (page text, section 4)"],
         ),
-    Beat::new("the plug is 15-20 nm wide", BEAT_MS)
+    Beat::new("a plug narrower than the electron's path", BEAT_MS)
         .note(
-            "The plug is about 15-20 nm wide, and current has to squeeze down it.",
-            "dots passing down the narrow drain plug from M1 toward the silicide",
+            "The tungsten core here is only about 14 nm wide. One calculation puts tungsten's electron mean free path at 19.1 nm, longer than the core is wide, so electrons hit the walls more often than anything else and the metal behaves as more resistive than in bulk.",
+            "Close on one plug: a glowing yellow bar (the 19.1 nm mean free path) wider than the grey core between the gold liner walls, and dots zigzagging down the core.",
         )
         .detail(
-            "Tungsten's 19.1 nm electron mean free path is longer than the plug, so the surfaces scatter the electrons.",
-            &["W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])", "Plugs about 15-20 nm wide (page text, section 4)"],
+            "Surface scattering, not bulk resistivity, decides a narrow plug's resistance.",
+            &["W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])", "Plugs ~15-20 nm wide (page text, section 4)"],
         ),
-    Beat::new("the liner takes a few nm a side", BEAT_MS)
+    Beat::new("the liner squeeze", BEAT_MS)
         .note(
-            "The liner and TiN take a few nm from each side of the hole, so much of the width is not conductor.",
-            "the liner ring lit around the drain plug, the tungsten core inside",
+            "The Ti/TiN liner is a few nm thick whatever the hole size. In a 40 nm square hole a 3 nm liner leaves about 72% of the area as tungsten; in a 15 nm hole it leaves about 36%. The plug's resistance climbs far faster than its size falls.",
+            "Two plugs seen at an angle from above: a big one with a thin gold ring round a wide grey core, and a small one where the gold ring takes much of the hole.",
         )
         .detail(
-            "That is why the plug body's resistance rises as the holes shrink.",
-            &["Liner and TiN take a few nm per side of a 15 nm hole (page text, section 4)"],
+            "TiN doesn't shrink, so plug body resistance rises.",
+            &[
+                "Liner and TiN take a few nm per side (page text, section 4)",
+                "3 nm liner: 40 nm hole ~72% W, 15 nm hole ~36% W (geometry)",
+            ],
         ),
-    Beat::new("the barrier: 0.7 to 0.34 eV", BEAT_MS)
+    Beat::new("lowering the Schottky barrier", BEAT_MS)
         .note(
-            "Dopant segregation from an N2+ implant before silicidation lowers the Schottky barrier from 0.7 to 0.34 eV, so current crosses more easily.",
-            "the silicide lit on both source and drain, with dots crossing from the plug",
+            "Where silicide meets silicon there is an energy barrier, the Schottky barrier, that electrons must cross. Implanting dopants before silicidation so they pile up at the interface (dopant segregation) cut it from about 0.7 to 0.34 eV in one patent, so more current gets through.",
+            "The red bar beside the device drops to about half its height; afterwards more cyan dots pour down the plug into the drain.",
         )
         .detail(
-            "A lower barrier cuts rho_c, the contact resistance per area.",
-            &["N2+ pre-silicide implant 0.7 -> 0.34 eV (patent summary, source [4])"],
+            "A lower barrier cuts rho_c, the contact resistance per unit area.",
+            &["N2+ pre-silicide implant: 0.7 -> 0.34 eV (patent summary, source [4])"],
         ),
 ];
 
 const SEC5_BEATS: &[Beat] = &[
     Beat::new("W mean free path: 19.1 nm", BEAT_MS)
         .note(
-            "Tungsten's electron mean free path is 19.1 nm at room temperature, wider than a 15-20 nm plug.",
-            "dots down the plug core, with the plug lit",
+            "One DFT calculation gives tungsten an electron mean free path of 19.1 nm at room temperature. A plug with a 14 nm core is narrower than that, which is why thin-film resistivity, not bulk resistivity, decides which metal wins.",
+            "The glowing yellow 19.1 nm bar across the plug, wider than the grey core, with dots zigzagging down.",
         )
         .detail(
             "Surface scattering in a narrow plug is what makes this number matter.",
             &["W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])"],
         ),
-    Beat::new("Schottky barriers: NiSi and TiSi2", BEAT_MS)
+    Beat::new("Schottky barrier heights", BEAT_MS)
         .note(
-            "The silicide-to-silicon barrier is 0.65-0.7 eV for NiSi and 0.58 eV for TiSi2.",
-            "the silicide lit on both the source and drain",
+            "The barrier between silicide and n-type silicon is about 0.65-0.7 eV for NiSi and 0.58 eV for TiSi2, and dopant segregation can bring it to about 0.34 eV. A lower barrier gives a lower specific contact resistivity, rho_c.",
+            "Three red bars on dark plinths: NiSi tallest, TiSi2 a little lower, the segregated one about half height.",
         )
         .detail(
-            "A lower barrier means a lower contact resistance.",
-            &["NiSi 0.65-0.7 eV; TiSi2 0.58 eV (patents, source [4])"],
+            "Barrier height and doping together set rho_c.",
+            &[
+                "NiSi 0.65-0.7 eV; TiSi2 0.58 eV; segregated 0.34 eV (source [4])",
+                "rho_c pFET ~3e-9, nFET ~1e-8 ohm-cm2 (older patent background)",
+            ],
         ),
-    Beat::new("contact rho_c and bulk resistivity", BEAT_MS)
+    Beat::new("bulk resistivity of the candidates", BEAT_MS)
         .note(
-            "Contact rho_c is about 3e-9 ohm-cm2 for pFET and 1e-8 for nFET, from older patent background. Bulk: W ~5.6, Co ~6.2, Ru ~7.1, Mo ~5.3 uOhm-cm, approximate.",
-            "the NMOS plugs lit",
+            "In bulk, copper conducts far better than the rest, but it needs a thick barrier and its lead fades in thin films. Tungsten, molybdenum, cobalt and ruthenium are three to four times worse in bulk; they win in contacts because they need less liner and lose less to thin-film scattering.",
+            "Five bars in each metal's colour: a short copper bar, then molybdenum, tungsten, cobalt and a tall teal ruthenium bar.",
         )
         .detail(
-            "Contact values come from older patent background; the bulk values are approximate.",
-            &["contact rho_c pFET ~3e-9, nFET ~1e-8 ohm-cm2 (older patent background)", "bulk resistivity W ~5.6, Co ~6.2, Ru ~7.1, Mo ~5.3 uOhm-cm (approximate)"],
+            "Bulk values are approximate and are not what a narrow plug sees.",
+            &["Cu ~1.7, Mo ~5.3, W ~5.6, Co ~6.2, Ru ~7.1 uOhm-cm (approximate)"],
         ),
     Beat::new("vendor and fab claims", BEAT_MS)
         .note(
-            "Applied's Volta W claims up to 90% lower contact resistance. Intel's cobalt claims 5-10x electromigration. TSMC N2 reports up to a 20% middle-of-line R+C cut.",
-            "the whole chip, with the contact layer lit under both transistors",
+            "Applied Materials says its Volta W cuts contact resistance by up to 90%, depending on size. Intel's 10 nm (2017) moved its lowest local wiring to cobalt, claiming 5-10x better electromigration. TSMC reported up to 20% lower middle-of-line R+C on N2.",
+            "The whole device with three tags: on a tungsten plug, on the gate contact and on an M1 line.",
         )
         .detail(
-            "These are claims, not equal test conditions.",
-            &["Applied Volta W up to 90% lower contact R, CD dependent (vendor claim, source [5])", "Intel 10 nm cobalt, 5-10x electromigration (source [6])", "TSMC N2 up to 20% R+C cut (reported, source [9])"],
+            "These are claims under different test conditions, not one comparison.",
+            &[
+                "Applied Volta W: up to 90% lower contact R, CD dependent (vendor claim, source [5])",
+                "Intel 10 nm cobalt: 5-10x electromigration (source [6])",
+                "TSMC N2: up to 20% MOL R+C cut (reported, source [9])",
+            ],
         ),
 ];
 
 const SEC6_BEATS: &[Beat] = &[
-    Beat::new("Applied: $28.37B in FY2025", BEAT_MS)
+    Beat::new("Applied Materials FY2025: $28.37B", BEAT_MS)
         .note(
-            "Applied Materials' FY2025 revenue was $28.37B, and it sells the contact-metal tools.",
-            "the M1 wires lit over the transistor",
+            "Applied Materials is one of the main suppliers of the deposition tools used to build contacts. Its FY2025 revenue was $28.37B: Semiconductor Systems (the tools) $20.80B, about 73%; Applied Global Services about 23%; the rest about 4%.",
+            "A stacked bar: blue Semiconductor Systems at the bottom, teal Services above, a thin grey slice on top.",
         )
         .detail(
             "Revenue from the company's FY2025 10-K.",
-            &["AMAT FY2025 10-K (source [1])"],
+            &["Revenue $28.37B; Semiconductor Systems $20.80B (AMAT FY2025 10-K, source [1])"],
         ),
-    Beat::new("Semiconductor Systems: $20.80B", BEAT_MS)
+    Beat::new("where the tools go", BEAT_MS)
         .note(
-            "Semiconductor Systems was $20.80B: 67% foundry, logic and other, 26% DRAM, 7% NAND.",
-            "the whole chip, with the M1 wires lit",
+            "Of the $20.80B Semiconductor Systems revenue, 67% came from foundry, logic and other customers, 26% from DRAM and 7% from NAND. Foundry and logic customers, who adopt new contact metals first, are the largest share.",
+            "A second bar beside the first: blue foundry/logic, teal DRAM and a thin grey NAND slice.",
         )
         .detail(
             "The segment split shows where the contact tools sell.",
-            &["AMAT FY2025 10-K segment split (source [1])"],
+            &["67% foundry/logic/other, 26% DRAM, 7% NAND (AMAT FY2025 10-K, source [1])"],
         ),
-    Beat::new("contact metals: Endura and selective W", BEAT_MS)
+    Beat::new("the contact steps Applied sells", BEAT_MS)
         .note(
-            "Endura PVD, CVD and ALD tools deposit the liners and the tungsten. Selective W and cobalt are on the list too.",
-            "the plugs lit, with their liners and cores",
+            "Applied's Endura platform carries the PVD, CVD and ALD chambers that lay down the Ti/TiN liner and the tungsten fill, and Applied also sells selective tungsten and cobalt processes for the newest contacts.",
+            "The device with tags on a gold liner, a grey tungsten core and the gate contact.",
         )
         .detail(
-            "These are Applied's own claims for its tools.",
+            "These are Applied's own descriptions of its tools.",
             &["Endura PVD/CVD/ALD, cobalt, selective W (source [1], [5])"],
         ),
 ];
 
 const SEC7_BEATS: &[Beat] = &[
-    Beat::new("tungsten: the old standard", BEAT_MS)
+    Beat::new("tungsten: the long-time standard", BEAT_MS)
         .note(
-            "Tungsten fills the plugs. Its 19.1 nm mean free path is longer than the plug, so the surfaces scatter the electrons.",
-            "the tungsten cores in the three plugs lit",
+            "Tungsten has filled contacts for decades because CVD fills tall, narrow holes well. But it needs a Ti/TiN liner about 3 nm a side, and conventional fill leaves a seam down the middle, so in a 20 nm hole much of the width isn't tungsten.",
+            "A grey tungsten plug in a gold liner with a dark seam down its middle; the two holes to its right are still empty.",
         )
         .detail(
-            "Surface scattering in a 15-20 nm plug is what pushes the industry to new fills.",
-            &["W mean free path 19.1 nm at 293 K (PRB 2012, DFT; source [3])"],
+            "Liner and seam both take conductor away.",
+            &["W bulk ~5.6 uOhm-cm (approximate)", "Liner a few nm per side (page text, section 4)"],
         ),
-    Beat::new("cobalt: Intel 10 nm", BEAT_MS)
+    Beat::new("cobalt: Intel 10 nm, 2017", BEAT_MS)
         .note(
-            "Intel moved local interconnect to cobalt at 10 nm in 2017.",
-            "the M1 wires lit, with the plugs below them",
+            "Intel moved its lowest local wiring to cobalt at 10 nm in 2017. Cobalt gets by with a thinner liner than tungsten and resists electromigration well, so more of the hole carries current.",
+            "The middle plug fills: a lilac-grey cobalt core inside a thinner gold liner.",
         )
         .detail(
-            "Intel's claims for cobalt are 2x via resistance and 5-10x electromigration.",
-            &["Intel 10 nm cobalt (source [6])"],
+            "Intel's claims for cobalt are 2x lower via resistance and 5-10x electromigration.",
+            &["Intel 10 nm cobalt (source [6])", "Co bulk ~6.2 uOhm-cm (approximate)"],
         ),
-    Beat::new("Ru, Mo: less barrier", BEAT_MS)
+    Beat::new("molybdenum and ruthenium: barrierless", BEAT_MS)
         .note(
-            "Molybdenum and ruthenium can run with thinner or no barrier, which saves width.",
-            "the row of wires lit with the plugs",
+            "Molybdenum and ruthenium can go in with little or no barrier, so the whole hole is metal. Lam sells molybdenum fill for contacts and Applied an ALD molybdenum process. The catch, without a liner, is adhesion and diffusion.",
+            "The third plug fills with gold-grey molybdenum right out to the oxide walls.",
         )
         .detail(
-            "Less barrier raises adhesion and diffusion risk.",
-            &["Bulk: Mo ~5.3, Ru ~7.1 uOhm-cm (approximate)", "Barrierless fill raises adhesion and diffusion risk (page text, section 9)"],
+            "Less barrier saves width but raises adhesion and diffusion risk.",
+            &[
+                "Mo ~5.3, Ru ~7.1 uOhm-cm (approximate)",
+                "Barrierless fill raises adhesion and diffusion risk (page text, section 7)",
+            ],
         ),
 ];
 
 const SEC8_BEATS: &[Beat] = &[
-    Beat::new("Applied Materials and Lam Research", BEAT_MS)
+    Beat::new("the tool makers", BEAT_MS)
         .note(
-            "Applied makes the Endura PVD, CVD and ALD tools. Lam makes ALTUS CVD and ALD tungsten and molybdenum.",
-            "the M1 wires lit over the transistor",
+            "Applied Materials (Endura PVD, CVD and ALD; cobalt; selective tungsten) and Lam Research (ALTUS CVD and ALD tungsten and molybdenum) are the main suppliers of the liner and fill steps. Lam's FY2025 revenue was $18.44B.",
+            "Close on a contact, with tags on the gold liner and the grey tungsten core.",
         )
         .detail(
             "Tool suppliers for the contact step.",
             &["AMAT Endura; Lam ALTUS (page text, section 8)", "Lam FY2025 $18.44B (source [2])"],
         ),
-    Beat::new("TSMC and Intel design the contact scheme", BEAT_MS)
+    Beat::new("TSMC and Intel design the scheme", BEAT_MS)
         .note(
-            "TSMC and Intel design the contact schemes. Intel was first with cobalt and COAG at 10 nm.",
-            "the contact layer lit under both transistors",
+            "The foundries decide the contact scheme: which silicide, which liner, which fill metal and whether to use COAG. Intel was first with both cobalt and COAG at 10 nm.",
+            "Tags on the silicide under the drain plug and on the gate contact over the middle gate.",
         )
         .detail(
-            "Foundry design choices set what the tools have to deposit.",
+            "Foundry choices set what the tools have to deposit.",
             &["TSMC (TSM) and Intel (INTC) (page text, section 8)"],
         ),
-    Beat::new("memory makers, TEL and EDA", BEAT_MS)
+    Beat::new("buyers and the RC extractors", BEAT_MS)
         .note(
-            "Samsung, SK hynix and Micron buy the tools. Tokyo Electron sells CVD and ALD. Synopsys and Cadence extract contact RC.",
-            "the whole chip pulled back, with the plug and wire labels",
+            "Samsung, SK hynix and Micron buy the same tools for DRAM and NAND, and Tokyo Electron sells competing CVD and ALD tools. Synopsys and Cadence software extracts each contact's resistance and capacitance so designers can time the circuit.",
+            "The whole device with cyan dots running the current path, tagged with the buyers, TEL and the EDA firms.",
         )
         .detail(
-            "Buyers, tool sellers and the software that extracts the resistance.",
+            "Buyers, a second tool seller and the software that models the result.",
             &["Samsung, SK hynix, Micron; TEL 8035.T; Synopsys, Cadence (page text, section 8)"],
         ),
 ];
@@ -480,30 +520,34 @@ const SEC8_BEATS: &[Beat] = &[
 const SEC9_BEATS: &[Beat] = &[
     Beat::new("new metals need new tools", BEAT_MS)
         .note(
-            "Molybdenum and ruthenium need new tools and qualification before a fab can run them.",
-            "the plugs lit with M1 above",
+            "Switching the plugs to molybdenum or ruthenium means new deposition chambers, new etch and clean chemistry, and months of qualification before a fab will run it in volume.",
+            "The device with gold-grey molybdenum plugs and no gold liner.",
         )
         .detail(
             "Adoption risk.",
             &["New metals (Mo, Ru) need new tools and qualification (page text, section 9)"],
         ),
-    Beat::new("barrierless fill: adhesion and diffusion risk", BEAT_MS)
+    Beat::new("barrierless: adhesion and diffusion", BEAT_MS)
         .note(
-            "Dropping the barrier saves width but raises adhesion and diffusion risk.",
-            "the drain plug lit, with its liner",
+            "Without a liner, the metal may not stick well to the oxide, leaving voids along the walls, and metal atoms can diffuse into the dielectric and weaken it. Both show up as reliability failures over time, not on day one.",
+            "Close on a molybdenum plug: a dark void along its left wall and red dots in the oxide beside it.",
         )
         .detail(
             "A reliability risk.",
             &["Barrierless fill raises adhesion and diffusion risk (page text, section 9)"],
         ),
-    Beat::new("contact RC erodes the node gains", BEAT_MS)
+    Beat::new("contact R erodes each node's gain", BEAT_MS)
         .note(
-            "Contact RC erodes node-to-node performance gains, so the middle of line matters more each node.",
-            "the whole chip with the contact layer lit under both transistors",
+            "Contact resistance is rho_c divided by contact area. Halve the width of a square contact and its area falls to a quarter, so its resistance rises about four times unless rho_c falls too. That is how contact RC eats into each new node's speed gain.",
+            "A 20 nm and a 10 nm plug seen from above, and two red bars: the second four times taller.",
         )
         .detail(
             "Contacts limit every device on the chip.",
-            &["Contact RC erodes node-to-node gains (page text, section 9)"],
+            &[
+                "R = rho_c / A (page text, section 4)",
+                "Half the width: ~4x R at fixed rho_c (geometry)",
+                "Contact RC erodes node-to-node gains (page text, section 9)",
+            ],
         ),
 ];
 
@@ -511,7 +555,7 @@ const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 1-3: the 10-Ks and the mean free path", BEAT_MS)
         .note(
             "The Applied and Lam 10-K filings, and the paper that gives tungsten's mean free path.",
-            "the whole chip, pulling back slowly",
+            "The transistor and its contacts in cut-away, turning slowly.",
         )
         .detail(
             "Each number on this page traces to one of these.",
@@ -524,7 +568,7 @@ const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 4-6: patents, Applied Volta W, Intel cobalt", BEAT_MS)
         .note(
             "The silicide patent, the Applied Volta W page, and Intel's cobalt interconnect article.",
-            "the whole chip, pulling back slowly",
+            "The transistor and its contacts in cut-away, turning slowly.",
         )
         .detail(
             "Patent figures and vendor claims are marked as such on the page.",
@@ -537,7 +581,7 @@ const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 7-9: COAG, Applied blog, TSMC N2", BEAT_MS)
         .note(
             "The COAG pages, Applied's contact-scaling blog, and TSMC's N2 paper summary.",
-            "the whole chip, pulling back slowly",
+            "The transistor and its contacts in cut-away, turning slowly.",
         )
         .detail(
             "Intel's COAG figure is a secondary source.",

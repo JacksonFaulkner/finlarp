@@ -1,0 +1,23 @@
+== HBF spec
+# What it does
+8- and 16-high NAND stacks, up to 512 GB, bandwidth tiers from about 0.4 to 3.0 TB/s.
+# Why it matters
+Capacity per GPU at a bandwidth between flash and HBM; the spec is what lets other vendors build to it.
+# Source
+SanDisk and SK hynix, OCP spec (Aug 2026).
+
+== UCIe link
+# What it does
+The HBF stack reportedly reaches 3 TB/s through a UCIe chiplet link to the host.
+# Why it matters
+A standard die-to-die link lets the stack sit on many accelerators, not one vendor's.
+# Source
+Guru3D (reported figure).
+
+== Workstream and timing
+# What it does
+Google and Tenstorrent joined the standard; samples of first inference devices are expected in early 2027.
+# Why it matters
+Customer validation is the step that turns a spec into product demand.
+# Source
+TrendForce and TechRadar on the HBF standard.

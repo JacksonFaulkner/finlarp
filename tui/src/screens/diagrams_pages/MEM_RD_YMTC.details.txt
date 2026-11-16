@@ -1,0 +1,23 @@
+== Xtacking 4.0
+# What it does
+NAND array bonded onto a separate logic wafer; reported at about 267-270 layers in mass production.
+# Why it matters
+Keeps the circuits out of the way of the stack, so more layers can be added.
+# Source
+Capital & Compute and Digitimes-sourced reports (layer counts vary).
+
+== Three-deck bonding
+# What it does
+X5-9080 is reported to pass 300 layers by bonding three decks.
+# Why it matters
+More bits per wafer, at some cost in throughput.
+# Source
+Digitimes via Domain-b (2026).
+
+== DRAM pivot
+# What it does
+Wuhan Phase 3 reportedly splits output between NAND and DRAM; a 9,600 MT/s low-power DRAM on 4F2 cells is planned, no timeline.
+# Why it matters
+Would put YMTC in DRAM, not just flash; still unconfirmed.
+# Source
+TweakTown (reported plan).

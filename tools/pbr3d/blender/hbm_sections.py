@@ -88,12 +88,12 @@ def sec1():
     bus_dots(root, m, 2, 0.1, 0.6)
     label("GPU", (0.0, 420.0, 40.0), root, beat(0))
     label("HBM stacks beside the GPU", (-1500.0, 640.0, 0.0), root, beat(0))
-    label("silicon interposer", (1900.0, -60.0, 0.0), root, beat(0))
+    label("silicon interposer", (1150.0, -60.0, 0.0), root, beat(0))
     label("microbumps join each die", (-660.0, 330.0, 0.0), root, beat(1))
     label("PHY drives the bus to the GPU", (-300.0, 330.0, 0.0), root, beat(2))
     camera(root, [
         ((0.0, 260.0, 0.0), 5200.0, 0.30, 0.16),
-        ((-850.0, 420.0, 0.0), 2100.0, 0.34, 0.12),
+        ((-850.0, 450.0, 0.0), 2600.0, 0.24, 0.12),
         ((-300.0, 330.0, 0.0), 4300.0, 0.30, 0.14),
     ])
     finish("sec1", page="hbm")
@@ -123,8 +123,8 @@ def sec2():
     camera(root, [
         ((SX, 300.0, 0.0), 1400.0, 0.30, 0.10),
         ((SX, 60.0, 0.0), 1000.0, 0.30, 0.12),
-        ((SX, 300.0, 0.0), 900.0, 0.30, 0.10),
-        ((SX, 420.0, 0.0), 1800.0, 0.30, 0.12),
+        ((SX, 320.0, 0.0), 1700.0, 0.30, 0.10),
+        ((SX, 540.0, 0.0), 2500.0, 0.30, 0.12),
         ((-300.0, 250.0, 0.0), 3800.0, 0.30, 0.14),
     ])
     finish("sec2", page="hbm")
@@ -149,16 +149,18 @@ def sec3():
     for name in ("interposer", "substrate", "gpu"):
         show(pkg_item(name), [(F(4, 0.0), END)])
     bus_dots(root, m, 4, 0.2, 0.6)
+    # Beat 3: the test field sits under the dies, so the test signal is shown running down the TSVs
+    read_dots(root, m, SX, 3, 0.1, 0.8, die_top(7) - 10)
     label("1. dies placed one by one", (SX + DIE_HALF + 10, 300.0, 0.0), root, beat(0))
     label("2. thinned, TSVs and bumps", (SX + 130.0, 150.0, 0.0), root, beat(1))
     label("3. bonded onto the base die", (SX + BASE_HALF + 10, 200.0, 0.0), root, beat(2))
-    label("4. tested through the TSVs", (SX - 130.0, 300.0, 0.0), root, beat(3))
+    label("4. tested through the TSVs", (SX - 110.0, 300.0, 0.0), root, beat(3))
     label("5. mounted beside the GPU", (-300.0, 330.0, 0.0), root, beat(4))
     camera(root, [
         ((SX, 300.0, 0.0), 1400.0, 0.30, 0.10),
-        ((SX, 300.0, 0.0), 1600.0, 0.30, 0.10),
+        ((SX, 440.0, 0.0), 2300.0, 0.30, 0.10),
         ((SX, 300.0, 0.0), 1400.0, 0.30, 0.10),
-        ((SX, 300.0, 0.0), 1200.0, 0.30, 0.10),
+        ((SX, 300.0, 0.0), 1400.0, 0.30, 0.10),
         ((-300.0, 250.0, 0.0), 3800.0, 0.30, 0.14),
     ])
     finish("sec3", page="hbm")
@@ -171,8 +173,8 @@ def bar(root, m, name, x, h, f0, f1, iv):
     """A bar standing at x that grows to height h over [f0, f1], shown during the intervals `iv`."""
     g = empty(f"{name}_show", root)
     b = pivot(f"{name}_grow", (x, 0.0, 0.0), g)
-    box(f"{name}_box", (x - 130, 0.0, -130), (x + 130, h, 130), m["dram"], b)
-    scale_keys(b, [(0, (1, OFF, 1)), (f0, (1, OFF, 1)), (f1, (1, 1, 1)), (END, (1, 1, 1))], until=f0)
+    box(f"{name}_box", (-130, 0.0, -130), (130, h, 130), m["dram"], b)
+    scale_keys(b, [(0, (1, 1, OFF)), (f0, (1, 1, OFF)), (f1, (1, 1, 1)), (END, (1, 1, 1))], until=f0)
     show(g, iv)
     return b
 
@@ -259,12 +261,12 @@ def sec7():
     for i in range(22):
         z = -880.0 + i * 40.0
         wires.append(box(f"wire{i}", (-1800.0, 0.0, z - 4), (1800.0, 8.0, z + 4), m["copper"], root))
-    label("interposer wiring", (-660.0, 10.0, -300.0), root, beat(0))
-    label("on a package substrate", (2300.0, -200.0, 0.0), root, beat(1))
+    label("interposer wiring", (-660.0, 10.0, -650.0), root, beat(0))
+    label("on a package substrate", (1700.0, -220.0, 0.0), root, beat(1))
     label("packaging capacity limits output", (0.0, 640.0, 0.0), root, beat(2))
     camera(root, [
-        ((-600.0, 10.0, -400.0), 1100.0, 0.2, 0.75),
-        ((0.0, 150.0, 0.0), 5000.0, 1.57, 0.05),
+        ((-600.0, 0.0, -700.0), 2200.0, 0.0, 1.4),
+        ((1400.0, 100.0, 0.0), 3800.0, 0.15, 0.08),
         ((0.0, 200.0, 0.0), 5200.0, 0.30, 0.40),
     ])
     finish("sec7", page="hbm")
@@ -283,7 +285,7 @@ def sec8():
         spot = gbox(f"spot{i}", (x - 320, -6.0, 0.0), (x + 320, 580.0, 12.0), m["gold_glow"], root)
         show(spot, beat(i))
         label(name, (x, 600.0, 30.0), root, beat(i))
-    camera(root, [((0.0, 280.0, 0.0), 3600.0, 0.0, 0.10)] * 3)
+    camera(root, [((x, 300.0, 0.0), 2600.0, 0.0, 0.10) for x, _ in MAKERS])
     finish("sec8", page="hbm")
 
 
@@ -292,16 +294,18 @@ def sec8():
 
 def sec9():
     m, root = begin(9, 3)
-    box("cowos_line", (-1500.0, -60.0, -300.0), (-100.0, 0.0, 300.0), m["interposer"], root)
+    queue = empty("queue", root)  # only in beat 0, so it does not stand among the bars and the stack
+    box("cowos_line", (-1500.0, -60.0, -300.0), (-100.0, 0.0, 300.0), m["interposer"], queue)
     for i in range(5):
-        box(f"queued_gpu{i}", (-1400.0 + 260 * i, 0.0, -120.0), (-1200.0 + 260 * i, 220.0, 120.0), m["gpu"], root)
+        box(f"queued_gpu{i}", (-1400.0 + 260 * i, 0.0, -120.0), (-1200.0 + 260 * i, 220.0, 120.0), m["gpu"], queue)
+    show(queue, beat(0))
     for i in range(3):
         bar_x = -200.0 + 300.0 * i
         h = (600.0, 540.0, 480.0)[i]
         g = empty(f"yield_show{i}", root)
         b = pivot(f"yield_grow{i}", (bar_x, 0.0, 0.0), g)
-        box(f"yield_bar{i}", (bar_x - 110, 0.0, -110), (bar_x + 110, h, 110), m["dram"], b)
-        scale_keys(b, [(0, (1, OFF, 1)), (F(1, 0.05), (1, OFF, 1)), (F(1, 0.4), (1, 1, 1)), (END, (1, 1, 1))], until=F(1, 0.05))
+        box(f"yield_bar{i}", (-110, 0.0, -110), (110, h, 110), m["dram"], b)
+        scale_keys(b, [(0, (1, 1, OFF)), (F(1, 0.05), (1, 1, OFF)), (F(1, 0.4), (1, 1, 1)), (END, (1, 1, 1))], until=F(1, 0.05))
         show(g, beat(1))
     stack = K.stack(root, m, 0.0, 16, "risk", glow=True)
     show(stack.g, beat(2))
@@ -311,12 +315,12 @@ def sec9():
         else:
             show(stack.glows[k], [])
     label("GPU dies queue at packaging", (-800.0, 260.0, 0.0), root, beat(0))
-    label("CoWoS: one supplier does most", (-200.0, 400.0, 0.0), root, beat(0))
-    label("yield falls as stacks grow", (-200.0, 720.0, 0.0), root, beat(1))
+    label("CoWoS: one supplier does most", (-250.0, -30.0, 300.0), root, beat(0))
+    label("yield falls as stacks grow", (100.0, 600.0, 0.0), root, beat(1))
     label("heat from the lower dies", (250.0, 200.0, 0.0), root, beat(2))
     camera(root, [
         ((-600.0, 200.0, 0.0), 3200.0, 0.10, 0.10),
-        ((0.0, 320.0, 0.0), 2600.0, 0.10, 0.08),
+        ((100.0, 320.0, 0.0), 2400.0, 0.10, 0.08),
         ((0.0, 520.0, 0.0), 2700.0, 0.10, 0.08),
     ])
     finish("sec9", page="hbm")
@@ -324,21 +328,22 @@ def sec9():
 
 # ---- 10. sources -------------------------------------------------------------------------------
 
+# Two staggered rows, 2200 mm apart along x, so each source label has its own space.
 CARDS = [
-    (-2400.0, -800.0, "JEDEC JESD238 (HBM3)", 0, 0.15),
-    (-800.0, -800.0, "JEDEC JESD270-4 (HBM4)", 0, 0.45),
-    (800.0, -800.0, "SemiEngineering: microbumps", 0, 0.75),
-    (-2400.0, 800.0, "Tom's Hardware: hybrid bonding", 1, 0.15),
-    (-800.0, 800.0, "Tom's Hardware: CoWoS", 1, 0.45),
-    (800.0, 800.0, "TrendForce: CoWoS capacity", 2, 0.15),
-    (2400.0, 800.0, "PC Watch: HBM3 channels", 2, 0.45),
+    (-2900.0, -900.0, "JEDEC JESD238 (HBM3)", 0, 0.15),
+    (-900.0, -900.0, "JEDEC JESD270-4 (HBM4)", 0, 0.45),
+    (1100.0, -900.0, "SemiEngineering: microbumps", 0, 0.75),
+    (3000.0, -900.0, "Tom's Hardware: hybrid bonding", 1, 0.15),
+    (-2200.0, 900.0, "Tom's Hardware: CoWoS", 1, 0.45),
+    (0.0, 900.0, "TrendForce: CoWoS capacity", 2, 0.15),
+    (2200.0, 900.0, "PC Watch: HBM3 channels", 2, 0.45),
 ]
 
 
 def sec10():
     m, root = begin(10, 3)
     g = empty("sources", root)
-    box("plinth", (-3300.0, -80.0, -1700.0), (3300.0, 0.0, 1700.0), m["plinth"], g)
+    box("plinth", (-4300.0, -80.0, -1800.0), (4300.0, 0.0, 1800.0), m["plinth"], g)
     for n, (x, z, text, b, u) in enumerate(CARDS):
         box(f"card{n}", (x - 700, 0.0, z - 500), (x + 700, 30.0, z + 500), m["paper"], g)
         lit = empty(f"lit{n}", g)
@@ -346,9 +351,9 @@ def sec10():
         show(lit, [(F(b, u), END)])
         label(text, (x - 700, 40.0, z + 500), g, [(F(b, u), END)])
     camera(root, [
-        ((0.0, 0.0, 0.0), 13500.0, 0.06, 0.85),
-        ((0.0, 0.0, 0.0), 13200.0, 0.03, 0.85),
-        ((0.0, 0.0, 0.0), 13500.0, -0.03, 0.85),
+        ((250.0, 0.0, 0.0), 19500.0, 0.05, 0.85),
+        ((250.0, 0.0, 0.0), 19500.0, 0.03, 0.85),
+        ((250.0, 0.0, 0.0), 19500.0, -0.02, 0.85),
     ])
     finish("sec10", page="hbm")
 

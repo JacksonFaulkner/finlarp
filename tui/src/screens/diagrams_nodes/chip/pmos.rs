@@ -12,57 +12,57 @@ use crate::ui::anim::{Beat, Scene, Zoom};
 const BEATS: &[Beat] = &[
     Beat::new("PMOS: the hole-carrying pull-up in the chip", BEAT_MS)
         .note(
-            "The whole chip, with the PMOS picked out: the p-channel transistor that pulls the output up to VDD.",
-            "A pink outline around the PMOS in the silicon; the gate is low, so it is not lit.",
+            "The whole chip in cut-away: silicon at the bottom, copper wiring above, package bumps on top. The transistor outlined in yellow is a PMOS, the switch that pulls a signal up to VDD. Power comes in through the bumps.",
+            "The chip as a slab: the blue NMOS on the left and the pink PMOS on the right in the tan silicon, wiring tiers and silver bumps above, a yellow box round the PMOS.",
         )
         .detail(
-            "The PMOS is the pull-up half of the CMOS pair.",
-            &["PMOS conducts with holes when the gate is low (textbook)"],
+            "The PMOS is the pull-up half of every CMOS gate.",
+            &["PMOS conducts with holes when its gate is low (CHIP_PMOS.txt, section 1)"],
         ),
     Beat::new("gate low: holes form a channel", BEAT_MS)
         .note(
-            "The camera moves in. The gate is pulled low, below the source, and holes gather under it into a channel joining source to drain.",
-            "A gold channel glows at the silicon surface between the p+ source and drain; the gate is grey.",
+            "Up close the PMOS is the NMOS mirrored: p+ source and drain in an n-type well whose free carriers are electrons. The source is tied to VDD. With the gate at 0 V, well below the source, the field draws holes to the surface and a channel forms.",
+            "Pink p+ blocks under orange SiGe:B raised epitaxy, grey contact pillars up to the copper, the dark gate, cyan dots (electrons) in the slate-blue n-well, and a bright orange strip (the hole channel) under the gate.",
         )
         .detail(
-            "Holes are slower than electrons in silicon.",
-            &["Si hole mobility ~450 vs electrons ~1400 cm2/Vs (textbook)"],
+            "A PMOS is on when its gate is low: the opposite of an NMOS.",
+            &["|Vt| ~0.2-0.4 V at leading nodes (typical)", "SiGe:B source and drain (CHIP_PMOS.txt, section 2)"],
         ),
     Beat::new("holes flow from VDD to the output", BEAT_MS)
         .note(
-            "Holes come down from VDD into the source, cross the channel to the drain and rise to the output wire.",
-            "Orange dots run from the top into the right-hand p+ source, across the gold channel and up the left-hand drain.",
+            "Holes come in from VDD down the source contact, cross the channel, and leave up the drain contact to the output, charging it toward VDD. Holes are about a third as mobile as electrons, so the PMOS is the weaker half.",
+            "Orange beads ride down the right contact pillar, along the orange channel under the gate, and up the left pillar toward the copper wire.",
         )
         .detail(
-            "With the input low the output is pulled to VDD.",
-            &["In = 0 -> Out = 1 (textbook)"],
+            "Every PMOS trick, from SiGe strain to wider devices, makes up for slow holes.",
+            &["Holes ~450 vs electrons ~1400 cm2/Vs in bulk Si (textbook)"],
         ),
     Beat::new("gate high: the channel closes, PMOS off", BEAT_MS)
         .note(
-            "The gate rises to VDD. The channel disappears and the holes stop: the PMOS is off and no current passes.",
-            "The gate turns solid orange; the channel is gone and no dots flow.",
+            "The input rises to VDD. With gate and source at the same voltage there is no field to hold holes at the surface, so the channel disappears and the PMOS turns off. The well's electrons return under the gate.",
+            "The gate's fill metal glowing amber, the orange strip gone, and cyan electrons back under the gate.",
         )
         .detail(
-            "A high input switches the PMOS off.",
-            &["In = 1 -> PMOS off (textbook)"],
+            "High input: PMOS off, so the output can be pulled low.",
+            &["Gate high ~0.75 V: PMOS off (CHIP_PMOS.txt, section 3)"],
         ),
     Beat::new("CMOS: one of the pair is always off", BEAT_MS)
         .note(
-            "The camera pulls back to the pair. The gates are tied and high: the NMOS conducts to ground and the PMOS is off.",
-            "Both gates are orange; the NMOS on the left is lit, the PMOS on the right is dark.",
+            "Pulled back to the pair: the same high input turns the NMOS on. Electrons flow through it and pull the output to ground while the PMOS is off. Because one of the two is always off, there is no steady path from VDD to ground.",
+            "The NMOS on the left with an amber gate, a cyan channel and cyan beads riding through it; the PMOS on the right with an amber gate and no channel.",
         )
         .detail(
-            "Only the switching itself draws current: CMOS power ~ C x V^2 x f.",
-            &["CMOS power ~ C x V^2 x f (textbook)"],
+            "CMOS draws power mainly while it switches: about C V^2 f.",
+            &["CMOS power ~ C V^2 f (CHIP_PMOS.txt, section 3)"],
         ),
     Beat::new("gate low again: back to the PMOS on", BEAT_MS)
         .note(
-            "The input falls again and the camera returns to the whole chip. The PMOS turns back on, and the NMOS turns off.",
-            "The gate loses its orange and the PMOS outline shows again, as at the start.",
+            "The input falls again and the camera returns to the whole chip. The PMOS turns back on and the NMOS off, and the output goes high.",
+            "The whole chip, the yellow box back round the PMOS.",
         )
         .detail(
             "Each input change flips which of the pair conducts.",
-            &["In = 0 -> Out = 1 (textbook)"],
+            &["Input 0 -> output 1 (CHIP_PMOS.txt, section 3)"],
         ),
 ];
 
@@ -88,158 +88,71 @@ static ZE: Cell = std::sync::OnceLock::new();
 const ZA_BEATS: &[Beat] = &[
     Beat::new("the n-well sits under the PMOS", BEAT_MS)
         .note(
-            "The PMOS sits in an n-type well inside the p-type substrate. The well is what makes its source and drain p-type junctions in an n-type tub.",
-            "A translucent blue well under and around the pink source and drain, with the grey gate above it.",
+            "A PMOS needs n-type silicon around it, but the wafer is p-type. So it is built in an n-well: a pocket of phosphorus-doped silicon whose free carriers are electrons. NMOS devices sit in the p-type silicon alongside.",
+            "A yellow outline round the slate-blue n-well under the PMOS, cyan dots (electrons) through it, and the tan p substrate below.",
         )
         .detail(
-            "The PMOS lives in an n-well; the NMOS sits in the p-substrate or a p-well tied to ground.",
-            &["N-well: n-type region in which PMOS devices sit (textbook)", "NMOS sits in the p-substrate or a p-well (textbook)"],
+            "The well and substrate form a junction too, which must stay reverse-biased.",
+            &["N-well: n-type silicon under the PMOS (CHIP_PMOS.txt, section 2)"],
         ),
     Beat::new("a tap ties the well to VDD", BEAT_MS)
         .note(
-            "An n+ tap at the edge of the well is plugged up to the metal above, so the well sits at VDD and the junctions stay reverse-biased.",
-            "A blue n+ block at the right-hand edge of the well, with a tungsten plug running up to the thin metal.",
+            "An n+ tap past the STI wall connects the well to the VDD wire, the same wire that feeds the source. Holding the well at the highest voltage keeps every p+/n junction reverse-biased and stops the parasitic thyristor between neighbouring wells from latching up.",
+            "Yellow outlines on the blue n+ tap and its contact pillar at the right, and a red arched VDD wire joining the tap contact to the source contact.",
         )
         .detail(
-            "Taps along each row stop latch-up, the p-n-p-n path between VDD and ground.",
-            &["Well tied to Vdd through n+ taps (textbook)", "Poor tap spacing can trigger latch-up (textbook)"],
+            "Taps and well spacing set how robust a chip is against latch-up.",
+            &["Well tied to VDD through an n+ tap (CHIP_PMOS.txt, section 2)"],
         ),
     Beat::new("only the channel conducts", BEAT_MS)
         .note(
-            "With the well reverse-biased, current flows only through the channel when the gate is low. The well itself stays dark.",
-            "The gold channel lights at the surface under the gate; the well stays a pale blue tint.",
+            "With the well at VDD, the source and drain junctions stay blocked, so the only path for current is the channel under the gate. Pull the gate low and holes flow source to drain, and nowhere else.",
+            "Violet depletion bands round the pink source and drain (blocked junctions), an orange channel under the gate, and orange holes crossing from the right contact to the left.",
         )
         .detail(
-            "Well-proximity effects shift the threshold of transistors near the well edge.",
-            &["Well-proximity effect (textbook)", "Latch-up prevention depends on the taps (textbook)"],
+            "Isolation by reverse-biased junctions is what lets PMOS and NMOS share one wafer.",
+            &["P+/n junctions reverse-biased (CHIP_PMOS.txt, section 2)"],
         ),
 ];
 
-const ZB_BEATS: &[Beat] = &[
-    Beat::new("boron-doped SiGe source and drain", BEAT_MS)
-        .note(
-            "The source and drain are etched out and regrown as boron-doped SiGe, with the boron grown in rather than implanted.",
-            "Pale pink SiGe blocks with boron atoms glowing in them, on either side of the channel.",
-        )
-        .detail(
-            "Boron is light and diffuses fast, especially after implant damage, so junctions are less abrupt.",
-            &["Boron diffuses fast; transient-enhanced diffusion after implants (patent descriptions)"],
-        ),
-    Beat::new("SiGe is bigger, so it squeezes the channel", BEAT_MS)
-        .note(
-            "Germanium atoms are larger than silicon, so the regrown SiGe wants more room. Confined by the silicon around it, it pushes on the channel along the current direction.",
-            "White arrows press inward on the channel from both sides, and the channel glows under the gate.",
-        )
-        .detail(
-            "Compressive strain along the channel raises hole mobility.",
-            &["Compressive stress along the channel raises hole mobility (patent description, CHIP_PMOS.details.txt)"],
-        ),
-    Beat::new("faster holes, more drive", BEAT_MS)
-        .note(
-            "Strain raises hole mobility. Intel's 90 nm process used SiGe source and drain for about 25% more PMOS drive, at about 2% more process cost.",
-            "A burst of holes races across the squeezed channel, faster than in the beat before.",
-        )
-        .detail(
-            "Intel reported 0.72 mA/um of PMOS drive at 1.2 V in 2004.",
-            &[
-                "Intel 90 nm: +25% PMOS drive for ~2% process cost (siliconsemiconductor.net, Intel strains ahead with 90nm)",
-                "0.72 mA/um PMOS drive at 1.2 V (VLSI 2004, Intel, session 6)",
-            ],
-        ),
-];
+// The same picture as section 6, so the same beats.
+const ZB_BEATS: &[Beat] = SEC6_BEATS;
 
 const ZC_BEATS: &[Beat] = &[
     Beat::new("PMOS pull-up, NMOS pull-down", BEAT_MS)
         .note(
-            "An inverter: the PMOS pulls the output up to VDD, the NMOS pulls it down to ground, and the gates and drains are tied together.",
-            "The two transistors side by side in cut-away, both idle, with the output wire above them.",
+            "An inverter: the PMOS connects the output to VDD, the NMOS connects it to ground. Their gates share the input, and their drains share an output wire that runs to the next gate, which looks to the inverter like a small capacitor to charge or empty.",
+            "The NMOS (blue, tan well) left and the PMOS (pink, slate well) right; a copper input bar joins the gates; a copper wire arches from drain to drain and rises to two plates (the load); blue ground and red VDD caps on the outer contacts.",
         )
         .detail(
-            "The inverter is the unit that NAND, NOR and flip-flops are built from.",
-            &["Inverter: PMOS pull-up, NMOS pull-down (UCSB ECE122 lecture 9)"],
+            "Every CMOS gate is a pull-up network over a pull-down network.",
+            &["PMOS on top (pull-up), NMOS below (pull-down) (CHIP_PMOS.txt, section 3)"],
         ),
     Beat::new("input 0: PMOS on, output high", BEAT_MS)
         .note(
-            "A low input turns the PMOS on and the NMOS off. Holes flow from VDD into the output and charge it high.",
-            "The gold channel lights under the PMOS gate, orange holes run from the VDD side to the output, and the NMOS stays dark.",
+            "With the input at 0 V the PMOS turns on and the NMOS stays off. Holes ride from VDD through the PMOS, up its drain contact, along the arched output wire and into the load, charging it to VDD.",
+            "An orange channel under the PMOS gate and orange beads riding from the red VDD contact, through the PMOS, along the arch and up to the plates.",
         )
         .detail(
-            "No path runs from VDD to ground, so the pair draws current only while it switches.",
-            &["In = 0 -> Out = 1 (textbook)", "No static path from VDD to ground (UCSB ECE122 lecture 9)"],
+            "Charging the load takes energy of about C V^2 per cycle from the supply.",
+            &["Input 0: PMOS on, output charged to VDD (CHIP_PMOS.txt, section 3)"],
         ),
     Beat::new("input 1: NMOS on, output low", BEAT_MS)
         .note(
-            "A high input turns the PMOS off and the NMOS on. The output is pulled down to ground through the NMOS.",
-            "The NMOS gate is orange and its channel lights; blue electron dots run down to ground while the PMOS stays dark.",
+            "With the input high the NMOS turns on and the PMOS off. Electrons ride from ground through the NMOS, up the arched output wire and into the load, emptying its charge: the output falls to 0 V.",
+            "Both gates amber, a cyan channel under the NMOS gate, and cyan beads riding from the blue ground contact, through the NMOS, along the arch and up to the plates.",
         )
         .detail(
-            "Only the switching draws power: P = alpha x C x Vdd^2 x f, plus a short-circuit term.",
-            &["In = 1 -> Out = 0 (textbook)", "CMOS power: alpha C Vdd^2 f (allaboutcircuits, power dissipation of a CMOS inverter)"],
+            "One of the pair is always off, so there is no steady current, only switching current.",
+            &["Input 1: NMOS on, output discharged (CHIP_PMOS.txt, section 3)", "CMOS power ~ C V^2 f (CHIP_PMOS.txt, section 3)"],
         ),
 ];
 
-const ZD_BEATS: &[Beat] = &[
-    Beat::new("holes are about 3x slower", BEAT_MS)
-        .note(
-            "In silicon holes move at about a third of electrons' mobility, so the narrow PMOS carries less current than the NMOS beside it.",
-            "Blue electrons race through the NMOS, while the narrow PMOS carries a slow stream of orange holes.",
-        )
-        .detail(
-            "Holes have a heavier effective mass and more scattering, so they are the weaker carrier.",
-            &["Electrons ~1400 cm2/Vs, holes ~450 cm2/Vs in bulk Si (textbook)", "Holes: heavier effective mass, more scattering (textbook)"],
-        ),
-    Beat::new("make the PMOS wider", BEAT_MS)
-        .note(
-            "Equal drive needs mu_n x Wn = mu_p x Wp, so the PMOS is drawn about 2 to 2.5 times wider than the NMOS.",
-            "The PMOS widens to about twice the NMOS width, its source and drain pushed out, and its holes run faster across it.",
-        )
-        .detail(
-            "Equal rise and fall times need this ratio, which costs area and gate capacitance.",
-            &["Wp/Wn about 2-2.5 for equal rise and fall (UCSB ECE122 lecture 9, b = 2.4)", "A 2-2.5x pull-up costs area and gate capacitance (UCSB ECE122 lecture 9)"],
-        ),
-    Beat::new("in fins, width comes in whole fins", BEAT_MS)
-        .note(
-            "In FinFET and GAA, width is counted in whole fins or sheets, so the PMOS gets more of them. Strain narrows the ratio that is needed.",
-            "Two fins stand on the NMOS and three on the PMOS, on the silicon surface.",
-        )
-        .detail(
-            "Width is quantised by fin or sheet count, so the PMOS steps up in whole units.",
-            &["Width in whole fins or sheets (CHIP_PMOS.txt, section 5)", "Strain narrows the Wp/Wn gap (CHIP_PMOS.txt, section 5)"],
-        ),
-];
+// The same picture as section 5, so the same beats.
+const ZD_BEATS: &[Beat] = SEC5_BEATS;
 
-const ZE_BEATS: &[Beat] = &[
-    Beat::new("PMOS as stacked sheets", BEAT_MS)
-        .note(
-            "In gate-all-around, the PMOS channel is a stack of thin sheets, and the gate wraps around every one of them.",
-            "Three grey silicon sheets stacked between the pink source and drain, with the transparent gate around them.",
-        )
-        .detail(
-            "Wrapping the gate on all four sides gives the best control of the channel.",
-            &["GAA PFET: the channel is a stack of nanosheets (IBM stacked GAA nanosheet pFET)", "Gate control on all sides (textbook)"],
-        ),
-    Beat::new("SiGe sheets, about 1 GPa of strain", BEAT_MS)
-        .note(
-            "IBM's SiGe nanosheet pFET puts the sheets under about 1 GPa of compressive strain, which lifts hole mobility.",
-            "The sheets turn pink SiGe, and white arrows press on them from the source side.",
-        )
-        .detail(
-            "The paper reports +100% peak hole mobility and -40% channel resistance.",
-            &[
-                "~1 GPa compressive strain, +100% peak hole mobility, -40% channel resistance (IBM, stacked GAA nanosheet pFET)",
-                "Swing under 70 mV/decade (same IBM abstract)",
-            ],
-        ),
-    Beat::new("germanium: even faster holes", BEAT_MS)
-        .note(
-            "Germanium holes move at about 1900 cm2/Vs against silicon's 450, but germanium oxide and junction leakage are hard to manage.",
-            "The sheets turn teal germanium, and a row of holes runs along each sheet.",
-        )
-        .detail(
-            "The hard parts are germanium oxide quality, junction leakage and boron diffusing into the channel.",
-            &["Ge ~1900 vs Si ~450 cm2/Vs bulk (textbook)", "No production Ge-channel node in the sources (CHIP_PMOS.details.txt, GE CHANNEL)"],
-        ),
-];
+// The same picture as section 7, so the same beats.
+const ZE_BEATS: &[Beat] = SEC7_BEATS;
 
 macro_rules! zoom {
     ($cell:ident, $glb:literal, $beats:ident, $name:ident) => {
@@ -288,180 +201,304 @@ const ZOOMS: &[Zoom] = &[
 ];
 
 // ---- sections 1-10 -----------------------------------------------------------------------------
+// Each section is a close-up of one detailed PMOS in cut-away (chip_mos_detail.py): pink p+
+// source and drain under orange SiGe:B epitaxy, dark silicide and grey tungsten contacts, the gate
+// stack (white SiO2, teal high-k, gold p-type work-function metal, grey fill, green nitride),
+// slate-blue n-well over a tan p substrate, white STI walls. The source is on the right (VDD).
 
 const SEC1_BEATS: &[Beat] = &[
     Beat::new("a PMOS at rest: gate high, off", BEAT_MS)
         .note(
-            "The PMOS is the p-channel transistor: p+ source and drain in an n-type well, switched on by pulling the gate low.",
-            "The gate is solid orange (high) and the PMOS is dark, with no channel and no holes.",
+            "A PMOS is the mirror image of an NMOS: p+ source and drain sitting in an n-type well, where the free carriers are electrons. Its source is tied to VDD. With the gate high (at VDD, ~0.75 V) there is no voltage between gate and source, so no channel forms and the switch is off.",
+            "The cut face of one transistor: pink p+ blocks under orange SiGe raised epitaxy and grey contact pillars, the gate's fill metal glowing amber (high), and cyan dots (electrons) through the slate-blue n-well.",
         )
         .detail(
-            "A PMOS is the mirror image of an NMOS, carrying holes where the NMOS carries electrons.",
-            &["PMOS conducts with holes when the gate is low (textbook)", "Mirror image of the NMOS (CHIP_PMOS.txt, section 1)"],
+            "A PMOS turns on when its gate goes low: the opposite of an NMOS.",
+            &["PMOS conducts with holes when the gate is low (CHIP_PMOS.txt, section 1)", "Supply at leading nodes ~0.7-0.8 V (typical)"],
         ),
     Beat::new("gate low: holes flow source to drain", BEAT_MS)
         .note(
-            "Pulling the gate below the source opens a channel of holes, and they flow from the VDD side to the output.",
-            "A gold channel at the surface, with orange holes flowing down from VDD across it and up to the output.",
+            "Pulling the gate to 0 V puts it well below the source. The field pushes the well's electrons away from the surface and draws holes into a thin channel under the gate. Holes then flow from the VDD source to the drain, charging the output.",
+            "The gate dark, a bright orange strip (the hole channel) on the surface, and orange dots (holes) coming down the right contact, across the channel and up the left contact.",
         )
         .detail(
-            "Holes are the weak carrier: about 450 cm2/Vs against 1400 for electrons.",
-            &["Si hole mobility ~450 vs electrons ~1400 cm2/Vs (textbook)"],
+            "Holes are the weaker carrier, so every PMOS trick is about closing that gap.",
+            &["Bulk Si hole mobility ~450 vs electrons ~1400 cm2/Vs (textbook)", "|Vt| ~0.2-0.4 V at leading nodes (typical)"],
         ),
     Beat::new("paired with an NMOS: the CMOS inverter", BEAT_MS)
         .note(
-            "A PMOS on top of an NMOS, gates and drains tied, makes the CMOS inverter at the heart of logic.",
-            "The PMOS and NMOS side by side in cut-away, both idle, with the output wire above.",
+            "A PMOS and an NMOS with their gates tied (the input) and their drains tied (the output) make an inverter, the simplest CMOS gate. The PMOS pulls the output up to VDD, the NMOS pulls it down to ground, and only one is on at a time.",
+            "The NMOS (blue n+ in a tan p-well) on the left and the PMOS (pink p+ in a slate n-well) on the right; a copper bar joins the two gates, a lower copper bar joins the drains, a blue ground cap on the far-left contact and a red VDD cap on the far-right.",
         )
         .detail(
-            "One of the pair is always off, so the pair draws current only while it switches.",
-            &["INVERTER: out = NOT in (textbook)", "CMOS power ~ C V^2 f (allaboutcircuits power dissipation)"],
+            "Because one of the pair is always off, CMOS draws current mostly while it switches.",
+            &["INVERTER: output = NOT input (CHIP_PMOS.txt, section 3)", "CMOS power ~ C V^2 f (CHIP_PMOS.txt, section 3)"],
         ),
 ];
 
 const SEC2_BEATS: &[Beat] = &[
-    Beat::new("p+ SOURCE: SiGe:B on the Vdd side", BEAT_MS)
+    Beat::new("p+ SOURCE: SiGe:B on the VDD side", BEAT_MS)
         .note(
-            "The p+ source supplies the holes. It is boron-doped SiGe on the Vdd side of the channel.",
-            "The source block outlined in pink, on the VDD side under the bump.",
+            "The source supplies the holes. It is boron-doped silicon under a raised layer of silicon-germanium grown with boron already in it (SiGe:B). The germanium squeezes the channel (section 6). A silicide cap lets the tungsten contact connect it to VDD.",
+            "A yellow outline round the right side: the pink p+ block, the orange SiGe:B raised epitaxy on it, the dark silicide strip and the grey contact pillar.",
         )
         .detail(
-            "Its contact resistance is a main series term in PMOS drive.",
-            &["p+ source: heavily boron-doped, low-resistance contact (textbook)", "SiGe stressor on the source side (CHIP_PMOS.txt, section 2)"],
+            "The source's resistance and strain together set much of the PMOS drive current.",
+            &["p+ source: SiGe:B stressor on the VDD side (CHIP_PMOS.txt, section 2)", "p+ boron ~1e20-1e21 /cm3 (typical)"],
         ),
-    Beat::new("PMOS CHANNEL: holes flow when the gate is low", BEAT_MS)
+    Beat::new("PMOS CHANNEL: holes under a low gate", BEAT_MS)
         .note(
-            "Holes flow in this channel when the gate is low. The stressors squeeze it, which speeds the holes.",
-            "The gold strip at the silicon surface between the source and the drain.",
+            "With the gate low, a thin layer of holes forms on the silicon surface under it, joining source and drain. The channel is only tens of nanometres long, and squeezing it with SiGe makes the holes move faster.",
+            "Close on the middle: the bright orange strip under the dark gate and orange holes running along it from right to left.",
         )
         .detail(
-            "Strain, interface roughness and BTI set the channel's mobility.",
-            &["Inversion layer of holes under a gate pulled below the source (textbook)", "Channel length tens of nm at leading nodes (textbook)"],
+            "Strain, interface roughness and bias-temperature instability set channel mobility.",
+            &["Holes flow source to drain when the gate is low (CHIP_PMOS.txt, section 2)", "Gate lengths ~15-20 nm at leading nodes (estimate)"],
         ),
     Beat::new("p+ DRAIN: the output", BEAT_MS)
         .note(
-            "The drain is the output: holes leave the channel here and charge the load node in a pull-up.",
-            "The drain block outlined on the output side, under the wire that rises to the output.",
+            "The drain is built like the source and is the output node. In a pull-up it delivers the holes that charge the output to VDD. Its junction capacitance is part of the load the circuit must charge every cycle.",
+            "A yellow outline round the left side: pink p+ block, orange SiGe:B epitaxy, dark silicide, and the grey contact pillar to the output.",
         )
         .detail(
-            "Drain junction capacitance is part of the load the next stage sees, which feeds C V^2 f.",
-            &["Drain-side junction capacitance counts toward C V^2 f (CHIP_PMOS.txt, section 2)", "SiGe:B stressor on the drain (patent description)"],
+            "Drain capacitance feeds straight into the C in C V^2 f.",
+            &["p+ drain: SiGe:B stressor, the output (CHIP_PMOS.txt, section 2)"],
         ),
-    Beat::new("PMOS GATE: high-k metal", BEAT_MS)
+    Beat::new("PMOS GATE: high-k and a p-type metal", BEAT_MS)
         .note(
-            "The gate sits over the channel on a high-k hafnium dielectric with a metal gate. Its work function sets the threshold.",
-            "The gate block lit orange while it is high; the channel below it is dark.",
+            "The gate stack matches the NMOS layer for layer: SiO2 interlayer, hafnium-oxide high-k, a work-function metal, fill metal and a nitride cap. Only the work-function metal differs: a p-type metal (TiN-based) that sets the PMOS threshold.",
+            "Close on the gate: white interlayer at the bottom, teal high-k lining the U-shaped trench, gold p-type work-function metal inside it, grey fill, green nitride cap and spacers.",
         )
         .detail(
-            "Work-function drift and NBTI show up as threshold spread.",
-            &["HKMG: high-k hafnium dielectric and metal gate (textbook)", "NBTI, a PMOS bias instability (textbook)"],
+            "Separate work-function metals are why NMOS and PMOS gates are built in separate steps.",
+            &["HKMG: high-k hafnium dielectric, metal gate (CHIP_PMOS.txt, section 2)", "HfO2 k ~20-25 vs SiO2 3.9 (textbook)", "NBTI: a PMOS ageing effect (textbook)"],
         ),
     Beat::new("N-WELL: n-type silicon tied to VDD", BEAT_MS)
         .note(
-            "The n-well is n-type silicon in which the PMOS sits. Tied to VDD, it keeps the junctions reverse-biased.",
-            "The blue well under and around the PMOS, shown translucent.",
+            "The PMOS sits in an n-well, a pocket of phosphorus-doped silicon in the p-type wafer. An n+ tap past the STI wall ties the well to VDD, so the p+/n junctions stay reverse-biased and the well cannot turn on a parasitic path to the NMOS next door (latch-up).",
+            "A yellow outline round the slate-blue n-well with its cyan electrons, another on the blue n+ tap at the far right, and the tan p substrate below.",
         )
         .detail(
-            "Taps and well spacing set latch-up robustness.",
-            &["Well tied to Vdd through n+ taps (textbook)", "Latch-up patent (US 10872190, CHIP_PMOS.details.txt, N-WELL)"],
+            "Taps and well spacing set how robust a chip is against latch-up.",
+            &["N-well tied to VDD through an n+ tap (CHIP_PMOS.txt, section 2)", "Electrons: the well's majority carrier (textbook)"],
+        ),
+];
+
+const SEC3_BEATS: &[Beat] = &[
+    Beat::new("the inverter: pull-up over pull-down", BEAT_MS)
+        .note(
+            "In an inverter the PMOS connects the output to VDD and the NMOS connects it to ground. Their gates share the input and their drains share the output. Every logic gate is built from pull-up and pull-down networks like this.",
+            "The two transistors side by side with no current flowing: the NMOS left over a tan p-well, the PMOS right over a slate n-well, the copper input bar on top, the output bar below it, blue ground and red VDD caps.",
+        )
+        .detail(
+            "Only one network conducts at a time, so the output is always driven to a rail.",
+            &["PMOS on top (pull-up), NMOS below (pull-down) (CHIP_PMOS.txt, section 3)"],
+        ),
+    Beat::new("input 0: PMOS on, output to VDD", BEAT_MS)
+        .note(
+            "With the input low, the PMOS gate is below its source, so the PMOS turns on while the NMOS stays off. Holes flow from VDD through the PMOS into the output, charging it to VDD: the output reads 1.",
+            "An orange channel under the PMOS gate and orange holes running from the red VDD contact across to the PMOS drain and up into the output bar; the NMOS has no channel.",
+        )
+        .detail(
+            "There is never a direct VDD-to-ground path except briefly mid-switch.",
+            &["Input 0: PMOS on, output charged to VDD (CHIP_PMOS.txt, section 3)"],
+        ),
+    Beat::new("input 1: NMOS on, output to ground", BEAT_MS)
+        .note(
+            "With the input high, both gates glow, the PMOS turns off and the NMOS turns on. Electrons flow from ground through the NMOS to the output, discharging it to 0 V: the output reads 0.",
+            "Both gates amber, a cyan channel under the NMOS gate, cyan electrons running from the blue ground contact to the NMOS drain; the PMOS has no channel.",
+        )
+        .detail(
+            "Switching energy per cycle is about C V^2, which is why lower supply voltage matters so much.",
+            &["Input 1: NMOS on, output discharged (CHIP_PMOS.txt, section 3)", "CMOS power ~ C V^2 f plus a small short-circuit term (CHIP_PMOS.txt, section 3)"],
         ),
 ];
 
 const SEC4_BEATS: &[Beat] = &[
-    Beat::new("standard cell: PMOS over NMOS", BEAT_MS)
+    Beat::new("a standard cell: PMOS over NMOS", BEAT_MS)
         .note(
-            "Logic is tiled from standard cells: a PMOS strip over an NMOS strip, with a shared gate running across them.",
-            "The pair as one cell, idle, with its contacts and the output wire.",
+            "Chips are tiled from standard cells, seen here from above. The top half is the n-well with the PMOS (pink active), the bottom half the p-well with the NMOS (blue active). Grey gate lines run down through both, so one input drives a PMOS and an NMOS, and a copper M1 strap collects the output.",
+            "Top-down view, one cell outlined in yellow: a pink active strip on a slate n-well above, a blue strip on a tan p-well below, grey vertical gates through both, grey contacts and a copper strap in the middle.",
         )
         .detail(
-            "Cell height is counted in metal-2 tracks: ASAP7 has 9-track and 7.5-track cells.",
-            &["ASAP7 9-track and 7.5-track cells (arxiv.org/pdf/1807.11396)", "Standard cell libraries (eng.biu.ac.il, lecture 4)"],
+            "Standard cells let tools place billions of transistors automatically.",
+            &["Std cell: PMOS strip on top, NMOS below, shared gate (CHIP_PMOS.txt, section 4)"],
         ),
-    Beat::new("rails: Vdd and ground", BEAT_MS)
+    Beat::new("rails: VDD on top, ground below", BEAT_MS)
         .note(
-            "The Vdd and ground rails run along the edges of the cell in the thin metal, feeding the source and the well.",
-            "The thin-metal band lit pink, with rails running across the pair.",
+            "Power arrives on two rails along the cell edges: VDD on top feeds the PMOS sources, ground along the bottom feeds the NMOS sources. Cell height is counted in metal tracks between the rails; fewer tracks save area, more give room for faster, stronger cells.",
+            "The pale red VDD rail across the top and the pale blue ground rail across the bottom, both outlined in yellow, with the cells between them.",
         )
         .detail(
-            "The rails set the cell's height and how it joins its neighbours.",
-            &["Rails along the cell edges (CHIP_PMOS.txt, section 4)", "Cell height = tracks x metal-2 pitch (CHIP_PMOS.txt, section 4)"],
+            "Cell height = tracks x metal-2 pitch.",
+            &["ASAP7: 9-track and 7.5-track cells (CHIP_PMOS.txt, section 4)", "7-8 tracks favour area, 11-12 favour speed (CHIP_PMOS.txt, section 4)"],
         ),
-    Beat::new("tap cells tie the wells to the rails", BEAT_MS)
+    Beat::new("rows and tap cells", BEAT_MS)
         .note(
-            "Cells tile in rows, and tap cells tie each well to the rails to stop latch-up.",
-            "The whole chip, with the bumps at the top and rows of cells below the wiring.",
+            "Cells snap together in rows. Every other row is flipped so neighbours share a rail. Tap cells, placed at intervals, tie the n-well to VDD and the p-well to ground with n+ and p+ taps, which stops latch-up.",
+            "Two rows of cells, the upper one flipped so both share the red VDD rail in the middle; yellow outlines on the tap cells at each end, which hold only small blue and pink tap squares.",
         )
         .detail(
-            "7 to 8 tracks favour area; 11 to 12 favour speed.",
-            &["7-8 tracks favour area, 11-12 favour speed (CHIP_PMOS.txt, section 4)", "Tap cells prevent latch-up (textbook)"],
+            "Tap spacing is a design rule every placer must respect.",
+            &["Tap cells tie wells to rails, preventing latch-up (CHIP_PMOS.txt, section 4)"],
+        ),
+];
+
+const SEC5_BEATS: &[Beat] = &[
+    Beat::new("same size, uneven strength", BEAT_MS)
+        .note(
+            "Holes move about a third as fast as electrons in silicon. Built the same size, a PMOS delivers much less current than its NMOS partner, so the output would rise more slowly than it falls.",
+            "An NMOS and a PMOS of equal size, both on: cyan electrons stream quickly through the NMOS while orange holes crawl slowly through the PMOS.",
+        )
+        .detail(
+            "Equal rise and fall times need equal currents.",
+            &["Holes ~450, electrons ~1400 cm2/Vs in bulk Si (CHIP_PMOS.txt, section 5)"],
+        ),
+    Beat::new("make the PMOS wider", BEAT_MS)
+        .note(
+            "The classic fix is width: to balance mu_n x Wn = mu_p x Wp, the PMOS is drawn about two to two-and-a-half times wider than the NMOS. Strain closes part of the gap, so modern ratios are smaller.",
+            "Three-quarter view: the NMOS on the left is shallow, the PMOS on the right runs more than twice as far back into the picture, with a broad orange channel and more holes.",
+        )
+        .detail(
+            "Width costs area, which is why strain and new channel materials matter.",
+            &["Wp/Wn ~2-2.5 for equal rise and fall (CHIP_PMOS.txt, section 5)"],
+        ),
+    Beat::new("in FinFETs, width comes in whole fins", BEAT_MS)
+        .note(
+            "A fin has a fixed height, so a transistor can only be made wider by adding fins (or, in GAA, using wider or more sheets). A PMOS might get three fins where its NMOS has two.",
+            "Two FinFETs cut across the gate: the NMOS with two fins and cyan channels, the PMOS with three fins and orange channels, each fin wrapped in teal high-k and metal.",
+        )
+        .detail(
+            "Quantised width is one more constraint on cell design.",
+            &["FinFET/GAA: PMOS gets more fins or wider sheets (CHIP_PMOS.txt, section 5)"],
+        ),
+];
+
+const SEC6_BEATS: &[Beat] = &[
+    Beat::new("SiGe:B source and drain", BEAT_MS)
+        .note(
+            "Modern PMOS source and drain are etched out and regrown as silicon-germanium with boron added during growth. In-situ boron gives very high active doping; the germanium is there for strain.",
+            "Yellow outlines on the orange SiGe:B raised epitaxy on both sides, and white dots (boron atoms) through it and the pink p+ regions below.",
+        )
+        .detail(
+            "Grown-in boron avoids a separate implant and anneal.",
+            &["Boron grown into the epitaxy in place (CHIP_PMOS.txt, section 2)"],
+        ),
+    Beat::new("germanium is bigger: the channel is squeezed", BEAT_MS)
+        .note(
+            "Germanium atoms are about 4% larger than silicon's, so the SiGe source and drain push in on the silicon channel between them. This compressive strain along the channel changes the silicon's band structure so holes move faster.",
+            "Pale yellow arrows pressing inward from the source and drain toward the channel centre, with the orange hole channel lit under the dark gate.",
+        )
+        .detail(
+            "PMOS wants compressive strain; NMOS wants tensile.",
+            &["PMOS: compressive (SiGe S/D); NMOS: tensile (CHIP_PMOS.txt, section 6)", "Ge lattice ~4% larger than Si (textbook)"],
+        ),
+    Beat::new("faster holes, more drive", BEAT_MS)
+        .note(
+            "Strained, the same channel carries more current. Intel's first strained node, 90 nm, gained about 25% PMOS drive for a few percent more process cost, and every node since has used SiGe stressors.",
+            "The whole device: orange holes streaming quickly from the right contact through the squeezed channel to the left, the yellow strain arrows still pressing in.",
+        )
+        .detail(
+            "Strain was one of the cheapest speed-ups in transistor history.",
+            &["Intel 90 nm: PMOS +25%, NMOS +10% drive, ~2% cost (CHIP_PMOS.txt, section 6)", "0.72 mA/um PMOS drive at 1.2 V, 2004 (CHIP_PMOS.txt, section 6)"],
+        ),
+];
+
+const SEC7_BEATS: &[Beat] = &[
+    Beat::new("GAA PMOS: stacked sheets, gate all round", BEAT_MS)
+        .note(
+            "At 2 nm-class nodes the channel becomes a stack of thin horizontal sheets, cut here across the gate. The gate wraps all four sides of each sheet, and the source and drain are SiGe:B grown at the sheet ends.",
+            "Three-quarter view of three grey silicon sheets in the cut face, each ringed by teal high-k and gold metal inside the grey gate, with the orange SiGe:B epitaxy beyond the green spacer.",
+        )
+        .detail(
+            "Gate-all-around gives the best electrostatic control yet.",
+            &["Graded SiGe S/D at 55-60% Ge for stacked sheets (patent, CHIP_PMOS.txt, section 7)"],
+        ),
+    Beat::new("SiGe sheets: built-in strain", BEAT_MS)
+        .note(
+            "Making the sheets themselves from SiGe builds compressive strain into the channel. IBM's stacked SiGe nanosheet pFET, at about 1 GPa of strain, showed roughly double the peak hole mobility and 40% lower channel resistance.",
+            "The same stack with the sheets now orange-tan SiGe, still ringed by teal high-k and gold metal.",
+        )
+        .detail(
+            "Strain moves from the source and drain into the channel itself.",
+            &["~1 GPa strain, +100% peak hole mobility, -40% channel resistance (CHIP_PMOS.txt, section 7)", "Swing under 70 mV/decade (CHIP_PMOS.txt, section 7)"],
+        ),
+    Beat::new("germanium channels: the end goal", BEAT_MS)
+        .note(
+            "Pure germanium has about four times silicon's hole mobility. Germanium-rich channels would close the PMOS gap, but germanium's oxide is poor, its junctions leak more, and boron diffuses into it.",
+            "Pale teal germanium sheets, each wrapped in a bright orange hole channel on all four sides inside the gate.",
+        )
+        .detail(
+            "Germanium is research and early development, not yet volume production for logic.",
+            &["Ge hole mobility ~1900 vs Si ~450 cm2/Vs (CHIP_PMOS.txt, section 7)", "Hard parts: Ge oxide, junction leakage, boron diffusion (CHIP_PMOS.txt, section 7)"],
         ),
 ];
 
 const SEC8_BEATS: &[Beat] = &[
     Beat::new("TSMC, Intel, Samsung: stressors in every node", BEAT_MS)
         .note(
-            "The leading foundries build PMOS stressors into every FinFET and GAA node.",
-            "The whole chip, with its bumps and wiring; no part is picked out.",
+            "The three leading-edge foundries all build SiGe stressors into their PMOS: TSMC in its FinFET nodes and N2 nanosheets, Intel in 18A RibbonFET, Samsung in its gate-all-around nodes.",
+            "Three PMOS cross-sections side by side, cut across the gate: a FinFET with two fins and two nanosheet stacks, each tagged with its maker.",
         )
         .detail(
-            "Foundries spend process effort on PMOS strain at every node.",
-            &["TSMC (TSM), Intel (INTC), Samsung build PMOS stressors (CHIP_PMOS.txt, section 8)"],
+            "Every leading-edge PMOS depends on strain engineering.",
+            &["TSMC, Intel, Samsung build PMOS stressors (CHIP_PMOS.txt, section 8)"],
         ),
-    Beat::new("Applied Materials: the epi tools", BEAT_MS)
+    Beat::new("Applied Materials, ASM: the epi tools", BEAT_MS)
         .note(
-            "The SiGe is grown in epitaxy tools. Applied Materials held 53% of the epi market in 2004, per Gartner.",
-            "The PMOS source and drain, the place where the epi tool works.",
+            "The SiGe:B is grown one atomic layer after another in epitaxy reactors. Applied Materials (AMAT) led that market, with 53% in 2004 per Gartner; ASM International and Kokusai also make epi and furnace tools.",
+            "The PMOS cut face with yellow outlines on the orange SiGe:B epitaxy on both sides of the gate.",
         )
         .detail(
-            "ASM International and Kokusai also make epi and furnace tools.",
-            &["Applied Materials 53% of the epi market in 2004, Gartner via Applied release (ir.appliedmaterials.com)", "ASM International and Kokusai (textbook)"],
+            "Epi quality sets strain, doping and defects in every PMOS.",
+            &["Applied: 53% of epi market in 2004 (Gartner via Applied)", "Applied claimed >65% drive gain at 65 nm (vendor claim)"],
         ),
     Beat::new("Synopsys, Cadence, Arm: cells and layout", BEAT_MS)
         .note(
-            "Layout, place-and-route and cell characterisation turn the pairs into chips. Arm sells cell libraries.",
-            "The inverter pair as a standard cell, idle.",
+            "Arm (ARM) and others sell standard-cell libraries; Synopsys (SNPS) and Cadence (CDNS) sell the tools that place, route and characterise them. NVIDIA and AMD are fabless and design with what the foundry and these tools give them.",
+            "A row of standard cells from above, red VDD rail on top, blue ground rail below, tap cells at each end.",
         )
         .detail(
-            "NVIDIA and AMD are fabless and take whatever PMOS drive the foundry gives.",
-            &["Synopsys (SNPS) and Cadence (CDNS) do layout and characterisation (CHIP_PMOS.txt, section 8)", "Arm (ARM) sells cell libraries (CHIP_PMOS.txt, section 8)"],
+            "Design tools turn PMOS and NMOS pairs into whole chips.",
+            &["Synopsys and Cadence: layout, P&R, characterisation (CHIP_PMOS.txt, section 8)", "Arm sells cell libraries (CHIP_PMOS.txt, section 8)"],
         ),
 ];
 
 const SEC9_BEATS: &[Beat] = &[
     Beat::new("holes stay the weaker carrier", BEAT_MS)
         .note(
-            "Every node needs new strain or materials to keep the PMOS up, because holes stay the weaker carrier.",
-            "Slow orange holes crawl through an unstrained channel.",
+            "Whatever the node, holes stay slower than electrons, so each generation needs new strain or new channel materials just to keep the PMOS level with the NMOS.",
+            "A few orange holes crawling slowly from the right contact through the orange channel.",
         )
         .detail(
-            "Hole mobility is about a third of electron mobility in bulk silicon.",
-            &["Holes ~450, electrons ~1400 cm2/Vs (textbook)"],
+            "PMOS drive is a recurring bottleneck in every node.",
+            &["Hole mobility ~1/3 of electron mobility in bulk Si (textbook)"],
         ),
-    Beat::new("boron and germanium are hard", BEAT_MS)
+    Beat::new("boron diffuses into the channel", BEAT_MS)
         .note(
-            "Boron diffusion and germanium oxide quality limit the Ge-rich channels.",
-            "Boron atoms drift from the source toward the channel.",
+            "Boron is a small atom and diffuses fast during hot process steps. If it creeps from the heavily doped source and drain into the channel, it shifts the threshold and raises leakage. Germanium-rich channels make this harder to control.",
+            "White boron dots in the source and drain, a line of them drifting inward under the gate, and the channel region tinted red.",
         )
         .detail(
-            "Heavy boron can diffuse into the channel and roll off the threshold voltage.",
-            &["Boron diffusion and TED (patent descriptions)", "Germanium oxide quality and junction leakage (CHIP_PMOS.txt, section 9)"],
+            "Thermal budget is tightly limited after the SiGe:B is grown.",
+            &["Boron diffusion limits Ge-rich channels (CHIP_PMOS.txt, section 9)", "Ge oxide quality also limits them (CHIP_PMOS.txt, section 9)"],
         ),
-    Beat::new("few epi tool vendors", BEAT_MS)
+    Beat::new("few epitaxy tool vendors", BEAT_MS)
         .note(
-            "Epitaxy tools come from few vendors, and current market shares are not public in the sources found.",
-            "The SiGe source and drain highlighted in pink.",
+            "The SiGe:B regions come from epitaxy tools made by only a few vendors. Current market shares are not public in the sources found, so the size of this chokepoint is uncertain.",
+            "The orange SiGe:B epitaxy on both sides tinted red.",
         )
         .detail(
-            "A tooling chokepoint: Applied held 53% of epi in 2004, and no current share was found.",
-            &["Applied 53% of the epi market in 2004 (Gartner via Applied release)", "Current epi shares not found (CHIP_PMOS.txt, section 9)"],
+            "A tooling chokepoint, but an unquantified one.",
+            &["Applied 53% of epi in 2004 (Gartner via Applied)", "Current epi shares not found (CHIP_PMOS.txt, section 9)"],
         ),
 ];
 
 const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 1-2: Intel 90 nm and VLSI 2004", BEAT_MS)
         .note(
-            "The first two sources: Intel's 90 nm strain gain and its 2004 PMOS drive figure.",
-            "The whole chip pulls back, with the source tag on the screen.",
+            "Intel's 90 nm strain gains and its 2004 PMOS drive figure come from these two sources.",
+            "The PMOS cut face with yellow strain arrows pressing in on the orange channel.",
         )
         .detail(
             "The strain gain and the drive figure are measured values, not a model.",
@@ -470,19 +507,22 @@ const SEC10_BEATS: &[Beat] = &[
                 "[2] archive.vlsisymposium.org/14web/2004/technology/tec_pdf/SESSION 6.pdf",
             ],
         ),
-    Beat::new("source 3: IBM SiGe nanosheet pFET", BEAT_MS)
+    Beat::new("sources 3 and 6: IBM SiGe nanosheet, GAA patent", BEAT_MS)
         .note(
-            "The IBM SiGe nanosheet pFET gives the strain and mobility figures for the gate-all-around PMOS.",
-            "The whole chip, with the source tag on the screen.",
+            "IBM's SiGe nanosheet pFET gives the strain and mobility figures; the USPTO patent gives the graded SiGe source/drain.",
+            "The nanosheet stack cut across the gate, with orange SiGe sheets and the SiGe:B epitaxy behind.",
         )
         .detail(
             "Its abstract reports about 1 GPa of strain and +100% peak hole mobility.",
-            &["[3] researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel"],
+            &[
+                "[3] researcher.draco.res.ibm.com/publications/stacked-gate-all-around-nanosheet-pfet-with-highly-compressive-strained-silessinfgreater1-xlessinfgreatergelessinfgreaterxlessinfgreaterchannel",
+                "[6] image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11776998",
+            ],
         ),
     Beat::new("sources 4-5: UCSB lecture and Applied", BEAT_MS)
         .note(
-            "The inverter sizing comes from a UCSB lecture; the epi share comes from Applied's release.",
-            "The whole chip, with the source tag on the screen.",
+            "The inverter sizing comes from a UCSB lecture; the epi market share and drive-gain claim come from Applied's release.",
+            "The inverter pair, with a yellow outline on the PMOS epitaxy.",
         )
         .detail(
             "The inverter ratio and the epi market share are both cited on the page.",
@@ -491,18 +531,14 @@ const SEC10_BEATS: &[Beat] = &[
                 "[5] ir.appliedmaterials.com/news-releases/news-release-details/applied-materials-extends-leadership-position-epitaxy",
             ],
         ),
-    Beat::new("sources 6-8: USPTO, ASAP7 and the cell library", BEAT_MS)
+    Beat::new("sources 7-8: ASAP7 and the cell library", BEAT_MS)
         .note(
-            "The GAA source-drain patent, the ASAP7 cell paper and the standard-cell lecture close the list.",
-            "The whole chip, with the source tag on the screen.",
+            "The ASAP7 cell paper and the standard-cell library lecture back the cell-height and tap-cell figures.",
+            "A row of standard cells from above.",
         )
         .detail(
             "Each is cited on the page for the claim it supports.",
-            &[
-                "[6] image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/11776998",
-                "[7] arxiv.org/pdf/1807.11396",
-                "[8] eng.biu.ac.il/temanad/files/2017/02/Lecture-4-Standard-Cell-Libraries.pdf",
-            ],
+            &["[7] arxiv.org/pdf/1807.11396", "[8] eng.biu.ac.il/temanad/files/2017/02/Lecture-4-Standard-Cell-Libraries.pdf"],
         ),
 ];
 
@@ -524,16 +560,15 @@ macro_rules! section {
 
 static SECS: [Cell; 10] = [const { std::sync::OnceLock::new() }; 10];
 
-/// One picture per `# ` section of the page, in order. Sections 3, 5, 6 and 7 are the same scenes as
-/// zoom-ins c, d, b and e (CMOS pair, width ratio, SiGe strain, GAA).
+/// One picture per `# ` section of the page, in order.
 pub const SECTIONS: [fn() -> Box<dyn Scene>; 10] = [
     section!(1, SEC1_BEATS),
     section!(2, SEC2_BEATS),
-    section!(3, ZC_BEATS),
+    section!(3, SEC3_BEATS),
     section!(4, SEC4_BEATS),
-    section!(5, ZD_BEATS),
-    section!(6, ZB_BEATS),
-    section!(7, ZE_BEATS),
+    section!(5, SEC5_BEATS),
+    section!(6, SEC6_BEATS),
+    section!(7, SEC7_BEATS),
     section!(8, SEC8_BEATS),
     section!(9, SEC9_BEATS),
     section!(10, SEC10_BEATS),

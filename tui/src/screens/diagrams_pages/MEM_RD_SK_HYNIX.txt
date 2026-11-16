@@ -1,0 +1,20 @@
+# 1. Focus: faster HBM stacks
+
+SK hynix is the HBM incumbent of the three. Its R&D is the next HBM generation (HBM4 and beyond): wider 2048-bit interfaces, taller stacks, and a base die that does more of the work.
+
+# 2. Flash in an HBM package
+
+With SanDisk, SK hynix wrote the first open HBF spec (high-bandwidth flash): NAND stacked in an HBM-style package for AI inference that needs more capacity per GPU. The OCP spec came out in August 2026. Samples of the first HBF inference devices are expected in early 2027.
+
+# 3. What to watch
+
+- HBM4 yield and volume, and base die moves toward foundry logic
+- whether HBF wins a customer before samples land in 2027
+- hybrid bonding, once stacks go past 16 high
+
+# 4. Sources
+
+- SanDisk press release, HBF standardization (Feb 2026):
+  https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf
+- Guru3D, HBF standard reaches 512 GB and 3 TB/s through UCIe:
+  https://www.guru3d.com/story/sk-hynix-and-sandisk-hbf-standard-reaches-512gb-and-3tb-s-through-ucie/

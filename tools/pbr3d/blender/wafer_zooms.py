@@ -131,7 +131,7 @@ def soi():
     film = box("film", (-120, 0, -60), (120, 4, 0), m["device"], donor)
     top = pivot("donor_top", (0, 0, 0), donor)
     box("donor_bulk", (-120, 4, -60), (120, 60, 0), m["bulk"], top)
-    weak = box("weak_plane", (-120, 3.7, -60.4), (120, 4.3, 0.4), m["weak"], donor)
+    weak = K.pbox("weak_plane", (-120, 3.4, -60.4), (120, 4.6, 0.8), m["weak"], donor)  # pivot: show() on a box shrinks it
     show(weak, [(0, F(2, 0.3))])
 
     # beat 0: hydrogen ions go in through the bonding face and stop at the weak layer
@@ -142,7 +142,7 @@ def soi():
     key(donor, F(1, 0.05), "location", P(0, 110, 0))
     key(donor, F(1, 0.75), "location", P(0, 53, 0), linear=True)
     key(donor, F(2, 0.0), "location", P(0, 53, 0))
-    label("bond to a handle wafer", (110, 40, 20), root, [(F(1, 0.2), F(2, 0))])
+    label("bond to a handle wafer", (60, 40, 20), root, [(F(1, 0.2), F(2, 0))])  # left of centre: the tag ran off the right edge
 
     # beat 2: the anneal splits the donor along the weak layer; the upper part lifts away
     key(top, F(2, 0.05), "location", P(0, 0, 0))
@@ -171,9 +171,7 @@ def spec():
     # beats 0-1: a cut-away piece for thickness and for TTV (a tilted top face)
     thick = empty("thickness", root)
     box("piece", (-120, 0, -60), (120, 30, 0), m["bulk"], thick)
-    tube("dim_a", (150, 0, 0), (150, 30, 0), 2.0, m["gold"], thick, verts=8)
-    tube("dim_b", (140, 0, 0), (160, 0, 0), 2.0, m["gold"], thick, verts=8)
-    tube("dim_c", (140, 30, 0), (160, 30, 0), 2.0, m["gold"], thick, verts=8)
+    K.dim_marks(thick, m, 150.0, 0.0, 30.0)
     show(thick, [(0, F(1, 0))])
     label("775 +/- 25 um (not to scale)", (0, 40, 20), root, [(F(0, 0.1), F(1, 0))])
 

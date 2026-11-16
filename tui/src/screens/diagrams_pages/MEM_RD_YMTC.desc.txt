@@ -1,0 +1,1 @@
+YMTC is China's main NAND maker. Its Xtacking design bonds the array onto a separate logic wafer. Reports put mass production near 267-270 layers, with 300+ in development and a reported DRAM pivot at its Wuhan Phase 3 fab. Layer counts vary by source. No ticker here.

@@ -259,6 +259,9 @@ pub struct Section {
     pub short: String,
     #[serde(default)]
     pub blocks: Vec<Block>,
+    /// Memory R&D pages: the diagrams node whose 3D overview plays above the blocks ("HBM STACK").
+    #[serde(default, deserialize_with = "null_str")]
+    pub scene: String,
     /// Section contains something flagged new.
     #[serde(default)]
     pub new: bool,

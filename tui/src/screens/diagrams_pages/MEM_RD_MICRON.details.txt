@@ -1,0 +1,23 @@
+== HBM4 on 1-beta
+# What it does
+2048-bit interface per stack, built on Micron's 1-beta DRAM, with Micron's own base die.
+# Why it matters
+Micron is in the HBM4 volume ramp alongside SK hynix and Samsung.
+# Source
+TechRadar, Micron HBM4 and HBM4E.
+
+== HBM4E custom base die
+# What it does
+Logic base die made by a foundry (TSMC), with customer-specific logic; DRAM moves to 1-gamma.
+# Why it matters
+Speed and power targets need more advanced CMOS than a DRAM process gives.
+# Source
+TrendForce, Micron custom HBM era (Aug 2026).
+
+== vHBM
+# What it does
+DRAM stack placed directly on the processor rather than beside it, targeted for 2028.
+# Why it matters
+Removes the interposer shoreline limit on how many stacks fit around a GPU.
+# Source
+TrendForce and TechRadar on Micron's roadmap (roadmap, not a product).

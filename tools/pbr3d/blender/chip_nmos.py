@@ -17,7 +17,10 @@ Overview beats:
   4 gate down the gate falls, the channel closes, the flow stops
   5 whole     back out to the whole chip
 
-Zoom-ins (the old a-e, same letters and labels; 3 or 4 beats each): a the gate stack, b subthreshold,
+Every scene uses the detailed transistor of chip_mos_detail.py; the overview swaps it into the
+whole chip in place of chip_kit's plain one.
+
+Zoom-ins (same letters and labels; 3 or 4 beats each): a the gate stack, b subthreshold,
 threshold and on, c saturation and pinch-off, d short channels and DIBL, e dopants and strain.
 Sections (one scene per `# ` heading of CHIP_NMOS.txt): 1 what happens, 2 the parts, 3 one switching
 cycle, 4 threshold, 5 short channels and body bias, 6 dopants and strain, 7 transistor count,
@@ -30,405 +33,454 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from sand_zooms import finish, start  # noqa: E402
 import chip_kit as C  # noqa: E402
-from chip_kit import F, label, mat, overlay, route, show, stream_of, tube, empty, ball  # noqa: E402
+import chip_mos_detail as D  # noqa: E402
+from chip_kit import F, empty, label, show  # noqa: E402
 
 BEATS = 6
-WHOLE_POSE = C.WHOLE
-ZOOM_POSE = ((C.NMOS_X, 60.0, 0.0), 1500.0, 0.0, 0.08)  # the overview's zoom
-CLOSE_POSE = ((C.NMOS_X, 80.0, 0.0), 700.0, 0.0, 0.12)  # close on the channel and gate
-MID_POSE = ((C.NMOS_X, 60.0, 0.0), 1100.0, 0.0, 0.10)
-PULL_POSES = [
-    WHOLE_POSE,
-    ((0.0, 620.0, 0.0), 6300.0, 0.0, 0.10),
-    ((0.0, 620.0, 0.0), 6800.0, 0.0, 0.10),
-    ((0.0, 620.0, 0.0), 7300.0, 0.0, 0.10),
-]
-
-GATE_RISE, GATE_FALL = F(2, 0.10), F(4, 0.25)  # the overview's gate glow
-GATE_HALF = C.GATE_HALF
-ZOOM = ((C.NMOS_X, 60.0, 0.0), 1500.0, 0.0, 0.08)
 WHOLE = C.WHOLE
 
 
 def build():
+    """The overview: the whole chip, in on the detailed NMOS (off, gate up, flow, gate down), out."""
     m, root = start("nmos", BEATS, page="chip")
     C.mats(m)
-    C.chip(root, m)
-    cx = C.NMOS_X
-
-    m["hl"] = mat("chip_nmos_hl", (0.40, 0.95, 1.0), emit=(0.40, 0.95, 1.0), strength=1.0, alpha=0.16)
-    C.overlay(root, "nmos_hl", (cx - 330, -140, -250), (cx + 330, 150, 14), m["hl"],
-              [(F(0, 0), F(1, 0.3)), (F(5, 0.1), F(6, 0))])
-
-    # the gate's voltage: a glow on the gate stack, in front of the cut face
-    m["gate_on"] = mat("chip_nmos_gate_on", (1.0, 0.72, 0.35), emit=(1.0, 0.65, 0.25), strength=1.2, alpha=0.5)
-    C.overlay(root, "gate_on", (cx - C.GATE_HALF - 6, 14, -246), (cx + C.GATE_HALF + 6, 126, 6),
-              m["gate_on"], [(GATE_RISE, GATE_FALL)])
-    # the inversion layer: a cyan sheet on the silicon surface between the n+ islands, in front of the cut
-    m["chan"] = mat("chip_nmos_chan", (0.40, 0.95, 1.0), emit=(0.40, 0.95, 1.0), strength=6.0)
-    C.overlay(root, "chan_on", (cx - 150, -14, -40), (cx + 150, 16, 10), m["chan"],
-              [(CHAN_FORM, GATE_FALL)])
-
-    # electrons: out of the grounded source contact, along the surface through the channel, up the drain contact
-    s, p = route([(cx - C.SD, 410.0, 12), (cx - C.SD, 0.0, 12), (cx + C.SD, 0.0, 12), (cx + C.SD, 410.0, 12)])
-    stream_of(root, "elec", 12, s, p, 22, m["c_dot_sig"], 3, 0.05, 0.70, 100)
-
+    D.mats(m)
+    d, _ = D.in_chip(m, root)
+    cx = d.cx
+    D.outline(root, m, "nmos_pick", (cx - d.half - 30, -350.0), (cx + d.half + 30, d.ct_top + 40),
+              [(F(0, 0), F(1, 0.2)), (F(5, 0.2), F(6, 0))], t=22.0, z=12.0)
     whole = [(F(0, 0), F(1, 0)), (F(5, 0), F(6, 0))]
-    label("NMOS", (cx, -190.0, 0), root, whole)
-    label("n+ source", (cx - C.SD, -130.0, 0), root, ZW)
-    label("n+ drain", (cx + C.SD, -130.0, 0), root, ZW)
-    label("p-type silicon", (cx - 330.0, -230.0, 0), root, [(F(1, 0), F(2, 0.1))])
-    label("gate low: no channel", (cx, 290.0, 0), root, [(F(1, 0), F(2, 0.1)), (F(4, 0.25), F(5, 0))])
-    label("gate high", (cx, 290.0, 0), root, [(GATE_RISE, GATE_FALL)])
-    label("channel: electrons", (cx, -60.0, 0), root, [(CHAN_FORM, GATE_FALL)])
-    label("current: source to drain", (cx + 50, 330.0, 0), root, [(F(3, 0.1), F(4, 0.0))])
-
-    C.glide_camera(root, POSES)
-
-
-ZOOM_IN = ((C.NMOS_X, 60.0, 0.0), 1400.0, 0.0, 0.08)
-POSES = [WHOLE, ZOOM, ZOOM, ZOOM_IN, ZOOM, WHOLE]
-ZW = [(F(1, 0), F(5, 0))]  # the zoomed-in tags: beats 1 to 4
-CHAN_FORM = F(2, 0.50)  # the channel forms once the gate is up
-
-
-# ---- shared pieces ---------------------------------------------------------------------------
-
-NX, SD = C.NMOS_X, C.SD
-
-
-def span(a, b):
-    """Beats a up to b, as one interval."""
-    return [(F(a, 0), F(b, 0))]
-
-
-def nmos_mats(m):
-    """The NMOS-only materials, named chip_nmos_* (mat() caches by name)."""
-    return {
-        "gate_on": mat("chip_nmos_gate_on2", (1.0, 0.72, 0.35), emit=(1.0, 0.65, 0.25), strength=1.6, alpha=0.5),
-        "chan": mat("chip_nmos_chan2", (0.40, 0.95, 1.0), emit=(0.40, 0.95, 1.0), strength=6.0),
-        "part": mat("chip_nmos_part", (0.40, 0.95, 1.0), emit=(0.40, 0.95, 1.0), strength=1.5, alpha=0.35),
-        "dep": mat("chip_nmos_dep", (0.70, 0.50, 1.0), emit=(0.70, 0.50, 1.0), strength=2.0, alpha=0.5),
-        "halo": mat("chip_nmos_halo", (0.75, 0.60, 1.0), emit=(0.70, 0.50, 1.0), strength=2.5, alpha=0.6),
-        "field": mat("chip_nmos_field", (1.0, 0.55, 0.85), emit=(1.0, 0.50, 0.80), strength=3.0),
-        "strain": mat("chip_nmos_strain", (1.0, 0.82, 0.35), emit=(1.0, 0.78, 0.30), strength=3.0),
-        "dopant": mat("chip_nmos_dopant", (1.0, 0.90, 0.55), emit=(1.0, 0.85, 0.40), strength=1.2, alpha=0.5),
-        "atom": mat("chip_nmos_atom", (1.0, 0.95, 0.60), emit=(1.0, 0.92, 0.50), strength=6.0),
-        "hik": mat("chip_nmos_hik", (0.85, 0.90, 1.0), emit=(0.80, 0.90, 1.0), strength=2.0, alpha=0.6),
-        "fin": mat("chip_nmos_fin", (0.40, 0.95, 1.0), emit=(0.40, 0.95, 1.0), strength=4.0, alpha=0.7),
-        "sheet": mat("chip_nmos_sheet", (0.40, 0.95, 1.0), emit=(0.40, 0.95, 1.0), strength=4.0),
-        "well": mat("chip_nmos_well", (0.70, 0.50, 1.0), emit=(0.70, 0.50, 1.0), strength=2.0, alpha=0.45),
-        "sim": mat("chip_nmos_sim", (0.60, 0.75, 1.0), emit=(0.60, 0.75, 1.0), strength=2.0),
-        "warn": mat("chip_nmos_warn", (1.0, 0.30, 0.30), emit=(1.0, 0.25, 0.25), strength=3.0, alpha=0.5),
-        "cont": mat("chip_nmos_cont", (1.0, 0.82, 0.40), emit=(1.0, 0.78, 0.30), strength=4.0, alpha=0.6),
-    }
-
-
-def gate_glow(root, x, iv):
-    return overlay(root, "gate_glow", (NX - GATE_HALF - 6, 14, -246), (NX + GATE_HALF + 6, 126, 6), x["gate_on"], iv)
-
-
-def channel(root, x, iv, x1=150.0):
-    """The inversion layer from the source side to x1 (offset from the NMOS centre)."""
-    return overlay(root, "chan_on", (NX - 150, -14, -40), (NX + x1, 16, 10), x["chan"], iv)
-
-
-def part(root, x, name, lo, hi, iv, mat_key="part"):
-    return overlay(root, name, lo, hi, x[mat_key], iv)
-
-
-def lines(root, name, segs, m, r, iv, verts=8):
-    """Tubes (poly point pairs) grouped and switched on for `iv`."""
-    g = empty(name, root)
-    for i, (a, b) in enumerate(segs):
-        tube(f"{name}{i}", a, b, r, m, g, verts=verts)
-    show(g, iv)
-    return g
-
-
-def leak(root, m, b, n=9, u0=0.05, u1=0.7, life=100):
-    """Off-state leakage: dots under the surface, from source to drain, in beat b."""
-    s, p = route([(NX - SD, -40.0, 30.0), (NX + SD, -40.0, 30.0)])
-    return stream_of(root, f"leak{b}", n, s, p, 12, m["c_dot_out"], b, u0, u1, life)
-
-
-def current(root, m, b, n=10, u0=0.05, u1=0.7, life=100):
-    """On-state electrons along the surface, from source to drain, in beat b."""
-    s, p = route([(NX - SD, 20.0, 14.0), (NX + SD, 20.0, 14.0)])
-    return stream_of(root, f"flow{b}", n, s, p, 16, m["c_dot_sig"], b, u0, u1, life)
-
-
-def whole(root, m, **lit):
-    C.chip(root, m, **lit)
+    label("NMOS", (cx, d.ct_top + 60, 12), root, whole)
+    label("copper wiring", (0.0, C.MID[0], 0), root, whole)
+    label("package bumps", (C.bump_x(5), C.BUMP_Y, -60), root, whole)
+    # 1 off: holes everywhere in the well, no channel
+    D.majority_dots(root, m, d, D.beats(1, 5), [(F(1, 0), F(2, 0.45)), (F(4, 0.35), F(5, 0))])
+    D.depletion(root, m, d, D.beats(1), under_gate=False)
+    label("n+ source: ground", (cx - d.ct_x, -70.0, 0), root, D.beats(1))
+    label("n+ drain: output", (cx + d.ct_x, -70.0, 0), root, D.beats(1))
+    label("gate 0 V: off", (cx, 120.0, 0), root, D.beats(1))
+    label("p-well: holes", (cx - 230.0, -180.0, D.CZ), root, D.beats(1))
+    # 2 the gate rises, the field reaches down, the channel forms
+    D.gate_glow(root, m, d, [(F(2, 0.1), F(4, 0.25))])
+    D.field(root, m, d, [(F(2, 0.1), F(3, 0))])
+    D.channel(root, m, d, [(F(2, 0.45), F(4, 0.25))])
+    label("gate rises to ~0.75 V", (cx, 120.0, 0), root, D.beats(2))
+    label("field through the high-k", (cx, 60.0, D.CZ), root, D.beats(2))
+    label("electron channel forms", (cx + 25, -8.0, 2), root, [(F(2, 0.45), F(3, 0))])
+    # 3 electrons ride in through the source contact, across, and out through the drain
+    D.beads(root, "elec_in", D.carrier_path(d), 14, 10.0, m["mos_elec"], 3, 0.03, 0.8, 100)
+    label("electrons from ground", (cx - d.ct_x, 300.0, D.CZ), root, D.beats(3))
+    label("across the channel", (cx, -8.0, 2), root, D.beats(3))
+    label("out to the drain", (cx + d.ct_x, 300.0, D.CZ), root, D.beats(3))
+    # 4 the gate falls, the channel empties, a trickle of leakage
+    D.leak(root, m, d, 4, n=5)
+    label("gate falls to 0 V", (cx, 120.0, 0), root, D.beats(4))
+    label("channel empties", (cx, -8.0, 2), root, [(F(4, 0.2), F(5, 0))])
+    label("leakage only", (cx - 120.0, -52.0, D.CZ), root, D.beats(4))
+    label("one switch of billions", (cx, -420.0, 0), root, D.beats(5))
+    zoom = D.frame_dev(d, bottom=-300, pad=1.16)
+    close = D.frame_dev(d, x0=cx - 330, x1=cx + 330, bottom=-200, top=240, pad=1.12)
+    C.glide_camera(root, [WHOLE, zoom, close, zoom, close, WHOLE])
 
 
 # ---- zoom-ins a-e ----------------------------------------------------------------------------
+# Close-ups of the detailed NMOS on its own (chip_mos_detail), like the sections. Each zoom
+# function builds its pieces and returns one camera pose per beat.
 
-ZA_POSES = [ZOOM_POSE, CLOSE_POSE, CLOSE_POSE, CLOSE_POSE]
-ZB_POSES = [ZOOM_POSE, CLOSE_POSE, CLOSE_POSE]
-ZC_POSES = [ZOOM_POSE, CLOSE_POSE, CLOSE_POSE]
-ZD_POSES = [ZOOM_POSE, CLOSE_POSE, CLOSE_POSE]
-ZE_POSES = [ZOOM_POSE, CLOSE_POSE, CLOSE_POSE]
-
-
-def zoom_a(m, root, x=None):
-    """a the gate stack: metal on high-k, the field through it, the channel it draws."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    part(root, x, "hik_on", (NX - 108, -2, -244), (NX + 108, 26, 10), span(0, 4), "hik")
-    label("metal gate", (NX + 130, 96, 14), root, span(0, 4))
-    label("high-k dielectric", (NX + 150, 8, 14), root, span(0, 4))
-    label("p-type silicon", (NX + 330, -45, 0), root, span(0, 4))
-    gate_glow(root, x, span(1, 4))
-    lines(root, "field", [((NX - 70, 130, 30), (NX - 70, -30, 30)), ((NX + 70, 130, 30), (NX + 70, -30, 30))],
-          x["field"], 4, span(1, 2))
-    label("field through the oxide", (NX - 240, 60, 30), root, span(1, 2))
-    channel(root, x, span(2, 4))
-    label("channel: electrons", (NX, -40, 24), root, span(2, 4))
-    label("thick, but electrically thin", (NX - 260, 40, 14), root, span(3, 4))
+def _dev(m, root, iv=None, **kw):
+    D.mats(m)
+    return D.planar(m, root, "n", 0.0, name="nm", iv=iv, **kw)
 
 
-def zoom_b(m, root, x=None):
-    """b subthreshold, threshold and on: leakage, then the channel forms, then full current."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    leak(root, m, 0)
-    label("below threshold: leakage only", (NX, -95, 30), root, span(0, 1))
-    gate_glow(root, x, span(1, 3))
-    channel(root, x, span(1, 3))
-    label("threshold: inversion starts", (NX, 60, 40), root, span(1, 2))
-    current(root, m, 2)
-    label("above threshold: full current", (NX, 170, 30), root, span(2, 3))
+def _gate_close(d):
+    return D.frame((-230.0, -90.0, -40.0), (230.0, 210.0, 0.0), pitch=0.10, pad=1.12)
 
 
-def zoom_c(m, root, x=None):
-    """c saturation: an even channel, the drain end thins, the channel pinches off at the drain."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    gate_glow(root, x, span(0, 3))
-    channel(root, x, span(0, 1))
-    current(root, m, 0, n=10, life=100)
-    label("low drain voltage: even channel", (NX, 170, 30), root, span(0, 1))
-    channel(root, x, span(1, 2), x1=90.0)
-    current(root, m, 1, n=10)
-    label("the drain end thins", (NX + 150, 170, 30), root, span(1, 2))
-    channel(root, x, span(2, 3), x1=40.0)
-    current(root, m, 2, n=10, life=70)
-    label("pinch-off at the drain", (NX + 150, 170, 30), root, span(2, 3))
+def zoom_a(m, root):
+    """a the gate stack: its layers, the field through them, the channel it draws, high-k."""
+    d = _dev(m, root, contacts=False)
+    label("fill metal (W)", (0.0, 120.0, 0), root, D.beats(0))
+    label("work-function metal", (d.gh - 15, 90.0, 0), root, D.beats(0))
+    label("high-k HfO2", (-d.gh + 4, 60.0, 0), root, D.beats(0))
+    label("SiO2 interlayer", (-30.0, 3.0, 0), root, D.beats(0))
+    label("nitride spacer", (-d.gh - 19, 150.0, 0), root, D.beats(0))
+    D.gate_glow(root, m, d, D.beats(1, 4))
+    D.field(root, m, d, D.beats(1, 3))
+    D.majority_dots(root, m, d, D.beats(0, 4), D.beats(0, 2))
+    label("gate at ~0.75 V", (0.0, 140.0, 0), root, D.beats(1))
+    label("field crosses the oxide", (0.0, 60.0, D.CZ), root, D.beats(1))
+    label("no current into the gate", (d.gh + 19, 150.0, 0), root, D.beats(1))
+    D.channel(root, m, d, D.beats(2, 4))
+    label("electron channel", (20.0, -8.0, 2), root, D.beats(2))
+    label("holes pushed down", (-60.0, -88.0, D.CZ), root, D.beats(2))
+    D.outline(root, m, "hik_hl", (-d.gh - 2, 4.0), (d.gh + 2, 19.0), D.beats(3), t=3.0)
+    D.outline(root, m, "hik_l", (-d.gh - 2, 19.0), (-d.gh + 11, 167.0), D.beats(3), t=3.0)
+    label("high-k: thicker, same pull", (-d.gh + 4, 60.0, 0), root, D.beats(3))
+    label("acts like ~1 nm of SiO2", (0.0, 12.0, 4), root, D.beats(3))
+    c = D.frame((-170.0, -100.0, -40.0), (170.0, 200.0, 0.0), pitch=0.10, pad=1.08)
+    return [c, c, c, c]
 
 
-def zoom_d(m, root, x=None):
-    """d short channels: the gate owns the barrier, then the drain reaches the source side, then leakage."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    gate_glow(root, x, span(0, 1))
-    channel(root, x, span(0, 1))
-    label("long gate: the gate owns the barrier", (NX, 170, 30), root, span(0, 1))
-    drain_field = [((NX + SD, y, 30), (NX - 40, y, 30)) for y in (40.0, 62.0, 84.0)]
-    lines(root, "drain_field", drain_field, x["field"], 3, span(1, 3))
-    label("drain field reaches the source", (NX + 60, 130, 30), root, span(1, 3))
-    leak(root, m, 1, n=9)
-    label("short channel: Vt falls", (NX, -95, 30), root, span(1, 2))
-    leak(root, m, 2, n=12)
-    label("higher drain voltage: more leakage", (NX, -95, 30), root, span(2, 3))
+def zoom_b(m, root):
+    """b subthreshold, threshold and on, with a current gauge that climbs decade by decade."""
+    d = _dev(m, root)
+    D.meter(root, m, "id", 560.0, -200.0, [0.12, 0.45, 0.95])
+    label("drain current (log)", (560.0, 130.0, -10), root, D.beats(0, 3))
+    D.gate_glow(root, m, d, D.beats(0, 2), weak=True)
+    D.depletion(root, m, d, D.beats(0, 3), junctions=False)
+    D.leak(root, m, d, 0, n=6, y=-22.0)
+    label("VG below Vt", (0.0, 120.0, 0), root, D.beats(0))
+    label("few electrons over the barrier", (-40.0, -22.0, D.CZ), root, D.beats(0))
+    label("leakage", (560.0, -170.0, -10), root, D.beats(0))
+    D.channel(root, m, d, D.beats(1), weak=True)
+    D.flow(root, m, d, 1, n=5, life=150)
+    label("VG = Vt ~0.3 V", (0.0, 120.0, 0), root, D.beats(1))
+    label("inversion starts", (20.0, -8.0, 2), root, D.beats(1))
+    D.gate_glow(root, m, d, D.beats(2))
+    D.channel(root, m, d, D.beats(2))
+    D.flow(root, m, d, 2, n=16, life=90)
+    label("VG ~0.75 V: fully on", (0.0, 120.0, 0), root, D.beats(2))
+    label("~5-6 decades above leakage", (560.0, 90.0, -10), root, D.beats(2))
+    p = D.frame((-440.0, -260.0, -40.0), (620.0, 340.0, 0.0), pitch=0.10, pad=1.06)
+    return [p, p, p]
 
 
-def zoom_e(m, root, x=None):
-    """e dopants and strain: the dopant atoms, the halo pockets and Si:P, then the tensile strain."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    dopants_body(root, m, x, 0)
-    label("As / P atoms", (NX + SD + 150, -80, 40), root, span(0, 1))
-    halo_body(root, m, x, 1)
-    label("halo pocket", (NX + 95, 40, 30), root, span(1, 2))
-    label("Si:P epitaxy", (NX - SD, -120, 40), root, span(1, 2))
-    gate_glow(root, x, span(2, 3))
-    channel(root, x, span(2, 3))
-    lines(root, "strain", [((NX - 40, 28, 30), (NX - 240, 28, 30)), ((NX + 40, 28, 30), (NX + 240, 28, 30))],
-          x["strain"], 5, span(2, 3))
-    current(root, m, 2, n=10, life=80)
-    label("tensile strain: faster electrons", (NX, 170, 30), root, span(2, 3))
+def zoom_c(m, root):
+    """c saturation: an even channel, the drain end thinning, pinch-off at the drain."""
+    d = _dev(m, root)
+    D.gate_glow(root, m, d, D.beats(0, 3))
+    D.channel(root, m, d, D.beats(0))
+    D.flow(root, m, d, 0, n=10, life=130)
+    label("drain ~0.05 V: even channel", (0.0, -8.0, 2), root, D.beats(0))
+    label("acts like a resistor", (d.ct_x, 250.0, 0), root, D.beats(0))
+    D.pinch(root, m, d, D.beats(1), thin=True, name="nm_thin")
+    D.flow(root, m, d, 1, n=12, life=110)
+    label("drain end thins", (0.6 * d.ext_in, -8.0, 2), root, D.beats(1))
+    label("drain voltage rising", (d.ct_x, 250.0, 0), root, D.beats(1))
+    D.pinch(root, m, d, D.beats(2))
+    D.depletion(root, m, d, D.beats(2), under_gate=False, reach=30.0, name="nm_dep_sat")
+    D.flow(root, m, d, 2, n=12, life=110)
+    label("pinch-off at the drain", (0.45 * d.ext_in, -8.0, 2), root, D.beats(2))
+    label("drain ~0.75 V: current levels off", (d.ct_x, 250.0, 0), root, D.beats(2))
+    p = D.frame_dev(d, x0=-420, x1=420, bottom=-180, top=300)
+    return [p, p, p]
 
 
-def dopants_body(root, m, x, b):
-    """The source and drain lit as doped n+ silicon, with dopant atoms in front of them."""
-    overlay(root, "dop_src", (NX - SD - 72, -92, -244), (NX - SD + 72, 8, 10), x["dopant"], span(b, b + 2))
-    overlay(root, "dop_drn", (NX + SD - 72, -92, -244), (NX + SD + 72, 8, 10), x["dopant"], span(b, b + 2))
-    g = empty("atoms", root)
-    for xi, xo in enumerate((NX - SD - 40, NX - SD + 40, NX + SD - 40, NX + SD + 40)):
-        for yi, yo in enumerate((-70.0, -40.0, -12.0)):
-            ball(f"atom{xi}_{yi}", (xo, yo, 16.0), 9.0, x["atom"], g, 8)
-    show(g, span(b, b + 1))
+def zoom_d(m, root):
+    """d short channels: a long gate owns the barrier; a short one lets the drain reach the source."""
+    D.mats(m)
+    dl = D.planar(m, root, "n", 0.0, name="nm_long", gh=110.0, sd_out=400.0, half=480.0, iv=D.beats(0))
+    D.depletion(root, m, dl, D.beats(0), name="long_dep")
+    label("long gate", (0.0, 120.0, 0), root, D.beats(0))
+    label("gate's depletion owns the barrier", (0.0, -60.0, 2), root, D.beats(0))
+    label("drain field stays near the drain", (dl.ct_x, -128.0, 0), root, D.beats(0))
+    d = D.planar(m, root, "n", 0.0, name="nm_short", gh=38.0, iv=D.beats(1, 3))
+    D.depletion(root, m, d, D.beats(1), reach=70.0, name="short_dep1")
+    D.depletion(root, m, d, D.beats(2), reach=105.0, name="short_dep2")
+    D.arrows(root, m, "dibl1", [((d.sd_in + 60, -60, D.CZ + 6), (-10, -60, D.CZ + 6))], D.beats(1))
+    D.arrows(root, m, "dibl2", [((d.sd_in + 60, -60, D.CZ + 6), (-d.ext_in - 10, -60, D.CZ + 6)),
+                                ((d.sd_in + 60, -95, D.CZ + 6), (-d.ext_in - 10, -95, D.CZ + 6))], D.beats(2))
+    D.leak(root, m, d, 1, n=5, y=-40.0)
+    D.leak(root, m, d, 2, n=12, y=-40.0, life=110)
+    label("short gate", (0.0, 120.0, 0), root, D.beats(1, 3))
+    label("drain field reaches the source", (d.sd_in + 40, -60.0, D.CZ), root, D.beats(1))
+    label("Vt falls: leakage", (-d.ext_in - 20, -40.0, D.CZ), root, D.beats(1))
+    label("higher drain voltage", (d.ct_x, 250.0, 0), root, D.beats(2))
+    label("barrier lower, more leakage", (-d.ext_in - 20, -40.0, D.CZ), root, D.beats(2))
+    return [D.frame_dev(dl, x0=-480, x1=480, bottom=-200), D.frame_dev(d, x0=-420, x1=420, bottom=-200),
+            D.frame_dev(d, x0=-420, x1=420, bottom=-200)]
 
 
-def halo_body(root, m, x, b):
-    """Halo pockets beside the channel ends, and the Si:P source and drain still lit."""
-    overlay(root, "halo_l", (NX - 125, -40, -200), (NX - 70, 12, 8), x["halo"], span(b, b + 1))
-    overlay(root, "halo_r", (NX + 70, -40, -200), (NX + 125, 12, 8), x["halo"], span(b, b + 1))
-    overlay(root, "dop_src", (NX - SD - 72, -92, -244), (NX - SD + 72, 8, 10), x["dopant"], span(b, b + 1))
-    overlay(root, "dop_drn", (NX + SD - 72, -92, -244), (NX + SD + 72, 8, 10), x["dopant"], span(b, b + 1))
+def zoom_e(m, root):
+    """e dopants and strain: the dopant atoms, Si:P and the halo pockets, tensile strain."""
+    return sec6(m, root)
 
 
 # ---- sections 1-10 --------------------------------------------------------------------------
+# The sections are close-ups of one detailed NMOS in cut-away (chip_mos_detail): each section
+# function builds its pieces and returns one camera pose per beat.
 
-S1_POSES = [ZOOM_POSE] * 3
-S2_POSES = [ZOOM_POSE] * 5
-S3_POSES = [ZOOM_POSE] * 5
-S4_POSES = [MID_POSE] * 3
-S5_POSES = [ZOOM_POSE] * 3
-S6_POSES = [ZOOM_POSE] * 3
-S7_POSES = [CLOSE_POSE, WHOLE, WHOLE]
-S8_POSES = [ZOOM_POSE] * 3
-S9_POSES = [ZOOM_POSE, ZOOM_POSE, WHOLE]
-S10_POSES = PULL_POSES
-
-
-def sec1(m, root, x=None):
-    """1 what happens: off, then the channel and gate on, then the current."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    label("gate low: no channel", (NX, 290.0, 0), root, span(0, 1))
-    label("n+ source", (NX - SD, -130.0, 0), root, span(0, 3))
-    label("n+ drain", (NX + SD, -130.0, 0), root, span(0, 3))
-    gate_glow(root, x, span(1, 3))
-    channel(root, x, span(1, 3))
-    label("gate high: electron channel", (NX, 290.0, 0), root, span(1, 2))
-    current(root, m, 2)
-    label("current: source to drain", (NX + 50, 330.0, 0), root, span(2, 3))
+def sec1(m, root):
+    """1 what happens: off, the gate high and the channel forming, then the electrons flowing."""
+    d = _dev(m, root)
+    D.majority_dots(root, m, d, D.beats(0, 3), D.beats(0))
+    D.gate_glow(root, m, d, D.beats(1, 3))
+    D.field(root, m, d, D.beats(1))
+    D.channel(root, m, d, D.beats(1, 3))
+    D.flow(root, m, d, 2, n=12)
+    label("n+ source: 0 V", (-d.ct_x, -60.0, 0), root, D.beats(0))
+    label("n+ drain", (d.ct_x, -60.0, 0), root, D.beats(0))
+    label("gate 0 V: off", (0.0, 120.0, 0), root, D.beats(0))
+    label("p-well: holes", (-230.0, -180.0, 0), root, D.beats(0))
+    label("gate ~0.75 V", (0.0, 120.0, 0), root, D.beats(1))
+    label("field through the oxide", (0.0, 60.0, D.CZ), root, D.beats(1))
+    label("electron channel", (25.0, -8.0, 2), root, D.beats(1))
+    label("electrons: source to drain", (-d.ct_x, 180.0, D.CZ), root, D.beats(2))
+    label("drain ~0.75 V", (d.ct_x, 250.0, 0), root, D.beats(2))
+    label("channel on", (0.0, -8.0, 2), root, D.beats(2))
+    whole = D.frame_dev(d)
+    return [whole, _gate_close(d), whole]
 
 
-def sec2(m, root, x=None):
-    """2 the parts: source, gate stack, drain, p-well, and the parts inside, each lit in turn."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    part(root, x, "src_hl", (NX - SD - 75, -96, -246), (NX - SD + 75, 12, 8), span(0, 1))
-    label("N+ SOURCE", (NX - SD, -130.0, 0), root, span(0, 1))
-    part(root, x, "gate_hl", (NX - GATE_HALF - 8, 10, -248), (NX + GATE_HALF + 8, 126, 8), span(1, 2))
-    label("GATE STACK", (NX, 170.0, 0), root, span(1, 2))
-    part(root, x, "drn_hl", (NX + SD - 75, -96, -246), (NX + SD + 75, 12, 8), span(2, 3))
-    label("N+ DRAIN", (NX + SD, -130.0, 0), root, span(2, 3))
-    part(root, x, "well_hl", (NX - 420, -300, -244), (NX + 420, -2, 8), span(3, 4))
-    label("P-WELL", (NX - 330.0, -230.0, 0), root, span(3, 4))
-    overlay(root, "halo_l", (NX - 125, -40, -200), (NX - 70, 12, 8), x["halo"], span(4, 5))
-    overlay(root, "halo_r", (NX + 70, -40, -200), (NX + 125, 12, 8), x["halo"], span(4, 5))
-    overlay(root, "sti", (NX + 290, -120, -240), (NX + 320, 14, 6), x["well"], span(4, 5))
-    label("halo pockets, spacers, STI", (NX + 330, 40.0, 0), root, span(4, 5))
+def sec2(m, root):
+    """2 the parts: source, gate stack, drain, p-well, then halos, spacers and STI."""
+    d = _dev(m, root)
+    D.hl(root, m, d, "source", D.beats(0), pad=6.0)
+    label("n+ source", (-d.ct_x, -70.0, 0), root, D.beats(0))
+    label("Si:P raised epitaxy", (-d.ct_x - 60, 22.0, 0), root, D.beats(0))
+    label("silicide", (-d.ct_x + 60, 48.0, 0), root, D.beats(0))
+    label("tungsten contact", (-d.ct_x, 250.0, 0), root, D.beats(0))
+    label("fill metal", (0.0, 120.0, 0), root, D.beats(1))
+    label("work-function metal", (d.gh - 15, 90.0, 0), root, D.beats(1))
+    label("high-k HfO2", (-d.gh + 4, 60.0, 0), root, D.beats(1))
+    label("SiO2 interlayer", (-30.0, 3.0, 0), root, D.beats(1))
+    label("nitride cap", (0.0, 178.0, 0), root, D.beats(1))
+    D.hl(root, m, d, "drain", D.beats(2), pad=6.0)
+    label("n+ drain: the output", (d.ct_x, -70.0, 0), root, D.beats(2))
+    label("contact to the output", (d.ct_x, 250.0, 0), root, D.beats(2))
+    D.outline(root, m, "well_hl", (-d.half + 70, -228.0), (d.half - 70, -118.0), D.beats(3))
+    D.majority_dots(root, m, d, D.beats(3), D.beats(3))
+    label("p-well: boron-doped", (-200.0, -170.0, 0), root, D.beats(3))
+    label("holes: majority carrier", (130.0, -150.0, D.CZ), root, D.beats(3))
+    label("p substrate", (0.0, -285.0, 0), root, D.beats(3))
+    D.hl(root, m, d, "halo-1", D.beats(4), pad=3.0)
+    D.hl(root, m, d, "halo1", D.beats(4), pad=3.0)
+    label("halo pocket", (-d.ext_in - 5, -55.0, 0), root, D.beats(4))
+    label("extension", (d.ext_in + 25, -18.0, 0), root, D.beats(4))
+    label("nitride spacer", (-d.gh - 19, 140.0, 0), root, D.beats(4))
+    label("STI oxide", (d.half - 35, -100.0, 0), root, D.beats(4))
+    whole = D.frame_dev(d)
+    return [D.frame_dev(d, x0=-470, x1=40, bottom=-150, top=350), _gate_close(d),
+            D.frame_dev(d, x0=-40, x1=470, bottom=-150, top=350), whole, whole]
 
 
-def sec3(m, root, x=None):
+def sec3(m, root):
     """3 one switching cycle: off, depletion, inversion, linear then saturation, turn-off."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    label("1. off: gate at 0 V", (NX, 290.0, 0), root, span(0, 1))
-    overlay(root, "depletion", (NX - GATE_HALF, -60, -200), (NX + GATE_HALF, -2, 8), x["dep"], span(1, 2))
-    label("2. depletion: holes pushed away", (NX, 290.0, 0), root, span(1, 2))
-    gate_glow(root, x, span(2, 4))
-    channel(root, x, span(2, 4))
-    label("3. inversion: electron channel", (NX, 290.0, 0), root, span(2, 3))
-    channel(root, x, [(F(3, 0), F(3, 0.5))])
-    channel(root, x, [(F(3, 0.5), F(4, 0))], x1=40.0)
-    current(root, m, 3, n=10, u0=0.05, u1=0.6)
-    label("4. linear, then saturation", (NX, 290.0, 0), root, span(3, 4))
-    leak(root, m, 4, n=9)
-    label("5. turn-off: channel empties", (NX, 290.0, 0), root, span(4, 5))
+    d = _dev(m, root)
+    D.majority_dots(root, m, d, D.beats(0, 5), [(F(0, 0), F(1, 0)), (F(4, 0.35), F(5, 0))])
+    D.depletion(root, m, d, D.beats(0), under_gate=False)
+    label("VG = 0 V", (0.0, 120.0, 0), root, D.beats(0))
+    label("reverse-biased junction", (d.ct_x, -128.0, 0), root, D.beats(0))
+    D.gate_glow(root, m, d, D.beats(1), weak=True)
+    D.depletion(root, m, d, D.beats(1, 4), name="nm_dep_on")
+    label("0 < VG < Vt", (0.0, 120.0, 0), root, D.beats(1))
+    label("depletion: holes pushed down", (0.0, -50.0, 0), root, D.beats(1))
+    D.gate_glow(root, m, d, D.beats(2, 4))
+    D.field(root, m, d, D.beats(2))
+    D.channel(root, m, d, D.beats(2))
+    label("VG > Vt", (0.0, 120.0, 0), root, D.beats(2))
+    label("inversion layer", (20.0, -8.0, 2), root, D.beats(2))
+    D.channel(root, m, d, [(F(3, 0), F(3, 0.5))], name="nm_lin")
+    D.pinch(root, m, d, [(F(3, 0.5), F(4, 0))])
+    D.flow(root, m, d, 3, n=12, u1=0.8)
+    label("linear: even channel", (-20.0, -8.0, 2), root, [(F(3, 0), F(3, 0.5))])
+    label("saturation: pinch-off", (0.5 * d.ext_in, -8.0, 2), root, [(F(3, 0.5), F(4, 0))])
+    label("electrons", (-d.ct_x, 200.0, D.CZ), root, D.beats(3))
+    D.leak(root, m, d, 4, n=5)
+    D.gate_glow(root, m, d, [(F(4, 0), F(4, 0.25))], weak=True, name="nm_fall")
+    D.channel(root, m, d, [(F(4, 0), F(4, 0.25))], weak=True, name="nm_fade")
+    label("VG back to 0 V", (0.0, 120.0, 0), root, D.beats(4))
+    label("channel empties", (0.0, -8.0, 2), root, D.beats(4))
+    label("leakage remains", (-120.0, -52.0, D.CZ), root, D.beats(4))
+    whole = D.frame_dev(d)
+    close = D.frame_dev(d, x0=-330, x1=330, bottom=-190, top=230)
+    return [whole, close, close, whole, close]
 
 
-def sec4(m, root, x=None):
-    """4 threshold and subthreshold: leakage below it, the channel at it, full current above it."""
-    zoom_b(m, root, x)
+def sec4(m, root):
+    """4 threshold: subthreshold leakage, the channel at threshold, full current above it."""
+    d = _dev(m, root)
+    D.gate_glow(root, m, d, D.beats(0, 2), weak=True)
+    D.depletion(root, m, d, D.beats(0, 3), junctions=False)
+    D.leak(root, m, d, 0, n=6, y=-22.0)
+    label("VG ~0.15 V: below Vt", (0.0, 120.0, 0), root, D.beats(0))
+    label("barrier: few electrons cross", (-40.0, -22.0, D.CZ), root, D.beats(0))
+    D.channel(root, m, d, D.beats(1), weak=True)
+    D.flow(root, m, d, 1, n=5, life=150)
+    label("VG = Vt ~0.3 V", (0.0, 120.0, 0), root, D.beats(1))
+    label("thin inversion layer", (20.0, -8.0, 2), root, D.beats(1))
+    D.gate_glow(root, m, d, D.beats(2))
+    D.channel(root, m, d, D.beats(2))
+    D.flow(root, m, d, 2, n=16, life=90)
+    label("VG ~0.75 V: fully on", (0.0, 120.0, 0), root, D.beats(2))
+    label("strong channel", (20.0, -8.0, 2), root, D.beats(2))
+    label("full current", (d.ct_x, 220.0, D.CZ), root, D.beats(2))
+    whole = D.frame_dev(d, x0=-420, x1=420, bottom=-200)
+    return [whole, whole, whole]
 
 
-def sec5(m, root, x=None):
-    """5 short channels and body bias, then wrapping the gate."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    leak(root, m, 0, n=9)
-    label("DIBL: drain lowers the barrier", (NX, 170.0, 30), root, span(0, 1))
-    overlay(root, "well_on", (NX - 420, -300, -240), (NX + 420, -4, 6), x["well"], span(1, 2))
-    label("body bias: the well shifts Vt", (NX + 330, -150, 20), root, span(1, 2))
-    gate_glow(root, x, span(2, 3))
-    overlay(root, "fin", (NX - 40, -30, -200), (NX + 40, 110, 8), x["fin"], span(2, 3))
-    label("fin: the gate wraps the channel", (NX + 120, 150, 20), root, span(2, 3))
+def sec5(m, root):
+    """5 short channels and body bias, then the gate wrapped round a fin."""
+    d = _dev(m, root, iv=D.beats(0, 2), tap=True)
+    D.depletion(root, m, d, D.beats(0), reach=110.0)
+    D.arrows(root, m, "dibl", [((d.ext_in + 40, -60, D.CZ + 6), (-20, -60, D.CZ + 6)),
+                               ((d.ext_in + 40, -95, D.CZ + 6), (-20, -95, D.CZ + 6))], D.beats(0))
+    D.leak(root, m, d, 0, n=8, y=-40.0)
+    label("drain field reaches under", (d.ext_in + 30, -95.0, D.CZ), root, D.beats(0))
+    label("source barrier lowered", (-d.ext_in, -40.0, D.CZ), root, D.beats(0))
+    label("drain ~0.75 V", (d.ct_x, 250.0, 0), root, D.beats(0))
+    D.hl(root, m, d, "tap", D.beats(1), pad=6.0)
+    D.hl(root, m, d, "tap_ct", D.beats(1), pad=4.0)
+    D.depletion(root, m, d, D.beats(1), junctions=False, deep=130.0, name="nm_dep_bb")
+    D.arrows(root, m, "bias", [((d.half + 65, -120, D.CZ + 6), (120, -150, D.CZ + 6))], D.beats(1))
+    label("body tap (p+)", (d.half + 65, 200.0, 0), root, D.beats(1))
+    label("well bias shifts Vt", (230.0, -160.0, D.CZ), root, D.beats(1))
+    label("wider depletion", (0.0, -110.0, 0), root, D.beats(1))
+    _, zs, ext = D.finfet(m, root, "n", nfins=2, iv=D.beats(2), lit=D.beats(2))
+    label("silicon fin", (-4.0, 60.0, zs[0]), root, D.beats(2))
+    label("gate wraps 3 sides", (-4.0, D.FIN_H + 40, zs[1] + 40), root, D.beats(2))
+    label("high-k", (-4.0, 80.0, zs[1] + D.FIN_W / 2 + 4), root, D.beats(2))
+    label("n+ epitaxy", (300.0, D.FIN_H + 10, zs[1] + 50), root, D.beats(2))
+    return [D.frame_dev(d, x0=-300, x1=460, bottom=-200), D.frame_dev(d, x0=-200, x1=d.half + 140, bottom=-330),
+            D.frame(ext[0], ext[1], yaw=-0.75, pitch=0.25, pad=1.05)]
 
 
-def sec6(m, root, x=None):
-    """6 dopants and strain: the dopant atoms, the halo pockets, the tensile strain."""
-    zoom_e(m, root, x)
+def sec6(m, root):
+    """6 dopants and strain: the dopant atoms, the halos and Si:P, then tensile strain."""
+    d = _dev(m, root)
+    D.dopants(root, m, d, D.beats(0, 2))
+    D.hl(root, m, d, "ext-1", D.beats(0), pad=4.0)
+    D.hl(root, m, d, "ext1", D.beats(0), pad=4.0)
+    label("arsenic: shallow extension", (-d.ext_in - 20, -18.0, D.CZ), root, D.beats(0))
+    label("phosphorus: deep S/D", (d.ct_x, -95.0, D.CZ), root, D.beats(0))
+    D.hl(root, m, d, "epi-1", D.beats(1), pad=4.0)
+    D.hl(root, m, d, "epi1", D.beats(1), pad=4.0)
+    D.hl(root, m, d, "halo-1", D.beats(1), pad=3.0)
+    D.hl(root, m, d, "halo1", D.beats(1), pad=3.0)
+    label("Si:P epi ~1e21 /cm3", (d.ct_x, 22.0, 0), root, D.beats(1))
+    label("halo pocket (boron)", (-d.ext_in - 5, -55.0, 0), root, D.beats(1))
+    D.strain(root, m, d, D.beats(2))
+    D.gate_glow(root, m, d, D.beats(2))
+    D.channel(root, m, d, D.beats(2))
+    D.flow(root, m, d, 2, n=14, life=80)
+    label("tensile strain", (-120.0, -60.0, D.CZ), root, D.beats(2))
+    label("faster electrons", (d.ct_x, 200.0, D.CZ), root, D.beats(2))
+    close = D.frame_dev(d, x0=-420, x1=420, bottom=-180, top=200)
+    return [close, close, close]
 
 
-def sec7(m, root, x=None):
-    """7 transistor count: one NMOS, billions of them, then the chip wired up."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    part(root, x, "one_hl", (NX - 330, -140, -250), (NX + 330, 150, 14), span(0, 1))
-    label("one NMOS", (NX, -190.0, 0), root, span(0, 1))
-    label("billions of switches like this one", (0.0, -380.0, 0), root, span(1, 2))
-    overlay(root, "lit_thin", (-C.HALF - 6, C.THIN[0] - 14, -C.DEPTH + 40), (C.HALF + 6, C.THIN[1] + 14, 6),
-            m["c_lit_thin"], span(2, 3))
-    label("contacts and copper wiring", (1100.0, 500.0, 0), root, span(2, 3))
+ARR = dict(cols=24, rows=3, pitch=90.0, row_h=520.0)
 
 
-def sec8(m, root, x=None):
-    """8 who makes it: a FinFET (TSMC), stacked sheets (Intel), the device simulated (Synopsys, Cadence)."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    overlay(root, "fin", (NX - 40, -30, -200), (NX + 40, 110, 8), x["fin"], span(0, 1))
-    label("TSMC: FinFET, N3/N5", (NX + 120, 150, 20), root, span(0, 1))
-    for i, y in enumerate((40.0, 70.0, 100.0)):
-        overlay(root, f"sheet{i}", (NX - 150, y, -12), (NX + 150, y + 12, 12), x["sheet"], span(1, 2))
-    label("Intel 18A: RibbonFET, stacked sheets", (NX + 120, 150, 20), root, span(1, 2))
-    grid = [((NX + dx, -100.0, 14.0), (NX + dx, 170.0, 14.0)) for dx in (-240.0, -120.0, 0.0, 120.0, 240.0)]
-    grid += [((NX - 260.0, y, 14.0), (NX + 260.0, y, 14.0)) for y in (-90.0, -30.0, 30.0, 90.0, 150.0)]
-    lines(root, "sim", grid, x["sim"], 1.5, span(2, 3), verts=6)
-    label("Synopsys, Cadence: device equations", (NX + 120, 150, 20), root, span(2, 3))
+def sec7(m, root):
+    """7 transistor count: one NMOS, rows of them from above, then the wiring over them."""
+    d = _dev(m, root, iv=D.beats(0))
+    D.gate_glow(root, m, d, D.beats(0))
+    D.channel(root, m, d, D.beats(0))
+    D.flow(root, m, d, 0, n=10)
+    label("one NMOS: one switch", (0.0, 120.0, 0), root, D.beats(0))
+    label("~0.1 um across (estimate)", (0.0, -200.0, 0), root, D.beats(0))
+    D.array(m, root, "arr", iv=D.beats(1, 3), wires_iv=D.beats(2), **ARR)
+    W, H = ARR["cols"] * ARR["pitch"], ARR["rows"] * ARR["row_h"]
+    label("gate lines", (W * 0.52, H - 60, 6), root, D.beats(1))
+    label("NMOS rows (blue)", (W * 0.25, 120.0, 0), root, D.beats(1))
+    label("PMOS rows (pink)", (W * 0.75, 360.0, 0), root, D.beats(1))
+    label("B200: ~208 billion", (W * 0.5, H * 0.55, 6), root, D.beats(1))
+    label("copper wiring on top", (W * 0.4, 120.0 + ARR["row_h"], 26), root, D.beats(2))
+    label("contacts down to each", (W * 0.7, H * 0.8, 40), root, D.beats(2))
+    arr = D.frame((0.0, -20.0, -16.0), (W, H, 40.0), pitch=0.0, pad=1.05)
+    return [D.frame_dev(d), arr, arr]
 
 
-def sec9(m, root, x=None):
-    """9 chokepoints and risks: leakage, contact resistance, very few fabs."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    leak(root, m, 0, n=9)
-    label("leakage and Vt variability", (NX, 170.0, 30), root, span(0, 1))
-    overlay(root, "cont_s", (NX - SD - 36, 8, -40), (NX - SD + 36, 410, 12), x["cont"], span(1, 2))
-    overlay(root, "cont_d", (NX + SD - 36, 8, -40), (NX + SD + 36, 410, 12), x["cont"], span(1, 2))
-    overlay(root, "cont_g", (NX - 36, 120, -40), (NX + 36, 410, 12), x["cont"], span(1, 2))
-    label("contact resistance limits drive", (NX + SD + 80, 300, 20), root, span(1, 2))
-    part(root, x, "risk_hl", (NX - 330, -140, -250), (NX + 330, 150, 14), span(2, 3), "warn")
-    label("very few leading fabs", (NX, -190.0, 0), root, span(2, 3))
+def sec8(m, root):
+    """8 who makes it: a FinFET (TSMC), stacked sheets (Intel 18A), a simulated device."""
+    D.mats(m)
+    _, zs, e0 = D.finfet(m, root, "n", nfins=2, iv=D.beats(0), lit=D.beats(0), name="f8")
+    label("TSMC N3: FinFET", (-4.0, D.FIN_H + 72, zs[0]), root, D.beats(0))
+    label("fin ~5-7 nm wide", (-4.0, 50.0, zs[1]), root, D.beats(0))
+    _, e1 = D.gaa(m, root, "n", iv=D.beats(1), lit=D.beats(1), name="g8")
+    label("Intel 18A: RibbonFET", (-4.0, D.SHEET_Y[-1] + 80, 0.0), root, D.beats(1))
+    label("stacked sheets", (-4.0, D.SHEET_Y[1] + 15, -40.0), root, D.beats(1))
+    label("gate all round", (-4.0, D.SHEET_Y[0] - 8, 100.0), root, D.beats(1))
+    d = D.planar(m, root, "n", 0.0, name="nm", iv=D.beats(2))
+    D.gate_glow(root, m, d, D.beats(2))
+    D.channel(root, m, d, D.beats(2))
+    g = []
+    for i, xx in enumerate(range(-420, 421, 60)):
+        g.append(((xx, -230, 4.0), (xx, 200, 4.0)))
+    for yy in range(-220, 201, 40):
+        g.append(((-420, yy, 4.0), (420, yy, 4.0)))
+    D.arrows(root, m, "mesh", g, D.beats(2), mt="mos_grid", r=1.2, tip=1.6)
+    D.box_on(root, "pot", (-d.ext_in - 30, -90, -40), (d.ext_in + 30, -16, 3.0), m["mos_dep"], D.beats(2))
+    label("Synopsys, Cadence: TCAD mesh", (-300.0, 150.0, 4), root, D.beats(2))
+    label("solved potential", (0.0, -60.0, 3), root, D.beats(2))
+    return [D.frame(e0[0], e0[1], yaw=-0.75, pitch=0.25, pad=1.05),
+            D.frame(e1[0], e1[1], yaw=-0.75, pitch=0.25, pad=1.05), D.frame_dev(d)]
 
 
-def sec10(m, root, x=None):
-    """10 sources: the whole chip, pulled back slowly, the four source groups tagged in turn."""
-    x = x or nmos_mats(m)
-    whole(root, m)
-    part(root, x, "src_all", (NX - 330, -140, -250), (NX + 330, 150, 14), span(0, 1))
-    label("transistor counts", (NX, -190.0, 0), root, span(0, 1))
-    part(root, x, "src_sd", (NX - SD - 75, -96, -246), (NX + SD + 75, 12, 8), span(1, 2))
-    label("dopants and Si:P", (NX, -190.0, 0), root, span(1, 2))
-    part(root, x, "src_gate", (NX - GATE_HALF - 8, 10, -248), (NX + GATE_HALF + 8, 126, 8), span(2, 3))
-    label("swing and DIBL", (NX, -190.0, 0), root, span(2, 3))
-    label("makers and simulators", (NX, -190.0, 0), root, span(3, 4))
+def sec9(m, root):
+    """9 chokepoints and risks: leakage and variability, contact resistance, very few fabs."""
+    d = _dev(m, root, iv=D.beats(0, 2))
+    D.leak(root, m, d, 0, n=8)
+    D.gate_leak(root, m, d, 0)
+    g = empty("rnd", root)
+    for i, (xx, yy) in enumerate(((-30, -30), (20, -55), (-5, -80), (35, -20))):
+        D.ball(f"rdop{i}", (xx, yy, D.CZ + 4), 10.0, m["mos_atom_n"], g, 8)
+    show(g, D.beats(0))
+    label("leakage under the gate", (-120.0, -52.0, D.CZ), root, D.beats(0))
+    label("gate-oxide tunnelling", (-15.0, 40.0, D.CZ), root, D.beats(0))
+    label("few dopants: Vt varies", (30.0, -85.0, D.CZ), root, D.beats(0))
+    D.gate_glow(root, m, d, D.beats(1))
+    D.channel(root, m, d, D.beats(1))
+    D.flow(root, m, d, 1, n=10, life=150)
+    for s in (-1, 1):
+        D.hl(root, m, d, f"ct{s}", D.beats(1), pad=5.0, mt="mos_warn")
+        D.box_on(root, f"hot{s}", (s * d.ct_x - 34, d.sil_top - 6, -40), (s * d.ct_x + 34, d.sil_top + 6, 4.0),
+                 m["mos_hot"], D.beats(1))
+    label("contact resistance", (d.ct_x, 250.0, 0), root, D.beats(1))
+    label("silicide interface", (-d.ct_x, d.sil_top, 4), root, D.beats(1))
+    e = D.makers_row(m, root, "n", D.beats(2))
+    label("TSMC: N3 FinFET, N2 GAA", (-4.0, 250.0, D.ROW_Z[0]), root, D.beats(2))
+    label("Intel: 18A", (-4.0, 250.0, D.ROW_Z[1]), root, D.beats(2))
+    label("Samsung: SF3, SF2 GAA", (-4.0, 250.0, D.ROW_Z[2]), root, D.beats(2))
+    close = D.frame_dev(d, x0=-420, x1=420, bottom=-180)
+    return [close, close, D.row_pose(e)]
+
+
+def sec10(m, root):
+    """10 sources: each beat lights the part its sources back."""
+    D.mats(m)
+    D.array(m, root, "arr", iv=D.beats(0), **ARR)
+    W, H = ARR["cols"] * ARR["pitch"], ARR["rows"] * ARR["row_h"]
+    label("[1]-[3] [11] transistor counts", (W * 0.5, H * 0.55, 6), root, D.beats(0))
+    d = D.planar(m, root, "n", 0.0, name="nm", iv=D.beats(1, 3))
+    D.dopants(root, m, d, D.beats(1))
+    for k in ("source", "drain"):
+        D.hl(root, m, d, k, D.beats(1), pad=6.0)
+    label("[4] As vs P patents", (-d.ct_x, -60.0, D.CZ), root, D.beats(1))
+    label("[5] Si:P patent and ECS paper", (d.ct_x, 22.0, D.CZ), root, D.beats(1))
+    D.gate_glow(root, m, d, D.beats(2), weak=True)
+    D.depletion(root, m, d, D.beats(2), reach=80.0)
+    D.hl(root, m, d, "stack", D.beats(2), pad=4.0)
+    label("[6] swing and DIBL: UCSB, arXiv", (0.0, 120.0, 0), root, D.beats(2))
+    e = D.makers_row(m, root, "n", D.beats(3))
+    label("[7] Intel 18A", (-4.0, 250.0, D.ROW_Z[1]), root, D.beats(3))
+    label("[8] TSMC 6-K", (-4.0, 250.0, D.ROW_Z[0]), root, D.beats(3))
+    label("[9] [10] NVIDIA, Synopsys, Cadence", (-4.0, 250.0, D.ROW_Z[2]), root, D.beats(3))
+    arr = D.frame((0.0, -20.0, -16.0), (W, H, 40.0), pitch=0.0, pad=1.05)
+    return [arr, D.frame_dev(d), D.frame_dev(d, x0=-330, x1=330, bottom=-190, top=230),
+            D.row_pose(e)]
 
 
 # ---- registry and entry point ----------------------------------------------------------------
 
 # key -> (beats, camera poses, builder)
 SCENES = {
-    "zoom_a": (4, ZA_POSES, zoom_a),
-    "zoom_b": (3, ZB_POSES, zoom_b),
-    "zoom_c": (3, ZC_POSES, zoom_c),
-    "zoom_d": (3, ZD_POSES, zoom_d),
-    "zoom_e": (3, ZE_POSES, zoom_e),
-    "sec1": (3, S1_POSES, sec1),
-    "sec2": (5, S2_POSES, sec2),
-    "sec3": (5, S3_POSES, sec3),
-    "sec4": (3, S4_POSES, sec4),
-    "sec5": (3, S5_POSES, sec5),
-    "sec6": (3, S6_POSES, sec6),
-    "sec7": (3, S7_POSES, sec7),
-    "sec8": (3, S8_POSES, sec8),
-    "sec9": (3, S9_POSES, sec9),
-    "sec10": (4, S10_POSES, sec10),
+    "zoom_a": (4, None, zoom_a),
+    "zoom_b": (3, None, zoom_b),
+    "zoom_c": (3, None, zoom_c),
+    "zoom_d": (3, None, zoom_d),
+    "zoom_e": (3, None, zoom_e),
+    "sec1": (3, None, sec1),
+    "sec2": (5, None, sec2),
+    "sec3": (5, None, sec3),
+    "sec4": (3, None, sec4),
+    "sec5": (3, None, sec5),
+    "sec6": (3, None, sec6),
+    "sec7": (3, None, sec7),
+    "sec8": (3, None, sec8),
+    "sec9": (3, None, sec9),
+    "sec10": (4, None, sec10),
 }
 
 
@@ -437,8 +489,9 @@ def scene(key):
     name = f"nmos_{key}"
     m, root = start(name, beats, page="chip")
     C.mats(m)
-    fn(m, root, nmos_mats(m))
-    C.glide_camera(root, poses)
+    D.mats(m)
+    out = fn(m, root)
+    C.glide_camera(root, out if poses is None else poses)
     finish(name, page="chip")
 
 

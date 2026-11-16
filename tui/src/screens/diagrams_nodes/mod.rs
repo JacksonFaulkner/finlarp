@@ -17,6 +17,7 @@ mod develop;
 mod dice;
 mod etch;
 mod expose;
+mod fiber;
 mod final_test;
 mod hbm;
 mod implant;
@@ -24,8 +25,10 @@ mod ingot;
 mod litho;
 mod melt;
 mod package;
+mod packaging;
 mod pick;
 mod polysilicon;
+mod power;
 mod sand;
 mod ship;
 mod slice_polish;
@@ -72,6 +75,24 @@ const NODES: &[Node] = &[
     dice::NODE,
     pick::NODE,
     package::NODE,
+    packaging::logic_die::NODE,
+    packaging::microbump::NODE,
+    packaging::interposer::NODE,
+    packaging::substrate::NODE,
+    packaging::assembly::NODE,
+    packaging::board::NODE,
+    fiber::dsp::NODE,
+    fiber::laser::NODE,
+    fiber::fibre::NODE,
+    fiber::photodiode::NODE,
+    fiber::module::NODE,
+    fiber::cpo::NODE,
+    power::grid::NODE,
+    power::substation::NODE,
+    power::switchgear::NODE,
+    power::ups::NODE,
+    power::rack::NODE,
+    power::vrm::NODE,
     final_test::NODE,
     ship::NODE,
 ];
@@ -112,8 +133,13 @@ mod tests {
             let art = super::super::diagrams_desc::visual(n.page)
                 .unwrap_or_else(|| panic!("{}: no page", n.page));
             let heads = art.lines().filter(|l| l.starts_with("# ")).count();
+            // A page whose last heading is its sources list may stop at the picture sections:
+            // the sources page is text only (as in POLYSILICON's section 10 before its picture).
+            let text_only_sources = art.lines().rev().find(|l| l.starts_with("# "))
+                .is_some_and(|l| l.contains("Sources"));
+            let want = if text_only_sources { heads - 1 } else { heads };
             assert!(
-                n.sections.is_empty() || n.sections.len() == heads,
+                n.sections.is_empty() || n.sections.len() == want || n.sections.len() == heads,
                 "{}: {} sections for {heads} headings",
                 n.page,
                 n.sections.len()
@@ -158,5 +184,43 @@ mod tests {
                 check(n.page, &format!("section {}", i + 1), *b);
             }
         }
+    }
+
+    /// Every FIBER overview and numbered section moves inside each of its beats:
+    /// a beat that is still would read as a frozen page.
+    #[test]
+    fn fiber_pictures_move_in_every_beat() {
+        use crate::ui::anim::Player;
+        use std::collections::HashSet;
+        use std::time::Instant;
+        const FIBER: [&str; 6] = ["PAM4 DSP", "LASER", "OPTICAL FIBER", "PHOTODIODE", "TRANSCEIVER", "CPO"];
+        let mut stuck = Vec::new();
+        for n in NODES.iter().filter(|n| FIBER.contains(&n.page)) {
+            let mut scenes: Vec<(String, Box<dyn crate::ui::anim::Scene>)> = Vec::new();
+            // Zoom-ins are held pictures by design (one frozen state, captions change), so only
+            // the overview and the numbered sections must move.
+            if let Some(b) = n.overview {
+                scenes.push((format!("{} overview", n.page), b()));
+            }
+            for (i, b) in n.sections.iter().enumerate() {
+                scenes.push((format!("{} section {}", n.page, i + 1), b()));
+            }
+            for (name, scene) in scenes {
+                let mut p = Player::new(scene, Instant::now());
+                let beats = p.shot_at(0).beats;
+                for beat in 0..beats {
+                    let mut seen = HashSet::new();
+                    for k in 0..4u64 {
+                        let ms = beat as u64 * 8000 + k * 2000 + 1000;
+                        let img = p.pixels(&p.time_at(ms), 120, 72).expect("pixel frame");
+                        seen.insert(img.into_raw());
+                    }
+                    if seen.len() < 2 {
+                        stuck.push(format!("{name} beat {beat}"));
+                    }
+                }
+            }
+        }
+        assert!(stuck.is_empty(), "frozen beats:\n{}", stuck.join("\n"));
     }
 }

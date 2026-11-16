@@ -1,0 +1,284 @@
+{
+  "logic_die": [
+    {
+      "section": 1,
+      "zoom": "a",
+      "caption": "the reticle limit"
+    },
+    {
+      "section": 2,
+      "zoom": "d",
+      "caption": "HBM shoreline"
+    },
+    {
+      "section": 3,
+      "zoom": "b",
+      "caption": "yield and known-good dies"
+    },
+    {
+      "section": 4,
+      "zoom": "a",
+      "caption": "the reticle limit"
+    },
+    {
+      "section": 5,
+      "zoom": "b",
+      "caption": "yield and known-good dies"
+    },
+    {
+      "section": 6,
+      "zoom": "c",
+      "caption": "chiplets and the die-to-die link"
+    },
+    {
+      "section": 7,
+      "zoom": "e",
+      "caption": "power and heat"
+    },
+    {
+      "section": 8,
+      "zoom": "c",
+      "caption": "chiplets and the die-to-die link"
+    },
+    {
+      "section": 9,
+      "zoom": "b",
+      "caption": "yield and known-good dies"
+    }
+  ],
+  "microbump": [
+    {
+      "section": 1,
+      "zoom": "a",
+      "caption": "C4, microbump, hybrid bond"
+    },
+    {
+      "section": 2,
+      "zoom": "a",
+      "caption": "C4, microbump, hybrid bond"
+    },
+    {
+      "section": 3,
+      "zoom": "b",
+      "caption": "making a joint"
+    },
+    {
+      "section": 4,
+      "zoom": "c",
+      "caption": "pitch and the solder wall"
+    },
+    {
+      "section": 5,
+      "zoom": "c",
+      "caption": "pitch and the solder wall"
+    },
+    {
+      "section": 6,
+      "zoom": "d",
+      "caption": "stress, warpage and underfill"
+    },
+    {
+      "section": 7,
+      "zoom": "e",
+      "caption": "current through the bumps"
+    },
+    {
+      "section": 8,
+      "zoom": "b",
+      "caption": "making a joint"
+    },
+    {
+      "section": 9,
+      "zoom": "c",
+      "caption": "pitch and the solder wall"
+    }
+  ],
+  "interposer": [
+    {
+      "section": 1,
+      "zoom": "a",
+      "caption": "CoWoS-S, -R and -L"
+    },
+    {
+      "section": 2,
+      "zoom": "a",
+      "caption": "CoWoS-S, -R and -L"
+    },
+    {
+      "section": 3,
+      "zoom": "b",
+      "caption": "a signal from HBM to GPU"
+    },
+    {
+      "section": 4,
+      "zoom": "a",
+      "caption": "CoWoS-S, -R and -L"
+    },
+    {
+      "section": 5,
+      "zoom": "a",
+      "caption": "CoWoS-S, -R and -L"
+    },
+    {
+      "section": 6,
+      "zoom": "c",
+      "caption": "growing past the reticle"
+    },
+    {
+      "section": 7,
+      "zoom": "b",
+      "caption": "a signal from HBM to GPU"
+    },
+    {
+      "section": 8,
+      "zoom": "e",
+      "caption": "capacity"
+    },
+    {
+      "section": 9,
+      "zoom": "e",
+      "caption": "capacity"
+    }
+  ],
+  "substrate": [
+    {
+      "section": 1,
+      "zoom": "b",
+      "caption": "fan-out: C4 to BGA"
+    },
+    {
+      "section": 2,
+      "zoom": "a",
+      "caption": "building the layers"
+    },
+    {
+      "section": 3,
+      "zoom": "a",
+      "caption": "building the layers"
+    },
+    {
+      "section": 4,
+      "zoom": "d",
+      "caption": "ABF film and substrate makers"
+    },
+    {
+      "section": 5,
+      "zoom": "d",
+      "caption": "ABF film and substrate makers"
+    },
+    {
+      "section": 6,
+      "zoom": "c",
+      "caption": "warpage and glass cores"
+    },
+    {
+      "section": 7,
+      "zoom": "b",
+      "caption": "fan-out: C4 to BGA"
+    },
+    {
+      "section": 8,
+      "zoom": "d",
+      "caption": "ABF film and substrate makers"
+    },
+    {
+      "section": 9,
+      "zoom": "c",
+      "caption": "warpage and glass cores"
+    }
+  ],
+  "assembly": [
+    {
+      "section": 1,
+      "zoom": "a",
+      "caption": "chip on the wafer"
+    },
+    {
+      "section": 2,
+      "zoom": "b",
+      "caption": "on substrate"
+    },
+    {
+      "section": 3,
+      "zoom": "a",
+      "caption": "chip on the wafer"
+    },
+    {
+      "section": 4,
+      "zoom": "c",
+      "caption": "yield stackup"
+    },
+    {
+      "section": 5,
+      "zoom": "d",
+      "caption": "capacity"
+    },
+    {
+      "section": 6,
+      "zoom": "d",
+      "caption": "capacity"
+    },
+    {
+      "section": 7,
+      "zoom": "e",
+      "caption": "test at every stage"
+    },
+    {
+      "section": 8,
+      "zoom": "d",
+      "caption": "capacity"
+    },
+    {
+      "section": 9,
+      "zoom": "c",
+      "caption": "yield stackup"
+    }
+  ],
+  "board": [
+    {
+      "section": 1,
+      "zoom": "a",
+      "caption": "BGA to the board"
+    },
+    {
+      "section": 2,
+      "zoom": "a",
+      "caption": "BGA to the board"
+    },
+    {
+      "section": 3,
+      "zoom": "b",
+      "caption": "power delivery"
+    },
+    {
+      "section": 4,
+      "zoom": "b",
+      "caption": "power delivery"
+    },
+    {
+      "section": 5,
+      "zoom": "c",
+      "caption": "cooling: cold plate and liquid"
+    },
+    {
+      "section": 6,
+      "zoom": "d",
+      "caption": "modules, links and racks"
+    },
+    {
+      "section": 7,
+      "zoom": "d",
+      "caption": "modules, links and racks"
+    },
+    {
+      "section": 8,
+      "zoom": "d",
+      "caption": "modules, links and racks"
+    },
+    {
+      "section": 9,
+      "zoom": "e",
+      "caption": "power, cooling and size limits"
+    }
+  ]
+}

@@ -235,7 +235,7 @@ def test(root, m, X, f_beam, f_scatter, f_align, f_end):
         show(s, [(f_scatter, f_end)])
 
 
-def saw(root, m, rod_parts, X, f_cut, f_spread, f_end):
+def saw(root, m, rod_parts, X, f_cut, f_spread, f_end, f_on=0):
     """The wire web (wires in the kerf between wafer positions, two rollers) and the ingot, which
     is cut at f_cut into wafers that spread apart from f_spread to f_end. The caller moves the rod
     group through the web."""
@@ -246,7 +246,7 @@ def saw(root, m, rod_parts, X, f_cut, f_spread, f_end):
         xcyl(f"roller{s:+d}", X - 580, X + 580, 70, A, s * 440, m["steel"], root)
     beam = empty("mount_beam", rod_parts["group"])
     box("mount_beam_m", (-HALF - 70, A + RAW, -80), (HALF + 70, A + RAW + 70, 80), m["steel"], beam)
-    show(beam, [(0, f_end)])
+    show(beam, [(f_on, f_end)])  # only during the saw step: it would sit on the notch and grind
     show(rod_parts["body"], [(0, f_cut)])
     if rod_parts["skin"] is not None:
         show(rod_parts["skin"], [(0, f_cut)])
@@ -270,6 +270,9 @@ def line(root, m, names, tags=None, marks=False, skin_grind=None):
     tags = tags or {}
     n = len(names)
     rod_skin_until = F(names.index("grind"), 0.85) if "grind" in names else None
+    if rod_skin_until is None and "notch" in names:
+        # no grind station: drop the skin as the notch starts, or it would bury the groove
+        rod_skin_until = F(names.index("notch"), 0.15)
     rp = rod(root, m, skin_until=rod_skin_until, cones=True)
     plinth(root, m, -700, STAGE_W * (n - 1) + 700)
     for i in range(n):
@@ -295,7 +298,7 @@ def line(root, m, names, tags=None, marks=False, skin_grind=None):
         if nm == "notch":
             notch(root, m, rp, F(i, 0.2), F(i, 0.9))
         if nm == "saw":
-            saw(root, m, rp, X, F(i, 0.42), F(i, 0.6), F(i + 1, 0))
+            saw(root, m, rp, X, F(i, 0.42), F(i, 0.6), F(i + 1, 0), f_on=F(i, 0))
         for text, dx, dy, dz in tags.get(i, []):
             label(text, (X + dx, dy, dz), root, [(F(i, 0.3), F(i + 1, 0))])
     # the rod's keys: station moves, the saw lift, and the hold at each station

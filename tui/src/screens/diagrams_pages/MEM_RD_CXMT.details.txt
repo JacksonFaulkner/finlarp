@@ -1,0 +1,23 @@
+== HBM3 on 16 nm
+# What it does
+Reported 8-high HBM3 stack on a 16 nm process; samples went to Huawei in 2025.
+# Why it matters
+Shows domestic HBM is reaching samples, not only plans.
+# Source
+Tom's Hardware and Notebookcheck, 2025-2026 reports.
+
+== Yield
+# What it does
+One secondary source puts HBM3 yield near 25%; mass production is targeted for late Q4 2026.
+# Why it matters
+Low yield caps how many stacks can ship, whatever the target date.
+# Source
+Notebookcheck (single source; verify before relying on it).
+
+== Gap to leaders
+# What it does
+Analysts put CXMT three to four years behind; a SemiAnalysis projection has HBM wafer input near 55,000 per month in 2027.
+# Why it matters
+Sets the pace of domestic HBM supply if the yield and timing targets hold.
+# Source
+EE Times Japan, July 2026.

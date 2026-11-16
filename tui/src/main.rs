@@ -47,6 +47,7 @@ const SCREENS: &[&str] = &[
     "portfolio",
     "canslim",
     "dossier",
+    "memory",
     "earnings",
     "search",
     "filings",
@@ -163,6 +164,8 @@ fn build_screen(
         // Open from cache right away; the screen refreshes itself in the background.
         ("canslim", Some(sym)) => Box::new(canslim::open(ctx, Some(sym))?),
         ("dossier", Some(sym)) => Box::new(dossier::open(ctx, Some(sym))?),
+        // memory R&D company page (diagrams Memory tab), cached as "MEM:<TICKER>"
+        ("memory", Some(sym)) => Box::new(dossier::open(ctx, Some(format!("MEM:{sym}")))?),
         ("chat", _) => Box::new(chat::open(ctx, arg)?),
         ("candles", _) => Box::new(candles::open(ctx, arg)?),
         ("notes", _) => Box::new(notes::open(ctx, arg)?),

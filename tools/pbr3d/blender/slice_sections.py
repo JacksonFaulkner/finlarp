@@ -70,7 +70,7 @@ def plinth(g, m, x0, x1, z0=-600, z1=600, y=0.0):
 def cards(root, m, specs, z_rows=(-800, 800)):
     """Paper cards in a grid; specs = [(label text, beat, lit-from u)], lit with a gold strip."""
     for n, (text, b, u) in enumerate(specs):
-        x = -2400 + 1600 * (n % 4)
+        x = -3900 + 2600 * (n % 4)  # wide spacing: the long tags run about 2100 mm
         z = z_rows[0] if n < 4 else z_rows[1]
         box(f"card{n}", (x - 700, 0, z - 500), (x + 700, 30, z + 500), m["paper"], root)
         lit = empty(f"lit{n}", root)
@@ -85,7 +85,8 @@ def sec1():
     names = ["INGOT", "SLICE", "GRIND/LAP", "ETCH", "EDGE", "POLISH", "CLEAN"]
     for i, x in enumerate(X):
         h = 260 + 60 * (i % 2)
-        box(f"st{i}", (x - 260, TRACK_Y, -220), (x + 260, TRACK_Y + h, 220), m["dark_steel"], root)
+        # behind the track (z < -170): a box over the track hid the wafer at every station
+        box(f"st{i}", (x - 260, TRACK_Y, -440), (x + 260, TRACK_Y + h, -180), m["dark_steel"], root)
     stops = [(0, X[0]), (F(0, 0.8), X[1]), (F(1, 0.0), X[1]), (F(1, 0.8), X[3]),
              (F(2, 0.0), X[3]), (F(2, 0.8), X[5]), (F(3, 0.0), X[5]), (F(3, 0.8), X[6]), (END, X[6])]
     carrier = K.Carrier(root, m, stops)
@@ -98,8 +99,8 @@ def sec1():
     ]
     for b, idxs, text in tags:
         label(text, (X[idxs[0]] + 200, 600, 0), root, beat(b))
-    camera(root, [((500.0, 280.0, 0.0), 3400.0, 0.10, 0.14), ((2500.0, 280.0, 0.0), 3400.0, 0.10, 0.14),
-                  ((4500.0, 280.0, 0.0), 3400.0, 0.10, 0.14), ((6000.0, 280.0, 0.0), 3400.0, 0.10, 0.14)])
+    camera(root, [((500.0, 250.0, 0.0), 3000.0, 0.10, 0.28), ((2500.0, 250.0, 0.0), 3000.0, 0.10, 0.28),
+                  ((4500.0, 250.0, 0.0), 3000.0, 0.10, 0.28), ((6000.0, 250.0, 0.0), 3000.0, 0.10, 0.28)])
     finish("sec1", page="slice")
 
 
@@ -124,14 +125,15 @@ def sec2():
     label("ingot fed down into the web", (320, 520, 0), root, [(F(1, 0.1), F(2, 0.0))])
     label("coolant washes out the swarf", (300, 600, 0), root, [(F(2, 0.2), END)])
     # the close look: one wire and its slot
-    grit = K.grit_points(root, m, 0.0, WEB_YS[2], 0.0, F(3, 0.0), END, n=7)
-    label("grit tips chip the silicon", (60, WEB_YS[2] + 24, 40), root, [(F(3, 0.1), END)])
-    label("kerf: wire plus diamond layer", (120, WEB_YS[2] + 40, 0), root, [(F(3, 0.3), END)])
+    # on the wire just past the slice edge (x > 150), not inside the slot where the slices hide it
+    grit = K.grit_points(root, m, 255.0, WEB_YS[2], 0.0, F(3, 0.0), END, n=7)
+    label("grit tips chip the silicon", (240, WEB_YS[2] + 14, 10), root, [(F(3, 0.1), END)])
+    label("kerf: wire plus diamond layer", (175, WEB_YS[2] + 30, 0), root, [(F(3, 0.3), END)])
     camera(root, [
         ((0.0, 350.0, 0.0), 2600.0, 0.22, 0.12),
         ((0.0, 350.0, 0.0), 2600.0, 0.22, 0.12),
         ((0.0, 420.0, 0.0), 2000.0, 0.20, 0.10),
-        ((260.0, WEB_YS[2], 0.0), 300.0, 0.18, 0.05),
+        ((240.0, WEB_YS[2], 0.0), 420.0, 0.25, 0.10),
     ])
     finish("sec2", page="slice")
 
@@ -157,7 +159,7 @@ def sec3():
     disc("lap_lower", (0, TRACK_Y / 2, 0), 260.0, TRACK_Y, m["plate"], g, verts=72)
     K.slab(g, "lap_wafer", 0.0, TRACK_Y, 0.0, WAFER_R, WAFER_T, m["silicon"])
     upper = pivot("lap_upper", (0, 0, 0), g)
-    disc("lap_upper_m", (0, 0, 0), 260.0, 60.0, m["plate"], upper, verts=72)
+    cut(disc("lap_upper_m", (0, 0, 0), 260.0, 60.0, m["plate"], upper, verts=72), z=-40.0)
     key(upper, F(1, 0.0), "location", P(0, 187.5, 0), linear=True)
     key(upper, F(1, 0.8), "location", P(0, 140.5, 0), linear=True)
     key(upper, END, "location", P(0, 140.5, 0), linear=True)
@@ -188,13 +190,14 @@ def sec3():
     # 4 polishing: the pad, and the softened band wiped off
     g = bgroup(root, "m_pol", 4)
     K.slab(g, "pol_wafer", 0.0, TRACK_Y, 0.0, WAFER_R, WAFER_T, m["silicon"])
-    band = box("pol_band", (-150, TRACK_Y + WAFER_T - 1, -150), (150, TRACK_Y + WAFER_T + 2, 150), m["film"], g)
+    band = K.pbox("pol_band", (-150, TRACK_Y + WAFER_T - 1, -150), (150, TRACK_Y + WAFER_T + 2, 150), m["film"], g,
+                  at=(150, TRACK_Y + WAFER_T, 0))
     scale_keys(band, [(0, (1, 1, 1)), (F(4, 0.2), (1, 1, 1)), (F(4, 0.85), (0.0001, 1, 1)), (END, (0.0001, 1, 1))], until=F(4, 0.2))
     pad = empty("pol_pad", g)
     key(pad, 0, "location", P(0, 200, 0))
     key(pad, F(4, 0.4), "location", P(0, 160, 0), linear=True)
     key(pad, END, "location", P(0, 160, 0), linear=True)
-    disc("pol_pad_m", (0, 0, 0), 230.0, 30.0, m["pad"], pad, verts=72)
+    cut(disc("pol_pad_m", (0, 0, 0), 230.0, 30.0, m["pad"], pad, verts=72), z=-40.0)
     label("pad and slurry: chemistry softens, abrasive wipes", (330, 260, 0), root, beat(4))
     camera(root, [
         ((0.0, 200.0, 0.0), 1500.0, 0.25, 0.14),
@@ -237,7 +240,7 @@ def sec4():
     label("775 um +/- 25 um", (210, 200, 0), root, beat(3))
     label("TTV 5 um or less", (210, 140, 0), root, beat(3))
     camera(root, [
-        ((0.0, 230.0, 0.0), 1900.0, 0.12, 0.14),
+        ((-50.0, 230.0, 0.0), 2400.0, 0.12, 0.14),
         ((350.0, 230.0, 0.0), 1900.0, 0.12, 0.14),
         ((-300.0, 230.0, 0.0), 1900.0, 0.12, 0.14),
         ((0.0, 230.0, 0.0), 1900.0, 0.12, 0.14),
@@ -257,9 +260,9 @@ def sec5():
     ]
     box("zero_line", (-3, -60, -60), (0, 680, 60), m["steel"], g)
     for k, (text, um, y, mm, b, u0, u1) in enumerate(rows):
-        grow_hbar(g, f"bar{k}", 0, y, 0, um * 2.0, 40.0, mm, F(b, u0), F(b, u1))
-        label(text, (um * 2.0 + 20, y + 60, 0), g, [(F(b, u1 - 0.05), END)])
-    camera(root, [((150.0, 330.0, 0.0), 1400.0, 0.04, 0.10)] * 4)
+        grow_hbar(g, f"bar{k}", 0, y, 0, um * 4.0, 70.0, mm, F(b, u0), F(b, u1))
+        label(text, (um * 4.0 + 20, y + 50, 0), g, [(F(b, u1 - 0.05), END)])
+    camera(root, [((300.0, 380.0, 0.0), 1500.0, 0.10, 0.12)] * 4)
     finish("sec5", page="slice")
 
 
@@ -286,8 +289,8 @@ def sec6():
     g = bgroup(root, "s3", 3)
     grow_bar(g, "gold_pad", 0, 0, 220, 50 * 2.0, m, F(3, 0.1), F(3, 0.5))
     label("DuPont (DD): over 50% of pads (undated)", (-170, 160, 0), root, beat(3))
-    camera(root, [((330.0, 150.0, 0.0), 2300.0, 0.10, 0.10), ((500.0, 150.0, 0.0), 2900.0, 0.10, 0.10),
-                  ((150.0, 150.0, 0.0), 2300.0, 0.10, 0.10), ((150.0, 150.0, 0.0), 2300.0, 0.10, 0.10)])
+    camera(root, [((60.0, 120.0, 0.0), 1500.0, 0.10, 0.15), ((500.0, 120.0, 0.0), 2200.0, 0.10, 0.15),
+                  ((200.0, 120.0, 0.0), 1600.0, 0.10, 0.15), ((60.0, 120.0, 0.0), 1500.0, 0.10, 0.15)])
     finish("sec6", page="slice")
 
 
@@ -322,8 +325,8 @@ def sec7():
     box("tool_c", (520, 0, -200), (640, 110, 200), m["red"], g)
     label("Applied and Ebara: two suppliers", (-300, 420, 0), root, beat(3))
     label("Chinese toolmakers pushing in", (460, 180, 0), root, [(F(3, 0.1), END)])
-    camera(root, [((150.0, 220.0, 0.0), 1800.0, 0.08, 0.12), ((0.0, 150.0, 0.0), 2600.0, 0.08, 0.12),
-                  ((0.0, 150.0, 0.0), 2600.0, 0.08, 0.12), ((150.0, 220.0, 0.0), 1800.0, 0.08, 0.12)])
+    camera(root, [((150.0, y - 30, 0.0), 1500.0, 0.08, 0.12), ((50.0, 210.0, 0.0), 1600.0, 0.08, 0.12),
+                  ((0.0, 180.0, 0.0), 2600.0, 0.08, 0.12), ((180.0, 200.0, 0.0), 2600.0, 0.08, 0.12)])
     finish("sec7", page="slice")
 
 
@@ -337,14 +340,14 @@ def sec8():
     # 1: a film with a bump on the wafer, planarised by a pad
     g = bgroup(root, "d1", 1)
     box("film_base", (-260, TRACK_Y, -200), (260, TRACK_Y + 60, 200), m["silicon"], g)
-    bump = box("film_bump", (-40, TRACK_Y + 60, -120), (40, TRACK_Y + 180, 120), m["film"], g)
+    bump = K.pbox("film_bump", (-40, TRACK_Y + 60, -120), (40, TRACK_Y + 180, 120), m["film"], g, at=(0, TRACK_Y + 60, 0))
     scale_keys(bump, [(0, (1, 1, 1)), (F(1, 0.1), (1, 1, 1)), (F(1, 0.8), (1, 1, 0.4)), (END, (1, 1, 0.4))], until=F(1, 0.1))
     pad = empty("fl_pad", g)
     key(pad, 0, "location", P(0, 330, 0))
     key(pad, F(1, 0.2), "location", P(0, 330, 0), linear=True)
     key(pad, F(1, 0.9), "location", P(0, 260, 0), linear=True)
     key(pad, END, "location", P(0, 260, 0), linear=True)
-    disc("fl_pad_m", (0, 0, 0), 230.0, 30.0, m["pad"], pad, verts=72)
+    cut(disc("fl_pad_m", (0, 0, 0), 230.0, 30.0, m["pad"], pad, verts=72), z=-40.0)  # the bump shows
     label("films: STI, copper, tungsten", (260, 260, 0), root, beat(1))
     # 2: the same law at both ends: wafer polish and fab CMP
     g = bgroup(root, "d2", 2)
@@ -355,26 +358,26 @@ def sec8():
     camera(root, [
         ((0.0, 200.0, 0.0), 1500.0, 0.10, 0.14),
         ((0.0, 200.0, 0.0), 1700.0, 0.10, 0.14),
-        ((0.0, 200.0, 0.0), 2100.0, 0.06, 0.14),
+        ((0.0, 160.0, 0.0), 2700.0, 0.06, 0.14),
     ])
     finish("sec8", page="slice")
 
 
 def sec9():
     m, root = begin(9, 3)
-    plinth(root, m, -3300, 3300, -1700, 1700)
+    plinth(root, m, -4400, 4400, -1700, 1700)
     cards(root, m, [
         ("removal amounts: patent examples, not a standard", 0, 0.2),
         ("market shares: old or market-research, verify", 1, 0.2),
         ("kerf: solar-grade roadmap numbers", 2, 0.2),
     ])
-    camera(root, [((0.0, 0.0, 0.0), 6200.0, 0.06, 0.85)] * 3)
+    camera(root, [((-1800.0, 0.0, -800.0), 20000.0, 0.06, 0.85)] * 3)  # the labels run to about x -5000 and +3300
     finish("sec9", page="slice")
 
 
 def sec10():
     m, root = begin(10, 3)
-    plinth(root, m, -3300, 3300, -1700, 1700)
+    plinth(root, m, -4400, 4400, -1700, 1700)
     srcs = [
         ("[1] TaiyangNews, diamond wire", 0), ("[2] Ge et al., fine wire", 0), ("[3] Springer 2026, wear and kerf", 0),
         ("[4] Lapping, etch, polish patents", 1), ("[5] Preston law and pH (patent, doi)", 1),
@@ -387,7 +390,7 @@ def sec10():
         seen[b] = j + 1
         specs.append((t, b, 0.15 + 0.3 * j))
     cards(root, m, specs)
-    camera(root, [((0.0, 0.0, 0.0), 13500.0, 0.06, 0.85)] * 3)
+    camera(root, [((900.0, 0.0, 0.0), 24000.0, 0.06, 0.85)] * 3)  # the right-hand column's tags reach x 6000
     finish("sec10", page="slice")
 
 

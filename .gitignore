@@ -3,6 +3,13 @@
 *.env
 !.env.example
 .envrc
+# pbr3d run log (observe.py): this machine's timings, not for git
+tools/pbr3d/runs.jsonl
+# terraform: tfvars hold secret values; state holds them too
+terraform/*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
 .venv/
 __pycache__/
 *.pyc

@@ -32,6 +32,9 @@ const SOCKET: &str = "fl-claude";
 /// `gl` last column. Every other key in that table runs its normal copy-mode
 /// action, and each key returns the client to copy-mode-vi.
 ///
+/// In copy-mode, `v` starts a selection (tmux's default `v` toggles block mode),
+/// `V` selects lines, and `y` copies to the macOS clipboard (pbcopy) and leaves copy-mode.
+///
 /// `space a c` in copy-mode closes the popup (the session keeps running).
 const KEYS: &str = r##"
 set -g mode-keys vi
@@ -43,6 +46,8 @@ bind-key -T fl-g g send-keys -X history-top \; switch-client -T copy-mode-vi
 bind-key -T fl-g h send-keys -X back-to-indentation \; switch-client -T copy-mode-vi
 bind-key -T fl-g l send-keys -X end-of-line \; switch-client -T copy-mode-vi
 bind-key -T copy-mode-vi i send-keys -X cancel
+bind-key -T copy-mode-vi v send-keys -X begin-selection
+bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "pbcopy"
 bind-key -T copy-mode-vi Space switch-client -T fl-sp
 bind-key -T fl-sp a switch-client -T fl-spa
 bind-key -T fl-spa c detach-client
@@ -226,5 +231,21 @@ fn tmux(args: &[&str]) -> io::Result<()> {
         Err(io::Error::other(
             String::from_utf8_lossy(&out.stderr).trim().to_string(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn copy_mode_visual_and_yank_are_bound() {
+        let script = keys_script("");
+        assert!(script.contains("bind-key -T copy-mode-vi v send-keys -X begin-selection"));
+        assert!(
+            script.contains(
+                "bind-key -T copy-mode-vi y send-keys -X copy-pipe-and-cancel \"pbcopy\""
+            )
+        );
     }
 }

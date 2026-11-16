@@ -97,7 +97,7 @@ def groups():
     same_y, alt_y = 150.0, -150.0
     for k in range(5):
         x = -860.0 + SAME_STEP * k
-        timed(root, f"rd_same{k}", (x, same_y - 90, 0), (x + BURST, same_y + 90, 50), m["rd"], [(F(0, 0.05), F(3, 0))])
+        timed(root, f"rd_same{k}", (x, same_y - 90, 0), (x + BURST, same_y + 90, 50), m["rd"], [(F(0, 0.05), F(1, 0)), (F(2, 0.0), F(3, 0))])
     for k in range(6):
         x = -840.0 + ALT_STEP * k
         timed(root, f"rd_alt{k}", (x, same_y - 90, 0), (x + BURST, same_y + 90, 50), m["rd2"] if k % 2 else m["rd"], [(F(1, 0.05), F(2, 0.0))])
@@ -171,7 +171,7 @@ def mapping():
         K.reads(root, bk, F(3, 0.30), F(3, 0.90), 2, m)
     tag(root, "row hits first, rest spread", (-120.0, 40.0, 60.0), beat(3))
     K.commit({"all": banks})
-    camera(root, [((0.0, 100.0, 0.0), 3600.0, 0.10, 0.22)] * BEATS)
+    camera(root, [((0.0, 100.0, 0.0), 2600.0, 0.08, 0.16)] * BEATS)
 
 
 # ---- refresh: DDR4 all-bank vs DDR5 same-bank -----------------------------------------------

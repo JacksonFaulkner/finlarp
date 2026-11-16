@@ -1,0 +1,1 @@
+SanDisk is a NAND maker that co-developed high-bandwidth flash (HBF) with SK hynix: NAND stacked in an HBM-style package for AI inference. The first open spec (OCP, Aug 2026) covers up to 512 GB per package. Samples are expected in early 2027. Ticker: SNDK.

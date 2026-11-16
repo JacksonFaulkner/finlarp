@@ -1,0 +1,23 @@
+== zHBM roadmap
+# What it does
+Three phases: compute inside the memory stack first, then DRAM stacked directly on the processor.
+# Why it matters
+Removes the interposer shoreline limit: the memory no longer has to sit beside the GPU.
+# Source
+Tom's Hardware, Hot Chips 2026 coverage.
+
+== Hybrid copper bonding
+# What it does
+Joins copper pads directly between dies or wafers, with no solder bump.
+# Why it matters
+Higher I/O density in a shorter stack; the enabling step for zHBM.
+# Source
+SemiEngineering, HBM4 sticks with microbumps (hybrid bonding is not yet in volume).
+
+== HBM5 timing
+# What it does
+The JEDEC HBM5 spec is not final; zHBM commercialization is expected around 2028.
+# Why it matters
+A roadmap date, not a product: volume depends on the spec and on bonding yield.
+# Source
+Tom's Hardware, Hot Chips 2026 coverage.

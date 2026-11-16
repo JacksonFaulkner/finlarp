@@ -120,9 +120,7 @@ def sec3():
     m, root = begin(3, 4)
     thick = group(root, "thickness")
     box("piece", (-120, 0, -60), (120, 30, 0), m["bulk"], thick)
-    tube("dim_a", (150, 0, 0), (150, 30, 0), 2.0, m["gold"], thick, verts=8)
-    tube("dim_b", (140, 0, 0), (160, 0, 0), 2.0, m["gold"], thick, verts=8)
-    tube("dim_c", (140, 30, 0), (160, 30, 0), 2.0, m["gold"], thick, verts=8)
+    K.dim_marks(thick, m, 150.0, 0.0, 30.0)
     show(thick, beat(0))
     label("775 +/- 25 um, vendor sheet", (0, 40, 20), root, beat(0))
 
@@ -214,26 +212,27 @@ def sec5():
     xs = [-450.0 + 180.0 * k for k in range(6)]
     f_on = [(0, 0.05), (0, 0.2), (1, 0.05), (1, 0.2), (1, 0.35), (2, 0.05)]
     for k, ((text, v, mm), x, (b, u)) in enumerate(zip(names, xs, f_on)):
-        grow = K.grow_bar(root, f"share{k}", x, 0, 110, v * 4.0, mm, F(b, u), F(b, u + 0.4))
-        label(text, (x, v * 4.0 + 20, 0), root, [(F(b, u + 0.2), END)])
+        grow = K.grow_bar(root, f"share{k}", x, 0, 110, v * 8.0, mm, F(b, u), F(b, u + 0.4))
+        label(text, (x, v * 8.0 + 20, 0), root, [(F(b, u + 0.2), END)])
 
     ghost = group(root, "ghost25")
-    box("ghost_sh", (xs[0] - 55, 0, -55), (xs[0] + 55, 28 * 4.0, 55), m["ghost"], ghost)
-    box("ghost_su", (xs[1] - 55, 0, -55), (xs[1] + 55, 25 * 4.0, 55), m["ghost"], ghost)
+    # behind the real bars (z < -60), so the 2025 outlines do not cover the 2024 bars in front
+    box("ghost_sh", (xs[0] - 60, 0, -220), (xs[0] + 60, 28 * 8.0, -140), m["ghost"], ghost)
+    box("ghost_su", (xs[1] - 60, 0, -220), (xs[1] + 60, 25 * 8.0, -140), m["ghost"], ghost)
     show(ghost, beat(3))
-    label("2025-ish source: Shin-Etsu 28%", (xs[0], 28 * 4.0 + 40, 0), root, beat(3))
+    label("2025-ish source: Shin-Etsu 28%", (xs[0], 28 * 8.0 + 60, 0), root, beat(3))
 
     br = group(root, "top5")
-    box("bracket", (xs[0] - 60, 150, -10), (xs[4] + 60, 160, 10), m["red"], br)
+    box("bracket", (xs[0] - 60, 255, -10), (xs[4] + 60, 265, 10), m["red"], br)
     show(br, beat(2))
-    label("top five: 85% (blog, low confidence)", (-60, 200, 0), root, beat(2))
-    label("top five above 90% (GEP 2018)", (-60, 240, 0), root, beat(2))
+    label("top five: 85% (blog, low confidence)", (-60, 300, 0), root, beat(2))
+    label("top five above 90% (GEP 2018)", (-60, 340, 0), root, beat(2))
 
     camera(root, [
-        ((0.0, 110.0, 0.0), 2000.0, 0.10, 0.10),
-        ((0.0, 110.0, 0.0), 2000.0, 0.10, 0.10),
-        ((0.0, 130.0, 0.0), 2000.0, 0.10, 0.10),
-        ((0.0, 130.0, 0.0), 2000.0, 0.10, 0.10),
+        ((-270.0, 140.0, 0.0), 1100.0, 0.10, 0.10),
+        ((-90.0, 150.0, 0.0), 1600.0, 0.10, 0.10),
+        ((0.0, 180.0, 0.0), 1700.0, 0.10, 0.10),
+        ((0.0, 160.0, 0.0), 1700.0, 0.10, 0.10),
     ])
     finish("sec5", page="wafer")
 
@@ -280,8 +279,8 @@ def sec6():
     label("the deal did not complete (textbook)", (0, 180, 0), root, beat(3))
 
     camera(root, [
-        ((0.0, 350.0, 0.0), 4200.0, 0.05, 0.05),
-        ((0.0, 300.0, 0.0), 3400.0, 0.05, 0.10),
+        ((0.0, 350.0, 0.0), 5600.0, 0.05, 0.05),  # wide: the outer maker cards sit at x +-900
+        ((0.0, 300.0, 0.0), 4600.0, 0.05, 0.10),
         ((0.0, 120.0, 0.0), 2200.0, 0.10, 0.10),
         ((0.0, 120.0, 0.0), 2200.0, 0.10, 0.10),
     ])
@@ -298,7 +297,7 @@ def sec7():
         h = K.wafer(discs, m, f"maker_disc{k}", y0=0.0, notch=False)
         h.location = P(-480 + 240 * k, 0, 0)
     quake = group(root, "quake")
-    box("quake_block", (-700, 0, -260), (700, 200, 260), m["quake"], quake)
+    box("quake_block", (-700, 0, -560), (700, 200, -200), m["quake"], quake)  # behind: it used to bury the wafers
     show(quake, [(F(0, 0.4), F(1, 0))])
     label("a Japan outage hits all five", (-300, 230, 0), root, [(F(0, 0.45), F(1, 0))])
 
@@ -357,9 +356,9 @@ def sec8():
     label("DEPOSIT, LITHO, ETCH start here", (850, 230, 0), root, beat(2))
 
     camera(root, [
-        ((-300.0, 100.0, 0.0), 3400.0, 0.35, 0.22),
-        ((0.0, 80.0, 0.0), 3000.0, 0.35, 0.22),
-        ((300.0, 100.0, 0.0), 3400.0, 0.35, 0.22),
+        ((-450.0, 100.0, 0.0), 2300.0, 0.35, 0.25),  # upstream tools
+        ((0.0, 50.0, 0.0), 800.0, 0.35, 0.28),  # the reference wafer fills the frame
+        ((350.0, 80.0, 0.0), 2000.0, 0.35, 0.25),  # wafer and the downstream tools
     ])
     finish("sec8", page="wafer")
 
@@ -383,10 +382,10 @@ CARDS = {
 def sec9():
     m, root = begin(9, 3)
     g = group(root, "sources")
-    K.plinth(g, m, -2300, 2300, -1600, 1600)
+    K.plinth(g, m, -4200, 4200, -1600, 1600)
     for n in range(1, 10):
         b = (n - 1) // 3
-        x = -1600.0 + 1600.0 * ((n - 1) % 3)
+        x = -2400.0 + 2400.0 * ((n - 1) % 3)  # wide columns: the long source tags run about 2000 mm
         z = -1000.0 + 1000.0 * b
         box(f"card{n}", (x - 600, 0, z - 400), (x + 600, 30, z + 400), m["paper"], g)
         lit = group(g, f"lit{n}")
@@ -394,9 +393,9 @@ def sec9():
         show(lit, [(F(b, 0.15 + 0.2 * ((n - 1) % 3)), END)])
         label(CARDS[n], (x - 600, 40, z + 400), g, [(F(b, 0.15 + 0.2 * ((n - 1) % 3)), END)])
     camera(root, [
-        ((0.0, 0.0, 0.0), 9400.0, 0.03, 0.85),
-        ((0.0, 0.0, 0.0), 9400.0, 0.02, 0.85),
-        ((0.0, 0.0, 0.0), 9400.0, -0.02, 0.85),
+        ((0.0, 0.0, 0.0), 14000.0, 0.03, 0.85),
+        ((0.0, 0.0, 0.0), 14000.0, 0.02, 0.85),
+        ((0.0, 0.0, 0.0), 14000.0, -0.02, 0.85),
     ])
     finish("sec9", page="wafer")
 

@@ -1,0 +1,23 @@
+== HBM4 and beyond
+# What it does
+Next HBM generation: 2048-bit interface per stack, with the base die doing more of the interface and test work.
+# Why it matters
+Bandwidth per stack is set by bus width and pin rate, so wider stacks are the path to more memory bandwidth per GPU.
+# Source
+JEDEC JESD270-4 (HBM4).
+
+== HBF with SanDisk
+# What it does
+NAND stacked in an HBM-style package, with a shared open spec: up to 512 GB, bandwidth tiers from about 0.4 to 3.0 TB/s.
+# Why it matters
+Gives inference chips far more capacity per GPU than HBM at a lower cost per bit, at a bandwidth below HBM.
+# Source
+SanDisk and SK hynix HBF press releases (Feb 2026; OCP spec Aug 2026).
+
+== Base die
+# What it does
+The logic die under the DRAM stack. It drives the PHY and test logic and is where custom logic would sit.
+# Why it matters
+Moving the base die to foundry logic lets the stack meet higher speed and power targets.
+# Source
+Trade press on HBM base dies (reported, not confirmed here).

@@ -24,7 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sand_overview import OFF, F, P, ball, box, empty, key, label, show  # noqa: E402
+from sand_overview import OFF, F, P, ball, box, empty, key, label, mat, show  # noqa: E402
 from sand_zooms import camera, finish, scale_keys  # noqa: E402
 import ingot_kit as K  # noqa: E402
 from ingot_kit import A, HALF, PITCH, R, RAW, STAGE_W, begin  # noqa: E402
@@ -68,7 +68,13 @@ def sec1():
         3: [("V groove, marks <110>", 0, A + R + 150, 80)],
         4: [("wire web cuts the kerf", 0, A - 300, 0)],
     })
-    camera(root, [((i * K.STAGE_W, 640.0, 0.0), 3800.0, 0.40, 0.20) for i in range(len(names))])
+    camera(root, [
+        ((0.0, 640.0, 0.0), 3800.0, 0.40, 0.20),
+        ((K.STAGE_W + 300, 620.0, 0.0), 3400.0, 0.75, 0.20),  # round to see the cut face
+        ((2 * K.STAGE_W, 640.0, 0.0), 3800.0, 0.40, 0.20),
+        ((3 * K.STAGE_W, 660.0, 0.0), 3200.0, 0.40, 0.55),  # from above: the groove on top
+        ((4 * K.STAGE_W, 620.0, 0.0), 4000.0, 0.50, 0.50),  # above the near roller
+    ])
     finish("sec1", page="ingot")
 
 
@@ -84,7 +90,12 @@ def sec2():
         2: [("V groove runs the full length", 0, A + R + 150, 80)],
         3: [("wire web: the ingot is cut", 0, A - 300, 0)],
     })
-    camera(root, [((i * K.STAGE_W, 620.0, 0.0), 3600.0, 0.25, 0.14) for i in range(len(names))])
+    camera(root, [
+        ((0.0, 620.0, 0.0), 3600.0, 0.25, 0.14),
+        ((K.STAGE_W, 620.0, 0.0), 3600.0, 0.25, 0.14),
+        ((2 * K.STAGE_W, 660.0, 0.0), 3200.0, 0.30, 0.55),  # from above: the groove on top
+        ((3 * K.STAGE_W, 620.0, 0.0), 3900.0, 0.40, 0.50),  # above the near roller
+    ])
     finish("sec2", page="ingot")
 
 
@@ -109,12 +120,20 @@ def atoms(root, m, origin, mat=None, skip=None):
 
 def sec3():
     m, root = begin("sec3", 4)
+    m["dopant"] = mat("ingot_dopant", (0.3, 0.6, 1.0), emit=(0.3, 0.6, 1.0), strength=2.5)
     ox = -2 * SP
     oy = A - 2 * SP
     oz = -2 * SP
     lat = empty("lattice", root)
     atoms(lat, m, (ox, oy, oz))
-    show(lat, [(0, F(2, 0)), (F(3, 0), END)])
+    show(lat, [(0, F(2, 0))])
+    # beat 3: a small-atom copy of the lattice, so the dopant atoms inside it are not hidden
+    lat_s = empty("lattice_small", root)
+    for i in range(CUBE):
+        for j in range(CUBE):
+            for k in range(CUBE):
+                ball(f"atom_s{i}{j}{k}", (ox + i * SP, oy + j * SP, oz + k * SP), 9, m["atom"], lat_s, segs=6)
+    show(lat_s, [(F(3, 0), END)])
     # beat 0: the top face, {100}, a square grid; gold atoms on that layer
     top = empty("top_layer", root)
     for i in range(CUBE):
@@ -135,13 +154,13 @@ def sec3():
     wf_notch.rotation_euler = (0, 0, math.radians(45))
     show(wf, [(F(2, 0), F(3, 0))])
     show(wf_g, [(F(2, 0), F(3, 0))])
-    tag(root, "notch marks <110>", (150, A + R + 120, 60), F(2, 0.3), F(3, 0))
+    tag(root, "notch marks <110>", (90, A + R + 40, 30), F(2, 0.3), F(3, 0))
     # beat 3: dopant atoms in the lattice, 1e13 to 1e16 per cm3
     dop = empty("dopant", root)
     for n, (i, j, k) in enumerate([(1, 2, 1), (3, 1, 3), (2, 3, 0), (0, 0, 4)]):
-        ball(f"dop{n}", (ox + i * SP, oy + j * SP, oz + k * SP), 30, m["blue"], dop, segs=8)
+        ball(f"dop{n}", (ox + i * SP, oy + j * SP, oz + k * SP), 30, m["dopant"], dop, segs=10)
     show(dop, [(F(3, 0.2), END)])
-    tag(root, "dopant atoms: 1e13 to 1e16 per cm3", (-260, A + 260, 200), F(3, 0.3), END)
+    tag(root, "dopant atoms: 1e13 to 1e16 per cm3", (ox + 1 * SP, oy + 2 * SP, oz + 1 * SP), F(3, 0.3), END)
     camera(root, [
         ((0.0, A, 0.0), 1100.0, 0.5, 0.35),
         ((0.0, A, 0.0), 1200.0, 0.6, 0.45),
@@ -157,21 +176,20 @@ def sec3():
 def sec4():
     m, root = begin("sec4", 4)
     wf = K.zcyl("wafer", 0, A, 0, R, 22, m["si"], root)
-    show(wf, [(0, END)])
     # beat 0: diameter 300 mm, a bar across the wafer
-    d = hbar(root, "diameter", -R, A + R + 60, 2 * R, 10, m["bar_hi"], F(0, 0.1), F(1, 0))
-    tag(root, "300 mm, +/- 0.2 mm", (0, A + R + 130, 60), F(0, 0.3), F(1, 0))
+    d = hbar(root, "diameter", -R, A, 2 * R, 10, m["bar_hi"], F(0, 0.1), F(1, 0))  # across the face
+    tag(root, "300 mm, +/- 0.2 mm", (0, A + R + 40, 20), F(0, 0.3), F(1, 0))
     # beat 1: thickness 775 um, seen from the edge
     edge = K.xcyl("edge", -40, 40, R, A, 0, m["si"], root)
     show(edge, [(F(1, 0), F(2, 0))])
-    show(wf, [(0, F(1, 0))])
+    show(wf, [(0, F(1, 0)), (F(2, 0), END)])  # off only for the edge view
     tag(root, "775 um, +/- 25 um", (60, A + R + 70, 0), F(1, 0.3), F(2, 0))
     # beat 2: the 1.0 mm V notch on the rim
     n2_g = empty("notch_lip", root)
     n2 = box("notch_lip_m", (-30, A + R - 22, -18), (30, A + R + 16, 18), m["notch"], n2_g)
     n2.rotation_euler = (0, 0, math.radians(45))
     show(n2_g, [(F(2, 0), F(3, 0))])
-    tag(root, "notch 1.0 mm deep, 90 deg", (120, A + R + 110, 60), F(2, 0.3), F(3, 0))
+    tag(root, "notch 1.0 mm deep, 90 deg", (90, A + R + 35, 30), F(2, 0.3), F(3, 0))
     # beat 3: a die grid inside the circle, about 640 dies of 100 mm2
     dies = empty("dies", root)
     for i in range(-6, 7):
@@ -180,10 +198,10 @@ def sec4():
             if math.hypot(x, y) < R - 14:
                 box(f"die{i}_{j}", (x - 9, A + y - 9, 30), (x + 9, A + y + 9, 46), m["bar_hi"], dies)
     show(dies, [(F(3, 0.1), END)])
-    tag(root, "about 125 g, about 640 dies", (0, A + R + 100, 60), F(3, 0.3), END)
+    tag(root, "about 125 g, about 640 dies", (0, A + R + 35, 60), F(3, 0.3), END)
     camera(root, [
         ((0.0, A, 0.0), 1000.0, 0.02, 0.05),
-        ((0.0, A, 0.0), 1000.0, math.pi / 2 - 0.15, 0.05),
+        ((0.0, A, 0.0), 1000.0, 0.45, 0.12),  # the edge disc side on: its thickness shows
         ((0.0, A, 0.0), 800.0, 0.02, 0.05),
         ((0.0, A, 0.0), 800.0, 0.02, 0.05),
     ])
@@ -205,8 +223,7 @@ def sec5():
             mat = m["ghost"]
         bar(root, f"um_{k}", x, 240, um / 2.0, mat, f0)
         tag(root, f"{name}: {um} um", (x, um / 2.0 + 90, 0), f0 + 40, END)
-    camera(root, [((0, 260, 0), 3900.0, 0.2, 0.15), ((0, 260, 0), 3900.0, 0.2, 0.15),
-                  ((0, 260, 0), 3900.0, 0.2, 0.15)])
+    camera(root, [((0, 300, 0), 3500.0, 0.15, 0.12)] * 3)
     finish("sec5", page="ingot")
 
 
@@ -220,12 +237,11 @@ def sec6():
     for k, (name, g, dies) in enumerate(MASS):
         x = (k - 1.5) * 380.0
         mat = m["bar_hi"] if name == "300 mm" else (m["ghost"] if name == "450 mm" else m["bar"])
-        bar(root, f"mass_{k}", x, 200, g / 2.0, mat, 0)
+        bar(root, f"mass_{k}", x, 200, g / 2.0, mat, 0, F(1, 0))
         bar(root, f"dies_{k}", x, 200, dies / 6.0, mat, F(1, 0))
         tag(root, f"{name}: {g} g", (x, g / 2.0 + 50, 0), 40, F(1, 0))
         tag(root, f"{dies} dies", (x, dies / 6.0 + 50, 0), F(1, 0) + 40, END)
-    camera(root, [((0, 240, 0), 3400.0, 0.2, 0.15), ((0, 240, 0), 3400.0, 0.2, 0.15),
-                  ((0, 240, 0), 3400.0, 0.2, 0.15)])
+    camera(root, [((0, 170, 0), 2300.0, 0.15, 0.12)] * 3)
     finish("sec6", page="ingot")
 
 
@@ -243,10 +259,12 @@ def sec7():
         hbar(root, f"share{k}", 0, y, pct * 40.0, 120, mat, f0)
         tag(root, f"{name}: {pct}%", (pct * 40.0 + 80, y, 60), f0 + 40, F(3, 0) if k < 4 else END)
     # beat 3: the five firms stacked against the rest of the market
-    hbar(root, "rest", 0, 140, 1300.0, 120, m["ghost"], F(3, 0))
-    tag(root, "five firms 68.5%, rest 31.5%", (0, 120, 60), F(3, 0.3), END)
+    # one stacked bar under the list (it used to sit on top of the GlobalWafers bar)
+    hbar(root, "five", 0, -560, 68.5 * 20.0, 120, m["bar_hi"], F(3, 0))
+    hbar(root, "rest", 68.5 * 20.0, -560, 31.5 * 20.0, 120, m["ghost"], F(3, 0))
+    tag(root, "five firms 68.5%, rest 31.5%", (68.5 * 20.0, -500, 60), F(3, 0.3), END)
     camera(root, [((350, 350, 0), 3600.0, 0.0, 0.0), ((350, 350, 0), 3600.0, 0.0, 0.0),
-                  ((350, 350, 0), 3600.0, 0.0, 0.0), ((350, 300, 0), 3600.0, 0.0, 0.0)])
+                  ((350, 350, 0), 3600.0, 0.0, 0.0), ((800, 100, 0), 4200.0, 0.0, 0.0)])
     finish("sec7", page="ingot")
 
 
@@ -263,17 +281,17 @@ def sec8():
     rows = [("wafer revenue -10.9%", 10.9), ("area shipped -14.3%", 14.3), ("polished 300 mm -13%", 13.0), ("epi 300 mm -5%", 5.0)]
     for k, (name, pct) in enumerate(rows):
         y = 300.0 - k * 180.0
-        hbar(root, f"base{k}", 0, y, 1000, 90, m["ghost"], F(1, 0))
-        hbar(root, f"drop{k}", 0, y, 1000 * (1 - pct / 100.0), 90, m["bar_hi"], F(1, 0))
+        hbar(root, f"base{k}", 0, y, 1000, 90, m["ghost"], F(1, 0), F(2, 0))
+        hbar(root, f"drop{k}", 0, y, 1000 * (1 - pct / 100.0), 90, m["bar_hi"], F(1, 0), F(2, 0))
         tag(root, name, (1050, y, 60), F(1, 0.3), F(2, 0))
     # beat 2: the supply chain, with the quartz link flagged
     steps = ["Spruce Pine quartz", "crucible", "polysilicon", "CZ pull", "wafer"]
     for k, s in enumerate(steps):
-        x = (k - 2) * 900.0
-        box(f"chain{k}", (x - 300, 0, -120), (x + 300, 220, 120), m["bar"] if k else m["bar_hi"], root)
+        x = (k - 2) * 800.0
+        gbox(root, f"chain{k}", (x - 280, 0, -120), (x + 280, 220, 120), m["bar"] if k else m["bar_hi"], F(2, 0))
         tag(root, s, (x, 300, 140), F(2, 0.2), END)
     camera(root, [((300, 420, 0), 4800.0, 0.0, 0.0), ((700, 300, 0), 4800.0, 0.0, 0.0),
-                  ((0, 260, 0), 6400.0, 0.1, 0.1)])
+                  ((0, 200, 0), 6800.0, 0.0, 0.1)])
     finish("sec8", page="ingot")
 
 
@@ -289,11 +307,12 @@ def sec9():
         x = (k - 2) * 700.0
         gbox(root, f"card{k}", (x - 300, 0, -40), (x + 300, 200, 40), m["card"], 0)
         gbox(root, f"lit{k}", (x - 300, 200, -40), (x + 300, 224, 40), m["gold_glow"], F(beat, 0.2))
-        tag(root, name, (x, 260, 0), F(beat, 0.3), END)
+        # labels alternate height and sit left of their card, so long names do not collide
+        tag(root, name, (x - 150, 260 if k % 2 == 0 else 420, 0), F(beat, 0.3), END)
     gbox(root, "stamp", (-900, -180, -40), (900, -60, 40), m["red"], F(2, 0.5))
     tag(root, "tickers: general knowledge, not fetched", (0, -250, 0), F(2, 0.6), END)
-    camera(root, [((0, 200, 0), 6400.0, 0.0, 0.0), ((0, 200, 0), 6400.0, 0.0, 0.0),
-                  ((0, 150, 0), 6400.0, 0.0, 0.0)])
+    camera(root, [((0, 200, 0), 8000.0, 0.0, 0.0), ((0, 200, 0), 8000.0, 0.0, 0.0),
+                  ((0, 180, 0), 8000.0, 0.0, 0.0)])
     finish("sec9", page="ingot")
 
 
@@ -310,12 +329,12 @@ def sec10():
     for k, text in enumerate(SOURCES):
         x = (k % 4 - 1.5) * 760.0
         z = 0.0
-        y = 300.0 - (k // 4) * 320.0
+        y = 560.0 - (k // 4) * 560.0  # two rows, the lower label clear of the upper cards
         beat = k // 2
         box(f"src{k}", (x - 330, y, -30), (x + 330, y + 200, 30), m["card"], root)
         gbox(root, f"lit{k}", (x - 330, y + 200, -30), (x + 330, y + 226, 30), m["gold_glow"], F(beat, 0.2))
-        tag(root, text, (x, y + 250, 0), F(beat, 0.3), F(beat + 1, 0))
-    camera(root, [((0, 80, 0), 5200.0, 0.0, 0.0)] * 4)
+        tag(root, text, (x - 250, y + 280, 0), F(beat, 0.3), F(beat + 1, 0))
+    camera(root, [((250, 330, 0), 8000.0, 0.0, 0.0)] * 4)  # wide enough for the right-hand labels
     finish("sec10", page="ingot")
 
 

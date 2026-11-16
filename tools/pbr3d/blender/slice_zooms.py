@@ -72,7 +72,7 @@ def web():
             show(c, [(0, F(2, 0.0)), (F(3, 0.0), END)])
     box("dzmax_bar", (-400, y - dz, -26), (-392, y, -22), m["red"], root)
     # beat 3: the last wafers are still held by an uncut base
-    base = box("uncut_base", (-150, 0, -150), (150, TRACK_Y, 150), m["ingot"], root)
+    base = K.pbox("uncut_base", (-150, 0, -150), (150, TRACK_Y, 150), m["ingot"], root)
     show(base, [(F(3, 0.0), END)])
 
     label("ingot fed down through the wire web", (300, 520, 0), root, [(F(0, 0.1), F(1, 0.0))])
@@ -92,13 +92,14 @@ def lap():
     carrier = K.Carrier(root, m, [(0, 0.0)])
     rough = carrier.disc("wafer", "silicon")
     scale_keys(carrier.pv, [(0, (1, 1, 1)), (F(1, 0.25), (1, 1, 1)), (F(2, 0.8), (1, 1, 0.897)), (END, (1, 1, 0.897))])
-    dtop = disc("damage_top", (0, WAFER_T - 1.5, 0), WAFER_R + 1, 3.0, m["damage"], carrier.pv)
+    dtop = disc("damage_top", (0, WAFER_T - 1.0, 0), WAFER_R + 1, 3.0, m["damage"], carrier.pv)
     dbot = disc("damage_bot", (0, 1.5, 0), WAFER_R + 1, 3.0, m["damage"], carrier.pv)
     show(dtop, [(F(2, 0.1), END)])
     show(dbot, [(F(2, 0.1), END)])
     disc("plate_lower", (0, TRACK_Y / 2, 0), 260.0, TRACK_Y, m["plate"], root, verts=72)
     upper = pivot("plate_upper", (0, 0, 0), root)
-    disc("plate_upper_m", (0, 0, 0), 260.0, 60.0, m["plate"], upper, verts=72)
+    # front half cut away, so the gap, the slurry and the wafer's top face show under it
+    cut(disc("plate_upper_m", (0, 0, 0), 260.0, 60.0, m["plate"], upper, verts=72), z=-40.0)
     key(upper, 0, "location", P(0, 187.5, 0), linear=True)
     key(upper, F(1, 0.05), "location", P(0, 187.5, 0), linear=True)
     key(upper, F(2, 0.7), "location", P(0, 140.5, 0), linear=True)
@@ -115,8 +116,8 @@ def lap():
     # pressure arrows on the upper plate while it presses
     arrows = empty("pressure", root)
     for s in (-150, 0, 150):
-        tube(f"shaft{s}", (s, 300, 0), (s, 240, 0), 6.0, m["red"], arrows, verts=6)
-        ball(f"head{s}", (s, 236, 0), 14.0, m["red"], arrows, 8)
+        tube(f"shaft{s}", (s, 300, -130), (s, 240, -130), 6.0, m["red"], arrows, verts=6)
+        ball(f"head{s}", (s, 236, -130), 14.0, m["red"], arrows, 8)
     show(arrows, [(F(1, 0.1), F(2, 0.8))])
 
     label("wafers sit between two plates, slurry in the gap", (330, 240, 0), root, [(0, F(1, 0.0))])
@@ -135,7 +136,8 @@ def preston():
     carrier = K.Carrier(root, m, [(0, 0.0)])
     carrier.disc("wafer", "silicon")
     # the softened band on the top face, wiped off from left to right during beat 1
-    band = box("softened_band", (-150, TRACK_Y + WAFER_T - 1, -150), (150, TRACK_Y + WAFER_T + 2, 150), m["film"], root)
+    band = K.pbox("softened_band", (-150, TRACK_Y + WAFER_T - 1, -150), (150, TRACK_Y + WAFER_T + 2, 150), m["film"], root,
+                  at=(150, TRACK_Y + WAFER_T, 0))
     scale_keys(band, [(0, (1, 1, 1)), (F(1, 0.2), (1, 1, 1)), (F(1, 0.85), (0.0001, 1, 1)), (END, (0.0001, 1, 1))], until=F(1, 0.2))
     # the pad, lowered onto the wafer in beat 1
     pad = empty("pad", root)
@@ -159,7 +161,7 @@ def preston():
     box("ph_scale", (-320, 0, 230), (320, 20, 250), m["grey"], root)
     for pH in (8.5, 13.0):
         x = -320 + 640 * pH / 14.0
-        show(box(f"ph_mark{pH}", (x - 8, 20, 225), (x + 8, 90, 255), m["red"], root), [(F(2, 0.0), END)])
+        show(K.pbox(f"ph_mark{pH}", (x - 8, 20, 225), (x + 8, 90, 255), m["red"], root), [(F(2, 0.0), END)])
     # pits at pH 13 in beat 3
     pits = empty("pits", root)
     for k in range(12):
@@ -180,6 +182,9 @@ def preston():
 # ---- d: the thickness budget ----------------------------------------------------------------
 
 
+LAYER_MAT = {"kerf": "grey", "lapping": "damage", "etch": "blue", "polish": "gold"}
+
+
 def budget():
     m, root = begin("budget")
     # from the bottom: the finished wafer, then polish, etch, lapping and the kerf on top
@@ -194,7 +199,7 @@ def budget():
     home = {}
     y = wafer_top
     for name, t, mk in layers:
-        obj = K.slab(root, name, 0.0, y, 0, WAFER_R, t, m["grey"] if name == "kerf" else m[mk])
+        obj = K.slab(root, name, 0.0, y, 0, WAFER_R, t, m[LAYER_MAT[name]])  # one colour each, or they read as one slab
         home[name] = (y, t)
         y += t
     # each layer is peeled off to the side in its own beat, in the order the process takes them
@@ -205,11 +210,11 @@ def budget():
         key(obj, F(b, 0.2), "location", P(0, 0, 0), linear=True)
         key(obj, F(b, 0.85), "location", P(-300, 90, 0), linear=True)
         key(obj, END, "location", P(-300, 90, 0), linear=True)
-    label("kerf about 125 um: lost at the saw", (300, 190, 0), root, [(F(0, 0.3), F(1, 0.0))])
-    label("lapping: 80 um example (80-200)", (300, 190, 0), root, [(F(1, 0.3), F(2, 0.0))])
-    label("etch: 15-25 um", (300, 190, 0), root, [(F(2, 0.3), F(3, 0.0))])
-    label("DSP polish: 10-20 um; 775 um left", (300, 190, 0), root, [(F(3, 0.3), END)])
-    camera(root, [((-120.0, 90.0, 0.0), 1400.0, 0.35, 0.16)] * BEATS)
+    label("kerf about 125 um: lost at the saw", (-300, 220, 0), root, [(F(0, 0.3), F(1, 0.0))])
+    label("lapping: 80 um example (80-200)", (-300, 220, 0), root, [(F(1, 0.3), F(2, 0.0))])
+    label("etch: 15-25 um", (-300, 220, 0), root, [(F(2, 0.3), F(3, 0.0))])
+    label("DSP polish: 10-20 um; 775 um left", (100, 160, 60), root, [(F(3, 0.3), END)])
+    camera(root, [((-120.0, 110.0, 0.0), 1300.0, 0.35, 0.22)] * BEATS)
     finish("zoom_budget", page="slice")
 
 

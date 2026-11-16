@@ -99,6 +99,11 @@ pub fn anim_for(page: &str) -> Option<Anim> {
 
 /// Animated close-up for numbered section `i` of a node page, if the page has one.
 pub fn section_anim(page: &str, i: usize) -> Option<fn() -> Box<dyn Scene>> {
+    // The Blender node registry wins, as in `scene_for`: the older poly3d rigs below still list
+    // the Chip, Packaging and Fiber pages, and checking them first played their old sections.
+    if let Some(b) = super::diagrams_nodes::section(page, i) {
+        return Some(b);
+    }
     match page {
         _ if super::diagrams_scene_chip::node(page).is_some() => {
             super::diagrams_scene_chip::node(page).and_then(|n| n.sections.get(i).copied())
@@ -181,6 +186,24 @@ pub fn scene_for(page: &str) -> Option<Box<dyn Scene>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// The menu's 1-9 keys go through `section_anim`; for every page in the Blender registry it
+    /// must hand back the registry's section, not an older rig's.
+    #[test]
+    fn sections_come_from_the_blender_registry() {
+        let pages = [
+            "PAM4 DSP", "LASER", "OPTICAL FIBER", "PHOTODIODE", "TRANSCEIVER", "CPO",
+            "TOP METAL", "MID METAL", "THIN METAL", "CONTACTS", "NMOS", "GATE STACK", "PMOS",
+            "PLANAR", "FINFET", "GATE-ALL-AROUND", "LOGIC DIE",
+        ];
+        for page in pages {
+            assert!(super::super::diagrams_nodes::section(page, 0).is_some(), "{page}: no registry section");
+            for i in 0..12 {
+                let (got, want) = (section_anim(page, i), super::super::diagrams_nodes::section(page, i));
+                assert_eq!(got.map(|f| f as usize), want.map(|f| f as usize), "{page} section {}", i + 1);
+            }
+        }
+    }
 
     #[test]
     fn parses_frames() {

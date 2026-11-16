@@ -83,6 +83,16 @@ def cradle(parent, x, m, w=300.0, z=160.0):
     box("cradle", (x - w, 0, -z), (x + w, TRACK_Y, z), m["dark_steel"], parent)
 
 
+def pbox(name, lo, hi, m, parent, at=None):
+    """A box held in its own pivot at poly point `at` (default: the box centre). box() sizes the
+    cube with its object scale, so show() or scale_keys() straight on a box shrink it to a speck;
+    animate the returned pivot instead."""
+    at = at or tuple((lo[i] + hi[i]) / 2 for i in range(3))
+    pv = pivot(name + "_pv", at, parent)
+    box(name, rel(at, lo), rel(at, hi), m, pv)
+    return pv
+
+
 def slab(parent, name, x, y0, z, r, t, m, verts=64):
     """A wafer-like disc lying flat: bottom at poly height y0, thickness t."""
     return disc(name, (x, y0 + t / 2, z), r, t, m, parent, verts=verts)

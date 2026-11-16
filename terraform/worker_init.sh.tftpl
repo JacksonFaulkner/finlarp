@@ -1,0 +1,26 @@
+#!/bin/bash
+# First-boot setup (cloud-init runs this as root). Log: /var/log/cloud-init-output.log
+set -euo pipefail
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update -y
+apt-get install -y --no-install-recommends unzip curl ca-certificates git
+
+# AWS CLI v2 is not in Ubuntu's apt repos.
+tmp=$(mktemp -d)
+curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$(uname -m).zip" -o "$tmp/awscli.zip"
+unzip -q "$tmp/awscli.zip" -d "$tmp"
+"$tmp/aws/install" --update
+rm -rf "$tmp"
+
+# Pull every /finlarp/* parameter into a root-only env file.
+# Load with:  set -a; . /etc/finlarp/env; set +a
+install -d -m 0700 /etc/finlarp
+aws ssm get-parameters-by-path \
+  --region "${region}" --path "${ssm_path}" --recursive --with-decryption \
+  --query 'Parameters[].[Name,Value]' --output text \
+  | while IFS=$'\t' read -r name value; do
+      printf '%s=%q\n' "$${name##*/}" "$value"
+    done > /etc/finlarp/env.tmp
+mv /etc/finlarp/env.tmp /etc/finlarp/env
+chmod 0600 /etc/finlarp/env

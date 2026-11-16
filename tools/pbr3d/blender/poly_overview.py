@@ -430,7 +430,10 @@ def build_finish(root, m):
     fill = pivot("bin_fill", (bin_c, 60, -250), g)
     box("bin_chunks", rel((bin_c, 60, -250), (BIN_X0 + 40, 60, -460)), rel((bin_c, 60, -250), (BIN_X1 - 40, 760, -70)), m["poly"], fill)
     scale_keys(fill, [(0, (1, 1, 0.12)), (F(5, 0.82), (1, 1, 0.12)), (F(5, 0.95), (1, 1, 1)), (F(6, 0), (1, 1, 1))], until=None)
-    box("bin_bag", (BIN_X0 + 20, 60, -480), (BIN_X1 - 20, 980, -50), m["bag"], g)
+    # the bag liner: back and sides only, so the chunks filling it aren't behind a milky front/top
+    box("bin_bag", (BIN_X0 + 20, 60, -480), (BIN_X1 - 20, 980, -460), m["bag"], g)
+    for x0 in (BIN_X0 + 20, BIN_X1 - 40):
+        box(f"bin_bag_side{x0:.0f}", (x0, 60, -480), (x0 + 20, 980, -50), m["bag"], g)
     label("9N+ chunks, bagged", (BIN_X1, 800, 0), g, [(F(5, 0.7), F(6, 0))])
     return g
 

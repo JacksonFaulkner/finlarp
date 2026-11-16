@@ -108,6 +108,24 @@ def slab(parent, m, name, layers, w=240.0, d=60.0, y0=0.0):
     return g
 
 
+def pbox(name, lo, hi, m, parent, at=None):
+    """A box held in its own pivot at poly point `at` (default: its centre). box() sizes the cube
+    with its object scale, so show() or scale keys straight on a box shrink it to a speck; animate
+    the returned pivot instead."""
+    at = at or tuple((lo[i] + hi[i]) / 2 for i in range(3))
+    pv = pivot(name + "_pv", at, parent)
+    box(name, tuple(lo[i] - at[i] for i in range(3)), tuple(hi[i] - at[i] for i in range(3)), m, pv)
+    return pv
+
+
+def dim_marks(parent, m, x, y0, y1, w=10.0, r=2.5):
+    """A gold thickness dimension at x: a bar from y0 to y1 with a tick at each end (boxes: the
+    thin tubes it replaces barely showed)."""
+    box("dim_a", (x - r, y0, -r), (x + r, y1, r), m["gold"], parent)
+    box("dim_b", (x - w, y0 - r, -r), (x + w, y0 + r, r), m["gold"], parent)
+    box("dim_c", (x - w, y1 - r, -r), (x + w, y1 + r, r), m["gold"], parent)
+
+
 def plinth(parent, m, x0, x1, z0, z1, y=-6.0):
     box("plinth", (x0, y - 6, z0), (x1, y, z1), m["plinth"], parent)
 

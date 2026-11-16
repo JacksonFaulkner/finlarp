@@ -69,7 +69,7 @@ def sec1():
         K.reads(root, bk, F(2, 0.30 + 0.14 * k), F(2, 0.30 + 0.14 * k + 0.12), 2, m)
     tag(root, "four banks in turn: bus busy", (-420.0, 90.0, 40.0), beat(2))
     K.commit(d)
-    _cam(root, 3, (60.0, 100.0, 0.0), 5600.0, 0.18, 0.18)
+    _cam(root, 3, (160.0, 100.0, 0.0), 6000.0, 0.14, 0.16)
 
 
 # ---- 2 parts ------------------------------------------------------------------------------
@@ -102,7 +102,13 @@ def sec2():
         K.send(root, "ctl", [(-1750.0, 0.0, 40.0), (-1400.0, CMD_Y, 40.0), (-900.0, CMD_Y, 40.0)], F(4, 0.05 + 0.12 * k), F(4, 0.30 + 0.12 * k), m["cmd_dot"])
     tag(root, "controller: picks the order", (-1950.0, 320.0, 100.0), beat(4))
     K.commit(d)
-    _cam(root, 5, (-200.0, 150.0, 0.0), 7000.0, 0.10, 0.16)
+    camera(root, [
+        ((-700.0, 330.0, 0.0), 2600.0, 0.08, 0.12),
+        ((-700.0, 360.0, 0.0), 3000.0, 0.08, 0.12),
+        ((0.0, 420.0, 0.0), 5600.0, 0.04, 0.14),
+        ((160.0, 100.0, 0.0), 6000.0, 0.06, 0.14),
+        ((-1300.0, 300.0, 0.0), 3900.0, 0.10, 0.12),
+    ])
 
 
 # ---- 3 one interleaved access ------------------------------------------------------------
@@ -134,7 +140,7 @@ def sec3():
     K.set_state(B, "pink", [(F(4, 0.10), F(4, 0.80))])
     tag(root, "5. PRECHARGE both", K.above(A), beat(4))
     K.commit(d)
-    _cam(root, 5, (60.0, 100.0, 0.0), 5200.0, 0.14, 0.18)
+    _cam(root, 5, (160.0, 100.0, 0.0), 5800.0, 0.12, 0.16)
 
 
 # ---- 4 timing rules -----------------------------------------------------------------------
@@ -160,7 +166,7 @@ def sec4():
         x = -900.0 + 420.0 * k
         timed(root, f"rd_g{k}", (x, -220.0, 0.0), (x + 180.0, -80.0, 60.0), m["rd"], beat(1))
     tag(root, "tCCD_S 2.5 ns: one burst", (-900.0, 300.0, 60.0), beat(1))
-    tag(root, "tCCD_L about 5.36 ns: same group", (-900.0, -300.0, 60.0), beat(1))
+    tag(root, "tCCD_L about 5.36 ns: same group", (-900.0, -420.0, 60.0), beat(1))
     # beat 2: tFAW. Four ACTs in one window; a fifth must wait
     for k in range(4):
         x = -700.0 + 110.0 * k
@@ -168,7 +174,7 @@ def sec4():
     timed(root, "faw_win", (-700.0, -340.0, 0.0), (-700.0 + 630.0, -300.0, 40.0), m["window"], beat(2))
     timed(root, "faw_act5", (-700.0 + 630.0, -40.0, 0.0), (-700.0 + 700.0, 200.0, 60.0), m["act"], [(F(2, 0.5), END)])
     tag(root, "tFAW about 21 ns: four ACTs max", (-700.0, 300.0, 60.0), beat(2))
-    _cam(root, 3, (-200.0, 0.0, 0.0), 2600.0, 0.0, 0.10)
+    _cam(root, 3, (-480.0, 0.0, 0.0), 2500.0, 0.0, 0.10)
     K.commit({"all": []})
 
 
@@ -202,7 +208,7 @@ def sec5():
         K.reads(root, bk, F(2, 0.30), F(2, 0.90), 2, m)
     tag(root, "row hits first, rest spread", K.above(A), beat(2))
     K.commit(d)
-    _cam(root, 3, (60.0, 100.0, 0.0), 5600.0, 0.14, 0.18)
+    _cam(root, 3, (160.0, 100.0, 0.0), 6000.0, 0.12, 0.16)
 
 
 # ---- 6 numbers ----------------------------------------------------------------------------
@@ -219,7 +225,11 @@ def sec6():
     tag(root, "DDR5: 32 banks in 8 groups", (-1480.0, 620.0, 40.0), beat(1))
     show(d8["root"], beat(1))
     K.commit(d8)
-    _cam(root, 3, (60.0, 100.0, 0.0), 5600.0, 0.10, 0.18)
+    camera(root, [
+        ((160.0, 100.0, 0.0), 6000.0, 0.08, 0.16),
+        ((180.0, 100.0, 0.0), 6600.0, 0.06, 0.16),
+        ((0.0, 0.0, 0.0), 3000.0, 0.0, 0.08),
+    ])
     # beat 2: transfers per burst, drawn as cubes: DDR4 8, DDR5 16
     for k in range(8):
         x = -800.0 + 100.0 * k
@@ -228,7 +238,7 @@ def sec6():
         x = -800.0 + 100.0 * k
         timed(root, f"bl16_{k}", (x, -170.0, 0.0), (x + 80.0, -90.0, 60.0), m["rd2"], beat(2))
     tag(root, "DDR4 burst: 8 transfers", (-800.0, 240.0, 60.0), beat(2))
-    tag(root, "DDR5 burst: 16 transfers", (-800.0, -240.0, 60.0), beat(2))
+    tag(root, "DDR5 burst: 16 transfers", (-800.0, -340.0, 60.0), beat(2))
     return root
 
 
@@ -242,7 +252,7 @@ def sec7():
     # beat 0: DDR4: every bank closes and refreshes; the rank is locked
     for bk in d["all"]:
         K.set_state(bk, "cyan", [(F(0, 0.10), F(1, 0.0))])
-    timed(root, "lock", (-1300.0, -130.0, 40.0), (1400.0, -80.0, 90.0), m["stop"], beat(0))
+    timed(root, "lock", (-1300.0, -22.0, 40.0), (1400.0, 22.0, 70.0), m["stop"], beat(0))
     tag(root, "DDR4 refresh: rank locked", (0.0, 640.0, 40.0), beat(0))
     # beat 1: DDR5: one bank index per group steps through the refresh
     for b in range(4):
@@ -256,7 +266,7 @@ def sec7():
             K.reads(root, g[gi][b], F(2, 0.10), F(2, 0.90), 2, m)
     tag(root, "other banks keep serving reads", (-1000.0, 640.0, 40.0), beat(2))
     K.commit(d)
-    _cam(root, 3, (60.0, 100.0, 0.0), 6000.0, 0.14, 0.18)
+    _cam(root, 3, (160.0, 100.0, 0.0), 6200.0, 0.12, 0.16)
 
 
 # ---- 8 who makes it -----------------------------------------------------------------------
@@ -291,7 +301,11 @@ def sec9():
     tag(root, "two cores fight over one bank", K.above(A), beat(0))
     K.commit(d)
     show(d["root"], beat(0))
-    _cam(root, 3, (60.0, 100.0, 0.0), 6000.0, 0.14, 0.18)
+    camera(root, [
+        ((160.0, 100.0, 0.0), 6200.0, 0.12, 0.16),
+        ((300.0, 140.0, 0.0), 3700.0, 0.06, 0.10),
+        ((50.0, 200.0, 0.0), 3300.0, 0.06, 0.10),
+    ])
     # beat 1: four ACTs fit in the window; the lid is tFAW, two more wait outside
     for i in range(4):
         timed(root, f"lit{i}", (-600.0 + 280.0 * i, -200.0, 0.0), (-600.0 + 280.0 * i + 180.0, 300.0, 200.0), m["row"], beat(1))
@@ -323,12 +337,12 @@ LIT = [(0, 1, 2), (3, 4), (5, 6, 7)]
 
 
 def _card_xy(i):
-    return -1200.0 + 800.0 * (i % 4), (200.0 if i < 4 else -200.0)
+    return -1500.0 + 1000.0 * (i % 4), (300.0 if i < 4 else -340.0)
 
 
 def sec10():
     m, root = begin("sec10", 3)
-    box("plinth", (-1800.0, -450.0, -60.0), (1800.0, 450.0, 0.0), m["plinth"], root)
+    box("plinth", (-2300.0, -600.0, -60.0), (2300.0, 600.0, 0.0), m["plinth"], root)
     for i in range(len(CARDS)):
         x, y = _card_xy(i)
         box(f"card{i}", (x - 250.0, y - 130.0, 0.0), (x + 250.0, y + 130.0, 30.0), m["paper"] if "paper" in m else m["bank"], root)
@@ -336,8 +350,9 @@ def sec10():
         for i in group:
             x, y = _card_xy(i)
             timed(root, f"lit{i}", (x - 250.0, y - 130.0, 30.0), (x + 250.0, y + 130.0, 50.0), m["row"], beat(beat_i))
-            tag(root, CARDS[i], (x, y + 170.0, 60.0), beat(beat_i))
-    _cam(root, 3, (0.0, 0.0, 0.0), 6800.0, 0.0, 0.10)
+            ty = y + 230.0 if i < 4 else y - 230.0  # top-row tags above their cards, bottom-row tags below
+            tag(root, CARDS[i], (x, ty, 60.0), beat(beat_i))
+    _cam(root, 3, (0.0, 0.0, 0.0), 8200.0, 0.0, 0.10)
     K.commit({"all": []})
 
 

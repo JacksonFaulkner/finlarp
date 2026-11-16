@@ -15,8 +15,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sand_overview import OFF, F, P, ball, beat, box, disc, empty, key, label, pivot, show, tube  # noqa: E402
-from sand_zooms import camera, finish, start  # noqa: E402
+from sand_overview import OFF, F, P, ball, beat, box, disc, empty, key, label, mat, pivot, rel, show, tube  # noqa: E402
+from sand_zooms import camera, finish, scale_keys, start  # noqa: E402
 from poly_overview import run  # noqa: E402
 import litho_kit as K  # noqa: E402
 from litho_kit import END, RES_TOP, RET_Y  # noqa: E402
@@ -55,7 +55,7 @@ def reticle():
     label("chrome bars block the light", (-150, RET_Y + 22, 20), root, [(F(0, 0), F(1, 0))])
     label("clear quartz passes it", (-150, RET_Y - 10, 20), root, [(F(1, 0), F(2, 0))])
     label("speck: one flaw in the mask", (40, RET_Y + 30, 20), root, [(F(2, 0), F(3, 0))])
-    label("same flaw on every die", (-150, DIE_Y1 + 40, 20), root, [(F(3, 0), END)])
+    label("same flaw on every die", (-75, DIE_Y1 + 20, 20), root, [(F(3, 0), END)])
     camera(root, [
         ((0.0, 650.0, 0.0), 560.0, 0.30, 0.14),
         ((0.0, 360.0, 0.0), 1250.0, 0.26, 0.12),
@@ -91,11 +91,11 @@ def lens():
     cone_rays(root, m, 3, NA_HIGH_R)
     # the in-focus band: long at NA 0.33 (beat 2), short at NA 0.55 (beat 3), shorter by NA^2
     long_b = empty("band_long", root)
-    tube("band_long_m", (0, RES_TOP - 150, -4), (0, RES_TOP + 150, -4), 10, m["band"], long_b, verts=12)
+    tube("band_long_m", (0, RES_TOP - 150, 14), (0, RES_TOP + 150, 14), 10, m["band"], long_b, verts=12)
     show(long_b, [(F(2, 0.1), F(3, 0.0))])
     short_b = empty("band_short", root)
     half = 150.0 * (0.33 / 0.55) ** 2
-    tube("band_short_m", (0, RES_TOP - half, -4), (0, RES_TOP + half, -4), 10, m["band"], short_b, verts=12)
+    tube("band_short_m", (0, RES_TOP - half, 14), (0, RES_TOP + half, 14), 10, m["band"], short_b, verts=12)
     show(short_b, [(F(3, 0.1), END)])
     label("NA 0.33: narrow cone", (120, 300, 20), root, [(F(0, 0), F(1, 0))])
     label("NA 0.55: wider cone, finer line", (120, 300, 20), root, [(F(1, 0), F(2, 0))])
@@ -140,7 +140,7 @@ def resist():
     acid = empty("acid", root)
     for k, x in enumerate(COL_X):
         for j, y in enumerate((39.0, 42.0, 44.0)):
-            ball(f"acid{k}_{j}", (x + (j - 1) * 6, y, -20 + 6 * j), 2.2, m["acid"], acid, 12)
+            ball(f"acid{k}_{j}", (x + (j - 1) * 6, y, 1.0), 2.2, m["acid"], acid, 12)
     show(acid, [(F(0, 0.3), F(1, 0.8))])
     # the etch: ions fall down the trenches once the film gap is open (beat 2)
     for k, x in enumerate(COL_X):
@@ -195,9 +195,9 @@ def scan():
     label("so a wafer takes about twice the exposures", (0, RES_TOP + 40, 20), wg, [(F(3, 0), END)])
     camera(root, [
         ((0.0, 120.0, 0.0), 1000.0, 0.22, 0.14),
-        ((0.0, 80.0, 0.0), 800.0, 0.22, 0.16),
-        ((0.0, 60.0, 0.0), 700.0, 0.22, 0.16),
-        ((0.0, 60.0, 0.0), 700.0, 0.22, 0.16),
+        ((0.0, 40.0, 0.0), 720.0, 0.22, 0.42),
+        ((0.0, 40.0, 0.0), 620.0, 0.22, 0.42),
+        ((0.0, 40.0, 0.0), 620.0, 0.22, 0.42),
     ])
     finish("scan", page="litho")
 
@@ -242,8 +242,8 @@ def overlay():
     camera(root, [
         ((0.0, 30.0, 0.0), 560.0, 0.20, 0.18),
         ((0.0, 60.0, 0.0), 620.0, 0.20, 0.18),
-        ((0.0, 30.0, 0.0), 440.0, 0.20, 0.18),
-        ((0.0, 30.0, 0.0), 440.0, 0.20, 0.18),
+        ((0.0, 30.0, 0.0), 540.0, 0.20, 0.18),
+        ((0.0, 30.0, 0.0), 540.0, 0.20, 0.18),
     ])
     finish("overlay", page="litho")
 
@@ -255,19 +255,62 @@ MIRRORS = [(-160.0, 180.0, -40.0), (-40.0, 110.0, 30.0), (80.0, 40.0, -30.0), (1
 
 def euv():
     m, root = begin("euv")
-    # beat 0: a tin droplet falls and is hit by the laser; the plasma flashes
+    # beat 0: two pulses hit each falling droplet. The pre-pulse flattens it into a disk; the main
+    # pulse turns the disk into plasma, which glows at 13.5 nm and throws off debris (web: two-pulse
+    # tin-droplet scheme, pre-pulse makes a flattened disk, main pulse makes the EUV plasma)
+    m["pre"] = mat("prepulse", (1.0, 0.55, 0.15), emit=(1.0, 0.55, 0.15), strength=3.0)
+    m["euv"] = mat("euv_glow", (0.55, 0.80, 1.0), emit=(0.55, 0.80, 1.0), strength=1.5, alpha=0.25)
+    # timing (beat 0 = 8 s): the drop falls at one constant speed from y 330 to y 30 over 0.80 of the
+    # beat. It crosses the pre-pulse beam (y 62-67) at 0.70 and the main beam (y 44-52) at 0.75, so
+    # the lasers meet it on the way down and it never slows.
     drop = empty("droplet", root)
-    ball("drop_m", (0, 0, 0), 9, m["tin"], drop, 16)
-    key(drop, F(0, 0.0), "location", P(0, 330, 0))
-    key(drop, F(0, 0.45), "location", P(0, 60, 0), linear=True)
-    show(drop, [(F(0, 0.0), F(0, 0.5))])
+    key(drop, F(0, 0.0), "location", P(0, 330, 0), linear=True)
+    key(drop, F(0, 0.80), "location", P(0, 30, 0), linear=True)
+    show(drop, [(F(0, 0.0), F(0, 0.68))])
+    # the drop flattens as the pre-pulse reaches it (0.70 -> 0.76), radius 9 -> 22, height 18 -> 4
+    squash = pivot("squash", (0, 0, 0), drop)
+    ball("drop_m", (0, 0, 0), 9, m["tin"], squash, 24)
+    scale_keys(squash, [
+        (0, (1, 1, 1)),
+        (F(0, 0.55), (1, 1, 1)),
+        (F(0, 0.565), (1.5, 1.5, 0.62)),
+        (F(0, 0.58), (2.1, 2.1, 0.34)),
+        (F(0, 0.60), (2.45, 2.45, 0.22)),
+        (F(0, 0.80), (2.45, 2.45, 0.22)),
+    ], until=F(0, 0.55))
+    # the pre-pulse beam from its machine, on while the drop crosses it
+    # it fires out of its mouth and reaches the drop in about 0.03 of the beat
+    pre = empty("prepulse", root)
+    mouth = (-224.0, 90.5, -6.0)  # the drop's centre crosses this height at about 0.64
+    grow_pre = pivot("pre_grow", mouth, pre)
+    box("pre_m", rel(mouth, (-224, 88, -10)), rel(mouth, (0, 93, -2)), m["pre"], grow_pre)
+    scale_keys(grow_pre, [(0, (0.01, 1, 1)), (F(0, 0.50), (0.01, 1, 1)), (F(0, 0.53), (1, 1, 1)), (F(0, 0.64), (1, 1, 1))], until=F(0, 0.50))
+    show(pre, [(F(0, 0.50), F(0, 0.64))])
+    # the machines: a solid-state pre-pulse laser and the CO2 main laser, each with its beam mouth
+    src = empty("laser_machines", root)
+    box("pre_housing", (-300, 82, -40), (-220, 100, 10), m["grey"], src)
+    box("pre_mouth", (-224, 86, -14), (-218, 95, -6), m["pre"], src)
+    box("co2_housing", (-300, 8, -40), (-220, 52, 10), m["grey"], src)
+    box("co2_mouth", (-224, 44, -14), (-218, 52, -6), m["light"], src)
+    show(src, [(F(0, 0.0), F(1, 0.0))])
+    label("pre-pulse laser", (-290, 122, 20), root, [(F(0, 0.0), F(1, 0.0))])
+    label("CO2 laser", (-290, -40, 20), root, [(F(0, 0.0), F(1, 0.0))])
+    # the main pulse from the CO2 laser, through the flat drop at y 48; plasma and debris follow
     flash = empty("laser_flash", root)
-    box("laser_m", (-200, 44, -10), (200, 52, -2), m["light"], flash)
-    show(flash, [(F(0, 0.45), F(0, 0.8)), (F(0, 0.8), F(1, 0.0))])
+    box("laser_m", (-224, 44, -10), (200, 52, -2), m["light"], flash)
+    show(flash, [(F(0, 0.67), F(0, 0.86))])
     plasma = empty("plasma", root)
-    ball("plasma_m", (0, 58, 0), 28, m["plasma"], plasma, 16)
-    show(plasma, [(F(0, 0.5), F(1, 0.0))])
-    run(root, "debris_", 6, [(0, 60, 0), (90, 120, 30)], 4, m["tin"], 0, 0.5, 0.6, 30)
+    grow = pivot("plasma_grow", (0, 48, 0), plasma)
+    ball("plasma_m", (0, 48, 0), 28, m["plasma"], grow, 16)
+    ball("euv_m", (0, 48, 0), 40, m["euv"], grow, 16)
+    scale_keys(grow, [(0, (0.05, 0.05, 0.05)), (F(0, 0.68), (0.05, 0.05, 0.05)), (F(0, 0.86), (1.0, 1.0, 1.0)), (F(1, 0.0), (1.2, 1.2, 1.2))], until=F(0, 0.68))
+    show(plasma, [(F(0, 0.68), F(1, 0.0))])
+    run(root, "debris_", 8, [(0, 48, 0), (110, 90, 40)], 4, m["tin"], 0, 0.68, 0.78, 30)
+    label("tin droplet falls: laser hits it twice", (40, 200, 20), root, [(F(0, 0), F(0, 0.50))])
+    label("1st pulse flattens the droplet", (-150, 150, 20), root, [(F(0, 0.56), F(0, 0.66))])
+    label("2nd pulse makes the plasma", (-150, 130, 20), root, [(F(0, 0.68), F(1, 0.0))])
+    label("13.5 nm EUV light", (-70, 175, 20), root, [(F(0, 0.72), F(1, 0.0))])
+
     # beat 1: light bounces off mirrors; each keeps about 70%
     for k, (x, y, a) in enumerate(MIRRORS):
         mir = empty(f"mirror{k}", root)
@@ -275,7 +318,7 @@ def euv():
         mir.rotation_euler = (0, 0, math.radians(a))
         show(mir, [(F(1, 0.0), END)])
     pts = [(-260, 200, 10)] + [(x, y + 14, 10) for x, y, _ in MIRRORS] + [(260, -110, 10)]
-    run(root, "beam_", 4, pts, 6, m["light"], 1, 0.0, 0.5, 48)
+    run(root, "beam_", 12, pts, 8, m["light"], 1, 0.0, 0.8, 48)
     # beat 2: the parts that must hold sub-nanometre alignment: a pile, and one mirror trembles
     pile = empty("parts", root)
     for k in range(9):
@@ -291,10 +334,9 @@ def euv():
     key(tremble, F(3, 0.0), "rotation_euler", (0, 0, 0), linear=True)
     label("Zeiss: ultra-flat optics", (-120, -40, 20), root, [(F(2, 0), F(3, 0))])
     label("a dozen mirrors leave about 1%", (60, 230, 20), root, [(F(3, 0), END)])
-    label("tin droplet: laser hits it twice", (40, 300, 20), root, [(F(0, 0), F(1, 0))])
     label("70% per mirror", (-190, 260, 20), root, [(F(1, 0), F(2, 0))])
     camera(root, [
-        ((0.0, 150.0, 0.0), 900.0, 0.20, 0.10),
+        ((-90.0, 110.0, 0.0), 800.0, 0.20, 0.10),
         ((0.0, 120.0, 0.0), 900.0, 0.20, 0.10),
         ((0.0, 40.0, 0.0), 900.0, 0.20, 0.10),
         ((0.0, 70.0, 0.0), 900.0, 0.20, 0.10),

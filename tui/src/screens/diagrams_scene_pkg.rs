@@ -12,20 +12,13 @@ use super::diagrams_px as px;
 use crate::ui::anim::{Beat, Canvas, Scene, Time, Zoom};
 use poly3d::PkgKey;
 
-pub use poly3d::{PkgPart as P, PkgState};
 
 pub const MIN_W: u16 = 84;
 pub const MIN_H: u16 = 26;
-pub const BEAT_MS: u64 = 6500;
-pub const OVERVIEW_MS: u64 = 13000;
 
 /// The starting state every keyframe edits: a finished four-stack CoWoS-S package.
-pub const BASE: PkgState = PkgState::BASE;
 
 /// Common camera targets: the whole package, the die level, the bump levels.
-pub const PKG: [f64; 3] = [0.0, 100.0, 0.0];
-pub const DIES: [f64; 3] = [0.0, 150.0, 0.0];
-pub const LOW: [f64; 3] = [0.0, 40.0, 0.0];
 
 /// One lettered zoom: key, menu label, beats, keyframes.
 pub type ZoomData = (char, &'static str, &'static [Beat], &'static [PkgKey]);
@@ -112,158 +105,11 @@ pub struct PkgNode {
 
 /// Builds a node's menu entries from its data: `$zooms` (5 `Zoom`s) and `$sections`
 /// (9 scene builders) from the consts `$z` (5 `ZoomData`) and `$s` (9 `SecData`).
-macro_rules! pkg_node {
-    ($zooms:ident, $sections:ident, $z:ident, $s:ident) => {
-        pub const $zooms: [crate::ui::anim::Zoom; 5] = [
-            crate::ui::anim::Zoom {
-                key: $z[0].0,
-                label: $z[0].1,
-                build: || {
-                    Box::new(super::diagrams_scene_pkg::PkgScene {
-                        beats: $z[0].2,
-                        keys: $z[0].3,
-                        zooms: &[],
-                        notes: false,
-                    })
-                },
-            },
-            crate::ui::anim::Zoom {
-                key: $z[1].0,
-                label: $z[1].1,
-                build: || {
-                    Box::new(super::diagrams_scene_pkg::PkgScene {
-                        beats: $z[1].2,
-                        keys: $z[1].3,
-                        zooms: &[],
-                        notes: false,
-                    })
-                },
-            },
-            crate::ui::anim::Zoom {
-                key: $z[2].0,
-                label: $z[2].1,
-                build: || {
-                    Box::new(super::diagrams_scene_pkg::PkgScene {
-                        beats: $z[2].2,
-                        keys: $z[2].3,
-                        zooms: &[],
-                        notes: false,
-                    })
-                },
-            },
-            crate::ui::anim::Zoom {
-                key: $z[3].0,
-                label: $z[3].1,
-                build: || {
-                    Box::new(super::diagrams_scene_pkg::PkgScene {
-                        beats: $z[3].2,
-                        keys: $z[3].3,
-                        zooms: &[],
-                        notes: false,
-                    })
-                },
-            },
-            crate::ui::anim::Zoom {
-                key: $z[4].0,
-                label: $z[4].1,
-                build: || {
-                    Box::new(super::diagrams_scene_pkg::PkgScene {
-                        beats: $z[4].2,
-                        keys: $z[4].3,
-                        zooms: &[],
-                        notes: false,
-                    })
-                },
-            },
-        ];
-        pub const $sections: [fn() -> Box<dyn crate::ui::anim::Scene>; 9] = [
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[0].0,
-                    keys: $s[0].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[1].0,
-                    keys: $s[1].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[2].0,
-                    keys: $s[2].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[3].0,
-                    keys: $s[3].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[4].0,
-                    keys: $s[4].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[5].0,
-                    keys: $s[5].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[6].0,
-                    keys: $s[6].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[7].0,
-                    keys: $s[7].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-            || {
-                Box::new(super::diagrams_scene_pkg::PkgScene {
-                    beats: $s[8].0,
-                    keys: $s[8].1,
-                    zooms: &[],
-                    notes: false,
-                })
-            },
-        ];
-    };
-}
 
-pub(crate) use pkg_node;
 
 /// The Packaging-tab pages built on this template.
 pub fn nodes() -> Vec<&'static PkgNode> {
     vec![
-        &super::diagrams_pkg_nodes::LOGIC,
-        &super::diagrams_pkg_nodes::UBUMP,
-        &super::diagrams_pkg_nodes::INTERPOSER,
-        &super::diagrams_pkg_nodes::SUBSTRATE,
-        &super::diagrams_pkg_nodes::ASSEMBLY,
-        &super::diagrams_pkg_nodes::BOARD,
     ]
 }
 

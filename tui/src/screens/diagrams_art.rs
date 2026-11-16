@@ -26,7 +26,7 @@ pub const DIAGRAMS: &[Diagram] = &[
     Diagram {
         title: "DRAM: how a bit is stored and why AI needs HBM",
         tab: "Memory",
-        tickers: "MU 000660.KS 005930.KS",
+        tickers: "MU 000660.KS 005930.KS SNDK",
         art: MEMORY,
     },
     Diagram {
@@ -133,6 +133,17 @@ const MEMORY: &str = r#"# A bit is charge on a capacitor. Bandwidth is bus width
  (enter opens a node's page; h/l moves between nodes)
  (HBM STACK hands off to the Packaging tab)
  (stub: node pages are placeholders until they are written)
+
+# R&D: who is building the next memory, DRAM and flash
+
+ ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+ │  SK HYNIX   │  │   SAMSUNG   │  │   MICRON    │  │    CXMT     │  │    YMTC     │  │   SANDISK   │
+ │  DRAM, HBM  │  │ DRAM, zHBM  │  │ DRAM, HBM4E │  │ DRAM, HBM3E │  │ NAND, DRAM  │  │  NAND, HBF  │
+ └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
+
+ (DRAM keeps a bit as charge on a capacitor; NAND keeps it as charge trapped in a gate)
+ (HBF = high-bandwidth flash: NAND stacked in an HBM-style package)
+ (stub: R&D node pages are placeholders until they are written)
 "#;
 
 const PACKAGE: &str = r#"# Packaging: how a GPU and its memory become one part on a board

@@ -96,6 +96,12 @@ pub const DESCS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.desc.txt"),
     ),
+    ("SK HYNIX", include_str!("diagrams_pages/MEM_RD_SK_HYNIX.desc.txt")),
+    ("SAMSUNG", include_str!("diagrams_pages/MEM_RD_SAMSUNG.desc.txt")),
+    ("MICRON", include_str!("diagrams_pages/MEM_RD_MICRON.desc.txt")),
+    ("CXMT", include_str!("diagrams_pages/MEM_RD_CXMT.desc.txt")),
+    ("YMTC", include_str!("diagrams_pages/MEM_RD_YMTC.desc.txt")),
+    ("SANDISK", include_str!("diagrams_pages/MEM_RD_SANDISK.desc.txt")),
     // Packaging tab
     (
         "LOGIC DIE",
@@ -224,6 +230,12 @@ pub const VISUALS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.txt"),
     ),
+    ("SK HYNIX", include_str!("diagrams_pages/MEM_RD_SK_HYNIX.txt")),
+    ("SAMSUNG", include_str!("diagrams_pages/MEM_RD_SAMSUNG.txt")),
+    ("MICRON", include_str!("diagrams_pages/MEM_RD_MICRON.txt")),
+    ("CXMT", include_str!("diagrams_pages/MEM_RD_CXMT.txt")),
+    ("YMTC", include_str!("diagrams_pages/MEM_RD_YMTC.txt")),
+    ("SANDISK", include_str!("diagrams_pages/MEM_RD_SANDISK.txt")),
     // Packaging tab
     (
         "LOGIC DIE",
@@ -388,6 +400,12 @@ pub const DETAILS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.details.txt"),
     ),
+    ("SK HYNIX", include_str!("diagrams_pages/MEM_RD_SK_HYNIX.details.txt")),
+    ("SAMSUNG", include_str!("diagrams_pages/MEM_RD_SAMSUNG.details.txt")),
+    ("MICRON", include_str!("diagrams_pages/MEM_RD_MICRON.details.txt")),
+    ("CXMT", include_str!("diagrams_pages/MEM_RD_CXMT.details.txt")),
+    ("YMTC", include_str!("diagrams_pages/MEM_RD_YMTC.details.txt")),
+    ("SANDISK", include_str!("diagrams_pages/MEM_RD_SANDISK.details.txt")),
     // Packaging tab
     (
         "LOGIC DIE",

@@ -77,6 +77,7 @@ fn parse_report(raw: &str, theme: Theme) -> Result<EarningsReport, serde_json::E
                 id: string(section, "id"),
                 title: string(section, "title"),
                 short: String::new(),
+                scene: String::new(),
                 blocks,
                 new: false,
                 badge: String::new(),

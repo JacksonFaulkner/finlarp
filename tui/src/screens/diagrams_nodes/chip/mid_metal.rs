@@ -1,7 +1,7 @@
-// CHIP tab, MID METAL: the overview is the whole-chip scene (tools/pbr3d/blender/chip_kit.py) with
-// the camera zooming in on the middle wiring tier, M5-M9 (tools/pbr3d/blender/chip_mid_metal.py).
-// Six beats. Zoom-ins a-e and sections 1-10 are Blender scenes from the same script, each a
-// picture-and-panel page (docs/diagram-pages.md): zooms are 3 beats, sections 3 or 4.
+// CHIP tab, MID METAL (tools/pbr3d/blender/chip_mid_metal.py). The overview opens and closes on the
+// whole-chip scene (chip_kit.py) and in between works on a detailed cut-away of the M5-M9 wiring
+// (chip_mid_metal_detail.py), with signal beads riding the copper. Zoom-ins a-e and sections 1-10
+// are cut-aways too (docs/diagram-pages.md): zooms are 3 beats, sections 3 or 4.
 //
 // Sources: tui/src/screens/diagrams_pages/CHIP_MID_METAL.txt and .details.txt (IBM copper history
 // and resistivity study; Intel 4 and TSMC N5 and N3E node notes; low-k modulus, patent text; Intel
@@ -12,77 +12,59 @@ use super::super::Node;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[
-    Beat::new("the middle tier: M5-M9 route block to block", BEAT_MS)
+    Beat::new("the middle tier: M5-M9", BEAT_MS)
         .note(
-            "The whole chip, cut open. Above the thin wires, five levels of copper, M5-M9, carry signals from one block to the next. The middle tier is lit.",
-            "the lit band of copper between the thin wires below and the thick top wires above, with the vias that join the levels",
+            "Between the thin cell wiring and the thick top levels sit five medium levels, M5-M9. They carry signals from block to block across the chip.",
+            "The whole chip, the middle tier lit violet between the thin wiring below and the thick top tier and bumps above.",
         )
         .detail(
-            "Medium copper is the tier that routes block-to-block signals, between thin M1-M4 and thick M10-M14.",
-            &[
-                "M5-M9: five dual-damascene passes (CHIP_MID_METAL.txt, section 1)",
-                "Medium levels balance R and C (CHIP_MID_METAL.txt, section 3)",
-            ],
+            "Medium wires for reach between blocks.",
+            &["M5-M9 medium copper for block signals (CHIP_MID_METAL.txt, section 1)"],
         ),
-    Beat::new("in on the mid wires", BEAT_MS)
+    Beat::new("five levels in cut-away", BEAT_MS)
         .note(
-            "The camera glides in on the middle tier. Each wire is a copper line in low-k dielectric, and a signal crosses to the next block only along these wires and the vias between them.",
-            "the lit copper runs left and right at several heights, joined by vertical vias, with the block beneath",
+            "Cut open, each level is a layer of copper wires in low-k dielectric, sealed by a thin cap. Alternate levels run at right angles, and vias connect a wire to the one above or below.",
+            "Rows of copper cross-sections alternating with long copper bars, vertical vias between them, a pale green cap on every level, and a few cyan signals moving.",
         )
         .detail(
-            "Block-to-block wires are wider and taller than the thin level, so they carry signals further.",
-            &[
-                "Dual damascene: one copper fill and one CMP per level (CHIP_MID_METAL.txt, section 2)",
-                "Cu resistivity: about 2.0 uOhm-cm in wide lines, over 3.0 below about 60 nm (IBM study)",
-            ],
+            "Five passes of the dual-damascene loop.",
+            &["M5-M9: five passes, each about 4-6 tool visits (CHIP_MID_METAL.txt, section 1)"],
         ),
-    Beat::new("a short hop: one block over is quick", BEAT_MS)
+    Beat::new("a short hop", BEAT_MS)
         .note(
-            "A signal leaves a via and runs along one middle wire to the next block. The wire is short, so its resistance and capacitance are small and the signal arrives fast.",
-            "a train of cyan dots running from the via along one short run, reaching its end before the longer run below does",
+            "A signal climbs a via from an M6 line onto an M7 wire and travels one block over. On a short wire the resistance and capacitance are small, so it arrives almost at once.",
+            "Cyan beads rising through a via into the M7 copper bar and running a short way along it.",
         )
         .detail(
-            "Wire delay is set by R times C, so a short wire is fast.",
-            &[
-                "Wire delay ~ R x C = rho k eps0 L^2 / (W S) (CHIP_MID_METAL.txt, section 3; textbook)",
-                "Cu resistivity: about 2.0 uOhm-cm in wide lines (IBM study)",
-            ],
+            "Short wires are fast.",
+            &["Wire delay ~ R x C, and both grow with length (CHIP_MID_METAL.txt, section 3)"],
         ),
-    Beat::new("a longer run takes longer", BEAT_MS)
+    Beat::new("a long run", BEAT_MS)
         .note(
-            "The same signal on a longer run. Both the resistance and the capacitance to the neighbouring wires grow with length, so the delay grows faster than the length.",
-            "the cyan dots on the long run to the left, slower to arrive than the short hop before, with the via at their start",
+            "The same signal sent along the full length of an M5 wire takes far longer. Resistance and capacitance both grow with length, so delay grows roughly with length squared.",
+            "Cyan beads dropping a via onto the long M5 bar at the bottom and crawling slowly to its far end.",
         )
         .detail(
-            "Both R and C grow with length, so the RC product grows with length squared.",
-            &[
-                "R x C scales with L^2 (CHIP_MID_METAL.txt, section 3; textbook)",
-                "Long nets get repeaters, or move to upper levels (CHIP_MID_METAL.txt, section 3)",
-            ],
+            "Twice the length, about four times the delay.",
+            &["RC ~ L^2 (CHIP_MID_METAL.txt, section 3); the timing here is schematic"],
         ),
-    Beat::new("why: resistance times capacitance", BEAT_MS)
+    Beat::new("R and C on one wire", BEAT_MS)
         .note(
-            "Up close, one wire has resistance from its narrow copper, and capacitance to the wire beside it through the dielectric between them. The delay is their product.",
-            "the copper line with the via rising from it; the tag R marks the narrow copper, the tag C marks the gap of dielectric between it and the next wire",
+            "Close on one wire: its resistance comes from the narrow copper itself, and its capacitance from the wires around it, here the M6 lines just below, across a thin layer of low-k.",
+            "The M7 wire glowing orange for its resistance, with blue electron beads in it, and yellow bands down to the M6 lines for the capacitance.",
         )
         .detail(
-            "Narrower lines raise R and closer neighbours raise C. Low-k cuts C, but soft low-k is weak.",
-            &[
-                "SiO2 k 4.0 at about 72 GPa; carbon-doped oxide k 2.7 at 7-10 GPa (patent text, section 5)",
-                "Air gaps cut line-to-line capacitance by up to 25% (Intel IEDM 2024)",
-            ],
+            "Wire width sets R; spacing and k set C.",
+            &["R = rho L / (W H); C grows with k and H/S (CHIP_MID_METAL.txt, section 3)"],
         ),
-    Beat::new("the longest runs climb to the thick top", BEAT_MS)
+    Beat::new("long runs climb to the top", BEAT_MS)
         .note(
-            "Back on the whole chip. The longest signals leave the middle tier and climb to the thick top wires, which have the lowest resistance. Critical nets move up, and repeaters cover the rest.",
-            "the top tier lit in gold, the middle tier below it, and the long runs rising through the vias",
+            "The longest connections leave the middle tier and climb to the thick top levels, where the resistance per micron is lowest.",
+            "The whole chip again, the thick top tier lit amber above the middle tier.",
         )
         .detail(
-            "Wider, thicker copper has lower resistance, so the longest runs move up.",
-            &[
-                "Thick M10-M14 carry power, clock and global wires (CHIP_MID_METAL.txt, section 3)",
-                "Designers insert repeaters and move critical nets to upper levels (CHIP_MID_METAL.txt, section 3)",
-            ],
+            "Each tier has its job.",
+            &["M10-M14: thick copper for power, clock and global wires (CHIP_MID_METAL.txt, section 3)"],
         ),
 ];
 
@@ -99,199 +81,99 @@ fn build() -> Box<dyn Scene> {
 
 // ---- zoom-ins a-e -----------------------------------------------------------------------------
 
-const ZA_BEATS: &[Beat] = &[
-    Beat::new("trench and via, cut through one mask", BEAT_MS)
-        .note(
-            "The level about to form: a trench and the via below it are etched into the low-k film through one hard mask.",
-            "the lilac dielectric band over the lower wire run, with the via column dropping to the level below; the tag marks the trench and via",
-        )
-        .detail(
-            "Both the trench and the via are patterned, then filled together, so one pass makes both.",
-            &[
-                "PATTERN+ETCH: trench and via through a hard mask (CHIP_MID_METAL.details.txt)",
-                "Each pass is 4-6 tool visits (CHIP_MID_METAL.txt, section 1)",
-            ],
-        ),
-    Beat::new("copper plates both at once", BEAT_MS)
-        .note(
-            "A barrier and seed line the walls, then copper plates bottom-up, filling the via and the trench in one step.",
-            "a translucent copper glow over the lower wire run, with cyan dots flowing out of the via along it",
-        )
-        .detail(
-            "One copper fill and one polish per level keeps the process to two steps.",
-            &[
-                "Trench and via are filled with copper in one plating step (CHIP_MID_METAL.txt, section 2)",
-                "PLATE Cu: bottom-up electroplating (CHIP_MID_METAL.details.txt)",
-            ],
-        ),
-    Beat::new("CMP levels it, a SiCN cap seals it", BEAT_MS)
-        .note(
-            "Polish removes the excess copper and stops on the dielectric. A SiCN or SiN cap then seals the level so the next one can form.",
-            "a gold cap glow over the same wire run, the tag marking CMP and the cap",
-        )
-        .detail(
-            "The cap has a higher k than the dielectric, so thinner caps and metal caps are used to cut capacitance.",
-            &[
-                "CMP strips the excess, stops on the dielectric (CHIP_MID_METAL.txt, section 1)",
-                "SiCN or SiN cap, higher k (CHIP_MID_METAL.txt, section 2)",
-            ],
-        ),
-];
+// a is section 1's pass from the etch on; d is section 6 seen from the other side.
+const ZA_BEATS: &[Beat] = SEC1_BEATS.split_at(1).1;
 
 const ZB_BEATS: &[Beat] = &[
-    Beat::new("R: the narrow copper", BEAT_MS)
+    Beat::new("R: the copper itself", BEAT_MS)
         .note(
-            "Resistance is set by the copper's length, width and height: R = rho L / (W H). A narrow wire resists more.",
-            "the lilac-lit lower wire running left, with the tag R = rho L / (W H) under it",
+            "A wire's resistance is R = rho x L / (W x H): it grows with length and falls with width and height. At tens of nanometres wide, a mid-level wire has real resistance per micron.",
+            "The long M7 wire at the top glowing orange, with blue electron beads moving through it.",
         )
         .detail(
-            "Narrow lines raise R, and the copper's resistivity rises below about 60 nm.",
+            "Narrow copper resists.",
             &[
-                "R = rho L / (W H) (CHIP_MID_METAL.details.txt, RC DELAY)",
-                "Cu about 2.0 uOhm-cm in wide lines, over 3.0 below about 60 nm (IBM study)",
+                "R = rho L / (W H) (CHIP_MID_METAL.txt, section 3)",
+                "About 2.0 uOhm-cm in wide lines, over 3.0 below ~60 nm (IBM study)",
             ],
         ),
-    Beat::new("C: wire to wire through low-k", BEAT_MS)
+    Beat::new("C: through the low-k", BEAT_MS)
         .note(
-            "Capacitance is mostly between neighbouring lines, through the dielectric between them. It grows with k and with height over spacing.",
-            "two lilac-lit wires, one above the other, with the dielectric gap between them and the tag on that gap",
+            "The wire also stores charge against its neighbours: the M6 lines below it through the via-level dielectric, and side by side within a level. Every transition has to charge that capacitance through the wire's resistance.",
+            "Yellow bands from the M7 wire down to each M6 line, and more yellow between the M6 lines.",
         )
         .detail(
-            "Low-k cuts C, but the softer the film, the weaker it is.",
-            &[
-                "C grows with k and H/S (CHIP_MID_METAL.txt, section 3)",
-                "Low-k trades k against stiffness (CHIP_MID_METAL.txt, section 5)",
-            ],
+            "Low-k cuts C.",
+            &["C grows with k and with H/S (CHIP_MID_METAL.txt, section 3)"],
         ),
-    Beat::new("long run: delay ~ L^2", BEAT_MS)
+    Beat::new("delay ~ L^2", BEAT_MS)
         .note(
-            "Delay is R times C, and both grow with length. A run twice as long is about four times slower to arrive.",
-            "the lilac-lit lower wire with the cyan dots crossing slowly from the left, the tag long run",
+            "Because R and C both grow with length, the delay of an unbuffered wire grows roughly with its length squared. A short hop is quick; the long wire is many times slower, so long runs get repeaters or move to thicker metal.",
+            "Cyan beads crawling the full M7 wire at the top while a quick stream crosses a short stretch of M5 at the bottom.",
         )
         .detail(
-            "Long block-to-block runs belong on wider, thicker levels.",
-            &[
-                "Wire delay ~ R x C = rho k eps0 L^2 / (W S) (CHIP_MID_METAL.txt, section 3; textbook)",
-                "Long nets move to upper levels (CHIP_MID_METAL.txt, section 3)",
-            ],
+            "The reason levels get fatter going up.",
+            &["Delay ~ rho k eps0 L^2 / (W S) (CHIP_MID_METAL.txt, section 3)"],
         ),
 ];
 
 const ZC_BEATS: &[Beat] = &[
-    Beat::new("low-k: a soft, porous film", BEAT_MS)
+    Beat::new("porous low-k", BEAT_MS)
         .note(
-            "A lower-k dielectric cuts capacitance, but the film gets softer as k drops. Silicon dioxide is stiff; carbon-doped oxide is not.",
-            "the lilac dielectric band across the middle tier with its wires; the tag gives k 2.7 CDO at 7-10 GPa",
+            "The film between the wires is a carbon-doped oxide filled with pores to bring k down toward 2.5 and below. Lower k means less capacitance, but the film gets soft: a 58% porous CDO is down to about 3 GPa.",
+            "Dark pores packed into the dielectric between the copper lines.",
         )
         .detail(
-            "Each step down in k costs stiffness, and porous films crack in CMP and packaging.",
+            "Lower k, softer film.",
             &[
-                "SiO2 k 4.0 at about 72 GPa; carbon-doped oxide k 2.7 at 7-10 GPa (CHIP_MID_METAL.txt, section 5)",
-                "Weak ILD cracks in CMP, wire bonding and packaging (CHIP_MID_METAL.details.txt, DEPOSIT ILD)",
+                "CDO k ~2.7: 7-10 GPa; 58% porous CDO: 3 GPa (CHIP_MID_METAL.txt, section 5)",
+                "SiO2: k ~4.0, 72 GPa",
             ],
         ),
-    Beat::new("air gap: no dielectric between lines", BEAT_MS)
+    Beat::new("air gaps", BEAT_MS)
         .note(
-            "Removing the dielectric between the tightest lines leaves a gap of air, which cuts line-to-line capacitance.",
-            "a pale glowing box in the dielectric between two wires, where no solid film sits; the tag air gap -25% C",
+            "The lowest k of all is nothing: the film between lines is etched out and the cap bridges over the gap. Air gaps cut capacitance by 25% or more, but add no strength.",
+            "Dark empty gaps between the copper lines, with the pale green cap spanning over them.",
+        )
+        .detail("k about 1.", &["Air gap: capacitance down 25% or more (CHIP_MID_METAL.txt, section 5)"]),
+    Beat::new("etched ruthenium", BEAT_MS)
+        .note(
+            "At the tightest pitches, ruthenium lines are etched out of a blanket film instead of copper being filled into trenches. Ru needs no barrier, and the gaps between lines can be left as air.",
+            "Blue-grey ruthenium lines with no barrier, dark air gaps between them, and a cap over the top.",
         )
         .detail(
-            "Air has k near 1, so a gap is the lowest-k dielectric there is. Voids are weak and trap heat.",
-            &[
-                "Intel IEDM 2024: up to 25% lower line-to-line capacitance at pitches <=25 nm (CHIP_MID_METAL.details.txt, AIR GAP)",
-                "Voids are mechanically weak and trap heat (CHIP_MID_METAL.details.txt, AIR GAP)",
-            ],
-        ),
-    Beat::new("ruthenium: etched lines, no barrier", BEAT_MS)
-        .note(
-            "Below about 20 nm pitch, etched ruthenium without a barrier replaces damascene copper. Ru needs no liner and can be etched.",
-            "two middle wires recoloured as blue-grey ruthenium, the tag Ru: etched, no barrier",
-        )
-        .detail(
-            "Copper's resistance wall at tight pitch is why the subtractive flow is coming.",
-            &[
-                "RU / SUBTRACTIVE: below about 20-25 nm pitch (CHIP_MID_METAL.txt, section 7)",
-                "Intel IEDM 2024: <=25 nm subtractive Ru (CHIP_MID_METAL.details.txt, RU / SUBTRACTIVE)",
-            ],
+            "Below about 20 nm pitch.",
+            &["Subtractive Ru with air gap, -25% line-line C (Intel, IEDM 2024)"],
         ),
 ];
 
-const ZD_BEATS: &[Beat] = &[
-    Beat::new("current pushes copper atoms", BEAT_MS)
-        .note(
-            "Electrons drag copper atoms along the copper and cap interface, the weakest path in the line.",
-            "a train of cyan dots drifting along the middle wire, with the tag electrons push Cu atoms",
-        )
-        .detail(
-            "The drift is the electron wind; the atoms move opposite to the current.",
-            &[
-                "ELECTROMIGRATION: atoms drift along the Cu/cap interface (CHIP_MID_METAL.txt, section 6)",
-                "Voids upstream, hillocks downstream (CHIP_MID_METAL.txt, section 6)",
-            ],
-        ),
-    Beat::new("heat and a void: MTTF falls", BEAT_MS)
-        .note(
-            "Black's equation: lifetime falls with current density and with temperature. A void opens upstream, where atoms have left.",
-            "the middle wire glowing orange, with a dark void on it and the tag void upstream, heat: MTTF falls",
-        )
-        .detail(
-            "Hotter and denser currents fail sooner; the exponent on J is about 2.",
-            &[
-                "MTTF = A x J^-n x exp(Ea/kT), n often about 2 (CHIP_MID_METAL.txt, section 6)",
-                "Cu Ea about 0.7-1.1 eV against Al 0.5-0.7 eV (CHIP_MID_METAL.txt, section 6)",
-            ],
-        ),
-    Beat::new("CoWP or Co cap slows drift", BEAT_MS)
-        .note(
-            "A metal cap on the copper, and a liner under it, hold the atoms at the interface and slow the drift.",
-            "the middle wire under a gold cap glow, the void still dark, the tag CoWP or Co cap slows drift",
-        )
-        .detail(
-            "A better cap raises lifetime, but a metal cap costs selectivity and carries leakage risk.",
-            &[
-                "Fixes: CoWP, Co or Ru caps, Mn or Co liners, copper reflow (CHIP_MID_METAL.txt, section 6)",
-                "Metal caps reduce EM at the cost of selectivity and leakage (CHIP_MID_METAL.details.txt, CAP+REPEAT)",
-            ],
-        ),
-];
+const ZD_BEATS: &[Beat] = SEC6_BEATS;
 
 const ZE_BEATS: &[Beat] = &[
-    Beat::new("via: lands on target", BEAT_MS)
+    Beat::new("a via on target", BEAT_MS)
         .note(
-            "A via landed where it was drawn has low resistance and joins one level to the next cleanly.",
-            "a lilac-lit via column between the lower and upper middle wires, the tag via: lands on target, low R",
+            "A via is printed by its own exposure, so it has to line up with the line below. Landed where planned, its whole foot sits on copper: low resistance and plenty of margin to the next line.",
+            "A copper via dropping from the long M7 wire onto an M6 line, its foot glowing green across the full width of the line.",
         )
         .detail(
-            "A via is a copper plug between levels, and at the tightest levels its resistance can dominate.",
-            &[
-                "VIA / EPE: a via landed where planned has low resistance (CHIP_MID_METAL.txt, section 7)",
-                "Via resistance is the main RC problem at the tightest levels (CHIP_MID_METAL.details.txt, VIA / EPE)",
-            ],
+            "Overlay is the budget.",
+            &["Overlay budget about 1/4 of the pitch at 70 nm and below (CHIP_MID_METAL.txt, section 7)"],
         ),
-    Beat::new("misaligned: narrow bottom", BEAT_MS)
+    Beat::new("edge placement error", BEAT_MS)
         .note(
-            "A misaligned via narrows at the bottom. Its resistance rises, and a short or electromigration becomes more likely.",
-            "a thin orange via beside the lit one, narrower at its foot; the tag misaligned: narrow, R up",
+            "If overlay and size errors add up, the via lands partly off its line. Less of its foot touches copper, so resistance and current density rise, and its edge creeps toward the neighbouring line, risking a short.",
+            "The via shifted right, a red patch where its foot hangs over the dielectric, and the thin gap left to the next line.",
         )
         .detail(
-            "The overlay budget is about a quarter of the pitch at 70 nm and below.",
-            &[
-                "Overlay about a quarter of the pitch at 70 nm and below (CHIP_MID_METAL.txt, section 7)",
-                "EPE: litho overlay plus CD error (CHIP_MID_METAL.details.txt, VIA / EPE)",
-            ],
+            "A small shift, a big risk.",
+            &["Misaligned via: narrower contact, higher R, short or EM risk (patent 11916010)"],
         ),
-    Beat::new("StarRC, Quantus: R and C per wire", BEAT_MS)
+    Beat::new("RC extraction", BEAT_MS)
         .note(
-            "The stack pulled back. Extraction tools turn every wire into R and C values, so timing signoff sees the real delay.",
-            "cyan dots along the lower and middle runs of the stack, with the tag StarRC, Quantus: R and C per wire",
+            "Before tape-out, every wire's resistance and its capacitance to its neighbours are extracted from the layout and fed to timing sign-off, so delays like these are known for every net. Synopsys StarRC and Cadence Quantus are the standard tools.",
+            "The M7 wire glowing orange for its resistance with electron beads in it, and yellow bands between the M6 lines for capacitance.",
         )
-        .detail(
-            "Designers see the back end as resistance and capacitance tables for each layer.",
-            &[
-                "Synopsys StarRC (SNPS) and Cadence Quantus (CDNS) (CHIP_MID_METAL.txt, section 8)",
-                "StarRC product page (CHIP_MID_METAL.txt, section 10, source 12)",
-            ],
-        ),
+        .detail("Software for every wire.", &["Synopsys StarRC (SNPS), Cadence Quantus (CDNS)"]),
 ];
 
 const ZOOMS: &[Zoom] = &[
@@ -371,361 +253,343 @@ fn zoom_e() -> Box<dyn Scene> {
 // ---- sections 1-10 ---------------------------------------------------------------------------
 
 const SEC1_BEATS: &[Beat] = &[
-    Beat::new("five passes build M5 to M9", BEAT_MS)
+    Beat::new("deposit: low-k film on the etch stop", BEAT_MS)
         .note(
-            "The middle tier is five metal levels, each made by the same dual-damascene pass, one on top of the other.",
-            "the middle tier lit lilac, the tag M5-M9: five passes",
+            "Each wiring level starts as a blank film. A thin SiCN etch stop already covers the level below; a low-k dielectric (a carbon-doped oxide) is deposited on it, then a TiN hard mask that will hold the pattern during the etch.",
+            "The copper bar of M5 at the bottom, the pale green etch stop on it, the grey-blue low-k film growing upward, and the dark grey TiN mask landing on top.",
         )
         .detail(
-            "Each pass makes one metal level plus the vias below it.",
-            &["M5-M9 is five dual-damascene passes, about 4-6 tool visits each (CHIP_MID_METAL.txt, section 1)"],
-        ),
-    Beat::new("M5: the first pass", BEAT_MS)
-        .note(
-            "The first level goes down: ILD, pattern and etch, barrier and seed, copper, CMP, then the cap.",
-            "the lowest middle level glowing copper, the tag M5: one pass",
-        )
-        .detail(
-            "Every level goes through the same sequence of tool steps.",
+            "Every level of M5-M9 repeats this loop.",
             &[
-                "DEPOSIT ILD, PATTERN+ETCH, BARRIER+SEED, PLATE Cu, CMP, CAP+REPEAT (CHIP_MID_METAL.txt, section 1)",
-                "Each pass makes one metal level plus the vias below it (CHIP_MID_METAL.txt, section 1)",
+                "M5-M9: five passes, each about 4-6 tool visits (CHIP_MID_METAL.txt, section 1)",
+                "Etch stop and cap: SiCN or SiN",
             ],
         ),
-    Beat::new("M6 on top of M5", BEAT_MS)
+    Beat::new("pattern and etch: trench and via", BEAT_MS)
         .note(
-            "The next level is built the same way, its vias landing on the level below.",
-            "the second middle level lit copper, the tag M6: the next pass",
+            "Lithography and a plasma etch cut a trench for each wire and, under some of them, a deeper hole for the via that will reach M5. The hard mask protects the film between the trenches.",
+            "The purple plasma glow in the openings, then grey-blue fins of low-k standing between empty trenches, and two narrow via holes reaching down to the M5 bar.",
         )
         .detail(
-            "The cap makes the level below ready to take the next one.",
+            "Dual damascene: trench and via in one film.",
             &[
-                "CAP+REPEAT forms the next level (CHIP_MID_METAL.txt, section 1)",
-                "Vias join each level to the one below (CHIP_MID_METAL.details.txt, CAP+REPEAT)",
+                "Trench and via etched through one hard mask (CHIP_MID_METAL.txt, section 1)",
+                "The via opens through the etch stop onto M5 copper",
             ],
         ),
-    Beat::new("M7 to M9 complete the tier", BEAT_MS)
+    Beat::new("barrier, liner, then copper", BEAT_MS)
         .note(
-            "Three more levels finish the tier. Each repeats the same sequence, one fill and one polish per level.",
-            "the three upper middle levels lit copper, the tag M7 to M9: three more",
+            "A few-nanometre TaN/Ta barrier and a Ru or Co liner coat the trench walls so copper cannot diffuse into the dielectric. Copper then electroplates from the bottom up, filling via and trench in one step and piling up as excess on top.",
+            "Dark blue U-shaped barrier shells first, then copper filling them and the two via columns, and a copper slab growing across the top.",
         )
         .detail(
-            "M5 to M9 is five passes, each also forming the vias down to the previous level.",
+            "One fill for via and trench.",
             &[
-                "Five passes for M5-M9 (CHIP_MID_METAL.details.txt, CMP)",
-                "Dual damascene: one copper fill and one CMP per level (CHIP_MID_METAL.txt, section 2)",
+                "Barrier/liner TaN/Ta and Ru by PVD, ALD or CVD (CHIP_MID_METAL.txt, section 1)",
+                "Bottom-up electroplating; barrier drawn thicker than life",
+            ],
+        ),
+    Beat::new("CMP and cap, then the next level", BEAT_MS)
+        .note(
+            "Chemical-mechanical polishing grinds off the excess copper and stops on the dielectric, leaving each wire separate. A SiCN cap then seals the copper, and the next level is built on top. Five passes make M5 to M9.",
+            "The dark CMP pad sweeping across, the copper slab gone, five separate copper lines left in the low-k, and a pale green cap over them.",
+        )
+        .detail(
+            "Polish flat, seal, repeat.",
+            &[
+                "CMP strips the excess and stops on the dielectric (CHIP_MID_METAL.txt, section 1)",
+                "CAP+REPEAT: SiCN/SiN cap, then the next level",
             ],
         ),
 ];
 
 const SEC2_BEATS: &[Beat] = &[
-    Beat::new("trench: the wire that runs across", BEAT_MS)
+    Beat::new("one copper line in section", BEAT_MS)
         .note(
-            "The trench is the horizontal part of the level: the wire that routes the signal across the block.",
-            "the lower wire lit lilac, the tag trench: the lateral wire",
+            "Cut across, a wire is a copper rectangle wrapped on three sides by a liner and a barrier; the cap closes the fourth side. At tens of nanometres wide, those few-nanometre layers take a real share of the cross-section, and they conduct far worse than copper.",
+            "A copper rectangle with a thin pale liner inside a dark blue barrier, its neighbours either side, and grey-blue low-k between them.",
         )
         .detail(
-            "The trench and the via below it are patterned into the same dielectric, then filled at once.",
-            &["Trench and via patterned into the same ILD, then filled at once (CHIP_MID_METAL.details.txt, PATTERN+ETCH)"],
-        ),
-    Beat::new("via: the plug down", BEAT_MS)
-        .note(
-            "The via is the vertical plug that joins one level to the next.",
-            "the via column lit lilac between the levels, the tag via: the plug down",
-        )
-        .detail(
-            "A via is a copper plug between levels; its resistance counts in a short net.",
-            &["A via is a Cu plug between levels (CHIP_MID_METAL.details.txt, VIA / EPE)"],
-        ),
-    Beat::new("one fill: copper runs into both", BEAT_MS)
-        .note(
-            "Copper plates down the via and out along the trench in one step, so each level has one fill and one polish.",
-            "cyan dots flowing from the upper level down the via and out along the lower wire, the tag one fill for both",
-        )
-        .detail(
-            "One plating step fills both, so there is only one copper fill and one CMP per level.",
+            "The barrier keeps copper out of the dielectric.",
             &[
-                "Trench and via are filled with copper in one plating step (CHIP_MID_METAL.txt, section 2)",
-                "PLATE Cu: bottom-up electrofill (CHIP_MID_METAL.details.txt, PLATE Cu)",
+                "Barrier/liner: TaN/Ta plus Ru or Co (CHIP_MID_METAL.txt, section 1)",
+                "Barrier and liner are a few nm thick (drawn thicker here)",
             ],
         ),
-    Beat::new("barrier stops short of the via foot", BEAT_MS)
+    Beat::new("via and line: one copper fill", BEAT_MS)
         .note(
-            "The barrier coats the walls but not the bottom of the via, so the via copper touches the line copper directly.",
-            "the via lit at its junction with the wire, the tag barrier stops at via foot",
+            "In dual damascene the via and the line above it are plated as one piece, so each level needs one fill and one CMP. The barrier coats the via walls but not its foot, so the via's copper touches the copper below directly.",
+            "A copper column rising from an M6 line into the M7 wire above, and the green glow at the via foot where copper meets copper.",
         )
         .detail(
-            "Leaving the barrier off the via bottom keeps the via resistance low.",
+            "Fewer steps, lower via resistance.",
             &[
-                "The barrier coats the walls but not the via bottom (CHIP_MID_METAL.txt, section 2)",
-                "No barrier at the via bottom (CHIP_MID_METAL.details.txt, overview notes)",
+                "One plating step and one CMP per level (CHIP_MID_METAL.txt, section 2)",
+                "No barrier at the via bottom",
             ],
+        ),
+    Beat::new("the cap between levels", BEAT_MS)
+        .note(
+            "A thin SiCN or SiN cap seals the top of every level and is the etch stop for the next. Its k is higher than the low-k around it, so it adds capacitance; thinner caps and selective metal caps are used to cut that.",
+            "The bright yellow band along the cap on top of M6, and the same pale green layer on top of every other level.",
+        )
+        .detail(
+            "Needed, but it costs capacitance.",
+            &[
+                "SiCN k ~4.5-5 against ULK ~2.5 (typical values, estimate)",
+                "Thinner and selective metal caps cut capacitance (CHIP_MID_METAL.txt, section 2)",
+            ],
+        ),
+    Beat::new("ultra-low-k between the lines", BEAT_MS)
+        .note(
+            "The film between wires is ultra-low-k: a carbon-doped oxide made porous so it stores less charge. Lower k means less capacitance between neighbours and faster signals, but a softer, more fragile film.",
+            "Dark pores dotted through the grey-blue dielectric between the copper lines and in the via layer above them.",
+        )
+        .detail(
+            "Lower k, faster wires.",
+            &["ULK k ~2.5 or below; SiO2 ~4.0 (CHIP_MID_METAL.txt, section 5)"],
         ),
 ];
 
 const SEC3_BEATS: &[Beat] = &[
-    Beat::new("thin: high R", BEAT_MS)
+    Beat::new("RC: thin, medium and thick levels", BEAT_MS)
         .note(
-            "The thin levels M1-M4 are the finest wires, with the most resistance per micron.",
-            "the bottom tier lit cyan, the tag thin: high R",
+            "A wire's delay grows roughly with its resistance times its capacitance, and both scale with length. Thin lower wires have the most resistance per micron, so a signal crawls along them; thick top wires let it race. That is why levels get fatter going up.",
+            "One block with three tiers: tiny M2-M3 lines at the bottom, M6-M7 in the middle, big M12-M13 on top, and cyan signal dots crossing slowly on the thin wire and fast on the thick one.",
         )
         .detail(
-            "Thin lines have the highest resistance per micron, the size effect.",
-            &["Thin M1-M4 have the highest resistance per micron, the size effect (CHIP_MID_METAL.txt, section 3)"],
-        ),
-    Beat::new("medium: R and C balanced", BEAT_MS)
-        .note(
-            "The medium levels M5-M9 are wider and taller than the thin ones, which balances resistance against capacitance.",
-            "the middle tier lit lilac, the tag medium: R and C balanced",
-        )
-        .detail(
-            "Medium levels are where R and C are traded off against each other.",
-            &["Medium M5-M9 balance R and C (CHIP_MID_METAL.txt, section 3)"],
-        ),
-    Beat::new("thick: lowest R", BEAT_MS)
-        .note(
-            "The thick top levels carry power, clock and global wires, at the lowest resistance.",
-            "the top tier lit gold, the tag thick: lowest R, and the formula in the corner",
-        )
-        .detail(
-            "Wide copper has the lowest resistance; the resistivity rises as lines narrow.",
+            "Each tier trades density for speed.",
             &[
-                "Thick M10-M14 carry power, clock and global wires (CHIP_MID_METAL.txt, section 3)",
-                "Cu about 2.0 uOhm-cm in wide lines, over 3.0 below about 60 nm (IBM study)",
+                "Delay ~ R x C = rho k eps0 L^2 / (W S) (CHIP_MID_METAL.txt, section 3)",
+                "Thin M1-M4 have the highest R per micron",
+            ],
+        ),
+    Beat::new("C: mostly line to line", BEAT_MS)
+        .note(
+            "In a dense level most of a wire's capacitance is to the wires beside it. It grows with the dielectric's k and with how tall the wires are compared with the gap, so making wires taller to cut R also raises C.",
+            "Yellow bands filling the gaps between the M6 copper lines: the line-to-line capacitance.",
+        )
+        .detail(
+            "R and C pull against each other.",
+            &["C grows with k and with H/S; R falls with W x H (CHIP_MID_METAL.txt, section 3)"],
+        ),
+    Beat::new("the size effect", BEAT_MS)
+        .note(
+            "Copper's resistivity rises as lines narrow: electrons scatter off grain boundaries and surfaces, and the barrier takes a bigger share of the cross-section. Thin lines conduct well below what bulk copper would suggest.",
+            "The thin M2 lines glowing orange at the bottom, the wider M6 lines above them in plain copper.",
+        )
+        .detail(
+            "Narrow copper is worse copper.",
+            &[
+                "About 2.0 uOhm-cm in wide lines (IBM study)",
+                "Over 3.0 uOhm-cm below about 60 nm width (IBM study)",
             ],
         ),
 ];
 
 const SEC4_BEATS: &[Beat] = &[
-    Beat::new("Intel 7 and Intel 4 at 44-52 nm", BEAT_MS)
+    Beat::new("Intel 7 and Intel 4 pitches", BEAT_MS)
         .note(
-            "Published points for the middle levels: Intel 7 M2 and M4 at 44 and 52 nm, Intel 4 at 45 nm with some EUV.",
-            "the middle tier lit, the tags Intel 7 M2/M4: 44-52 nm and Intel 4: 45 nm, some EUV",
+            "Each level has its own pitch, the centre-to-centre spacing of its wires. Published points: Intel 7 M2 at 44 nm and M4 at 52 nm by DUV multipatterning; Intel 4 M2 and M4 at 45 nm, with EUV for some metal and via layers.",
+            "Three copper gratings stacked up, each with a glowing bar spanning one pitch: Intel 7 M2 at the bottom, Intel 7 M4 in the middle, Intel 4 M2 on top.",
         )
         .detail(
-            "EUV or multipatterning is chosen per level.",
+            "Published points, not full tables.",
             &[
-                "Intel 7 M2 / M4 44 / 52 nm, DUV multipatterning (CHIP_MID_METAL.txt, section 4)",
-                "Intel 4 M2 / M4 45 nm, EUV for some metal and vias (CHIP_MID_METAL.txt, section 4)",
+                "Intel 7 M2/M4: 44/52 nm, DUV multipatterning (WikiChip, AnandTech)",
+                "Intel 4 M2/M4: 45 nm, EUV for some layers",
             ],
         ),
-    Beat::new("TSMC: 23 nm and 30% tighter", BEAT_MS)
+    Beat::new("TSMC N3E M0: 23 nm, one EUV shot", BEAT_MS)
         .note(
-            "TSMC N5 Mx scaled about 30% tighter than N7 with EUV. N3E reached 23 nm with a single EUV exposure.",
-            "the thin tier lit cyan, the tags TSMC N3E: 23 nm, EUV single and TSMC N5 Mx ~30% tighter",
+            "At TSMC N3E the tightest metal, M0, is 23 nm pitch, printed in a single EUV exposure. N3B used EUV double patterning on three layers: two exposures that each print every other line and must line up with each other.",
+            "The lower grating in plain copper (one exposure) and the upper one with alternate lines tinted orange and blue (two exposures).",
         )
         .detail(
-            "Tight pitches now need EUV; the cost of each step is what sets the choice.",
+            "EUV vs multipatterning is a per-level choice.",
             &[
-                "TSMC N5 Mx about 30% tighter than N7, EUV (CHIP_MID_METAL.txt, section 4)",
-                "TSMC N3E M0 23 nm, EUV single pattern (CHIP_MID_METAL.txt, section 4)",
+                "N3E M0: 23 nm, EUV single pattern; N3B: 3 layers EUV double (SemiAnalysis)",
+                "TSMC N5 Mx about 30% tighter than N7",
             ],
         ),
-    Beat::new("no full per-level tables", BEAT_MS)
+    Beat::new("Intel IEDM 2024: etched Ru", BEAT_MS)
         .note(
-            "Foundries do not publish a pitch for every level. M5-M9 is a class label, and EUV or multipatterning is a per-level choice.",
-            "the whole chip with the middle tier lit, the tag no full per-level tables",
+            "At 25 nm pitch and below, Intel showed ruthenium lines etched out of a blanket film instead of copper filled into trenches. Ru needs no barrier, and the spaces between lines can be left as air gaps, which cut line-to-line capacitance by about 25%.",
+            "Blue-grey ruthenium lines with no barrier, dark air gaps between them, and a cap bridging over the top.",
         )
         .detail(
-            "Only the disclosed examples are given here.",
-            &["EUV VS MULTI is a per-level choice; foundries don't publish full per-level pitch tables (CHIP_MID_METAL.txt, section 4)"],
+            "A different way to make the tightest wires.",
+            &["Subtractive Ru with air gap, -25% line-line capacitance (Intel, IEDM 2024)"],
         ),
 ];
 
 const SEC5_BEATS: &[Beat] = &[
     Beat::new("SiO2: stiff, k 4.0", BEAT_MS)
         .note(
-            "Plain silicon dioxide has k about 4.0 and is stiff, about 72 GPa.",
-            "the middle tier's dielectric band lit lilac, the tag SiO2 k 4.0: 72 GPa",
+            "Plain silicon dioxide was the original film between wires. It is stiff and tough, but its k of about 4.0 means high capacitance between neighbouring wires.",
+            "Pale solid SiO2 between the copper lines, and the tall grey bar on the right for its stiffness.",
         )
-        .detail(
-            "This is the reference point: every lower-k film trades stiffness for k.",
-            &["SiO2 (k about 4.0) 72 GPa (CHIP_MID_METAL.txt, section 5)"],
-        ),
-    Beat::new("k 2.7 CDO: softer", BEAT_MS)
+        .detail("The stiff baseline.", &["SiO2: k ~4.0, modulus 72 GPa (CHIP_MID_METAL.txt, section 5)"]),
+    Beat::new("carbon-doped oxide: k 2.7", BEAT_MS)
         .note(
-            "Carbon-doped oxide at k 2.7 is about ten times softer than silicon dioxide.",
-            "the same band, the tag k 2.7 CDO: 7-10 GPa",
+            "Adding carbon to the oxide lowers k to about 2.7, cutting capacitance by about a third. The film gets far softer, which makes polishing and packaging stress harder to survive.",
+            "A darker blue film with a few pores between the lines, and a short second bar next to the SiO2 one.",
         )
         .detail(
-            "Modulus falls an order of magnitude as k drops by a third.",
+            "Lower k, much softer.",
             &[
-                "Carbon-doped oxide (k about 2.7) 7-10 GPa (CHIP_MID_METAL.txt, section 5)",
-                "Modulus falls an order of magnitude as k drops by a third (CHIP_MID_METAL.txt, section 5)",
+                "CDO k ~2.7: 7-10 GPa (CHIP_MID_METAL.txt, section 5)",
+                "Intel patent target: k 2.5 or less at 15 GPa",
             ],
         ),
-    Beat::new("58% porous CDO: 3 GPa", BEAT_MS)
+    Beat::new("porous CDO: 3 GPa", BEAT_MS)
         .note(
-            "Pores lower k further, but a porous film is much weaker, about 3 GPa. The white pores are the air in it.",
-            "white pores scattered through the dielectric band, the tag 58% porous CDO: 3 GPa",
+            "Making the film porous lowers k further, at a price: a 58% porous CDO is down to about 3 GPa, and films below k 2 are at least half pores. Stiffness falls by about ten times as k drops by a third.",
+            "The dielectric full of dark pores, and a third bar barely above the base.",
         )
         .detail(
-            "Films below k 2 are at least half porous, which is why they crack under CMP and packaging.",
-            &[
-                "58% porous CDO 3 GPa (CHIP_MID_METAL.txt, section 5)",
-                "Films below k 2.0 are at least 50% porous (CHIP_MID_METAL.details.txt, LOW-K / ULK)",
-            ],
+            "Soft films crack and absorb damage.",
+            &["58% porous CDO: 3 GPa; spin-on k below 2.0: 1-3 GPa (CHIP_MID_METAL.txt, section 5)"],
         ),
     Beat::new("air gap: no dielectric at all", BEAT_MS)
         .note(
-            "Removing the dielectric between lines leaves a gap of air, which cuts capacitance by 25% or more.",
-            "a pale gap glow between two middle wires where no film sits; the tag air gap: -25% C",
+            "The limit is to etch the film out between lines and leave air, k about 1. The cap bridges over the gap. Air gaps cut capacitance by 25% or more, but the gap carries no mechanical load.",
+            "Dark empty gaps between the copper lines, and the pale green cap spanning over them.",
         )
-        .detail(
-            "The gap is the lowest-k dielectric there is, at the cost of mechanical strength.",
-            &[
-                "AIR GAP cuts capacitance 25% or more (CHIP_MID_METAL.txt, section 5)",
-                "Intel IEDM 2024: up to 25% lower line-to-line capacitance (CHIP_MID_METAL.details.txt, AIR GAP)",
-            ],
-        ),
+        .detail("The lowest k possible.", &["Air gap: capacitance down 25% or more (CHIP_MID_METAL.txt, section 5)"]),
 ];
 
 const SEC6_BEATS: &[Beat] = &[
-    Beat::new("electrons push copper atoms", BEAT_MS)
+    Beat::new("the electron wind", BEAT_MS)
         .note(
-            "The electron wind pushes copper atoms along the weakest path, the copper and cap interface.",
-            "cyan dots drifting along the middle wire, with the tag electrons push Cu atoms",
+            "Electrons flowing at high current density push on the copper atoms. The atoms drift the same way as the electrons, fastest along the weakest path: the interface between the copper and its cap.",
+            "Blue electron dots running along the M7 wire from the via on the left, and small orange copper atoms creeping along its top edge under the cap.",
         )
         .detail(
-            "Atoms leave voids upstream and pile up as hillocks downstream.",
-            &["ELECTROMIGRATION: voids upstream, hillocks downstream (CHIP_MID_METAL.txt, section 6)"],
+            "The slow wear-out of every wire.",
+            &["EM drift runs along the Cu/cap interface (CHIP_MID_METAL.txt, section 6)"],
         ),
-    Beat::new("heat makes it worse", BEAT_MS)
+    Beat::new("a void and a hillock", BEAT_MS)
         .note(
-            "Black's equation: lifetime falls with current density and with temperature, so a hot level fails sooner.",
-            "the middle wire glowing orange, the tag MTTF = A J^-n exp(Ea/kT)",
+            "Where atoms leave faster than they arrive, a void opens, usually just past the via where the current enters, and the wire's resistance climbs until it fails open. Downstream the atoms pile into a hillock that can crack the cap. Black's equation gives the lifetime.",
+            "A black void opening in the wire beside the left via, a copper hillock pushing up through the cap on the right, and the wire glowing hot.",
         )
         .detail(
-            "The exponent on current density is often about 2.",
+            "Lifetime falls steeply with current and heat.",
             &[
-                "Black's equation, n often about 2 (CHIP_MID_METAL.txt, section 6)",
-                "Cu Ea about 0.7-1.1 eV against Al 0.5-0.7 eV (CHIP_MID_METAL.txt, section 6)",
+                "MTTF = A x J^-n x exp(Ea / kT), n often ~2 (Black's equation)",
+                "Cu Ea ~0.7-1.1 eV vs Al 0.5-0.7 eV",
             ],
         ),
-    Beat::new("caps and liners slow it", BEAT_MS)
+    Beat::new("caps that hold the copper", BEAT_MS)
         .note(
-            "Metal caps and liners hold the atoms at the interface, so the drift is slower.",
-            "the wire under a gold cap glow, the tag caps and liners slow it",
+            "The fix is a stronger top interface. A cobalt cap, or CoWP or Ru, bonds to copper better than SiCN does, so the atoms drift far more slowly. Mn or Co liners and copper reflow help too.",
+            "A bright blue-silver cobalt layer along the top of the wire, and only a few orange atoms moving.",
         )
-        .detail(
-            "Metal caps cut EM, but cost selectivity and carry leakage risk.",
-            &[
-                "Fixes: CoWP, Co or Ru caps, Mn or Co liners, copper reflow (CHIP_MID_METAL.txt, section 6)",
-                "Metal caps reduce EM at the cost of selectivity and leakage (CHIP_MID_METAL.details.txt, CAP+REPEAT)",
-            ],
-        ),
+        .detail("Caps and liners buy lifetime.", &["Fixes: CoWP, Co or Ru caps; Mn or Co liners; Cu reflow (CHIP_MID_METAL.txt, section 6)"]),
 ];
 
 const SEC7_BEATS: &[Beat] = &[
-    Beat::new("via: lands on target", BEAT_MS)
+    Beat::new("a via on target", BEAT_MS)
         .note(
-            "A via landed where it was drawn has low resistance and a clean join between levels.",
-            "two via columns lit lilac between the middle levels, the tag via: lands on target",
+            "A via is printed by its own exposure, so it has to line up with the line below. Landed where planned, its whole foot sits on copper: low resistance and plenty of margin to the next line.",
+            "A copper via dropping from the long M7 wire onto an M6 line, its foot glowing green across the full width of the line.",
         )
         .detail(
-            "A landed via is a low-resistance join; a missed one is a problem.",
-            &["VIA / EPE: a via landed where planned has low resistance (CHIP_MID_METAL.txt, section 7)"],
+            "Overlay is the budget.",
+            &["Overlay budget about 1/4 of the pitch at 70 nm and below (CHIP_MID_METAL.txt, section 7)"],
         ),
-    Beat::new("misaligned: narrow bottom", BEAT_MS)
+    Beat::new("edge placement error", BEAT_MS)
         .note(
-            "A misaligned via narrows at the bottom. Its resistance rises, and a short or electromigration becomes more likely.",
-            "an orange via, thinner at its foot, the tag misaligned: narrow bottom",
+            "If overlay and size errors add up, the via lands partly off its line. Less of its foot touches copper, so resistance and current density rise, and its edge creeps toward the neighbouring line, risking a short.",
+            "The via shifted right, a red patch where its foot hangs over the dielectric, and the thin gap left between it and the next line.",
         )
         .detail(
-            "Self-aligned vias set the via edge by the line grating, which cuts placement error.",
-            &[
-                "Overlay about a quarter of the pitch at 70 nm and below (CHIP_MID_METAL.txt, section 7)",
-                "Self-aligned vias cut EPE (CHIP_MID_METAL.details.txt, VIA / EPE)",
-            ],
+            "A small shift, a big risk.",
+            &["Misaligned via: narrower contact, higher R, short or EM risk (patent 11916010)"],
         ),
-    Beat::new("StarRC, Quantus: R and C", BEAT_MS)
+    Beat::new("self-aligned vias", BEAT_MS)
         .note(
-            "Extraction tools turn every wire into R and C values, so timing signoff sees the real delay.",
-            "cyan dots along the lower and middle runs, the tag StarRC, Quantus: R and C",
+            "With self-aligned vias the line grating sets the via's edges: the opening is drawn wider than needed and trimmed to the line it lands on. Below about 20 nm pitch, etched ruthenium is expected to replace damascene copper.",
+            "The wide yellow opening at the top of the via, and the copper via under it exactly the width of its line.",
         )
         .detail(
-            "Millions of parasitics per net make extraction hard, and the foundry tech file decides adoption.",
+            "Let the lines do the aligning.",
             &[
-                "Synopsys StarRC (SNPS), Cadence Quantus (CDNS) (CHIP_MID_METAL.txt, section 8)",
-                "StarRC product page (CHIP_MID_METAL.txt, section 10, source 12)",
+                "Self-aligned via: the line edges set the via edge (CHIP_MID_METAL.txt, section 7)",
+                "Below ~20 nm pitch: subtractive Ru, no barrier",
             ],
         ),
 ];
 
 const SEC8_BEATS: &[Beat] = &[
-    Beat::new("tool makers", BEAT_MS)
+    Beat::new("the tools for each layer", BEAT_MS)
         .note(
-            "Applied Materials supplies the barrier, seed and low-k tools; Lam Research supplies the copper plating.",
-            "the middle tier lit lilac, the tags Applied: Endura CuBS, Black Diamond and Lam: SABRE copper plating",
+            "Every step of the loop has its tool makers. Applied Materials deposits the low-k (Black Diamond) and the barrier and seed (Endura, with Ru CVD); Lam Research plates the copper (SABRE); Applied and Ebara polish it; Tokyo Electron also sells deposition and etch.",
+            "Tags on the grey-blue low-k, the dark barrier, the copper and the top cap of a three-level cut-away.",
         )
         .detail(
-            "The tool makers sell the deposition, etch, CMP and plating steps.",
+            "Fabs: TSMC (TSM), Intel (INTC), Samsung (005930.KS).",
             &[
-                "Applied: Endura CuBS barrier/seed with Ru CVD, Black Diamond low-k (CHIP_MID_METAL.txt, section 8)",
-                "Lam: SABRE copper plating (CHIP_MID_METAL.txt, section 8)",
+                "AMAT: Endura, Black Diamond; LRCX: SABRE (CHIP_MID_METAL.txt, section 8)",
+                "TEL (8035.T), Ebara (6361.T)",
             ],
         ),
-    Beat::new("fabs and designers", BEAT_MS)
+    Beat::new("RC extraction", BEAT_MS)
         .note(
-            "TSMC, Intel and Samsung build the chips. Arm, NVIDIA and AMD design to the rules those fabs publish.",
-            "the silicon tagged with the fabs, the top tier tagged with the designers",
+            "Before tape-out, every wire's resistance and its capacitance to its neighbours are extracted from the layout and fed to timing sign-off. Synopsys StarRC and Cadence Quantus are the standard extraction tools.",
+            "An orange glow along an M7 wire for its resistance, and yellow bands between the M6 lines for capacitance.",
+        )
+        .detail("Software for every wire.", &["Synopsys StarRC (SNPS), Cadence Quantus (CDNS)"]),
+    Beat::new("Applied: 30% from China", BEAT_MS)
+        .note(
+            "Applied Materials' fiscal 2025 revenue was $28,368M, and 30% of it, $8,529M, came from China. That exposure is a risk if export rules tighten.",
+            "A tall copper bar for Applied's total revenue and a short glowing bar for China, beside the stack.",
         )
         .detail(
-            "The fabs own the process; the designers see it as timing tables.",
-            &[
-                "Fabs: TSMC (TSM), Intel (INTC), Samsung (005930.KS) (CHIP_MID_METAL.txt, section 8)",
-                "Designers working to the fabs' rules (textbook)",
-            ],
-        ),
-    Beat::new("China: 30% of Applied sales", BEAT_MS)
-        .note(
-            "China was 30% of Applied's FY2025 revenue: $8,529M of $28,368M.",
-            "the middle tier lit, the tags China: 30% of Applied sales and the FY2025 figures",
-        )
-        .detail(
-            "Export controls make this revenue share a risk to watch.",
-            &["Applied FY2025 revenue $28,368M, $8,529M from China (CHIP_MID_METAL.txt, section 8; AMAT FY2025 ARS)"],
+            "The biggest supplier's China exposure.",
+            &["AMAT FY2025: $28,368M revenue, $8,529M (30%) China (AMAT FY2025 annual report)"],
         ),
 ];
 
 const SEC9_BEATS: &[Beat] = &[
-    Beat::new("copper's resistance wall", BEAT_MS)
+    Beat::new("the copper resistance wall", BEAT_MS)
         .note(
-            "Below about 20 nm pitch copper's resistance is a wall: narrow copper resists more than ruthenium does.",
-            "the thin tier lit cyan, the tag Cu wall below ~20 nm pitch",
+            "At about 20 nm pitch a copper line is only about 10 nm wide, and the barrier and liner, which do not shrink with it, take most of that width. Ruthenium needs no barrier, so the tightest levels are moving to Ru.",
+            "Top row: tiny copper cores inside thick dark barriers. Bottom row: solid blue-grey Ru lines with dark air gaps between them.",
         )
         .detail(
-            "This is the switch to ruthenium at the tightest levels.",
-            &["A copper resistance wall below about 20 nm pitch, the switch to Ru (CHIP_MID_METAL.txt, section 9)"],
+            "Copper stops scaling.",
+            &["Copper resistance wall below ~20 nm pitch; switch to Ru (CHIP_MID_METAL.txt, section 9)"],
         ),
-    Beat::new("porous ULK and EM", BEAT_MS)
+    Beat::new("fragile low-k, more current", BEAT_MS)
         .note(
-            "Porous low-k films damage easily, and higher current speeds electromigration. One wire glows hot.",
-            "the middle tier lit, one wire orange; the tags porous ULK damages easily and EM: more current, faster",
+            "Porous ultra-low-k is easily damaged: the etch and strip plasmas pull carbon out of the trench walls, which raises k and weakens the film. Higher current per wire also speeds electromigration.",
+            "The purple plasma over the trenches, damaged purple bands on the dielectric beside each line, and one line glowing hot.",
         )
         .detail(
-            "Two reliability risks rise together as the film gets softer and the current gets higher.",
+            "Two reliability limits.",
+            &["Porous ULK damage; EM at higher current (CHIP_MID_METAL.txt, section 9)"],
+        ),
+    Beat::new("who sells the tools", BEAT_MS)
+        .note(
+            "About 30% of Applied's sales go to China. And if the tightest levels switch to etched ruthenium, spending moves from copper plating and CMP toward deposition and etch, which changes which tool makers win.",
+            "Two bars, about 70% rest of world and about 30% China, and a small etched-Ru grating with air gaps.",
+        )
+        .detail(
+            "A market shift and a geographic risk.",
             &[
-                "Damage to porous ultra-low-k films (CHIP_MID_METAL.txt, section 9)",
-                "Electromigration at higher current (CHIP_MID_METAL.txt, section 9)",
+                "China ~30% of Applied FY2025 revenue (AMAT annual report)",
+                "Etched Ru favours deposition and etch over plating and CMP (estimate)",
             ],
-        ),
-    Beat::new("tools shift, China at 30%", BEAT_MS)
-        .note(
-            "Subtractive ruthenium changes which companies sell the tools, and China is 30% of Applied's sales.",
-            "the top tier lit gold; the tags tools shift to Ru and China: 30% of Applied",
-        )
-        .detail(
-            "The tool market shifts with the process, so the sellers and their exposure shift too.",
-            &["China at 30% of Applied's sales, and the move to subtractive Ru (CHIP_MID_METAL.txt, section 9)"],
         ),
 ];
 
 const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources: copper and resistivity", BEAT_MS)
         .note(
-            "The whole chip, pulled back slowly. The first sources cover the copper history and the resistivity study.",
-            "the whole chip, slowly pulled back, with no tags",
+            "The sources behind this page, in four groups. The first cover the copper history, barrier scaling and the resistivity study.",
+            "The M5-M9 cut-away from the front right: copper lines in low-k, vias and caps.",
         )
         .detail(
             "Sources 1, 2 and 6, as listed on the page.",
@@ -737,8 +601,8 @@ const SEC10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources: nodes and fabs", BEAT_MS)
         .note(
-            "The whole chip, pulled back further. These sources cover the node pitches and the IEDM papers.",
-            "the whole chip, pulled back, with no tags",
+            "These sources cover the node pitches and the IEDM papers.",
+            "Close on a via joining an M6 line to the M7 wire above.",
         )
         .detail(
             "Sources 3 to 5, as listed on the page.",
@@ -750,8 +614,8 @@ const SEC10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources: dielectric, EM and vias", BEAT_MS)
         .note(
-            "The whole chip at its widest. These sources cover the low-k modulus, the electromigration and the via placement.",
-            "the whole chip at its widest, with no tags",
+            "These sources cover the low-k modulus, electromigration and via placement.",
+            "The block from above and to the left, its line ends showing on the side.",
         )
         .detail(
             "Sources 7 to 10, as listed on the page.",
@@ -764,8 +628,8 @@ const SEC10_BEATS: &[Beat] = &[
         ),
     Beat::new("sources: tools and EDA", BEAT_MS)
         .note(
-            "The whole chip, held at its widest. The last sources cover the tool makers and the extraction tools.",
-            "the whole chip, held wide, with no tags",
+            "The last sources cover the tool makers and the extraction tools.",
+            "The block nearly face on, the green caps marking each level.",
         )
         .detail(
             "Sources 11 and 12, as listed on the page.",

@@ -1,0 +1,20 @@
+# 1. HBF: flash in an HBM package
+
+SanDisk co-developed high-bandwidth flash (HBF) with SK hynix: NAND stacked in an HBM-style package, so an AI inference chip gets far more capacity per GPU at a bandwidth below HBM.
+
+# 2. The spec
+
+The first HBF spec came out through the Open Compute Project in August 2026. It covers 8- and 16-high NAND stacks up to 512 GB, with three bandwidth tiers from about 0.4 to 3.0 TB/s, plus the xPU-HBF host interface. Google and Tenstorrent joined the workstream.
+
+# 3. Timing
+
+Samples of the first HBF inference devices are expected in early 2027. This is a spec and a roadmap, not a product you can buy.
+
+# 4. Sources
+
+- SanDisk press release, HBF standardization (Feb 2026):
+  https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf
+- TechRadar, SK hynix and Sandisk HBF specs (not buyable soon):
+  https://techradar.com/pro/sk-hynix-and-sandisk-reveal-first-specs-for-high-bandwidth-flash-but-dont-get-too-excited-you-probably-wont-be-able-to-buy-it-anytime-soon
+- Guru3D, HBF standard reaches 512 GB and 3 TB/s through UCIe:
+  https://www.guru3d.com/story/sk-hynix-and-sandisk-hbf-standard-reaches-512gb-and-3tb-s-through-ucie/

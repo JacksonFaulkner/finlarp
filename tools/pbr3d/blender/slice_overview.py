@@ -37,7 +37,16 @@ X = STATION_X
 INGOT_H = 6 * PITCH + WAFER_T  # seven slices with six kerfs between
 
 # camera: one pose per beat, on the station of that beat
-POSES = [((x, 260.0, 0.0), 3600.0, 0.18, 0.12) for x in X]
+# (closer than the old 3600 mm line view: the wafer is 300 mm and a station was a speck)
+POSES = [
+    ((X[0], 320.0, 0.0), 2000.0, 0.22, 0.14),
+    ((X[1], 360.0, 0.0), 2100.0, 0.22, 0.14),
+    ((X[2], 150.0, 0.0), 1400.0, 0.25, 0.30),
+    ((X[3], 140.0, 0.0), 1400.0, 0.25, 0.35),
+    ((X[4] + 100.0, 120.0, 0.0), 1200.0, 0.25, 0.35),
+    ((X[5], 150.0, 0.0), 1300.0, 0.25, 0.35),
+    ((X[6], 150.0, 0.0), 1300.0, 0.25, 0.30),
+]
 
 
 def build():
@@ -75,7 +84,7 @@ def build():
         (END, (1, 1, 0.84)),
     ])
     # damage on both faces after lapping; the etch takes it off
-    disc("damage_top", (0, WAFER_T - 1.5, 0), WAFER_R + 1, 3.0, m["damage"], carrier.pv)
+    disc("damage_top", (0, WAFER_T - 1.0, 0), WAFER_R + 1, 3.0, m["damage"], carrier.pv)
     disc("damage_bot", (0, 1.5, 0), WAFER_R + 1, 3.0, m["damage"], carrier.pv)
     for name in ("damage_top", "damage_bot"):
         show(carrier.pv.children[[c.name for c in carrier.pv.children].index(name)], [(F(2, 0.3), F(3, 0.6))])
@@ -83,7 +92,7 @@ def build():
     # 2: the lapping plates close on the wafer
     disc("plate_lower", (X[2], TRACK_Y / 2, 0), 260.0, TRACK_Y, m["plate"], root, verts=72)
     upper = pivot("plate_upper", (X[2], 0, 0), root)
-    disc("plate_upper_m", (0, 0, 0), 260.0, 60.0, m["plate"], upper, verts=72)
+    cut(disc("plate_upper_m", (0, 0, 0), 260.0, 60.0, m["plate"], upper, verts=72), z=-40.0)  # see the gap
     key(upper, F(2, 0.25), "location", P(X[2], 187.5, 0), linear=True)
     key(upper, F(2, 0.85), "location", P(X[2], 140.5, 0), linear=True)
     key(upper, END, "location", P(X[2], 140.5, 0), linear=True)
@@ -108,7 +117,7 @@ def build():
     for f, x in [(F(5, 0.1), X[5] - 120), (F(5, 0.9), X[5] + 120)]:
         key(sheen_g, f, "location", P(x, 0, 0), linear=True)
     sheen = box("sheen", (-30, top + 0.5, -110), (30, top + 1.5, 110), m["sheen"], sheen_g)
-    show(sheen, [(F(5, 0.1), F(5, 0.95))])
+    show(sheen_g, [(F(5, 0.1), F(5, 0.95))])  # the group: show() on the box itself shrinks it
 
     # 6: spray over the mirror wafer
     K.spray_nozzles(root, m, X[6], 240.0, [(F(6, 0.1), F(6, 0.6)), (F(6, 0.3), F(6, 0.8))], n=12)

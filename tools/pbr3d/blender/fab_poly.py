@@ -2,9 +2,10 @@
 
 Run from the repo root:
 
-    blender -b --factory-startup --python tools/pbr3d/blender/fab_poly.py
+    blender -b --factory-startup --python tools/pbr3d/blender/fab_poly.py [-- jar sec2 ...]
 
-Writes assets/poly_<name>.glb and blender/poly_<name>.blend for each scene.
+Writes assets/poly_<name>.glb and blender/poly_<name>.blend for each scene (the zooms and
+sections; the overview below is the old stand-in, poly_overview.py writes the real one).
 
   overview  poly_overview  the chain: MG-Si, fluidised bed, distillation, bell jar, chunks
   zooms     a bed    the fluidised bed: Si + HCl makes TCS, bubbles and particles
@@ -54,19 +55,21 @@ def column(name, base, radius, height, m, parent=None):
     return disc(name, (base[0], base[1] + height / 2, base[2]), radius, height, m, parent)
 
 
-def rod_pair(root, m, x, grow_frames):
-    """A Siemens rod pair at x: two vertical rods joined by a U-bridge at the top. The rods grow in
-    diameter over `grow_frames` (f0, f1). Returns the two rod objects."""
+def rod_pair(root, m, x, grow_frames, half=120, grow=8.0, z=0.0):
+    """A Siemens rod pair at x: two vertical rods `half` either side, joined by a U-bridge at the
+    top. The rods grow in diameter (not length) by `grow` over `grow_frames` (f0, f1). Returns the
+    two rod objects."""
     rods = []
     for side in (-1, 1):
-        rx = x + side * 120
-        r = tube(f"rod_{x}_{side}", (rx, 40, 0), (rx, 480, 0), 20, m["rod"], root, verts=16)
+        rx = x + side * half
+        r = tube(f"rod_{x}_{side}", (rx, 40, z), (rx, 480, z), 20, m["rod"], root, verts=16)
         rods.append(r)
-    tube(f"bridge_{x}", (x - 120, 480, 0), (x + 120, 480, 0), 14, m["graphite"], root, verts=10)
+    tube(f"bridge_{x}", (x - half, 480, z), (x + half, 480, z), 14, m["graphite"], root, verts=10)
     f0, f1 = grow_frames
     for r in rods:
+        # the tube's local z is its length (vertical here): scale x and y only
         key(r, f0, "scale", (1, 1, 1))
-        key(r, f1, "scale", (8, 1, 8))
+        key(r, f1, "scale", (grow, grow, 1))
     return rods
 
 
@@ -124,14 +127,15 @@ def zoom_bed():
             f0 = 6 * k + 24 * j
             travel(p, [(x, 80, z), (x * 0.4, 520 + 40 * (k % 3), z * 0.4), (x, 80, z)], f0, f0 + 22, steps=3)
     for k, (x, z) in enumerate(ring(6, 90)):
-        b = ball(f"bubble{k}", (x, 60, z), 40, m["gas"], root)
+        # green HCl bubbles (the beat text says so); the emissive HCl material reads on the dark ground
+        b = ball(f"bubble{k}", (x, 60, z), 40, m["hcl"], root)
         travel(b, [(x, 60, z), (x * 0.6, 700, z * 0.6)], BF + 6 * k, BF + 6 * k + 40, steps=2)
-        show(b, [(BF, 4 * BF)])
+        show(b, [(BF, 4 * BF - 1)])
     # beat 2: the reaction products leave the top
     for k in range(3):
         out = ball(f"exit{k}", (0, 800, 0), 30, m["hcl"], root)
         travel(out, [(0, 800, 0), (200, 1000, 0)], 2 * BF + 6 * k, 3 * BF + 6 * k, steps=2)
-        show(out, [(2 * BF, 4 * BF)])
+        show(out, [(2 * BF, 4 * BF - 1)])
     camera(root, [((0, 300, 0), 2200, 0.5, 0.2), ((0, 300, 0), 2000, 0.8, 0.2),
                   ((0, 400, 0), 2200, 0.3, 0.25), ((0, 420, 0), 2400, 0.6, 0.25)])
     finish("poly_zoom_bed")
@@ -152,11 +156,11 @@ def zoom_column():
     for k in range(6):
         v = ball(f"vap{k}", (-60, 80, 0), 50, m["gas"], root)
         travel(v, [(-60, 80, 0), (-60, 700, 0), (-60, 1280, 0)], k * 10, k * 10 + 60, steps=2)
-        show(v, [(0, 4 * BF)])
+        show(v, [(0, 4 * BF - 1)])
     for k in range(4):
         d = ball(f"drip{k}", (60, 1200 - k * 260, 0), 18, m["tcs"], root)
         travel(d, [(60, 1200 - k * 260, 0), (60, 1120 - k * 260, 0)], k * 24 + 6, k * 24 + 20, steps=2)
-        show(d, [(0, 4 * BF)])
+        show(d, [(0, 4 * BF - 1)])
     # beats 2-3: the TCS and STC take off at different heights, marked by bars
     grow_bar(root, "tcs_take", 250, 330, 500, m["hi"], 2 * BF, 3 * BF, z0=-40, z1=40)
     grow_bar(root, "stc_take", 350, 430, 200, m["bar"], 2 * BF, 3 * BF, z0=-40, z1=40)
@@ -172,24 +176,36 @@ def zoom_jar():
     root = start("poly_zoom_jar", 4)
     m = poly_mats()
     disc("base_plate", (0, 0, 0), 500, 40, m["steel"], root)
-    jar = column("jar_wall", (0, 40, 0), 450, 700, m["glass"], root)
-    dome = ball("jar_dome", (0, 740, 0), 450, m["glass"], root)
+    # the bell (wall + dome) lifts off in beat 3 so the grown rods stand clear
+    bell = empty("bell", root)
+    column("jar_wall", (0, 40, 0), 450, 700, m["glass"], bell)
+    dome = ball("jar_dome", (0, 740, 0), 450, m["glass"], bell)
     dome.scale = (1.0, 0.45, 1.0)
-    # the U-rod pairs; they grow in diameter across the beats
-    pairs = []
-    for x in (-250, 0, 250):
-        pairs.append(rod_pair(root, m, x, (0, 4 * BF - 1)))
-    # the current runs up one rod and back down the other, shown as a pulse
-    for x in (-250, 0, 250):
-        arc = tube(f"current_{x}", (x - 120, 40, 0), (x - 120, 480, 0), 8, m["arc"], root, verts=8)
-        show(arc, [(BF, 4 * BF)])
+    key(bell, 3 * BF + 2, "location", P(0, 0, 0))
+    key(bell, 3 * BF + 16, "location", P(0, 900, 0))
+    # two U-rod pairs spaced so the rods stay apart as they grow from 20 mm to about 150 mm (3.75x
+    # in this drawing): slim through beat 0, growing through beats 1-2, full in beat 3
+    for x in (-200, 200):
+        rod_pair(root, m, x, (BF, 3 * BF), half=110, grow=3.75)
+    # beat 0: the current, as pulses running up one rod, over the bridge and down the other, in
+    # front of the slim rods so they read; the bridges glow while it flows
+    for x in (-200, 200):
+        path = [(x - 110, 50, 30), (x - 110, 480, 30), (x + 110, 480, 30), (x + 110, 50, 30)]
+        for k in range(3):
+            p = ball(f"current_{x}_{k}", path[0], 16, m["arc"], root)
+            f0 = 2 + 6 * k
+            travel(p, path, f0, f0 + 14, steps=6)
+            show(p, [(f0, f0 + 15)])
+        glow = tube(f"bridge_glow_{x}", (x - 110, 480, 0), (x + 110, 480, 0), 17, m["hot"], root, verts=10)
+        show(glow, [(0, BF)])
     # gas nozzles feed the base, gas circulates in the jar
     for k in range(8):
         g = ball(f"gas{k}", (-400, 100, -60 + 17 * k), 22, m["gas"], root)
         travel(g, [(-400, 100, -60 + 17 * k), (0, 300, 0), (400, 100, -60 + 17 * k)], 3 * k, 3 * k + 40, steps=2)
-        show(g, [(0, 4 * BF)])
-    camera(root, [((0, 300, 0), 1900, 0.5, 0.25), ((0, 350, 0), 1800, 0.8, 0.25),
-                  ((0, 400, 0), 1800, 0.3, 0.25), ((0, 400, 0), 2000, 1.0, 0.3)])
+        show(g, [(BF, 3 * BF)])
+    # whole jar in frame (about 0.53 x distance tall), slightly from above
+    camera(root, [((0, 360, 0), 1700, 0.35, 0.22), ((0, 380, 0), 1800, 0.6, 0.25),
+                  ((0, 380, 0), 1800, 0.3, 0.25), ((0, 500, 0), 2300, 0.5, 0.3)])
     finish("poly_zoom_jar")
 
 
@@ -208,7 +224,7 @@ def zoom_loop():
     for k in range(5):
         p = ball(f"recycle{k}", loop_pts[0], 40, m["loop"], root)
         travel(p, loop_pts[:9], 0, 4 * BF - 4, steps=8)
-        show(p, [(0, 4 * BF)])
+        show(p, [(0, 4 * BF - 1)])
     # the growth trade-off: rate against diameter, two bars on a scale
     grow_bar(root, "rate", -150, -50, 1.9 * 200, m["hi"], 2 * BF, 3 * BF, z0=-40, z1=40)
     grow_bar(root, "rod_mm", 50, 150, 180, m["bar"], BF, 3 * BF, z0=-40, z1=40)
@@ -249,15 +265,16 @@ def sec2_bell_jar():
     column("jar_wall", (0, 40, 0), 450, 700, m["glass"], root)
     dome = ball("jar_dome", (0, 740, 0), 450, m["glass"], root)
     dome.scale = (1.0, 0.45, 1.0)
-    for x in (-220, 0, 220):
-        rod_pair(root, m, x, (0, 3 * BF - 1))
+    # two rod pairs, set back behind the glow, spaced so the grown rods stay apart
+    for x in (-200, 200):
+        rod_pair(root, m, x, (0, 3 * BF - 1), half=110, grow=3.75, z=-120)
     for k in range(3):
         box(f"nozzle{k}", (-300 + 300 * k, 40, -20), (-260 + 300 * k, 120, 20), m["steel"], root)
-    # the hot rods glow through the growth
-    hot = ball("hot_core", (0, 260, 0), 120, m["hot"], root)
+    # the hot rods glow through the growth: a small core low between the pairs
+    hot = ball("hot_core", (0, 200, 60), 70, m["hot"], root)
     flicker(hot, 0, 3 * BF - 1, base=1.0)
-    camera(root, [((0, 320, 0), 2000, 0.5, 0.25), ((0, 320, 0), 1800, 0.9, 0.25),
-                  ((0, 320, 0), 1800, 0.2, 0.35)])
+    camera(root, [((0, 380, 0), 1800, 0.5, 0.25), ((0, 380, 0), 1800, 0.9, 0.25),
+                  ((0, 380, 0), 1800, 0.2, 0.3)])
     finish("poly_sec2")
 
 
@@ -397,8 +414,12 @@ def sec10_sources():
     finish("poly_sec10")
 
 
+SCENES = {"bed": zoom_bed, "column": zoom_column, "jar": zoom_jar, "loop": zoom_loop}
+
+
 def build_all():
-    overview()
+    # overview() is the old stand-in: poly_overview.py now writes poly_overview.glb, so a full run
+    # here must not overwrite it
     zoom_bed()
     zoom_column()
     zoom_jar()
@@ -416,4 +437,14 @@ def build_all():
 
 
 if __name__ == "__main__":
-    build_all()
+    # `-- jar sec2` builds only those scenes (zoom names, or secN); no args builds all but overview
+    which = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
+    if not which:
+        build_all()
+    for name in which:
+        if name in SCENES:
+            SCENES[name]()
+        else:
+            n = int(name.removeprefix("sec"))
+            [sec1_what_happens, sec2_bell_jar, sec3_chemistry, sec4_numbers, sec5_impurities,
+             sec6_makers, sec7_grades, sec8_risks, sec9_names, sec10_sources][n - 1]()

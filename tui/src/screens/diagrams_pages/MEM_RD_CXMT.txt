@@ -1,0 +1,24 @@
+# 1. HBM3 and HBM3E
+
+CXMT is China's main DRAM maker and is trying to build domestic HBM. Reports say HBM3 samples went to Huawei in 2025. HBM3 is reported as an 8-high stack on a 16 nm process, with yields around 25% from one secondary source.
+
+# 2. Timing
+
+Small-scale HBM3E output reportedly started in 2026, with mass production targeted for late Q4 2026 despite weak yields. Earlier HBM3 targets slipped. Sources disagree on generation labels.
+
+# 3. The gap
+
+Analysts put CXMT three to four years behind the HBM leaders. One SemiAnalysis projection, via EE Times Japan, has HBM wafer input near 55,000 per month in 2027 and 100,000 in 2028.
+
+# 4. Caveat
+
+Figures come from press reports and aggregators, not company filings. CXMT has no ticker on this tab.
+
+# 5. Sources
+
+- Notebookcheck, CXMT to mass-produce HBM3E in late Q4 2026 despite yields:
+  https://notebookcheck.net/CXMT-to-mass-produce-HBM3E-memory-chips-in-late-Q4-2026-despite-abysmal-yields.1437211.0.html
+- Tom's Hardware, China gears up for domestic HBM3 production by end-2026:
+  https://www.tomshardware.com/pc-components/dram/chinese-semiconductor-industry-gears-up-for-domestic-hbm3-production-by-the-end-of-2026-cxmt-to-produce-chips-while-naura-maxwell-and-u-preseason-design-tools-for-assembly
+- EE Times Japan, CXMT and SemiAnalysis projections (Jul 2026):
+  https://eetimes.itmedia.co.jp/ee/articles/2607/31/news068_2.html

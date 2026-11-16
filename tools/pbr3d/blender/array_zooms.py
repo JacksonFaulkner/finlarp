@@ -87,7 +87,7 @@ def rowbuf():
 
     label("ACTIVATE raises one word line", (cx(7) + 70, cy(r0) + 70, 0), root, beat(0))
     label("sense amps latch each bit", (cx(cols - 1) + 120, K.SA_Y - 40, 0), root, beat(1))
-    label("READ: latches feed the I/O", (cx(2), K.SEL_Y - 50, 0), root, beat(2))
+    label("READ: latches feed the I/O", (cx(2), K.SEL_Y - 130, 0), root, beat(2))
     label("precharge empties the row buffer", (cx(2), cy(r0) + 150, 0), root, beat(3))
 
     camera(root, [
@@ -144,16 +144,16 @@ def mats_zoom():
     show(K.bright_cells(groups[0], m, rows, cols, [1], name="open_row0"), beat(3))
     show(K.bright_cells(groups[1], m, rows, cols, [1], name="open_row1"), beat(3))
 
-    label("one mat: local drivers, sense amp stripe", (cx(2) + 40, -60, 0), root, beat(0))
+    label("one mat: local drivers, sense amp stripe", (-40.0, K.SA_Y - 150, 0), root, beat(0))
     label("a subarray: mats under one global word line", (offs[1], cy(rows - 1) + 150, 0), root, beat(1))
     label("a bank: subarrays share global bit lines", (offs[1], -260, 0), root, beat(2))
     label("one subarray's row is open", (offs[0], cy(rows - 1) + 150, 0), root, beat(3))
 
     camera(root, [
-        ((150.0, 150.0, 0.0), 1000.0, 0.10, 0.08),
-        ((585.0, 150.0, 0.0), 3400.0, 0.06, 0.08),
-        ((585.0, 150.0, 0.0), 3400.0, 0.02, 0.08),
-        ((585.0, 150.0, 0.0), 3400.0, -0.02, 0.08),
+        ((60.0, 20.0, 0.0), 1500.0, 0.08, 0.06),
+        ((570.0, 80.0, 0.0), 2900.0, 0.05, 0.06),
+        ((570.0, 60.0, 0.0), 2900.0, 0.02, 0.06),
+        ((570.0, 60.0, 0.0), 2900.0, -0.02, 0.06),
     ])
     finish("mats", page="array")
 
@@ -204,7 +204,7 @@ def redundancy():
 
     camera(root, [
         ((330.0, 330.0, 0.0), 2400.0, 0.08, 0.08),
-        ((330.0, 330.0, 0.0), 2300.0, 0.05, 0.08),
+        ((640.0, 780.0, 0.0), 1100.0, 0.05, 0.06),
         ((330.0, 330.0, 0.0), 2300.0, 0.0, 0.08),
         ((330.0, 330.0, 0.0), 2300.0, -0.04, 0.08),
     ])
@@ -251,10 +251,10 @@ def burst():
     label("one open row serves many READs", (cx(7), K.SA_Y - 70, 0), root, beat(3))
 
     camera(root, [
-        ((850.0, -100.0, 0.0), 3200.0, 0.06, 0.06),
-        ((850.0, -100.0, 0.0), 3200.0, 0.03, 0.06),
-        ((850.0, -100.0, 0.0), 3200.0, 0.0, 0.06),
-        ((850.0, -100.0, 0.0), 3200.0, -0.03, 0.06),
+        ((930.0, -110.0, 0.0), 3500.0, 0.05, 0.06),
+        ((1640.0, -200.0, 0.0), 1250.0, 0.03, 0.05),
+        ((930.0, -110.0, 0.0), 3500.0, 0.0, 0.06),
+        ((930.0, -110.0, 0.0), 3500.0, -0.03, 0.06),
     ])
     finish("burst", page="array")
 

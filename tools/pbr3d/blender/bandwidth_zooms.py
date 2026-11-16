@@ -95,10 +95,10 @@ def pin():
     label("PAM4: four levels, two bits", (-300.0, 260.0, -40), root, beat(3))
 
     camera(root, [
-        ((0.0, 350.0, 0.0), 4600.0, 0.08, 0.06),
-        ((0.0, 350.0, 0.0), 4600.0, 0.06, 0.06),
-        ((0.0, 350.0, 0.0), 4600.0, 0.04, 0.06),
-        ((0.0, 250.0, 0.0), 4200.0, 0.02, 0.06),
+        ((0.0, 350.0, 0.0), 5400.0, 0.06, 0.06),
+        ((0.0, 300.0, 0.0), 5400.0, 0.04, 0.06),
+        ((0.0, 300.0, 0.0), 5400.0, 0.03, 0.06),
+        ((0.0, 200.0, 0.0), 5400.0, 0.02, 0.06),
     ])
     finish("pin", page="bandwidth")
 
@@ -116,7 +116,7 @@ def subch():
     lanes = K.lanes(root, "lanes64", x0 + K.DIMM_LEN, x0 + K.DIMM_LEN + 500.0, yc, m, n=8)
     show(lanes, [(F(0, 0), F(1, 0))])
     K.dots(root, "chips_together", (x0 + 20.0, yc, 60.0), (x0 + K.DIMM_LEN + 480.0, yc, -40.0), 6, m["read"], 0, 0.05, 0.6, 80, size=12)
-    label("8 chips answer together", (x0 + 40.0, 260.0, 60.0), root, beat(0))
+    label("8 chips answer together", (x0 + 40.0, 110.0, 50.0), root, beat(0))
 
     # beats 1 onward: the DIMM splits into two 32-bit subchannels, each with its own lanes
     for side in (0, 1):
@@ -125,7 +125,7 @@ def subch():
         ly = yc + (60.0 if side == 0 else -60.0)
         sub = K.lanes(root, f"sub{side}_lanes", x0 + K.DIMM_LEN, x0 + K.DIMM_LEN + 500.0, ly, m, n=4)
         show(sub, [(F(1, 0), END)])
-    label("DDR5: two 32-bit subchannels", (x0 + 40.0, 260.0, 60.0), root, beat(1))
+    label("DDR5: two 32-bit subchannels", (x0 + 40.0, 110.0, 50.0), root, beat(1))
 
     # beat 2: two requests at once, one per subchannel
     for side, mat_name in ((0, "cyan"), (1, "write")):
@@ -142,10 +142,10 @@ def subch():
             K.dots(root, f"rate{side}_{i}", (x0 + K.DIMM_LEN + 20.0, ly, -40.0), (x0 + K.DIMM_LEN + 480.0, ly, -40.0), 2, m["read"], 3, 0.1 * i, 0.5 + 0.1 * i, 80, size=10)
 
     camera(root, [
-        ((0.0, 0.0, 0.0), 3800.0, 0.10, 0.08),
-        ((0.0, 0.0, 0.0), 3800.0, 0.08, 0.08),
-        ((0.0, 0.0, 0.0), 3800.0, 0.06, 0.08),
-        ((0.0, 0.0, 0.0), 3800.0, 0.04, 0.08),
+        ((280.0, 60.0, 0.0), 3300.0, 0.08, 0.08),
+        ((280.0, 60.0, 0.0), 3300.0, 0.06, 0.08),
+        ((280.0, 60.0, 0.0), 3300.0, 0.05, 0.08),
+        ((280.0, 60.0, 0.0), 3300.0, 0.04, 0.08),
     ])
     finish("subch", page="bandwidth")
 
@@ -165,7 +165,7 @@ def gddr():
         box(f"gddr{i}", (x, y - 110.0, -60.0), (x + 220.0, y + 110.0, 40.0), m["dram"], chips)
         K.lanes(chips, f"gddr{i}_lanes", x + 220.0 if x < 0 else 300.0, -300.0 if x < 0 else x, y, m, n=8, z=-60.0)
     show(chips, [(0, F(1, 0)), (F(3, 0), END)])
-    label("GDDR6: 32 pins, 64 GB/s", (-1000.0, 560.0, 40.0), root, beat(0))
+    label("GDDR6: 32 pins, 64 GB/s", (-890.0, 110.0, 40.0), root, beat(0))
     for i in range(3):
         K.dots(root, f"gddr_dots{i}", (-780.0, 0.0 + 30.0 * i, -60.0), (-300.0, 30.0 * i, -60.0), 3, m["read"], 0, 0.1, 0.7, 60, size=10)
     for i in range(3):
@@ -174,21 +174,21 @@ def gddr():
     # HBM3 beside the GPU on an interposer, from beat 1
     hb = K.hbm(root, m, 480.0, 1080.0, -230.0, -700.0, -360.0)
     show(hb, [(F(1, 0), END)])
-    label("HBM3: 1024 pins, 819 GB/s", (480.0, 600.0, -360.0), root, beat(1) + beat(2) + beat(3))
+    label("HBM3: 1024 pins, 819 GB/s", (780.0, 200.0, -380.0), root, beat(1) + beat(2) + beat(3))
 
     # beat 2: the interposer's short, dense wires (a comb of lanes)
     comb = K.hbm_comb(root, "comb", 300.0, 480.0, -180.0, -500.0, 24, 22.0, m, r=3.0)
     show(comb, [(F(2, 0), END)])
     for i in range(6):
         K.dots(root, f"comb_dots{i}", (310.0, -180.0 + 22.0 * (i * 4), -500.0), (470.0, -180.0 + 22.0 * (i * 4), -500.0), 2, m["read"], 2, 0.05 * i, 0.6, 40, size=7)
-    label("short, dense wires on the interposer", (300.0, 600.0, -360.0), root, beat(2))
+    label("short, dense wires on the interposer", (390.0, 150.0, -500.0), root, beat(2))
     label("both at once: GDDR long board wires, HBM short ones", (-1000.0, 560.0, 40.0), root, beat(3))
 
     camera(root, [
         ((0.0, 200.0, -300.0), 5000.0, 0.12, 0.12),
         ((450.0, 200.0, -300.0), 3800.0, 0.18, 0.12),
         ((450.0, 200.0, -300.0), 3600.0, 0.10, 0.12),
-        ((0.0, 200.0, -300.0), 5200.0, 0.06, 0.12),
+        ((0.0, 100.0, -300.0), 5000.0, 0.06, 0.55),
     ])
     finish("gddr", page="bandwidth")
 
@@ -265,15 +265,15 @@ def wall():
     tube("bracket_top", (x_of(STEPS - 1) - 80.0, gap_top + 40.0, -120.0), (x_of(STEPS - 1) + 170.0, gap_top + 40.0, -120.0), 6.0, m["gold"], root, verts=8)
     label("the gap is the wall", (x_of(STEPS - 1) - 400.0, gap_top + 120.0, -120.0), root, beat(2))
     cpu = empty("cpu_block", root)
-    box("cpu_big", (-1500.0, -260.0, -700.0), (-1100.0, -20.0, -300.0), m["cpu"], cpu)
+    box("cpu_big", (-1950.0, -260.0, -700.0), (-1550.0, 140.0, -300.0), m["cpu"], cpu)
     show(cpu, [(F(3, 0), END)])
-    label("large models wait on memory", (-1500.0, 100.0, -300.0), root, beat(3))
+    label("large models wait on memory", (-1750.0, 140.0, -300.0), root, beat(3))
 
     camera(root, [
-        ((0.0, 500.0, 0.0), 8200.0, 0.08, 0.08),
-        ((0.0, 500.0, 0.0), 8200.0, 0.06, 0.08),
-        ((0.0, 500.0, 0.0), 8200.0, 0.04, 0.08),
-        ((-400.0, 400.0, 0.0), 7600.0, 0.02, 0.08),
+        ((80.0, 560.0, 0.0), 5600.0, 0.08, 0.08),
+        ((80.0, 560.0, 0.0), 5600.0, 0.06, 0.08),
+        ((80.0, 560.0, 0.0), 5600.0, 0.04, 0.08),
+        ((-250.0, 500.0, 0.0), 6200.0, 0.02, 0.08),
     ])
     finish("wall", page="bandwidth")
 

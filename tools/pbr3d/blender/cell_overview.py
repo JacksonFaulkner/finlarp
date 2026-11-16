@@ -98,21 +98,21 @@ def build():
     ])
 
     # charge sharing: a dot is a slice of charge, so the counts follow the amounts moved; the latch sends violet back
-    stream_of(root, "share", 6, (SRC_X, 600.0, ZC), K.PATH_CAP_TO_BL, 14, m["cyan_dot"], 2, 0.25, 0.55, LIFE)
-    stream_of(root, "restore", 6, (DRN_X, BL_Y, ZC), K.PATH_BL_TO_CAP, 14, m["violet_dot"], 3, 0.10, 0.45, LIFE)
+    stream_of(root, "share", 6, K.SHARE_START, K.PATH_CAP_TO_BL, 26, m["cyan_dot"], 2, 0.25, 0.55, LIFE)
+    stream_of(root, "restore", 6, K.RESTORE_START, K.PATH_BL_TO_CAP, 26, m["violet_dot"], 3, 0.10, 0.45, LIFE)
     # leakage: orange dots drain out of the capacitor's side, steadily, while the level falls
-    stream_of(root, "leak", 6, (SRC_X - 150, 380.0, ZC), K.PATH_LEAK, 18, m["orange_dot"], 5, 0.10, 0.85, 80)
+    stream_of(root, "leak", 6, K.LEAK_START, K.PATH_LEAK, 26, m["orange_dot"], 5, 0.10, 0.85, 80)
     # refresh: read (cyan) up, then the latch, then rewrite (violet) back down
-    stream_of(root, "refresh_read", 5, (SRC_X, 600.0, ZC), K.PATH_CAP_TO_BL, 14, m["cyan_dot"], 6, 0.05, 0.28, LIFE)
-    stream_of(root, "refresh_write", 5, (DRN_X, BL_Y, ZC), K.PATH_BL_TO_CAP, 18, m["violet_dot"], 6, 0.58, 0.74, LIFE)
+    stream_of(root, "refresh_read", 5, K.SHARE_START, K.PATH_CAP_TO_BL, 26, m["cyan_dot"], 6, 0.05, 0.28, LIFE)
+    stream_of(root, "refresh_write", 5, K.RESTORE_START, K.PATH_BL_TO_CAP, 26, m["violet_dot"], 6, 0.58, 0.74, LIFE)
 
     # the margin: a 1 bumps the bit line up by dV, a 0 would dip it down by as much. The sense
     # amp only has to tell which way it moved.
     land = [(F(2, 0.55 + lag), F(3, 0.0))]
     dv = box("dv_bracket", (K.GAUGE_X + 170, K.HALF_Y, ZC - 20), (K.GAUGE_X + 210, K.HALF_Y + 100, ZC + 20), m["gold_glow"], root)
-    show(dv, land)
+    K.switch(dv, land)
     zero = box("zero_tick", (K.GAUGE_X - 125, K.HALF_Y - 100 - 7, ZC - 125), (K.GAUGE_X + 125, K.HALF_Y - 100 + 7, ZC + 125), m["gold_glow"], root)
-    show(zero, land)
+    K.switch(zero, land)
 
     # the clock: time since the last refresh, filling over the idle beat toward the 64 ms window
     # and emptying when the row is rewritten; and the deadline, the level below which a read fails
@@ -133,7 +133,7 @@ def build():
     dl_y = CAP_Y0 + 20 + DEADLINE_LV * (CAP_Y1 - CAP_Y0 - 40)
     box("deadline", (SRC_X + K.CAP_R + 20, dl_y - 8, ZC - 25), (SRC_X + K.CAP_R + 230, dl_y + 8, ZC + 25), m["red"], cg)
 
-    label("storage capacitor", (SRC_X + 40, CAP_Y1 + 70, ZC), root, [(F(0, 0), F(1, 0))])
+    label("storage capacitor", K.CAP_TAG, root, [(F(0, 0), F(1, 0))])
     label("bit line at VDD/2", (K.GAUGE_X + 60, K.HALF_Y + 120, ZC), root, [(F(0, 0), F(2, 0))])
     label("word line: row select", (0, WL_Y + 190, ZC + 170), root, [(F(1, 0), F(2, 0))])
     label("access transistor", (-120, 60, ZC + 150), root, [(F(1, 0), F(2, 0))])

@@ -179,6 +179,7 @@ impl Diagrams {
                 .open_key()
                 .map_or("overview".to_string(), |k| k.to_string()),
             PopupView::Pane => "text".to_string(),
+            PopupView::Lab => "sandbox".to_string(),
         }
     }
 

@@ -330,7 +330,8 @@ def build_crust():
     camera(
         root,
         [
-            ((0, 1350, 0), 5600, 0.15, 0.10),
+            # beat 0: look down past the electrode so the cavity ring and its rim show
+            ((0, 1350, 0), 5600, 0.15, 0.32),
             ((0, 1150, 0), 4200, 0.10, 0.08),
             ((0, 1250, 0), 4900, -0.12, 0.10),
             ((0, 1500, 0), 6000, 0.20, 0.14),

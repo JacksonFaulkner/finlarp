@@ -1,6 +1,7 @@
-// CHIP tab, THIN METAL: the overview is the whole-chip scene (tools/pbr3d/blender/chip_kit.py)
-// with the camera zooming in on the thin wiring; zoom-ins a-e and sections 1-10 are the same chip
-// from other poses (tools/pbr3d/blender/chip_thin_metal.py).
+// CHIP tab, THIN METAL: the overview opens on the whole chip (tools/pbr3d/blender/chip_kit.py),
+// then glides into a detailed cut-away of the M1-M4 levels set in the thin band; zoom-ins a-e and
+// sections 1-10 are detailed cut-aways too (tools/pbr3d/blender/chip_thin_metal.py,
+// chip_thin_metal_detail.py).
 
 use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
@@ -9,66 +10,69 @@ use crate::ui::anim::{Beat, Scene, Zoom};
 const BEATS: &[Beat] = &[
     Beat::new("the whole chip, thin wiring lit", BEAT_MS)
         .note(
-            "M1-M4 are the thinnest wiring levels, just above the transistors. They carry signals from cell to cell.",
-            "The whole chip, with the cyan band of thin copper levels over the transistors.",
+            "Just above the transistors sit four levels of very fine copper wiring, M1 to M4, that join neighbouring cells. They are the densest and the most resistive wires on the chip.",
+            "The whole chip, with the cyan band of thin levels just above the transistors.",
         )
         .detail(
-            "Each thin level is one damascene loop, printed at about 20-30 nm pitch.",
-            &["M1-M4 pitch ~20-30 nm (CHIP_THIN_METAL section 1)"],
+            "Each thin level is one damascene loop.",
+            &["M1-M4 pitch ~20-40 nm (CHIP_THIN_METAL section 1)"],
         ),
     Beat::new("in on the dense local wires", BEAT_MS)
         .note(
-            "The camera glides in. Four levels of copper runs stack close together, each one line in low-k dielectric.",
-            "Horizontal copper runs stacked in the lit band, the levels close together.",
+            "The camera goes into the band and the schematic gives way to a cut-away of the real stack. Each level is a row of copper lines in a low-k insulator, alternate levels run at right angles, and tungsten contacts below reach the transistors.",
+            "A stepped cut-away: brown copper lines in thin blue skins set in grey low-k, long brown bars on the levels that run across, and the dark contact layer at the bottom.",
         )
         .detail(
             "Thin levels are printed at the tightest pitch the node allows.",
-            &["EUV 0.33 NA: ~26 nm pitch single exposure (CHIP_THIN_METAL section 7)"],
+            &[
+                "M1-M4 pitch ~20-40 nm (CHIP_THIN_METAL section 1)",
+                "EUV 0.33 NA: ~26 nm pitch single exposure (section 7)",
+            ],
         ),
     Beat::new("a short local hop", BEAT_MS)
         .note(
-            "A signal climbs from the NMOS drain through a via to M3, runs across one cell and drops down to the PMOS drain.",
-            "White pulses rise the column on the left, run across the level and fall the column on the right.",
+            "A signal leaves one transistor through a tungsten contact, climbs an M1 line, rises through a via, runs along M2 and drops back down to the next cell. Most wiring inside and between cells is short hops like this, and their RC delay now outweighs the transistors' own delay.",
+            "Cyan beads rising from a contact up an M1 line, back across its top, up a via, along the long M2 bar and down again.",
         )
         .detail(
-            "Local hops like this are most of the wiring inside a cell; their RC now dominates gate delay.",
+            "Local hops are most of the wiring inside a cell.",
             &["RC delay of thin wires dominates gate delay (CHIP_THIN_METAL section 9)"],
         ),
     Beat::new("narrow wire, high resistance", BEAT_MS)
         .note(
-            "Close on one run. Once the barrier is counted, the copper core is only about 12-15 nm wide. The barrier skin does not shrink with the line, so it takes a growing share of the cross-section and resistance rises.",
-            "A glassy blue skin around the copper run, with the signal pulses bunched along it.",
+            "Close on one M1 line. About 2 nm of TaN barrier and cobalt liner wraps three sides and does not shrink with the line, so a 16 nm line keeps only about a 12 nm copper core. Electrons also scatter off the walls, so resistance climbs faster than the line shrinks.",
+            "One line cut end-on: the amber-glowing skin round the brown copper core, with beads zigzagging down between its walls.",
         )
         .detail(
             "The fixed barrier is what makes narrow lines resistive.",
             &[
                 "Core ~12-15 nm after barrier (CHIP_THIN_METAL section 2)",
-                "Barrier 1-2 nm per side; one source says it is too thick below ~15 nm width",
+                "Barrier + liner 1-2 nm per side (section 2)",
             ],
         ),
     Beat::new("EUV prints the tight pitch", BEAT_MS)
         .note(
-            "An EUV exposure slit sweeps across the band. A 0.33 NA scanner prints lines at about 26 nm pitch in one pass; below that the layer needs two exposures or a self-aligned scheme.",
-            "A cyan slit moving across the thin levels, the lines under it.",
+            "Every level's lines are printed by lithography. An EUV scanner sweeps an exposure slit across the wafer; at 0.33 NA it prints lines at about 26 nm pitch in one pass, and tighter levels need two exposures or a self-aligned scheme.",
+            "A violet slit of EUV light sweeping across the top of the stack.",
         )
         .detail(
             "Pitch is set by lithography; the wire width then follows from the pitch and the barrier.",
             &[
                 "EUV 0.33 NA: ~26 nm pitch single exposure (CHIP_THIN_METAL section 7)",
-                "High-NA 0.55: ~16 nm pitch reported (CHIP_THIN_METAL section 7)",
+                "High-NA 0.55: ~16 nm pitch reported (section 7)",
                 "TSMC N3E minimum metal pitch 23 nm (IEDM 2022 via WikiChip)",
             ],
         ),
     Beat::new("whole chip again", BEAT_MS)
         .note(
-            "Back out to the whole chip. The thin levels are the densest and the most resistive; ruthenium or molybdenum may replace copper here first.",
-            "The whole chip, the thin band still lit.",
+            "Back out to the whole chip. The thin levels are the densest and most resistive wiring, and the first place ruthenium or molybdenum may replace copper.",
+            "The whole chip, the thin band lit again.",
         )
         .detail(
-            "Ru and Mo are candidates for the thinnest lines; copper's barrier is the problem.",
+            "Copper's barrier is the problem at the thinnest levels.",
             &[
-                "Ru may beat Cu at ~17 nm width and below (CHIP_THIN_METAL section 4)",
-                "AMAT claims RuCo liner cut to 2 nm and line resistance down up to 25% (company claim)",
+                "Ru may beat Cu at ~17 nm width and below, one analysis (CHIP_THIN_METAL section 4)",
+                "RuCo liner: line R down up to 25% (Applied claim, section 4)",
             ],
         ),
 ];
@@ -78,38 +82,35 @@ const BEATS: &[Beat] = &[
 const ZA_BEATS: &[Beat] = &[
     Beat::new("litho and trench etch", BEAT_MS)
         .note(
-            "The mask prints the level pitch, and the trench is etched down through the low-k dielectric. This is the first step of each thin level.",
-            "An amber mask lit over the M3 run, the dielectric around it being cut.",
+            "EUV light through the reticle exposes a resist layer on a hard mask. The pattern is transferred into the mask, and a plasma etches trenches through it into the low-k below.",
+            "Pink resist under a violet column of light from a grey reticle, then open trenches under dark hard-mask strips.",
         )
         .detail(
-            "The pitch is set here, and the trench width then sets the line width.",
-            &[
-                "LITHO PITCH: EUV 26-30 nm, or 193i multipatterning (CHIP_THIN_METAL section 1)",
-                "TRENCH ETCH through a hard mask (CHIP_THIN_METAL section 1)",
-            ],
+            "The trench sets the line's width and pitch.",
+            &["EUV at ~26-30 nm pitch, or 193i multipatterning (CHIP_THIN_METAL section 1)"],
         ),
     Beat::new("barrier, liner and copper fill", BEAT_MS)
         .note(
-            "A 1-2 nm Ta/TaN barrier, with Co or Ru as the liner, lines the trench. Copper then fills it. The pale dots are the fill moving along the run.",
-            "A glassy barrier skin over the M3 run, with bright fill dots streaming along it.",
+            "A TaN barrier and a cobalt or ruthenium liner, together about 2 nm, coat each trench. Copper is then electroplated; additives in the bath make it fill from the bottom up so no voids are trapped, and it overfills the top.",
+            "Blue-and-silver lining in the trenches, cyan ions raining in, copper rising from the trench floors, then a copper blanket over everything.",
         )
         .detail(
-            "Copper is plated or reflowed into the trench; the barrier does not scale down with the line.",
+            "The lining keeps copper out of the insulator and helps it fill.",
             &[
-                "BARRIER+LINER Ta/TaN with Co or Ru, 1-2 nm (CHIP_THIN_METAL section 1)",
-                "The barrier does not shrink with line width (CHIP_THIN_METAL section 2)",
+                "Barrier + liner 1-2 nm (CHIP_THIN_METAL section 1)",
+                "Copper plated or reflowed; or Ru, Mo (section 1)",
             ],
         ),
     Beat::new("CMP, cap and via", BEAT_MS)
         .note(
-            "The copper is polished flat, a cap seals the top, and a via opens up to the next level. The next level is then built on top.",
-            "A pale cap slab on the top of the M3 run, and a copper via rising from it to the level above.",
+            "Chemical-mechanical polishing removes the extra copper and the hard mask, leaving lines inlaid flush with the low-k. An SiCN cap seals the copper, the next insulator goes on, and a via is opened down onto a line to start the next level.",
+            "A dark pad sweeping across the copper, then a white cap, then a new grey layer with a copper via down to the middle line.",
         )
         .detail(
-            "Each level repeats the loop, and M1 to M4 together repeat it about four times.",
+            "The loop then repeats for the next level.",
             &[
-                "CMP, then CAP + VIA to the next level (CHIP_THIN_METAL section 1)",
-                "M1-M4 repeat the loop about four times at 20-40 nm pitch (CHIP_THIN_METAL section 1)",
+                "CMP stops on the dielectric (CHIP_THIN_METAL section 1)",
+                "CAP + VIA to the next level (section 1)",
             ],
         ),
 ];
@@ -117,68 +118,65 @@ const ZA_BEATS: &[Beat] = &[
 const ZB_BEATS: &[Beat] = &[
     Beat::new("copper core, 12-15 nm", BEAT_MS)
         .note(
-            "Once the barrier is counted, only about 12-15 nm of the line is copper. The rest is the barrier.",
-            "Close on the copper run, its core tagged on the wire.",
+            "Current flows in the copper core of each line. Here it runs along the long M2 line, above a row of M1 lines about 16 nm wide whose cores are only about 12 nm once the skin is counted.",
+            "Cyan beads running along the long brown M2 bar, with M1 cut ends below it.",
         )
         .detail(
-            "Grain and surface scattering also raise the resistivity of copper as lines narrow.",
-            &[
-                "Core ~12-15 nm after barrier (CHIP_THIN_METAL section 2)",
-                "Resistivity rises from grain and surface scattering (textbook)",
-            ],
+            "The barrier does not shrink, so the copper core is what is left.",
+            &["Core ~12-15 nm after barrier (CHIP_THIN_METAL section 2)"],
         ),
     Beat::new("low-k dielectric between the lines", BEAT_MS)
         .note(
-            "The spaces between the lines are SiOCH with k about 2.5-3, spaced at half the pitch. Air gaps can lower k further.",
-            "A pale cyan slab in the gap above the M3 run, the low-k between the lines.",
+            "The insulator between lines is SiOCH, with a dielectric constant of about 2.5-3 against about 3.9 for SiO2. With lines this close, the capacitance to the neighbours is a large part of each wire's load, so a lower k means faster, lower-power wires.",
+            "Two amber-lit low-k spaces between M1 lines.",
         )
         .detail(
-            "A lower k means less capacitance between neighbouring lines.",
-            &[
-                "SiOCH at k about 2.5-3, with optional air gaps (CHIP_THIN_METAL section 2)",
-                "Spacing is half the pitch (CHIP_THIN_METAL section 2)",
-            ],
+            "Air gaps (k = 1) go further where they can be used.",
+            &["SiOCH k ~2.5-3, optional air gaps (CHIP_THIN_METAL section 2)", "SiO2 k ~3.9"],
         ),
     Beat::new("the barrier takes a growing share", BEAT_MS)
         .note(
-            "The 1-2 nm barrier sits on three sides of every line and does not scale down. As the line narrows it takes a bigger share of the cross-section.",
-            "A translucent blue skin around the M3 run, with the copper core inside.",
+            "A TaN barrier and a cobalt liner, about 2 nm together, wrap three sides of every line. That skin stays the same as lines narrow, so it takes a bigger share of each smaller line, and electrons scatter off the walls as well.",
+            "One line cut end-on, its skin glowing amber, beads zigzagging down the brown core.",
         )
         .detail(
-            "A fixed skin is why narrow lines are resistive.",
-            &["Barrier 1-2 nm on three sides, not scaling with width (CHIP_THIN_METAL section 2)"],
+            "A fixed skin takes a bigger share as the line narrows.",
+            &[
+                "Barrier 1-2 nm on three sides (CHIP_THIN_METAL section 2)",
+                "A 16 nm line keeps a ~12 nm core",
+            ],
         ),
 ];
 
 const ZC_BEATS: &[Beat] = &[
     Beat::new("DAMASCENE: copper inlaid in low-k", BEAT_MS)
         .note(
-            "Copper cannot be dry-etched, so the trench is cut in the dielectric, filled with copper and polished. The tag marks the inlaid copper.",
-            "A cyan dielectric band over the M2 run, with the copper inlaid in it.",
+            "Copper forms no volatile compounds, so a plasma can't etch it into lines. Instead trenches are cut in the low-k, lined, overfilled with copper and polished back.",
+            "A low-k block: open trenches under a dark hard mask, a blue lining, a copper blanket, then a flat polished top under a white cap.",
         )
         .detail(
             "Every copper node is damascene.",
-            &["DAMASCENE: copper cannot be dry-etched (CHIP_THIN_METAL section 3)"],
+            &["DAMASCENE: copper can't be dry-etched (CHIP_THIN_METAL section 3)"],
         ),
     Beat::new("SUBTRACTIVE: metal etched to lines", BEAT_MS)
         .note(
-            "Ru, Mo and W etch to volatile products, so the metal can be etched into lines from a blanket, and the gaps filled with dielectric afterwards.",
-            "A violet metal band over the M2 run, the lines standing alone.",
+            "Ruthenium, molybdenum and tungsten form volatile etch products, so a blanket of metal can be etched straight into lines. The gaps are then filled with dielectric, and pinching the fill off early leaves air gaps.",
+            "A teal ruthenium slab under hard-mask strips, then three free-standing teal lines, then grey fill with dark air-gap slots between them.",
         )
         .detail(
             "The subtractive route allows air gaps and needs no liner.",
-            &["SUBTRACTIVE: Ru, Mo and W etch to volatile products (CHIP_THIN_METAL section 3)"],
+            &["Ru, Mo and W etch to volatile products (CHIP_THIN_METAL section 3)"],
         ),
     Beat::new("Ru and Mo: beyond copper", BEAT_MS)
         .note(
-            "Ruthenium may beat copper at about 17 nm width and below in one analysis. imec has etched Ru and Mo at 32 nm pitch and below. The dots run along the violet Ru line.",
-            "Cyan signal dots running along the violet M2 run.",
+            "At the same 14 nm width, copper loses about a third of the line to its skin, while ruthenium and molybdenum need no barrier and lose less to thin-line scattering. One analysis has ruthenium beating copper at about 17 nm width and below.",
+            "Three 14 nm lines in grey low-k: brown copper in a blue skin, teal ruthenium and gold-grey molybdenum.",
         )
         .detail(
-            "These are candidates; the electromigration data for Mo are less clear.",
+            "This is one analysis, not a production choice.",
             &[
-                "Ru may beat Cu at ~17 nm width and below (CHIP_THIN_METAL section 4)",
-                "imec direct-etched Ru and Mo at 32 nm pitch and below (CHIP_THIN_METAL section 4)",
+                "Ru beats Cu at ~17 nm width and below, one analysis (CHIP_THIN_METAL section 4)",
+                "imec direct-etched Ru and Mo at 32 nm pitch and below (section 4)",
             ],
         ),
 ];
@@ -186,20 +184,20 @@ const ZC_BEATS: &[Beat] = &[
 const ZD_BEATS: &[Beat] = &[
     Beat::new("a via placed by overlay alone", BEAT_MS)
         .note(
-            "A via placed only by lithography overlay can land off its line. The amber column is where overlay alone puts it, beside the copper via.",
-            "An amber via column to the right of the real copper via, rising through the levels.",
+            "A via is printed in its own lithography step and has to line up with the line below. Here it does: the signal comes along the upper line, drops through the via and lands on its own line.",
+            "Cyan beads running along the long top line, down the brown via and into the middle line below.",
         )
         .detail(
-            "Overlay needs about a quarter of the via pitch, and the tightest via pitches fall below EUV resolution.",
+            "Overlay error has to stay within about a quarter of the via pitch.",
             &[
-                "Overlay needs about 1/4 of the via pitch (CHIP_THIN_METAL section 5)",
-                "The tightest via pitches fall below EUV resolution (CHIP_THIN_METAL section 5)",
+                "Overlay needs ~1/4 of the via pitch (CHIP_THIN_METAL section 5)",
+                "Tightest via pitches are below EUV resolution (section 5)",
             ],
         ),
     Beat::new("shifted: a short or a wall hit", BEAT_MS)
         .note(
-            "A shifted via can short to a neighbouring line or hit the low-k wall. The red column has moved further right, clear of the run it should land on.",
-            "A red via column further right, off the end of the copper run it should land on.",
+            "Shift the same via by half a space and its foot touches the next line over, so the signal leaks into the wrong wire: a short. If it only just misses, the thin sliver of insulator left can break down early.",
+            "The via moved right; red beads go down it and into the neighbouring line, with a red glow where they meet.",
         )
         .detail(
             "Edge placement error shorts or opens lines at this pitch.",
@@ -207,11 +205,11 @@ const ZD_BEATS: &[Beat] = &[
         ),
     Beat::new("SELF-ALIGNED VIA: lands on its own line", BEAT_MS)
         .note(
-            "The via hole is bounded by the line below, by dielectric grown over the neighbours or by a metal-selective etch. The via lands only on its own line.",
-            "A cyan via column standing on the end of the M3 run, where it lands on its own line.",
+            "In a self-aligned scheme, dielectric is grown selectively on top of the neighbouring lines, or a metal-selective etch is used. The via can be printed off-centre and still only reach its own line.",
+            "White dielectric blocks on the two neighbours; the shifted via narrows between them, and cyan beads land on the middle line only.",
         )
         .detail(
-            "Selective dielectric growth or a metal-selective etch sets the boundary.",
+            "The line below, not the overlay, sets where the via lands.",
             &["SELF-ALIGNED VIA: the hole is bounded by the line below (CHIP_THIN_METAL section 5)"],
         ),
 ];
@@ -219,350 +217,400 @@ const ZD_BEATS: &[Beat] = &[
 const ZE_BEATS: &[Beat] = &[
     Beat::new("PIN ACCESS on M1 and M2", BEAT_MS)
         .note(
-            "Cell pins sit on M1 and M2 inside the cell, and the router must reach each one from above.",
-            "A cyan band over the M1 run in a standard cell, with the pin tag above the M2 run.",
+            "Logic is built from standard cells with power rails along the top and bottom and gates between them. Each cell's inputs and output are short M1 pins, and the router has to reach them from the M2 tracks above.",
+            "Seen from above: gold VDD and VSS rails, dark red gates, three copper M1 pins (A, B and Y) and faint cyan M2 tracks crossing the cell.",
         )
         .detail(
-            "Libraries require a minimum number of accessible M1 tracks per pin.",
-            &[
-                "PIN ACCESS on M1 and M2 (CHIP_THIN_METAL section 6)",
-                "Libraries enforce a minimum of accessible M1 tracks per pin (CHIP_THIN_METAL section 6)",
-            ],
+            "Libraries require a minimum number of reachable tracks per pin.",
+            &["PIN ACCESS on M1 and M2 (CHIP_THIN_METAL section 6)"],
         ),
     Beat::new("more pins, fewer tracks", BEAT_MS)
         .note(
-            "Shrinking from 7.5 to 6 to 5 tracks packs more pins into the same cell, and each pin is covered by fewer tracks. Blockages can strand pins.",
-            "Five orange pin dots crowding the M1 run.",
+            "A pin can only be reached where an M2 track crosses it. Shrinking cells from 7.5 to 6 to 5 tracks leaves each pin fewer crossings, and a track already used by another net blocks its access points.",
+            "Green dots where tracks cross each pin; one track carries an orange wire from another net, and the dots on it are red.",
         )
         .detail(
-            "Congestion grows as the cell shrinks.",
+            "Congestion grows as cells shrink.",
             &[
-                "7.5 to 6 to 5 tracks raises pin density and congestion (CHIP_THIN_METAL section 6)",
-                "Blockages can leave pins unreachable (CHIP_THIN_METAL section 6)",
+                "7.5 to 6 to 5 tracks raises pin density (CHIP_THIN_METAL section 6)",
+                "Blockages can leave pins unreachable (section 6)",
             ],
         ),
     Beat::new("routers join the pins", BEAT_MS)
         .note(
-            "Synopsys and Cadence place-and-route tools find the paths from above. Some M2 pins are hand-placed. The dots run along the M2 route.",
-            "Cyan signal dots running along the M2 run.",
+            "Place-and-route software picks free tracks, drops vias onto the pins and joins them. Here an M2 wire ties pins A and B together and another carries output Y out of the cell, with signals riding both.",
+            "Two copper M2 wires with vias onto the pins, cyan beads running along them.",
         )
         .detail(
-            "The router has to reach each pin from above, so pin placement and routing are planned together.",
-            &[
-                "Synopsys (SNPS) and Cadence (CDNS) place-and-route tools (CHIP_THIN_METAL section 6)",
-                "Some M2 pins are hand-placed (CHIP_THIN_METAL section 6)",
-            ],
+            "Pin placement and routing are planned together.",
+            &["Synopsys (SNPS) and Cadence (CDNS) place-and-route (CHIP_THIN_METAL section 6)"],
         ),
 ];
 
 // ---- sections 1-10 (one picture per `# ` heading of CHIP_THIN_METAL.txt) --------------------
+// The pictures are detailed cut-aways (chip_thin_metal_detail.py), not the schematic chip.
 
 const SEC1_BEATS: &[Beat] = &[
-    Beat::new("M1-M4: the thinnest wiring levels", BEAT_MS)
+    Beat::new("M1-M4: four thin copper levels", BEAT_MS)
         .note(
-            "The whole chip with the thin band lit. M1-M4 are the thinnest local wiring, just above the transistors.",
-            "The whole chip, the cyan thin band over the transistors, tagged thin metal M1-M4.",
+            "The thin metal levels are the first four layers of wiring above the transistors. Each level is a row of copper lines set in a low-k insulator, and alternate levels run at right angles so a signal can turn corners. Tungsten contacts below connect them down to the transistors.",
+            "A stepped cut-away block. Brown copper lines with a thin blue skin (the barrier) sit in grey low-k; the long brown bars are levels running across the cut. The dark slab at the bottom is the contact layer and silicon.",
         )
         .detail(
-            "Each thin level is one damascene loop, at a pitch of about 20-40 nm.",
-            &["M1-M4 at about 20-40 nm pitch (CHIP_THIN_METAL section 1)"],
+            "These are the densest and most resistive wires on the chip.",
+            &[
+                "M1-M4 pitch ~20-40 nm (CHIP_THIN_METAL section 1)",
+                "Four levels, one damascene loop each",
+                "Alternate levels run at 90 degrees",
+            ],
         ),
-    Beat::new("one loop per level", BEAT_MS)
+    Beat::new("one damascene loop: etch, line, fill, polish", BEAT_MS)
         .note(
-            "Each level is printed, etched, lined, filled, polished and capped. The amber mask marks the M1 level while its loop runs.",
-            "The amber mask on the lowest thin run, tagged one damascene loop per level.",
+            "Each level is built the same way. Trenches are etched into the low-k through a hard mask, lined with a TaN barrier and a cobalt or ruthenium liner, then overfilled with plated copper. Polishing (CMP) removes the excess and an SiCN cap seals the top.",
+            "A small low-k block: open trenches under a dark hard mask, then a blue lining, then a copper blanket over everything, then a flat polished top under a white cap with three inlaid lines.",
         )
         .detail(
-            "The loop repeats about four times for M1-M4.",
-            &["The loop repeats about four times for M1-M4 (CHIP_THIN_METAL section 1)"],
+            "Copper can't be dry-etched, so it is inlaid rather than cut.",
+            &[
+                "Barrier + liner ~1-2 nm (CHIP_THIN_METAL section 1)",
+                "EUV at ~26-30 nm pitch, or 193i multipatterning (section 1)",
+                "The loop repeats once per level",
+            ],
         ),
-    Beat::new("M1 to M4 stacked", BEAT_MS)
+    Beat::new("M1 to M4, named", BEAT_MS)
         .note(
-            "The four levels stack in the thin band, each a layer of copper runs in low-k. Each is tagged M1 to M4 at the right.",
-            "Four tags, M1 to M4, one beside each level at the right of the band.",
+            "Back on the stack with each level named. M1 and M3 run into the picture, so their cut ends show as small rectangles; M2 and M4 run across it, so you see them lengthwise. Short vias between levels join a line to the one above.",
+            "Tags M1 to M4 on the four steps: small brown rectangles on M1 and M3, long brown bars on M2 and M4, and short brown vias between the steps.",
         )
         .detail(
-            "Higher levels get thicker and wider, because RC falls with the cross-section.",
-            &["Higher levels thicken because RC falls with cross-section (CHIP_THIN_METAL section 9, notes)"],
+            "Each level up is a little wider and taller, because resistance falls with cross-section.",
+            &[
+                "Drawn: M1 ~32 nm pitch, M2 and M3 ~28 nm, M4 ~36 nm (illustrative)",
+                "Real pitches vary by node; N2 and 14A are not public",
+            ],
         ),
 ];
 
 const SEC2_BEATS: &[Beat] = &[
-    Beat::new("copper core, 12-15 nm", BEAT_MS)
+    Beat::new("a 16 nm line at a 32 nm pitch", BEAT_MS)
         .note(
-            "Once the barrier is counted, the copper in the M3 run is only about 12-15 nm wide.",
-            "Close on the M3 copper run, its core tagged on the wire.",
+            "Close on the M1 cut face. Each line is about 16 nm wide and twice as tall, and the next line sits one pitch away with insulator of about the same width between them. Only the inside of each line is copper.",
+            "Brown rectangles (copper) with a thin blue rim, evenly spaced in grey low-k; above them a long M2 bar and its vias.",
         )
         .detail(
-            "The barrier does not shrink, so the copper core is what is left.",
-            &["Core ~12-15 nm after barrier (CHIP_THIN_METAL section 2)"],
+            "Pitch is line plus space; the space is roughly half the pitch.",
+            &[
+                "Line ~16 nm, pitch ~32 nm as drawn",
+                "Copper core ~12-15 nm once the barrier is in (CHIP_THIN_METAL section 2)",
+            ],
         ),
-    Beat::new("low-k between the lines", BEAT_MS)
+    Beat::new("low-k between the lines, sometimes air", BEAT_MS)
         .note(
-            "The spaces are SiOCH at k about 2.5-3, with optional air gaps, spaced at half the pitch.",
-            "A pale cyan slab in the gap above the M3 run, tagged low-k between lines.",
+            "The grey between lines is SiOCH, a porous carbon-doped oxide with a dielectric constant of about 2.5-3, against about 3.9 for plain SiO2. Lower k means less capacitance between neighbours, so less delay and power. Some processes leave air gaps (k = 1) in the spaces.",
+            "The grey spaces between the copper lines, and two dark slots in the spaces on the right: air gaps.",
         )
         .detail(
-            "A lower k lowers the capacitance between neighbours.",
-            &["SiOCH at k about 2.5-3, with optional air gaps (CHIP_THIN_METAL section 2)"],
+            "Capacitance rises as lines get closer; low-k and air gaps push it back down.",
+            &[
+                "SiOCH k ~2.5-3 (CHIP_THIN_METAL section 2)",
+                "SiO2 k ~3.9; air k = 1",
+                "Air gaps are optional (section 2)",
+            ],
         ),
-    Beat::new("barrier on three sides", BEAT_MS)
+    Beat::new("the barrier skin does not shrink", BEAT_MS)
         .note(
-            "A 1-2 nm barrier lines three sides of each line. The copper is the core inside it.",
-            "A translucent blue skin around the M3 run.",
+            "Each line is wrapped on three sides by a TaN barrier, which stops copper diffusing into the insulator, and a thin Co or Ru liner that helps the copper stick and fill. Together they are about 2 nm, and that stays the same as lines narrow, so the skin takes a bigger share of every smaller line.",
+            "One line up close: the blue outer skin (TaN), a thin silver layer inside it (the liner) and the brown copper core. Halfway through, the skin glows amber.",
         )
         .detail(
-            "A fixed skin takes a bigger share as the line narrows.",
-            &["Barrier 1-2 nm on three sides (CHIP_THIN_METAL section 2)"],
+            "The skin conducts poorly, so the copper core sets the resistance.",
+            &[
+                "Barrier + liner ~1-2 nm per side (CHIP_THIN_METAL section 2)",
+                "A 16 nm line keeps a ~12 nm copper core",
+                "Barrier on 3 sides; the SiCN cap closes the top",
+            ],
         ),
-    Beat::new("vias stack the levels", BEAT_MS)
+    Beat::new("a via drops onto the line below", BEAT_MS)
         .note(
-            "Vias connect each thin level to the one above. The two cyan columns are vias standing at the ends of the M3 run.",
-            "Two cyan via columns rising through the thin band, tagged vias stack the levels.",
+            "M2 runs across M1. Where the two must connect, a via fills a hole through the SiCN cap and lands on the M1 line beneath. Vias carry the same barrier and liner, so small vias are resistive too.",
+            "A brown via column between the long M2 bar above and a cut M1 line below, passing through the thin white SiCN cap.",
         )
         .detail(
-            "Each via lands on a line below and joins the level above, after a cap.",
-            &["CAP + VIA to the next level (CHIP_THIN_METAL section 1)"],
+            "Via resistance climbs as vias shrink, for the same reason lines do.",
+            &[
+                "Via and line are filled together (dual damascene)",
+                "SiCN cap: etch stop and copper seal",
+            ],
         ),
 ];
 
 const SEC3_BEATS: &[Beat] = &[
-    Beat::new("DAMASCENE: copper inlaid in low-k", BEAT_MS)
+    Beat::new("DAMASCENE: cut the insulator, inlay copper", BEAT_MS)
         .note(
-            "Copper cannot be dry-etched, so the trench is cut in the dielectric, filled with copper and polished. The tag marks the inlaid copper.",
-            "A cyan dielectric band over the M2 run, with the copper inlaid in it.",
+            "Copper forms no volatile compounds, so a plasma can't etch it into lines. Instead trenches are etched in the low-k, lined, overfilled with copper and polished back. Every production copper level is built this way.",
+            "A low-k block: open trenches under a dark hard mask, a blue lining, a copper blanket, then a flat polished top under a white cap.",
         )
         .detail(
-            "Every copper node is damascene.",
-            &["DAMASCENE: copper cannot be dry-etched (CHIP_THIN_METAL section 3)"],
+            "The barrier must line three sides of every trench.",
+            &["DAMASCENE: copper can't be dry-etched (CHIP_THIN_METAL section 3)"],
         ),
-    Beat::new("SUBTRACTIVE: metal etched to lines", BEAT_MS)
+    Beat::new("SUBTRACTIVE: etch the metal itself", BEAT_MS)
         .note(
-            "Ru, Mo and W etch to volatile products, so the metal can be etched into lines from a blanket, and the gaps filled with dielectric afterwards.",
-            "A violet metal band over the M2 run, the lines standing alone.",
+            "Ruthenium, molybdenum and tungsten do form volatile etch products, so a blanket of metal can be patterned directly, as aluminium wiring once was. The gaps are then filled with dielectric, and pinching the fill off early leaves air gaps.",
+            "A teal ruthenium slab under dark hard-mask strips, then three free-standing teal lines, then grey fill with dark air-gap slots between the lines.",
         )
         .detail(
-            "The subtractive route allows air gaps and needs no liner.",
-            &["SUBTRACTIVE: Ru, Mo and W etch to volatile products (CHIP_THIN_METAL section 3)"],
+            "The subtractive route needs no liner and allows air gaps.",
+            &[
+                "Ru, Mo and W etch to volatile products (CHIP_THIN_METAL section 3)",
+                "Allows air gaps and no liner (section 3)",
+            ],
         ),
-    Beat::new("Ru and Mo etch to volatile products", BEAT_MS)
+    Beat::new("same pitch, two routes", BEAT_MS)
         .note(
-            "Ruthenium and molybdenum can be dry-etched, which is what opens the subtractive route to them. The dots run along the violet Ru line.",
-            "Cyan signal dots running along the violet M2 run.",
+            "Side by side: inlaid copper with its barrier on three sides, and etched ruthenium lines with no liner and air gaps between. The etched line keeps all of its width as metal, which matters most at the smallest widths.",
+            "Left block: brown copper lines in blue skins. Right block: teal ruthenium lines with dark air gaps between them.",
         )
         .detail(
-            "Ru and Mo are the metals that make the subtractive route possible.",
-            &["Ru, Mo and W form volatile etch products (CHIP_THIN_METAL section 3)"],
+            "Both routes print the same pitch; they differ in what fills the line and the space.",
+            &["Ru lines need no barrier", "Air gaps cut line-to-line capacitance"],
         ),
 ];
 
 const SEC4_BEATS: &[Beat] = &[
-    Beat::new("copper with a RuCo liner", BEAT_MS)
+    Beat::new("the barrier eats a narrowing line", BEAT_MS)
         .note(
-            "Copper needs a barrier and a liner. A RuCo liner can cut the liner to about 2 nm; one company claims line resistance falls by up to 25 percent.",
-            "A translucent blue liner band over the M2 run.",
+            "Three copper lines 40, 24 and 14 nm wide, each with the same 2 nm skin. At 40 nm copper fills about 88% of the line; at 14 nm only about 66%. Copper also gets more resistive in thin lines, because electrons scatter off its surfaces and grain boundaries.",
+            "Three cut lines, big to small, in grey low-k: brown copper cores inside the same thin blue skin.",
         )
         .detail(
-            "The 25 percent figure is a company claim, not an independent measurement.",
-            &["Applied claim: RuCo liner to about 2 nm, line resistance down up to 25% (CHIP_THIN_METAL section 4)"],
+            "Less copper and worse copper: resistance rises much faster than the line shrinks.",
+            &[
+                "Copper share at 2 nm skin, 2:1 aspect: ~88%, ~80%, ~66% (geometry)",
+                "Cu bulk ~1.7 uOhm-cm; electron mean free path ~39 nm",
+            ],
         ),
-    Beat::new("ruthenium: steadier with width", BEAT_MS)
+    Beat::new("ruthenium: all metal, no barrier", BEAT_MS)
         .note(
-            "Ruthenium's resistance depends less on width. One analysis has it beating copper at about 17 nm width and below.",
-            "A violet band over the M3 run.",
+            "Ruthenium doesn't diffuse into the insulator, so it needs no barrier, and its short electron mean free path means thin lines lose less to surface scattering. Its bulk resistivity is about four times copper's, but one analysis has it beating copper at about 17 nm width and below.",
+            "The 14 nm copper line (brown core, blue skin) beside a 14 nm ruthenium line that is teal metal all the way across.",
         )
         .detail(
             "This is one analysis, not a production choice.",
-            &["Ru beats Cu at 17 nm width and below in one analysis (CHIP_THIN_METAL section 4)"],
-        ),
-    Beat::new("molybdenum: low bulk mean free path", BEAT_MS)
-        .note(
-            "Molybdenum has a low bulk mean free path. imec has etched Ru and Mo directly at 32 nm pitch and below; the electromigration data are less clear.",
-            "A violet band over the M1 run in the cell.",
-        )
-        .detail(
-            "Electromigration data for molybdenum are less clear than for copper.",
-            &["imec direct-etched Ru and Mo at 32 nm pitch and below (CHIP_THIN_METAL section 4)"],
-        ),
-    Beat::new("liners for the thinnest levels", BEAT_MS)
-        .note(
-            "Cobalt, the traditional liner and fill, costs yield and resistance at 3 nm and below. The blue band over the M2 run stands for the liner.",
-            "A blue liner band over the M2 run, tagged cobalt yield and R cost at 3 nm.",
-        )
-        .detail(
-            "The liner and fill metal are the choices that matter most at the thinnest levels.",
             &[
-                "Cobalt costs yield and resistance at 3 nm and below (CHIP_THIN_METAL section 4)",
-                "Liner and fill choice for the thinnest levels (textbook)",
+                "Ru beats Cu at ~17 nm width and below, one analysis (CHIP_THIN_METAL section 4)",
+                "Ru bulk ~7.1 vs Cu ~1.7 uOhm-cm (approximate)",
+            ],
+        ),
+    Beat::new("molybdenum: a short mean free path", BEAT_MS)
+        .note(
+            "Molybdenum is the other candidate. Like ruthenium, its electrons travel only a short way between collisions, so narrow lines lose less to scattering, and imec has etched both directly at 32 nm pitch and below. Its electromigration data are less complete than copper's.",
+            "Three 14 nm lines: brown copper in a blue skin, teal ruthenium and gold-grey molybdenum, the last two all metal.",
+        )
+        .detail(
+            "Reliability data decide adoption as much as resistance does.",
+            &[
+                "imec direct-etched Ru and Mo at 32 nm pitch and below (CHIP_THIN_METAL section 4)",
+                "Mo bulk ~5.3 uOhm-cm (approximate)",
+            ],
+        ),
+    Beat::new("a thinner liner buys back copper", BEAT_MS)
+        .note(
+            "Until a new metal takes over, the fix is to thin the skin. A TaN plus cobalt skin of about 3 nm leaves a 14 nm line about half copper; a RuCo liner of about 2 nm leaves about two thirds. Applied Materials says its RuCo liner cuts line resistance by up to 25%. Cobalt costs yield and resistance at 3 nm and below.",
+            "Two 14 nm copper lines: on the left a thick blue-and-silver skin round a narrow brown core, on the right a thin skin (teal liner) round a wider core.",
+        )
+        .detail(
+            "The 25% figure is a company claim, not an independent measurement.",
+            &[
+                "RuCo liner ~2 nm, line R down up to 25% (Applied claim, section 4)",
+                "As drawn: 3 nm skin ~50% Cu, 2 nm skin ~66% Cu (geometry)",
             ],
         ),
 ];
 
 const SEC5_BEATS: &[Beat] = &[
-    Beat::new("a via placed by overlay alone", BEAT_MS)
+    Beat::new("a via placed by lithography overlay", BEAT_MS)
         .note(
-            "A via placed only by lithography overlay can land off its line. The amber column is where overlay alone puts it, beside the copper via.",
-            "An amber via column to the right of the real copper via, rising through the levels.",
+            "A via is printed in its own lithography step and has to line up with the line below it. The overlay error must stay within about a quarter of the via pitch, which at these pitches is only a few nanometres.",
+            "Three cut lines in grey low-k, a long copper line across the top, and a brown via between them landing on the middle line, with a green glow where it lands.",
         )
         .detail(
-            "Overlay needs about a quarter of the via pitch, and the tightest via pitches fall below EUV resolution.",
+            "Overlay is the alignment between two separately printed layers.",
             &[
-                "Overlay needs about 1/4 of the via pitch (CHIP_THIN_METAL section 5)",
-                "The tightest via pitches fall below EUV resolution (CHIP_THIN_METAL section 5)",
+                "Overlay budget ~1/4 of the via pitch (CHIP_THIN_METAL section 5)",
+                "At a 28 nm pitch that is ~7 nm",
             ],
         ),
-    Beat::new("shifted: a short or a wall hit", BEAT_MS)
+    Beat::new("shifted: a short to the neighbour", BEAT_MS)
         .note(
-            "A shifted via can short to a neighbouring line or hit the low-k wall. The red column has moved further right, clear of the run it should land on.",
-            "A red via column further right, off the end of the copper run it should land on.",
+            "Shift the same via by half a space and its foot touches the next line over. That is a short circuit; if it only just misses, the thin sliver of insulator left can break down early. Adding masks to prevent it raises cost.",
+            "The via moved to the right, with a red glow where its foot meets the neighbouring line.",
         )
         .detail(
             "Edge placement error shorts or opens lines at this pitch.",
-            &["Edge placement error shorts or opens lines (CHIP_THIN_METAL details, failure modes)"],
+            &[
+                "Shifted via: short or wall hit (CHIP_THIN_METAL section 5)",
+                "The tightest via pitches are below EUV resolution (section 5)",
+            ],
         ),
-    Beat::new("SELF-ALIGNED VIA: lands on its own line", BEAT_MS)
+    Beat::new("SELF-ALIGNED VIA: hemmed in", BEAT_MS)
         .note(
-            "The via hole is bounded by the line below, by dielectric grown over the neighbours or by a metal-selective etch. The via lands only on its own line.",
-            "A cyan via column standing on the end of the M3 run, where it lands on its own line.",
+            "In a self-aligned scheme, dielectric is grown selectively on top of the neighbouring lines, or a metal-selective etch is used. The via hole can then be printed oversize and off-centre, and it still reaches only its own line.",
+            "White dielectric blocks raised on the two neighbouring lines; the via, still shifted, narrows between them and lands only on the middle line (green glow).",
         )
         .detail(
-            "Selective dielectric growth or a metal-selective etch sets the boundary.",
-            &["SELF-ALIGNED VIA: the hole is bounded by the line below (CHIP_THIN_METAL section 5)"],
+            "The line below, not the overlay, sets where the via lands.",
+            &[
+                "Hole bounded by the line below (CHIP_THIN_METAL section 5)",
+                "Selective dielectric or metal-selective etch (section 5)",
+            ],
         ),
 ];
 
 const SEC6_BEATS: &[Beat] = &[
-    Beat::new("PIN ACCESS on M1 and M2", BEAT_MS)
+    Beat::new("a standard cell from above", BEAT_MS)
         .note(
-            "Cell pins sit on M1 and M2 inside the cell, and the router must reach each one from above.",
-            "A cyan band over the M1 run in a standard cell, with the pin tag above the M2 run.",
+            "Logic is built from standard cells: fixed-height tiles with power rails along the top and bottom and gates running between them. A cell's inputs and output are short M1 pins inside it, and the router has to reach them from the M2 tracks above.",
+            "Seen from above: gold VDD and VSS rails, dark red gates, three copper M1 pins (A, B and Y), and faint cyan M2 tracks crossing the cell.",
         )
         .detail(
-            "Libraries require a minimum number of accessible M1 tracks per pin.",
+            "Cell height is counted in M2 tracks.",
             &[
                 "PIN ACCESS on M1 and M2 (CHIP_THIN_METAL section 6)",
-                "Libraries enforce a minimum of accessible M1 tracks per pin (CHIP_THIN_METAL section 6)",
+                "Libraries require a minimum of reachable tracks per pin (section 6)",
             ],
         ),
-    Beat::new("more pins, fewer tracks", BEAT_MS)
+    Beat::new("fewer tracks, fewer ways in", BEAT_MS)
         .note(
-            "Shrinking from 7.5 to 6 to 5 tracks packs more pins into the same cell, and each pin is covered by fewer tracks. Blockages can strand pins.",
-            "Five orange pin dots crowding the M1 run.",
+            "A pin can only be reached where an M2 track crosses it. Shrinking cells from 7.5 to 6 to 5 tracks leaves each pin fewer crossings, and if another net already uses a track, that access point is lost. Blocked pins can make a cell unroutable.",
+            "Green dots where tracks cross each pin; one track now carries an orange wire from another net, and the dots on it are red.",
         )
         .detail(
-            "Congestion grows as the cell shrinks.",
+            "Congestion grows as cells shrink.",
             &[
-                "7.5 to 6 to 5 tracks raises pin density and congestion (CHIP_THIN_METAL section 6)",
-                "Blockages can leave pins unreachable (CHIP_THIN_METAL section 6)",
+                "7.5 to 6 to 5 tracks raises pin density (CHIP_THIN_METAL section 6)",
+                "Blockages can leave pins unreachable (section 6)",
             ],
         ),
-    Beat::new("routers join the pins", BEAT_MS)
+    Beat::new("the router joins the pins", BEAT_MS)
         .note(
-            "Synopsys and Cadence place-and-route tools find the paths from above. Some M2 pins are hand-placed. The dots run along the M2 route.",
-            "Cyan signal dots running along the M2 run.",
+            "Place-and-route software picks free tracks, drops vias onto the pins and joins them. Here one M2 wire ties pins A and B together and another leaves from pin Y. Some M2 pins are still placed by hand.",
+            "Two glowing cyan M2 wires, one between pins A and B and one from pin Y to the cell edge, with vias down onto the pins.",
         )
         .detail(
-            "The router has to reach each pin from above, so pin placement and routing are planned together.",
+            "Pin placement and routing are planned together.",
             &[
-                "Synopsys (SNPS) and Cadence (CDNS) place-and-route tools (CHIP_THIN_METAL section 6)",
-                "Some M2 pins are hand-placed (CHIP_THIN_METAL section 6)",
+                "Synopsys (SNPS) and Cadence (CDNS) place-and-route (CHIP_THIN_METAL section 6)",
+                "Some M2 pins are hand-placed (section 6)",
             ],
         ),
 ];
 
 const SEC7_BEATS: &[Beat] = &[
-    Beat::new("EUV 0.33 NA: about 26 nm pitch", BEAT_MS)
+    Beat::new("EUV 0.33 NA: ~26 nm pitch in one pass", BEAT_MS)
         .note(
-            "The EUV slit scans across the band and prints lines at about 26 nm pitch in one exposure.",
-            "A wide translucent cyan slit sweeping across the thin levels.",
+            "An EUV scanner images the reticle onto resist with 13.5 nm light. With today's 0.33 numerical-aperture optics, the finest lines it prints reliably in one exposure are at about 26 nm pitch. Tighter levels need two exposures or a self-aligned spacer scheme.",
+            "Pink resist lines on a dark hard mask and silicon, under a violet column of EUV light from the grey reticle above.",
         )
         .detail(
-            "Below about 26 nm the layer needs two exposures or a self-aligned scheme.",
-            &["EUV 0.33 NA: about 26 nm pitch single exposure, 13 nm half-pitch (CHIP_THIN_METAL section 7)"],
-        ),
-    Beat::new("High-NA 0.55: about 16 nm pitch", BEAT_MS)
-        .note(
-            "High-NA is reported to reach about 16 nm pitch in one exposure. Intel uses it on selected 18A layers.",
-            "A narrower cyan slit sweeping across the band.",
-        )
-        .detail(
-            "This is a reported figure, not a measured one for any shipping node.",
+            "Pitch is set by lithography; line width then follows.",
             &[
-                "High-NA 0.55: about 16 nm pitch reported (CHIP_THIN_METAL section 7)",
-                "Intel uses High-NA on selected 18A layers (CHIP_THIN_METAL section 7)",
+                "0.33 NA: ~26 nm pitch, 13 nm half-pitch (CHIP_THIN_METAL section 7)",
+                "EUV wavelength 13.5 nm",
             ],
         ),
-    Beat::new("TSMC N3E 23 nm, imec Ru 28 nm", BEAT_MS)
+    Beat::new("High-NA 0.55: ~16 nm reported", BEAT_MS)
         .note(
-            "TSMC N3E has a 23 nm minimum metal pitch. imec patterned 28 nm pitch Ru lines in one 0.33 NA exposure. No slit is shown here.",
-            "The thin levels with the pitch tag, and no slit.",
+            "High-NA EUV uses larger 0.55 NA optics, which resolve finer lines: about 16 nm pitch in one exposure has been reported. The trade-off is an exposure field half the size, so the largest dies need two fields stitched together.",
+            "A narrower violet beam over a tighter array of thin pink resist lines.",
         )
         .detail(
-            "Public pitch figures are scarce; N2 and 14A are not public.",
+            "A reported figure, not one measured on a shipping node.",
+            &[
+                "High-NA ~16 nm pitch reported (CHIP_THIN_METAL section 7)",
+                "Field 26 x 16.5 mm, half of 26 x 33 mm",
+            ],
+        ),
+    Beat::new("published pitches", BEAT_MS)
+        .note(
+            "What has been published: TSMC's N3E has a 23 nm minimum metal pitch, and imec has printed 28 nm pitch ruthenium lines in one 0.33 NA exposure. Pitches for TSMC N2 and Intel 14A were not found in public sources.",
+            "Two line arrays at their published pitches: copper lines at 23 nm and teal ruthenium lines at 28 nm.",
+        )
+        .detail(
+            "Public pitch figures are scarce.",
             &[
                 "TSMC N3E minimum metal pitch 23 nm (IEDM 2022 via WikiChip)",
-                "imec 28 nm pitch Ru in one 0.33 NA exposure (CHIP_THIN_METAL section 7)",
+                "imec 28 nm pitch Ru, single 0.33 NA exposure (section 7)",
             ],
         ),
 ];
 
 const SEC8_BEATS: &[Beat] = &[
-    Beat::new("fabs set the pitch", BEAT_MS)
+    Beat::new("fabs set the pitch and the metal", BEAT_MS)
         .note(
-            "TSMC, Intel and Samsung choose the metal pitch and the metal for each level.",
-            "The thin band from a wide view, tagged with the fabs.",
+            "TSMC, Intel and Samsung decide the pitch of each level and what it is made of. Those choices fix how dense the logic can be and how fast its wires are.",
+            "The M1-M4 stack, with the fabs tagged on M2 and M3.",
         )
         .detail(
-            "Pitch and metal choices are the fabs' decisions.",
-            &["TSMC (TSM), Intel (INTC) and Samsung set pitch and metal choices (CHIP_THIN_METAL section 8)"],
+            "Pitch and metal are the fabs' decisions.",
+            &["TSMC (TSM), Intel (INTC) and Samsung (CHIP_THIN_METAL section 8)"],
         ),
-    Beat::new("tool makers", BEAT_MS)
+    Beat::new("the tool makers, step by step", BEAT_MS)
         .note(
-            "Applied Materials sells copper barrier and seed and ruthenium CVD tools. Lam Research and Tokyo Electron etch and plate; ASML makes the EUV scanners.",
-            "The thin band from a wide view, tagged with the tool makers.",
+            "Applied Materials sells the deposition tools for the barrier, liner, seed and ruthenium. Lam Research and Tokyo Electron supply etch and copper plating. ASML is the only maker of the EUV scanners that print the lines.",
+            "The stack with tags on the blue barrier of an M1 line, on an M3 line and on top of M4.",
         )
         .detail(
-            "The tools in these steps come from a few suppliers.",
-            &["AMAT, LRCX, 8035.T and ASML (CHIP_THIN_METAL section 8)"],
+            "A few suppliers cover each step.",
+            &[
+                "AMAT, LRCX, 8035.T and ASML (CHIP_THIN_METAL section 8)",
+                "ASML: sole supplier of EUV scanners",
+            ],
         ),
     Beat::new("designers and routers", BEAT_MS)
         .note(
-            "NVIDIA, AMD and Arm design cells that must route at these pitches. Synopsys and Cadence supply the routers.",
-            "The thin band from a wide view, tagged with the designers and routers.",
+            "NVIDIA, AMD and Arm design cells that have to route at these pitches, and Synopsys and Cadence write the routers that connect them. Pin access problems show up here first.",
+            "The standard cell from above with a cyan M2 route between two pins, tagged with the designers and EDA firms.",
         )
         .detail(
-            "The designers and the routers have to meet the fabs' pitches.",
+            "Designers and routers have to meet the fabs' pitches.",
             &["NVDA, AMD, ARM, SNPS and CDNS (CHIP_THIN_METAL section 8)"],
         ),
 ];
 
 const SEC9_BEATS: &[Beat] = &[
-    Beat::new("new metals: maturity", BEAT_MS)
+    Beat::new("ruthenium and molybdenum aren't mature", BEAT_MS)
         .note(
-            "CMP, etch and cost for ruthenium and molybdenum are not yet mature. The violet band over the M2 run stands for them.",
-            "The violet band over the M2 run, tagged new metals maturity.",
+            "Etched ruthenium and molybdenum lines are promising, but their etch, CMP and cost are still being worked out. Defects such as residue or broken lines cost yield until the process matures.",
+            "Teal ruthenium lines in grey fill with dark air gaps; two red dots mark defects on the lines.",
         )
         .detail(
-            "Adoption depends on CMP and etch maturity.",
-            &["CMP, etch and cost for Ru and Mo are not mature (CHIP_THIN_METAL section 9)"],
+            "Adoption depends on etch and CMP maturity.",
+            &["Ru and Mo cost, CMP and etch maturity (CHIP_THIN_METAL section 9)"],
         ),
-    Beat::new("RC: thin wires slow the signal", BEAT_MS)
+    Beat::new("RC: thin wires set the speed", BEAT_MS)
         .note(
-            "The RC of the thin wires now dominates gate delay, so the wires set the speed more than the transistors do.",
-            "Cyan signal dots crossing the M3 run slowly.",
+            "A wire's delay grows with its resistance times its capacitance. Halving a line's width and height raises its resistance per length about four times while its capacitance per length barely falls, so a signal crosses a thin wire far more slowly than a thick one. At these levels wire delay now outweighs gate delay.",
+            "Two copper wires seen lengthwise: a thin one below where cyan pulses crawl, and a thick one above where they race across.",
         )
         .detail(
-            "At this level the wires, not the transistors, set the speed.",
-            &["RC of thin wires dominates gate delay (CHIP_THIN_METAL section 9)"],
+            "The wires, not the transistors, set the speed here.",
+            &[
+                "RC delay of thin wires dominates (CHIP_THIN_METAL section 9)",
+                "R per length ~ 1 / (width x height)",
+            ],
         ),
-    Beat::new("N2 and 14A pitches not public", BEAT_MS)
+    Beat::new("upper levels thicken; next pitches unknown", BEAT_MS)
         .note(
-            "The metal pitches for N2 and 14A were not found in the public sources, so none are shown here.",
-            "The whole chip, a slow pull-back, tagged N2 and 14A pitches not public.",
+            "That is why each level up is a little wider and taller, and long routes climb to the thick metal higher in the stack. The metal pitches for TSMC N2 and Intel 14A were not found in public sources.",
+            "The stack, with the thicker M4 bars on top and the thin M1 lines at the bottom.",
         )
         .detail(
             "Numbers without a source are left out.",
-            &["N2 and 14A metal pitches not public in the sources found (CHIP_THIN_METAL section 9)"],
+            &[
+                "Higher levels thicken because RC falls with cross-section (section 9)",
+                "N2 and 14A metal pitches not public (section 9)",
+            ],
         ),
 ];
 
@@ -570,7 +618,7 @@ const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 1-4", BEAT_MS)
         .note(
             "Semiengineering on ruthenium interconnects and the end of copper; semiengineering on ruthenium liners; Applied Materials on chip wiring; a US patent on self-aligned vias.",
-            "The whole chip, slowly pulling back.",
+            "The M1-M4 cut-away, turning slowly.",
         )
         .detail(
             "Sources for the interconnect and ruthenium claims.",
@@ -584,7 +632,7 @@ const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 5-7", BEAT_MS)
         .note(
             "imec on direct-etched ruthenium and molybdenum; an arXiv paper and an SPIE proceeding; HotHardware and HWBusters on High-NA and Panther Lake.",
-            "The whole chip, slowly pulling back.",
+            "The M1-M4 cut-away, turning slowly.",
         )
         .detail(
             "Sources for the etch, pitch and High-NA figures.",
@@ -597,7 +645,7 @@ const SEC10_BEATS: &[Beat] = &[
     Beat::new("sources 8-10", BEAT_MS)
         .note(
             "A teardown-based report on Intel 18A (unconfirmed); Wikipedia and WikiChip on the 3 nm pitch; an imec publication on the thin levels.",
-            "The whole chip, slowly pulling back.",
+            "The M1-M4 cut-away, turning slowly.",
         )
         .detail(
             "The teardown report is unconfirmed and is marked as such.",

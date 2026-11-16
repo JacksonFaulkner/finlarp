@@ -1,0 +1,1 @@
+Samsung's R&D pushes HBM furthest into logic. Its zHBM roadmap (Hot Chips 2026) moves compute into the memory stack and, in the last phase, puts DRAM directly on the processor, enabled by hybrid copper bonding. Ticker: 005930.KS.

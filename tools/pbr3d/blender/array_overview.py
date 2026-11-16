@@ -77,7 +77,8 @@ def build():
     # the word line of the open row, a bright bar that moves for refresh
     hl, bar = K.row_bar(root, m, ROWS, COLS, R0)
     show(bar, [(F(1, 0.0), F(5, 0.25))] + beat(6))
-    K.move_row(hl, [(F(6, 0.02 + 0.095 * i), i) for i in range(ROWS)], R0)
+    # the mover holds the bar on row R0 (it is hidden from F(5, 0.25)) until refresh walks it
+    K.move_row(hl, [(F(0, 0.0), R0), (F(5, 0.5), R0)] + [(F(6, 0.02 + 0.095 * i), i) for i in range(ROWS)], R0)
 
     selA = K.select(root, m, COLS, SEL_A)
     show(selA, beat(3))
@@ -102,7 +103,7 @@ def build():
     label("word line: one row opens", (-300, cy(R0) + 70, 0), root, beat(1))
     label("cells share charge with bit lines", (cx(8) + 80, cy(R0) + 60, 0), root, beat(1))
     label("sense amps: the row buffer", (cx(9) + 120, K.SA_Y - 40, 0), root, beat(2))
-    label("column decoder: 4 columns", (-20, K.SEL_Y - 50, 0), root, beat(3))
+    label("column decoder: 4 columns", (-20, K.SEL_Y - 130, 0), root, beat(3))
     label("I/O: a burst of 8 transfers", (io_x + 40, -360, 0), root, beat(3))
     label("row hit: no activate needed", (cx(8) + 50, K.SEL_Y - 50, 0), root, beat(4))
     label("precharge: bit lines to VDD/2", (cx(2), cy(R0) + 150, 0), root, beat(5))

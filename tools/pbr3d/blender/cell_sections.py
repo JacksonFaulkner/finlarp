@@ -45,7 +45,7 @@ def wrap(root, name, intervals):
 
 
 def cap_label(root, text, b, u0=0.0, u1=1.0):
-    label(text, (SRC_X + 40, CAP_Y1 + 70, ZC), root, [(F(b, u0), F(b, u1))])
+    label(text, K.CAP_TAG, root, [(F(b, u0), F(b, u1))])
 
 
 # ---- 1. what happens ----------------------------------------------------------------------
@@ -59,7 +59,7 @@ def sec1():
     array = wrap(root, "array", [(F(2, 0), END)])
     cells = K.rows_of_cells(array, m, 3, 3, 520.0)
     for k, (g, pv) in enumerate(cells):
-        scale_keys(pv, [(0, (1, 1.0 if k % 2 == 0 else 0.02, 1))])
+        scale_keys(pv, [(0, (1, 1, 1.0 if k % 2 == 0 else 0.02))])
     cap_label(root, "a full capacitor reads as 1", 0)
     cap_label(root, "an empty capacitor reads as 0", 1)
     label("every cell holds its own bit", (0, 900, 0), root, [(F(2, 0), END)])
@@ -118,8 +118,8 @@ def sec3():
         (F(2, 0.60), (1, 1, 0.85)),
         (F(4, 0.60), (1, 1, 1.0)),
     ])
-    stream_of(root, "share", 6, (SRC_X, 600.0, ZC), K.PATH_CAP_TO_BL, 28, m["cyan_dot"], 2, 0.20, 0.60, 60)
-    stream_of(root, "restore", 6, (DRN_X, BL_Y, ZC), K.PATH_BL_TO_CAP, 28, m["violet_dot"], 4, 0.10, 0.60, 60)
+    stream_of(root, "share", 6, K.SHARE_START, K.PATH_CAP_TO_BL, 28, m["cyan_dot"], 2, 0.20, 0.60, 60)
+    stream_of(root, "restore", 6, K.RESTORE_START, K.PATH_BL_TO_CAP, 28, m["violet_dot"], 4, 0.10, 0.60, 60)
     label("precharge: the line sits at VDD/2", (1150, BL_Y + 210, ZC), root, [(F(0, 0), F(1, 0))])
     label("word line high: transistor on", (0, WL_Y + 190, ZC + 170), root, [(F(1, 0), F(2, 0))])
     label("charge sharing: a small move", (DRN_X, BL_Y + 130, ZC), root, [(F(2, 0), F(3, 0))])
@@ -146,7 +146,7 @@ def sweep_rows(root, m, t0, t1):
     """A row of cells with a pointer walking along z from t0 to t1, each row rewritten as it passes."""
     cells = K.rows_of_cells(root, m, 1, ROWS, PITCH)
     ptr = empty("pointer", root)
-    box("pointer_m", (-330, 820, -22), (330, 850, 22), m["pointer"], ptr)
+    box("pointer_m", (-200, 820, -110), (200, 850, 110), m["pointer"], ptr)
     key(ptr, t0, "location", P(0, 0, Z_LO), linear=True)
     key(ptr, t1, "location", P(0, 0, Z_HI), linear=True)
     for j, (g, pv) in enumerate(cells):
@@ -163,9 +163,9 @@ def sec4():
     label("each slice is read, rewritten", (0, 900, 150), root, [(F(1, 0), F(2, 0))])
     label("window closes, all rows done", (0, 900, 300), root, [(F(2, 0), F(3, 0))])
     camera(root, [
-        ((0.0, 400.0, -900.0), 4200.0, 0.55, 0.22),
-        ((0.0, 400.0, 0.0), 4400.0, 0.55, 0.22),
-        ((0.0, 400.0, 700.0), 4200.0, 0.55, 0.22),
+        ((0.0, 420.0, 0.0), 5200.0, 1.25, 0.24),
+        ((0.0, 420.0, 0.0), 5000.0, 1.25, 0.24),
+        ((0.0, 420.0, 0.0), 5200.0, 1.25, 0.24),
     ])
     finish("sec4", page="cell")
 
@@ -188,9 +188,9 @@ def sec5():
     label("each cell drains at its own rate", (0, 900, 0), root, [(F(1, 0), F(2, 0))])
     label("refresh arrives just in time", (0, 900, 0), root, [(F(2, 0), F(3, 0))])
     camera(root, [
-        ((0.0, 400.0, 0.0), 3400.0, 0.50, 0.14),
-        ((0.0, 400.0, 0.0), 3400.0, 0.50, 0.14),
-        ((0.0, 400.0, 0.0), 3400.0, 0.50, 0.14),
+        ((0.0, 400.0, 0.0), 2900.0, 1.20, 0.16),
+        ((0.0, 400.0, 0.0), 2900.0, 1.20, 0.16),
+        ((0.0, 400.0, 0.0), 2900.0, 1.20, 0.16),
     ])
     finish("sec5", page="cell")
 
@@ -214,14 +214,14 @@ def sec6():
     t6 = tiles(wrap(root, "six", [(F(0, 0), F(1, 0))]), m, 3, 2, 260.0, 30.0, m["charge"])
     t8 = tiles(wrap(root, "eight", [(F(1, 0), F(2, 0))]), m, 4, 2, 260.0, 30.0, m["cyan_dot"])
     grid = wrap(root, "grid", [(F(2, 0), END)])
-    tiles(grid, m, 16, 16, 30.0, 10.0, m["cap_out"])
+    tiles(grid, m, 16, 16, 30.0, 10.0, m["n_plus"])
     label("6F^2 with an open bit line", (0, 300, 300), root, [(F(0, 0), F(1, 0))])
     label("8F^2 with a folded bit line", (0, 300, 300), root, [(F(1, 0), F(2, 0))])
-    label("512 x 512 cells in one array", (0, 300, 300), root, [(F(2, 0), END)])
+    label("512 x 512 cells in one array", (0, 70, 330), root, [(F(2, 0), END)])
     camera(root, [
         ((0.0, 0.0, 0.0), 2600.0, 0.25, 0.55),
         ((0.0, 0.0, 0.0), 2800.0, 0.25, 0.55),
-        ((0.0, 0.0, 0.0), 6200.0, 0.25, 0.55),
+        ((0.0, 0.0, 0.0), 1700.0, 0.25, 0.55),
     ])
     finish("sec6", page="cell")
 
@@ -280,7 +280,7 @@ def sec8():
 def sec9():
     m, root = begin(9, 3)
     # beat 0: the refresh sweep on a meter of its time
-    meter, bar = K.gauge(root, m)
+    meter, bar = K.gauge(wrap(root, "meter_s0", [(F(0, 0), F(1, 0))]), m)
     scale_keys(bar, [(0, (1, 1, 0.05)), (F(0, 0.9), (1, 1, 1.0)), (F(2, 0.9), (1, 1, 1.0))])
     rows_grp = wrap(root, "rows_s0", [(F(0, 0), F(1, 0))])
     sweep_rows(rows_grp, m, F(0, 0), F(0, 0.9))
@@ -299,7 +299,7 @@ def sec9():
     camera(root, [
         ((0.0, 500.0, 0.0), 4800.0, 0.40, 0.20),
         ((0.0, 500.0, 0.0), 4400.0, 0.40, 0.20),
-        ((0.0, 500.0, 0.0), 3600.0, 0.40, 0.20),
+        ((0.0, 420.0, 0.0), 2700.0, 1.20, 0.18),
     ])
     finish("sec9", page="cell")
 
@@ -318,9 +318,9 @@ def sec10():
     ]
     for i, (c, text) in enumerate(cards):
         x, _, z = c
-        box(f"card{i}", (x - 600, 30, z - 380), (x + 600, 50, z + 380), m["paper"], root)
+        box(f"card{i}", (x - 600, 30, z - 380), (x + 600, 50, z + 380), m["grey"], root)
         lit = box(f"card{i}_lit", (x - 620, 50, z - 400), (x + 620, 60, z + 400), m["gold_glow"], root)
-        show(lit, [(F(i, 0.1), END)])
+        K.switch(lit, [(F(i, 0.1), END)])
         label(text, (x - 600, 70, z + 400), root, [(F(i, 0.1), F(i + 1, 0))])
     camera(root, [
         ((-800.0, 0.0, -400.0), 3200.0, 0.0, 0.95),

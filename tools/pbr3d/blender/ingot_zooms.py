@@ -37,12 +37,12 @@ def grind(root=None):
     tag(root, "rough skin, a little over size", (HALF * 0.3, A + RAW + 40, 60), F(0, 0.3), F(1, 0))
     tag(root, "the wheel takes the skin off", (-120, A + RAW + 330, 60), F(1, 0.3), F(2, 0))
     tag(root, "round body, 300 mm", (HALF * 0.5, A + R + 60, 60), F(2, 0.3), F(3, 0))
-    tag(root, "end face: +/- 0.2 mm", (HALF, A + R + 80, 60), F(3, 0.3), END)
+    tag(root, "end face: +/- 0.2 mm", (HALF, A + R + 30, 40), F(3, 0.3), END)
     camera(root, [
         ((0.0, A, 0.0), 1800.0, 0.5, 0.22),
-        ((0.0, A + 80, 0.0), 1700.0, 0.6, 0.2),
+        ((0.0, A + 140, 0.0), 1950.0, 0.6, 0.2),
         ((0.0, A + 60, 0.0), 1500.0, 0.8, 0.2),
-        ((HALF, A, 0.0), 900.0, math.pi / 2 - 0.25, 0.12),
+        ((HALF - 150, A + 30, 0.0), 1500.0, math.pi / 2 - 0.4, 0.15),
     ])
     finish("grind", page="ingot")
 
@@ -60,12 +60,12 @@ def notch(root=None):
     tube("direction", (16, A, 0), (16, A + R - 30, 0), 4, m["notch"], root, verts=8)
     tag(root, "V groove along the length", (HALF * 0.4, A + R + 140, 60), F(1, 0.3), F(2, 0))
     tag(root, "90 deg, 1.0 mm deep", (HALF * 0.5, A + R + 90, 60), F(2, 0.3), F(2, 0.9))
-    tag(root, "marks <110>", (-HALF * 0.1, A + R + 120, 60), F(3, 0.3), END)
+    tag(root, "marks <110>", (40, A + R + 40, 20), F(3, 0.3), END)
     camera(root, [
         ((0.0, A, 0.0), 1800.0, 0.5, 0.22),
         ((0.0, A, 0.0), 1700.0, 0.8, 0.2),
-        ((0.0, A, 0.0), 1000.0, math.pi / 2, 0.02),
-        ((0.0, A, 0.0), 700.0, math.pi / 2, 0.04),
+        ((0.0, A + R - 60, 0.0), 1400.0, math.pi / 2 - 0.4, 0.3),
+        ((0.0, A + 20, 0.0), 900.0, math.pi / 2, 0.04),
     ])
     finish("notch", page="ingot")
 
@@ -97,10 +97,10 @@ def saw(root=None):
     tag(root, "each wire leaves a wafer", (0, A - 300, 0), F(2, 0.3), F(3, 0))
     tag(root, "kerf between wafers", (HALF * 0.4, A + RAW + 230, 0), F(3, 0.3), END)
     camera(root, [
-        ((0.0, A, 0.0), 2600.0, 0.6, 0.25),
-        ((0.0, A - 60, 0.0), 2500.0, 0.6, 0.25),
-        ((0.0, A - 40, 0.0), 2400.0, 0.7, 0.25),
-        ((0.0, A - 40, 0.0), 2600.0, 0.7, 0.25),
+        ((0.0, A + 80, 0.0), 2600.0, 0.6, 0.45),
+        ((0.0, A + 40, 0.0), 2500.0, 0.6, 0.45),
+        ((0.0, A, 0.0), 2300.0, 0.7, 0.55),
+        ((0.0, A, 0.0), 2400.0, 0.7, 0.55),
     ])
     finish("saw", page="ingot")
 
