@@ -43,7 +43,8 @@ enum Role {
     Error,
 }
 
-enum Ev {
+/// What one line of `claude -p --output-format stream-json` says.
+pub(super) enum Ev {
     Session(String),
     /// A new assistant message began (after a tool call or a fresh turn).
     Message,
@@ -132,7 +133,7 @@ fn find_tickers(s: &str, known: &HashSet<String>) -> Vec<String> {
 }
 
 /// Maps one stream-json line to the events the UI cares about.
-fn parse_line(line: &str) -> Vec<Ev> {
+pub(super) fn parse_line(line: &str) -> Vec<Ev> {
     let Ok(v) = serde_json::from_str::<serde_json::Value>(line) else {
         return Vec::new();
     };

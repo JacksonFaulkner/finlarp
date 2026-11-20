@@ -69,6 +69,12 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         'b',
     ),
     ("Intraday", "intraday", "2x2 live candle tapes", 'i'),
+    (
+        "Breadth",
+        "breadth",
+        "SOXX QQQ SPY DRAM NVDA: all up at once?",
+        'B',
+    ),
     ("Filings", "filings", "EDGAR 8-K and 6-K filing search", 'f'),
     (
         "Notes",
@@ -130,6 +136,18 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "video",
         "play docs screen recordings in the terminal",
         'V',
+    ),
+    (
+        "Scratch",
+        "scratch",
+        "one-off research pad: term -> tickers -> dig in",
+        'y',
+    ),
+    (
+        "Figgie",
+        "figgie",
+        "Jane Street's card game: trade four suits against 3 bots",
+        'F',
     ),
     ("Keys", "keys", "command and key reference", '?'),
 ];

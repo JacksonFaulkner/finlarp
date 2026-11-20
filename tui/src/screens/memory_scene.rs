@@ -7,6 +7,8 @@
 use std::time::{Duration, Instant};
 
 use image::{DynamicImage, RgbaImage, imageops};
+use pbr3d::math::V3;
+use pbr3d::scene_gltf::Scene;
 use ratatui::Frame;
 use ratatui::layout::Rect;
 use ratatui_image::picker::cap_parser::QueryStdioOptions;
@@ -14,6 +16,7 @@ use ratatui_image::picker::{Capability, Picker, ProtocolType};
 use ratatui_image::protocol::kitty::StatefulKitty;
 use ratatui_image::protocol::{StatefulProtocol, StatefulProtocolType};
 use ratatui_image::{Resize, StatefulImage};
+use serde::Deserialize;
 
 use crate::ui::anim::Player;
 
@@ -38,6 +41,11 @@ enum Source {
 
 /// Custom memory-page scenes (tools/pbr3d/blender/mem_*.py) are 3 beats of 8 s.
 pub const GLB_LOOP_SECS: f32 = 24.0;
+
+/// How long a flight to a map site (or back to the overview) takes.
+pub const FLIGHT: Duration = Duration::from_millis(1600);
+/// The camera over a site: this far above the land (degrees of the view's elevation).
+const SITE_PITCH: f32 = 0.9;
 
 /// Where custom scenes live; read at runtime so new scenes need no rebuild.
 fn glb_path(name: &str) -> std::path::PathBuf {
@@ -73,9 +81,166 @@ pub fn glb_frame(scene: &pbr3d::scene_gltf::Scene, secs: f32, w: u32, h: u32) ->
     img
 }
 
+/// A camera: eye and look-at target.
+type View = (V3, V3);
+
+/// One site of an interactive map: its text from `<scene>.sites.json`, its place in the scene.
+#[derive(Debug, Clone, Deserialize)]
+pub struct SiteText {
+    pub id: String,
+    pub name: String,
+    pub text: String,
+    pub src: String,
+    /// The camera's distance from the site when flown to, in scene units.
+    pub dist: f32,
+}
+
+#[derive(Deserialize)]
+struct SiteFile {
+    sites: Vec<SiteText>,
+}
+
+struct MapSite {
+    text: SiteText,
+    pos: V3,
+}
+
+/// An interactive map scene: the sites, which one is selected, and the camera. The camera holds
+/// the overview until a flight to the selected site (Enter) or back home (o) ends.
+struct Map {
+    sites: Vec<MapSite>,
+    overview: View,
+    selected: usize,
+    /// The site the camera is heading to; None is the overview.
+    goal: Option<usize>,
+    /// The view a flight started from, and when it started.
+    flight: Option<(View, Instant)>,
+    /// The view drawn last, the start of the next flight.
+    shown: Option<View>,
+}
+
+/// What the caption under an interactive map shows.
+pub struct MapCaption<'a> {
+    /// 0-based index of the selected site, and how many there are.
+    pub index: usize,
+    pub count: usize,
+    pub site: &'a SiteText,
+    /// The camera is on this site (or is flying there).
+    pub here: bool,
+    pub flying: bool,
+}
+
+impl Map {
+    /// The map for scene `name` (a `mem/` GLB): sites from its `.sites.json` sidecar, placed by
+    /// the scene's `site:<id>` empties. None when there is no sidecar or no site matches.
+    fn load(name: &str, scene: &Scene) -> Option<Map> {
+        let path = glb_path(name).with_extension("sites.json");
+        let file: SiteFile = serde_json::from_slice(&std::fs::read(path).ok()?).ok()?;
+        let at = scene.sites(0.0);
+        let sites: Vec<MapSite> = file
+            .sites
+            .into_iter()
+            .filter_map(|text| {
+                let pos = at.iter().find(|(id, _)| *id == text.id)?.1;
+                Some(MapSite { text, pos })
+            })
+            .collect();
+        if sites.is_empty() {
+            return None;
+        }
+        let overview = scene
+            .camera(0.0)
+            .unwrap_or(([0.0, 500.0, 3000.0], [0.0, 0.0, 0.0]));
+        Some(Map {
+            sites,
+            overview,
+            selected: 0,
+            goal: None,
+            flight: None,
+            shown: None,
+        })
+    }
+
+    /// The camera over a site: `dist` away, SITE_PITCH above the land, looking at the site.
+    fn site_view(site: &MapSite) -> View {
+        let target = [site.pos[0], site.pos[1] + 4.0, site.pos[2]];
+        let (d, cp, sp) = (site.text.dist, SITE_PITCH.cos(), SITE_PITCH.sin());
+        ([target[0], target[1] + d * sp, target[2] + d * cp], target)
+    }
+
+    fn goal_view(&self) -> View {
+        match self.goal {
+            Some(i) => Self::site_view(&self.sites[i]),
+            None => self.overview,
+        }
+    }
+
+    /// The view to draw now: the goal, or part of the way there during a flight.
+    fn view(&mut self) -> View {
+        let goal = self.goal_view();
+        let view = match self.flight {
+            Some((from, start)) => {
+                let u = (start.elapsed().as_secs_f32() / FLIGHT.as_secs_f32()).min(1.0);
+                if u >= 1.0 {
+                    self.flight = None;
+                    goal
+                } else {
+                    let e = u * u * (3.0 - 2.0 * u);
+                    (lerp(from.0, goal.0, e), lerp(from.1, goal.1, e))
+                }
+            }
+            None => goal,
+        };
+        self.shown = Some(view);
+        view
+    }
+
+    /// Head for `goal` (a site, or None for the overview) from wherever the camera is now.
+    fn go(&mut self, goal: Option<usize>) {
+        if self.goal == goal {
+            return;
+        }
+        self.flight = Some((self.shown.unwrap_or(self.overview), Instant::now()));
+        self.goal = goal;
+    }
+
+    /// The selected site's name, pinned in the picture at the site.
+    fn tag(&self) -> (String, V3) {
+        let s = &self.sites[self.selected];
+        (s.text.name.clone(), s.pos)
+    }
+}
+
+fn lerp(a: V3, b: V3, t: f32) -> V3 {
+    [
+        a[0] + (b[0] - a[0]) * t,
+        a[1] + (b[1] - a[1]) * t,
+        a[2] + (b[2] - a[2]) * t,
+    ]
+}
+
+/// A map frame at `secs` from `view`, with the selected site's name pinned on it.
+fn map_frame(scene: &Scene, secs: f32, view: View, tag: (String, V3), w: u32, h: u32) -> RgbaImage {
+    let mut img = pbr3d::scene_gltf::render_view(
+        scene,
+        secs,
+        Some(view),
+        w,
+        h,
+        crate::screens::diagrams_px::BG,
+    );
+    let (text, p) = tag;
+    if let Some((x, y)) = pbr3d::scene_gltf::project_view(scene, secs, Some(view), w, h, p) {
+        pbr3d::caption::Tags::new().add(&mut img, x, y, &text, w, h);
+    }
+    img
+}
+
 struct Slot {
     page: String,
     source: Source,
+    /// Set for a map scene (its GLB has `site:` empties and a sites sidecar).
+    map: Option<Map>,
     start: Instant,
     proto: Option<StatefulProtocol>,
     sent: Option<Instant>,
@@ -125,14 +290,20 @@ impl MemoryScene {
         self.slot = page.and_then(|p| {
             let start = Instant::now();
             // "mem/<company>_<tab>" = a custom scene; anything else is a diagrams node
-            let source = if p.starts_with("mem/") {
-                Source::Glb(load_glb(p)?)
+            let (source, map) = if p.starts_with("mem/") {
+                let scene = load_glb(p)?;
+                let map = Map::load(p, &scene);
+                (Source::Glb(scene), map)
             } else {
-                Source::Node(Player::new(super::diagrams_nodes::overview(p)?, start))
+                (
+                    Source::Node(Player::new(super::diagrams_nodes::overview(p)?, start)),
+                    None,
+                )
             };
             Some(Slot {
                 page: p.to_string(),
                 source,
+                map,
                 start,
                 proto: None,
                 sent: None,
@@ -140,6 +311,50 @@ impl MemoryScene {
                 frames: 0,
             })
         });
+    }
+
+    fn map_mut(&mut self) -> Option<&mut Map> {
+        self.slot.as_mut()?.map.as_mut()
+    }
+
+    /// Whether the page is an interactive map (its keys are the map's: [ ] o and Enter).
+    pub fn is_map(&self) -> bool {
+        self.slot.as_ref().is_some_and(|s| s.map.is_some())
+    }
+
+    /// Select the site `delta` along from the current one (wrapping). Does not fly.
+    pub fn map_step(&mut self, delta: isize) {
+        if let Some(m) = self.map_mut() {
+            let n = m.sites.len() as isize;
+            m.selected = (m.selected as isize + delta).rem_euclid(n) as usize;
+        }
+    }
+
+    /// Fly the camera to the selected site.
+    pub fn map_fly(&mut self) {
+        if let Some(m) = self.map_mut() {
+            let i = m.selected;
+            m.go(Some(i));
+        }
+    }
+
+    /// Fly the camera back to the overview of the whole map.
+    pub fn map_home(&mut self) {
+        if let Some(m) = self.map_mut() {
+            m.go(None);
+        }
+    }
+
+    /// The caption for the selected site, when the page is a map.
+    pub fn map_caption(&self) -> Option<MapCaption<'_>> {
+        let m = self.slot.as_ref()?.map.as_ref()?;
+        Some(MapCaption {
+            index: m.selected,
+            count: m.sites.len(),
+            site: &m.sites[m.selected].text,
+            here: m.goal == Some(m.selected),
+            flying: m.flight.is_some(),
+        })
     }
 
     /// How often frames are rendered and sent: slower inside tmux.
@@ -166,8 +381,15 @@ impl MemoryScene {
             return;
         }
         let font = picker.font_size();
-        let px = (area.width as u32 * font.width as u32, area.height as u32 * font.height as u32);
-        let every = if picker.tmux_detected() { FRAME_TMUX } else { FRAME };
+        let px = (
+            area.width as u32 * font.width as u32,
+            area.height as u32 * font.height as u32,
+        );
+        let every = if picker.tmux_detected() {
+            FRAME_TMUX
+        } else {
+            FRAME
+        };
         let due = slot.sent.is_none_or(|t| t.elapsed() >= every) || slot.px != px;
         if due {
             let img = match &slot.source {
@@ -177,7 +399,14 @@ impl MemoryScene {
                 }
                 Source::Glb(scene) => {
                     let secs = slot.start.elapsed().as_secs_f32() % GLB_LOOP_SECS;
-                    Some(glb_frame(scene, secs, px.0.max(1), px.1.max(1)))
+                    let (w, h) = (px.0.max(1), px.1.max(1));
+                    match slot.map.as_mut() {
+                        Some(map) => {
+                            let view = map.view();
+                            Some(map_frame(scene, secs, view, map.tag(), w, h))
+                        }
+                        None => Some(glb_frame(scene, secs, w, h)),
+                    }
                 }
             };
             if let Some(img) = img {
@@ -189,14 +418,22 @@ impl MemoryScene {
             }
         }
         if let Some(p) = slot.proto.as_mut() {
-            frame.render_stateful_widget(StatefulImage::default().resize(Resize::Fit(None)), area, p);
+            frame.render_stateful_widget(
+                StatefulImage::default().resize(Resize::Fit(None)),
+                area,
+                p,
+            );
         }
     }
 }
 
 /// The scene's 3D part at `px`: the page frame is rendered so its scene width (the frame minus
 /// the caption panel) is px.0, then the panel is cropped off.
-pub fn scene_frame(player: &Player, t: &crate::ui::anim::Time, px: (u32, u32)) -> Option<RgbaImage> {
+pub fn scene_frame(
+    player: &Player,
+    t: &crate::ui::anim::Time,
+    px: (u32, u32),
+) -> Option<RgbaImage> {
     let (w, h) = (px.0.max(1), px.1.max(1));
     let full_w = ((w as f32) / (1.0 - pbr3d::caption::PANEL_FRAC)).ceil() as u32;
     let mut img = player.pixels(t, full_w, h)?;
@@ -231,16 +468,30 @@ mod tests {
     /// overview, and its 3D part renders at the slot size with the caption panel cropped off.
     #[test]
     fn every_page_scene_renders_cropped() {
-        for page in ["HBM STACK", "CELL", "BANK", "ARRAY", "BANDWIDTH", "WAFER", "LITHO", "ASSEMBLY"] {
+        for page in [
+            "HBM STACK",
+            "CELL",
+            "BANK",
+            "ARRAY",
+            "BANDWIDTH",
+            "WAFER",
+            "LITHO",
+            "ASSEMBLY",
+        ] {
             let scene = crate::screens::diagrams_nodes::overview(page)
                 .unwrap_or_else(|| panic!("{page}: no Blender overview"));
             let player = Player::new(scene, Instant::now());
             let t = player.time_at(1500);
             let img = scene_frame(&player, &t, (480, 240)).expect("a picture scene");
             assert_eq!(img.height(), 240, "{page}");
-            assert!((478..=482).contains(&img.width()), "{page}: 3D part only, width {}", img.width());
+            assert!(
+                (478..=482).contains(&img.width()),
+                "{page}: 3D part only, width {}",
+                img.width()
+            );
             if let Ok(dir) = std::env::var("FL_SCENE_DIR") {
-                img.save(format!("{dir}/{}.png", page.replace(' ', "_"))).unwrap();
+                img.save(format!("{dir}/{}.png", page.replace(' ', "_")))
+                    .unwrap();
             }
         }
     }
@@ -250,10 +501,12 @@ mod tests {
     /// writes <dir>/<name>_b<beat>_<t>.png for each beat at 0.2 / 0.5 / 0.85 and a sheet.png.
     #[test]
     fn mem_glb_dump() {
-        let (Ok(name), Ok(dir)) = (std::env::var("FL_MEM_GLB"), std::env::var("FL_SCENE_DIR")) else {
+        let (Ok(name), Ok(dir)) = (std::env::var("FL_MEM_GLB"), std::env::var("FL_SCENE_DIR"))
+        else {
             return;
         };
-        let scene = load_glb(&name).unwrap_or_else(|| panic!("{name}: no GLB at {:?}", glb_path(&name)));
+        let scene =
+            load_glb(&name).unwrap_or_else(|| panic!("{name}: no GLB at {:?}", glb_path(&name)));
         let (w, h) = (1140, 380);
         let mut sheet = RgbaImage::new(w * 3, h * 3);
         let stem = name.trim_start_matches("mem/");
@@ -285,7 +538,8 @@ mod tests {
             for s in doc["sections"].as_array().unwrap() {
                 let name = s["scene"].as_str().unwrap_or("");
                 if let Some(rest) = name.strip_prefix("mem/") {
-                    let scene = load_glb(name).unwrap_or_else(|| panic!("{rest}: GLB missing or invalid"));
+                    let scene =
+                        load_glb(name).unwrap_or_else(|| panic!("{rest}: GLB missing or invalid"));
                     let img = glb_frame(&scene, 12.0, 240, 80);
                     assert_eq!(img.dimensions(), (240, 80), "{rest}");
                     n += 1;
@@ -295,6 +549,108 @@ mod tests {
         assert!(n >= 60, "custom scenes found: {n}");
     }
 
+    /// The fabs map of SK hynix: every site in the sidecar is placed by a `site:` empty.
+    #[test]
+    fn fabs_map_places_every_site() {
+        let mut s = MemoryScene::default();
+        s.set_page(Some("mem/sk_hynix_fabs"));
+        assert!(s.is_map());
+        let c = s.map_caption().expect("a map caption");
+        assert_eq!(c.count, 11);
+        assert_eq!(c.index, 0);
+        assert!(!c.here && !c.flying, "starts at the overview");
+        for site in s.slot.as_ref().unwrap().map.as_ref().unwrap().sites.iter() {
+            assert!(
+                site.text.dist > 40.0,
+                "{}: flight distance past the near plane",
+                site.text.id
+            );
+            assert!(
+                !site.text.text.is_empty() && !site.text.src.is_empty(),
+                "{}",
+                site.text.id
+            );
+        }
+    }
+
+    #[test]
+    fn map_keys_step_wrap_and_fly() {
+        let mut s = MemoryScene::default();
+        s.set_page(Some("mem/sk_hynix_fabs"));
+        s.map_step(-1);
+        assert_eq!(
+            s.map_caption().unwrap().index,
+            10,
+            "wraps back to the last site"
+        );
+        s.map_step(1);
+        assert_eq!(s.map_caption().unwrap().index, 0);
+        s.map_step(1);
+        s.map_fly();
+        let c = s.map_caption().unwrap();
+        assert!(c.here && c.flying, "Enter heads for the selected site");
+        assert_eq!(c.index, 1);
+        s.map_home();
+        assert!(!s.map_caption().unwrap().here, "o heads home");
+    }
+
+    /// A finished flight sits exactly on its goal, and the overview is the scene's own camera.
+    #[test]
+    fn map_flight_lands_on_its_goal() {
+        let mut s = MemoryScene::default();
+        s.set_page(Some("mem/sk_hynix_fabs"));
+        s.map_step(2);
+        s.map_fly();
+        let m = s.map_mut().unwrap();
+        m.flight = m
+            .flight
+            .map(|(from, _)| (from, Instant::now() - FLIGHT * 2));
+        let v = m.view();
+        assert!(m.flight.is_none());
+        assert_eq!(v, Map::site_view(&m.sites[2]));
+        s.map_home();
+        let m = s.map_mut().unwrap();
+        m.flight = m
+            .flight
+            .map(|(from, _)| (from, Instant::now() - FLIGHT * 2));
+        assert_eq!(m.view(), m.overview);
+    }
+
+    /// `FL_MAP_DUMP=<dir> cargo test --release fabs_map_dump`: the overview and each site's flight
+    /// end, drawn at the slot size, as <dir>/map_<id>.png for a visual check.
+    #[test]
+    fn fabs_map_dump() {
+        let Ok(dir) = std::env::var("FL_MAP_DUMP") else {
+            return;
+        };
+        let scene = load_glb("mem/sk_hynix_fabs").expect("fabs map GLB");
+        let map = Map::load("mem/sk_hynix_fabs", &scene).expect("fabs map sites");
+        let (w, h) = (1140, 380);
+        let mut views = vec![("overview".to_string(), map.overview, None)];
+        for (i, site) in map.sites.iter().enumerate() {
+            views.push((site.text.id.clone(), Map::site_view(site), Some(i)));
+        }
+        for (name, view, sel) in views {
+            let tag = match sel {
+                Some(i) => (map.sites[i].text.name.clone(), map.sites[i].pos),
+                None => ("".to_string(), [0.0, 0.0, 0.0]),
+            };
+            let img = if sel.is_some() {
+                map_frame(&scene, 0.0, view, tag, w, h)
+            } else {
+                pbr3d::scene_gltf::render_view(
+                    &scene,
+                    0.0,
+                    Some(view),
+                    w,
+                    h,
+                    crate::screens::diagrams_px::BG,
+                )
+            };
+            img.save(format!("{dir}/map_{name}.png")).unwrap();
+        }
+    }
+
     #[test]
     fn set_page_ignores_unknown_nodes() {
         let mut s = MemoryScene::default();
@@ -302,6 +658,9 @@ mod tests {
         assert!(s.page().is_none());
         s.set_page(Some("HBM STACK"));
         assert_eq!(s.page(), Some("HBM STACK"));
-        assert!(!s.playing(), "no picker in tests = no picture, page still shows data");
+        assert!(
+            !s.playing(),
+            "no picker in tests = no picture, page still shows data"
+        );
     }
 }

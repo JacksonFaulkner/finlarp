@@ -52,6 +52,16 @@ const NAV_KEYS: &[Key] = &[
     key("?", "help"),
     key("q", "quit"),
 ];
+/// Footer on an interactive map section: the map's keys replace the source ones for Enter.
+const MAP_FOOTER_KEYS: &[Key] = &[
+    key("[ ]", "site"),
+    key("↵", "fly"),
+    key("o", "overview"),
+    key("v", "doc"),
+    key("y", "copy"),
+    key("J/K", "section"),
+    key("?", "help"),
+];
 const FOOTER_KEYS: &[Key] = &[
     key("J/K", "section"),
     key("↵", "browser"),
@@ -159,7 +169,10 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
     }
     if let Some(ticker) = symbol.strip_prefix("MEM:") {
         // memory pages rebuild from data/memory_facts in well under a second
-        d.refresh = Some(crate::pyrun::spawn_script("py/derive/memory_page.py", &[ticker]));
+        d.refresh = Some(crate::pyrun::spawn_script(
+            "py/derive/memory_page.py",
+            &[ticker],
+        ));
         d.flash = Some("refreshing…".into());
     } else if !symbol.is_empty() {
         // --if-stale: the script skips the rebuild when the cache is current.
@@ -272,6 +285,39 @@ impl Dossier {
                 .sections
                 .get(self.selected())
                 .is_some_and(|s| GRID_SECTIONS.contains(&s.id.as_str()))
+    }
+
+    /// The caption under an interactive map: the selected site, its text and source, the keys.
+    fn draw_map_caption(&self, frame: &mut Frame, area: Rect) {
+        let Some(c) = self.scene.map_caption() else {
+            return;
+        };
+        let t = &self.theme;
+        let state = if c.flying {
+            "flying"
+        } else if c.here {
+            "at site"
+        } else {
+            "↵ fly"
+        };
+        let lines = vec![
+            Line::from(vec![
+                Span::styled(format!(" {} ", c.site.name), t.selected()),
+                Span::styled(format!(" {}/{}", c.index + 1, c.count), t.dim()),
+            ]),
+            Line::from(Span::styled(format!(" {}", c.site.text), t.base())),
+            Line::from(Span::styled(format!(" {}", c.site.src), t.dim())),
+            Line::from(Span::styled(
+                format!(" [ ] site · ↵ fly · o overview · {state}"),
+                t.accent(),
+            )),
+        ];
+        frame.render_widget(
+            Paragraph::new(lines)
+                .style(t.base())
+                .wrap(Wrap { trim: true }),
+            area,
+        );
     }
 
     fn selected_source(&self) -> Option<&Source> {
@@ -473,6 +519,14 @@ impl Screen for Dossier {
         } else {
             p.detail
         };
+        let detail = if self.scene.playing() && self.scene.is_map() && detail.height >= 10 {
+            let [caption, body] =
+                Layout::vertical([Constraint::Length(5), Constraint::Min(4)]).areas(detail);
+            self.draw_map_caption(frame, caption);
+            body
+        } else {
+            detail
+        };
         if p.nav.width == 0 && self.focus == Focus::Nav {
             self.nav.render(frame, p.detail, sections, &theme, true);
         } else if grid {
@@ -492,7 +546,12 @@ impl Screen for Dossier {
                 })
             }),
         };
-        help::render_footer(frame, p.footer, FOOTER_KEYS, status.as_deref(), &theme);
+        let footer = if self.scene.is_map() {
+            MAP_FOOTER_KEYS
+        } else {
+            FOOTER_KEYS
+        };
+        help::render_footer(frame, p.footer, footer, status.as_deref(), &theme);
         if self.inspector.is_open() {
             self.inspector.render(frame, area, &theme);
         }
@@ -556,6 +615,11 @@ impl Screen for Dossier {
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
             KeyCode::Char('?') => self.help = true,
+            // An interactive map (Capex & fabs): [ ] pick a site, Enter flies to it, o goes home.
+            KeyCode::Char('[') if self.scene.is_map() => self.scene.map_step(-1),
+            KeyCode::Char(']') if self.scene.is_map() => self.scene.map_step(1),
+            KeyCode::Char('o') if self.scene.is_map() => self.scene.map_home(),
+            KeyCode::Enter if self.scene.is_map() => self.scene.map_fly(),
             KeyCode::Char('a') => self.toggle_audit(),
             KeyCode::Char('J') => self.select_section(self.selected() + 1),
             KeyCode::Char('K') => self.select_section(self.selected().saturating_sub(1)),
@@ -992,7 +1056,11 @@ mod tests {
             for s in &d.sections {
                 assert!(s.title != "Latest", "{t}");
                 assert!(!s.blocks.is_empty(), "{t}: tab {} has data", s.title);
-                assert!(s.title.chars().count() <= 20, "{t}: tab title {:?} fits the nav", s.title);
+                assert!(
+                    s.title.chars().count() <= 20,
+                    "{t}: tab title {:?} fits the nav",
+                    s.title
+                );
             }
             // draws at a normal terminal size without panicking
             let mut d = d;
