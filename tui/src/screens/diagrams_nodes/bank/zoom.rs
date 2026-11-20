@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/bank_zooms.py: a one bank and its row buffer, b bank groups and tCCD,
 // c the four-activate window, d address mapping, e refresh (all-bank vs same-bank). Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const ONE_BEATS: &[Beat] = &[
@@ -207,23 +207,43 @@ static MAP: Cell = std::sync::OnceLock::new();
 static REFRESH: Cell = std::sync::OnceLock::new();
 
 pub fn one() -> Box<dyn Scene> {
-    page(&ONE, include_bytes!("../../../../../tools/pbr3d/assets/bank_one.glb"), ONE_BEATS)
+    page(
+        &ONE,
+        include_bytes!("../../../../../tools/pbr3d/assets/bank_one.glb"),
+        ONE_BEATS,
+    )
 }
 
 pub fn groups() -> Box<dyn Scene> {
-    page(&GROUPS, include_bytes!("../../../../../tools/pbr3d/assets/bank_groups.glb"), GROUPS_BEATS)
+    page(
+        &GROUPS,
+        include_bytes!("../../../../../tools/pbr3d/assets/bank_groups.glb"),
+        GROUPS_BEATS,
+    )
 }
 
 pub fn faw() -> Box<dyn Scene> {
-    page(&FAW, include_bytes!("../../../../../tools/pbr3d/assets/bank_faw.glb"), FAW_BEATS)
+    page(
+        &FAW,
+        include_bytes!("../../../../../tools/pbr3d/assets/bank_faw.glb"),
+        FAW_BEATS,
+    )
 }
 
 pub fn map() -> Box<dyn Scene> {
-    page(&MAP, include_bytes!("../../../../../tools/pbr3d/assets/bank_map.glb"), MAP_BEATS)
+    page(
+        &MAP,
+        include_bytes!("../../../../../tools/pbr3d/assets/bank_map.glb"),
+        MAP_BEATS,
+    )
 }
 
 pub fn refresh() -> Box<dyn Scene> {
-    page(&REFRESH, include_bytes!("../../../../../tools/pbr3d/assets/bank_refresh.glb"), REFRESH_BEATS)
+    page(
+        &REFRESH,
+        include_bytes!("../../../../../tools/pbr3d/assets/bank_refresh.glb"),
+        REFRESH_BEATS,
+    )
 }
 
 #[cfg(test)]

@@ -3,7 +3,7 @@
 // 4 timing rules, 5 conflicts, 6 numbers, 7 refresh, 8 makers, 9 risks, 10 sources. Beats per
 // section: 3, 5, 5, 3, 3, 3, 3, 3, 3, 3.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[

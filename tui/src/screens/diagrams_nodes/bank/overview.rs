@@ -8,7 +8,7 @@
 // Sources: DDR4-3200 module SPD values (tRRD, tCCD, tFAW); Micron DDR5 white paper; arXiv 1607.08578
 // and 1509.03721 (address interleaving); PCPer (DDR4 refresh locks the rank).
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
