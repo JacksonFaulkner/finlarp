@@ -22,6 +22,7 @@ mod db;
 mod mock;
 mod model;
 mod pyrun;
+mod remote;
 mod screens;
 mod tmux_title;
 mod ui;
@@ -57,6 +58,7 @@ const SCREENS: &[&str] = &[
     "chat",
     "candles",
     "intraday",
+    "breadth",
     "godel",
     "menu",
     "notes",
@@ -71,6 +73,8 @@ const SCREENS: &[&str] = &[
     "claude_log",
     "keys",
     "video",
+    "scratch",
+    "figgie",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -122,7 +126,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|filings|universe|diagrams|events|chat|candles|intraday|godel|menu|notes|sources] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|filings|universe|diagrams|events|chat|candles|intraday|breadth|godel|menu|notes|sources] [arg]";
 
 /// Finlarp's data directory: the repo's `data/` folder, or `FINLARP_DATA`.
 /// The Python side resolves the same directory from its own location.
@@ -155,8 +159,10 @@ fn build_screen(
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
         candles, canslim, chart, chat, claude_history, claude_log, diagrams, docview, dossier,
-        earnings_report, events, filings, godel, home, intraday, keys, menu, note, notes, onboard,
-        pick, portfolio, rebuild, rows, search, sources, transactions, universe, video, watchlists,
+        earnings_report, events, figgie, filings, godel, home, intraday, keys, menu, note, notes,
+        onboard,
+        pick, portfolio, rebuild, rows, scratch, search, sources, transactions, universe, video,
+        watchlists,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -172,6 +178,7 @@ fn build_screen(
         ("menu", _) => Box::new(menu::open(ctx, arg)?),
         ("godel", _) => Box::new(godel::open(ctx, arg)?),
         ("intraday", _) => Box::new(intraday::open(ctx, arg)?),
+        ("breadth", _) => Box::new(intraday::breadth::open(ctx, arg)?),
         ("home", _) => Box::new(home::open(ctx)?),
         ("portfolio", _) => Box::new(portfolio::open(ctx, arg)?),
         ("earnings", _) => Box::new(earnings_report::open(ctx, arg)?),
@@ -191,6 +198,8 @@ fn build_screen(
         ("claude_history", _) => Box::new(claude_history::open(ctx, arg)?),
         ("claude_log", _) => Box::new(claude_log::open(ctx, arg)?),
         ("keys", _) => Box::new(keys::open(ctx, arg)?),
+        ("scratch", _) => Box::new(scratch::open(ctx, arg)?),
+        ("figgie", _) => Box::new(figgie::open(ctx, arg)?),
         // Reached only through Route::Rebuild (`<space>wq`), not the CLI.
         ("rebuild", _) => Box::new(rebuild::open(ctx, arg)?),
         _ => Box::new(chart::open(ctx, arg)?),
@@ -372,7 +381,12 @@ fn main() {
             cli.fg_down.as_deref(),
         ),
     };
-    match run_session(&ctx, &cli.screen, cli.arg) {
+    // In-place control: another process can move this screen (remote.rs). Failure to listen
+    // only costs that feature, so it is not fatal.
+    let _ = remote::start(SCREENS);
+    let ended = run_session(&ctx, &cli.screen, cli.arg);
+    remote::stop();
+    match ended {
         Ok(End::Code(code)) => std::process::exit(code),
         Ok(End::Restart { screen, arg }) => {
             let e = exec_rebuilt(&args, &screen, arg.as_deref());

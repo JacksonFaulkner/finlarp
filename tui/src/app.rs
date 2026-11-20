@@ -127,6 +127,19 @@ pub trait Screen {
     fn ask_claude(&mut self) -> bool {
         false
     }
+    /// A tool call from outside (remote.rs), answered on `reply`. Screens that take
+    /// none refuse it.
+    fn remote_tool(
+        &mut self,
+        tool: String,
+        _args: serde_json::Value,
+        reply: std::sync::mpsc::Sender<serde_json::Value>,
+    ) {
+        let _ = reply.send(serde_json::json!({
+            "ok": false,
+            "error": format!("this screen takes no tools ({tool}); open diagrams first"),
+        }));
+    }
 }
 
 /// Every leader chord as (keys after space, what it does), in the order
@@ -355,7 +368,17 @@ pub(crate) fn event_loop<B: Backend>(
                 .map_err(|e| io::Error::other(e.to_string()))?;
             dirty = false;
         }
-        let mut action = screen.tick();
+        // A request from outside (remote.rs): a route pushes a screen like a key would;
+        // a tool call goes to the open screen, which answers it in place.
+        let mut action = match crate::remote::next() {
+            Some(crate::remote::Remote::Route(route)) => Action::Route(route),
+            Some(crate::remote::Remote::Tool { tool, args, reply }) => {
+                screen.remote_tool(tool, args, reply);
+                dirty = true;
+                Action::None
+            }
+            None => screen.tick(),
+        };
         if action == Action::None {
             match events.next(screen.poll_interval())? {
                 Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
