@@ -7,7 +7,7 @@
 // Sources: JEDEC JESD238 (HBM3, 6.4 Gb/s, 819 GB/s per device); Micron GDDR6 flyer (32 DQ, 16 Gb/s);
 // Micron GDDR6X PAM4 brief; Micron DDR5 modules; Gholami et al., AI and Memory Wall (arXiv 2403.14123).
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 

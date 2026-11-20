@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/bandwidth_sections.py. Beat counts: 4, 5, 5, 4, 3, 3, 3, 3, 4, 3. Section 10
 // is the sources page.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[
@@ -325,7 +325,10 @@ const SEC8: &[Beat] = &[
         )
         .detail(
             "Market share is covered on the market pages.",
-            &["DRAM, GDDR and HBM are made by Micron (MU) (section 8)", "Market share is on the market pages (section 8)"],
+            &[
+                "DRAM, GDDR and HBM are made by Micron (MU) (section 8)",
+                "Market share is on the market pages (section 8)",
+            ],
         ),
     Beat::new("SK hynix (000660.KS)", BEAT_MS)
         .note(
@@ -334,7 +337,10 @@ const SEC8: &[Beat] = &[
         )
         .detail(
             "The ticker is the Korean listing.",
-            &["SK hynix (000660.KS) (section 8)", "Market share is on the market pages (section 8)"],
+            &[
+                "SK hynix (000660.KS) (section 8)",
+                "Market share is on the market pages (section 8)",
+            ],
         ),
     Beat::new("Samsung (005930.KS)", BEAT_MS)
         .note(
@@ -343,7 +349,10 @@ const SEC8: &[Beat] = &[
         )
         .detail(
             "Three makers make the DRAM, GDDR and HBM on this page.",
-            &["Samsung (005930.KS) (section 8)", "DRAM makers: Micron, SK hynix, Samsung (section 8)"],
+            &[
+                "Samsung (005930.KS) (section 8)",
+                "DRAM makers: Micron, SK hynix, Samsung (section 8)",
+            ],
         ),
 ];
 

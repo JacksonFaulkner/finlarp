@@ -3,7 +3,7 @@
 // c GDDR next to HBM, d the bus as slots (turnarounds, refresh, row misses), e the memory wall.
 // Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 pub const PIN_BEATS: &[Beat] = &[
