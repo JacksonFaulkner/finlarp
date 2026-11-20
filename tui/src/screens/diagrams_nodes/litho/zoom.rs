@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/litho_zooms.py: a the reticle, b the lens and NA, c inside the resist,
 // d step and scan, e overlay, f EUV light. Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 pub const RETICLE_BEATS: &[Beat] = &[
@@ -247,27 +247,51 @@ static OVERLAY: Cell = std::sync::OnceLock::new();
 static EUV: Cell = std::sync::OnceLock::new();
 
 pub fn reticle() -> Box<dyn Scene> {
-    page(&RETICLE, include_bytes!("../../../../../tools/pbr3d/assets/litho_reticle.glb"), RETICLE_BEATS)
+    page(
+        &RETICLE,
+        include_bytes!("../../../../../tools/pbr3d/assets/litho_reticle.glb"),
+        RETICLE_BEATS,
+    )
 }
 
 pub fn lens() -> Box<dyn Scene> {
-    page(&LENS, include_bytes!("../../../../../tools/pbr3d/assets/litho_lens.glb"), LENS_BEATS)
+    page(
+        &LENS,
+        include_bytes!("../../../../../tools/pbr3d/assets/litho_lens.glb"),
+        LENS_BEATS,
+    )
 }
 
 pub fn resist() -> Box<dyn Scene> {
-    page(&RESIST, include_bytes!("../../../../../tools/pbr3d/assets/litho_resist.glb"), RESIST_BEATS)
+    page(
+        &RESIST,
+        include_bytes!("../../../../../tools/pbr3d/assets/litho_resist.glb"),
+        RESIST_BEATS,
+    )
 }
 
 pub fn scan() -> Box<dyn Scene> {
-    page(&SCAN, include_bytes!("../../../../../tools/pbr3d/assets/litho_scan.glb"), SCAN_BEATS)
+    page(
+        &SCAN,
+        include_bytes!("../../../../../tools/pbr3d/assets/litho_scan.glb"),
+        SCAN_BEATS,
+    )
 }
 
 pub fn overlay() -> Box<dyn Scene> {
-    page(&OVERLAY, include_bytes!("../../../../../tools/pbr3d/assets/litho_overlay.glb"), OVERLAY_BEATS)
+    page(
+        &OVERLAY,
+        include_bytes!("../../../../../tools/pbr3d/assets/litho_overlay.glb"),
+        OVERLAY_BEATS,
+    )
 }
 
 pub fn euv() -> Box<dyn Scene> {
-    page(&EUV, include_bytes!("../../../../../tools/pbr3d/assets/litho_euv.glb"), EUV_BEATS)
+    page(
+        &EUV,
+        include_bytes!("../../../../../tools/pbr3d/assets/litho_euv.glb"),
+        EUV_BEATS,
+    )
 }
 
 #[cfg(test)]

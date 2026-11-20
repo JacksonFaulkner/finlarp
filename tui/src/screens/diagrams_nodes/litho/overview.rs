@@ -9,7 +9,7 @@
 // about High NA EUV lithography" (2024); ASML annual report 2024 and 20-F FY2025 (NXE:3800E 220
 // wafers per hour, matched overlay 0.9 nm); US 6,839,125 (k1 floor ~0.25).
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 

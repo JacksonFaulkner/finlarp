@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/litho_sections.py. Beat counts: 4, 5, 5, 3, 3, 3, 3, 3, 4, 3. Section 10 is
 // the sources page.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[
