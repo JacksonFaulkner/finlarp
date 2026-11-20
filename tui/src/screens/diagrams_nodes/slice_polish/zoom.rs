@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/slice_zooms.py: a the wire web and its kerf, b lapping both faces, c the Preston
 // polish and pH, d the thickness budget. Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const WEB_BEATS: &[Beat] = &[

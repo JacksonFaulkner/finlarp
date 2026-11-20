@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/slice_sections.py. Beats per section: 4, 4, 5, 4, 4, 4, 4, 3, 3, 3. Section 10 is
 // the sources page.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[

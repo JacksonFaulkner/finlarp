@@ -5,7 +5,7 @@
 //
 // Sources: see the zoom and section pages and the page's own list ([1]-[8] in SLICE_POLISH.txt).
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
