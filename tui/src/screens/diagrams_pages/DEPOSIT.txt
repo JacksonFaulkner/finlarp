@@ -1,44 +1,28 @@
 # 1. What happens: building the chip's layers one film at a time
 
- ┌──────────────┐   ┌──────────────┐   ┌────────────┐   ┌─────────────┐   ┌────────────┐
- │ GAS / TARGET │   │ CHAMBER      │   │ FILM       │   │ PUMP        │   │ CMP/ETCH   │
- │ precursor    │──▶│ vacuum,      │──▶│ atoms bond │──▶│ by-products │──▶│ pattern or │
- │ or metal     │   │ heated wafer │   │ on surface │   │ removed     │   │ planarise  │
- └──────────────┘   └──────────────┘   └────────────┘   └─────────────┘   └────────────┘
+  Flow: GAS / TARGET (precursor gas or metal source) -> CHAMBER (vacuum, heated wafer) -> FILM
+  (atoms bond on the surface) -> PUMP (by-products removed) -> CMP/ETCH (pattern or planarise the film)
 
   (three families: CVD builds from gas, ALD builds one atomic layer per cycle, PVD sputters from a solid)
 
 # 2. Inside a CVD chamber (showerhead reactor)
 
- ┌────────────────────────────────────────────────────────────────────────────────────┐
- │         PRECURSOR + CARRIER GAS IN (e.g. WF6, SiH4, H2)                            │
- │                          │                                                         │
- │                          ▼                                                         │
- │    ═══════════ SHOWERHEAD (also RF electrode in PECVD) ═══════════                 │
- │       ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   ↓   gas spreads evenly           │
- │       ·   ·   ·  ≈ plasma / reactive gas ≈  ·   ·   ·                              │
- │    ┌─────────────────────────────────────────────────────────┐                     │
- │    │▓▓▓▓▓▓▓▓▓▓▓▓▓▓ WAFER with growing film ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                     │
- │    └─────────────────────────────────────────────────────────┘                     │
- │    ═══════════ HEATED PEDESTAL / CHUCK (hundreds of C) ═══════════                 │
- │                          │                      by-product gas                     │
- │                          ▼                      ◀──── to PUMP ────▶ scrubber       │
- │    reaction at surface:  gas ──heat or plasma──▶ solid film + volatile by-products │
- └────────────────────────────────────────────────────────────────────────────────────┘
+  Precursor + carrier gas in (e.g. WF6, SiH4, H2) -> SHOWERHEAD (also the RF electrode in PECVD),
+  which spreads gas evenly over the wafer. Plasma or reactive gas sits above the wafer. The wafer
+  with its growing film sits on a HEATED PEDESTAL / chuck (hundreds of C). By-product gas goes to
+  the pump and a scrubber.
+  Reaction at surface: gas -> solid film + volatile by-products, driven by heat or plasma.
 
 # 3. The ALD cycle (self-limiting, one monolayer at a time)
 
- ┌────────────┐   ┌───────────┐   ┌─────────────┐   ┌─────────────┐
- │ 1 PULSE A  │   │ 2 PURGE   │   │ 3 PULSE B   │   │ 4 PURGE     │
- │ precursor  │   │ inert gas │   │ reactant    │   │ remove      │
- │ sticks to  │──▶│ removes   │──▶│ reacts with │──▶│ by-products │
- │ every site │   │ excess    │   │ layer A     │   └─────────────┘
- └────────────┘   └───────────┘   └─────────────┘                  
-                                                                          │
-   ◀──────────────────── repeat N times, each cycle adds a fixed thickness ◀┘
+  1 PULSE A: precursor sticks to every site.
+  2 PURGE: inert gas removes excess precursor.
+  3 PULSE B: reactant reacts with layer A.
+  4 PURGE: remove by-products.
+  Repeat N times; each cycle adds a fixed thickness.
 
-  Example, Al2O3:   Al(CH3)3 + surface-OH ──▶ surface-O-Al(CH3)2 + CH4   (pulse A, TMA)
-                    surface-Al-CH3 + H2O ──▶ surface-Al-OH + CH4          (pulse B, water)
+  Example, Al2O3:   Al(CH3)3 + surface-OH -> surface-O-Al(CH3)2 + CH4   (pulse A, TMA)
+                    surface-Al-CH3 + H2O -> surface-Al-OH + CH4          (pulse B, water)
   UPenn recipe, 200 C TMA/H2O: 0.015 s pulses, 8 s purges, precursor lines at 150 C
   (growth is about 1 A/cycle for TMA/H2O; textbook, my source gave only ozone-process numbers)
   Ozone Al2O3: about 0.6 A/cycle at 100 C and 0.9 A/cycle at 250 C (UPenn)
@@ -46,24 +30,18 @@
 
 # 4. PVD: sputtering a metal off a target
 
- ┌───────────────────────────────────────────────────────────────────────────────────────────────────┐
- │       Ar+ ions                         ┌──────────────────────┐                                   │
- │       ↓  ↓  ↓  ↓      ◀────────────────│ TARGET (Ta, Ti, Cu)  │ biased negative                   │
- │      ≈≈≈ Ar plasma ≈≈≈                 └──────────────────────┘                                   │
- │       metal atoms knocked out fly across the vacuum gap                                           │
- │       ↓  ↓  ↓  ↓                                                                                  │
- │      ┌──────────────────────┐   ▓ wafer on chuck (sometimes RF-biased for trench bottom coverage) │
- │      │▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓│                                                                     │
- └───────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Ar+ ions hit a TARGET (Ta, Ti, Cu) that is biased negative. The Ar plasma knocks metal atoms
+  out of the target, and they fly across the vacuum gap to the wafer on its chuck (sometimes
+  RF-biased for trench bottom coverage).
   PVD is line-of-sight, so ALD or CVD takes over where trenches get narrow (textbook).
 
 # 5. Chemistry and process windows
 
-  TEOS SiO2        Si(OC2H5)4 ──heat/plasma──▶ SiO2 + organic by-products
+  TEOS SiO2        Si(OC2H5)4 -> SiO2 + organic by-products (heat or plasma)
     LPCVD          650-800 C, rate rises exponentially with T; below about 5 Torr (patents)
     PECVD          typical under 1 Torr; one example 200-400 C up to 50 Torr (patent claim)
     PECVD rates    reported 41 A/s (about 2,460 A/min) at 4 Torr, 200 C; high rate means low density
-  Tungsten fill    WF6 + 3H2 ──▶ W + 6HF ;  2WF6 + 3SiH4 ──▶ 2W + 3SiF4 + 6H2  (textbook)
+  Tungsten fill    WF6 + 3H2 -> W + 6HF ;  2WF6 + 3SiH4 -> 2W + 3SiF4 + 6H2  (textbook)
     window         wafer at about 400-500 C; SiH4 nucleation layer under 100 nm, then H2 bulk fill
     resistivity    pulsed nucleation about 100 uohm-cm vs about 25 for conventional (400 C study)
   Sequence logic   silane makes nucleation and protects Ti / Si from WF6; H2 gives conformal low-R bulk
@@ -81,21 +59,14 @@
 
 # 7. Who makes it: Applied Materials Semiconductor Systems by end market, FY2025 vs FY2024, percent
 
-  Foundry/logic FY25 ███████████████████████████████████████ 67%
-  Foundry/logic FY24 ████████████████████████████████████████ 68%
-  DRAM FY25          ███████████████ 26%
-  DRAM FY24          ████████████████ 28%
-  NAND FY25          ████ 7%
-  NAND FY24          ██ 4%
+  Foundry/logic   FY25 67%   FY24 68%
+  DRAM            FY25 26%   FY24 28%
+  NAND            FY25 7%    FY24 4%
   (segment covers all of Applied's chip tools, not deposition alone; Applied does CVD, PVD, epi +
       polysilicon)
 
   Historical deposition share, 2009 (Barclays / Gartner via trade press; old, shown for structure only),
-      percent
-
-  Applied Materials  ████████████████████████████████████████ 49%
-  Tokyo Electron     ██████████████ 17%
-  Novellus (now Lam) █████████████ 16%
+      percent: Applied Materials 49%, Tokyo Electron 17%, Novellus (now Lam) 16%
 
 # 8. Market structure, tickers, chokepoints
 
