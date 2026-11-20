@@ -1,10 +1,12 @@
-// DEVELOP page in the MELT + PULL template. Stub until it is written.
+// DEVELOP: the lone overview scene (overview.rs). No zoom-ins or numbered sections for this page.
+
+mod overview;
 
 use super::Node;
 
 pub const NODE: Node = Node {
     page: "DEVELOP",
-    overview: None,
+    overview: Some(overview::build),
     sections: &[],
     clips: false,
 };
