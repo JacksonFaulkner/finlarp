@@ -26,7 +26,7 @@
 //     SSG.DE; that is kept here as the page says. Xetra lists Siltronic as WAF, so the page text should be checked by its owner.
 //   Sources (section 10): the page's list [1]-[8] (INGOT.txt).
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[

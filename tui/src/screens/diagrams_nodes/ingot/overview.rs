@@ -9,7 +9,7 @@
 // and US 12605863 (crop, grind, notch, saw steps, patent text); US 9,988,736 (tail growth).
 // The rod drawings are schematic, not to scale.
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 

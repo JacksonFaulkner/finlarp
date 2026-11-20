@@ -11,7 +11,7 @@
 //   saw captions only; the 150 mm test-cut pitch and kerf in those patents are not used here.
 //   INGOT page text (crop, test, grind, notch and saw steps). The drawings are schematic.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 pub const GRIND_BEATS: &[Beat] = &[
