@@ -1,128 +1,67 @@
-# 1. What happens: thin the wafer, cut it into die, pick them up
+# 1. What happens: thin the wafer, cut it into die, pick the good ones
 
- ┌─────────────┐   ┌───────────┐   ┌─────────────────┐   ┌─────────────────┐   ┌────────────────┐
- │ TAPE        │──▶│ BACKGRIND │──▶│ MOUNT           │──▶│ DICE            │──▶│ EXPAND + PICK  │
- │ cover front │   │ thin to   │   │ wafer on dicing │   │ blade or laser  │   │ separate die,  │
- │ with tape   │   │ 50-200 um │   │ tape + frame    │   │ cut the streets │   │ good ones only │
- └─────────────┘   └───────────┘   └─────────────────┘   └─────────────────┘   └────────────────┘
+DICE is the back-end step that separates a finished wafer into individual die. First the wafer is thinned, then it is laminated onto blue dicing tape stretched across a steel ring frame. A saw blade or a laser cuts the wafer along the streets between die, and the tape holds the separated die in place. The picker takes only the die that passed wafer sort.
 
-  (wafer map from WAFER SORT tells the picker which die to skip; DAF-backed die go straight to die
-      attach)
+# 2. The parts
 
-# 2. Backgrinding: cross-section
+WAFER          a 300 mm silicon disc, about 775 um out of the fab, ground to 50-200 um
+DICING TAPE    blue tape stretched on a ring frame, so the wafer can be cut and handled
+STREET         the scribe lane between die, where test structures sit and the cut goes
+KERF           the width of material the cut removes
+BLADE          a thin diamond-edged saw blade, spun fast and cooled with water
+STEALTH LASER  a laser focused inside the silicon, making a modified layer, not a groove
+LOW-K          porous, brittle dielectric film in the top layers, prone to chipping
+PICKER         the machine that lifts good die off the tape for die attach
 
- ┌──────────────────────────────────────────────────────────────────────────┐
- │                       spindle (rotates)                                  │
- │                           ║                                              │
- │                   ┌────────────────┐                                     │
- │                   │ GRINDING WHEEL │   diamond teeth on the rim          │
- │                   └▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓┘                                     │
- │       ≈≈≈ DI water ≈≈ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ≈≈≈ coolant + swarf out              │
- │         ┌──────────────────────────┐                                     │
- │         │ wafer back (silicon)     │  ~750 um in ──▶ 75-50 um common out │
- │         │--------------------------│                                     │
- │         │ device layers (front)    │                                     │
- │         ├──────────────────────────┤                                     │
- │         │ UV-curable BG tape       │  shields the circuits from debris   │
- │         └──────────────────────────┘                                     │
- │         ═══════ porous vacuum chuck (rotates) ═══════                    │
- └──────────────────────────────────────────────────────────────────────────┘
+# 3. Backgrinding first
 
-  (schematic; coarse then fine wheels, ending with stress relief so subsurface cracks a few um deep do
-      not break the wafer)
+The starting thickness is the first number to know: 750 um in, for a 300 mm wafer. Incoming wafers are 725-775 um thick (SemiconductorX), roughly 750 um per Wikipedia. The BACKGRIND step then removes most of that silicon from the back, down to 50-200 um: about 150-200 um for standard wire-bond and flip-chip die, 75-100 um for mobile, and below 50 um for stacked DRAM such as HBM. Thinning to 75 um removes about 90% of the silicon.
 
-# 3. Streets: blade vs stealth laser, top view and section
+The wafer is held on a porous vacuum chuck while it is ground, so the thin silicon stays flat. The GRINDING WHEEL is a ring of diamond abrasive segments; only its rim touches the wafer. Coarse and fine passes leave a damaged layer that a final polish or etch removes.
 
- ┌────────────────────────────────────────────────────────────────────────────────────┐
- │ BLADE (street 50-80 um)                  STEALTH (street about 15 um)              │
- │                                                                                    │
- │   die  |<- kerf: tens um ->|  die     die |<-15um->| die                           │
- │   ┌────┐     ┌──────────┐     ┌────┐        ┌───┐     ┌───┐                        │
- │   │▓▓▓▓│     │ blade    │     │▓▓▓▓│        │▓▓▓│ ·:· │▓▓▓│  laser focus INSIDE    │
- │   │▓▓▓▓│     │ spins in │     │▓▓▓▓│        │▓▓▓│ ·:· │▓▓▓│  wafer, modified layer │
- │   │▓▓▓▓│     │ water    │     │▓▓▓▓│        │▓▓▓│ ·:· │▓▓▓│  (cracks), no removal  │
- │   └────┘     └──────────┘     └────┘        └───┘     └───┘                        │
- │   chipping risk, wet process                dry, tape expansion splits it          │
- │                                                                                    │
- │ GROOVING: laser first burns off brittle low-k film, then a blade cuts              │
- └────────────────────────────────────────────────────────────────────────────────────┘
+At MOUNT, the front-side tape is removed and the wafer is laminated back side down onto dicing tape stretched across a ring frame. The frame makes the floppy wafer a rigid part that the saw, the laser, the expander and the picker can all grip.
 
-  (DISCO: stealth dicing focuses the beam inside the wafer to form an SD layer; separation by die
-      expansion)
+# 4. Streets: how wide the lane is
 
-# 4. SDBG: stealth dicing before grinding, the order matters
+Blade-cut streets commonly run 60-100 um wide, and about 80 um is a typical design. A narrower street leaves more room for die. On a 300 mm wafer, a 0.5 mm die gets about 24.5% more die when the street shrinks from 80 um to 20 um (computed with the standard gross-dies formula, before edge exclusion and yield). Larger die gain less, about 1-2% for 10 mm die.
 
-  1  Stealth dicing: laser forms a modified section in the wafer
-  2  Backside grinding thins the wafer; die separate at the modified section, which grinding removes
-  3  DAF (die attach film) is expanded at low temperature, because cold DAF is brittle and splits cleanly
-  4  Heat shrink removes tape sag so die move to die bonding without re-laminating the tape (DISCO DDS
-      series)
-  Why: grinding first then dicing leaves micro-cracks a few um deep; if thinned below that depth
-      strength collapses
+# 5. Blade dicing
 
-# 5. By the numbers
+The DICE blade is a diamond blade that spins at 15,000-30,000 rpm for general dicing, and up to 50,000 rpm in advanced operations. Water cools the blade and flushes swarf. Resin-bonded blades cut kerfs of about 55-110 um, and metal-bonded blades about 20-25 um. The blade cuts through the wafer and into the tape, not through the tape, so the die stay held. Mechanical stress chips the top and bottom edges; a chip over 5-10 um may disqualify a die.
 
-  Incoming 300 mm wafer thickness      725-775 um (SemiconductorX); roughly 750 um (Wikipedia)
-  Backgrind target                     50-200 um; 150-200 um wire-bond/flip-chip; 75-100 um mobile;
-      <=50 um 3D stacking
-  Subsurface damage from grinding      a few um deep
-  Blade street (sawlane)               50 to 80 um; stealth laser as narrow as about 15 um
-  Saw kerf                             tens of um (no exact value in source)
-  Mature-line dicing yield             well above 99% (SemiconductorX)
-  Dies per wafer                       hundreds to tens of thousands
-  Laser dicing adoption grows          at 7 nm and below, where small die make kerf loss matter
-  DISCO DFL7363 stealth saw            about 50% productivity over its conventional model (vendor claim)
-  DISCO laser saw shipments            passed 2,000 units by April 2020
+# 6. Stealth laser dicing
 
-# 6. Street width: blade vs stealth, um (upper end of blade range)
+The STEALTH process focuses a laser at a wavelength silicon passes through to a point inside the wafer. At the focus, a modified layer of microcracks forms without touching the surface, and stretching the tape splits the wafer along the lines. There is no blade and no kerf. The SDBG variant, stealth dicing before grinding, lasers the wafer first while it is still thick and strong, then grinds it. The grinding removes the modified layer itself; DISCO says SDBG reduces front and back chipping and gives thin die higher strength.
 
-  Blade, wide end   ████████████████████████████████████████ 80 um
-  Blade, narrow end █████████████████████████ 50 um
-  Stealth laser     ████████ 15 um
-  Narrower streets mean more die per wafer. (Dies-per-wafer gain depends on die size; the source gives
-      no number.)
+# 7. Low-k: grooving before the cut
 
-# 7. Wafer thickness path, um
+Low-k films are porous and brittle, and a blade alone can chip or peel them. Laser grooving followed by a blade is now standard for logic wafers. In GROOVING, a laser burns a pair of narrow grooves through the low-k and metal stack on each edge of the street, and then the blade cuts the silicon between them. Plasma dicing is the other route: it etches the street chemically. The cut edge matters because a chip that reaches the seal ring can let moisture in later.
 
-  Incoming 300 mm          ████████████████████████████████████████ 775 um
-  Standard backgrind, max  ██████████ 200 um
-  Mobile / wearable, upper █████ 100 um
-  Common thin today        ████ 75 um
-  Thinnest flip-chip / 3D  ███ 50 um
+# 8. Plasma dicing
 
-# 8. DISCO net sales, billion yen (company results)
+Plasma dicing etches the streets through a mask instead of cutting them. A 2023 study on 10 x 10 mm dies compared blade, stealth and plasma dicing before grinding; the plasma-diced dies showed the least chipping and cracking and the highest strength. Equipment vendors claim larger gains. Blade dicing is still the most cost-effective choice in most cases, and plasma is most compelling for very small die or very thin wafers.
 
-  FY ending Mar 2025 ████████████████████████████████████ 393.3
-  FY ending Mar 2026 ████████████████████████████████████████ 436.9
-  FY Mar-2026 net sales 436.889B yen, shipments 442.824B yen; consumables record high; grinders flat
-      for IC, down for
-  power/other. Nine months to Dec 2025: sales +11.5%, net income +8.7%. (Roic's FY Mar-2025 figure; a
-      SWOT site
-  gave a conflicting ~348B yen and was discarded.)
+# 9. DAF, EXPAND + PICK, and yield
 
-# 9. Who makes it, chokepoints
+The back of the wafer carries DAF, the die attach film: a thin adhesive that becomes the glue holding each die to its substrate or to the die below. The film has to split with the die. DAF stretches rather than snaps at room temperature, so the expander runs cold, where the film is brittle and tears along the die edges.
 
-  Dicers + grinders   DISCO (6146.T, ADR DSCSY) dominant; Accretech / Tokyo Seimitsu (7729.T) second
-      source;
-                      ASMPT (0522.HK), ADT (Israel), Okamoto (Japan) (no sourced share numbers)
-  Laser / plasma      Synova (Switzerland), Plasma-Therm (US), Oxford Instruments (OXIG.L)
-  Dicing tape         Lintec (7966.T), Mitsui Chemicals (4183.T), Nitto Denko (6988.T), Furukawa
-      Electric (5801.T)
-  Die attach film     Resonac (4004.T), Nitto Denko, Lintec, Furukawa Electric
-  Risk                one Japanese vendor dominates saws, wheels and blades; HBM stacks need wafers
-      thinned to tens of
-                      um, so grinder and laser-saw supply gates AI memory output
-                          (inference from the numbers above)
+In EXPAND + PICK, the tape is stretched radially. This widens the gaps so neighbouring die do not touch during pick-up, and it makes sure the stealth cracks or the DAF fully separate. Heat shrink then removes slack so die spacing holds on the frame. The picker uses the wafer map from wafer sort: only die marked good are lifted, and the rest stay on the tape. In a 12-high HBM stack every die must be known good, so a sorting miss multiplies.
 
-# Sources
+Dicing is a yield step: each chip, crack or off-street cut can kill a die, and the loss is paid for only once the good die are packaged. Dicing yield on mature lines is reported above 99%, but that figure is from a vendor and is not a sourced industry average.
 
-  [1] SemiconductorX wafer dicing overview: semiconductorx.com/mfg-back-end-dicing.html
-  [2] Wikipedia Wafer backgrinding: en.wikipedia.org/wiki/Wafer_backgrinding
-  [3] DISCO SDBG process: disco.co.jp/eg/solution/library/dbg/sdbg.html
-  [4] DISCO DFL7362 stealth saw: disco.co.jp/eg/news/press/20171206.html
-  [5] DISCO three laser saws, Dec 2025: disco.co.jp/eg/news/corp/20251215_2.html
-  [6] DISCO laser saw shipments: disco.co.jp/eg/news/press/20200402.html
-  [7] DISCO FY results Apr 2026: disco.co.jp/eg/ir/library/doc/fr/fr20260422.pdf
-  [8] Sales history: roic.ai/quote/DSCSY/classic
-  [9] Stealth + DAF patent US8415232B2; LINTEC DDAF paper: imapsource.org (DDAF for Stealth Dicing and
-      Cool Expansion)
+# 10. Who makes it, and the chokepoints
+
+DISCO (6146.T) is the dominant supplier of dicing saws, grinders and blades, and it sells stealth and laser dicing systems. DISCO net sales were 436.889 billion yen for the fiscal year ended March 2026, per the company results PDF cited in the sources. Consumables such as blades and wheels are recurring and tied to wafer volume.
+
+Risk: DISCO dominates saws, wheels and blades, and HBM stacks need wafers thinned to tens of um, so grinder and laser-saw supply gates AI memory output. This is an inference from the numbers, not a sourced shortage claim. Tokyo Seimitsu (Accretech, 7729.T) is the other large saw supplier; ASMPT (0522.HK), ADT and Okamoto also appear in the market. Laser dicing and grooving tools come from Hamamatsu (stealth engines), EO Technics, Synova and Oxford Instruments. Plasma dicing tools come from Plasma-Therm, SPTS (KLA) and Panasonic.
+
+Lintec, Mitsui Chemicals, Nitto Denko and Furukawa Electric make the dicing tape, and Resonac, Nitto Denko, Lintec and Furukawa make the DAF. Each wafer uses tape and film once, and the film is qualified with a specific saw and expander recipe, so supplier switches take time.
+
+# 11. Sources
+
+  [1] Blade kerf, street width, chipping, tape and frame: semiconductorx.com/mfg-back-end-dicing.html ; ukam.com/practical-guide-to-semiconductor-wafer-dicing-materials-blades-and-process-optimization/
+  [2] Kerf widths for resin- and metal-bonded blades: USPTO patent US 10707387 (ppubs)
+  [3] Stealth dicing before grinding, SDBG: disco.co.jp/eg/solution/library/dbg/sdbg.html
+  [4] Plasma vs blade vs stealth dicing before grinding, 2023: link.springer.com/article/10.1186/s40486-023-00183-w (Micro and Nano Systems Letters)
+  [5] Backgrinding thickness targets: en.wikipedia.org/wiki/Wafer_backgrinding
+  [6] DISCO net sales, fiscal year ended March 2026: disco.co.jp/eg/ir/library/doc/fr/fr20260422.pdf
