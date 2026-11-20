@@ -193,6 +193,20 @@ impl Scene {
         Some((translation(world[eye]), translation(world[target])))
     }
 
+    /// Every empty named `site:<id>`: its id and its world position at time `t`.
+    pub fn sites(&self, t: f32) -> Vec<(String, V3)> {
+        let locals = self.locals(t);
+        let world = self.worlds(&locals);
+        self.nodes
+            .iter()
+            .enumerate()
+            .filter_map(|(i, n)| {
+                let id = n.name.strip_prefix("site:")?;
+                Some((id.to_string(), translation(world[i])))
+            })
+            .collect()
+    }
+
     /// Tags authored as empties named `label:<text>`: the text and its world position at time
     /// `t`, for every one whose own scale and its parents' are not switched off.
     pub fn labels(&self, t: f32) -> Vec<(String, V3)> {
@@ -397,23 +411,57 @@ fn emit(p: &Prim, world: &M4, into: &mut Mesh) {
 /// Where the world point `p` lands in a `w` x `h` picture of `scene` at time `t`, in pixels from
 /// the top left; None behind the camera.
 pub fn project(scene: &Scene, t: f32, w: u32, h: u32, p: V3) -> Option<(f32, f32)> {
-    let (eye, target) = cam(scene, t);
-    let vp = math::mul(math::perspective(FOV, w as f32 / h.max(1) as f32, 40.0, 40000.0), math::look_at(eye, target, [0.0, 1.0, 0.0]));
-    let c: Vec<f32> = (0..4).map(|r| vp[0][r] * p[0] + vp[1][r] * p[1] + vp[2][r] * p[2] + vp[3][r]).collect();
+    project_view(scene, t, None, w, h, p)
+}
+
+/// As `project`, from an explicit camera `view` (eye, target) instead of the scene's own.
+pub fn project_view(
+    scene: &Scene,
+    t: f32,
+    view: Option<(V3, V3)>,
+    w: u32,
+    h: u32,
+    p: V3,
+) -> Option<(f32, f32)> {
+    let (eye, target) = view.unwrap_or_else(|| cam(scene, t));
+    let vp = math::mul(
+        math::perspective(FOV, w as f32 / h.max(1) as f32, 40.0, 40000.0),
+        math::look_at(eye, target, [0.0, 1.0, 0.0]),
+    );
+    let c: Vec<f32> = (0..4)
+        .map(|r| vp[0][r] * p[0] + vp[1][r] * p[1] + vp[2][r] * p[2] + vp[3][r])
+        .collect();
     if c[3] <= 1.0 {
         return None;
     }
-    Some(((c[0] / c[3] * 0.5 + 0.5) * w as f32, (0.5 - c[1] / c[3] * 0.5) * h as f32))
+    Some((
+        (c[0] / c[3] * 0.5 + 0.5) * w as f32,
+        (0.5 - c[1] / c[3] * 0.5) * h as f32,
+    ))
 }
 
 const FOV: f32 = 0.52;
 
 fn cam(scene: &Scene, t: f32) -> (V3, V3) {
-    scene.camera(t).unwrap_or(([0.0, 500.0, 3000.0], [0.0, 0.0, 0.0]))
+    scene
+        .camera(t)
+        .unwrap_or(([0.0, 500.0, 3000.0], [0.0, 0.0, 0.0]))
 }
 
 pub fn render(scene: &Scene, t: f32, w: u32, h: u32, bg: [u8; 3]) -> image::RgbaImage {
-    let (eye, target) = cam(scene, t);
+    render_view(scene, t, None, w, h, bg)
+}
+
+/// As `render`, from an explicit camera `view` (eye, target) instead of the scene's own.
+pub fn render_view(
+    scene: &Scene,
+    t: f32,
+    view: Option<(V3, V3)>,
+    w: u32,
+    h: u32,
+    bg: [u8; 3],
+) -> image::RgbaImage {
+    let (eye, target) = view.unwrap_or_else(|| cam(scene, t));
     let (solid, glass) = scene.meshes(t);
     let bgf = [
         bg[0] as f32 / 255.0,

@@ -16,7 +16,7 @@ const INK: [u8; 3] = [222, 226, 232];
 const DIM: [u8; 3] = [128, 136, 156];
 const HEAD: [u8; 3] = [240, 196, 118];
 const LOOK: [u8; 3] = [170, 205, 236];
-const PANEL: [u8; 3] = [22, 24, 32];
+const PANEL: [u8; 3] = [40, 42, 54];
 const RULE: [u8; 3] = [52, 56, 70];
 const TAG: [u8; 3] = [16, 18, 24];
 
@@ -240,6 +240,17 @@ fn wrap(text: &str, max: usize) -> Vec<String> {
         out.push(cur);
     }
     out
+}
+
+/// Font size (px) at which one monospace character is `cell` px wide, so text sets on a grid of
+/// character cells.
+pub fn px_for_advance(cell: f32) -> f32 {
+    cell / advance(1.0)
+}
+
+/// Draws one line of JetBrains Mono with its top at `y`, antialiased, in `col`.
+pub fn text(img: &mut RgbaImage, x: f32, y: f32, px: f32, s: &str, col: [u8; 3]) {
+    draw(img, x, y, px, s, col);
 }
 
 /// Draws `text` with its top at `y`, antialiased.
