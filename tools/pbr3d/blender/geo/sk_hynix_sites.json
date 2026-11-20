@@ -1,0 +1,93 @@
+{
+  "_about": "SK hynix fab and packaging sites pinned on the Capex & fabs map (fab_map.py). lon/lat are approximate site-level positions (city or cluster centre, campus offsets for Cheongju); verify before quoting a location. text is what the TUI shows when a site is flown to. src names where each figure came from; KRW figures are as the source states them. dist is the flight camera distance in map units (40 units = 1 degree).",
+  "sites": [
+    {
+      "id": "icheon",
+      "name": "Icheon (M10, M14, M16)",
+      "lon": 127.44, "lat": 37.27, "dist": 150,
+      "text": "Headquarters and main DRAM base: M10, M14 and M16 fabs.",
+      "src": "Korea JoongAng Daily, 'P5, M17, Y2: what Korea's cryptic chip factory names mean' (2026)",
+      "url": "https://www.koreajoongangdaily.com/business/p5-m17-y2-what-koreas-cryptic-chip-factory-names-actually-mean/12888604"
+    },
+    {
+      "id": "cheongju_campus",
+      "name": "Cheongju campus (M11, M12, M15)",
+      "lon": 127.46, "lat": 36.63, "dist": 150,
+      "text": "Cheongju campus: M11, M12 and M15 fabs. One report says it makes both DRAM and NAND.",
+      "src": "Korea JoongAng Daily (2026), as above",
+      "url": "https://www.koreajoongangdaily.com/business/p5-m17-y2-what-koreas-cryptic-chip-factory-names-actually-mean/12888604"
+    },
+    {
+      "id": "m15x",
+      "name": "M15X (Cheongju)",
+      "lon": 127.43, "lat": 36.62, "dist": 130,
+      "text": "M15X, an extension beside M15. Cleanroom opened Oct 2025. KRW 20T (estimate). Wafer input began 2026Q1. About 50k wafers/month by 2026Q4 (estimate).",
+      "src": "memory_facts skh-ops: Korea Times 2026-01-13; SK hynix 424B4 prospectus",
+      "url": "https://www.koreatimes.co.kr/business/tech-science/20260113/sk-hynix-confirms-13-bil-packaging-fab-construction-in-cheongju"
+    },
+    {
+      "id": "p_t7",
+      "name": "P&T7 (Cheongju, HBM packaging)",
+      "lon": 127.49, "lat": 36.61, "dist": 130,
+      "text": "Advanced packaging for HBM. KRW 19T (company-stated, Jan 2026). Press targets completion in 2027. The 424B4 spend table runs to 2030.",
+      "src": "memory_facts skh-ops: 424B4 prospectus 2026-07-10; Korea Times 2026-01-13",
+      "url": "https://www.sec.gov/Archives/edgar/data/2120882/000119312526299963/d32785d424b4.htm"
+    },
+    {
+      "id": "m17",
+      "name": "M17 (Cheongju, NAND)",
+      "lon": 127.47, "lat": 36.66, "dist": 130,
+      "text": "New NAND fab. Board approved KRW 19.1T (Aug 2026). Press puts the Cheongju NAND plan at KRW 100T, with ops targeted for 1H 2029. The two figures conflict.",
+      "src": "memory_facts skh-ops: Korea Times 2026-08-07; Herald 2026-07-02 (KRW 100T plan)",
+      "url": "https://www.koreatimes.co.kr/business/companies/20260807/sk-hynix-to-invest-383-bil-in-yongins-y2-fab-cheongjus-m17-fab"
+    },
+    {
+      "id": "yongin_fab1",
+      "name": "Yongin Fab 1 (Y1)",
+      "lon": 127.20, "lat": 37.20, "dist": 150,
+      "text": "KRW 31T (company-stated). Construction began Feb 2025. First cleanroom guided for Feb 2027. Sits in Wonsam-myeon, Cheoin-gu, in the Yongin cluster.",
+      "src": "memory_facts skh-ops: 424B4 prospectus; Korea JoongAng Daily 2026-02-25",
+      "url": "https://www.koreajoongangdaily.com/business/sk-hynix-invests-151b-to-build-first-fab-plant-at-yongin-semiconductor-cluster/11961960"
+    },
+    {
+      "id": "yongin_y2",
+      "name": "Yongin Y2",
+      "lon": 127.23, "lat": 37.22, "dist": 150,
+      "text": "KRW 35.2T (company-stated, Aug 2026). First cleanroom guided for Jun 2029. Planned for next-gen DRAM, including HBM (per report). The Yongin cluster total is KRW 600T, done by 2033.",
+      "src": "memory_facts skh-ops: Korea Times 2026-08-07; Herald 2026-06-29",
+      "url": "https://www.koreatimes.co.kr/business/companies/20260807/sk-hynix-to-invest-383-bil-in-yongins-y2-fab-cheongjus-m17-fab"
+    },
+    {
+      "id": "wuxi",
+      "name": "Wuxi (China, DRAM)",
+      "lon": 120.30, "lat": 31.49, "dist": 230,
+      "text": "Conventional DRAM fab in Wuxi, Jiangsu. Secondary sources only; check against SK hynix disclosures.",
+      "src": "Secondary reports (JoongAng, 2026); not in memory_facts",
+      "url": "https://www.koreajoongangdaily.com/business/p5-m17-y2-what-koreas-cryptic-chip-factory-names-actually-mean/12888604"
+    },
+    {
+      "id": "dalian",
+      "name": "Dalian (China, NAND)",
+      "lon": 121.61, "lat": 38.92, "dist": 260,
+      "text": "300mm NAND fab, run by SK hynix Semiconductor (Dalian), the Chinese subsidiary. Fab 1 about 100k wafers/month. Expansion of about 50k reported.",
+      "src": "StorageReview / Blocks & Files, 2026-08-12",
+      "url": "https://www.blocksandfiles.com/flash/2026/08/12/sk-hynix-expanding-solidigm-dalian-nand-plant/5286679"
+    },
+    {
+      "id": "chongqing",
+      "name": "Chongqing (China, NAND back-end)",
+      "lon": 106.55, "lat": 29.56, "dist": 260,
+      "text": "NAND back-end (assembly and test). Secondary sources only; verify.",
+      "src": "Secondary reports (JoongAng, 2026); not in memory_facts",
+      "url": "https://www.koreajoongangdaily.com/business/p5-m17-y2-what-koreas-cryptic-chip-factory-names-actually-mean/12888604"
+    },
+    {
+      "id": "west_lafayette",
+      "name": "West Lafayette, Indiana (HBM packaging)",
+      "lon": -86.92, "lat": 40.43, "dist": 170,
+      "text": "Advanced HBM packaging at Purdue Research Park. About $3.87B (company-stated). Cleanroom ops 2H 2028. CHIPS Act grant up to $458M.",
+      "src": "memory_facts skh-ops: NIST CHIPS for America (2024); 424B4 prospectus (2026)",
+      "url": "https://www.nist.gov/node/1856251"
+    }
+  ]
+}

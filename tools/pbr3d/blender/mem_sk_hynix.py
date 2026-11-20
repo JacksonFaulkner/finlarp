@@ -21,7 +21,7 @@ OpenDART rows in data/dart/facts.parquet, or the cached page (memory_page.py 000
             costs: 79.7% operating margin in 2026Q3
   pricing   DRAM ASP QoQ vs DRAM bit growth QoQ: the 2026 spike is price, not volume
   share     HBM share towers for SK hynix, Samsung, Micron trading places 2022 / 2Q25 / 2Q26
-  fabs      capex bars, the new fabs rising on their opening dates, the 600T Yongin plan
+  fabs      a world map with each SK hynix fab and packaging site pinned; Enter flies to it (fab_map.py)
   tech      TSVs, 40% thinner dies + MR-MUF for 12-high, HBM4's 2,048 I/O bus
   listing   the July 2026 Nasdaq ADR: $149 x 177.9M ADS -> $26.2B -> Yongin Fab 1 + P&T7
 """
@@ -35,6 +35,7 @@ import bpy
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import sand_overview as O  # noqa: E402
+import fab_map  # noqa: E402
 from sand_overview import OFF, F, P, _constant_until, ball, box, disc, empty, fly, key, label, mat, pivot, rel, show, tube  # noqa: E402
 from sand_zooms import camera, start  # noqa: E402
 import hbm_kit as H  # noqa: E402
@@ -245,6 +246,8 @@ def finish(tab):
         export_lights=False, use_selection=False,
     )
     print("exported", glb)
+    if tab == "fabs":
+        fab_map.sidecar(os.path.join(ASSETS, f"{SLUG}_{tab}.sites.json"))
 
 
 def kt(v):
@@ -653,72 +656,10 @@ def fab(name, parent, x, z, w, h, d, m):
 
 
 def build_fabs(root, m):
-    # beat 0: capex bars (cash paid for PP&E, 424B4) and the 2026 guide ("high-40T", ghost)
-    g0 = empty("capex", root)
-    show(g0, beat(0))
-    S0, X0 = 18.0, -5200.0
-    box("floor0", (X0 - 1300, -32, -700), (X0 + 1300, -12, 250), m["floor"], g0)
-    caps = [("FY2023", 8.325, "rev_dim"), ("FY2024", 15.946, "rev"), ("FY2025", 27.519, "rev"), ("2026g", 47.5, "ghost")]
-    for i, (nm, v, mk) in enumerate(caps):
-        x = X0 - 825 + 550 * i
-        pv = bar(f"cap_{nm}", g0, x, 360, 0, v * S0, m[mk])
-        grow(pv, F(0, 0.05 + 0.18 * i), F(0, 0.2 + 0.18 * i))
-    label("FY2023 capex KRW 8.3T", (X0 - 825, 8.325 * S0 + 10, 0), g0, beat(0, 0.2))
-    label("FY2024 KRW 15.9T", (X0 - 275, 15.946 * S0 + 10, 0), g0, beat(0, 0.4))
-    label("FY2025 KRW 27.5T", (X0 + 275, 27.519 * S0 + 10, 0), g0, beat(0, 0.6))
-    label("2026 guide: high-40T", (X0 + 825, 47.5 * S0 + 10, 0), g0, beat(0, 0.8))
-
-    # beat 1: fabs rise on a timeline, height by investment (25 mm per KRW trillion)
-    g1 = empty("fabs", root)
-    show(g1, beat(1))
-    S1 = 24.0
-    box("floor1", (-1900, -32, -800), (1900, -12, 250), m["floor"], g1)
-    box("rail1", (-1800, -10, 60), (1800, 4, 110), m["rail"], g1)
-    fabs = [  # name, x (timeline), KRW T, tag
-        ("m15x", -1350.0, 20.0, "M15X KRW 20T est, wafers 1Q26"),
-        ("y1", -450.0, 31.0, "Yongin Fab 1 KRW 31T, Feb 2027"),
-        ("pt7", 350.0, 19.0, "P&T7 HBM pkg KRW 19T, end-2027"),
-        ("y2", 1300.0, 35.2, "Yongin Y2 KRW 35.2T, Jun 2029"),
-    ]
-    for i, (nm, x, v, tag) in enumerate(fabs):
-        g, pv = fab(nm, g1, x, 0, 520, v * S1, 420, m)
-        grow(pv, F(1, 0.03 + 0.2 * i), F(1, 0.2 + 0.2 * i))
-        box(f"{nm}_tick", (x - 10, 4, 60), (x + 10, 40, 110), m["line"], g1)
-        label(tag, (x, v * S1 + 40, 0), g1, beat(1, 0.15 + 0.2 * i))
-    # M15X is the one running: wafers leave it
-    for k in range(8):
-        f0 = F(1, 0.25 + 0.08 * k)
-        path = [(-1050, 120, 40), (-850, 120, 120), (-700, 80, 160)]
-        flyer(f"mw{k}", g1, lambda e, c, k=k: wafer_disc(f"mw{k}_m", c, e, m["wafer"], r=40, t=6), path, f0, f0 + 36)
-
-    # beat 2: the Yongin cluster plan, KRW 600T = 19.4 Fab-1s (31T each), as ghost fabs
-    g2 = empty("yongin", root)
-    show(g2, beat(2))
-    X2 = 5200.0
-    box("floor2", (X2 - 2300, -32, -2600), (X2 + 2300, -12, 250), m["floor"], g2)
-    fh = 31.0 * S1 * 0.5
-    g, pv = fab("y1_real", g2, X2 - 1700, 0, 300, fh, 260, m)
-    grow(pv, F(2, 0.02), F(2, 0.1))
-    k = 0
-    for row in range(2):
-        for col in range(10):
-            if k >= 19:
-                break
-            x = X2 - 1250 + 320 * col
-            z = -row * 380.0
-            gg = empty(f"gh{k}", g2)
-            pvg = pivot(f"gh{k}_p", (x, 0, 0), gg)
-            box(f"gh{k}_m", rel((x, 0, 0), (x - 140, 0, z - 260)), rel((x, 0, 0), (x + 140, fh, z)), m["ghost"], pvg)
-            grow(pvg, F(2, 0.12 + 0.025 * k), F(2, 0.18 + 0.025 * k))
-            k += 1
-    label("Yongin Fab 1 KRW 31T", (X2 - 1700, fh + 30, 0), g2, beat(2, 0.1))
-    label("Yongin cluster plan KRW 600T", (X2 + 200, fh + 40, -380), g2, beat(2, 0.6))
-    label("= 19 Fab 1s; done 2033 (guide)", (X2 + 400, fh * 0.5, 30), g2, beat(2, 0.75))
-    camera(root, [
-        ((X0, 470.0, 0.0), 2350.0, 0.12, 0.07),
-        ((60.0, 460.0, 0.0), 2650.0, 0.10, 0.07),
-        ((X2 - 60, 330.0, -200.0), 2750.0, 0.10, 0.16),
-    ])
+    """Capex & fabs: a world map with each SK hynix site pinned on it. The TUI flies the camera to
+    a site on Enter (fab_map.py; sites in geo/sk_hynix_sites.json). The capex bars and fab tables
+    stay in the section's data below the picture."""
+    fab_map.build(root, m)
 
 
 # ---- tech: TSVs, thin dies + MR-MUF, HBM4's wide bus ---------------------------------------------
