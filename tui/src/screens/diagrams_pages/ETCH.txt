@@ -1,47 +1,15 @@
 # 1. What happens: carve the pattern into the wafer
 
- ┌───────────┐  ┌───────────┐  ┌───────────┐  ┌──────────────┐  ┌───────────┐  ┌─────────┐
- │ HARD MASK │  │ IGNITE    │  │ RADICALS  │  │ ION-ASSISTED │  │ SIDEWALL  │  │ STRIP + │
- │ litho     │─▶│ PLASMA    │─▶│ + IONS    │─▶│ ETCH         │─▶│ PASSIVATE │─▶│ CLEAN   │
- │           │  │ RF on gas │  │ in plasma │  │ vertical     │  │ film      │  │ strip   │
- └───────────┘  └───────────┘  └───────────┘  └──────────────┘  └───────────┘  └─────────┘
 
   (etch transfers the litho pattern into the film; each litho layer is followed by etch, then CLEAN)
 
 # 2. Inside a plasma etch chamber (capacitive RIE or inductive ICP)
 
- ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │   process gas in ──▶ gas plenum                                                                      │
- │   ═════════════ SHOWERHEAD (top electrode, or dielectric window under the ICP coil) ═════════        │
- │      ║   ║   ║   ║   ║   ║   ║   gas jets, 5-100 mTorr                                               │
- │   ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈                     │
- │   ≈≈≈  PLASMA: electrons, radicals (F, Cl), ions (CF3+, Ar+), density ~1e11 /cm3  ≈≈≈≈≈≈≈≈≈≈≈≈≈      │
- │   ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈                     │
- │       ▼   ▼   ▼   ▼   ▼   ▼   ▼    ions accelerated across the sheath by the RF bias                 │
- │     ┌───────────────────────────────────────────────┐                                                │
- │     │ WAFER (pattern under hard mask)               │    bias RF 13.56 MHz (textbook)                │
- │     └───────────────────────────────────────────────┘    ICP source: tool spec up to 2500 W, 2.4 MHz │
- │     ▓▓▓▓▓▓▓ ESC: electrostatic chuck, He back-side cooling ▓▓▓▓▓▓▓▓▓▓▓                               │
- │     ▓▓▓▓▓▓▓ cathode (RF bias) + chiller, 0 to -30 C for cryo etch ▓▓▓▓▓▓                             │
- │   byproducts (SiF4, CO ...) ◀── turbo + dry pump ◀────────────────────────────────                   │
- └──────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
   (source power sets ion FLUX, bias power sets ion ENERGY; about 1 V per watt, geometry-dependent)
 
 # 3. Trench cross-section: why ions make it vertical
 
- ┌──────────────────────────────────────────────────────────────────────────────────────────┐
- │   BEFORE                        DURING                                AFTER              │
- │   ┌────┐    ┌────┐              ions ↓↓↓↓  radicals ≈ ≈               ┌────┐    ┌────┐   │
- │   │mask│    │mask│              ┌────┐ ↓↓↓↓ ┌────┐                    │mask│    │mask│   │
- │   ├────┴────┴────┤              │mask│      │mask│                    ├────┤    ├────┤   │
- │   │  film (SiO2) │              ├────┤▓    ▓├────┤  ▓ = sidewall      │film│    │film│   │
- │   │              │              │film│▓    ▓│film│  passivation       │    │    │    │   │
- │   │              │              │    │▓    ▓│    │  (byproduct film)  │    │    │    │   │
- │   │ stop layer   │              │ stop layer ▼    │  blocks sideways   ├────┴────┴────┤  │
- │   └──────────────┘              └──────────────────┘  attack            │ stop layer   │ │
- │                                                                         └──────────────┘ │
- └──────────────────────────────────────────────────────────────────────────────────────────┘
 
   (ions hit the floor at normal incidence and break the film there; the sidewalls stay protected)
 
@@ -88,17 +56,6 @@
 
 # 8. Why deep holes are hard (HAR etch)
 
- ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
- │   top of hole                                  failure modes as the hole deepens [2]            │
- │   ┌──┐   ┌──┐   polymer at the mouth           * polymer at top can block ions                  │
- │   │  │   │  │   narrows the opening           * conventional RIE rate drops as holes get deeper │
- │   │  │   │  │                                 * allowed deviation <10 nm over 10 um             │
- │   │  │   │  │   ions lose energy and angle    * 30+ recipe knobs; 33 tuned by AI once [2]       │
- │   │  │   │  │   on the way down               * ~30% more word lines per generation [2]         │
- │   │  │   │  │                                                                                   │
- │   └──┘   └──┘   floor: ions + HF / F reach it, byproducts must get out                          │
- │   cold wafer (cryo): less sidewall attack, more adsorbed neutrals, faster floor etch [2]        │
- └─────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 # 9. Who makes it, structure, risks
 
@@ -111,6 +68,43 @@
   Risks: NAND capex swings (2023 drop above), China at 34% of Lam sales (export controls), and the
   etch-step count rising with every NAND layer and GAA node (textbook).
 
+# 10. Key terms
+
+HARD MASK: # Resist is too soft Litho exposes resist, but resist is too soft to survive a long, deep etch.
+
+IGNITE: # From neutral gas to plasma A strong RF field accelerates the few free electrons present.
+
+RADICALS: # The chemical half Radicals are neutral, highly reactive fragments made when electrons break gas molecules apart, for example CF4 + e- giving CF3 + F.
+
+ION-ASSISTED: # Ions make it vertical Radicals sit on the surface but SiO2 etches slowly with fluorine alone, because Si-O bonds are strong.
+
+SIDEWALL: # The protective film Sidewall passivation keeps trench walls from being eaten sideways.
+
+STRIP: # Remove the helpers Strip and clean removes everything that was only there to enable the etch: leftover hard mask or resist (typically oxygen plasma ashing, textbook), the sidewall polymer, and residues containing halogens that would corrode metal if left.
+
+SHOWERHEAD: # Even gas delivery The showerhead is a perforated top electrode (capacitive reactors) or a dielectric window beneath the coil (ICP) that distributes process gas evenly across the wafer.
+
+PLASMA:: # Three species The plasma region holds three species.
+
+ESC: # Holding and cooling the wafer The electrostatic chuck holds the wafer flat with an electrostatic force and lets helium flow behind it to carry heat between wafer and chuck.
+
+cathode: # The bottom electrode The cathode is the bottom electrode beneath the chuck.
+
+Lam Cryo 3.0: # What it is Lam Cryo 3.0 is Lam Research's third-generation cryogenic dielectric etch, aimed at the deepest 3D NAND channel holes.
+
+NAND channel hole: # A very deep, very thin hole The NAND channel hole is a vertical hole punched through the whole stack of alternating oxide and nitride layers, later filled to form the string of memory cells.
+
+aspect ratio: # Depth over width Aspect ratio is hole depth divided by hole width.
+
+ALE: # Two self-limiting steps Atomic layer etching splits etching into two self-limiting half-steps: first a surface modification step (for example chlorine adsorbs on silicon), then a low-energy ion step (Ar+) that removes only the modified layer.
+
+China: # Lam's biggest region China was Lam's largest region in FY2025 at 34% of its $18.44B revenue, ahead of Korea at 22% and Taiwan at 19%.
+
+Etch+clean 22: # Share of wafer-fab equipment This row is Yole Group's estimate of etch plus clean as a share of wafer-fab equipment: 27% in 2022 and 19% in H1 2024, versus patterning (lithography) at 29% of WFE in 2024e and deposition at 25%.
+
+Tokyo Electron: # Number two in etch Tokyo Electron (8035.T) is the number two etch player and the strongest challenger to Lam in memory.
+
+Lam Research (LRCX): # The pure play Lam Research is the etch leader and the best pure-play on the segment.
 # Sources
 
   [1] Lam Cryo 3.0: emsnow.com/?p=42504
