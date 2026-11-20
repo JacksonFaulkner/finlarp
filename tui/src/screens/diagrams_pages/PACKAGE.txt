@@ -1,132 +1,42 @@
-# 1. What happens: loose dies to one GPU package
+# 1. What happens: a die becomes a package
 
- ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌───────────────┐   ┌───────────┐   ┌───────────┐
- │ KNOWN-GOOD │──▶│ HBM STACK  │──▶│ INTERPOSER │──▶│ CHIP-ON-WAFER │──▶│ FLIP ONTO │──▶│ MOLD +    │
- │ DIE (PICK) │   │ TSV + bond │   │ CoWoS-S/L  │   │ dies on Si    │   │ SUBSTRATE │   │ LID + BGA │
- └────────────┘   └────────────┘   └────────────┘   └───────────────┘   └───────────┘   └───────────┘
+Packaging takes a tested die, attaches it to a substrate, connects it with wires or bumps, seals it, and provides the power and signal paths a board needs. For an AI GPU the package also holds HBM memory stacks beside the logic die, so this is the step where logic and memory are joined. Only dies that passed WAFER SORT and DICE reach this step.
 
-  (steps 1 and 2 come from PICK and the memory fabs; this node covers everything from the interposer up)
+# 2. Die attach: wire bond or flip chip
 
-# 2. Cross-section: GPU + HBM package, side view (not to scale)
+Wire bonding is the older method. The die is glued face-up with adhesive or epoxy, and fine wires run from its bond pads to the substrate or leadframe. One vendor source puts wire bonding at roughly 75-80% of all IC interconnections worldwide, because it is cheap and suits most package types.
 
-     ═════════════════════ [1] LID / COLD PLATE (liquid cooled in the rack) ═════════════════════
-     ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈ [2] TIM ≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈≈
-     ┌──────────────┐  [3] HBM = 12 DRAM dies + base die; GPU dies face down   ┌──────────────┐
-     │ ║ DRAM 12  ║ │                                                          │ ║ DRAM 12  ║ │
-     ├──────────────┤                                                          ├──────────────┤
-     │ ║ DRAM 11  ║ │                                                          │ ║ DRAM 11  ║ │
-     ├──────────────┤  ┌────────────────────────┐  ┌────────────────────────┐  ├──────────────┤
-     │ ║   ...    ║ │  │                        │  │                        │  │ ║   ...    ║ │
-     ├──────────────┤  │       GPU DIE A        │  │       GPU DIE B        │  ├──────────────┤
-     │ ║ DRAM 02  ║ │  │   TSMC 4NP, ~104B tr   │  │   TSMC 4NP, ~104B tr   │  │ ║ DRAM 02  ║ │
-     ├──────────────┤  │   near reticle limit   │  │   near reticle limit   │  ├──────────────┤
-     │ ║ DRAM 01  ║ │  │                        │  │                        │  │ ║ DRAM 01  ║ │
-     ├──────────────┤  │  back-end metal stack  │  │  back-end metal stack  │  ├──────────────┤
-     │ ║ BASE DIE ║ │  │ (faces DOWN, flipped)  │  │ (faces DOWN, flipped)  │  │ ║ BASE DIE ║ │
-     └──────────────┘  └────────────────────────┘  └────────────────────────┘  └──────────────┘
-    oooooooooooooooooooooooooooo [4] microbumps (tens of um pitch) ooooooooooooooooooooooooooooo
-   ┌────────────────────────────────────────────────────────────────────────────────────────────┐
-   │           [5] SILICON INTERPOSER (CoWoS-S)  or  RDL + local Si bridge (CoWoS-L)            │
-   │     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║        │
-   │     ║ [6] TSV   ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║        │
-   │     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║     ║        │
-   │                                                                                            │
-   │     RDL wiring layers: die-to-die and die-to-HBM traces (HBM bus = 1024 bit per stack)     │
-   │        [7] NV-HBI die-to-die link here: 10 TB/s aggregate between the two GPU dies         │
-   └────────────────────────────────────────────────────────────────────────────────────────────┘
-    oooooooooooooooooooooooooooooo [8] C4 bumps (bigger, coarser) oooooooooooooooooooooooooooooo
-   ┌────────────────────────────────────────────────────────────────────────────────────────────┐
-   │         [9] ORGANIC SUBSTRATE (ABF build-up, many layers): fans out + routes power         │
-   │            plated through-holes, power planes, decoupling caps on the underside            │
-   │                                                                                            │
-   └────────────────────────────────────────────────────────────────────────────────────────────┘
-    OOOOOOOOOOOOOOOOOOOOOOO [10] BGA balls (about 1 mm class, textbook) OOOOOOOOOOOOOOOOOOOOOOOO
-   ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ system board / socket ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+Flip chip turns the die face-down onto solder or copper bumps, so every connection forms at once. Flip chip packages need underfill, an epoxy that fills the gap under the die, to survive thermal cycling and drop shock.
 
+# 3. Mold and substrate
 
+Transfer molding encapsulates the die and wires in epoxy molding compound, one vendor source gives 175 C at 5-10 MPa, to protect them mechanically. The die sits on an organic substrate: a multi-layer board built up in thin dielectric layers. A conventional substrate is symmetric, with more than 10 ABF build-up layers on each side of the core. Adding layers unevenly to one side causes warpage, and large substrates get harder to keep flat as their size grows.
 
+# 4. HBM: DRAM dies stacked on TSVs
 
-  Legend: [3] real B200 package carries 8 HBM3E stacks (4 per die side) and 2 GPU dies; drawn with 1 + 1
-  for width. [5] CoWoS-S interposers reach up to 3.3x reticle (~2,700 mm2); beyond that TSMC points to
-  CoWoS-L (small LSI bridge chips + RDL) or CoWoS-R. CoWoS-L with ~3x reticle and 8 HBM has been shown.
+An HBM stack is thinned DRAM dies stacked on a base logic die. Through-silicon vias (TSVs, copper columns that pass through each thinned die) carry signals and power up the stack, and microbumps join each layer. SK hynix says its 12-high HBM is in production and 16-high is under qualification (ServeTheHome, August 2026). Stacks are bonded with thermocompression plus non-conductive film (TC-NCF) or mass reflow molded underfill (MR-MUF). Hybrid bonding, which joins copper to copper, is the next step: it pushes bump pitch below 18 um, which MR-MUF cannot reach. An HBM4 part reported by the same source has over 20,000 TSVs and 16,148 base microbumps.
 
-# 3. Procedure and physics
+# 5. CoWoS: GPU and HBM on one silicon interposer
 
-  1 interposer wafer   TSVs etched, Cu-filled; RDL on front; wafer thinned to expose TSVs.
-                       Interposer is passive silicon: wires only, no transistors (CoWoS-S).
-  2 chip-on-wafer      known-good GPU and HBM dies placed face-down, microbumps reflowed (CoW).
-  3 underfill + mold   epoxy flows between dies (capillary), then compression mold fixes the whole stack.
-  4 wafer-on-substrate CoW thinned, C4-bumped, diced, flipped onto organic substrate.
-  5 second underfill   C4 joints get their own underfill; lid + TIM fitted; BGA balls attached.
-  Why Si interposer: only silicon can route thousands of fine wires between GPU and HBM at um pitch.
-  Why the name matters: Chip on Wafer on Substrate = steps 2 then 4 (TSMC expansion, textbook).
+CoWoS (Chip-on-Wafer-on-Substrate) is TSMC's 2.5D packaging. GPU dies and HBM stacks sit side by side on a silicon interposer, a slab of silicon with fine wires and TSVs that carries the signals between them. The interposer sits on an organic substrate that fans the signals out to the board. CoWoS-S interposers reach up to about 3.3 times the reticle, roughly 2,700 mm2 (TSMC). Beyond that, TSMC points to CoWoS-L or CoWoS-R. A B200 package carries two reticle-sized GPU dies and eight HBM3E stacks, joined through the interposer.
 
-  Thermal stress: Si ~3 ppm/C vs organic substrate ~15-20 ppm/C (textbook) so a big package warps on
-  every heat cycle; underfill, stiffener ring and lid keep bumps from cracking.
+# 6. Why packaging is the bottleneck
 
-  Inside the HBM stack (memory makers, not TSMC):
-    DRAM dies thinned to tens of um, each pierced by TSVs, stacked and bonded, base die at the bottom
-    HBM3E 12-high = 12 DRAM dies; JEDEC raised stack height limit 720 to 775 um (Tom's)
-    microbump pitch: historically ~40 um, trending to ~10 um; volume standard cited ~25 um
-    bonding: TC-NCF or MR-MUF (SK hynix); hybrid bonding validated at 12-high, not yet volume
-    hybrid bonding ~6 um pitch now, 4.5 and 3 um coming; TSMC wants ~5 um class bumps by 2H 2028
+Every die and HBM stack placed on an interposer is expensive, so one bad part can ruin the whole package. Known-good stacked-die testing keeps defective memory from using costly interposer area. The interposer is itself made on a wafer, and bigger interposers and bigger substrates are harder to keep flat. Counterpoint Research, in an older report, named CoWoS as the main bottleneck for AI shipments. As stacks climb past 20 dies, heat rather than bonding becomes the limit on height (ServeTheHome).
 
-# 4. By the numbers
+# 7. The parts on the page
 
-  interposer limit      3.3x reticle, ~2,700 mm2 (CoWoS-S, TSMC); 6x reticle is a development target
-  B200 package          2 dies, 208B transistors, 192 GB HBM3E, ~8 TB/s memory, 10 TB/s die-to-die
-  HBM per stack         1024-bit bus, ~1 TB/s (Tom's Hardware launch report)
-  CoWoS-R RDL pitch     4 um minimum stated (secondary source)
-  OSAT top-10 revenue   $41.56 billion in 2024 (+3% YoY, TrendForce)
-  TSMC CoWoS CAGR       above 80% from 2022 to 2027 (TSMC symposium, May 2026, via Reuters/TrendForce)
-  supply gap            about 20% now, may narrow to about 10% by end-2026 (TrendForce, June 2026)
+INTERPOSER is the passive silicon slab that carries the wiring between dies. CHIP-ON-WAFER is the step that places known-good GPU and HBM dies on the interposer wafer, and FLIP ONTO sets that chip-plus-interposer module on the organic substrate. GPU DIE A is one of the two compute dies in a B200 package, and [3] HBM is the memory stack beside it. [4] microbumps and [8] C4 bumps carry the signals at two pitches, and [6] TSV are the copper-filled vias that carry them through silicon. [7] NV-HBI is the link that joins the two GPU dies, and [9] ORGANIC SUBSTRATE fans the signals out toward the board.
 
-# 5. CoWoS capacity, thousand wafers per month (estimates, not TSMC disclosures)
+MOLD + is the finishing step: the mould, the second underfill, the [1] LID and cold plate, the [2] TIM between the die backs and the lid, and the BGA balls under the substrate.
 
-  End-2025 level (36Kr analysis):
-  end-2025     ███████████████████████ 80
-
-  End-2026 forecasts by source and date:
-  TF Dec 2024  ██████████████████████████ 90
-  JPM Sep 2025 ███████████████████████████ 95
-  36Kr         ██████████████████████████████████ ~120
-  equip Dec 25 ████████████████████████████████████ 127
-  TF Jun 2026  ████████████████████████████████████████ 120-140 (top of range shown)
-  Also: JPM 112 by end-2027; OSAT-side add-on 40 (equipment) or 50-60 (TrendForce June).
-  Industry total could approach 200 (TSMC 120-140 + OSAT partners), per TrendForce June 2026.
-
-# 6. OSAT revenue 2024, $ billion (TrendForce) - the back-end that does the rest of packaging
-
-  ASE     ████████████████████████████████████████████ 18.54  (~45% of top 10)
-  Amkor   ███████████████ 6.32  (-2.8% YoY)
-  JCET    ████████████ 5.0  (+19.3% YoY, ~12%)
-
-  Other shares of top-10 (%): Tongfu 8, Powertech 5.5, HT-Tech 4.8, WiseRoad 3.7, Hana Micron 2.2,
-  KYEC 2.2, ChipMOS 1.7. Chinese players grew double digits in 2024.
-
-# 7. Who makes it, market structure, chokepoints
-
-  CoWoS (the advanced part)  TSM is the main CoWoS source (textbook); ASE (ASX),
-                             Amkor (AMKR) take overflow oS work. SPIL is part of ASE.
-  HBM                        SK hynix (000660.KS), Samsung (005930.KS), Micron (MU); see PICK for shares.
-  Substrates (ABF)           Ibiden (4062.T), Unimicron (3037.TW) (textbook, no share sourced)
-  Mold / underfill           epoxy-compound makers, mostly Japanese (textbook)
-  Risks                      one company's packaging lines gate Nvidia + AMD + custom ASIC output
-                             warpage and yield loss rise with interposer area; ABF substrate supply
-                             Taiwan concentration; ~20% supply gap (TrendForce) means allocation rules
-  Competition                panel-level packaging, glass cores (watch items, not sourced)
+CoWoS-L is the route past the reticle limit: local silicon bridges and redistribution wiring replace one full interposer. The supply gap is the shortfall between CoWoS demand and capacity, which TrendForce's June 2026 estimate puts near 20% now. ASE and Amkor take overflow back-end work while CoWoS is short.
 
 # Sources
 
-  [1] TrendForce on CoWoS capacity (June 2026): trendforce.com/news/?p=59316 (also ?p=29317, ?p=30991)
-  [2] 36Kr CoWoS trajectory: eu.36kr.com/en/p/3631956080985095
-  [3] TrendForce OSAT 2024 ranking: trendforce.com/presscenter/news/20250513-12577.html
-      evertiq.com/news/2025-05-23-chinese-firms-gain-ground-in-2024-top-10-osat-ranking
-  [4] TSMC CoWoS: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
-  [5] CoWoS-L / 8 HBM paper:
-      conferences.computer.org/ectc/pdfs/ECTC2023-1NkkviSxgDnmPjptC1ysqm/349800b022.pdf
-  [6] Blackwell B200 specs: anandtech.com/show/21310 ; tomshardware.com (Blackwell B200 reveal)
-  [7] HBM bonding + hybrid bonding status: trendforce.com/news/?p=56780 ;
-      semiengineering.com/hbm-leads-the-way-to-defect-free-bumps/
-  [8] CoWoS-R pitch:
-      semiwiki.com/semiconductor-manufacturers/tsmc/371759-the-difference-between-cowos-s-and-cowos-r/
+- NextPCB, CoWoS for H100 and B200: https://www.nextpcb.com/blog/cowos-packaging-h100-b200
+- TSMC 3DFabric, CoWoS: https://3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+- PCBSync, wire bonding vs flip chip (vendor page): https://pcbsync.com/wire-bonding-vs-flip-chip/
+- iConnect007, large substrates for AI servers: https://iconnect007.com/article/136973/inemi-packaging-tech-topic-challenges-and-solutions-for-ai-servers-with-large-substrates/136976/pcb
+- ServeTheHome, SK hynix HBM packaging at Hot Chips 2026: https://www.servethehome.com/sk-hynix-hbm-packaging-at-hot-chips-2026/
+- Counterpoint Research, CoWoS and AI shipments (older): https://counterpointresearch.com/?p=977297
