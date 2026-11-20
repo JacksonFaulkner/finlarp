@@ -294,7 +294,6 @@ const S9_B: &[Beat] = &[
         ),
 ];
 
-
 fn section_1() -> Box<dyn Scene> {
     page(
         &S1,
