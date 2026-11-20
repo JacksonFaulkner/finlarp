@@ -20,25 +20,9 @@ const ANIMS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/SLICE_POLISH.anim.txt"),
     ),
     ("WAFER", include_str!("diagrams_pages/WAFER.anim.txt")),
-    ("DEPOSIT", include_str!("diagrams_pages/DEPOSIT.anim.txt")),
-    ("COAT", include_str!("diagrams_pages/COAT.anim.txt")),
-    ("EXPOSE", include_str!("diagrams_pages/EXPOSE.anim.txt")),
-    ("DEVELOP", include_str!("diagrams_pages/DEVELOP.anim.txt")),
     ("ETCH", include_str!("diagrams_pages/ETCH.anim.txt")),
     ("IMPLANT", include_str!("diagrams_pages/IMPLANT.anim.txt")),
-    ("CLEAN", include_str!("diagrams_pages/CLEAN.anim.txt")),
     ("KLAC", include_str!("diagrams_pages/KLAC.anim.txt")),
-    (
-        "WAFER SORT",
-        include_str!("diagrams_pages/WAFER_SORT.anim.txt"),
-    ),
-    ("DICE", include_str!("diagrams_pages/DICE.anim.txt")),
-    ("PICK", include_str!("diagrams_pages/PICK.anim.txt")),
-    ("PACKAGE", include_str!("diagrams_pages/PACKAGE.anim.txt")),
-    (
-        "FINAL TEST",
-        include_str!("diagrams_pages/FINAL_TEST.anim.txt"),
-    ),
     ("SHIP", include_str!("diagrams_pages/SHIP.anim.txt")),
 ];
 
@@ -71,9 +55,7 @@ pub fn parse(src: &'static str) -> Option<Anim> {
 
 /// Zoom-ins that open in the full-screen 3D view (`F`), by page and key: a letter for a
 /// zoom, a digit for a numbered section.
-const ORBIT: &[(&str, char)] = &[
-    ("POLYSILICON", 'c'),
-];
+const ORBIT: &[(&str, char)] = &[("POLYSILICON", 'c')];
 
 /// Whether zoom `key` of `page` has a 3D model the full-screen view can orbit.
 pub fn orbitable(page: &str, key: char) -> bool {
@@ -192,15 +174,40 @@ mod tests {
     #[test]
     fn sections_come_from_the_blender_registry() {
         let pages = [
-            "PAM4 DSP", "LASER", "OPTICAL FIBER", "PHOTODIODE", "TRANSCEIVER", "CPO",
-            "TOP METAL", "MID METAL", "THIN METAL", "CONTACTS", "NMOS", "GATE STACK", "PMOS",
-            "PLANAR", "FINFET", "GATE-ALL-AROUND", "LOGIC DIE",
+            "PAM4 DSP",
+            "LASER",
+            "OPTICAL FIBER",
+            "PHOTODIODE",
+            "TRANSCEIVER",
+            "CPO",
+            "TOP METAL",
+            "MID METAL",
+            "THIN METAL",
+            "CONTACTS",
+            "NMOS",
+            "GATE STACK",
+            "PMOS",
+            "PLANAR",
+            "FINFET",
+            "GATE-ALL-AROUND",
+            "LOGIC DIE",
         ];
         for page in pages {
-            assert!(super::super::diagrams_nodes::section(page, 0).is_some(), "{page}: no registry section");
+            assert!(
+                super::super::diagrams_nodes::section(page, 0).is_some(),
+                "{page}: no registry section"
+            );
             for i in 0..12 {
-                let (got, want) = (section_anim(page, i), super::super::diagrams_nodes::section(page, i));
-                assert_eq!(got.map(|f| f as usize), want.map(|f| f as usize), "{page} section {}", i + 1);
+                let (got, want) = (
+                    section_anim(page, i),
+                    super::super::diagrams_nodes::section(page, i),
+                );
+                assert_eq!(
+                    got.map(|f| f as usize),
+                    want.map(|f| f as usize),
+                    "{page} section {}",
+                    i + 1
+                );
             }
         }
     }
@@ -284,8 +291,8 @@ mod tests {
             let heads = art.lines().filter(|l| l.starts_with("# ")).count();
             assert_eq!(heads, n, "{page}: headings");
             for i in 0..n {
-                let build = section_anim(page, i)
-                    .unwrap_or_else(|| panic!("{page}: no section {}", i + 1));
+                let build =
+                    section_anim(page, i).unwrap_or_else(|| panic!("{page}: no section {}", i + 1));
                 let beats = Player::new(build(), std::time::Instant::now())
                     .shot_at(0)
                     .beats;

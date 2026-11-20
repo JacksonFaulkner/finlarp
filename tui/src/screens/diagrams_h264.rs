@@ -21,10 +21,10 @@
 // order (no B-frames, or the decode order would not be the presentation order), the stream
 // carries its own parameter sets, and the image size `s`/`v` is the stream's frame size.
 
+use std::collections::HashSet;
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::collections::HashSet;
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant};
 
@@ -99,7 +99,9 @@ fn probe_stdio() -> io::Result<bool> {
     }
     let result = (|| {
         let mut out = io::stdout().lock();
-        out.write_all(format!("\x1b_Gi={PROBE_ID},s=16,v=16,a=q,t=d,f=264;AAAA\x1b\\\x1b[c").as_bytes())?;
+        out.write_all(
+            format!("\x1b_Gi={PROBE_ID},s=16,v=16,a=q,t=d,f=264;AAAA\x1b\\\x1b[c").as_bytes(),
+        )?;
         out.flush()?;
         drop(out);
         let stdin = io::stdin();
@@ -108,8 +110,14 @@ fn probe_stdio() -> io::Result<bool> {
         let mut got = Vec::new();
         let mut buf = [0u8; 256];
         while Instant::now() < deadline && !has_da1_reply(&got) {
-            let left = deadline.saturating_duration_since(Instant::now()).as_millis() as i32;
-            let mut pfd = libc::pollfd { fd, events: libc::POLLIN, revents: 0 };
+            let left = deadline
+                .saturating_duration_since(Instant::now())
+                .as_millis() as i32;
+            let mut pfd = libc::pollfd {
+                fd,
+                events: libc::POLLIN,
+                revents: 0,
+            };
             // SAFETY: one valid pollfd for the duration of the call.
             let ready = unsafe { libc::poll(&mut pfd, 1, left.max(1)) };
             if ready <= 0 {
@@ -131,7 +139,9 @@ fn probe_stdio() -> io::Result<bool> {
 
 /// Whether the bytes hold a DA1 reply (`ESC [ ? ... c`), the probe's end marker.
 fn has_da1_reply(b: &[u8]) -> bool {
-    b.windows(3).position(|w| w == b"\x1b[?").is_some_and(|i| b[i..].contains(&b'c'))
+    b.windows(3)
+        .position(|w| w == b"\x1b[?")
+        .is_some_and(|i| b[i..].contains(&b'c'))
 }
 
 /// Whether the probe's kitty reply is OK.
@@ -146,13 +156,20 @@ pub fn fingerprint(img: &RgbaImage) -> Vec<u8> {
     let mut out = Vec::with_capacity((PRINT_COLS * PRINT_ROWS) as usize);
     for r in 0..PRINT_ROWS {
         for c in 0..PRINT_COLS {
-            let (x0, x1) = (c * w / PRINT_COLS, ((c + 1) * w / PRINT_COLS).max(c * w / PRINT_COLS + 1));
-            let (y0, y1) = (r * h / PRINT_ROWS, ((r + 1) * h / PRINT_ROWS).max(r * h / PRINT_ROWS + 1));
+            let (x0, x1) = (
+                c * w / PRINT_COLS,
+                ((c + 1) * w / PRINT_COLS).max(c * w / PRINT_COLS + 1),
+            );
+            let (y0, y1) = (
+                r * h / PRINT_ROWS,
+                ((r + 1) * h / PRINT_ROWS).max(r * h / PRINT_ROWS + 1),
+            );
             let (mut sum, mut n) = (0u64, 0u64);
             for y in y0..y1.min(h) {
                 for x in x0..x1.min(w) {
                     let p = img.get_pixel(x, y).0;
-                    sum += (u64::from(p[0]) * 299 + u64::from(p[1]) * 587 + u64::from(p[2]) * 114) / 1000;
+                    sum += (u64::from(p[0]) * 299 + u64::from(p[1]) * 587 + u64::from(p[2]) * 114)
+                        / 1000;
                     n += 1;
                 }
             }
@@ -167,14 +184,23 @@ pub fn same_print(a: &[u8], b: &[u8]) -> bool {
     if a.len() != b.len() || a.is_empty() {
         return false;
     }
-    let diff: u64 = a.iter().zip(b).map(|(x, y)| u64::from(x.abs_diff(*y))).sum();
+    let diff: u64 = a
+        .iter()
+        .zip(b)
+        .map(|(x, y)| u64::from(x.abs_diff(*y)))
+        .sum();
     diff as f64 / a.len() as f64 <= PRINT_TOLERANCE
 }
 
 /// The time of beat `b`'s middle frame, the one its fingerprint is taken from.
 fn mid_time(beats_ms: &[u64], b: usize) -> Time {
     let start: u64 = beats_ms[..b].iter().sum();
-    Time { ms: start + beats_ms[b] / 2, beat: b, local: 0.5, beat_start: start }
+    Time {
+        ms: start + beats_ms[b] / 2,
+        beat: b,
+        local: 0.5,
+        beat_start: start,
+    }
 }
 
 /// Where the clips live: FL_CLIPS, else data/clips in the finlarp checkout.
@@ -233,9 +259,17 @@ pub fn jobs(page: &str) -> Vec<Job> {
     let Some(scene) = scene_for(page) else {
         return out;
     };
-    out.push(Job { page: page.to_string(), clip: "overview".into(), src: Src::Overview });
+    out.push(Job {
+        page: page.to_string(),
+        clip: "overview".into(),
+        src: Src::Overview,
+    });
     for Zoom { key, build, .. } in scene.zooms() {
-        out.push(Job { page: page.to_string(), clip: format!("zoom-{key}"), src: Src::Build(*build) });
+        out.push(Job {
+            page: page.to_string(),
+            clip: format!("zoom-{key}"),
+            src: Src::Build(*build),
+        });
     }
     for i in 0.. {
         match super::diagrams_anim::section_anim(page, i) {
@@ -263,7 +297,12 @@ fn render_job(job: &Job, root: &Path, w: u32, h: u32, fps: u32) -> io::Result<Op
     if beats.is_empty() {
         return Ok(None);
     }
-    let probe = Time { ms: 0, beat: 0, local: 0.0, beat_start: 0 };
+    let probe = Time {
+        ms: 0,
+        beat: 0,
+        local: 0.0,
+        beat_start: 0,
+    };
     if scene.pixels(&probe, w, h).is_none() {
         return Ok(None);
     }
@@ -288,7 +327,10 @@ fn render_job(job: &Job, root: &Path, w: u32, h: u32, fps: u32) -> io::Result<Op
             .pixels(&mid_time(&beats_ms, b), PRINT_W, PRINT_H)
             .ok_or_else(|| io::Error::other("the fingerprint frame came back without a picture"))?;
         meta.prints.push(fingerprint(&thumb));
-        meta.beats.push(Beat { ms: beat.ms, frames });
+        meta.beats.push(Beat {
+            ms: beat.ms,
+            frames,
+        });
         start += beat.ms;
     }
     // the sidecar goes last and whole: a reader sees the old clip or the new one, never half
@@ -353,7 +395,10 @@ fn encode_beat(
         .stderr(Stdio::inherit())
         .spawn()?;
     {
-        let stdin = ff.stdin.as_mut().ok_or_else(|| io::Error::other("no ffmpeg stdin"))?;
+        let stdin = ff
+            .stdin
+            .as_mut()
+            .ok_or_else(|| io::Error::other("no ffmpeg stdin"))?;
         for k in 0..frames {
             let local = k as f32 / frames as f32;
             let t = Time {
@@ -392,22 +437,24 @@ pub fn render_pages(pages: &[String], out: &Path, only: Option<&str>, threads: u
     pbr3d::gpu::set_per_thread(true);
     std::thread::scope(|s| {
         for _ in 0..threads.max(1) {
-            s.spawn(|| loop {
-                let job = match queue.lock().ok().and_then(|mut q| q.pop()) {
-                    Some(j) => j,
-                    None => break,
-                };
-                eprintln!("render-video --h264: {} / {}", job.page, job.clip);
-                match render_job(&job, out, W, H, FPS) {
-                    Ok(Some(m)) => {
-                        let secs: u64 = m.beats.iter().map(|b| b.ms).sum();
-                        eprintln!("  {} beats, {:.1} s", m.beats.len(), secs as f64 / 1000.0);
-                    }
-                    Ok(None) => eprintln!("  skipped: no picture"),
-                    Err(e) => {
-                        eprintln!("  failed: {e}");
-                        if let Ok(mut f) = failed.lock() {
-                            *f += 1;
+            s.spawn(|| {
+                loop {
+                    let job = match queue.lock().ok().and_then(|mut q| q.pop()) {
+                        Some(j) => j,
+                        None => break,
+                    };
+                    eprintln!("render-video --h264: {} / {}", job.page, job.clip);
+                    match render_job(&job, out, W, H, FPS) {
+                        Ok(Some(m)) => {
+                            let secs: u64 = m.beats.iter().map(|b| b.ms).sum();
+                            eprintln!("  {} beats, {:.1} s", m.beats.len(), secs as f64 / 1000.0);
+                        }
+                        Ok(None) => eprintln!("  skipped: no picture"),
+                        Err(e) => {
+                            eprintln!("  failed: {e}");
+                            if let Ok(mut f) = failed.lock() {
+                                *f += 1;
+                            }
                         }
                     }
                 }
@@ -419,7 +466,15 @@ pub fn render_pages(pages: &[String], out: &Path, only: Option<&str>, threads: u
 
 /// The escapes that send one beat's stream as a kitty image with a virtual placement of
 /// `cols` x `rows` cells. The stream is already compressed: no zlib, just base64 in chunks.
-pub fn transmit(id: u32, stream: &[u8], w: u32, h: u32, cols: u16, rows: u16, tmux: bool) -> Vec<u8> {
+pub fn transmit(
+    id: u32,
+    stream: &[u8],
+    w: u32,
+    h: u32,
+    cols: u16,
+    rows: u16,
+    tmux: bool,
+) -> Vec<u8> {
     let data = base64(stream);
     let mut out = Vec::new();
     let mut pos = 0;
@@ -445,7 +500,8 @@ pub fn transmit(id: u32, stream: &[u8], w: u32, h: u32, cols: u16, rows: u16, tm
 /// Largest whole-cell rectangle of a `w` x `h` picture that fits `area`, centred in it.
 pub fn fit(area: Rect, cell_px: (u16, u16), w: u32, h: u32) -> Rect {
     let (cw, ch) = (f64::from(cell_px.0.max(1)), f64::from(cell_px.1.max(1)));
-    let scale = (f64::from(area.width) * cw / f64::from(w)).min(f64::from(area.height) * ch / f64::from(h));
+    let scale =
+        (f64::from(area.width) * cw / f64::from(w)).min(f64::from(area.height) * ch / f64::from(h));
     let cols = ((f64::from(w) * scale / cw).floor().max(1.0) as u16).min(area.width);
     let rows = ((f64::from(h) * scale / ch).floor().max(1.0) as u16).min(area.height);
     let x = area.x + (area.width - cols) / 2;
@@ -501,7 +557,11 @@ impl Default for Playback {
 impl Playback {
     #[cfg_attr(not(test), allow(dead_code))]
     pub fn with_sink(sink: Sink) -> Self {
-        Self { sink, spawn: false, ..Self::default() }
+        Self {
+            sink,
+            spawn: false,
+            ..Self::default()
+        }
     }
 
     /// Escapes written to the buffer sink (tests).
@@ -570,7 +630,12 @@ impl Playback {
             let meta = std::fs::read_to_string(dir.join("clip.json"))
                 .ok()
                 .and_then(|text| serde_json::from_str::<Meta>(&text).ok());
-            self.clip = Some(ClipState { dir: dir.to_path_buf(), meta, fresh: None, read_at: Instant::now() });
+            self.clip = Some(ClipState {
+                dir: dir.to_path_buf(),
+                meta,
+                fresh: None,
+                read_at: Instant::now(),
+            });
         }
         self.clip.as_mut().expect("just set")
     }
@@ -621,7 +686,12 @@ impl Playback {
         let fitted = fit(area, cell_px, w, h);
         let slot = beat % SLOTS;
         let id = IMAGE_BASE + slot as u32;
-        let want = Loaded { key, beat, cols: fitted.width, rows: fitted.height };
+        let want = Loaded {
+            key,
+            beat,
+            cols: fitted.width,
+            rows: fitted.height,
+        };
         if self.slots[slot] != Some(want) {
             let Ok(stream) = std::fs::read(dir.join(format!("beat-{beat}.h264"))) else {
                 return false;
@@ -630,7 +700,15 @@ impl Playback {
             if self.slots[slot].is_some() {
                 bytes.extend(wrap(&format!("a=d,d=I,i={id},q=2"), tmux));
             }
-            bytes.extend(transmit(id, &stream, w, h, fitted.width, fitted.height, tmux));
+            bytes.extend(transmit(
+                id,
+                &stream,
+                w,
+                h,
+                fitted.width,
+                fitted.height,
+                tmux,
+            ));
             self.emit(&bytes);
             self.slots[slot] = Some(want);
         }
@@ -652,7 +730,8 @@ fn clip_matches(
         return false;
     }
     (0..beats_ms.len()).all(|b| {
-        render(&mid_time(beats_ms, b), PRINT_W, PRINT_H).is_some_and(|img| same_print(&fingerprint(&img), &meta.prints[b]))
+        render(&mid_time(beats_ms, b), PRINT_W, PRINT_H)
+            .is_some_and(|img| same_print(&fingerprint(&img), &meta.prints[b]))
     })
 }
 
@@ -675,8 +754,14 @@ mod tests {
         let escapes: Vec<&str> = out.split("\x1b\\").filter(|s| !s.is_empty()).collect();
         assert!(escapes.len() > 1, "a 10 KB stream spans several chunks");
         assert!(escapes[0].starts_with("\x1b_Ga=T,U=1,f=264,s=1280,v=720,c=40,r=12,i=7,q=2,m=1;"));
-        assert!(escapes[1].starts_with("\x1b_Gm="), "later chunks carry only m");
-        assert!(escapes.last().unwrap().starts_with("\x1b_Gm=0;"), "the last chunk ends the image");
+        assert!(
+            escapes[1].starts_with("\x1b_Gm="),
+            "later chunks carry only m"
+        );
+        assert!(
+            escapes.last().unwrap().starts_with("\x1b_Gm=0;"),
+            "the last chunk ends the image"
+        );
         let payload: String = escapes
             .iter()
             .map(|e| e.split_once(';').map(|(_, p)| p).unwrap_or(""))
@@ -696,7 +781,11 @@ mod tests {
         // 80x24 cells of 10x20 px: a 1280x720 picture is 16:9 in an 800x480 px area
         let area = Rect::new(0, 0, 80, 24);
         let r = fit(area, (10, 20), 1280, 720);
-        assert_eq!((r.width, r.height), (80, 22), "limited by width: 800 px wide, 450 px tall");
+        assert_eq!(
+            (r.width, r.height),
+            (80, 22),
+            "limited by width: 800 px wide, 450 px tall"
+        );
         assert_eq!((r.x, r.y), (0, 1));
         // a tall, narrow area is limited by width
         let r = fit(Rect::new(5, 5, 20, 60), (10, 20), 1280, 720);
@@ -723,12 +812,22 @@ mod tests {
         use std::time::Instant;
         let scene = scene_for("SAND").expect("SAND has a scene");
         let (w, h) = (1200u32, 660u32);
-        let t = Time { ms: 0, beat: 2, local: 0.5, beat_start: 0 };
+        let t = Time {
+            ms: 0,
+            beat: 2,
+            local: 0.5,
+            beat_start: 0,
+        };
         let _ = scene.pixels(&t, w, h);
         let n = 30;
         let (mut render, mut zlib) = (0.0f64, 0.0f64);
         for k in 0..n {
-            let t = Time { ms: 0, beat: 2, local: k as f32 / n as f32, beat_start: 0 };
+            let t = Time {
+                ms: 0,
+                beat: 2,
+                local: k as f32 / n as f32,
+                beat_start: 0,
+            };
             let s0 = Instant::now();
             let img = scene.pixels(&t, w, h).expect("a picture");
             render += s0.elapsed().as_secs_f64() * 1e3;
@@ -772,12 +871,15 @@ mod tests {
 
     #[test]
     fn fingerprints_tell_pictures_apart_but_forgive_noise() {
-        let grad = RgbaImage::from_fn(64, 36, |x, y| image::Rgba([(x * 4) as u8, (y * 7) as u8, 90, 255]));
+        let grad = RgbaImage::from_fn(64, 36, |x, y| {
+            image::Rgba([(x * 4) as u8, (y * 7) as u8, 90, 255])
+        });
         let noisy = RgbaImage::from_fn(64, 36, |x, y| {
             let p = grad.get_pixel(x, y).0;
             image::Rgba([p[0].saturating_add(((x + y) % 3) as u8), p[1], p[2], 255])
         });
-        let other = RgbaImage::from_fn(64, 36, |x, _| image::Rgba([255 - (x * 4) as u8, 0, 0, 255]));
+        let other =
+            RgbaImage::from_fn(64, 36, |x, _| image::Rgba([255 - (x * 4) as u8, 0, 0, 255]));
         let a = fingerprint(&grad);
         assert_eq!(a.len(), 144);
         assert!(same_print(&a, &fingerprint(&noisy)));
@@ -799,14 +901,27 @@ mod tests {
 
     #[test]
     fn a_clip_is_stale_when_the_scene_changed() {
-        let red = |_: &Time, w: u32, h: u32| Some(RgbaImage::from_pixel(w, h, image::Rgba([200, 20, 20, 255])));
-        let blue = |_: &Time, w: u32, h: u32| Some(RgbaImage::from_pixel(w, h, image::Rgba([20, 20, 200, 255])));
+        let red = |_: &Time, w: u32, h: u32| {
+            Some(RgbaImage::from_pixel(w, h, image::Rgba([200, 20, 20, 255])))
+        };
+        let blue = |_: &Time, w: u32, h: u32| {
+            Some(RgbaImage::from_pixel(w, h, image::Rgba([20, 20, 200, 255])))
+        };
         let print = fingerprint(&red(&mid_time(&[1000], 0), PRINT_W, PRINT_H).unwrap());
         let meta = meta_for(vec![print.clone(), print], &[1000, 1000]);
         assert!(clip_matches(&meta, &[1000, 1000], &mut { red }));
-        assert!(!clip_matches(&meta, &[1000, 1000], &mut { blue }), "the picture changed");
-        assert!(!clip_matches(&meta, &[1000, 2000], &mut { red }), "a beat got longer");
-        assert!(!clip_matches(&meta, &[1000], &mut { red }), "a beat was removed");
+        assert!(
+            !clip_matches(&meta, &[1000, 1000], &mut { blue }),
+            "the picture changed"
+        );
+        assert!(
+            !clip_matches(&meta, &[1000, 2000], &mut { red }),
+            "a beat got longer"
+        );
+        assert!(
+            !clip_matches(&meta, &[1000], &mut { red }),
+            "a beat was removed"
+        );
     }
 
     #[test]
@@ -814,11 +929,17 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("fl-h264-test-{}", std::process::id()));
         // SAFETY: tests that read FL_CLIPS run in this process only through this test.
         unsafe { std::env::set_var("FL_CLIPS", &dir) };
-        let red = |_: &Time, w: u32, h: u32| Some(RgbaImage::from_pixel(w, h, image::Rgba([200, 20, 20, 255])));
+        let red = |_: &Time, w: u32, h: u32| {
+            Some(RgbaImage::from_pixel(w, h, image::Rgba([200, 20, 20, 255])))
+        };
         let print = fingerprint(&red(&mid_time(&[1000], 0), PRINT_W, PRINT_H).unwrap());
         let clip = clip_dir(&dir, "TEST PAGE", "overview");
         std::fs::create_dir_all(&clip).unwrap();
-        std::fs::write(clip.join("clip.json"), serde_json::to_string(&meta_for(vec![print], &[1000])).unwrap()).unwrap();
+        std::fs::write(
+            clip.join("clip.json"),
+            serde_json::to_string(&meta_for(vec![print], &[1000])).unwrap(),
+        )
+        .unwrap();
         std::fs::write(clip.join("beat-0.h264"), b"\x00\x00\x00\x01stream").unwrap();
 
         let backend = ratatui::backend::TestBackend::new(40, 12);
@@ -826,16 +947,39 @@ mod tests {
         let mut pb = Playback::with_sink(Sink::Buffer(Vec::new()));
         let mut shown = false;
         term.draw(|f| {
-            shown = pb.paint(f, Rect::new(0, 0, 40, 12), "TEST PAGE", "overview", 0, &[1000], (10, 20), false, &mut { red });
+            shown = pb.paint(
+                f,
+                Rect::new(0, 0, 40, 12),
+                "TEST PAGE",
+                "overview",
+                0,
+                &[1000],
+                (10, 20),
+                false,
+                &mut { red },
+            );
         })
         .unwrap();
         assert!(shown);
         let sent = String::from_utf8_lossy(pb.written()).to_string();
-        assert!(sent.contains("f=264,s=64,v=36"), "the beat went out as an f=264 image");
+        assert!(
+            sent.contains("f=264,s=64,v=36"),
+            "the beat went out as an f=264 image"
+        );
 
         let mut missing = false;
         term.draw(|f| {
-            missing = !pb.paint(f, Rect::new(0, 0, 40, 12), "TEST PAGE", "zoom-a", 0, &[1000], (10, 20), false, &mut { red });
+            missing = !pb.paint(
+                f,
+                Rect::new(0, 0, 40, 12),
+                "TEST PAGE",
+                "zoom-a",
+                0,
+                &[1000],
+                (10, 20),
+                false,
+                &mut { red },
+            );
         })
         .unwrap();
         assert!(missing, "no clip on disk: the caller draws the frame path");
@@ -854,19 +998,30 @@ mod tests {
                 Src::Overview => scene_for("SAND").unwrap(),
                 Src::Build(f) => f(),
             };
-            let text = std::fs::read_to_string(clip_dir(&root, "SAND", &job.clip).join("clip.json"))
-                .unwrap_or_else(|_| panic!("{}: not rendered", job.clip));
+            let text =
+                std::fs::read_to_string(clip_dir(&root, "SAND", &job.clip).join("clip.json"))
+                    .unwrap_or_else(|_| panic!("{}: not rendered", job.clip));
             let meta: Meta = serde_json::from_str(&text).unwrap();
             let beats_ms: Vec<u64> = scene.beats().iter().map(|b| b.ms).collect();
             let worst = (0..beats_ms.len())
                 .map(|b| {
-                    let img = scene.pixels(&mid_time(&beats_ms, b), PRINT_W, PRINT_H).unwrap();
+                    let img = scene
+                        .pixels(&mid_time(&beats_ms, b), PRINT_W, PRINT_H)
+                        .unwrap();
                     let (a, p) = (fingerprint(&img), &meta.prints[b]);
-                    a.iter().zip(p).map(|(x, y)| u64::from(x.abs_diff(*y))).sum::<u64>() as f64 / a.len() as f64
+                    a.iter()
+                        .zip(p)
+                        .map(|(x, y)| u64::from(x.abs_diff(*y)))
+                        .sum::<u64>() as f64
+                        / a.len() as f64
                 })
                 .fold(0.0f64, f64::max);
             println!("{:<11} worst mean diff {worst:.2}", job.clip);
-            assert!(clip_matches(&meta, &beats_ms, &mut |t, w, h| scene.pixels(t, w, h)), "{} is stale", job.clip);
+            assert!(
+                clip_matches(&meta, &beats_ms, &mut |t, w, h| scene.pixels(t, w, h)),
+                "{} is stale",
+                job.clip
+            );
         }
     }
 

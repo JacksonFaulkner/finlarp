@@ -62,13 +62,22 @@ pub fn run_cli(args: &[String]) -> i32 {
         Ok(o) => o,
         Err(msg) => {
             eprintln!("{msg}");
-            eprintln!("usage: fl render-video (PAGE... | --all) --out DIR [--clip NAME] [--fps N] [--size WxH] [--h264]");
+            eprintln!(
+                "usage: fl render-video (PAGE... | --all) --out DIR [--clip NAME] [--fps N] [--size WxH] [--h264]"
+            );
             return 2;
         }
     };
     if opts.h264 {
-        let threads = std::thread::available_parallelism().map_or(2, |n| n.get()).min(4);
-        let failed = super::diagrams_h264::render_pages(&opts.pages, &opts.out, opts.only.as_deref(), threads);
+        let threads = std::thread::available_parallelism()
+            .map_or(2, |n| n.get())
+            .min(4);
+        let failed = super::diagrams_h264::render_pages(
+            &opts.pages,
+            &opts.out,
+            opts.only.as_deref(),
+            threads,
+        );
         return i32::from(failed > 0);
     }
     if let Err(e) = std::fs::create_dir_all(&opts.out) {
@@ -191,19 +200,18 @@ fn clips(page: &str) -> Vec<(String, String, Box<dyn Scene>)> {
 
 /// Renders one clip to an HLS playlist. Returns its length in seconds, or None when the scene
 /// draws text rather than a picture.
-fn render_clip(
-    scene: &dyn Scene,
-    dir: &Path,
-    w: u32,
-    h: u32,
-    fps: u32,
-) -> io::Result<Option<f64>> {
+fn render_clip(scene: &dyn Scene, dir: &Path, w: u32, h: u32, fps: u32) -> io::Result<Option<f64>> {
     let beats = scene.beats();
     if beats.is_empty() {
         return Ok(None);
     }
     // a scene with no picture returns None for its first frame; skip it before starting ffmpeg
-    let probe = Time { ms: 0, beat: 0, local: 0.0, beat_start: 0 };
+    let probe = Time {
+        ms: 0,
+        beat: 0,
+        local: 0.0,
+        beat_start: 0,
+    };
     if scene.pixels(&probe, w, h).is_none() {
         return Ok(None);
     }
@@ -258,7 +266,10 @@ fn render_clip(
         .spawn()?;
     let mut total_ms = 0u64;
     {
-        let stdin = ff.stdin.as_mut().ok_or_else(|| io::Error::other("no ffmpeg stdin"))?;
+        let stdin = ff
+            .stdin
+            .as_mut()
+            .ok_or_else(|| io::Error::other("no ffmpeg stdin"))?;
         let mut start = 0u64;
         for (b, beat) in beats.iter().enumerate() {
             let n = ((beat.ms as f64 / 1000.0) * fps as f64).round().max(1.0) as u32;
@@ -323,10 +334,12 @@ mod tests {
 
     #[test]
     fn parses_pages_and_options() {
-        let args: Vec<String> = ["SAND", "WAFER", "--out", "/tmp/v", "--fps", "12", "--size", "640x360"]
-            .iter()
-            .map(|s| s.to_string())
-            .collect();
+        let args: Vec<String> = [
+            "SAND", "WAFER", "--out", "/tmp/v", "--fps", "12", "--size", "640x360",
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
         let o = parse(&args).unwrap();
         assert_eq!(o.pages, vec!["SAND", "WAFER"]);
         assert_eq!((o.fps, o.w, o.h), (12, 640, 360));
