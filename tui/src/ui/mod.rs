@@ -45,6 +45,7 @@ pub mod spacing;
 pub mod spin;
 pub mod tape;
 pub mod text;
+pub mod tmux_pane;
 pub mod text_cursor;
 pub mod theme;
 pub mod throbber;
