@@ -655,6 +655,7 @@ impl Chat {
         if lines.len() > room {
             lines.drain(..lines.len() - room);
         }
+        let mut cursor = None;
         if self.focus {
             // a long question shows its end, where the typing is
             let typed = self.input.value();
@@ -665,7 +666,7 @@ impl Chat {
                 .nth(room.saturating_sub(1))
                 .map_or(0, |(i, _)| i);
             let shown = &typed[from..];
-            frame.set_cursor_position((
+            cursor = Some((
                 inner.x + (2 + text::width(shown)).min(w.saturating_sub(1)) as u16,
                 inner.y + lines.len() as u16,
             ));
@@ -675,6 +676,10 @@ impl Chat {
             ]));
         }
         frame.render_widget(Paragraph::new(lines).style(t.base()), inner);
+        // drawn after the text so it lands on top of it
+        if let Some((x, y)) = cursor {
+            super::diagrams_window::block_cursor(frame, x, y);
+        }
     }
 }
 

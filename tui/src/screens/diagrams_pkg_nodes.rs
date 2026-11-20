@@ -233,7 +233,10 @@ pub(crate) const UD_B: &[Beat] = &[
             &["CTE mismatch"],
         ),
     Beat::new("stress gathers at the joints", BEAT_MS)
-        .note("The big organic substrate carries every level.", "The package on its bumps.")
+        .note(
+            "The big organic substrate carries every level.",
+            "The package on its bumps.",
+        )
         .detail("Bumps take the strain.", &["WARPAGE"]),
     Beat::new("underfill spreads the load", BEAT_MS)
         .note(
@@ -406,13 +409,22 @@ pub(crate) const SA_B: &[Beat] = &[
 
 pub(crate) const SB_B: &[Beat] = &[
     Beat::new("150 um bumps on top", BEAT_MS)
-        .note("C4 bumps from the interposer.", "The C4 row under the lifted package.")
+        .note(
+            "C4 bumps from the interposer.",
+            "The C4 row under the lifted package.",
+        )
         .detail("Fine pitch.", &["C4"]),
     Beat::new("wires fan out through the layers", BEAT_MS)
-        .note("Wires spread out layer by layer.", "The layers in the cut face.")
+        .note(
+            "Wires spread out layer by layer.",
+            "The layers in the cut face.",
+        )
         .detail("FAN-OUT.", &["Fan-out"]),
     Beat::new("~1 mm balls below", BEAT_MS)
-        .note("BGA balls at board pitch.", "The ball grid under the substrate.")
+        .note(
+            "BGA balls at board pitch.",
+            "The ball grid under the substrate.",
+        )
         .detail("BGA.", &["BGA"]),
 ];
 
@@ -480,13 +492,54 @@ pub(crate) const SE_B: &[Beat] = &[
 ];
 
 pub(crate) const A_B: &[Beat] = &[
-    Beat::new("known-good dies arrive", OVERVIEW_MS).note("Tested logic dies and HBM stacks wait to be assembled.", "Bare dies and HBM stacks on a tray.").detail("Only known-good ones.", &["KNOWN GOOD DIE"]),
-    Beat::new("CHIP ON WAFER: onto the interposer wafer", OVERVIEW_MS).note("Dies are bonded face down onto a whole, uncut interposer wafer.", "Several interposers in a row with dies landing.").detail("Bonding happens before the wafer is cut apart.", &["CoW"]),
-    Beat::new("HBM stacks join", OVERVIEW_MS).note("The HBM stacks are bonded beside each logic die.", "Stacks appear on every interposer.").detail("HBM gives the logic die its memory bandwidth.", &["HBM"]),
-    Beat::new("cut apart, then ON SUBSTRATE", OVERVIEW_MS).note("One interposer is cut free and bonded to a substrate by C4 reflow.", "The rest of the wafer goes; the cut-out interposer is lowered onto a substrate.").detail("CoWoS is chip on wafer on substrate.", &["CoWoS"]),
-    Beat::new("UNDERFILL FLOW", OVERVIEW_MS).note("Epoxy wicks into the gap under the die and cures.", "Dark underfill flows in from the front and fills the gap.").detail(">10x joint life.", &["Underfill"]),
-    Beat::new("LID goes on", OVERVIEW_MS).note("A steel lid is set over the die and HBM stacks.", "The lid drops onto the package.").detail("A late defect scraps everything, HBM included. YIELD STACKUP: 10 parts at 99% = ~90%.", &["Test"]),
-    Beat::new("CAPACITY: the bottleneck", OVERVIEW_MS).note("CoWoS capacity limits how many AI accelerators ship; this row is the output.", "Finished packages in a row.").detail("NVIDIA reportedly took 40-50% in 2024. ASE and Amkor add capacity (OSAT).", &["Capacity"]),
+    Beat::new("known-good dies arrive", OVERVIEW_MS)
+        .note(
+            "Tested logic dies and HBM stacks wait to be assembled.",
+            "Bare dies and HBM stacks on a tray.",
+        )
+        .detail("Only known-good ones.", &["KNOWN GOOD DIE"]),
+    Beat::new("CHIP ON WAFER: onto the interposer wafer", OVERVIEW_MS)
+        .note(
+            "Dies are bonded face down onto a whole, uncut interposer wafer.",
+            "Several interposers in a row with dies landing.",
+        )
+        .detail("Bonding happens before the wafer is cut apart.", &["CoW"]),
+    Beat::new("HBM stacks join", OVERVIEW_MS)
+        .note(
+            "The HBM stacks are bonded beside each logic die.",
+            "Stacks appear on every interposer.",
+        )
+        .detail("HBM gives the logic die its memory bandwidth.", &["HBM"]),
+    Beat::new("cut apart, then ON SUBSTRATE", OVERVIEW_MS)
+        .note(
+            "One interposer is cut free and bonded to a substrate by C4 reflow.",
+            "The rest of the wafer goes; the cut-out interposer is lowered onto a substrate.",
+        )
+        .detail("CoWoS is chip on wafer on substrate.", &["CoWoS"]),
+    Beat::new("UNDERFILL FLOW", OVERVIEW_MS)
+        .note(
+            "Epoxy wicks into the gap under the die and cures.",
+            "Dark underfill flows in from the front and fills the gap.",
+        )
+        .detail(">10x joint life.", &["Underfill"]),
+    Beat::new("LID goes on", OVERVIEW_MS)
+        .note(
+            "A steel lid is set over the die and HBM stacks.",
+            "The lid drops onto the package.",
+        )
+        .detail(
+            "A late defect scraps everything, HBM included. YIELD STACKUP: 10 parts at 99% = ~90%.",
+            &["Test"],
+        ),
+    Beat::new("CAPACITY: the bottleneck", OVERVIEW_MS)
+        .note(
+            "CoWoS capacity limits how many AI accelerators ship; this row is the output.",
+            "Finished packages in a row.",
+        )
+        .detail(
+            "NVIDIA reportedly took 40-50% in 2024. ASE and Amkor add capacity (OSAT).",
+            &["Capacity"],
+        ),
 ];
 
 pub(crate) const AA_B: &[Beat] = &[
@@ -494,7 +547,10 @@ pub(crate) const AA_B: &[Beat] = &[
         .note("Placed face down at wafer scale.", "Interposers in a row.")
         .detail("CHIP ON WAFER.", &["CoW"]),
     Beat::new("HBM beside every die", BEAT_MS)
-        .note("Logic and HBM stacks sit on each interposer site.", "Stacks on every site.")
+        .note(
+            "Logic and HBM stacks sit on each interposer site.",
+            "Stacks on every site.",
+        )
         .detail("Microbumps.", &["Placed"]),
     Beat::new("the wafer is not cut yet", BEAT_MS)
         .note(
@@ -506,7 +562,10 @@ pub(crate) const AA_B: &[Beat] = &[
 
 pub(crate) const AB_B: &[Beat] = &[
     Beat::new("one interposer, cut out", BEAT_MS)
-        .note("The wafer is diced; this interposer keeps its dies.", "One interposer.")
+        .note(
+            "The wafer is diced; this interposer keeps its dies.",
+            "One interposer.",
+        )
         .detail("Each with its dies.", &["Dice"]),
     Beat::new("C4 REFLOW onto the substrate", BEAT_MS)
         .note(
@@ -515,7 +574,10 @@ pub(crate) const AB_B: &[Beat] = &[
         )
         .detail("ON SUBSTRATE.", &["oS"]),
     Beat::new("underfill fills the gap", BEAT_MS)
-        .note("Epoxy wicks under the die and cures.", "Dark underfill at the die edge.")
+        .note(
+            "Epoxy wicks under the die and cures.",
+            "Dark underfill at the die edge.",
+        )
         .detail("UNDERFILL FLOW.", &["Underfill"]),
 ];
 
@@ -530,16 +592,16 @@ pub(crate) const AC_B: &[Beat] = &[
         )
         .detail("YIELD STACKUP.", &["~90%"]),
     Beat::new("why known-good dies matter", BEAT_MS)
-        .note(
-            "A late failure scraps the whole package.",
-            "The package.",
-        )
+        .note("A late failure scraps the whole package.", "The package.")
         .detail("KGD.", &["KGD"]),
 ];
 
 pub(crate) const AD_B: &[Beat] = &[
     Beat::new("almost every AI accelerator uses CoWoS", BEAT_MS)
-        .note("So its capacity limits shipments.", "A row of finished packages.")
+        .note(
+            "So its capacity limits shipments.",
+            "A row of finished packages.",
+        )
         .detail("Reports.", &["CAPACITY"]),
     Beat::new("each package is one stack", BEAT_MS)
         .note(
@@ -557,13 +619,22 @@ pub(crate) const AD_B: &[Beat] = &[
 
 pub(crate) const AE_B: &[Beat] = &[
     Beat::new("the lid goes on", BEAT_MS)
-        .note("A steel lid seals the die and its HBM.", "The lid over the die.")
+        .note(
+            "A steel lid seals the die and its HBM.",
+            "The lid over the die.",
+        )
         .detail("LID.", &["Sort"]),
     Beat::new("one stack, whole", BEAT_MS)
-        .note("Substrate, C4, interposer, die and lid form one stack.", "The stack, whole.")
+        .note(
+            "Substrate, C4, interposer, die and lid form one stack.",
+            "The stack, whole.",
+        )
         .detail("Stacked.", &["Mid"]),
     Beat::new("the finished package", BEAT_MS)
-        .note("Ready to mount on the board.", "The package on its substrate.")
+        .note(
+            "Ready to mount on the board.",
+            "The package on its substrate.",
+        )
         .detail("Next: the board.", &["Final"]),
 ];
 
@@ -620,7 +691,10 @@ pub(crate) const BA_B: &[Beat] = &[
         .note("Reflowed onto the board.", "The ball grid.")
         .detail("BGA BALLS.", &["BGA"]),
     Beat::new("the board under it", BEAT_MS)
-        .note("A green board carries every ball.", "The board under the package.")
+        .note(
+            "A green board carries every ball.",
+            "The board under the package.",
+        )
         .detail("BOARD.", &["Board"]),
 ];
 
@@ -647,10 +721,16 @@ pub(crate) const BB_B: &[Beat] = &[
 
 pub(crate) const BC_B: &[Beat] = &[
     Beat::new("the lid and cold plate", BEAT_MS)
-        .note("A lid spreads heat into a copper plate.", "Lid and finned plate.")
+        .note(
+            "A lid spreads heat into a copper plate.",
+            "Lid and finned plate.",
+        )
         .detail("COLD PLATE.", &["Heat"]),
     Beat::new("fins on the copper", BEAT_MS)
-        .note("The fins give the plate a large surface.", "Rows of copper fins.")
+        .note(
+            "The fins give the plate a large surface.",
+            "Rows of copper fins.",
+        )
         .detail("Spreads heat.", &["Cold plate"]),
     Beat::new("LIQUID COOLING", BEAT_MS)
         .note(

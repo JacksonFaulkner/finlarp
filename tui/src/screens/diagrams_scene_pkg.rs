@@ -12,7 +12,6 @@ use super::diagrams_px as px;
 use crate::ui::anim::{Beat, Canvas, Scene, Time, Zoom};
 use poly3d::PkgKey;
 
-
 pub const MIN_W: u16 = 84;
 pub const MIN_H: u16 = 26;
 
@@ -106,11 +105,9 @@ pub struct PkgNode {
 /// Builds a node's menu entries from its data: `$zooms` (5 `Zoom`s) and `$sections`
 /// (9 scene builders) from the consts `$z` (5 `ZoomData`) and `$s` (9 `SecData`).
 
-
 /// The Packaging-tab pages built on this template.
 pub fn nodes() -> Vec<&'static PkgNode> {
-    vec![
-    ]
+    vec![]
 }
 
 pub fn node(page: &str) -> Option<&'static PkgNode> {

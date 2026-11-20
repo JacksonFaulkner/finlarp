@@ -286,8 +286,10 @@ static LASER_SCENE: std::sync::OnceLock<pbr3d::scene_gltf::Scene> = std::sync::O
 
 fn laser_scene() -> &'static pbr3d::scene_gltf::Scene {
     LASER_SCENE.get_or_init(|| {
-        pbr3d::scene_gltf::Scene::from_glb(include_bytes!("../../../tools/pbr3d/assets/laser_overview.glb"))
-            .expect("laser_overview.glb is a valid export")
+        pbr3d::scene_gltf::Scene::from_glb(include_bytes!(
+            "../../../tools/pbr3d/assets/laser_overview.glb"
+        ))
+        .expect("laser_overview.glb is a valid export")
     })
 }
 
@@ -323,7 +325,10 @@ impl Scene for LaserOverview {
 pub fn overview(page: &str) -> Option<Box<dyn Scene>> {
     let n = node(page)?;
     if page == "LASER" {
-        return Some(Box::new(LaserOverview { beats: n.beats, zooms: n.zooms }));
+        return Some(Box::new(LaserOverview {
+            beats: n.beats,
+            zooms: n.zooms,
+        }));
     }
     Some(Box::new(LinkScene {
         beats: n.beats,
@@ -461,11 +466,24 @@ mod laser_overview_tests {
         let beats = scene.beats().len();
         assert_eq!(beats, 7);
         for beat in 0..beats {
-            let t = Time { beat, local: 0.5, ms: 0, beat_start: 0 };
-            let img = scene.pixels(&t, 160, 100).expect("the Blender overview draws a picture");
+            let t = Time {
+                beat,
+                local: 0.5,
+                ms: 0,
+                beat_start: 0,
+            };
+            let img = scene
+                .pixels(&t, 160, 100)
+                .expect("the Blender overview draws a picture");
             let bg = px::BG;
-            let drawn = img.pixels().filter(|p| p.0[0] != bg[0] || p.0[1] != bg[1] || p.0[2] != bg[2]).count();
-            assert!(drawn > 160 * 100 / 50, "beat {beat} only {drawn} pixels off the background");
+            let drawn = img
+                .pixels()
+                .filter(|p| p.0[0] != bg[0] || p.0[1] != bg[1] || p.0[2] != bg[2])
+                .count();
+            assert!(
+                drawn > 160 * 100 / 50,
+                "beat {beat} only {drawn} pixels off the background"
+            );
         }
     }
 }

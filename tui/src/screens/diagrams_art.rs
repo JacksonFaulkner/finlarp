@@ -53,15 +53,27 @@ pub const DIAGRAMS: &[Diagram] = &[
         tickers: "ANET AVGO MRVL CSCO VRT SMCI",
         art: NETWORK,
     },
+    Diagram {
+        title: "Math: from adding one number to matrix multiplication",
+        tab: "Math",
+        tickers: "NVDA AMD AVGO",
+        art: MATH,
+    },
+    Diagram {
+        title: "R&D: memory bets that are not in production yet",
+        tab: "R&D",
+        tickers: "MU SNDK 005930.KS 000660.KS",
+        art: RND,
+    },
 ];
 
-const FAB: &str = r#"# 1. Wafer making
+const FAB: &str = r#"# Wafer making
    ┌──────┐     ┌─────────────┐     ┌─────────────┐     ┌───────────┐     ┌────────────────┐     ┌────────────┐
    │ SAND │     │ POLYSILICON │     │ MELT + PULL │     │ INGOT     │     │ SLICE + POLISH │     │ WAFER      │
    │ SiO2 │────▶│ refined Si  │────▶│ Czochralski │────▶│ 300mm rod │────▶│ wire saw, CMP  │────▶│ blank disc │
    └──────┘     └─────────────┘     └─────────────┘     └───────────┘     └────────────────┘     └────────────┘
 
-# 2. Front end: one pass per layer, repeated 60 to 100+ times
+# Front end: one pass per layer, repeated 60 to 100+ times
 
    ┌───────────┐   ┌────────┐   ┌───────────────┐   ┌─────────────┐   ┌────────────┐   ┌──────────────┐   ┌──────────────┐
    │ DEPOSIT   │   │ COAT   │   │ EXPOSE        │   │ DEVELOP     │   │ ETCH       │   │ IMPLANT      │   │ CLEAN        │
@@ -72,7 +84,7 @@ const FAB: &str = r#"# 1. Wafer making
  │                                                                                                                          │
  ┌──────────────────────────── KLAC metrology inspects every layer, then the next layer starts ─────────────────────────────┘
 
-# 3. Back end: wafer to product
+# Back end: wafer to product
    ┌────────────────┐    ┌─────────────┐    ┌───────────────┐    ┌─────────────────┐    ┌──────────────┐    ┌───────────┐
    │ WAFER SORT     │    │ DICE        │    │ PICK          │    │ PACKAGE         │    │ FINAL TEST   │    │ SHIP      │
    │ probe each die │───▶│ saw / laser │───▶│ good die only │───▶│ bond, mold, HBM │───▶│ burn-in, bin │───▶│ OEM / ODM │
@@ -225,4 +237,68 @@ const NETWORK: &str = r#"# Data path: GPU to GPU across the building (leaf-spine
           │                                                                                 │
           └─────────────────────────────────────────────────────────────────────────────────┘
                 cool water returns to the racks (VRT, nVent, SMCI racks)
+"#;
+
+const MATH: &str = r#"# 1. Four basic operations on one pair of numbers
+
+┌────────────────┐   ┌────────────────┐   ┌────────────────┐   ┌────────────────┐
+│ ADD            │   │ SUBTRACT       │   │ MULTIPLY       │   │ DIVIDE         │
+│ 3 + 4 = 7      │   │ 7 - 4 = 3      │   │ 3 x 4 = 12     │   │ 12 / 4 = 3     │
+│ put together   │   │ take away      │   │ 3 groups of 4  │   │ share into 4   │
+└────────────────┘   └────────────────┘   └────────────────┘   └────────────────┘
+
+  (enter opens a node's page; h/l moves between nodes)
+
+# 2. Lists of numbers: a vector and what you can do to it
+
+┌──────────────────────────┐     ┌──────────────────────────┐     ┌──────────────────────────┐
+│ VECTOR                   │     │ VECTOR ADD               │     │ SCALE                    │
+│ list: [2, 5, 1]          │────▶│ [1,2] + [3,4] = [4,6]    │────▶│ 3 x [1, 2] = [3, 6]      │
+│ one number per slot      │     │ add slot by slot         │     │ stretch every slot       │
+└──────────────────────────┘     └──────────────────────────┘     └──────────────────────────┘
+
+# 3. Multiply two lists: the dot product
+
+┌──────────────────────────────────────────────────────────┐
+│ DOT PRODUCT                                              │
+│ [1,2,3] . [4,5,6] = 1x4 + 2x5 + 3x6 = 32                 │
+│ multiply slot by slot, then add the products             │
+└──────────────────────────────────────────────────────────┘
+
+# 4. Grids of numbers: matrices, and when two can multiply
+
+┌────────────────────────┐     ┌────────────────────────────┐     ┌──────────────────────────┐
+│ MATRIX                 │     │ SHAPE RULE                 │     │ MATRIX x VECTOR          │
+│ 2 rows x 3 columns     │────▶│ (m x n)(n x p) = (m x p)   │────▶│ each row dotted with v   │
+│ shape (2 x 3)          │     │ inner n must match         │     │ (2x2)(2x1) = (2x1)       │
+└────────────────────────┘     └────────────────────────────┘     └──────────────────────────┘
+
+# 5. Matrix times matrix: one dot product per answer cell
+
+┌──────────────────────────────────────────────────────────────────┐
+│ MATRIX x MATRIX                                                  │
+│ [[1 2],[3 4]] x [[5 6],[7 8]] = [[19 22],[43 50]]                │
+│ (2x2)(2x2) = (2x2): four dot products, done at once on a GPU     │
+└──────────────────────────────────────────────────────────────────┘
+
+  (build order: ADD, MULTIPLY, then lists, dot product, grids, matrix x matrix; each step reuses the last)
+"#;
+
+// R&D tab: two floating nodes (3D DRAM, HBF); each node's text is in diagrams_desc.rs.
+const RND: &str = r#"# R&D: memory bets that are not in production yet
+
+    ┌────────────────────────────────┐
+    │ 3D DRAM                        │
+    │ build the cell vertically      │
+    │ so each bit takes less area    │
+    └────────────────────────────────┘
+                                              ┌────────────────────────────────┐
+                                              │ HBF                            │
+                                              │ NAND stacked in an HBM-style   │
+                                              │ package, for AI inference      │
+                                              └────────────────────────────────┘
+
+  (3D DRAM: Samsung, SK hynix, Micron race on the cell; HBF: SanDisk with SK hynix)
+
+  (enter opens a node's page; h/l moves between nodes)
 "#;
