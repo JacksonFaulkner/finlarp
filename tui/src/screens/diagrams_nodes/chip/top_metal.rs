@@ -6,8 +6,8 @@
 // Sources: CHIP_TOP_METAL.txt sections 2-4, CHIP_TOP_METAL.details.txt (POWER GRID, CLOCK TRUNK,
 // LONG WIRES, IR DROP, C4 BUMP), with the citations kept in each beat's `detail`.
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

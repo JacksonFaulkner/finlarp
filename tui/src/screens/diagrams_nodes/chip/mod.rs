@@ -2,16 +2,16 @@
 
 use super::Node;
 
-mod top_metal;
-mod mid_metal;
-mod thin_metal;
 mod contacts;
-mod nmos;
-mod gate_stack;
-mod pmos;
-mod planar;
 mod finfet;
 mod gaa;
+mod gate_stack;
+mod mid_metal;
+mod nmos;
+mod planar;
+mod pmos;
+mod thin_metal;
+mod top_metal;
 
 pub const NODES: [&Node; 10] = [
     &top_metal::NODE,

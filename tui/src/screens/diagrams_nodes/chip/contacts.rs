@@ -5,8 +5,8 @@
 // the schematic after beat 0. Zoom-ins a-e and sections 1-10 are detailed cut-aways too
 // (chip_contacts_detail.py).
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

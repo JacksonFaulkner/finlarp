@@ -7,8 +7,8 @@
 // Sources: CHIP_NMOS.txt section 10 (anandtech.com/show/21310; Banerjee, UCSB ECE225 Lecture 5;
 // semiengineering.com 18A coverage); textbook figures are marked as such.
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

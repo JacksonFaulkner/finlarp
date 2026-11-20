@@ -10,8 +10,8 @@
 // Sources: CHIP_PLANAR.details.txt (Counterpoint mature-node share, Intel 22 nm FinFET, textbook
 // subthreshold and DIBL figures, allaboutcircuits nanoscale SCE article).
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

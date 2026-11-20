@@ -4,8 +4,8 @@
 // nanosheet close-ups from the same file, all in the picture-and-panel template.
 // Sources are section 10 of CHIP_GAA.txt.
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

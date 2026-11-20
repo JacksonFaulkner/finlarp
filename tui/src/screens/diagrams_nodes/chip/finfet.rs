@@ -11,8 +11,8 @@
 // pr.tsmc.com/english/news/1835; SAQP fin patterning, USPTO 10121785; TSMC FinFlex, tsmc.com blog
 // 2022-06-16. Textbook items are marked as such.
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

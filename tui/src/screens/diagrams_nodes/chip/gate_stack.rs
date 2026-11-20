@@ -5,8 +5,8 @@
 // metals, the nanosheet gap) and sections 1-10 are close-up rigs of their own; section 10 lists
 // the sources.
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

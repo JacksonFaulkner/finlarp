@@ -5,8 +5,8 @@
 // CHIP_PMOS.txt section 10 and tui/src/screens/diagrams_pages/CHIP_PMOS.details.txt; textbook figures
 // are marked as such.
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

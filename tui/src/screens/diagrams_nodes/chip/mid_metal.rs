@@ -7,8 +7,8 @@
 // and resistivity study; Intel 4 and TSMC N5 and N3E node notes; low-k modulus, patent text; Intel
 // IEDM 2024; Lienig EM slides; Applied and Lam filings; textbook RC).
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[

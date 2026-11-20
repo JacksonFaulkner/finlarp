@@ -3,8 +3,8 @@
 // sections 1-10 are detailed cut-aways too (tools/pbr3d/blender/chip_thin_metal.py,
 // chip_thin_metal_detail.py).
 
-use super::super::blender::{page, Cell, Page, BEAT_MS};
 use super::super::Node;
+use super::super::blender::{BEAT_MS, Cell, Page, page};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[
