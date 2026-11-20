@@ -1,36 +1,17 @@
 # 1. What happens: the last gate before shipping
 
- ┌───────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
- │ LOAD          │─▶│ ATE TEST     │─▶│ BURN-IN      │─▶│ SYSTEM TEST │─▶│ SPEED BIN   │─▶│ MARK + SHIP │
- │ handler picks │  │ functional,  │  │ heat + volts │  │ run real    │  │ sort by     │  │ tray / tape │
- │ packaged part │  │ speed, power │  │ kill infants │  │ workload    │  │ fmax, power │  │ to server   │
- └───────────────┘  └──────────────┘  └──────────────┘  └─────────────┘  └─────────────┘  └─────────────┘
+  Order: LOAD (handler picks the packaged part) -> ATE TEST (functional, speed, power) -> BURN-IN (heat + volts,
+  kills infants) -> SYSTEM TEST (run a real workload) -> SPEED BIN (sort by fmax, power) -> MARK + SHIP (tray /
+  tape, to server).
 
   (order varies by product; burn-in and system-level test are used where a field failure is very costly)
 
 # 2. Mechanism: automatic test equipment (ATE) for one package
 
-  ┌─────────────────────────────────────────────────────────────────────────────────────────┐
-  │     ┌─────────────────────────────────────────┐                                         │
-  │     │  HANDLER: picks part, sorts by result   │   also presses part and sets hot / cold │
-  │     └─────────────────────────────────────────┘                                         │
-  │                          ▼ press + temperature                                          │
-  │               ┌─────────────────────┐                                                   │
-  │               │DEVICE (packaged GPU)│                                                   │
-  │               └─────────────────────┘                                                   │
-  │             ┌─────────────────────────┐                                                 │
-  │             │ SOCKET: pins touch BGA  │           thousands of contacts, wears out      │
-  │             └─────────────────────────┘                                                 │
-  │       ┌─────────────────────────────────────┐                                           │
-  │       │ LOAD BOARD (custom PCB per product) │     routes tester channels to socket      │
-  │       └─────────────────────────────────────┘                                           │
-  │           ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║  ║                       │
-  │     ┌─────────────────────────────────────────┐                                         │
-  │     │     TEST HEAD: pattern generators,      │   many channels, big current rails      │
-  │     │       power supplies, instruments       │                                         │
-  │     └─────────────────────────────────────────┘                                         │
-  │                                                                                         │
-  └─────────────────────────────────────────────────────────────────────────────────────────┘
+  HANDLER: picks part from the tray, sorts it by result, and also presses the part and sets hot / cold.
+  SOCKET: pins touch BGA balls. Thousands of contacts, and the socket wears out.
+  LOAD BOARD (custom PCB per product) routes tester channels to the socket.
+  TEST HEAD: pattern generators, power supplies, instruments. Many channels, big current rails.
 
   Test types: continuity/leakage first, scan patterns for logic defects, memory BIST for HBM links,
   serial loopback (NVLink, PCIe), power and thermal behaviour. All textbook; no counts sourced
@@ -38,15 +19,9 @@
 # 3. Burn-in and system-level test (SLT)
 
   Burn-in    hold parts hot at raised voltage for hours so weak parts fail now, not in a data centre.
-             (temperature, hours: product specific, none sourced). Failures follow a bathtub curve:
-
-   failure    infant mortality              useful life                      wear-out
-   rate       █                                                                    █
-     high     ██                                                                  ██
-              ███                                                                ███
-     low      ████▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄████
-              ──────────────────────────────────────────────────────────────▶ time
-   (burn-in uses heat and voltage to age the part past the infant zone; textbook, shape only)
+             (temperature, hours: product specific, none sourced). Failure rate follows a bathtub curve:
+             high early (infant mortality), low in useful life, high again at wear-out. Burn-in uses heat
+             and voltage to age the part past the infant zone (textbook, shape only).
 
   SLT       plug the part into a board like the real one and boot software or run a stress app. Catches
             what ATE patterns miss: interactions between blocks, power droop, firmware. It is slow, so it
@@ -58,16 +33,9 @@
 
 # 4. Speed binning: one design, many products
 
-  Every die is a little different. Test measures the highest stable clock and the power at that clock:
-
-   count of parts
-        ▲            ┌── bell curve of fmax across a wafer lot
-        │          ▄▄▄▄▄▄
-        │       ▄▄██████████▄▄
-        │    ▄▄████████████████▄▄
-        │ ▄▄████████████████████████▄▄
-        └─┴──────┴──────┴──────┴──────┴────▶ fmax / efficiency
-          SCRAP  LOW BIN  MID BIN  TOP BIN   (bins become different SKUs; salvage: fuse off bad blocks)
+  Every die is a little different. Test measures the highest stable clock and the power at that clock.
+  Parts are sorted into scrap, a low bin, a mid bin and a TOP BIN; bins become different SKUs (salvage:
+  fuse off bad blocks).
 
   A lower bin is not scrap: the same wafer feeds a top-bin SKU and cheaper cut-down SKUs (textbook).
   Large AI dies disable failed SMs or HBM channels and sell as a cut-down part (textbook practice).
@@ -84,17 +52,17 @@
 
 # 6. SoC tester share (analyst estimates, definitions differ)
 
-  Advantest 2023  █████████████████████████████ ~50%  (older report)
-  Teradyne 2023   █████████████████ ~30%  (older report)
-  Advantest CY25  ██████████████████████████████████████ 66%  (up from 56%, one analysis)
-  Teradyne VIP    █████████████████████████████ ~50%  (VIP compute, own claim 2025)
+  Advantest 2023   ~50%  (older report)
+  Teradyne 2023    ~30%  (older report)
+  Advantest CY25   66%, up from 56%  (one analysis)
+  Teradyne VIP     ~50%  (VIP compute, own claim 2025)
   Another source claims Teradyne holds 50-55% of SoC test; these do not reconcile. Treat as ranges.
   Teradyne also says it gained share in HBM and DRAM final test in 2025 (memory test otherwise flat).
 
 # 7. Teradyne growth, 2025 (YoY %)
 
-  SoC test        ████████████████████████████████████████ 23%
-  Semi test group █████████████████████████████████ 19%
+  SoC test         23%
+  Semi test group  19%
 
 # 8. Who makes it, market structure, risks
 

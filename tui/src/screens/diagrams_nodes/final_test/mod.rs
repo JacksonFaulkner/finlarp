@@ -1,10 +1,13 @@
-// FINAL TEST page in the MELT + PULL template. Stub until it is written.
+// FINAL TEST, the back-end test page. Its overview is a Blender scene (overview.rs); the lettered
+// zoom-ins and numbered sections are not written yet.
+
+mod overview;
 
 use super::Node;
 
 pub const NODE: Node = Node {
     page: "FINAL TEST",
-    overview: None,
+    overview: Some(overview::build),
     sections: &[],
     clips: false,
 };
