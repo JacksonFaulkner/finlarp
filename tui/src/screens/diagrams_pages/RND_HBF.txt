@@ -1,0 +1,68 @@
+# 1. What it is: NAND flash in an HBM package
+
+HBF (high-bandwidth flash) stacks NAND flash dies the way HBM stacks DRAM dies and puts the stack beside the GPU on the same interposer. It gives an inference chip far more memory capacity per GPU than HBM, at a bandwidth below HBM's. SanDisk and SK hynix lead the work; the first open spec came out through the Open Compute Project (OCP) in August 2026.
+
+# 2. The parts
+
+NAND DIE        a flash die: the memory array plus the CMOS logic that drives it
+CBA             CMOS directly bonded to array: the logic wafer bonded under the array wafer
+STACK           8 or 16 NAND dies on a base die, joined by TSVs and microbumps
+BASE DIE        the bottom die that talks to the GPU
+UCIe            the chiplet link between the stack and the processor
+xPU-HBF         the host interface the spec defines between a processor and HBF
+PAGE            the unit flash reads in: much larger than a DRAM access
+KV CACHE        the model's working memory during a conversation, rewritten as it runs
+ENDURANCE       how many times flash cells can be rewritten before they wear out
+
+# 3. From flash cell to GPU, in order
+
+1. the model's weights sit in the NAND arrays of each die
+2. the die's CMOS layer reads a page out of its array
+3. the data runs down the TSVs to the base die
+4. the base die sends it over the UCIe link across the interposer
+5. the GPU takes it in alongside what it reads from HBM
+
+# 4. Why inference wants capacity
+
+A model's weights must sit in memory close to the GPU. Llama 3.1 405B at 16 bits per weight is about 810 GB, which takes many HBM stacks. SanDisk claims HBF holds 8-16x the capacity of HBM at a similar cost, so the same weights fit in far fewer stacks.
+
+# 5. Inside the stack
+
+SanDisk's first-generation target (July 2025): 16 NAND dies of 256 Gb each, 512 GB per stack, and 1.6 TB/s of read bandwidth. Each die has its CMOS logic bonded directly under the array (CBA). SanDisk says the footprint, stack height and power are close to HBM4's. Company figures.
+
+# 6. The spec
+
+The first OCP HBF specification (August 3, 2026) covers 8-high and 16-high stacks up to 512 GB and three bandwidth grades from about 0.4 to 3.0 TB/s. It defines the xPU-HBF host interface, electrical guidelines, stack reliability and packaging, and a software guide for reads and writes. Trade press reports UCIe as the link to the processor. Google and Tenstorrent joined the workstream. 3.0 TB/s is the spec's ceiling, not a shipping part.
+
+# 7. What the papers found
+
+- FlashAccel (arXiv 2607.10186): adding six HBF stacks to an HBM GPU gave about 2.49x throughput per GPU and 1.93x energy efficiency under a 100 ms latency limit, in simulation.
+- Son et al. (arXiv 2608.13868): capacity alone is not enough; HBF needs read bandwidth close to HBM's.
+- UC Berkeley and FuriosaAI (arXiv 2609.39131): an HBM, HBF and host-memory hierarchy cut workload completion time by 46-60% against HBM alone.
+- FLINT (arXiv 2608.25062): HBF as a read-mostly capacity tier beside HBM, without an SRAM staging buffer.
+
+# 8. The weak spot: writes
+
+Flash wears out as it is rewritten and is slow to write, so HBF suits data that is read far more than written, such as model weights. The KV cache is rewritten constantly. One study found KV writes took 5-13.9% of run time (arXiv 2608.13868); the Berkeley and FuriosaAI scheduler cut HBF KV writes by 94%, raising estimated write lifetime from 1.2 to 14.8 years (arXiv 2609.39131).
+
+# 9. Who is building it, timing and risks
+
+SanDisk (SNDK) and SK hynix wrote the spec. Samsung has filed a "zHBF" trademark and is reported to be in early design; Kioxia's high-bandwidth flash module is a PCIe device, not an in-package stack. SanDisk targets HBF memory samples in H2 2026 and samples of the first inference devices in early 2027.
+
+- No product is on sale; the performance figures are company claims or simulations.
+- Write endurance limits what HBF can hold.
+- A shared interface does not guarantee parts from different vendors will be interchangeable.
+
+# 10. Sources
+
+  [1] SanDisk and SK hynix, first OCP HBF specification (Aug 2026): sandisk.com/company/newsroom/press-releases/2026/2026-08-03-Sandisk-and-sk-hynix-advance-global-standardization-of-hbf
+  [2] SK hynix at FMS 2026: news.skhynix.com/en/hbf-at-fms-2026/
+  [3] SanDisk, Memory-Centric AI (HBF targets, Llama 3.1 405B simulation, timeline): sandisk.com/company/newsroom/blogs/2025/memory-centric-ai
+  [4] OCP HBF base die specification v0.7: opencompute.org/documents/ocp-hbf-architecture-specification-v0-7-0-final-pdf/
+  [5] Spec read (grades, UCIe): siliconandsystems.com/en/articles/hbf/
+  [6] FlashAccel: arxiv.org/abs/2607.10186
+  [7] Exploring HBF for modern LLM inference: arxiv.org/abs/2608.13868
+  [8] Characterizing HBF for LLM serving (UC Berkeley, FuriosaAI): arxiv.org/abs/2609.39131
+  [9] FLINT: arxiv.org/abs/2608.25062
+  [10] Samsung and SanDisk bet on HBF (TrendForce, Nov 2025): trendforce.com/news/2025/11/11/news-sk-hynix-samsung-and-sandisk-bet-on-hbf-the-next-battleground-in-memory-sector/
+  [11] Kioxia high-bandwidth flash (Blocks and Files, Mar 2026): blocksandfiles.com/flash/2026/03/20/kioxia-eyes-gpu-memory-stack-with-high-bandwidth-flash-push/5210520
