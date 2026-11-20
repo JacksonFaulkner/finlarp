@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/melt_sections.py. Section 1 is five beats, the rest four; section 9 is the
 // sources page.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[

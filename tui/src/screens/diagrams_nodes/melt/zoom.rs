@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/melt_zooms.py: a the dash neck, b melt convection and the magnetic field,
 // c the hot zone and the argon sweep. Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 pub const NECK_BEATS: &[Beat] = &[

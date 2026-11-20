@@ -9,7 +9,7 @@
 // (dash neck); US 7,179,330 (dash-free neck); US 9,988,736 (tail growth); Journal of Synthetic Crystals 52(4)
 // (2023), 300 mm pull-rate study.
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
