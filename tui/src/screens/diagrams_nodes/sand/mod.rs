@@ -2,8 +2,8 @@
 // pictures (section 10 is the sources page) all share one layout: the Blender scene on the left
 // with tags pinned to its parts, and the beat's text in a panel on the right (pbr3d::caption).
 
-pub use super::blender::{Page, BEAT_MS};
 use super::Node;
+pub use super::blender::{BEAT_MS, Page};
 
 mod overview;
 mod sections;

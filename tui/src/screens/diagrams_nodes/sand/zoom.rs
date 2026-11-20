@@ -8,7 +8,7 @@
 
 use std::sync::OnceLock;
 
-use super::{Page, BEAT_MS};
+use super::{BEAT_MS, Page};
 use crate::ui::anim::{Beat, Scene};
 
 static CAVITY: OnceLock<pbr3d::scene_gltf::Scene> = OnceLock::new();

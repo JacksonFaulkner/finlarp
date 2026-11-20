@@ -6,7 +6,7 @@
 
 use std::sync::OnceLock;
 
-use super::{zoom, Page, BEAT_MS};
+use super::{BEAT_MS, Page, zoom};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const BEATS: &[Beat] = &[
