@@ -1,4 +1,4 @@
-"""The five CELL zoom-ins, authored in Blender and exported for pbr3d in the MELT + PULL template
+"""The six CELL zoom-ins, authored in Blender and exported for pbr3d in the MELT + PULL template
 (docs/diagram-pages.md), built from the cell pieces in cell_kit.py. Each zoom is four beats.
 
 Run from the repo root:
@@ -12,6 +12,7 @@ For each zoom it writes blender/cell_<name>.blend and assets/cell_<name>.glb.
   c rows    refresh across the rows: the pointer walks the rows, each rewritten at full charge
   d shrink  shrinking the cell: a smaller footprint, the plates grow taller to keep the charge
   e layout  open vs folded bit lines: a reference line moves beside the signal, noise hits both
+  f transistor  the access transistor: gate, source, drain; a read and a write through the channel
 
 One beat is SEC (8) seconds at 24 fps.
 """
@@ -20,7 +21,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from sand_overview import OFF, F, P, box, empty, key, label, pivot, show, tube  # noqa: E402
+from sand_overview import OFF, F, P, beat, box, empty, key, label, pivot, show, tube  # noqa: E402
 from sand_zooms import camera, finish, scale_keys, start, stream_of  # noqa: E402
 import cell_kit as K  # noqa: E402
 from cell_kit import ZC, SRC_X, DRN_X, BL_Y, CAP_Y0, CAP_Y1  # noqa: E402
@@ -214,7 +215,36 @@ def layout():
     finish("layout", page="cell")
 
 
+# ---- f: the transistor ------------------------------------------------------------------
+
+
+def transistor():
+    """The access transistor on its own: gate (word line), source (storage-node side) and drain
+    (bit-line side). Beat 1 is a read (charge leaves the source through the open channel), beat 3
+    a write (the bit line drives charge back through it)."""
+    m, root = begin("transistor")
+    K.substrate(root, m)
+    K.transistor(root, m, lit=beat(1) + beat(3))
+    stream_of(root, "read_flow", 6, (K.SRC_X, 30.0, K.ZC), [(0, 0, 0), (K.DRN_X - K.SRC_X, 0, 0)],
+              24, m["cyan_dot"], 1, 0.15, 0.70, 40)
+    stream_of(root, "write_flow", 6, (K.DRN_X, 30.0, K.ZC), [(0, 0, 0), (K.SRC_X - K.DRN_X, 0, 0)],
+              24, m["violet_dot"], 3, 0.15, 0.70, 40)
+    label("gate: the word line", (0, K.WL_Y + 260, K.ZC), root, beat(0))
+    label("drain: the bit-line side", (K.DRN_X, 260, K.ZC + 240), root, beat(0))
+    label("source: the storage-node side", (K.SRC_X, 260, K.ZC + 240), root, beat(0))
+    label("gate high: channel open, charge leaves the cell", (0, 480, K.ZC), root, beat(1))
+    label("gate low: channel closed, cell cut off", (0, 480, K.ZC), root, beat(2))
+    label("write: the bit line drives charge back in", (0, 480, K.ZC), root, beat(3))
+    camera(root, [
+        ((0.0, 200.0, K.ZC), 2300.0, 0.45, 0.18),
+        ((0.0, 200.0, K.ZC), 2200.0, 0.40, 0.18),
+        ((0.0, 200.0, K.ZC), 2200.0, 0.40, 0.18),
+        ((0.0, 200.0, K.ZC), 2300.0, 0.50, 0.18),
+    ])
+    finish("transistor", page="cell")
+
+
 if __name__ == "__main__":
-    which = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["cap", "read", "rows", "shrink", "layout"]
+    which = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else ["cap", "read", "rows", "shrink", "layout", "transistor"]
     for name in which:
         globals()[name]()

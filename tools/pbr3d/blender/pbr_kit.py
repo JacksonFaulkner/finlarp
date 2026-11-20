@@ -267,16 +267,20 @@ def start(name, beats):
     return empty(f"fab_{name}")
 
 
-def camera(root, poses):
-    """Camera keys: one (target, distance, yaw, pitch) per beat, held at the middle of the beat."""
+def camera(root, poses, cut=False):
+    """Camera keys: one (target, distance, yaw, pitch) per beat. By default the camera glides from
+    each beat's pose toward the next, keyed at the middle of the beat. With `cut=True` each pose
+    holds for its whole beat and the camera cuts at the beat boundary (as sand_zooms.camera does);
+    gliding between poses with different yaw orbits the subject, which reads as the scene spinning."""
     target = empty("CamTarget", root)
     eye = empty("CamEye", root)
     for i, (t, dist, yaw, pitch) in enumerate(poses):
-        f = BEAT_FRAMES * i + BEAT_FRAMES // 2
         cp, sp = math.cos(pitch), math.sin(pitch)
         e = (t[0] + dist * cp * math.sin(yaw), t[1] + dist * sp, t[2] + dist * cp * math.cos(yaw))
-        key(target, f, "location", P(*t))
-        key(eye, f, "location", P(*e))
+        frames = (BEAT_FRAMES * i, BEAT_FRAMES * (i + 1) - 1) if cut else (BEAT_FRAMES * i + BEAT_FRAMES // 2,)
+        for f in frames:
+            key(target, f, "location", P(*t), linear=cut)
+            key(eye, f, "location", P(*e), linear=cut)
 
 
 def finish(name):

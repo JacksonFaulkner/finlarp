@@ -106,7 +106,7 @@ def overview():
         c = ball(f"chunk{k}", (xs[4] + 50, 300, -60 + 40 * k), 60, m["chunk"], root)
         travel(c, [(xs[4] + 50, 300, -60 + 40 * k), (xs[5], 260, -60 + 40 * k)], 3 * BF + 2 * k, 4 * BF - 4, steps=2)
         show(c, [(3 * BF, 4 * BF)])
-    camera(root, [((-300, 250, 0), 4300, 0.3, 0.2), ((-300, 300, 0), 3800, 0.3, 0.2),
+    camera(root, cut=True, poses=[((-300, 250, 0), 4300, 0.3, 0.2), ((-300, 300, 0), 3800, 0.3, 0.2),
                   ((600, 300, 0), 4000, 0.3, 0.2), ((1100, 200, 0), 3800, 0.3, 0.2)])
     finish("poly_overview")
 
@@ -136,7 +136,7 @@ def zoom_bed():
         out = ball(f"exit{k}", (0, 800, 0), 30, m["hcl"], root)
         travel(out, [(0, 800, 0), (200, 1000, 0)], 2 * BF + 6 * k, 3 * BF + 6 * k, steps=2)
         show(out, [(2 * BF, 4 * BF - 1)])
-    camera(root, [((0, 300, 0), 2200, 0.5, 0.2), ((0, 300, 0), 2000, 0.8, 0.2),
+    camera(root, cut=True, poses=[((0, 300, 0), 2200, 0.5, 0.2), ((0, 300, 0), 2000, 0.8, 0.2),
                   ((0, 400, 0), 2200, 0.3, 0.25), ((0, 420, 0), 2400, 0.6, 0.25)])
     finish("poly_zoom_bed")
 
@@ -164,7 +164,7 @@ def zoom_column():
     # beats 2-3: the TCS and STC take off at different heights, marked by bars
     grow_bar(root, "tcs_take", 250, 330, 500, m["hi"], 2 * BF, 3 * BF, z0=-40, z1=40)
     grow_bar(root, "stc_take", 350, 430, 200, m["bar"], 2 * BF, 3 * BF, z0=-40, z1=40)
-    camera(root, [((0, 500, 0), 2600, 0.4, 0.2), ((0, 600, 0), 2600, 0.4, 0.2),
+    camera(root, cut=True, poses=[((0, 500, 0), 2600, 0.4, 0.2), ((0, 600, 0), 2600, 0.4, 0.2),
                   ((150, 400, 0), 2400, 0.4, 0.2), ((0, 500, 0), 2600, 0.6, 0.2)])
     finish("poly_zoom_column")
 
@@ -204,7 +204,7 @@ def zoom_jar():
         travel(g, [(-400, 100, -60 + 17 * k), (0, 300, 0), (400, 100, -60 + 17 * k)], 3 * k, 3 * k + 40, steps=2)
         show(g, [(BF, 3 * BF)])
     # whole jar in frame (about 0.53 x distance tall), slightly from above
-    camera(root, [((0, 360, 0), 1700, 0.35, 0.22), ((0, 380, 0), 1800, 0.6, 0.25),
+    camera(root, cut=True, poses=[((0, 360, 0), 1700, 0.35, 0.22), ((0, 380, 0), 1800, 0.6, 0.25),
                   ((0, 380, 0), 1800, 0.3, 0.25), ((0, 500, 0), 2300, 0.5, 0.3)])
     finish("poly_zoom_jar")
 
@@ -228,7 +228,7 @@ def zoom_loop():
     # the growth trade-off: rate against diameter, two bars on a scale
     grow_bar(root, "rate", -150, -50, 1.9 * 200, m["hi"], 2 * BF, 3 * BF, z0=-40, z1=40)
     grow_bar(root, "rod_mm", 50, 150, 180, m["bar"], BF, 3 * BF, z0=-40, z1=40)
-    camera(root, [((0, 200, 0), 2600, 0.3, 0.6), ((0, 200, 0), 2600, 0.5, 0.6),
+    camera(root, cut=True, poses=[((0, 200, 0), 2600, 0.3, 0.6), ((0, 200, 0), 2600, 0.5, 0.6),
                   ((0, 250, 0), 2400, 0.3, 0.45), ((0, 250, 0), 2400, 0.3, 0.45)])
     finish("poly_zoom_loop")
 
@@ -253,7 +253,7 @@ def sec1_what_happens():
         c = ball(f"chunk{k}", (xs[4], 300, -60 + 40 * k), 60, m["chunk"], root)
         travel(c, [(xs[4], 300, -60 + 40 * k), (xs[5], 260, -60 + 40 * k)], 2 * BF + 4 * k, 3 * BF - 4, steps=2)
         show(c, [(2 * BF, 3 * BF)])
-    camera(root, [((-600, 200, 0), 2600, 0.3, 0.3), ((0, 200, 0), 2600, 0.3, 0.3),
+    camera(root, cut=True, poses=[((-600, 200, 0), 2600, 0.3, 0.3), ((0, 200, 0), 2600, 0.3, 0.3),
                   ((800, 220, 0), 2600, 0.3, 0.3)])
     finish("poly_sec1")
 
@@ -273,7 +273,7 @@ def sec2_bell_jar():
     # the hot rods glow through the growth: a small core low between the pairs
     hot = ball("hot_core", (0, 200, 60), 70, m["hot"], root)
     flicker(hot, 0, 3 * BF - 1, base=1.0)
-    camera(root, [((0, 380, 0), 1800, 0.5, 0.25), ((0, 380, 0), 1800, 0.9, 0.25),
+    camera(root, cut=True, poses=[((0, 380, 0), 1800, 0.5, 0.25), ((0, 380, 0), 1800, 0.9, 0.25),
                   ((0, 380, 0), 1800, 0.2, 0.3)])
     finish("poly_sec2")
 
@@ -295,7 +295,7 @@ def sec3_chemistry():
         for k, (el, x, y) in enumerate(group):
             ball(f"atom{b}_{k}", (x, y + 200, 0), radius[el], mats[el], g)
         envelope(g, [(b * BF, b * BF + 2, (b + 1) * BF - 2, (b + 1) * BF + 4)])
-    camera(root, [((-700, 200, 0), 1600, 0.2, 0.2), ((0, 200, 0), 1600, 0.2, 0.2),
+    camera(root, cut=True, poses=[((-700, 200, 0), 1600, 0.2, 0.2), ((0, 200, 0), 1600, 0.2, 0.2),
                   ((700, 200, 0), 1600, 0.2, 0.2)])
     finish("poly_sec3")
 
@@ -308,7 +308,7 @@ def sec4_numbers():
     grow_bar(root, "rod_out", -300, -100, 180, m["hi"], 0, BF)
     grow_bar(root, "kwh", 0, 200, 65 * 3, m["bar"], BF, 2 * BF)
     grow_bar(root, "temp", 500, 700, 1100 / 10, m["hi"], 2 * BF, 3 * BF)
-    camera(root, [((-300, 150, 0), 1800, 0.2, 0.2), ((0, 150, 0), 1800, 0.2, 0.2),
+    camera(root, cut=True, poses=[((-300, 150, 0), 1800, 0.2, 0.2), ((0, 150, 0), 1800, 0.2, 0.2),
                   ((400, 150, 0), 1800, 0.2, 0.2)])
     finish("poly_sec4")
 
@@ -321,7 +321,7 @@ def sec5_impurities():
     for k, (name, e, mm) in enumerate(data):
         x = -500 + k * 500
         grow_bar(root, name, x - 120, x + 120, (e - 10) * 150, mm, k * BF, k * BF + BF)
-    camera(root, [((0, 200, 0), 1800, 0.2, 0.2), ((0, 200, 0), 1800, 0.2, 0.2),
+    camera(root, cut=True, poses=[((0, 200, 0), 1800, 0.2, 0.2), ((0, 200, 0), 1800, 0.2, 0.2),
                   ((0, 200, 0), 1800, 0.2, 0.2)])
     finish("poly_sec5")
 
@@ -334,7 +334,7 @@ def sec6_makers():
         x = -800 + k * 400
         f0 = 0 if k < 2 else (BF if k < 4 else 2 * BF)
         grow_bar(root, name, x - 120, x + 120, t / 4, m["hi"] if k == 0 else m["bar"], f0, f0 + BF)
-    camera(root, [((-400, 200, 0), 2200, 0.2, 0.2), ((0, 200, 0), 2200, 0.2, 0.2),
+    camera(root, cut=True, poses=[((-400, 200, 0), 2200, 0.2, 0.2), ((0, 200, 0), 2200, 0.2, 0.2),
                   ((400, 200, 0), 2200, 0.2, 0.2)])
     finish("poly_sec6")
 
@@ -349,7 +349,7 @@ def sec7_grades():
     box("chip_block", (300, 0, -120), (500, 120, 120), m["bar"], chip)
     grow_bar(root, "solar_grow", -600, -200, 900, m["hi"], 0, BF, z0=-200, z1=200)
     envelope(chip, [(BF, BF + 2, 3 * BF - 2, 3 * BF + 4)])
-    camera(root, [((-200, 300, 0), 2600, 0.3, 0.2), ((-200, 300, 0), 2600, 0.3, 0.2),
+    camera(root, cut=True, poses=[((-200, 300, 0), 2600, 0.3, 0.2), ((-200, 300, 0), 2600, 0.3, 0.2),
                   ((400, 150, 0), 2000, 0.3, 0.2)])
     finish("poly_sec7")
 
@@ -368,7 +368,7 @@ def sec8_risks():
         show(g, [(0, BF)])
     grow_bar(root, "glut", 400, 600, 800, m["hi"], 2 * BF, 3 * BF, z0=-120, z1=120)
     grow_bar(root, "power", -600, -400, 65 * 3, m["bar"], 0, 2 * BF, z0=-120, z1=120)
-    camera(root, [((-300, 200, 0), 2600, 0.3, 0.25), ((0, 300, 0), 2600, 0.3, 0.25),
+    camera(root, cut=True, poses=[((-300, 200, 0), 2600, 0.3, 0.25), ((0, 300, 0), 2600, 0.3, 0.25),
                   ((300, 300, 0), 2600, 0.3, 0.25)])
     finish("poly_sec8")
 
@@ -384,7 +384,7 @@ def sec9_names():
         box(f"tile{k}", (x - 200, 0, z - 100), (x + 200, 30, z + 100), m["card"], tile)
         beat = k // 3
         envelope(tile, [(beat * BF, beat * BF + 2, 3 * BF - 2, 3 * BF + 4)])
-    camera(root, [((0, 60, 0), 2400, 0.3, 0.7), ((0, 60, 0), 2400, 0.3, 0.7),
+    camera(root, cut=True, poses=[((0, 60, 0), 2400, 0.3, 0.7), ((0, 60, 0), 2400, 0.3, 0.7),
                   ((0, 60, 0), 2400, 0.3, 0.7)])
     finish("poly_sec9")
 
@@ -409,7 +409,7 @@ def sec10_sources():
     key(cards, 2 * BF, "rotation_euler", (0, 0, 0))
     key(cards, 2 * BF + 12, "rotation_euler", (0, 0, 0.12))
     key(cards, 3 * BF - 1, "rotation_euler", (0, 0, -0.12))
-    camera(root, [((0, 60, 0), 1800, 0.6, 0.7), ((0, 80, 0), 1800, 0.9, 0.7),
+    camera(root, cut=True, poses=[((0, 60, 0), 1800, 0.6, 0.7), ((0, 80, 0), 1800, 0.9, 0.7),
                   ((0, 80, 0), 1800, 0.3, 0.8)])
     finish("poly_sec10")
 
