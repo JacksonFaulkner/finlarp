@@ -1,41 +1,16 @@
 # 1. What happens: shoot dopant atoms into the crystal, then repair it
 
- ┌────────────┐  ┌──────────┐  ┌─────────┐  ┌────────────┐  ┌───────────┐  ┌───────┐  ┌────────────┐
- │ SOURCE     │  │ EXTRACT  │  │ MASS    │  │ ACCEL /    │  │ SCAN +    │  │ WAFER │  │ ANNEAL     │
- │ arc plasma │─▶│ pull out │─▶│ FILTER  │─▶│ DECEL      │─▶│ TILT      │─▶│ dose  │─▶│ fix damage │
- │            │  │          │  │ one ion │  │ set energy │  │ even dose │  │       │  │            │
- └────────────┘  └──────────┘  └─────────┘  └────────────┘  └───────────┘  └───────┘  └────────────┘
+The steps, in order: a source (arc plasma) makes the ions, extraction pulls them out, a mass filter keeps one ion, the accelerator or decelerator sets the energy, a scanner and tilt spread the dose evenly, and an anneal repairs the crystal.
 
   (places dopants at a controlled depth and dose, with no film left on the wafer)
 
 # 2. Inside a beamline implanter
 
- ┌────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │                    ┌────────┐   ┌────────────┐     ┌───────────┐    ┌─────────────┐                │
- │  gas: BF3, AsH3,   │ SOURCE │   │ ANALYZER   │     │ ACCELERATE│    │ SCAN/PARALLEL│               │
- │  PH3 or vapour ──▶ │ arc    │═══│ magnet 90° │═════│ or DECEL  │════│ LENS: makes  │═══╗           │
- │                    │ chamber│   │ B bends by │     │ column    │    │ beam wide    │   ║           │
- │                    └────────┘   │ mass/charge│     └───────────┘    └─────────────┘   ║            │
- │     extraction electrodes       └────────────┘                                          ▼          │
- │     pull ions out, ~kV          wrong masses hit the slit and stop       ┌──────────────────┐      │
- │                                                                          │ WAFER, tilted and│      │
- │                                 Faraday cup counts beam current ──────▶  │ spun (channeling)│      │
- │                                                                          └──────────────────┘      │
- │  vacuum throughout so the beam hits nothing but the wafer; either the beam or the wafer is scanned │
- └────────────────────────────────────────────────────────────────────────────────────────────────────┘
+A beamline takes a gas (BF3, AsH3, PH3, or a vapour) into an arc source. Extraction electrodes pull ions out at about kV. An analyzer magnet bends the ions by mass and charge, so wrong masses hit the slit and stop there, and a Faraday cup counts the beam current. An accelerate or decelerate column sets the energy. A scan or parallel lens makes the beam wide, and the wafer is tilted and spun to limit channeling. The whole path is under vacuum so the beam hits nothing but the wafer; either the beam or the wafer is scanned.
 
 # 3. Dopant depth profile: what the beam does inside silicon
 
- ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
- │  ion path                      concentration vs depth (Gaussian-like, textbook)                │
- │   ↓ ↓ ↓ ↓ ↓                                 *****                                              │
- │  ┌──────────────┐ surface                 ***     ***                                          │
- │  │ . .          │  ◀ nuclear + electronic ***       ***        peak sits at projected range Rp │
- │  │   . ▒▒▒▒     │    stopping slows ions **           **       energy up ──▶ Rp deeper         │
- │  │     ▒▒▒▒▒▒   │  ▒ = damaged / amorphous    *           *    dose up ──▶ taller peak         │
- │  │       ▒▒ .   │  after the beam stops         *         *                                    │
- │  └──────────────┘  tilt + rotation blocks channeling down crystal planes                       │
- └────────────────────────────────────────────────────────────────────────────────────────────────┘
+The ions slow down as they pass through the silicon (nuclear and electronic stopping), and they stop at a depth set by their energy. The concentration against depth is roughly Gaussian (textbook): the peak sits at the projected range Rp, higher energy pushes Rp deeper, and higher dose makes the peak taller. The top of the stopping region is damaged, or amorphous. Tilt and rotation block channeling down crystal planes.
 
   (the beam leaves vacancies and interstitials; ANNEAL puts dopants on lattice sites, heals crystal)
 
@@ -51,12 +26,10 @@
 
 # 5. By the numbers: the three implanter classes
 
- ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
- │ class          energy                       dose (ions/cm2)   beam current                          │
- │ high current   0.1 - 100 keV                1e14 - 1e17       up to ~25-30 mA                       │
- │ medium current 3 - 500 keV (some to ~600)   1e11 - 1e14       1 uA - 5 mA (Wikipedia: 10 uA - 2 mA) │
- │ high energy    100 keV - 5 MeV (to 10 MeV)  1e10 - 1e13       lower, deep wells                     │
- └─────────────────────────────────────────────────────────────────────────────────────────────────────┘
+  high current    energy 0.1 - 100 keV;   dose 1e14 - 1e17 ions/cm2;  beam current up to ~25-30 mA
+  medium current  energy 3 - 500 keV (some to ~600);  dose 1e11 - 1e14 ions/cm2;  beam current 1 uA - 5 mA (Wikipedia: 10 uA - 2 mA)
+  high energy     energy 100 keV - 5 MeV (to 10 MeV);  dose 1e10 - 1e13 ions/cm2;  beam current lower, deep wells
+
   (approximate ranges from patents, Wikipedia and Axcelis; the sources say not strict) [1][2][3]
   Highest dose with economical throughput: about 1e16 /cm2 [3]
 
@@ -85,29 +58,49 @@
 
 # 8. Where each class is used (textbook, unsourced) and the anneal that follows
 
- ┌──────────────────────────────────────────────────────────────────────────────────────────┐
- │ high current   source/drain and extensions: shallow, heavy dose (B, As, P), low energy   │
- │ medium current wells, channel and threshold-voltage adjust, halos: moderate energy, dose │
- │ high energy    retrograde / deep wells, image-sensor and power devices: MeV depth        │
- └──────────────────────────────────────────────────────────────────────────────────────────┘
+  high current    source/drain and extensions: shallow, heavy dose (B, As, P), low energy
+  medium current  wells, channel and threshold-voltage adjust, halos: moderate energy, dose
+  high energy     retrograde / deep wells, image-sensor and power devices: MeV depth
 
-  implant (damage)  ──▶  anneal (heal + activate)  ──▶  dopants electrically active
-
- ┌─────────────────────────────────────────────────────────────────────────────────────┐
- │   AFTER IMPLANT                       AFTER SPIKE / LASER ANNEAL                    │
- │   ┌──────────────────────┐            ┌──────────────────────┐                      │
- │   │ ▒▒▒▒ amorphous ▒▒▒▒  │   heat     │ crystal regrown      │                      │
- │   │ ▒▒ dopant on random  │  ≈≈≈≈≈▶    │ dopant on lattice    │                      │
- │   │ ▒▒ interstitials ▒▒  │  ramp      │ sites = ACTIVE       │                      │
- │   │ crystal below, intact│  >=75 C/s  │ little diffusion     │                      │
- │   └──────────────────────┘            └──────────────────────┘                      │
- │   risk: transient enhanced diffusion pushes dopant deeper if the anneal is slow [4] │
- └─────────────────────────────────────────────────────────────────────────────────────┘
+  Implant damages the crystal, and the anneal heals it and activates the dopant:
+  after the implant, the top layer is amorphous, with dopant on random sites and interstitials, and the crystal below is intact.
+  After a spike or laser anneal, the crystal has regrown, the dopant sits on lattice sites (active), and little diffusion has happened.
+  risk: transient enhanced diffusion pushes dopant deeper if the anneal is slow [4]
 
   (implant also makes SOI wafers by oxygen implant (SIMOX), per Wikipedia [1])
 
   Trade-off in one line: more heat activates more dopant but also diffuses it, so anneals keep getting
   shorter and hotter (spike, then millisecond, then microsecond laser) while keeping damage low. [4]
+
+# Card labels, in order
+
+SOURCE: the ion source is an arc chamber where a hot filament, or RF, strikes a plasma in a low-pressure gas or vapour, and collisions strip electrons from the dopant molecules.
+
+EXTRACT: extraction electrodes pull the ions out of the arc chamber through a slit, giving them their first energy and forming the beam.
+
+MASS: the mass filter is the analyser magnet, which bends ions of the wrong mass-to-charge ratio onto a slit so that only the chosen species passes.
+
+ACCEL: the acceleration or deceleration column sets the final ion energy, and that energy sets the depth of the dopant peak.
+
+SCAN +: scan and tilt spread the narrow beam evenly over the whole wafer, and the wafer is tilted and rotated to limit channeling.
+
+ANNEAL: anneal repairs the crystal damage left by the beam and activates the dopant, by heating the wafer so the dopant moves onto lattice sites.
+
+ANALYZER: the analyser is the 90 degree magnet that sorts ions by mass-to-charge ratio, so the beam leaving it is a single species.
+
+Faraday cup: a metal cup that catches the beam and measures its current, which is integrated over time and area to give the dose.
+
+channeling: ions that enter along open corridors in the crystal travel too deep, so the wafer is tilted and rotated, or the surface is pre-amorphised, to stop it.
+
+high current: the class that delivers the heaviest doses at low energy, from 0.1 to 100 keV, for source and drain doping.
+
+Applied Mat.: Applied Materials sold about 62.65% of ion implanters in 2024 in a third-party estimate, through its Varian lineage.
+
+Axcelis: Axcelis is the number two implanter maker, with a 21.19% share of 2024 unit sales in the same third-party estimate.
+
+SEN (Sumitomo Heavy 6302.T): a 50/50 joint venture between Axcelis and Sumitomo Heavy Industries, which was the leader in Japan per the 2004 10-K.
+
+laser anneal: a laser heats only the top thin layer of the wafer for a few microseconds, giving high activation with little diffusion.
 
 # Sources
 
