@@ -1,0 +1,362 @@
+[
+ {
+  "level": "fund",
+  "name": "DRAM",
+  "label": "Roundhill Memory ETF",
+  "parent": ""
+ },
+ {
+  "level": "fund",
+  "name": "QQQ",
+  "label": "Invesco QQQ Trust",
+  "parent": ""
+ },
+ {
+  "level": "fund",
+  "name": "QTUM",
+  "label": "Defiance Quantum ETF",
+  "parent": ""
+ },
+ {
+  "level": "fund",
+  "name": "REMX",
+  "label": "VanEck Rare Earth and Strategic Metals ETF",
+  "parent": ""
+ },
+ {
+  "level": "fund",
+  "name": "SOXX",
+  "label": "iShares Semiconductor ETF",
+  "parent": ""
+ },
+ {
+  "level": "fund",
+  "name": "SSO",
+  "label": "ProShares Ultra S&P500",
+  "parent": ""
+ },
+ {
+  "level": "fund",
+  "name": "VTI",
+  "label": "Vanguard Morningstar Total Stock Market ETF",
+  "parent": ""
+ },
+ {
+  "level": "primary",
+  "name": "applications",
+  "label": "Applications & Services",
+  "parent": "applications"
+ },
+ {
+  "level": "primary",
+  "name": "compute_hardware",
+  "label": "Compute & Semis",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "primary",
+  "name": "energy",
+  "label": "Power & Energy",
+  "parent": "energy"
+ },
+ {
+  "level": "primary",
+  "name": "infrastructure",
+  "label": "Data Center & Network",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "primary",
+  "name": "physical_ai",
+  "label": "Physical AI & Industrial",
+  "parent": "physical_ai"
+ },
+ {
+  "level": "primary",
+  "name": "software_platform",
+  "label": "Software & Platforms",
+  "parent": "software_platform"
+ },
+ {
+  "level": "region",
+  "name": "CN",
+  "label": "CN",
+  "parent": ""
+ },
+ {
+  "level": "region",
+  "name": "JP",
+  "label": "JP",
+  "parent": ""
+ },
+ {
+  "level": "region",
+  "name": "KR",
+  "label": "KR",
+  "parent": ""
+ },
+ {
+  "level": "region",
+  "name": "TW",
+  "label": "TW",
+  "parent": ""
+ },
+ {
+  "level": "region",
+  "name": "US",
+  "label": "US",
+  "parent": ""
+ },
+ {
+  "level": "sub",
+  "name": "adtech_marketing",
+  "label": "Adtech & Marketing",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "advanced_manufacturing",
+  "label": "3D Printing & On-Demand Mfg",
+  "parent": "physical_ai"
+ },
+ {
+  "level": "sub",
+  "name": "analog_power_semis",
+  "label": "Analog & Power Semis",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "autonomous_vehicles",
+  "label": "Autonomous Vehicles",
+  "parent": "physical_ai"
+ },
+ {
+  "level": "sub",
+  "name": "cloud_platforms",
+  "label": "Cloud & Edge Platforms",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "consumer_commerce_mobility",
+  "label": "Commerce & Mobility",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "cybersecurity",
+  "label": "Cybersecurity",
+  "parent": "software_platform"
+ },
+ {
+  "level": "sub",
+  "name": "data_ai_platforms",
+  "label": "Data & AI Platforms",
+  "parent": "software_platform"
+ },
+ {
+  "level": "sub",
+  "name": "datacenter_operators",
+  "label": "Data Center & Tower Operators",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "defense_gov",
+  "label": "Defense & Government",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "design_simulation_eda",
+  "label": "Design & EDA Software",
+  "parent": "software_platform"
+ },
+ {
+  "level": "sub",
+  "name": "devices_ems_distribution",
+  "label": "Devices, EMS & Distribution",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "devtools_observability",
+  "label": "DevOps & Observability",
+  "parent": "software_platform"
+ },
+ {
+  "level": "sub",
+  "name": "edge_rf_semis",
+  "label": "Edge, RF & Logic Semis",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "electrical_cooling_equipment",
+  "label": "Power & Cooling Equipment",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "engineering_construction",
+  "label": "Engineering & Construction",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "enterprise_saas",
+  "label": "Enterprise Software",
+  "parent": "software_platform"
+ },
+ {
+  "level": "sub",
+  "name": "fintech_software",
+  "label": "Fintech Software",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "foundry_packaging",
+  "label": "Foundry & Packaging",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "future_employer",
+  "label": "Future Employer",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "gaming",
+  "label": "Gaming",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "healthcare",
+  "label": "Healthcare",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "hr_legal_vertical",
+  "label": "HR, Legal & Info Services",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "industrial_components",
+  "label": "Industrial Components & Flow",
+  "parent": "physical_ai"
+ },
+ {
+  "level": "sub",
+  "name": "interconnect_semiconductors",
+  "label": "Interconnect Silicon",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "it_services_consulting",
+  "label": "IT Services & Consulting",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "market_data_exchanges",
+  "label": "Exchanges & Market Data",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "memory_storage",
+  "label": "Memory & Storage",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "natural_gas",
+  "label": "Natural Gas",
+  "parent": "energy"
+ },
+ {
+  "level": "sub",
+  "name": "neocloud_gpu_hosting",
+  "label": "Neoclouds & GPU Hosting",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "networking_connectivity",
+  "label": "Networking & Connectivity",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "nuclear",
+  "label": "Nuclear",
+  "parent": "energy"
+ },
+ {
+  "level": "sub",
+  "name": "optical_photonics",
+  "label": "Optical & Photonics",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "payments_lending",
+  "label": "Payments & Lending",
+  "parent": "applications"
+ },
+ {
+  "level": "sub",
+  "name": "power_equipment",
+  "label": "Generation & Storage Equipment",
+  "parent": "energy"
+ },
+ {
+  "level": "sub",
+  "name": "power_utilities",
+  "label": "Utilities & Power Producers",
+  "parent": "energy"
+ },
+ {
+  "level": "sub",
+  "name": "processors_accelerators",
+  "label": "Processors & AI Accelerators",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "quantum_computing",
+  "label": "Quantum Computing",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "robotics_automation",
+  "label": "Robotics & Automation",
+  "parent": "physical_ai"
+ },
+ {
+  "level": "sub",
+  "name": "semicap_materials",
+  "label": "Semicap, Materials & Test",
+  "parent": "compute_hardware"
+ },
+ {
+  "level": "sub",
+  "name": "servers_systems",
+  "label": "Servers & Systems",
+  "parent": "infrastructure"
+ },
+ {
+  "level": "sub",
+  "name": "social_media_streaming",
+  "label": "Social, Media & Streaming",
+  "parent": "applications"
+ }
+]
