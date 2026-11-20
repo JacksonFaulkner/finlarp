@@ -1,14 +1,14 @@
 // CELL overview: one 1T1C DRAM cell cut open at its centre plane, played back from the Blender
 // scene (tools/pbr3d/blender/cell_overview.py, built on cell_kit.py) in the picture-and-panel
 // template. Seven beats walk one bit through idle, word line, charge sharing, sense and restore,
-// precharge, leakage and refresh. Zoom-ins a-e open the capacitor, a read, the rows, the shrink
-// and the bit-line layouts (tools/pbr3d/blender/cell_zooms.py).
+// precharge, leakage and refresh. Zoom-ins a-f open the capacitor, a read, the rows, the shrink,
+// the bit-line layouts and the access transistor (tools/pbr3d/blender/cell_zooms.py).
 //
 // Sources: UMD ENEE 359a, DRAM Systems (Jacob), slide 3, and DRAM Circuits (Jacob), slides 4, 5, 9,
 // 11-14; Mutlu, arXiv 2306.16037, p. 1; HiRA, arXiv 2209.10198, pp. 1-2; PROTEAS, arXiv 2404.16256,
 // Table I.
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
@@ -107,8 +107,8 @@ const ZOOMS: &[Zoom] = &[
     },
     Zoom {
         key: 'b',
-        label: "a read: charge sharing and restore",
-        build: || -> Box<dyn Scene> { zoom::read() },
+        label: "open vs folded bit lines: the layout",
+        build: || -> Box<dyn Scene> { zoom::layout() },
     },
     Zoom {
         key: 'c',
@@ -122,8 +122,13 @@ const ZOOMS: &[Zoom] = &[
     },
     Zoom {
         key: 'e',
-        label: "open vs folded bit lines: the layout",
-        build: || -> Box<dyn Scene> { zoom::layout() },
+        label: "a read: charge sharing and restore",
+        build: || -> Box<dyn Scene> { zoom::read() },
+    },
+    Zoom {
+        key: 'f',
+        label: "the transistor: gate, source, drain",
+        build: || -> Box<dyn Scene> { zoom::transistor() },
     },
 ];
 
@@ -148,7 +153,7 @@ mod tests {
         assert_eq!(s.beats().len(), 7);
         super::super::super::blender::explained(s.as_ref(), "CELL overview");
         let keys: String = s.zooms().iter().map(|z| z.key).collect();
-        assert_eq!(keys, "abcde");
+        assert_eq!(keys, "abcdef");
     }
 
     #[test]

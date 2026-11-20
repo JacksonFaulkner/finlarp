@@ -1,8 +1,9 @@
-// CELL zoom-ins a-e in the picture-and-panel template, from the Blender scenes in
-// tools/pbr3d/blender/cell_zooms.py: a the storage capacitor, b a read, c refresh across the rows,
-// d shrinking the cell, e open vs folded bit lines. Four beats each.
+// CELL zoom-ins a-f in the picture-and-panel template, from the Blender scenes in
+// tools/pbr3d/blender/cell_zooms.py: a the storage capacitor, b open vs folded bit lines, c refresh
+// across the rows, d shrinking the cell, e a read (kept in code, moved off b), f the access
+// transistor. Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const CAP_BEATS: &[Beat] = &[
@@ -260,30 +261,110 @@ const LAYOUT_BEATS: &[Beat] = &[
         ),
 ];
 
+const TRANSISTOR_BEATS: &[Beat] = &[
+    Beat::new("three connections: gate, source, drain", BEAT_MS)
+        .note(
+            "A transistor has three connections. The gate is the word line on top. The source is the end on the storage-node side and the drain is the end on the bit-line side. Current flows between source and drain only when the gate is driven.",
+            "the pink gate on top, the blue drain on the bit-line side, the blue source on the storage-node side, all on the grey silicon",
+        )
+        .detail(
+            "The gate controls the channel; the drain and source are the two ends of the channel.",
+            &[
+                "The gate controls the channel; the drain and source are the two ends of the channel (textbook)",
+                "Access transistor on the word line (page text, section 2)",
+            ],
+        ),
+    Beat::new("read: the gate opens the channel, charge leaves the cell", BEAT_MS)
+        .note(
+            "The word line goes high and the channel under the gate opens. Charge leaves the storage node through the open channel toward the bit line.",
+            "the pink gate lit, the cyan channel glowing, cyan dots moving from source to drain",
+        )
+        .detail(
+            "A high gate forms a conducting channel between source and drain, so charge can pass through it.",
+            &[
+                "Gate high forms a channel that conducts source to drain (textbook)",
+                "Word line high turns on every access transistor in its row (Jacob, DRAM Systems, slide 3)",
+            ],
+        ),
+    Beat::new("gate low: the channel closes, the cell is cut off", BEAT_MS)
+        .note(
+            "With the word line low the channel closes, so the storage node is cut off from the bit line and holds its charge.",
+            "the gate dim, the channel dark, no dots moving",
+        )
+        .detail(
+            "With no gate drive the channel is gone, so the transistor acts as an open switch.",
+            &[
+                "Gate low: no channel, the transistor is off (textbook)",
+                "The cell keeps its restored charge after the word line falls (page text)",
+            ],
+        ),
+    Beat::new("write: the bit line drives charge back through the channel", BEAT_MS)
+        .note(
+            "The word line goes high again and the bit line drives its level into the cell through the open channel, from drain to source.",
+            "the pink gate lit, the channel glowing, violet dots moving from drain to source",
+        )
+        .detail(
+            "The same channel carries charge in either direction once the gate opens it.",
+            &[
+                "Current flows between source and drain when the gate is driven (textbook)",
+                "The restore step is the same write-back a read uses (HiRA, arXiv 2209.10198, p. 2)",
+            ],
+        ),
+];
+
 static CAP: Cell = std::sync::OnceLock::new();
 static READ: Cell = std::sync::OnceLock::new();
 static ROWS: Cell = std::sync::OnceLock::new();
 static SHRINK: Cell = std::sync::OnceLock::new();
 static LAYOUT: Cell = std::sync::OnceLock::new();
+static TRANSISTOR: Cell = std::sync::OnceLock::new();
 
 pub fn cap() -> Box<dyn Scene> {
-    page(&CAP, include_bytes!("../../../../../tools/pbr3d/assets/cell_cap.glb"), CAP_BEATS)
+    page(
+        &CAP,
+        include_bytes!("../../../../../tools/pbr3d/assets/cell_cap.glb"),
+        CAP_BEATS,
+    )
 }
 
 pub fn read() -> Box<dyn Scene> {
-    page(&READ, include_bytes!("../../../../../tools/pbr3d/assets/cell_read.glb"), READ_BEATS)
+    page(
+        &READ,
+        include_bytes!("../../../../../tools/pbr3d/assets/cell_read.glb"),
+        READ_BEATS,
+    )
 }
 
 pub fn rows() -> Box<dyn Scene> {
-    page(&ROWS, include_bytes!("../../../../../tools/pbr3d/assets/cell_rows.glb"), ROWS_BEATS)
+    page(
+        &ROWS,
+        include_bytes!("../../../../../tools/pbr3d/assets/cell_rows.glb"),
+        ROWS_BEATS,
+    )
 }
 
 pub fn shrink() -> Box<dyn Scene> {
-    page(&SHRINK, include_bytes!("../../../../../tools/pbr3d/assets/cell_shrink.glb"), SHRINK_BEATS)
+    page(
+        &SHRINK,
+        include_bytes!("../../../../../tools/pbr3d/assets/cell_shrink.glb"),
+        SHRINK_BEATS,
+    )
 }
 
 pub fn layout() -> Box<dyn Scene> {
-    page(&LAYOUT, include_bytes!("../../../../../tools/pbr3d/assets/cell_layout.glb"), LAYOUT_BEATS)
+    page(
+        &LAYOUT,
+        include_bytes!("../../../../../tools/pbr3d/assets/cell_layout.glb"),
+        LAYOUT_BEATS,
+    )
+}
+
+pub fn transistor() -> Box<dyn Scene> {
+    page(
+        &TRANSISTOR,
+        include_bytes!("../../../../../tools/pbr3d/assets/cell_transistor.glb"),
+        TRANSISTOR_BEATS,
+    )
 }
 
 #[cfg(test)]
@@ -298,6 +379,7 @@ mod tests {
             ("rows", rows),
             ("shrink", shrink),
             ("layout", layout),
+            ("transistor", transistor),
         ] {
             let s = build();
             assert_eq!(s.beats().len(), 4, "{name}");

@@ -4,7 +4,7 @@
 // 6 by the numbers (3), 7 shrinking (3), 8 who makes it (3), 9 chokepoints and risks (3),
 // 10 sources (4).
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[
