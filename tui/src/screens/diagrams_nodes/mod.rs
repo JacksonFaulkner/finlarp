@@ -7,7 +7,7 @@ use crate::ui::anim::Scene;
 mod array;
 mod bandwidth;
 mod bank;
-mod blender;
+pub(crate) mod blender;
 mod cell;
 mod chip;
 mod clean;
@@ -19,10 +19,12 @@ mod etch;
 mod expose;
 mod fiber;
 mod final_test;
+mod hbf;
 mod hbm;
 mod implant;
 mod ingot;
 mod litho;
+mod math;
 mod melt;
 mod package;
 mod packaging;
@@ -95,10 +97,15 @@ const NODES: &[Node] = &[
     power::vrm::NODE,
     final_test::NODE,
     ship::NODE,
+    hbf::NODE,
 ];
 
 fn node(page: &str) -> Option<&'static Node> {
-    NODES.iter().find(|n| n.page == page).or_else(|| chip::NODES.iter().copied().find(|n| n.page == page))
+    NODES
+        .iter()
+        .find(|n| n.page == page)
+        .or_else(|| chip::NODES.iter().copied().find(|n| n.page == page))
+        .or_else(|| math::NODES.iter().find(|n| n.page == page))
 }
 
 /// The overview scene for a node page, when its module has one.
@@ -135,7 +142,10 @@ mod tests {
             let heads = art.lines().filter(|l| l.starts_with("# ")).count();
             // A page whose last heading is its sources list may stop at the picture sections:
             // the sources page is text only (as in POLYSILICON's section 10 before its picture).
-            let text_only_sources = art.lines().rev().find(|l| l.starts_with("# "))
+            let text_only_sources = art
+                .lines()
+                .rev()
+                .find(|l| l.starts_with("# "))
                 .is_some_and(|l| l.contains("Sources"));
             let want = if text_only_sources { heads - 1 } else { heads };
             assert!(
@@ -193,7 +203,14 @@ mod tests {
         use crate::ui::anim::Player;
         use std::collections::HashSet;
         use std::time::Instant;
-        const FIBER: [&str; 6] = ["PAM4 DSP", "LASER", "OPTICAL FIBER", "PHOTODIODE", "TRANSCEIVER", "CPO"];
+        const FIBER: [&str; 6] = [
+            "PAM4 DSP",
+            "LASER",
+            "OPTICAL FIBER",
+            "PHOTODIODE",
+            "TRANSCEIVER",
+            "CPO",
+        ];
         let mut stuck = Vec::new();
         for n in NODES.iter().filter(|n| FIBER.contains(&n.page)) {
             let mut scenes: Vec<(String, Box<dyn crate::ui::anim::Scene>)> = Vec::new();
