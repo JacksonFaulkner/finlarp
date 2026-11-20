@@ -25,9 +25,10 @@ use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 use super::diagrams_anim::{orbitable, scene_for, section_anim};
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_chat::{Chat, Quiz, Step};
+use super::diagrams_window::ClaudeWindow;
 use super::diagrams_desc::{cards, describe, page_key, visual};
-use super::diagrams_mol::{Mol, mol_for};
 use super::diagrams_jar_3d::bell_jar_anim;
+use super::diagrams_mol::{Mol, mol_for};
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::anim::Player;
@@ -59,6 +60,8 @@ const KEYS: &[Key] = &[
     key("1-6", "jump to diagram"),
     key("g/G", "top / bottom"),
     key("space aw", "ask claude (in a node)"),
+    key("C", "chat with claude about this node"),
+    key("f", "hide / show the beat notes (picture fills the screen)"),
     key("X", "clear claude's notes"),
     key("D", "demo: set questions, rate each"),
     key("?", "this help"),
@@ -105,6 +108,8 @@ pub struct Diagrams {
     labs: std::collections::HashMap<&'static str, Box<dyn super::diagrams_lab::Lab>>,
     /// Asking Claude about the open node (`<space>aw`), and the node its notes belong to.
     chat: Chat,
+    /// The Claude window over the explanation (`C`).
+    win: ClaudeWindow,
     note_page: Option<String>,
     /// Directives from the answer still to run, and when the next may (a `wait`).
     queue: std::collections::VecDeque<Step>,
@@ -450,7 +455,7 @@ enum Shown {
 /// Inside tmux the kitty reply never reaches us (tmux drops it), so the query alone falls back
 /// to halfblocks even under Ghostty. Ghostty leaves its env vars in the tmux pane, so use kitty
 /// directly when the outer terminal is Ghostty; the kitty frames go out through tmux passthrough.
-fn query_picker() -> Picker {
+pub(crate) fn query_picker() -> Picker {
     let mode = std::env::var("FL_KITTY").unwrap_or_default();
     let options = QueryStdioOptions {
         kitty_compression: !matches!(mode.as_str(), "raw" | "shm"),
@@ -869,6 +874,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         menu_sel: 0,
         labs: std::collections::HashMap::new(),
         chat: Chat::new(),
+        win: ClaudeWindow::new(ctx.theme),
         note_page: None,
         queue: std::collections::VecDeque::new(),
         wait_until: None,
@@ -1198,6 +1204,18 @@ impl Diagrams {
     /// shows, and where it can go. The page's write-up goes with the first question
     /// asked on a node.
     fn chat_context(&mut self) -> String {
+        let label = self.cur_label().unwrap_or_default();
+        let sent = self.chat.sent_page.clone();
+        let (s, page) = self.diagram_context(sent.as_deref());
+        if page {
+            self.chat.sent_page = Some(label);
+        }
+        s
+    }
+
+    /// The diagram as text: tab, node, view, what the picture shows. The write-up of the
+    /// node goes in unless `sent` already has it; the flag says whether it went in.
+    fn diagram_context(&mut self, sent: Option<&str>) -> (String, bool) {
         let d = &DIAGRAMS[self.tab];
         let label = self.cur_label().unwrap_or_default();
         let zooms = self.zoom_list();
@@ -1303,17 +1321,17 @@ impl Diagrams {
                 ));
             }
         }
-        if self.chat.sent_page.as_deref() != Some(label.as_str()) {
+        let page = sent != Some(label.as_str());
+        if page {
             if let Some(desc) = describe(&label) {
                 s.push_str(&format!("\nabout this node: {desc}\n"));
             }
             if let Some(text) = visual(&label) {
                 s.push_str(&format!("\nwrite-up of this node:\n{text}\n"));
             }
-            self.chat.sent_page = Some(label);
         }
         s.push_str("[/diagram]");
-        s
+        (s, page)
     }
 
     /// A page animation is playing in the open popup.
@@ -1842,9 +1860,9 @@ impl Diagrams {
         frame.render_widget(Clear, r);
         let paused = self.scene_player().is_some_and(|p| p.is_paused());
         let play = if paused {
-            "p resume  h/l beat  space aw ask"
+            "p resume  h/l beat  C chat  space aw ask"
         } else {
-            "p pause  h/l beat  space aw ask"
+            "p pause  h/l beat  C chat  space aw ask"
         };
         let letters = match (zooms.first(), zooms.last()) {
             (Some((a, _)), Some((b, _))) if a != b => format!("{a}-{b} zoom"),
@@ -1968,7 +1986,9 @@ impl Diagrams {
             let key = px_key(&shot.caption, &time, pw, ph);
             // a page with clips, in a terminal that decodes them: the beat's pre-rendered H.264
             // stream goes out once and the terminal loops it (missing or stale clips fall through)
-            let streamed = self.picker.protocol_type() == ProtocolType::Kitty
+            let notes = crate::screens::diagrams_nodes::blender::notes_panel();
+            let streamed = notes
+                && self.picker.protocol_type() == ProtocolType::Kitty
                 && match h264_src.as_ref() {
                     Some((page, clip)) => {
                         let beats_ms: Vec<u64> = (0..shot.beats).map(|i| p.beat_len(i)).collect();
@@ -1988,23 +2008,24 @@ impl Diagrams {
                 };
             // with FL_KITTY_ANIM=1 the beat's frames are loaded into the terminal once and loop there
             let animated = streamed
-                || self.picker.protocol_type() == ProtocolType::Kitty
-                && super::diagrams_kitty_anim::enabled()
-                && {
-                    let beat_ms = p.beat_len(shot.beat);
-                    let tmux = self.picker.tmux_detected();
-                    let cell_px = (font.width, font.height);
-                    self.kitty_anim.paint(
-                        frame,
-                        art_r,
-                        scene_id,
-                        shot.beat,
-                        beat_ms,
-                        cell_px,
-                        tmux,
-                        &mut |t, w, h| p.pixels(t, w, h),
-                    )
-                };
+                || notes
+                    && self.picker.protocol_type() == ProtocolType::Kitty
+                    && super::diagrams_kitty_anim::enabled()
+                    && {
+                        let beat_ms = p.beat_len(shot.beat);
+                        let tmux = self.picker.tmux_detected();
+                        let cell_px = (font.width, font.height);
+                        self.kitty_anim.paint(
+                            frame,
+                            art_r,
+                            scene_id,
+                            shot.beat,
+                            beat_ms,
+                            cell_px,
+                            tmux,
+                            &mut |t, w, h| p.pixels(t, w, h),
+                        )
+                    };
             // the frame on screen is the same picture: draw its protocol again, which sends nothing
             let same = !animated
                 && self.picker.protocol_type() == ProtocolType::Kitty
@@ -2062,11 +2083,17 @@ impl Diagrams {
     fn draw_menu(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         frame.render_widget(Clear, r);
         let lab_hint = if self.has_lab() { "x sandbox  " } else { "" };
+        // the zoom keys run from the first zoom-in's key to the last (a-d, a-e, a-f, ...)
+        let zooms = self.zoom_list();
+        let zoom_hint = match (zooms.first(), zooms.last()) {
+            (Some((first, _)), Some((last, _))) => format!("{first}-{last} zoom  "),
+            _ => String::new(),
+        };
         let hint = if self.browse {
-            format!(" j/k move  enter open  a-d zoom  {lab_hint}1-9 sections  m list  esc close ")
+            format!(" j/k move  enter open  {zoom_hint}{lab_hint}1-9 sections  m list  esc close ")
         } else {
             format!(
-                " j/k move  enter open  a-d zoom  {lab_hint}1-9 sections  m preview  esc close "
+                " j/k move  enter open  {zoom_hint}{lab_hint}1-9 sections  m preview  esc close "
             )
         };
         let block = Block::new()
@@ -2077,7 +2104,6 @@ impl Diagrams {
             .padding(ratatui::widgets::Padding::new(2, 2, 1, 0));
         let inner = block.inner(r);
         frame.render_widget(block, r);
-        let zooms = self.zoom_list();
         let titles = self.pane_titles();
         let s0 = self.menu_sections();
         self.menu_sel = self.menu_sel.min((s0 + titles.len()).saturating_sub(1));
@@ -2741,8 +2767,16 @@ impl Screen for Diagrams {
             tickers,
         );
         render_footer(frame, foot, KEYS, None, &t);
+        // the Claude window goes over the description column on the right of the picture
+        // (the Claude window takes the right half of the screen), and nothing else
         if self.popup {
             self.draw_popup(frame, area, &t);
+        }
+        if self.popup && self.win.open {
+            let label = self.cur_label().unwrap_or_default();
+            let w = ((u32::from(area.width) * 50 / 100) as u16).clamp(40.min(area.width), area.width);
+            let r = Rect::new(area.right() - w, area.y, w, area.height);
+            self.win.draw(frame, r, &label, &t);
         }
         if self.help {
             render_overlay(frame, area, "diagrams", KEYS, &t);
@@ -2760,6 +2794,14 @@ impl Screen for Diagrams {
             }
             return Action::None;
         }
+        // the Claude window takes every key while it is open; it closes with the node
+        if !self.popup {
+            self.win.open = false;
+        }
+        if self.popup && self.win.open {
+            self.win.key(key);
+            return Action::None;
+        }
         // a question Claude is asking, then the demo's rating, come before the diagram
         if self.popup && (self.quiz_key(key) || self.demo_key(key)) {
             return Action::None;
@@ -2773,6 +2815,11 @@ impl Screen for Diagrams {
                 // esc first stops an answer that is still playing out
                 KeyCode::Esc if self.answering() => {
                     self.stop_answer();
+                    return Action::None;
+                }
+                // the Claude window over the explanation: not on the lab's own keys
+                KeyCode::Char('C') if self.view != PopupView::Lab => {
+                    self.win.show();
                     return Action::None;
                 }
                 KeyCode::Char('X') => {
@@ -2791,6 +2838,17 @@ impl Screen for Diagrams {
         }
         if self.popup && self.view == PopupView::Full {
             self.full_key(key.code, Instant::now());
+            return Action::None;
+        }
+        // `f` hides the beat notes on the right, so the picture fills the screen; again shows them.
+        // A page with a zoom-in keyed f (CELL's transistor, LITHO) keeps the key for that zoom.
+        if self.popup
+            && matches!(self.view, PopupView::Overview | PopupView::Zoom)
+            && self.has_scene()
+            && key.code == KeyCode::Char('f')
+            && self.zoom_for_key('f').is_none()
+        {
+            crate::screens::diagrams_nodes::blender::toggle_notes_panel();
             return Action::None;
         }
         if self.popup
@@ -3074,12 +3132,13 @@ impl Screen for Diagrams {
             || self.settle_until.is_some()
             || self.sharpen
             || (self.popup && self.chat.wants_redraw())
+            || (self.popup && self.win.open)
             || self.redraw
     }
 
     fn leader_ok(&self) -> bool {
         // space is a plain character while a question is being typed
-        !(self.popup && self.chat.focus)
+        !(self.popup && (self.chat.focus || self.win.open))
     }
 
     fn ask_claude(&mut self) -> bool {
@@ -3089,6 +3148,32 @@ impl Screen for Diagrams {
             self.chat.focus = true;
         }
         here
+    }
+
+    fn remote_tool(
+        &mut self,
+        tool: String,
+        args: serde_json::Value,
+        reply: std::sync::mpsc::Sender<serde_json::Value>,
+    ) {
+        // From the tab menu no node is open, and call() only runs inside one: open_node
+        // opens it directly, the way enter would.
+        if !self.popup && tool == "open_node" {
+            let name = args["node"].as_str().unwrap_or("").to_string();
+            let answer = if self.find_node(&name).is_some() {
+                self.exec(super::diagrams_chat::Step::Open(name.clone()));
+                serde_json::json!({ "ok": true, "node": name })
+            } else {
+                super::diagrams_ipc::fail(&format!(
+                    "no node {name:?}. Nodes: {}",
+                    self.node_names()
+                ))
+            };
+            let _ = reply.send(answer);
+            return;
+        }
+        // Inside a node: the same tools Claude's chat reaches over diagrams_ipc.
+        self.call(super::diagrams_ipc::Request { tool, args, reply });
     }
 
     fn poll_interval(&self) -> Duration {
@@ -3110,7 +3195,7 @@ impl Screen for Diagrams {
 
 const CELL_W: f64 = 8.43;
 const CELL_H: f64 = 17.0;
-const PAGE_BG: &str = "#1e1f29";
+const PAGE_BG: &str = "#282a36";
 
 fn hex(c: Color, fallback: &str) -> String {
     match c {
@@ -3519,6 +3604,44 @@ mod tests {
         d
     }
 
+    /// ctrl-] from the Claude window: back to browse mode.
+    fn browse(d: &mut Diagrams) {
+        use ratatui::crossterm::event::KeyModifiers;
+        d.on_key(KeyEvent::new(KeyCode::Char(']'), KeyModifiers::CONTROL));
+    }
+
+    #[test]
+    fn the_picture_keeps_playing_while_claude_has_focus() {
+        let mut d = polysilicon();
+        press(&mut d, KeyCode::Enter);
+        press(&mut d, KeyCode::Char('C'));
+        let _ = screen_text(&mut d, 175, 48);
+        assert!(d.win.focus && d.animating(), "focus on Claude, picture still plays");
+        assert!(d.scene_player().is_some_and(|p| !p.is_paused()));
+    }
+
+    #[test]
+    fn c_opens_the_claude_window_over_the_explanation() {
+        let mut d = polysilicon();
+        press(&mut d, KeyCode::Char('m'));
+        assert_eq!(d.view, PopupView::Menu);
+        press(&mut d, KeyCode::Char('C'));
+        assert!(d.win.open && d.win.focus, "C opens the window ready to type");
+        // keys type into the question, not the menu
+        for c in "why cq".chars() {
+            press(&mut d, KeyCode::Char(c));
+        }
+        assert_eq!(d.view, PopupView::Menu, "typing does not move the menu");
+        let all = screen_text(&mut d, 175, 48);
+        assert!(all.contains("claude"), "{all}");
+        // closing the node closes the window too
+        browse(&mut d);
+        press(&mut d, KeyCode::Esc);
+        d.popup = false;
+        press(&mut d, KeyCode::Char('x'));
+        assert!(!d.win.open);
+    }
+
     #[test]
     fn space_aw_opens_the_ask_box_which_takes_the_keys() {
         let mut d = polysilicon();
@@ -3758,10 +3881,7 @@ mod tests {
         let nodes = call(&mut d, "list_nodes", json!({})).unwrap();
         assert!(nodes.to_string().contains("HBM STACK"));
         let sec = call(&mut d, "read_section", json!({"n": 4})).unwrap();
-        assert!(
-            sec["text"].as_str().unwrap().contains("Threshold"),
-            "{sec}"
-        );
+        assert!(sec["text"].as_str().unwrap().contains("Threshold"), "{sec}");
         assert_eq!(
             call(&mut d, "read_section", json!({"n": 99})).unwrap()["ok"],
             false
@@ -4194,6 +4314,7 @@ mod tests {
         };
         assert_eq!(open(&ctx, Some("fib".into())).unwrap().tab, 4);
         assert_eq!(open(&ctx, Some("mem".into())).unwrap().tab, 2);
+        assert_eq!(open(&ctx, Some("math".into())).unwrap().tab, 7);
         assert_eq!(open(&ctx, Some("zzz".into())).unwrap().tab, 0);
     }
 
@@ -4220,6 +4341,36 @@ mod tests {
     #[test]
     fn power_nodes_all_described() {
         all_described(5, 6);
+    }
+
+    #[test]
+    fn rd_tab_holds_hbf_and_3d_dram_nodes() {
+        let rd = DIAGRAMS.iter().position(|d| d.tab == "R&D").expect("R&D tab");
+        assert_eq!(rd, 8, "R&D follows MATH");
+        let nodes = find_nodes(DIAGRAMS[rd].art);
+        let labels: Vec<_> = nodes.iter().map(|n| n.label.as_str()).collect();
+        assert_eq!(labels, ["3D DRAM", "HBF"]);
+        for n in &nodes {
+            assert!(describe(&n.label).is_some(), "no desc: {}", n.label);
+        }
+        let ctx = Ctx {
+            db_path: Default::default(),
+            theme: Theme::default(),
+        };
+        let mut d = open(&ctx, None).unwrap();
+        press(&mut d, KeyCode::Char('9'));
+        assert_eq!(DIAGRAMS[d.tab].tab, "R&D");
+    }
+
+    #[test]
+    fn math_nodes_all_have_a_desc_and_a_page() {
+        let nodes = find_nodes(DIAGRAMS[7].art);
+        assert_eq!(DIAGRAMS[7].tab, "Math");
+        assert_eq!(nodes.len(), 12);
+        for n in &nodes {
+            assert!(describe(&n.label).is_some(), "no desc: {}", n.label);
+            assert!(visual(&n.label).is_some(), "no page: {}", n.label);
+        }
     }
 
     #[test]

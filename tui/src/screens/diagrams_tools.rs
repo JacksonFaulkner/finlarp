@@ -160,7 +160,7 @@ impl Diagrams {
         find(true).or_else(|| find(false))
     }
 
-    fn node_names(&self) -> String {
+    pub(super) fn node_names(&self) -> String {
         let all: Vec<&str> = self
             .nodes
             .iter()
