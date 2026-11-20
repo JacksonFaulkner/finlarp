@@ -35,6 +35,8 @@ import os
 import queue
 import re
 import shutil
+import socket
+import tempfile
 import subprocess
 import sys
 import threading
@@ -1289,6 +1291,75 @@ def run_python(code: str, timeout_s: int = 300, session: str = "", reset_session
     return done(rc, text)
 
 
+SHOW = ToolAnnotations(readOnlyHint=False, destructiveHint=False, openWorldHint=False)
+_SHOW_ARG = re.compile(r"^[A-Za-z0-9._:,-]*$")
+
+
+def _fl_screens() -> list[str]:
+    """Screen names, read from SCREENS in tui/src/main.rs."""
+    src = (Path(__file__).resolve().parents[2] / "tui/src/main.rs").read_text()
+    block = re.search(r"const SCREENS: &\[&str\] = &\[(.*?)\];", src, re.S)
+    return re.findall(r'"([a-z_]+)"', block.group(1)) if block else []
+
+
+def _control_send(request: dict) -> dict | None:
+    """Send one request to the newest running fl; its reply, or None when no fl is listening.
+
+    Each fl listens on <temp dir>/fl-control-<pid>.sock (tui/src/remote.rs). A socket
+    that refuses the connection belongs to an fl that has exited: skip it.
+    """
+    socks = sorted(Path(tempfile.gettempdir()).glob("fl-control-*.sock"),
+                   key=lambda p: p.stat().st_mtime, reverse=True)
+    for sock in socks:
+        try:
+            with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as c:
+                c.settimeout(5)
+                c.connect(str(sock))
+                c.sendall((json.dumps(request) + "\n").encode())
+                reply = c.makefile().readline()
+        except OSError:
+            continue
+        try:
+            return json.loads(reply)
+        except ValueError:
+            return {"ok": False, "error": f"unreadable reply: {reply.strip()!r}"}
+    return None
+
+
+@mcp.tool(annotations=SHOW)
+def show_screen(screen: str, arg: str = "") -> str:
+    """Move the fl window the user is looking at to a screen, in place. The screen is pushed
+    on top, so q/esc returns to what was open. Needs a running fl started from this build
+    (a fl started before the control socket existed has none: restart it once).
+    Example: show_screen("diagrams", "memory") lands on the Memory tab.
+    Valid screens: SCREENS in tui/src/main.rs."""
+    screens = _fl_screens()
+    if screen not in screens:
+        return f"unknown screen {screen!r}. valid: {' '.join(screens)}"
+    if arg and not _SHOW_ARG.match(arg):
+        return f"arg {arg!r} has characters that are not allowed"
+    shown = screen + (f" {arg}" if arg else "")
+    reply = _control_send({"screen": screen, "arg": arg})
+    if reply is None:
+        return "no running fl is listening. restart fl (fl diagrams, or fl home) and try again."
+    if not reply.get("ok"):
+        return f"fl refused {shown}: {reply.get('error')}"
+    return f"showing {shown} in the running fl window."
+
+
+@mcp.tool(annotations=SHOW)
+def open_node(node: str) -> str:
+    """Move the diagram page the user has open to another node, in place (any tab): "HBM STACK",
+    "LITHO", "SAND". Lands on that node's overview. Needs fl on a diagrams node page; a wrong
+    name comes back with the valid ones."""
+    reply = _control_send({"tool": "open_node", "args": {"node": node}})
+    if reply is None:
+        return "no running fl is listening. restart fl and open a diagram node first."
+    if not reply.get("ok", True) or reply.get("error"):
+        return f"fl refused open_node {node!r}: {reply.get('error')}"
+    return f"opened node {node!r} in the running fl window. state: {json.dumps(reply)[:600]}"
+
+
 class BearerAuth:
     """ASGI guard for the HTTP transport: every HTTP request needs `Authorization: Bearer <token>`.
 
@@ -1326,8 +1397,8 @@ if __name__ == "__main__":
         if len(token) < 32:
             sys.exit("FINLARP_MCP_TOKEN must be set to at least 32 characters")
         import uvicorn
-        for _name in [t.name for t in mcp._tool_manager.list_tools() if t.name.startswith("etrade_")]:
-            mcp.remove_tool(_name)  # brokerage data stays stdio-only; never served over the network
+        for _name in [t.name for t in mcp._tool_manager.list_tools() if t.name.startswith("etrade_")] + ["show_screen", "open_node"]:
+            mcp.remove_tool(_name)  # brokerage data and local screen control stay stdio-only; never served over the network
         host = os.environ.get("FINLARP_MCP_HOST", "127.0.0.1")
         port = int(os.environ.get("FINLARP_MCP_PORT", "8765"))
         uvicorn.run(BearerAuth(mcp.streamable_http_app(host=host), token), host=host, port=port, log_level="info")
