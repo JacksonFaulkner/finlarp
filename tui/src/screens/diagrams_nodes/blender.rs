@@ -7,8 +7,24 @@
 // `Page` as they are ported.
 
 use std::sync::OnceLock;
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use crate::ui::anim::{Beat, Canvas, Scene, Time, Zoom};
+
+/// Whether a `Page`'s frame carries the beat's text panel on the right. The diagrams screen's `f`
+/// key turns it off, so the 3D picture fills the whole frame.
+static NOTES_PANEL: AtomicBool = AtomicBool::new(true);
+
+/// Flips the beat-notes panel and returns the new state (true = panel shown).
+pub fn toggle_notes_panel() -> bool {
+    !NOTES_PANEL.fetch_xor(true, Ordering::Relaxed)
+}
+
+/// Whether the beat-notes panel is shown. Pre-rendered clips and animations have it baked in,
+/// so the screen plays them only while it is.
+pub fn notes_panel() -> bool {
+    NOTES_PANEL.load(Ordering::Relaxed)
+}
 
 /// The parsed GLB, held once per scene for the life of the process.
 pub type Cell = OnceLock<pbr3d::scene_gltf::Scene>;
@@ -78,7 +94,9 @@ fn picture(
     w: u32,
     h: u32,
 ) -> image::RgbaImage {
-    let sw = pbr3d::caption::scene_width(w).max(1);
+    // panel off (the `f` key): the scene takes the whole frame, labels and all
+    let panel = NOTES_PANEL.load(Ordering::Relaxed);
+    let sw = if panel { pbr3d::caption::scene_width(w).max(1) } else { w.max(1) };
     let mut img = pbr3d::scene_gltf::render(scene, secs, sw, h, crate::screens::diagrams_px::BG);
     let mut tags = pbr3d::caption::Tags::new();
     for (text, p) in scene.labels(secs) {
@@ -86,7 +104,7 @@ fn picture(
             tags.add(&mut img, x, y, &text, sw, h);
         }
     }
-    let Some(b) = beats.get(beat) else { return img };
+    let Some(b) = beats.get(beat).filter(|_| panel) else { return img };
     let panel = pbr3d::caption::Panel {
         step: (beat, beats.len()),
         head: b.caption,
