@@ -96,12 +96,24 @@ pub const DESCS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.desc.txt"),
     ),
-    ("SK HYNIX", include_str!("diagrams_pages/MEM_RD_SK_HYNIX.desc.txt")),
-    ("SAMSUNG", include_str!("diagrams_pages/MEM_RD_SAMSUNG.desc.txt")),
-    ("MICRON", include_str!("diagrams_pages/MEM_RD_MICRON.desc.txt")),
+    (
+        "SK HYNIX",
+        include_str!("diagrams_pages/MEM_RD_SK_HYNIX.desc.txt"),
+    ),
+    (
+        "SAMSUNG",
+        include_str!("diagrams_pages/MEM_RD_SAMSUNG.desc.txt"),
+    ),
+    (
+        "MICRON",
+        include_str!("diagrams_pages/MEM_RD_MICRON.desc.txt"),
+    ),
     ("CXMT", include_str!("diagrams_pages/MEM_RD_CXMT.desc.txt")),
     ("YMTC", include_str!("diagrams_pages/MEM_RD_YMTC.desc.txt")),
-    ("SANDISK", include_str!("diagrams_pages/MEM_RD_SANDISK.desc.txt")),
+    (
+        "SANDISK",
+        include_str!("diagrams_pages/MEM_RD_SANDISK.desc.txt"),
+    ),
     // Packaging tab
     (
         "LOGIC DIE",
@@ -186,6 +198,57 @@ pub const DESCS: &[(&str, &str)] = &[
         "GATE-ALL-AROUND",
         include_str!("diagrams_pages/CHIP_GAA.desc.txt"),
     ),
+    (
+        "ADD",
+        "Adding joins two amounts into one total: 3 + 4 = 7. Count up from the first number by the second. Every other operation here is built on it: multiplying is repeated adding, and a matrix product is a sum of products.",
+    ),
+    (
+        "SUBTRACT",
+        "Subtracting takes an amount away, or finds the gap between two amounts. It undoes addition: 7 - 4 = 3 because 4 + 3 = 7. Taking away more than you have goes below zero into negative numbers.",
+    ),
+    (
+        "MULTIPLY",
+        "Multiplying is repeated addition: 3 x 4 is 4 + 4 + 4 = 12, or three groups of four. Swapping the two numbers gives the same product. Dot products and matrix products are built from multiplying pairs and adding the results.",
+    ),
+    (
+        "DIVIDE",
+        "Dividing splits an amount into equal groups, or asks how many times one number fits into another. It undoes multiplication: 4 x 3 = 12, so 12 / 4 = 3. Dividing by zero has no answer.",
+    ),
+    (
+        "VECTOR",
+        "A vector is an ordered list of numbers, one per slot: [2, 5, 1] has three slots. In 2D, [3, 4] is an arrow 3 steps right and 4 up. Vectors hold positions, directions, prices or colours, and the inputs and weights of AI models.",
+    ),
+    (
+        "VECTOR ADD",
+        "Adding two vectors of the same length adds each pair of slots: [1, 2] + [3, 4] = [4, 6]. Geometrically, the sum is the arrow from the first tail to the last tip. Vectors of different lengths cannot be added.",
+    ),
+    (
+        "SCALE",
+        "Scaling multiplies every slot of a vector by one number: 3 x [1, 2] = [3, 6]. As an arrow it stretches or shrinks it, and a negative number flips it. Scaled vectors added together give combinations, the basis of linear algebra.",
+    ),
+    (
+        "DOT PRODUCT",
+        "The dot product multiplies matching slots of two vectors and adds the products: [1, 2, 3] . [4, 5, 6] = 4 + 10 + 18 = 32. It is large when the vectors point the same way and 0 when they are perpendicular. A neuron's raw score is a dot product of its weights and inputs.",
+    ),
+    (
+        "MATRIX",
+        "A matrix is a rectangular grid of numbers, rows across and columns down. Its size is written rows x columns: a 2 x 3 matrix has 2 rows, 3 columns and 6 numbers. A matrix can be read as a stack of row vectors, and a single column is a vector.",
+    ),
+    (
+        "SHAPE RULE",
+        "Two matrices multiply only when the inner sizes match: (m x n) x (n x p) gives (m x p). The outer sizes set the answer's shape. Order matters: A x B and B x A often differ in shape and values, and one may not exist at all.",
+    ),
+    (
+        "MATRIX x VECTOR",
+        "Each answer slot is one row of the matrix dotted with the vector. A (2 x 2) matrix times a 2-slot vector gives a 2-slot vector. A neural-network layer is this operation: weights times inputs.",
+    ),
+    (
+        "MATRIX x MATRIX",
+        "Each cell of the answer is one row of A dotted with one column of B, so a (2 x 2) times (2 x 2) takes four dot products. Most of the arithmetic in modern AI models is products like this, which is why GPUs and tensor cores are built around them.",
+    ),
+    // R&D tab
+    ("3D DRAM", include_str!("diagrams_pages/RND_3D_DRAM.desc.txt")),
+    ("HBF", include_str!("diagrams_pages/RND_HBF.desc.txt")),
 ];
 
 /// Art shown above the description in the node popup (same conventions as
@@ -230,7 +293,10 @@ pub const VISUALS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.txt"),
     ),
-    ("SK HYNIX", include_str!("diagrams_pages/MEM_RD_SK_HYNIX.txt")),
+    (
+        "SK HYNIX",
+        include_str!("diagrams_pages/MEM_RD_SK_HYNIX.txt"),
+    ),
     ("SAMSUNG", include_str!("diagrams_pages/MEM_RD_SAMSUNG.txt")),
     ("MICRON", include_str!("diagrams_pages/MEM_RD_MICRON.txt")),
     ("CXMT", include_str!("diagrams_pages/MEM_RD_CXMT.txt")),
@@ -270,6 +336,7 @@ pub const VISUALS: &[(&str, &str)] = &[
     ("UPS", include_str!("diagrams_pages/PWR_UPS.txt")),
     ("RACK POWER", include_str!("diagrams_pages/PWR_RACK.txt")),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.txt")),
+    ("HBF", include_str!("diagrams_pages/RND_HBF.txt")),
     // Chip tab
     (
         "TOP METAL",
@@ -295,6 +362,33 @@ pub const VISUALS: &[(&str, &str)] = &[
     (
         "GATE-ALL-AROUND",
         include_str!("diagrams_pages/CHIP_GAA.txt"),
+    ),
+    ("ADD", include_str!("diagrams_pages/MATH_ADD.txt")),
+    ("SUBTRACT", include_str!("diagrams_pages/MATH_SUBTRACT.txt")),
+    ("MULTIPLY", include_str!("diagrams_pages/MATH_MULTIPLY.txt")),
+    ("DIVIDE", include_str!("diagrams_pages/MATH_DIVIDE.txt")),
+    ("VECTOR", include_str!("diagrams_pages/MATH_VECTOR.txt")),
+    (
+        "VECTOR ADD",
+        include_str!("diagrams_pages/MATH_VECTOR_ADD.txt"),
+    ),
+    ("SCALE", include_str!("diagrams_pages/MATH_SCALE.txt")),
+    (
+        "DOT PRODUCT",
+        include_str!("diagrams_pages/MATH_DOT_PRODUCT.txt"),
+    ),
+    ("MATRIX", include_str!("diagrams_pages/MATH_MATRIX.txt")),
+    (
+        "SHAPE RULE",
+        include_str!("diagrams_pages/MATH_SHAPE_RULE.txt"),
+    ),
+    (
+        "MATRIX x VECTOR",
+        include_str!("diagrams_pages/MATH_MATRIX_VECTOR.txt"),
+    ),
+    (
+        "MATRIX x MATRIX",
+        include_str!("diagrams_pages/MATH_MATRIX_MATRIX.txt"),
     ),
 ];
 
@@ -400,12 +494,30 @@ pub const DETAILS: &[(&str, &str)] = &[
         "HBM STACK",
         include_str!("diagrams_pages/MEM_HBM_STACK.details.txt"),
     ),
-    ("SK HYNIX", include_str!("diagrams_pages/MEM_RD_SK_HYNIX.details.txt")),
-    ("SAMSUNG", include_str!("diagrams_pages/MEM_RD_SAMSUNG.details.txt")),
-    ("MICRON", include_str!("diagrams_pages/MEM_RD_MICRON.details.txt")),
-    ("CXMT", include_str!("diagrams_pages/MEM_RD_CXMT.details.txt")),
-    ("YMTC", include_str!("diagrams_pages/MEM_RD_YMTC.details.txt")),
-    ("SANDISK", include_str!("diagrams_pages/MEM_RD_SANDISK.details.txt")),
+    (
+        "SK HYNIX",
+        include_str!("diagrams_pages/MEM_RD_SK_HYNIX.details.txt"),
+    ),
+    (
+        "SAMSUNG",
+        include_str!("diagrams_pages/MEM_RD_SAMSUNG.details.txt"),
+    ),
+    (
+        "MICRON",
+        include_str!("diagrams_pages/MEM_RD_MICRON.details.txt"),
+    ),
+    (
+        "CXMT",
+        include_str!("diagrams_pages/MEM_RD_CXMT.details.txt"),
+    ),
+    (
+        "YMTC",
+        include_str!("diagrams_pages/MEM_RD_YMTC.details.txt"),
+    ),
+    (
+        "SANDISK",
+        include_str!("diagrams_pages/MEM_RD_SANDISK.details.txt"),
+    ),
     // Packaging tab
     (
         "LOGIC DIE",
