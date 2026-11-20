@@ -1,56 +1,36 @@
 # 1. What happens: from tin droplet to printed pattern
 
- ┌───────────────┐  ┌─────────────────────┐  ┌───────────────┐  ┌────────────────────┐
- │ TIN DROPLET   │  │ 2 LASER SHOTS       │  │ PLASMA        │  │ COLLECTOR          │
- │ ~25 um molten │─▶│ pre-pulse flattens, │─▶│ emits 13.5 nm │─▶│ focuses to the     │
- │ tin, ~50 kHz  │  │ CO2 main pulse      │  │ light         │  │ intermediate focus │
- └───────────────┘  └─────────────────────┘  └───────────────┘  └────────────────────┘
-   (row 1 ends at the intermediate focus; row 2 is inside the scanner, same direction of travel)
- ┌──────────────────┐  ┌──────────────────────┐  ┌────────────────┐
- │ ILLUMINATOR      │  │ RETICLE + MIRRORS    │  │ WAFER          │
- │ shapes the beam  │─▶│ reflective mask,     │─▶│ resist absorbs │
- │ onto the reticle │  │ 6 mirrors, 4x shrink │  │ 92 eV photons  │
- └──────────────────┘  └──────────────────────┘  └────────────────┘
+  Order of the light path, in the scanner's direction of travel:
+  1. TIN DROPLET: about 25 um of molten tin, fired at about 50,000 per second.
+  2. 2 LASER SHOTS: a pre-pulse flattens the droplet, then the CO2 main pulse hits it.
+  3. PLASMA: emits 13.5 nm light.
+  4. COLLECTOR: focuses the light to the INTERMEDIATE FOCUS (IF), the handoff into the scanner.
+  5. ILLUMINATOR: shapes the beam onto the reticle.
+  6. RETICLE + MIRRORS: a reflective mask, then 6 projection mirrors at 4x shrink.
+  7. WAFER on stage: the resist absorbs 92 eV photons.
 
-  (all of it in vacuum or low-pressure hydrogen: EUV is absorbed by air and by every lens material)
+  Everything runs in vacuum or low-pressure hydrogen, since EUV is absorbed by air and by every lens material.
 
 # 2a. The light source (laser-produced plasma, LPP)
 
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │   DROPLET GENERATOR ──▶  ●  ●  ●  ●   tin droplets, ~25 um, ~70 m/s, ~50 kHz                     │
-  │                               │                                                                  │
-  │        PRE-PULSE laser ══▶    ▼   droplet swells from ~30 um to >100 um (pancake / mist)         │
-  │                            ◌◌◌◌◌                                                                 │
-  │        CO2 MAIN PULSE ══▶  ≈≈≈≈≈≈≈   10.6 um, 15-25 ns, ~1e11 W/cm2   ──▶ PLASMA ~100 um         │
-  │                            ≈≈≈≈≈≈≈   electron temp 20-50 eV, emits 13.5 nm EUV                   │
-  │                                  ╲                                                               │
-  │    COLLECTOR: ellipsoidal Mo/Si multilayer mirror, ringed around the plasma, aims light          │
-  │    at the INTERMEDIATE FOCUS (IF) ──▶ into the scanner. H2 gas (1-10 Pa) sweeps tin off the mirror │
-  │    tin debris still builds up: collector loses 0.1-0.3% per billion pulses, swapped ~yearly      │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Droplet generator: tin droplets, about 25 um, about 70 m/s, about 50 kHz.
+  Pre-pulse laser: the droplet swells from about 30 um to more than 100 um (a pancake or mist).
+  CO2 main pulse: 10.6 um, 15-25 ns, about 1e11 W/cm2. Makes a plasma about 100 um across at 20-50 eV,
+  which emits 13.5 nm EUV.
+  Collector: an ellipsoidal Mo/Si multilayer mirror ringed around the plasma, aimed at the IF.
+  H2 gas (1-10 Pa) sweeps tin off the mirror. Tin debris still builds up: the collector loses 0.1-0.3%
+  reflectivity per billion pulses and is swapped about yearly.
 
   (CO2 laser reflecting off the droplet can damage the laser, so the beam train is isolated; per patents)
 
 # 2b. The scanner: reticle to wafer (all mirrors, no lenses)
 
-  ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │       from IF ──▶ ILLUMINATOR (2+ mirrors: shape, homogenise)                                    │
-  │                          │                                                                       │
-  │                          ▼ ╲ small angle off the normal                                          │
-  │         ┌────────────────────────────┐                                                           │
-  │         │ RETICLE (reflective mask)  │  Mo/Si multilayer, Ta-based absorber draws the pattern    │
-  │         └────────────────────────────┘  scans one way                                            │
-  │                          │ reflected pattern                                                     │
-  │                          ▼                                                                       │
-  │        PROJECTION OPTICS: 6 mirrors (0.33 NA), 4x reduction, Mo/Si ~67-70% reflective each       │
-  │                          │                                                                       │
-  │                          ▼                                                                       │
-  │         ┌────────────────────────────┐                                                           │
-  │         │ WAFER on stage, resist     │  scans opposite way, synchronised to the reticle          │
-  │         └────────────────────────────┘                                                           │
-  └──────────────────────────────────────────────────────────────────────────────────────────────────┘
+  Illuminator: 2 or more mirrors, to shape and homogenise the light, at a small angle off the normal.
+  Reticle: a reflective mask, Mo/Si multilayer with a Ta-based absorber that draws the pattern. It scans one way.
+  PROJECTION OPTICS: 6 mirrors (0.33 NA), 4x reduction, Mo/Si about 67-70% reflective each.
+  Wafer: on the stage with resist; it scans the opposite way, synchronised to the reticle.
 
-  Light budget: each mirror reflects ~0.67-0.70, so ~10 mirrors keep <2%; 100 W in, ~1 W at wafer.
+  Light budget: each mirror reflects about 0.67-0.70, so about 10 mirrors keep under 2%; 100 W in, about 1 W at the wafer.
   (0.7^10 = 2.8% and 0.67^10 = 1.8%: computed here, matches the <2% patent figure)
 
 # 3. The physics
@@ -78,26 +58,23 @@
   overlay           NXE:3800E improves overlay by 13% (ASML)
   ASML 2025         sales EUR 32.7B; EUV EUR 11.6B (+39%), 48 EUV systems; backlog EUR 38.8B, EUV 25.5B
 
-# 5. Throughput by tool, wafers per hour (ASML decks / press)
+# 5. Throughput and price, by tool (ASML decks / press)
 
-  NXE:3600D     ██████████████████████ 160  customer sites, 30 mJ/cm2
-  NXE:3600D lab ██████████████████████████ 185  demonstrated, 30 mJ/cm2
-  NXE:3800E     ██████████████████████████████ 220  roadmap spec
-  NXE:3800F     ████████████████████████████████████ 260  reported (Tom's Hardware)
-  EXE:5000      ███████████████ 110  High-NA, first gen
+  Wafers per hour:
+  NXE:3600D           160  customer sites, 30 mJ/cm2
+  NXE:3600D lab       185  demonstrated, 30 mJ/cm2
+  NXE:3800E           220  roadmap spec
+  NXE:3800F           260  reported (Tom's Hardware)
+  EXE:5000            110  High-NA, first gen
 
-  Tool price, EUR millions (reported estimates; bar = upper end of range)
-  early NXE        ████████████ 100-120
-  NXE 3400C/3600D  █████████████████ 140-170
-  High-NA EXE      ████████████████████████████████████ 350+ (reported)
+  Tool price, EUR millions (reported estimates, range):
+  early NXE           100-120
+  NXE 3400C/3600D     140-170
+  High-NA EXE         350+ (reported)
 
-  Energy per wafer pass, kWh (Wikipedia)
-  EUV NXE:3400C    ████████████████████████████████████ 9.64
-  ArF immersion    ██ 0.45
+  Energy per wafer pass (Wikipedia): EUV NXE:3400C 9.64 kWh; ArF immersion 0.45 kWh.
 
   EUV share of ASML net system sales: 38% in 2024, 48% in 2025 (ASML Q4 2025 release)
-  2024             ████████████████████████████ 38%
-  2025             ████████████████████████████████████ 48%
 
 # 6. Who makes it, risks
 
