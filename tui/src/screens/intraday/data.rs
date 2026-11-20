@@ -90,6 +90,17 @@ impl Series {
         self.bars.values().next_back().map(|b| b.c)
     }
 
+    /// Minute start of the latest bar, epoch seconds.
+    pub fn last_time(&self) -> Option<i64> {
+        self.bars.keys().next_back().copied()
+    }
+
+    /// ET wall-clock HH:MM for an epoch second, from this series' session open.
+    pub fn label(&self, t: i64) -> String {
+        let s = (t + self.et_offset()).rem_euclid(86_400);
+        format!("{:02}:{:02}", s / 3600, s % 3600 / 60)
+    }
+
     /// Seconds to add to epoch to get ET wall-clock, from the session open.
     fn et_offset(&self) -> i64 {
         match self.reg {
@@ -102,11 +113,6 @@ impl Series {
             }
             None => -4 * 3600,
         }
-    }
-
-    fn label(&self, t: i64) -> String {
-        let s = (t + self.et_offset()).rem_euclid(86_400);
-        format!("{:02}:{:02}", s / 3600, s % 3600 / 60)
     }
 
     fn in_session(&self, t: i64) -> bool {

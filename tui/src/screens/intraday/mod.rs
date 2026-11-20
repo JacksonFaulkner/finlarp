@@ -7,6 +7,7 @@
 // interval key never touches the network. Each tile shows VWAP (accent line),
 // the previous close (dotted line), session volume, and dims pre/post-market.
 
+pub mod breadth;
 mod data;
 mod picture;
 mod stream;
