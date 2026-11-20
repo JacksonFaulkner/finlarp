@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/hbm_zooms.py: a a copper TSV cut open, b the base logic die, c the channels
 // of one stack, d microbumps against hybrid bonding, e CoWoS packaging. Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const TSV_BEATS: &[Beat] = &[
@@ -215,19 +215,35 @@ pub fn tsv() -> Box<dyn Scene> {
 }
 
 pub fn base() -> Box<dyn Scene> {
-    page(&BASE, include_bytes!("../../../../../tools/pbr3d/assets/hbm_base.glb"), BASE_BEATS)
+    page(
+        &BASE,
+        include_bytes!("../../../../../tools/pbr3d/assets/hbm_base.glb"),
+        BASE_BEATS,
+    )
 }
 
 pub fn channels() -> Box<dyn Scene> {
-    page(&CHANNELS, include_bytes!("../../../../../tools/pbr3d/assets/hbm_channels.glb"), CHANNELS_BEATS)
+    page(
+        &CHANNELS,
+        include_bytes!("../../../../../tools/pbr3d/assets/hbm_channels.glb"),
+        CHANNELS_BEATS,
+    )
 }
 
 pub fn bond() -> Box<dyn Scene> {
-    page(&BOND, include_bytes!("../../../../../tools/pbr3d/assets/hbm_bond.glb"), BOND_BEATS)
+    page(
+        &BOND,
+        include_bytes!("../../../../../tools/pbr3d/assets/hbm_bond.glb"),
+        BOND_BEATS,
+    )
 }
 
 pub fn cowos() -> Box<dyn Scene> {
-    page(&COWOS, include_bytes!("../../../../../tools/pbr3d/assets/hbm_cowos.glb"), COWOS_BEATS)
+    page(
+        &COWOS,
+        include_bytes!("../../../../../tools/pbr3d/assets/hbm_cowos.glb"),
+        COWOS_BEATS,
+    )
 }
 
 #[cfg(test)]

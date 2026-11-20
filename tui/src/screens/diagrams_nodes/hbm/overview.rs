@@ -8,7 +8,7 @@
 // microbumps; Tom's Hardware on the height limit and on CoWoS; TrendForce on CoWoS; PC Watch on
 // the HBM3 channel count.
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 

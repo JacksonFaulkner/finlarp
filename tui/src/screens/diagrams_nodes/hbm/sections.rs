@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/hbm_sections.py. Beat counts: 3, 5, 5, 3, 3, 3, 3, 3, 3, 3. Section 10 is
 // the sources page, which is also a picture: source cards light up in groups.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[
@@ -157,7 +157,10 @@ const SEC4: &[Beat] = &[
         )
         .detail(
             "Capacity rises to 64 GB at 16-high.",
-            &["HBM3: 819 GB/s per stack (JEDEC JESD238)", "HBM4: up to 2 TB/s per stack (JEDEC JESD270-4)"],
+            &[
+                "HBM3: 819 GB/s per stack (JEDEC JESD238)",
+                "HBM4: up to 2 TB/s per stack (JEDEC JESD270-4)",
+            ],
         ),
 ];
 
@@ -398,6 +401,10 @@ mod tests {
             .lines()
             .filter(|l| l.starts_with("# "))
             .count();
-        assert_eq!(heads, SECTIONS.len(), "one picture per # heading, sources included");
+        assert_eq!(
+            heads,
+            SECTIONS.len(),
+            "one picture per # heading, sources included"
+        );
     }
 }
