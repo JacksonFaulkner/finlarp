@@ -71,3 +71,5 @@ pub mod transactions;
 pub mod universe;
 pub mod video;
 pub mod watchlists;
+pub mod z;
+pub mod z_spec;

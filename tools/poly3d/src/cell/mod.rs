@@ -30,6 +30,7 @@ mod sec_retention;
 mod sec_risks;
 mod sec_swing;
 mod solids;
+mod spec;
 mod stage;
 mod wiring;
 mod zoom_cap;
@@ -40,6 +41,7 @@ mod zoom_shrink;
 
 use image::RgbaImage;
 
+pub use spec::{render_spec, SpecFlow, SpecPart, SpecScene, SpecShape};
 pub use chip::{part_at, render_chip, ChipKey, ChipPart, ChipState};
 pub use pkg::{pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState};
 pub use power::{pwr_part_at, render_power, PwrKey, PwrPart, PwrState, PWR_BACKUP_Z, PWR_BOARD_Z, PWR_RACK_Z, PWR_XFMR_Z};

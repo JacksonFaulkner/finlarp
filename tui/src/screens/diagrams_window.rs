@@ -38,6 +38,8 @@ pub struct ClaudeWindow {
     /// Keys go to Claude (otherwise they are browse keys for the window).
     pub focus: bool,
     pane: TmuxPane,
+    /// The shell command the tmux session runs when it starts.
+    command: String,
     /// The last screen Claude drew, as styled lines.
     screen: Vec<Line<'static>>,
     /// Why Claude is not on screen, when it is not.
@@ -46,11 +48,17 @@ pub struct ClaudeWindow {
 
 impl ClaudeWindow {
     pub fn new(theme: Theme) -> Self {
+        Self::with(theme, SOCKET, SESSION, claude_command())
+    }
+
+    /// A window on its own tmux session, running `command` (the Z screen keeps one per mode).
+    pub fn with(theme: Theme, socket: &'static str, session: &'static str, command: String) -> Self {
         Self {
             theme,
             open: false,
             focus: false,
-            pane: TmuxPane::new(SOCKET, SESSION),
+            pane: TmuxPane::new(socket, session),
+            command,
             screen: Vec::new(),
             error: None,
         }
@@ -100,7 +108,7 @@ impl ClaudeWindow {
 
         if self.error.is_none() {
             let dir = env::current_dir().unwrap_or_default();
-            if let Err(e) = self.pane.ensure(&dir, &claude_command(), inner.width, inner.height) {
+            if let Err(e) = self.pane.ensure(&dir, &self.command, inner.width, inner.height) {
                 self.error = Some(format!("can't start claude: {e}"));
             }
         }

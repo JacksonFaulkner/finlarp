@@ -75,6 +75,7 @@ const SCREENS: &[&str] = &[
     "video",
     "scratch",
     "figgie",
+    "z",
 ];
 
 /// `[--bg C] [--up C] [--down C] [screen [arg...]]`. No screen or `.` is
@@ -200,6 +201,7 @@ fn build_screen(
         ("keys", _) => Box::new(keys::open(ctx, arg)?),
         ("scratch", _) => Box::new(scratch::open(ctx, arg)?),
         ("figgie", _) => Box::new(figgie::open(ctx, arg)?),
+        ("z", _) => Box::new(screens::z::open(ctx, arg)?),
         // Reached only through Route::Rebuild (`<space>wq`), not the CLI.
         ("rebuild", _) => Box::new(rebuild::open(ctx, arg)?),
         _ => Box::new(chart::open(ctx, arg)?),
@@ -363,6 +365,13 @@ fn main() {
     }
     // `fl render-video PAGE... --out DIR`: the diagram pages as HLS video (screens::diagrams_video).
     // Headless: no terminal, so it runs the same way in CI and over ssh.
+    // `fl z check FILE...`: validates Z diagram files (screens::z_spec), for Claude to run.
+    if args.first().map(String::as_str) == Some("z") && args.get(1).map(String::as_str) == Some("check") {
+        std::process::exit(screens::z_spec::run_check(&args[2..]));
+    }
+    if args.first().map(String::as_str) == Some("z") && args.get(1).map(String::as_str) == Some("render") {
+        std::process::exit(screens::z_spec::run_render(&args[2..]));
+    }
     if args.first().map(String::as_str) == Some("render-video") {
         std::process::exit(screens::diagrams_video::run_cli(&args[1..]));
     }

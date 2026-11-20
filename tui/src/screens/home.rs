@@ -60,6 +60,12 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "chip fab, fiber optics, data center power",
         'x',
     ),
+    (
+        "Z",
+        "z",
+        "chat with Claude; it draws diagrams as it explains",
+        'z',
+    ),
     ("Events", "events", "catalyst calendar", 'v'),
     ("Chat", "chat", "ask Claude; open the tickers it names", 'a'),
     (
@@ -611,7 +617,8 @@ mod tests {
         let mut h = home();
         assert_eq!(press(&mut h, KeyCode::Char('d')), opens("dossier"));
         assert_eq!(press(&mut h, KeyCode::Char('N')), opens("note"));
-        assert_eq!(press(&mut h, KeyCode::Char('z')), Action::None);
+        assert_eq!(press(&mut h, KeyCode::Char('z')), opens("z"));
+        assert_eq!(press(&mut h, KeyCode::Char('m')), Action::None);
         assert_eq!(press(&mut h, KeyCode::Char('q')), Action::Quit);
     }
 

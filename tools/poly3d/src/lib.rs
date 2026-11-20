@@ -15,6 +15,7 @@ pub use cell::{
     part_at, render_chip, ChipKey, ChipPart, ChipState,
     pkg_part_at, render_pkg, PkgKey, PkgPart, PkgState,
     pwr_part_at, render_power, PwrKey, PwrPart, PwrState, PWR_BACKUP_Z, PWR_BOARD_Z, PWR_RACK_Z, PWR_XFMR_Z,
+    render_spec, SpecFlow, SpecPart, SpecScene, SpecShape,
     link_part_at, render_link, LinkKey, LinkPart, LinkState, LINK_CPO_Z, LINK_GLASS_Z, LINK_LASER_Z, LINK_PD_Z,
 };
 
