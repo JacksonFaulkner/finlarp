@@ -1,0 +1,19 @@
+# 1. Take away: 7 minus 4
+
+   ●●●●●●●                  start with 7
+   ●●●✕✕✕✕                   take away 4 (crossed out)
+   ●●●                       left: 3
+
+   7 - 4 = 3
+
+# 2. The same move backwards on the number line
+
+   0   1   2   3   4   5   6   7   8
+   ┼───┼───┼───┼───┼───┼───┼───┼───┼
+               ◀───────────────●
+                 -4 steps left
+
+# 3. Check it with addition
+
+  4 + 3 = 7, so 7 - 4 = 3. Subtraction undoes addition.
+  Step past zero and you reach negatives: 3 - 4 = -1.

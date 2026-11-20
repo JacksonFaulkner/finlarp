@@ -1,0 +1,23 @@
+# 1. The inner sizes must match
+
+   (2 x 3) x (3 x 2) = (2 x 2)
+        ╰─────╯
+   the inner 3 and 3 must match; the outer 2 and 2 set the answer's shape
+
+# 2. The rule
+
+   (m x n) x (n x p) = (m x p)
+
+  Multiply the first matrix's rows by the second matrix's columns. The n is used up in the
+  dot products; m and p are left over as the answer's size.
+
+# 3. A mismatch has no answer
+
+   (2 x 3) x (2 x 2)   the inner numbers are 3 and 2: no answer
+
+# 4. Order matters
+
+   A is (2 x 3), B is (3 x 2).
+   A x B = (2 x 2).  B x A = (3 x 3).
+
+  Different shapes, different numbers. Matrix multiplication is not commutative.

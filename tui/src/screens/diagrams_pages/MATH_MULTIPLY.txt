@@ -1,0 +1,26 @@
+# 1. Multiply is repeated addition: 3 x 4 = 4 + 4 + 4
+
+   ●●●●        +        ●●●●        +        ●●●●        =   12
+   group 1              group 2              group 3
+
+# 2. The same dots as a grid: 3 rows of 4
+
+   ●●●●     row 1
+   ●●●●     row 2
+   ●●●●     row 3
+
+   3 rows x 4 per row = 12 dots
+
+# 3. Turn it around: 4 rows of 3 is also 12
+
+   ●●●     row 1
+   ●●●     row 2
+   ●●●     row 3
+   ●●●     row 4
+
+   3 x 4 = 4 x 3 = 12. Swapping the two numbers never changes the product.
+
+# 4. A rectangle is a product
+
+  A rectangle 4 squares wide and 3 squares tall holds 4 x 3 = 12 unit squares.
+  Area is why multiplication is the natural way to count a grid.

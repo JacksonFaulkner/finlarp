@@ -1,0 +1,25 @@
+# 1. A vector is an ordered list of numbers
+
+      [ 2 ]
+   v  [ 5 ]     3 slots, so v is a 3-vector
+      [ 1 ]
+
+  (written in a row: v = [2, 5, 1]. Slot 1 is 2, slot 2 is 5, slot 3 is 1.)
+
+# 2. A pair of numbers is a point, or an arrow from the origin
+
+   In 2D, [3, 4] means: 3 steps right, then 4 steps up.
+
+     4 ┤                ●  [3, 4]
+     3 ┤
+     2 ┤
+     1 ┤
+     0 ┼────────┬───┬───┬───┬
+                1   2   3   4
+
+  (the arrow runs from the origin 0 to the dot)
+
+# 3. Where vectors show up
+
+  A position or direction in space, a row of prices, or a 3-number colour (red, green, blue).
+  Every AI model stores its inputs and its learned weights as vectors.

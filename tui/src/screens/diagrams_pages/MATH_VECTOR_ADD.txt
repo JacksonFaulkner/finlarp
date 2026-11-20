@@ -1,0 +1,17 @@
+# 1. Line up the slots, add each pair
+
+     [ 1 ]     [ 3 ]     [ 4 ]
+     [ 2 ]  +  [ 4 ]  =  [ 6 ]
+
+   slot 1: 1 + 3 = 4
+   slot 2: 2 + 4 = 6
+
+# 2. Both vectors need the same number of slots
+
+   [1, 2] + [3, 4, 5] has no answer: slot 3 has no partner to add to.
+
+# 3. Arrows: tip to tail
+
+  Put the tail of the second arrow at the tip of the first. The sum is the arrow from the
+  first tail to the last tip. Same rule for any number of arrows, and it does not matter
+  which goes first.

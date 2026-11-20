@@ -1,0 +1,20 @@
+# 1. Share 12 dots into 4 equal groups
+
+   ●●●  ●●●  ●●●  ●●●        4 groups of 3 = 12
+
+   12 / 4 = 3: each group gets 3
+
+# 2. Undo multiplication
+
+   4 x 3 = 12, so 12 / 4 = 3
+
+  (division asks: how many 4s fit into 12? Answer: 3)
+
+# 3. Repeated subtraction: take 4 away until none is left
+
+   12 - 4 = 8     (1 group taken)
+    8 - 4 = 4     (2 groups taken)
+    4 - 4 = 0     (3 groups taken)
+
+   3 groups were taken, so 12 / 4 = 3.
+   Dividing by 0 has no answer: taking 0 away never gets you to 0.

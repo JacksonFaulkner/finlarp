@@ -1,0 +1,20 @@
+# 1. Two amounts go in, one total comes out
+
+     ●●●           ●●●●            ●●●●●●●
+     3 apples  +   4 apples    =   7 apples
+
+  (order does not change the answer: 4 + 3 is also 7)
+
+# 2. On a number line: start at 3, move 4 steps right
+
+   0   1   2   3   4   5   6   7   8
+   ┼───┼───┼───┼───┼───┼───┼───┼───┼
+               ●───────────────▶
+                +4 steps right
+
+  3 + 4 = 7. A positive number moves you right; the amount moved is the second number.
+
+# 3. Carrying: 9 + 1 = 10
+
+  Write 0 in the ones column and carry 1 to the tens column. Computers do the same
+  in binary: a full adder takes two bits and a carry in, and gives a sum bit and a carry out.

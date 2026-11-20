@@ -1,0 +1,20 @@
+# 1. A matrix is a grid: rows run across, columns run down
+
+   A = [ 1  2  3 ]     row 1
+       [ 4  5  6 ]     row 2
+         ▲  ▲  ▲
+         col 1, 2, 3 run down
+
+   shape: 2 rows x 3 columns, written (2 x 3). That is 6 numbers.
+
+# 2. Naming a cell: A[i][j] is row i, column j
+
+   A[1][3] = 3     (row 1, column 3)
+   A[2][1] = 4     (row 2, column 1)
+
+# 3. A vector is a matrix with one column
+
+   v = [ 5 ]     shape (2 x 1)
+       [ 6 ]
+
+  (a matrix with one column is a vector; a matrix with one row is a row vector)

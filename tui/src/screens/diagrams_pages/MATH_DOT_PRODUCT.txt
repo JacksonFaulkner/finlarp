@@ -1,0 +1,24 @@
+# 1. Pair up the slots, multiply each pair
+
+   [ 1 ]     [ 4 ]
+   [ 2 ]  ·  [ 5 ]
+   [ 3 ]     [ 6 ]
+
+   slot 1: 1 x 4 = 4
+   slot 2: 2 x 5 = 10
+   slot 3: 3 x 6 = 18
+
+# 2. Then add the products
+
+   4 + 10 + 18 = 32
+
+   a · b = a1 b1 + a2 b2 + a3 b3
+
+# 3. Why AI uses it: a neuron is a dot product
+
+  A neuron multiplies each input by its weight, adds the results, then passes the total
+  through a simple function. The weights are a vector, the inputs are a vector, and the raw
+  score is their dot product.
+
+  The dot product also measures alignment. It is large and positive when two vectors point
+  the same way, and 0 when they are perpendicular: [1, 0] · [0, 1] = 0.

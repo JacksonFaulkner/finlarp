@@ -1,0 +1,22 @@
+# 1. A (2 x 2) matrix times a (2 x 1) vector
+
+   A = [ 1  2 ]     v = [ 5 ]
+       [ 3  4 ]         [ 6 ]
+
+   row 1 · v:  1 x 5 + 2 x 6 = 5 + 12 = 17
+   row 2 · v:  3 x 5 + 4 x 6 = 15 + 24 = 39
+
+   A v = [ 17 ]
+         [ 39 ]
+
+# 2. Each answer slot is one row dotted with v
+
+   answer slot 1  <-  row 1 of A  ·  v
+   answer slot 2  <-  row 2 of A  ·  v
+
+  The matrix is a stack of row vectors, so the product is a list of dot products.
+
+# 3. Why this is a neural-network layer
+
+  A layer computes W v: each row of W weighs the input v and gives one output. Stack more
+  rows and the layer makes more outputs at once.
