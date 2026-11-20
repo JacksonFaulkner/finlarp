@@ -1,39 +1,19 @@
 # 1. What happens: testing every die before it is cut
 
- ┌────────────┐   ┌────────────────┐   ┌───────────────┐   ┌─────────────────┐   ┌─────────────────┐
- │ WAFER      │──▶│ PROBER         │──▶│ PROBE CARD    │──▶│ ATE TESTER      │──▶│ WAFER MAP       │
- │ finished,  │   │ loads, aligns, │   │ needles touch │   │ drives signals, │   │ bin per die     │
- │ die intact │   │ steps per die  │   │ bond pads     │   │ reads responses │   │ ink / data file │
- └────────────┘   └────────────────┘   └───────────────┘   └─────────────────┘   └─────────────────┘
-
   (this is the first electrical test; bad die are marked so DICE and packaging never spend money on them)
 
 # 2. Inside the test cell: tester head, probe card, wafer chuck
 
-┌─────────────────────────────────────────────────────────────────────────────┐
-│ ATE TESTER MAINFRAME (Advantest / Teradyne): pin electronics, power, timing │
-└─────────────────────────────────────────────────────────────────────────────┘
-          ║  cabled to the test head
-┌────────────────────────────────────────────────┐
-│ TEST HEAD: pogo-pin / spring-contact interface │
-└────────────────────────────────────────────────┘
-          ║
-┌─────────────────────────────────────────────────────────┐
-│ PROBE CARD PCB (large, multilayer)                      │
-│ space transformer: re-routes the pad pitch to PCB pitch │
-└─────────────────────────────────────────────────────────┘
-     │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ │    probe needles / MEMS springs
-     ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼    tips land on the die bond pads (scrub the oxide)
-┌─────────────────────────────────────────────────────────────────┐
-│ WAFER: ▓▓ ┌──┐┌──┐┌──┐┌──┐┌──┐┌──┐┌──┐┌──┐ ▓▓  (die under test) │
-└─────────────────────────────────────────────────────────────────┘
-┌───────────────────────────────────────────────────────────────┐
-│ WAFER CHUCK: vacuum hold, X-Y-Z-theta stage, heated or cooled │
-└───────────────────────────────────────────────────────────────┘
    PROBER indexes the chuck die to die, cameras align the pads, and the Z-lift drives the needles
    'overdrive' a few mils past first touch so the skate breaks through the pad oxide (ohmic contact)
 
-  (schematic; a real card contacts many die at once, called parallelism)
+  (a real card contacts many die at once, called parallelism)
+
+The test cell has four hardware parts, named as on the page. The ATE TESTER mainframe holds the pin
+electronics, power and timing. The TEST HEAD carries those electronics close to the wafer, linked to the
+card by a pogo-pin or spring-contact interface. The PROBE CARD is a custom board with needles or MEMS
+springs matched to one chip's pad layout; its space transformer re-routes the pad pitch to the board
+pitch. The WAFER CHUCK holds the wafer by vacuum on an X-Y-Z-theta stage and may be heated or cooled.
 
 # 3. Procedure and physics
 
@@ -49,21 +29,11 @@
 
 # 4. Wafer map: good and bad die as the tester saw them
 
-  G = good bin 1    2,3 = lower speed bins    X = hard fail    . = edge, partial die not tested
+  (the sample map drawing was removed from this page; the overview's map is illustrative, not fab data.
+      Clusters of failing die at the edge point at process problems, a ring points at CMP)
 
-        . . . . X . G G G G . . . .
-      . G G G G G G G G G G G G . .
-    . G G G G G 2 G G G G G G G G .
-    . G G X G G G G G G G G G G G G
-    G G G G G G G G G G G G G 3 G G
-    G G G G G G G G G G 2 G G G G G
-    G G G G X G G G G G G G G G G G
-    . G G G G G G G G G G G G G G .
-      . G G G G G G G G G G G G . .
-        . . G G G G G G G G . . . .
-
-  (illustrative drawing, not real fab data; clusters of X at the edge point at process problems, a ring
-      points at CMP)
+The WAFER MAP holds one bin per die, as the tester returned it. It is the record that DICE and PICK read
+to decide which die to cut and pick.
 
 # 5. By the numbers
 
