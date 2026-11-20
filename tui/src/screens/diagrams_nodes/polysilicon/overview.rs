@@ -4,7 +4,7 @@
 // Zoom-ins a-d open the fluidised bed, the distillation column, the bell jar and the recycle loop
 // (still in the older layout, from tools/pbr3d/blender/fab_poly.py).
 
-use super::super::blender::{clip, Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page, clip};
 use crate::ui::anim::{Beat, Scene, Zoom};
 
 const OVERVIEW_BEATS: &[Beat] = &[

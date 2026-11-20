@@ -1,7 +1,7 @@
 // POLYSILICON sections 1-10: each a Blender picture (tools/pbr3d/blender/fab_poly.py), three beats
 // each. Section 10 is the sources page, drawn as cards filing into a stack.
 
-use super::super::blender::{clip, Cell};
+use super::super::blender::{Cell, clip};
 use crate::ui::anim::{Beat, Scene};
 
 const BEAT_MS: u64 = 5200;
@@ -319,16 +319,76 @@ const S10_BEATS: &[Beat] = &[
 
 /// The ten sections, in page order.
 pub const SECTIONS: [fn() -> Box<dyn Scene>; 10] = [
-    || clip(&S1, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec1.glb")[..], S1_BEATS),
-    || clip(&S2, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec2.glb")[..], S2_BEATS),
-    || clip(&S3, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec3.glb")[..], S3_BEATS),
-    || clip(&S4, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec4.glb")[..], S4_BEATS),
-    || clip(&S5, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec5.glb")[..], S5_BEATS),
-    || clip(&S6, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec6.glb")[..], S6_BEATS),
-    || clip(&S7, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec7.glb")[..], S7_BEATS),
-    || clip(&S8, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec8.glb")[..], S8_BEATS),
-    || clip(&S9, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec9.glb")[..], S9_BEATS),
-    || clip(&S10, &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec10.glb")[..], S10_BEATS),
+    || {
+        clip(
+            &S1,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec1.glb")[..],
+            S1_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S2,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec2.glb")[..],
+            S2_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S3,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec3.glb")[..],
+            S3_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S4,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec4.glb")[..],
+            S4_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S5,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec5.glb")[..],
+            S5_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S6,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec6.glb")[..],
+            S6_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S7,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec7.glb")[..],
+            S7_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S8,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec8.glb")[..],
+            S8_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S9,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec9.glb")[..],
+            S9_BEATS,
+        )
+    },
+    || {
+        clip(
+            &S10,
+            &include_bytes!("../../../../../tools/pbr3d/assets/poly_sec10.glb")[..],
+            S10_BEATS,
+        )
+    },
 ];
 
 #[cfg(test)]
@@ -337,12 +397,18 @@ mod tests {
 
     #[test]
     fn each_section_has_three_captioned_beats_and_draws_them() {
-        let all = [S1_BEATS, S2_BEATS, S3_BEATS, S4_BEATS, S5_BEATS, S6_BEATS, S7_BEATS, S8_BEATS, S9_BEATS, S10_BEATS];
+        let all = [
+            S1_BEATS, S2_BEATS, S3_BEATS, S4_BEATS, S5_BEATS, S6_BEATS, S7_BEATS, S8_BEATS,
+            S9_BEATS, S10_BEATS,
+        ];
         for (n, beats) in all.iter().enumerate() {
             assert_eq!(beats.len(), 3, "section {}", n + 1);
         }
         for (n, build) in SECTIONS.iter().enumerate() {
-            super::super::super::blender::draws_every_beat(build().as_ref(), &format!("POLYSILICON section {}", n + 1));
+            super::super::super::blender::draws_every_beat(
+                build().as_ref(),
+                &format!("POLYSILICON section {}", n + 1),
+            );
         }
     }
 }
