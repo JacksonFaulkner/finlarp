@@ -4,9 +4,9 @@
 // beats (tools/pbr3d/blender/pkg_zooms.py). Sections 1-9 are the zoom pictures they point at
 // (tools/pbr3d/sections.json).
 
-use super::super::blender::{page, Cell, Page};
 use super::super::Node;
-use crate::screens::diagrams_pkg_nodes::{AA_B, AB_B, AC_B, AD_B, AE_B, A_B};
+use super::super::blender::{Cell, Page, page};
+use crate::screens::diagrams_pkg_nodes::{A_B, AA_B, AB_B, AC_B, AD_B, AE_B};
 use crate::ui::anim::{Scene, Zoom};
 
 static OVERVIEW: Cell = std::sync::OnceLock::new();
@@ -93,7 +93,9 @@ const ZOOMS: &[Zoom] = &[
     },
 ];
 
-pub const SECTIONS: [fn() -> Box<dyn Scene>; 9] = [zoom_a, zoom_b, zoom_a, zoom_c, zoom_d, zoom_d, zoom_e, zoom_d, zoom_c];
+pub const SECTIONS: [fn() -> Box<dyn Scene>; 9] = [
+    zoom_a, zoom_b, zoom_a, zoom_c, zoom_d, zoom_d, zoom_e, zoom_d, zoom_c,
+];
 
 pub const NODE: Node = Node {
     page: "ASSEMBLY",
