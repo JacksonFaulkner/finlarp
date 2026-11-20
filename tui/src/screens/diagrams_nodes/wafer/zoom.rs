@@ -5,7 +5,7 @@
 // Sources: SEMI 2025 wafer shipments and revenue [1]; vendor 300 mm datasheets SV029 and SV031 [2];
 // SEMI M1 and M43 [3]; SFQR / ESFQR patent US 12,635,427 [4]; SOI implant depth US 8,497,187 [7].
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 pub const SITES_BEATS: &[Beat] = &[

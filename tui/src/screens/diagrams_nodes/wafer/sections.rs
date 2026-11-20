@@ -7,7 +7,7 @@
 // Engineering, market shares 2021; [6] GEP, top-five concentration 2018; [7] SOI implant depth US 8,497,187;
 // [8] 300 mm market blog, low confidence; [9] China wafer landscape report 2026.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[

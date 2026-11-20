@@ -8,7 +8,7 @@
 // GEP top-five concentration 2018 [6]; SOI implant depth US 8,497,187 [7]; 300 mm market blog, low
 // confidence [8]; China wafer landscape 2026 [9].
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 
