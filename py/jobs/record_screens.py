@@ -102,6 +102,7 @@ SPECS = [
     Spec("diagrams_fiber", ["diagrams"], setup=["5"], keys=["wait:6"]),
     Spec("diagrams_power", ["diagrams"], setup=["6"], keys=["wait:6"]),
     Spec("diagrams_network", ["diagrams"], setup=["7"], keys=["wait:6"]),
+    Spec("diagrams_math", ["diagrams"], setup=["8"], keys=["wait:6"]),
 ]
 
 

@@ -45,7 +45,7 @@ Computed in the same statement as the hits, so they cost ~one GROUP BY.
 line on stdin, one reply per line on stdout, in order, echoing "id". The
 connection and fts extension stay loaded, so a query is ~100ms instead of
 ~350ms for a fresh process; the query string is parsed here (single parser).
-    {"id": 1, "q": "t:MRVL guidance", "k": 50}
+    {"id": 1, "q": "t:MRVL guidance", "k": 50, "facet_n": 500}   (facet_n optional, default FACET_N)
         -> {"id": 1, "query": parse(q), "terms": [...], "results": [...], "facets": {...}, "ms": 97}
     {"id": 2, "get": 1234, "context": 1}
         -> {"id": 2, "rows": [...]}
@@ -272,9 +272,10 @@ _COLS = ["id", "ticker", "type", "section", "form", "date", "accn", "seq", "text
 
 
 def search_full(query: str, k: int = 30, con: duckdb.DuckDBPyConnection | None = None,
-                facets: bool = True) -> dict:
+                facets: bool = True, facet_n: int = FACET_N) -> dict:
     """Top-k hits plus facet counts over every match, in one statement.
-    Pass `con` (from connect()) to reuse a loaded connection (--serve)."""
+    Pass `con` (from connect()) to reuse a loaded connection (--serve).
+    `facet_n` caps each facet list (the scratch screen wants every ticker)."""
     q = parse(query)
     where, params, score, order = _where(q)
     own = con is None
@@ -289,7 +290,7 @@ def search_full(query: str, k: int = 30, con: duckdb.DuckDBPyConnection | None =
                 UNION ALL SELECT 'type', type, count(*) FROM h GROUP BY ALL
                 UNION ALL SELECT 'section', section, count(*) FROM h WHERE section IS NOT NULL GROUP BY ALL
                 UNION ALL SELECT 'year', CAST(year(date) AS VARCHAR), count(*) FROM h WHERE date IS NOT NULL GROUP BY ALL))
-         WHERE rk <= {FACET_N})""" if facets else "NULL"
+         WHERE rk <= {int(facet_n)})""" if facets else "NULL"
     try:
         top, flat = con.execute(f"""
             WITH h AS MATERIALIZED (
@@ -428,7 +429,8 @@ def serve() -> None:
             else:
                 import time
                 t = time.perf_counter()
-                out = {"id": rid, **search_full(req.get("q", ""), int(req.get("k", 50)), con)}
+                out = {"id": rid, **search_full(req.get("q", ""), int(req.get("k", 50)), con,
+                                                facet_n=int(req.get("facet_n", FACET_N)))}
                 out["ms"] = round((time.perf_counter() - t) * 1000)
         except Exception as e:  # noqa: BLE001 — every failure becomes a reply, never a dead server
             out = {"id": rid, "error": f"{type(e).__name__}: {e}"}
