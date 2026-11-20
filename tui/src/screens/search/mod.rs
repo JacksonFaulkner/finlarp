@@ -17,7 +17,7 @@
 // Parts: client (server process), query (facet token rewriting, term
 // highlighting, snippets), view (rendering), history (input history file).
 
-mod client;
+pub(crate) mod client;
 mod history;
 mod query;
 mod view;
@@ -207,6 +207,7 @@ impl Search {
                 id,
                 q: q.clone(),
                 k: K,
+                facet_n: None,
             })
             .is_ok()
         {

@@ -46,8 +46,19 @@ pub struct Hit {
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(untagged)]
 pub enum Request {
-    Query { id: u64, q: String, k: usize },
-    Get { id: u64, get: i64, context: u32 },
+    Query {
+        id: u64,
+        q: String,
+        k: usize,
+        /// Facet cap per dimension (search.py default when absent).
+        #[serde(skip_serializing_if = "Option::is_none", default)]
+        facet_n: Option<usize>,
+    },
+    Get {
+        id: u64,
+        get: i64,
+        context: u32,
+    },
 }
 
 impl Request {
@@ -191,6 +202,7 @@ mod tests {
             id: 3,
             q: "t:MRVL".into(),
             k: 50,
+            facet_n: None,
         })
         .unwrap_or_default();
         assert_eq!(q, r#"{"id":3,"q":"t:MRVL","k":50}"#);
@@ -216,6 +228,7 @@ mod tests {
                 id: 1,
                 q: "x".into(),
                 k: 5,
+                facet_n: None,
             },
         );
         let r = r.unwrap_or_default();
@@ -229,7 +242,8 @@ mod tests {
                 &Request::Query {
                     id: 2,
                     q: "x".into(),
-                    k: 5
+                    k: 5,
+                    facet_n: None,
                 }
             )
             .is_err()
