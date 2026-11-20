@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/array_zooms.py: a the row buffer, b row hit / miss / conflict, c mats,
 // subarrays and the bank, d redundancy, e a burst. Four beats each.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 pub const ROWBUF_BEATS: &[Beat] = &[

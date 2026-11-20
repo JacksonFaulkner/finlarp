@@ -8,7 +8,7 @@
 // Sources: section 10 of MEM_ARRAY.txt (UMD ENEE 359a; Kim et al., arXiv 1805.01966; AnandTech;
 // geizhals DDR4 listing; US 6,731,550 and US 5,325,334; Kim et al., ISCA 2014).
 
-use super::super::blender::{Cell, Page, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, Page};
 use super::zoom;
 use crate::ui::anim::{Beat, Scene, Zoom};
 

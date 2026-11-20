@@ -2,7 +2,7 @@
 // tools/pbr3d/blender/array_sections.py. Beat counts per section: 4, 4, 5, 3, 4, 4, 3, 3, 4, 4.
 // Section 10 is the sources page.
 
-use super::super::blender::{page, Cell, BEAT_MS};
+use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[
