@@ -1,34 +1,23 @@
 # 1. What happens: from tested package to a running rack
 
- ┌───────────┐  ┌─────────────┐  ┌────────────────┐  ┌──────────────┐  ┌─────────────┐  ┌─────────────┐
- │ BOARD     │─▶│ TRAY        │─▶│ RACK           │─▶│ BURN + TEST  │─▶│ SHIP        │─▶│ DATA CENTER │
- │ GPU + CPU │  │ power, NIC, │  │ trays + NVLink │  │ liquid loop, │  │ crate by    │  │ power, CDU, │
- │ on a tray │  │ cooling     │  │ switch trays   │  │ firmware     │  │ air / truck │  │ network     │
- └───────────┘  └─────────────┘  └────────────────┘  └──────────────┘  └─────────────┘  └─────────────┘
+  1 BOARD          GPU + CPU on a tray
+  2 TRAY           power, NIC, cooling
+  3 RACK           trays + NVLink switch trays
+  4 BURN + TEST    liquid loop, firmware
+  5 SHIP           crate by air / truck
+  6 DATA CENTER    power, CDU, network
 
   (the chip maker sells the GPU and the board design; ODMs and OEMs build the servers and racks)
 
 # 2. Mechanism: GB200 NVL72 rack, 72 GPUs acting as one
 
-  ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
-  │   ┌──────────── NVL72 RACK (front view) ────────────┐                                           │
-  │   │ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ COMPUTE TRAY 1 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │   tray = 2 boards (2 B200 + 1 Grace each) │
-  │   │ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ COMPUTE TRAY 2 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │          = 4 GPU + 2 CPU per tray         │
-  │   │ ▒▒▒▒▒▒▒▒▒ ... 10 trays in upper group ▒▒▒▒▒▒▒▒▒ │   18 compute trays, 72 GPU, 36 CPU        │
-  │   │═════════════════════════════════════════════════│                                           │
-  │   │ ████████████ NVLINK SWITCH TRAY 1 █████████████ │   9 NVSwitch trays, all-to-all fabric     │
-  │   │ ████████████ NVLINK SWITCH TRAY 2 █████████████ │   130 TB/s NVLink switch bandwidth        │
-  │   │ █████████████ ... 9 switch trays ██████████████ │                                           │
-  │   │═════════════════════════════════════════════════│                                           │
-  │   │ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ COMPUTE TRAY 11 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │   13.4 TB HBM3e, 576 TB/s                 │
-  │   │ ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ COMPUTE TRAY 12 ▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒ │                                           │
-  │   │ ▒▒▒▒▒▒▒▒▒ ... 8 trays in lower group ▒▒▒▒▒▒▒▒▒▒ │                                           │
-  │   │─────────────────────────────────────────────────│                                           │
-  │   │         power shelves: AC to DC, busbar         │   ~120 kW nominal                         │
-  │   │   coolant manifolds ≈≈≈ cold plates on chips    │   ~1.36 t, liquid cooling required        │
-  │   │                                                 │   copper NVLink spine at the rear         │
-  │   └─────────────────────────────────────────────────┘                                           │
-  └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+  72 Blackwell GPUs and 36 Grace CPUs sit in one liquid-cooled rack. The rack holds 18 compute trays
+  (two boards each: 4 GPU and 2 CPU per tray) and 9 NVLink switch trays, all-to-all, with 130 TB/s
+  of NVLink switch bandwidth. Memory is 13.4 TB HBM3e at 576 TB/s. Power shelves convert AC to DC onto
+  a busbar, coolant manifolds feed cold plates on the chips, and a copper NVLink spine runs at the rear.
+
+  NVLINK SWITCH TRAY 1 to 9: the nine switch trays sit in the middle of the rack and form the
+  all-to-all NVLink fabric that ties the 72 GPUs together.
 
   (tray and board counts from SemiAnalysis via search summary; tray order and copper spine are textbook)
 
@@ -73,23 +62,23 @@
 
 # 5. Rack power density, kW per rack (why liquid is mandatory)
 
-  CPU rack    ███ 12  general-purpose, up to
-  H100 air    █████████ 40  typical air-cooled
-  NVL72       ████████████████████████████ ~120 nominal
-  NVL72 peak  ████████████████████████████████████████████ 192  HPE peak / provisioning figure
+  CPU rack      12 kW     general-purpose, up to
+  H100 air      40 kW     typical air-cooled
+  NVL72         ~120 kW   nominal
+  NVL72 peak    192 kW    HPE peak / provisioning figure
 
 # 6. GB200 / GB300 rack shipments, thousand racks (KGI estimates)
 
-  2Q25 actual   ███ 4.5  (three ODMs combined)
-  2025 forecast ████████████████████ 27-28  (raised forecast, GB200/300)
-  2026 forecast ████████████████████████████████████████ 50-60
-  (bars show midpoints for ranges; 2025 and 2026 are forecasts, not deliveries)
+  2Q25 actual     4.5k racks    (three ODMs combined)
+  2025 forecast   27-28k racks  (raised forecast, GB200/300)
+  2026 forecast   50-60k racks
+  (ranges shown as midpoints; 2025 and 2026 are forecasts, not deliveries)
 
 # 7. Renting one GPU-hour: what the end customer pays (indicative, checked 22 Mar 2026, Spheron)
 
-  CoreWeave          ████████████████ $10.50
-  Oracle Cloud       ████████████████████████ $16
-  Azure ND GB200 v6  ████████████████████████████████████████ $27
+  CoreWeave          $10.50
+  Oracle Cloud       $16
+  Azure ND GB200 v6  $27
 
 # 8. Who makes it, market structure, risks
 
