@@ -30,8 +30,8 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 | `portfolio` | Your account: equity vs benchmark, drawdown, positions, daily % change history (E*TRADE; some tabs are placeholders) |
 | `chart` | Daily portfolio value over time, from the E*TRADE snapshots |
 
-Screens that show your account, watchlists, notes or a live feed (`portfolio`, `chart`, `transactions`,
-`intraday`, `watchlists`, `notes`, `chat`, `godel`) are not in the gallery below.
+Screens that show your account, notes or a live feed (`portfolio`, `chart`, `transactions`,
+`intraday`, `notes`, `chat`) are not in the gallery below.
 
 ### More screens
 

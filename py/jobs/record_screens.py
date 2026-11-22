@@ -4,7 +4,7 @@ Each screen runs in a detached tmux session at a fixed size. After every key in 
 colours (`capture-pane -e`), the ANSI is painted into a PNG with a monospace font, and the frames are written as a GIF.
 A single character is typed literally and gets a short frame; a named key (Enter, Down) or a bare `J`-style jump gets
 a longer one, so typing a query reads as typing.
-Only screens that read public data are listed. The portfolio, notes, chat, godel and watchlists screens show personal
+Only screens that read public data are listed. The portfolio, notes and chat screens show personal
 data; chart and candles show portfolio history and mock bars; intraday is a live feed that starts empty. None of those
 are recorded.
 

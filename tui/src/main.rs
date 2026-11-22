@@ -49,7 +49,6 @@ const SCREENS: &[&str] = &[
     "canslim",
     "dossier",
     "memory",
-    "earnings",
     "search",
     "filings",
     "universe",
@@ -59,7 +58,6 @@ const SCREENS: &[&str] = &[
     "candles",
     "intraday",
     "breadth",
-    "godel",
     "menu",
     "notes",
     "sources",
@@ -67,7 +65,6 @@ const SCREENS: &[&str] = &[
     "note",
     "docview",
     "transactions",
-    "watchlists",
     "onboard",
     "claude_history",
     "claude_log",
@@ -127,7 +124,7 @@ fn parse_args(args: &[String]) -> Result<Cli, String> {
 }
 
 const USAGE: &str = "usage: fl [--bg #rrggbb] [--up #rrggbb] [--down #rrggbb] \
-[home|chart|portfolio|canslim|dossier|earnings|search|filings|universe|diagrams|events|chat|candles|intraday|breadth|godel|menu|notes|sources] [arg]";
+[home|chart|portfolio|canslim|dossier|earnings|search|filings|universe|diagrams|events|chat|candles|intraday|breadth|menu|notes|sources] [arg]";
 
 /// Finlarp's data directory: the repo's `data/` folder, or `FINLARP_DATA`.
 /// The Python side resolves the same directory from its own location.
@@ -160,10 +157,9 @@ fn build_screen(
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
         candles, canslim, chart, chat, claude_history, claude_log, diagrams, docview, dossier,
-        earnings_report, events, figgie, filings, godel, home, intraday, keys, menu, note, notes,
-        onboard,
-        pick, portfolio, rebuild, rows, scratch, search, sources, transactions, universe, video,
-        watchlists,
+        events, figgie, filings, home, intraday, keys, menu, note, notes,
+        onboard, pick, portfolio, rebuild, rows, scratch, search, sources, transactions, universe,
+        video,
     };
     Ok(match (screen, upper(arg.clone())) {
         ("canslim", None) => Box::new(pick::open_symbols(ctx, "canslim")?),
@@ -177,12 +173,10 @@ fn build_screen(
         ("candles", _) => Box::new(candles::open(ctx, arg)?),
         ("notes", _) => Box::new(notes::open(ctx, arg)?),
         ("menu", _) => Box::new(menu::open(ctx, arg)?),
-        ("godel", _) => Box::new(godel::open(ctx, arg)?),
         ("intraday", _) => Box::new(intraday::open(ctx, arg)?),
         ("breadth", _) => Box::new(intraday::breadth::open(ctx, arg)?),
         ("home", _) => Box::new(home::open(ctx)?),
         ("portfolio", _) => Box::new(portfolio::open(ctx, arg)?),
-        ("earnings", _) => Box::new(earnings_report::open(ctx, arg)?),
         ("search", _) => Box::new(search::open(ctx, arg)?),
         ("filings", _) => Box::new(filings::open(ctx, arg)?),
         ("universe", _) => Box::new(universe::open(ctx, arg)?),
@@ -194,7 +188,6 @@ fn build_screen(
         ("note", _) => Box::new(note::open(ctx, arg)?),
         ("docview", _) => Box::new(docview::open(ctx, arg)?),
         ("transactions", _) => Box::new(transactions::open(ctx, arg)?),
-        ("watchlists", _) => Box::new(watchlists::open(ctx, arg)?),
         ("onboard", _) => Box::new(onboard::open(ctx, arg)?),
         ("claude_history", _) => Box::new(claude_history::open(ctx, arg)?),
         ("claude_log", _) => Box::new(claude_log::open(ctx, arg)?),
@@ -261,12 +254,14 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
     )];
     // One tape for the whole session: handing off to another screen keeps its data.
     let mut tape = ui::tape::Tape::new();
+    // A message for the screen about to open (a rebuild that could not start).
+    let mut flash: Option<String> = None;
     loop {
         let top = stack.last_mut().expect("stack never empty here");
         if let Some(t) = &title {
             t.set(&top.2);
         }
-        let exit = app::run(top.0.as_mut(), &mut tape, ctx.theme)?;
+        let exit = app::run(top.0.as_mut(), &mut tape, ctx.theme, flash.take())?;
         let next = match exit.handoff {
             Some(Route::Restart) => {
                 // The rebuild screen is on top; restart into the one beneath.
@@ -292,7 +287,7 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
                     Ok(c) => c,
                     // A rebuild that cannot start (no cargo) should not end the session.
                     Err(e) if screen == "rebuild" => {
-                        top_flash(&mut stack, e.to_string());
+                        flash = Some(e.to_string());
                         continue;
                     }
                     Err(e) => return Err(e),
@@ -309,12 +304,6 @@ fn run_session(ctx: &app::Ctx, start: &str, arg: Option<String>) -> std::io::Res
                 }
             }
         }
-    }
-}
-
-fn top_flash(stack: &mut [Entry], msg: String) {
-    if let Some(top) = stack.last_mut() {
-        top.0.set_flash(msg);
     }
 }
 
@@ -366,10 +355,14 @@ fn main() {
     // `fl render-video PAGE... --out DIR`: the diagram pages as HLS video (screens::diagrams_video).
     // Headless: no terminal, so it runs the same way in CI and over ssh.
     // `fl z check FILE...`: validates Z diagram files (screens::z_spec), for Claude to run.
-    if args.first().map(String::as_str) == Some("z") && args.get(1).map(String::as_str) == Some("check") {
+    if args.first().map(String::as_str) == Some("z")
+        && args.get(1).map(String::as_str) == Some("check")
+    {
         std::process::exit(screens::z_spec::run_check(&args[2..]));
     }
-    if args.first().map(String::as_str) == Some("z") && args.get(1).map(String::as_str) == Some("render") {
+    if args.first().map(String::as_str) == Some("z")
+        && args.get(1).map(String::as_str) == Some("render")
+    {
         std::process::exit(screens::z_spec::run_render(&args[2..]));
     }
     if args.first().map(String::as_str) == Some("render-video") {
