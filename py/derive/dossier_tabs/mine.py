@@ -1,10 +1,9 @@
 """Dossier tab: Mine. section(t, con, F, prof) -> {"id", "title", "blocks"} | None.
 
-Personal and local-only: this ticker's position, FIFO round trips, dividends, notes (mind.duckdb), Godel commands
-already generated for it, and watchlist membership when data/watchlist.txt exists. Every value is internal
+Personal and local-only: this ticker's position, FIFO round trips, dividends, notes (mind.duckdb), and watchlist membership when data/watchlist.txt exists. Every value is internal
 (src(..., internal=True)); no account ids, account numbers or account-level totals are written.
 
-Reads the derived account parquet (derive/account.py) and the mind/godel files directly, never the broker.
+Reads the derived account parquet (derive/account.py) and the mind files directly, never the broker.
 """
 from __future__ import annotations
 
@@ -17,7 +16,6 @@ from mind import store as mind_store
 from sources import universe
 
 ACCOUNT = universe.DATA_ROOT / "account"
-GODEL_ITEMS = universe.DATA_ROOT / "godel" / "items.json"  # not universe.data_dir(): that mkdirs on read
 WATCHLIST = Path(__file__).resolve().parents[3] / "data" / "watchlist.txt"  # same file jobs/refresh.py reads
 EPS = 1e-9
 
@@ -146,23 +144,6 @@ def notes_blocks(notes: list[dict], themes: list[tuple[str, int]], t: str) -> li
     return out
 
 
-def godel_block(items: list[dict], t: str) -> dict | None:
-    """items: godel items.json rows. Lists the generated commands (status done) that name ticker t."""
-    rows = []
-    for it in items or []:
-        if it.get("status") != "done":
-            continue
-        for c in it.get("commands") or []:
-            if t in [x.upper() for x in c.get("tickers") or []]:
-                when = " ".join(str(x) for x in (c.get("year"), c.get("period")) if x) or "—"
-                rows.append({"cells": [c.get("key") or "—", c.get("name") or c.get("cmd") or "—", when],
-                             "src": _own(f"godel item {it.get('id')} · {c.get('key')}")})
-    if not rows:
-        return None
-    return {"type": "table", "title": "Godel commands for this ticker", "cols": ["key", "command", "period"],
-            "rows": rows}
-
-
 def watchlist_block(t: str, lines: list[str] | None) -> dict | None:
     """lines: contents of data/watchlist.txt, or None when the file does not exist (then no block)."""
     if lines is None:
@@ -204,12 +185,6 @@ def _mind(t: str) -> tuple[list[dict], list[tuple[str, int]]]:
     return rows, [(th, int(n)) for th, n in themes]
 
 
-def _godel_items() -> list[dict] | None:
-    if not GODEL_ITEMS.exists():
-        return None
-    return json.loads(GODEL_ITEMS.read_text())
-
-
 def _watchlist_lines() -> list[str] | None:
     return WATCHLIST.read_text().splitlines() if WATCHLIST.exists() else None
 
@@ -226,8 +201,6 @@ def section(t: str, con, F, prof: dict | None) -> dict | None:
     notes, themes = _mind(t)
     blocks.extend(notes_blocks(notes, themes, t))
 
-    items = _godel_items()
-    blocks.append(godel_block(items, t) if items else None)
     lines = _watchlist_lines()
     blocks.append(watchlist_block(t, lines))
 

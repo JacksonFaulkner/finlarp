@@ -86,24 +86,6 @@ def test_notes_blocks_empty():
     assert mine.notes_blocks([], [], "MRVL") == []
 
 
-def test_godel_block_only_done_items_naming_ticker():
-    items = [
-        {"id": "a1", "status": "done", "commands": [
-            {"key": "MRVL US EQ FA 2025Q4", "cmd": "FA", "name": "Financials", "tickers": ["MRVL"],
-             "period": "Q4", "year": 2025},
-            {"key": "NVDA US EQ DES", "cmd": "DES", "name": "Description", "tickers": ["NVDA"],
-             "period": None, "year": None}]},
-        {"id": "b2", "status": "cooking", "commands": [
-            {"key": "MRVL US EQ N", "cmd": "N", "name": "News", "tickers": ["MRVL"], "period": None, "year": None}]},
-    ]
-    b = mine.godel_block(items, "MRVL")
-    assert [r["cells"][0] for r in b["rows"]] == ["MRVL US EQ FA 2025Q4"]
-    assert b["rows"][0]["cells"][2] == "2025 Q4"
-    assert _all_internal(b)
-    assert mine.godel_block(items, "AMD") is None
-    assert mine.godel_block(None, "MRVL") is None
-
-
 def test_watchlist_block_missing_file_and_membership():
     assert mine.watchlist_block("MRVL", None) is None
     b = mine.watchlist_block("MRVL", ["MRVL  # core", "NVDA"])
@@ -122,7 +104,6 @@ def tmp_mine(tmp_path, monkeypatch):
                  TO '{acct / 'round_trips.parquet'}' (FORMAT PARQUET)""")
     con.close()
     monkeypatch.setattr(mine, "ACCOUNT", acct)
-    monkeypatch.setattr(mine, "GODEL_ITEMS", tmp_path / "godel" / "items.json")
     monkeypatch.setattr(mine, "WATCHLIST", tmp_path / "watchlist.txt")
     # store.py runs ALTER TABLE answers before CREATE TABLE answers, so a brand-new file needs answers made first
     monkeypatch.setattr(mind_store, "MIND_PATH", tmp_path / "mind.duckdb")
@@ -143,20 +124,15 @@ def test_section_end_to_end_on_tmp_files(tmp_mine):
     assert "acct" not in json.dumps(s)
 
 
-def test_section_with_notes_and_godel(tmp_mine):
+def test_section_with_notes(tmp_mine):
     mind_store.add_note("why", anchor_entity="ticker:XYZ")
     nid = mind_store.add_note("another", mentions=["ticker:XYZ"])
     mind_store.save_answer(nid, {"summary": "s", "follow_ups": ["next?"], "themes": ["Capex"]}, "m")
-    (tmp_mine / "godel").mkdir()
-    (tmp_mine / "godel" / "items.json").write_text(json.dumps([{"id": "g1", "status": "done", "commands": [
-        {"key": "XYZ US EQ DES", "cmd": "DES", "name": "Description", "tickers": ["XYZ"], "period": None,
-         "year": None}]}]))
     (tmp_mine / "watchlist.txt").write_text("XYZ\n")
     con = duckdb.connect()
     s = mine.section("XYZ", con, None, None)
     titles = [b.get("title") or b.get("type") for b in s["blocks"]]
     assert "kv" in titles and "Follow-ups" in titles and "Note themes" in titles
-    assert "Godel commands for this ticker" in titles and "kv" in titles
     assert dossier.validate({"sections": [s]}) == []
 
 
