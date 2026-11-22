@@ -22,9 +22,13 @@ use std::time::{Duration, Instant};
 use ratatui::backend::{Backend, TestBackend};
 use ratatui::crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind, KeyModifiers};
 use ratatui::layout::Rect;
+use ratatui::text::Line;
+use ratatui::widgets::Clear;
 use ratatui::{Frame, Terminal};
 
+use crate::ui::help::{self, GLOBAL_KEYS, Help, section};
 use crate::ui::tape::Tape;
+use crate::ui::text;
 use crate::ui::theme::Theme;
 
 /// How long the loop waits for input before calling `tick` again.
@@ -70,6 +74,8 @@ pub enum Action {
     },
     /// Screen, picker, or Claude request; see `Route`.
     Route(Route),
+    /// Open the `?` menu over the screen (any key closes it).
+    Help,
 }
 
 pub trait Screen {
@@ -80,9 +86,22 @@ pub trait Screen {
     fn tick(&mut self) -> Action {
         Action::None
     }
-    /// Transient one-line status shown by screens that render a footer
-    /// ("copied", "opened in browser"). Set by `run` after in-process actions.
+    /// Transient one-line status ("copied", "opened in browser"). Set by `run`
+    /// after in-process actions and by the screen itself; the loop draws it at
+    /// the top right until the next key clears it.
     fn set_flash(&mut self, _msg: String) {}
+    /// The flash text to draw, if any (see `set_flash`).
+    fn flash_text(&self) -> Option<&str> {
+        None
+    }
+    /// The `?` menu: the screen's title and every key it handles (ui::help).
+    /// Required, so a screen cannot ship without listing its keys.
+    fn help(&self) -> Help;
+    /// Whether printable keys are typed text right now (a search box, a prompt,
+    /// a filter). While it is, `?` and `<space>` go to the screen, not the menu.
+    fn takes_text(&self) -> bool {
+        false
+    }
     /// Whether to redraw on an idle poll (no key, no resize, tick returned
     /// None). Default true = redraw every ~100ms, which is what tick-driven
     /// screens need. Screens whose state only changes on keys return false
@@ -184,6 +203,8 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
             if is_plain(&key, ' ') && screen.leader_ok() {
                 *chord = Chord::Space;
                 Action::None
+            } else if is_plain(&key, '?') && !screen.takes_text() {
+                Action::Help
             } else {
                 screen.on_key(key)
             }
@@ -244,7 +265,8 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
                 })
             } else if is_plain(&key, 'w') {
                 if !screen.ask_claude() {
-                    screen.set_flash("nothing to ask here (space aw works inside a diagram)".into());
+                    screen
+                        .set_flash("nothing to ask here (space aw works inside a diagram)".into());
                 }
                 Action::None
             } else if is_plain(&key, 's') {
@@ -260,6 +282,50 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
             }
         }
     }
+}
+
+/// One key press: Ctrl-C quits; while the `?` menu is open any key closes it
+/// (and is not passed on); otherwise the key goes through the leader chords.
+fn handle_key(
+    screen: &mut dyn Screen,
+    chord: &mut Chord,
+    help_open: &mut bool,
+    key: KeyEvent,
+) -> Action {
+    if key.code == KeyCode::Char('c') && key.modifiers.contains(KeyModifiers::CONTROL) {
+        return Action::Quit;
+    }
+    if *help_open {
+        *help_open = false;
+        return Action::None;
+    }
+    route_key(screen, chord, key)
+}
+
+/// The `?` menu: the screen's keys, then the keys that work everywhere.
+fn draw_help(frame: &mut Frame, help: Help, theme: Theme) {
+    let mut keys = help.keys;
+    keys.push(section("any screen"));
+    keys.extend_from_slice(GLOBAL_KEYS);
+    help::render_overlay(frame, frame.area(), help.title, &keys, &theme);
+}
+
+/// The screen's flash message at the top right, one row (see `Screen::set_flash`).
+fn draw_flash(frame: &mut Frame, msg: &str, theme: Theme) {
+    let area = frame.area();
+    if area.width < 4 || area.height == 0 {
+        return;
+    }
+    let body = text::truncate(msg, area.width as usize - 2);
+    let w = text::width(&body) as u16 + 2;
+    let r = Rect {
+        x: area.right() - w,
+        y: area.y,
+        width: w,
+        height: 1,
+    };
+    frame.render_widget(Clear, r);
+    frame.render_widget(Line::styled(format!(" {body} "), theme.accent()), r);
 }
 
 /// Where the loop gets terminal events from; crossterm in production, a
@@ -299,7 +365,17 @@ impl Exit {
 }
 
 /// Runs a screen to completion.
-pub fn run(screen: &mut dyn Screen, tape: &mut Tape, theme: Theme) -> io::Result<Exit> {
+/// Runs a screen to completion. `flash` (if any) is shown at once, e.g. why the
+/// screen above it failed to start.
+pub fn run(
+    screen: &mut dyn Screen,
+    tape: &mut Tape,
+    theme: Theme,
+    flash: Option<String>,
+) -> io::Result<Exit> {
+    if let Some(msg) = flash {
+        screen.set_flash(msg);
+    }
     ratatui::run(|terminal| event_loop(terminal, screen, &mut CrosstermEvents, tape, theme))
 }
 
@@ -355,6 +431,7 @@ pub(crate) fn event_loop<B: Backend>(
 ) -> io::Result<Exit> {
     let mut dirty = true;
     let mut chord = Chord::Idle;
+    let mut help_open = false;
     // The offscreen buffer a screen draws into while the tape holds the bottom row.
     let mut body =
         Terminal::new(TestBackend::new(1, 1)).map_err(|e| io::Error::other(e.to_string()))?;
@@ -364,7 +441,15 @@ pub(crate) fn event_loop<B: Backend>(
         let show = screen.shows_tape();
         if dirty || screen.needs_redraw() || (show && tape.enabled()) {
             terminal
-                .draw(|f| draw_with_tape(f, screen, &mut body, tape, show, theme))
+                .draw(|f| {
+                    draw_with_tape(f, screen, &mut body, tape, show, theme);
+                    if help_open {
+                        draw_help(f, screen.help(), theme);
+                    }
+                    if let Some(msg) = screen.flash_text() {
+                        draw_flash(f, msg, theme);
+                    }
+                })
                 .map_err(|e| io::Error::other(e.to_string()))?;
             dirty = false;
         }
@@ -383,26 +468,14 @@ pub(crate) fn event_loop<B: Backend>(
             match events.next(screen.poll_interval())? {
                 Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
                     dirty = true;
-                    action = if key.code == KeyCode::Char('c')
-                        && key.modifiers.contains(KeyModifiers::CONTROL)
-                    {
-                        Action::Quit
-                    } else {
-                        route_key(screen, &mut chord, key)
-                    };
+                    action = handle_key(screen, &mut chord, &mut help_open, key);
                     // Keys that queued up while the last frame drew (held J/K
                     // repeating) are handled now, before one draw, so a slow
                     // frame never builds a backlog the screen lags behind.
                     while action == Action::None {
                         match events.next(Duration::ZERO)? {
                             Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
-                                action = if key.code == KeyCode::Char('c')
-                                    && key.modifiers.contains(KeyModifiers::CONTROL)
-                                {
-                                    Action::Quit
-                                } else {
-                                    route_key(screen, &mut chord, key)
-                                };
+                                action = handle_key(screen, &mut chord, &mut help_open, key);
                             }
                             Some(Event::Resize(..)) => {}
                             Some(_) => {}
@@ -422,6 +495,7 @@ pub(crate) fn event_loop<B: Backend>(
         match action {
             Action::None => {}
             Action::Quit => return Ok(Exit::code(0)),
+            Action::Help => help_open = true,
             Action::OpenBrowser(url) => {
                 let msg = match open::that_detached(&url) {
                     Ok(()) => "opened in browser".to_string(),
@@ -465,7 +539,9 @@ pub(crate) fn event_loop<B: Backend>(
                 let res = crate::claude_popup::open(text.as_deref());
                 // Without tmux, fl left its screen for the attach; repaint it all.
                 if std::env::var_os("TMUX").is_none() {
-                    terminal.clear().map_err(|e| io::Error::other(e.to_string()))?;
+                    terminal
+                        .clear()
+                        .map_err(|e| io::Error::other(e.to_string()))?;
                 }
                 if let Err(e) = res {
                     screen.set_flash(format!("claude: {e}"));
@@ -520,6 +596,9 @@ mod tests {
                 _ => Action::None,
             }
         }
+        fn help(&self) -> Help {
+            Help::new("probe", &[])
+        }
         fn needs_redraw(&self) -> bool {
             self.idle_redraw
         }
@@ -548,6 +627,9 @@ mod tests {
             fn on_key(&mut self, _: KeyEvent) -> Action {
                 Action::Quit
             }
+            fn help(&self) -> Help {
+                Help::new("asks", &[])
+            }
             fn ask_claude(&mut self) -> bool {
                 self.asked = true;
                 true
@@ -572,6 +654,9 @@ mod tests {
         // a screen that does not ask: aw does nothing and ac still opens Claude
         struct Plain;
         impl Screen for Plain {
+            fn help(&self) -> Help {
+                Help::new("plain", &[])
+            }
             fn draw(&mut self, _: &mut Frame) {}
             fn on_key(&mut self, _: KeyEvent) -> Action {
                 Action::Quit
@@ -599,6 +684,9 @@ mod tests {
             fn draw(&mut self, _: &mut Frame) {}
             fn on_key(&mut self, _: KeyEvent) -> Action {
                 Action::Quit
+            }
+            fn help(&self) -> Help {
+                Help::new("ctx", &[])
             }
             fn claude_context(&self) -> Option<String> {
                 Some("ctx".into())
@@ -628,6 +716,9 @@ mod tests {
             fn draw(&mut self, _: &mut Frame) {}
             fn on_key(&mut self, _: KeyEvent) -> Action {
                 Action::Quit
+            }
+            fn help(&self) -> Help {
+                Help::new("sel", &[])
             }
             fn take_selection(&mut self) -> Option<String> {
                 self.0.take()
@@ -711,6 +802,66 @@ mod tests {
             KeyModifiers::CONTROL,
         )));
         assert_eq!(run_script(&mut p, vec![ctrl_c]).expect("run"), 0);
+    }
+
+    #[test]
+    fn question_mark_opens_the_menu_and_the_next_key_only_closes_it() {
+        struct Rec(String);
+        impl Screen for Rec {
+            fn draw(&mut self, _: &mut Frame) {}
+            fn on_key(&mut self, key: KeyEvent) -> Action {
+                if let KeyCode::Char(c) = key.code {
+                    self.0.push(c);
+                }
+                Action::None
+            }
+            fn help(&self) -> Help {
+                Help::new("rec", &[])
+            }
+        }
+        let k = |ch| KeyEvent::new(KeyCode::Char(ch), KeyModifiers::NONE);
+        let mut s = Rec(String::new());
+        let mut c = Chord::Idle;
+        let mut open = false;
+        assert_eq!(handle_key(&mut s, &mut c, &mut open, k('?')), Action::Help);
+        assert!(s.0.is_empty(), "? is the menu's key, not the screen's");
+        // the loop sets help_open on Action::Help
+        open = true;
+        assert_eq!(handle_key(&mut s, &mut c, &mut open, k('j')), Action::None);
+        assert!(!open, "any key closes the menu");
+        assert!(
+            s.0.is_empty(),
+            "the key that closes the menu is not passed on"
+        );
+        handle_key(&mut s, &mut c, &mut open, k('j'));
+        assert_eq!(s.0, "j");
+    }
+
+    #[test]
+    fn a_screen_that_types_gets_the_question_mark() {
+        struct Typing(String);
+        impl Screen for Typing {
+            fn draw(&mut self, _: &mut Frame) {}
+            fn on_key(&mut self, key: KeyEvent) -> Action {
+                if let KeyCode::Char(c) = key.code {
+                    self.0.push(c);
+                }
+                Action::None
+            }
+            fn help(&self) -> Help {
+                Help::new("typing", &[])
+            }
+            fn takes_text(&self) -> bool {
+                true
+            }
+        }
+        let mut s = Typing(String::new());
+        let mut c = Chord::Idle;
+        let mut open = false;
+        let k = |ch| KeyEvent::new(KeyCode::Char(ch), KeyModifiers::NONE);
+        assert_eq!(handle_key(&mut s, &mut c, &mut open, k('?')), Action::None);
+        assert_eq!(s.0, "?");
+        assert!(!open);
     }
 
     #[test]

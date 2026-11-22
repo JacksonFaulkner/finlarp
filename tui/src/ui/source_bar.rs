@@ -1,11 +1,10 @@
 // The "where did this number come from" UI.
 //
-// SourceBar: one or two lines under the detail pane showing the selected
-//   value's Source: document label + URL, or formula + input count.
+// SourceBar: the line under the detail pane showing the selected value's
+//   Source: document label + URL, or formula + input count. No key hints;
+//   the keys are in the `?` menu (`source_action` binds them, help::SOURCE_KEYS lists them).
 // SourceInspector: popup (key `i`) for a derived value: the formula and a
 //   selectable list of its inputs (recursively), each openable.
-// Standard keys every screen binds to the selected Source (see
-//   `source_action`): ↵ browser, v doc, y copy URL, i inspect.
 
 use ratatui::Frame;
 use ratatui::buffer::Buffer;
@@ -24,47 +23,16 @@ use crate::ui::theme::Theme;
 
 /// Render `src` into `area` (see `SourceBar`).
 pub fn render_source_bar(frame: &mut Frame, area: Rect, src: Option<&Source>, theme: &Theme) {
-    frame.render_widget(
-        SourceBar {
-            src,
-            theme,
-            hints: None,
-        },
-        area,
-    );
+    frame.render_widget(SourceBar { src, theme }, area);
 }
 
-/// Same, with the screen's own key hints instead of the standard source keys
-/// (for screens where ↵ does something else, e.g. search opens the chunk).
-pub fn render_source_bar_with(
-    frame: &mut Frame,
-    area: Rect,
-    src: Option<&Source>,
-    hints: &[(&str, &str)],
-    theme: &Theme,
-) {
-    frame.render_widget(
-        SourceBar {
-            src,
-            theme,
-            hints: Some(hints),
-        },
-        area,
-    );
-}
-
-/// One or two lines describing a Source:
+/// One line describing a Source:
 ///
 ///   ◆ 10-Q filed 2026-08-28 · Revenue · Q2 FY2027   sec.gov/…/mrvl-20260801.htm
-///   ↵ browser  v doc  y copy                       (second line if there's room)
-///
 ///   ƒ 2,739.3 / 2,006.1 − 1 · 2 inputs · YoY growth
-///   ↵ …  i inputs
 pub struct SourceBar<'a> {
     pub src: Option<&'a Source>,
     pub theme: &'a Theme,
-    /// Overrides the standard hints derived from `src`.
-    pub hints: Option<&'a [(&'a str, &'a str)]>,
 }
 
 impl Widget for SourceBar<'_> {
@@ -89,31 +57,7 @@ impl Widget for &SourceBar<'_> {
             return;
         };
         let w = area.width as usize;
-        let hints = match self.hints {
-            Some(keys) => key_spans(keys, th),
-            None => hint_spans(src, th),
-        };
-        let hints_w: usize = hints.iter().map(|s| s.width()).sum();
-        let two_lines = area.height >= 2;
-        // one-line mode: keep hints right-aligned only if they leave room for the label
-        let reserve = if !two_lines && hints_w + 20 <= w {
-            hints_w + 2
-        } else {
-            0
-        };
-        let desc = describe(src, w.saturating_sub(reserve), th);
-        desc.render(area, buf);
-        let hint_line = Line::from(hints);
-        if two_lines {
-            let r = Rect {
-                y: area.y + 1,
-                height: 1,
-                ..area
-            };
-            hint_line.render(r, buf);
-        } else if reserve > 0 {
-            hint_line.right_aligned().render(area, buf);
-        }
+        describe(src, w, th).render(area, buf);
     }
 }
 
@@ -183,34 +127,6 @@ fn fit_spans<'a>(spans: Vec<Span<'a>>, w: usize) -> Line<'a> {
         }
     }
     Line::from(out)
-}
-
-/// Key hints valid for `src` ("↵ browser" only if it has a URL, etc.).
-fn hint_spans<'a>(src: &Source, th: &Theme) -> Vec<Span<'a>> {
-    let mut keys: Vec<(&str, &str)> = Vec::new();
-    if src.url.is_some() {
-        keys.push(("↵", "browser"));
-        keys.push(("v", "doc"));
-    }
-    if src.url.is_some() || src.formula.is_some() {
-        keys.push(("y", "copy"));
-    }
-    if !src.inputs.is_empty() || src.is_derived() {
-        keys.push(("i", "inputs"));
-    }
-    key_spans(&keys, th)
-}
-
-fn key_spans<'a>(keys: &[(&str, &str)], th: &Theme) -> Vec<Span<'a>> {
-    let mut spans = Vec::new();
-    for (i, (k, d)) in keys.iter().enumerate() {
-        if i > 0 {
-            spans.push(Span::raw("  "));
-        }
-        spans.push(Span::styled(k.to_string(), th.accent()));
-        spans.push(Span::styled(format!(" {d}"), th.dim()));
-    }
-    spans
 }
 
 /// Maps the standard source keys to an Action for `src`. Returns None if
@@ -388,8 +304,7 @@ impl StatefulWidget for InspectorView<'_> {
         let block = Block::bordered()
             .border_style(th.accent())
             .style(th.base())
-            .title_top(Line::styled(title, th.accent()))
-            .title_bottom(Line::from(footer_hints(!st.stack.is_empty(), th)).right_aligned());
+            .title_top(Line::styled(title, th.accent()));
         let inner = block.inner(r);
         block.render(r, buf);
 
@@ -443,20 +358,6 @@ fn input_item<'a>(s: &Source, w: usize, th: &Theme) -> ListItem<'a> {
         th.dim(),
     );
     ListItem::new(Text::from(vec![first, second]))
-}
-
-fn footer_hints<'a>(nested: bool, th: &Theme) -> Vec<Span<'a>> {
-    let mut keys = vec![("↵", "open/drill"), ("v", "doc"), ("y", "copy")];
-    if nested {
-        keys.push(("⌫", "up"));
-    }
-    keys.push(("esc", "close"));
-    let mut spans = vec![Span::raw(" ")];
-    for (k, d) in keys {
-        spans.push(Span::styled(k.to_string(), th.accent()));
-        spans.push(Span::styled(format!(" {d} "), th.dim()));
-    }
-    spans
 }
 
 #[cfg(test)]
@@ -515,7 +416,7 @@ mod tests {
             out.contains("◆ 10-Q filed 2026-08-28 · sec.gov/…/mrvl-20260801.htm"),
             "{out}"
         );
-        assert!(out.contains("↵ browser  v doc  y copy"), "{out}");
+        assert!(!out.contains("browser"), "no key hints on the bar: {out}");
     }
 
     #[test]

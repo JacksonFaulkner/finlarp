@@ -16,6 +16,7 @@ use ratatui::style::Color;
 use ratatui::text::Line;
 
 use super::*;
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 const C4_PITCH_MM: f64 = 0.15;
@@ -127,17 +128,26 @@ impl SubstrateLab {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("h/l", "reticles"),
+    key("+/=/k", "more layers"),
+    key("-/j", "fewer layers"),
+    key("g", "core material"),
+    key("p", "next preset"),
+    key("r", "reset"),
+];
+
 impl Lab for SubstrateLab {
+    fn keys(&self) -> &'static [Key] {
+        KEYS
+    }
+
     fn menu(&self) -> &'static str {
         "substrate sandbox: size, layers, warpage, glass core"
     }
 
     fn name(&self) -> &'static str {
         "substrate sandbox"
-    }
-
-    fn hint(&self) -> &'static str {
-        "\u{2190}/\u{2192} interposer size  +/- layers  g organic/glass core  p preset  r reset"
     }
 
     fn head(&self) -> (String, &'static str) {

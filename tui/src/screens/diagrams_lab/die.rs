@@ -15,6 +15,7 @@ use ratatui::style::Color;
 use ratatui::text::Line;
 
 use super::*;
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 /// HBM3E-class stack: ~1 TB/s and 24 GB (B200: 8 stacks, ~8 TB/s, 192 GB).
@@ -236,17 +237,27 @@ impl DieLab {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("h/l H/L", "die area (H/L in bigger steps)"),
+    key("c", "chiplets"),
+    key("+/=/k", "more HBM stacks"),
+    key("-/j", "fewer HBM stacks"),
+    key("d", "defect density"),
+    key("p", "next preset"),
+    key("r", "reset"),
+];
+
 impl Lab for DieLab {
+    fn keys(&self) -> &'static [Key] {
+        KEYS
+    }
+
     fn menu(&self) -> &'static str {
         "die-size sandbox: reticle, yield, chiplets, HBM"
     }
 
     fn name(&self) -> &'static str {
         "die-size sandbox"
-    }
-
-    fn hint(&self) -> &'static str {
-        "\u{2190}/\u{2192} die size  c split  +/- HBM  d defects  p preset  r reset"
     }
 
     fn head(&self) -> (String, &'static str) {

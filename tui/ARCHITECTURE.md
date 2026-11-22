@@ -60,7 +60,9 @@ Source ──► Block ──► Section ──► screen
 - **`ui::layout`**: `render_frame` draws the standard frame with merged
   borders and returns inner areas; `panes` splits without borders.
 - **`ui::charts`**: `GroupedBars`, `SparkBars`, `LineChart` (Widgets + `fn`s).
-- **`ui::help`**: one `const KEYS: &[Key]` feeds the footer and `?` overlay.
+- **`ui::help`**: the `?` menu. A screen's `Screen::help()` returns its title and
+  `key(…)` rows; `?` opens them over the screen (plus the global chords). Screens
+  draw no key hints on the screen itself.
 - **`ui::theme`**: the only source of colours, as semantic styles.
 - **`ui::text`**: width-aware truncate / wrap / fit, `short_url`, `fmt_num`.
 
@@ -72,6 +74,9 @@ pub trait Screen {
     fn on_key(&mut self, key: KeyEvent) -> Action;
     fn tick(&mut self) -> Action { Action::None }        // debounce / async polling
     fn set_flash(&mut self, _msg: String) {}             // "copied", "opened in browser"
+    fn flash_text(&self) -> Option<&str> { None }        // drawn top right, see set_flash
+    fn help(&self) -> Help;                              // the ? menu: title + key rows (required)
+    fn takes_text(&self) -> bool { false }               // typing now: ? and space go to the screen
     fn needs_redraw(&self) -> bool { true }              // idle-poll redraw?
 }
 ```
@@ -95,6 +100,7 @@ hook restores the terminal). Each iteration:
 | `TmuxWindow { name, cmd }` | runs `cmd` in a new tmux window named `name`, in fl's working directory; the screen stays open |
 | `Route(Screen \| Picker)` | the screen exits with a handoff; `main` opens the requested screen |
 | `Route(Claude { text })` | the Claude popup opens (below); the screen stays open |
+| `Help` | the `?` menu opens over the screen; the next key closes it and is not passed on |
 
 ## Screen routing
 
@@ -125,7 +131,8 @@ otherwise the screen shows "claude: Claude popup needs fl run inside tmux".
    `pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<impl Screen>`.
    A missing cache becomes an in-screen message, never a panic.
 2. Compose `layout::render_frame`, `SectionList`, `BlockView`,
-   `render_source_bar`, `SourceInspector` and `help`; one `const KEYS`;
+   `render_source_bar` and `SourceInspector`; one `const KEYS` of `key(…)` rows,
+   returned from `help()` (a screen that cannot list its keys does not compile);
    `source_action` as the fallthrough for ↵ / v / y.
 3. Register in `screens/mod.rs`, and add the name to `SCREENS` and the
    `match` in `main.rs`. Add TestBackend tests.
@@ -140,6 +147,11 @@ otherwise the screen shows "claude: Claude popup needs fl run inside tmux".
 
 ## Testing
 
+- **Key coverage** (`ui::help::coverage`, runs under `cargo test`): every
+  `KeyCode::Char` a screen handles must appear in a `key(…)` row of that screen
+  (or in the shared rows, or `?`). Every chord in `app.rs` must be in
+  `GLOBAL_KEYS`. Adding a key without its row fails the test, with the file and key
+  named. Lab sandboxes declare their own rows (`Lab::keys`).
 - **Render tests** draw into a `TestBackend` buffer and assert on its text.
   Screens load JSON fixtures (`src/screens/fixtures/*.json`,
   `search/fixture.json`) via `include_str!`; chart builds synthetic history.

@@ -16,7 +16,7 @@
 //   candles      OHLC candlestick chart with price axis + volume strip
 //   charts       grouped bars, sparklines with gaps, line chart helpers
 //   hcandles     horizontal candles (one row per bar) for the intraday tape
-//   help         `?` keymap overlay + footer key hints
+//   help         the `?` key menu: each screen's keys (no key hints on screen)
 //   anim         procedural animation scenes: Canvas, motion/Particles, Scene + Player
 //   text_cursor  nvim-style cursor + v/V visual mode over rendered rows (yank via <space>y)
 //   text         width-aware truncate / wrap, URL shortening, number formatting
@@ -45,7 +45,7 @@ pub mod spacing;
 pub mod spin;
 pub mod tape;
 pub mod text;
-pub mod tmux_pane;
 pub mod text_cursor;
 pub mod theme;
 pub mod throbber;
+pub mod tmux_pane;

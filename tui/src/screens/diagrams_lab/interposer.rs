@@ -14,6 +14,7 @@ use ratatui::style::Color;
 use ratatui::text::Line;
 
 use super::*;
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 const S_MAX: f64 = 3.3;
@@ -130,17 +131,27 @@ impl InterposerLab {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("h/l", "total area"),
+    key("c", "chiplets"),
+    key("+/=/k", "more HBM stacks"),
+    key("-/j", "fewer HBM stacks"),
+    key("t", "interposer size (S or L)"),
+    key("p", "next preset"),
+    key("r", "reset"),
+];
+
 impl Lab for InterposerLab {
+    fn keys(&self) -> &'static [Key] {
+        KEYS
+    }
+
     fn menu(&self) -> &'static str {
         "interposer sandbox: size in reticles, CoWoS-S vs -L"
     }
 
     fn name(&self) -> &'static str {
         "interposer sandbox"
-    }
-
-    fn hint(&self) -> &'static str {
-        "\u{2190}/\u{2192} logic silicon  c dies  +/- HBM  t CoWoS-S/-L  p preset  r reset"
     }
 
     fn head(&self) -> (String, &'static str) {

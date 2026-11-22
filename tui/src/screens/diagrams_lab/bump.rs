@@ -15,6 +15,7 @@ use ratatui::style::Color;
 use ratatui::text::Line;
 
 use super::*;
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 const PITCHES: [f64; 20] = [
@@ -158,17 +159,28 @@ fn amps(a: f64) -> String {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("h/l", "bump pitch"),
+    key("s", "bonding method"),
+    key("+/=/k", "more current"),
+    key("-/j", "less current"),
+    key("[/]", "share of joints given to power"),
+    key("u", "underfill on or off"),
+    key("p", "next preset"),
+    key("r", "reset"),
+];
+
 impl Lab for BumpLab {
+    fn keys(&self) -> &'static [Key] {
+        KEYS
+    }
+
     fn menu(&self) -> &'static str {
         "bump-pitch sandbox: C4, microbump, hybrid bond"
     }
 
     fn name(&self) -> &'static str {
         "bump-pitch sandbox"
-    }
-
-    fn hint(&self) -> &'static str {
-        "\u{2190}/\u{2192} pitch  s solder/hybrid  +/- amps  [/] power share  u underfill  p preset"
     }
 
     fn head(&self) -> (String, &'static str) {

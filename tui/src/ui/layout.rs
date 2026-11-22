@@ -23,9 +23,9 @@ use crate::ui::theme::Theme;
 ///     tabs (optional one-row SectionTabs strip)
 ///   ┌ nav ─────┬ detail ────────────────────┐
 ///   │ nav      │ detail                     │
-///   ├──────────┴────────────────────────────┤
-///   │ source bar                            │
-///   └ footer (key hints) ───────────────────┘
+///   └──────────┴────────────────────────────┘
+///
+/// No footer: key help lives in the `?` menu (ui::help), not on the screen.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct Panes {
     pub header: Rect,
@@ -34,7 +34,6 @@ pub struct Panes {
     pub nav: Rect,
     pub detail: Rect,
     pub source: Rect,
-    pub footer: Rect,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -44,7 +43,6 @@ pub struct PaneOpts {
     /// Height of the source bar; 0 = none.
     pub source_height: u16,
     pub header_height: u16,
-    pub footer_height: u16,
     /// Rows for a tab strip under the header; 0 = none.
     pub tabs_height: u16,
 }
@@ -53,9 +51,8 @@ impl Default for PaneOpts {
     fn default() -> Self {
         Self {
             nav_width: 24,
-            source_height: 3,
+            source_height: 2,
             header_height: 1,
-            footer_height: 1,
             tabs_height: 0,
         }
     }
@@ -84,12 +81,11 @@ pub struct FrameTitles<'a> {
 /// Split `area` into `Panes` (outer rects, no borders drawn).
 /// Heights/widths are clamped by the layout solver, so tiny areas are safe.
 pub fn panes(area: Rect, opts: PaneOpts) -> Panes {
-    let [header, tabs, body, source, footer] = area.layout(&Layout::vertical([
+    let [header, tabs, body, source] = area.layout(&Layout::vertical([
         Constraint::Length(opts.header_height),
         Constraint::Length(opts.tabs_height),
         Constraint::Fill(1),
         Constraint::Length(opts.source_height),
-        Constraint::Length(opts.footer_height),
     ]));
     let (nav, detail) = split_nav(body, opts.nav_width, 0);
     Panes {
@@ -98,7 +94,6 @@ pub fn panes(area: Rect, opts: PaneOpts) -> Panes {
         nav,
         detail,
         source,
-        footer,
     }
 }
 
@@ -115,12 +110,11 @@ fn split_nav(body: Rect, nav_width: u16, overlap: i16) -> (Rect, Rect) {
 
 /// Draws the standard bordered frame and returns the inner content areas.
 ///
-/// `header` and `footer` are unbordered lines above / below the box (the
-/// screen draws the ticker line and `help::render_footer` there). nav,
-/// detail and source are bordered blocks that share their border lines.
+/// `header` is an unbordered line above the box. nav, detail and source are
+/// bordered blocks that share their border lines.
 /// `source_height` counts the source block's own rows including its bottom
-/// border (its top border is the detail pane's bottom), so the default of 3
-/// gives two content lines.
+/// border (its top border is the detail pane's bottom), so the default of 2
+/// gives one content line.
 pub fn render_frame<'a>(
     frame: &mut Frame,
     area: Rect,
@@ -128,11 +122,10 @@ pub fn render_frame<'a>(
     titles: &FrameTitles<'a>,
     theme: &Theme,
 ) -> Panes {
-    let [header, tabs, body, footer] = area.layout(&Layout::vertical([
+    let [header, tabs, body] = area.layout(&Layout::vertical([
         Constraint::Length(opts.header_height),
         Constraint::Length(opts.tabs_height),
         Constraint::Fill(1),
-        Constraint::Length(opts.footer_height),
     ]));
     // the source block's top border overlaps the main blocks' bottom border
     let (main, source) = if opts.source_height > 0 {
@@ -160,7 +153,6 @@ pub fn render_frame<'a>(
     let mut out = Panes {
         header,
         tabs,
-        footer,
         ..Panes::default()
     };
     if nav.width > 0 {
@@ -254,8 +246,8 @@ mod tests {
         assert_eq!(p.nav.width, 0);
         assert_eq!(p.detail.width, 80);
         assert_eq!(p.header.height, 1);
-        assert_eq!(p.source.height, 3);
-        assert_eq!(p.detail.height, 20 - 1 - 3 - 1);
+        assert_eq!(p.source.height, 2);
+        assert_eq!(p.detail.height, 20 - 1 - 2);
     }
 
     #[test]
@@ -278,15 +270,14 @@ mod tests {
         assert!(row(1).starts_with("┌ nav ─"), "{}", row(1));
         assert_eq!(buf[(9, 1)].symbol(), "┬");
         // detail bottom == source top, with the nav junction as ┴
-        // footer 1, source block 3 rows + the shared line
-        let join = 12 - 1 - 4;
+        // source block: 3 rows (its top border is the join, one content row, its bottom border)
+        let join = 12 - 3;
         assert_eq!(buf[(0, join)].symbol(), "├");
         assert_eq!(buf[(9, join)].symbol(), "┴");
         assert_eq!(buf[(39, join)].symbol(), "┤");
         assert_eq!(p.nav, Rect::new(1, 2, 8, join - 2));
         assert_eq!(p.detail.x, 10);
-        assert_eq!(p.source.height, 2);
-        assert_eq!(p.footer.y, 11);
+        assert_eq!(p.source.height, 1);
     }
 
     #[test]
@@ -313,7 +304,7 @@ mod tests {
             },
         );
         assert_eq!(p.nav.width, 0);
-        assert_eq!(p.detail, Rect::new(1, 2, 28, 6));
+        assert_eq!(p.detail, Rect::new(1, 2, 28, 7));
     }
 
     #[test]

@@ -595,7 +595,7 @@ impl TextCursor {
         text
     }
 
-    /// Footer tag: "-- VISUAL --" etc., or a pending count/prefix.
+    /// Status tag: "-- VISUAL --" etc., or a pending count/prefix.
     pub fn status(&self) -> Option<String> {
         let mode = match self.mode {
             Mode::Normal => None,

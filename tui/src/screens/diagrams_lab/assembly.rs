@@ -16,6 +16,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::Paragraph;
 
 use super::*;
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 /// Arriving yield of a part: tested at speed and burned in (KGD), or only probed at wafer sort.
@@ -122,17 +123,27 @@ impl AssemblyLab {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("+/=", "more HBM stacks"),
+    key("-/j", "fewer HBM stacks"),
+    key("c", "dies per package"),
+    key("k", "known-good-die test on or off"),
+    key("b", "bond yield"),
+    key("h/l", "capacity"),
+    key("r", "reset"),
+];
+
 impl Lab for AssemblyLab {
+    fn keys(&self) -> &'static [Key] {
+        KEYS
+    }
+
     fn menu(&self) -> &'static str {
         "assembly sandbox: yield stackup, known-good dies, capacity"
     }
 
     fn name(&self) -> &'static str {
         "assembly sandbox"
-    }
-
-    fn hint(&self) -> &'static str {
-        "+/- HBM  c dies  k known-good test  b bond yield  \u{2190}/\u{2192} CoWoS capacity  r reset"
     }
 
     fn head(&self) -> (String, &'static str) {

@@ -29,14 +29,14 @@ pub trait Lab: Send {
     fn menu(&self) -> &'static str;
     /// The border title after the page name, e.g. "die-size sandbox".
     fn name(&self) -> &'static str;
-    /// The keys, for the bottom border.
-    fn hint(&self) -> &'static str;
     /// The headline (preset name or "your design") and the one-line goal beside it.
     fn head(&self) -> (String, &'static str);
     /// What the current setup runs into; true when it is a hard limit (drawn red).
     fn verdict(&self) -> (String, bool);
     /// Handles a key; false when it is not the sandbox's.
     fn key(&mut self, code: KeyCode) -> bool;
+    /// The keys it handles, for the `?` menu.
+    fn keys(&self) -> &'static [crate::ui::help::Key];
     /// The pictures and numbers under the verdict.
     fn body(&self, frame: &mut Frame, r: Rect, t: &Theme);
     /// One line for Claude's view of the screen.
@@ -66,7 +66,6 @@ pub fn has_lab(page: &str) -> bool {
 /// The whole sandbox in `r`: border, headline, verdict, then the lab's own body.
 pub fn draw(frame: &mut Frame, r: Rect, label: &str, lab: &dyn Lab, t: &Theme) {
     frame.render_widget(Clear, r);
-    let hint = format!(" {}  esc menu ", lab.hint());
     let block = Block::new()
         .borders(Borders::ALL)
         .border_style(t.accent())
@@ -74,7 +73,6 @@ pub fn draw(frame: &mut Frame, r: Rect, label: &str, lab: &dyn Lab, t: &Theme) {
             format!(" {label} \u{00B7} {} ", lab.name()),
             t.title(),
         ))
-        .title_bottom(Span::styled(hint, t.dim()))
         .padding(ratatui::widgets::Padding::new(2, 2, 1, 0));
     let inner = block.inner(r);
     frame.render_widget(block, r);

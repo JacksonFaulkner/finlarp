@@ -28,14 +28,11 @@ pub struct Entry {
 }
 
 pub fn destinations(symbol: &str, picker: &'static str) -> Vec<Entry> {
-    let mut screens: Vec<&str> = if symbol.is_empty() {
+    let screens: Vec<&str> = if symbol.is_empty() {
         vec!["chart", "search"]
     } else {
         vec!["chart", "canslim", "dossier", "search"]
     };
-    if symbol.eq_ignore_ascii_case("MRVL") {
-        screens.push("earnings");
-    }
     let mut entries: Vec<Entry> = screens
         .into_iter()
         .map(|screen| Entry::new(format!("Open {screen}"), symbol, Command::Screen(screen)))
@@ -59,11 +56,6 @@ pub fn destinations(symbol: &str, picker: &'static str) -> Vec<Entry> {
             "open symbol picker",
             Command::Picker("dossier"),
         ));
-        entries.push(Entry::new(
-            "Open Marvell earnings report POC",
-            "hard-coded structured report · MRVL",
-            Command::Screen("earnings"),
-        ));
     }
     entries
 }
@@ -75,30 +67,6 @@ impl Entry {
             detail: detail.into(),
             command,
         }
-    }
-}
-
-#[cfg(test)]
-mod earnings_poc_tests {
-    use super::*;
-
-    #[test]
-    fn report_menu_entry_is_available_only_for_its_hard_coded_ticker() {
-        assert!(
-            destinations("MRVL", "dossier")
-                .iter()
-                .any(|e| e.command == Command::Screen("earnings"))
-        );
-        assert!(
-            !destinations("NVDA", "dossier")
-                .iter()
-                .any(|e| e.command == Command::Screen("earnings"))
-        );
-        assert!(
-            destinations("", "dossier")
-                .iter()
-                .any(|e| e.label.contains("Marvell earnings report"))
-        );
     }
 }
 

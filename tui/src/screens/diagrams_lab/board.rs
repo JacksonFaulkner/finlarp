@@ -15,6 +15,7 @@ use ratatui::style::Color;
 use ratatui::text::Line;
 
 use super::*;
+use crate::ui::help::{Key, key};
 use crate::ui::theme::Theme;
 
 const WATTS: [f64; 12] = [
@@ -128,17 +129,26 @@ fn heat(tj: f64) -> Color {
     )
 }
 
+const KEYS: &[Key] = &[
+    key("h/l", "watts"),
+    key("[/]", "volts"),
+    key("v", "vertical or flat board"),
+    key("c", "cooling: air or cold plate"),
+    key("g", "GPUs per rack"),
+    key("r", "reset"),
+];
+
 impl Lab for BoardLab {
+    fn keys(&self) -> &'static [Key] {
+        KEYS
+    }
+
     fn menu(&self) -> &'static str {
         "power & cooling sandbox: amps, voltage drop, heat, racks"
     }
 
     fn name(&self) -> &'static str {
         "power & cooling sandbox"
-    }
-
-    fn hint(&self) -> &'static str {
-        "\u{2190}/\u{2192} watts  [/] volts  v VRM beside/under  c cooling  g GPUs/rack  r reset"
     }
 
     fn head(&self) -> (String, &'static str) {
