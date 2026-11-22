@@ -299,12 +299,14 @@ fn resync_key_sends_a_command() {
 }
 
 #[test]
-fn help_overlay_opens_and_any_key_closes_it() {
-    let (mut s, _tx) = loaded();
-    press(&mut s, KeyCode::Char('?'));
-    assert!(render(&mut s, 100, 30).contains("full screen tile"));
-    press(&mut s, KeyCode::Char('x'));
-    assert!(!s.help);
+fn help_menu_lists_the_keys() {
+    let (s, _tx) = loaded();
+    assert!(
+        s.help()
+            .keys
+            .iter()
+            .any(|k| k.desc.contains("full screen tile"))
+    );
 }
 
 #[test]

@@ -25,14 +25,14 @@ use ratatui::widgets::{Block, Borders, Clear, Paragraph, Widget, Wrap};
 use super::diagrams_anim::{orbitable, scene_for, section_anim};
 use super::diagrams_art::{DIAGRAMS, Diagram};
 use super::diagrams_chat::{Chat, Quiz, Step};
-use super::diagrams_window::ClaudeWindow;
 use super::diagrams_desc::{cards, describe, page_key, visual};
 use super::diagrams_jar_3d::bell_jar_anim;
 use super::diagrams_mol::{Mol, mol_for};
 use super::diagrams_vis::{Placed, step as vis_step, visual_for};
+use super::diagrams_window::ClaudeWindow;
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::ui::anim::Player;
-use crate::ui::help::{Key, key, render_footer, render_overlay};
+use crate::ui::help::{Help, Key, key, section};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 use image::{DynamicImage, RgbaImage};
@@ -51,21 +51,52 @@ const TOUR_MS: u128 = 2200;
 /// Redraw interval while a page animation plays (~12 fps).
 const FRAME: Duration = Duration::from_millis(80);
 
+/// The `?` menu of the diagrams screen, in groups: the page, the picture
+/// (3D overview, zoom, full screen), a card, the demo and Claude. A sandbox's
+/// own keys are added while it is open (`Lab::keys`).
 const KEYS: &[Key] = &[
+    section("page"),
     key("h/l", "previous / next node"),
     key("j/k", "node below / above (scrolls if none)"),
     key("tab/S-tab", "next / previous node"),
-    key("enter", "open selected node's page"),
-    key("H/L, [/]", "previous / next diagram"),
-    key("1-6", "jump to diagram"),
     key("g/G", "top / bottom"),
-    key("space aw", "ask claude (in a node)"),
-    key("C", "chat with claude about this node"),
-    key("f", "hide / show the beat notes (picture fills the screen)"),
-    key("X", "clear claude's notes"),
+    key("enter", "open the selected node's page"),
+    key("H/L, [/]", "previous / next diagram"),
+    key("1-6", "jump to a diagram"),
+    key("m", "section menu (list / preview)"),
+    key(
+        "x",
+        "sandbox: play with the numbers, where the page has one",
+    ),
+    key("f", "hide / show the beat notes"),
+    key("C", "chat with Claude about this node"),
+    key("/", "ask Claude in the chat box"),
+    key("i", "type in the Claude window"),
+    key("ctrl-/ ctrl-7", "leave the Claude window"),
+    key("X", "clear Claude's notes"),
     key("D", "demo: set questions, rate each"),
-    key("?", "this help"),
-    key("q", "back"),
+    key("q/esc", "back"),
+    section("picture"),
+    key("1-9, 0", "open a section (0 = the tenth)"),
+    key("H/J/K/L", "turn the 3D picture"),
+    key("+/=", "zoom in"),
+    key("-/_", "zoom out"),
+    key("0", "reset the camera"),
+    key("h/l", "step the beat (while playing)"),
+    key("p", "pause / resume the animation"),
+    key("F", "full screen (again to leave)"),
+    key("letters", "zoom into the labelled part"),
+    section("card"),
+    key("^d/^u", "scroll the card"),
+    key("d/u", "half page down / up"),
+    key("[/]", "previous / next pane"),
+    key("J/K", "scroll the pane"),
+    key("space", "page down"),
+    section("demo"),
+    key("0-9", "type a rating (1-100), then enter"),
+    key("s", "skip this question"),
+    key("r", "start the demo over"),
+    key("letter", "answer a question from Claude (its choices)"),
 ];
 
 /// Where the cursor is inside a detail card: atom grid, a pane's tab strip, or its text.
@@ -97,7 +128,6 @@ pub struct Diagrams {
     tab: usize,
     scroll: u16,
     body_h: u16,
-    help: bool,
     nodes: Vec<Vec<Node>>,
     sel: usize,
     popup: bool,
@@ -865,7 +895,6 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         tab,
         scroll: 0,
         body_h: 0,
-        help: false,
         nodes: DIAGRAMS.iter().map(|d| find_nodes(d.art)).collect(),
         sel: 0,
         popup: false,
@@ -1266,8 +1295,8 @@ impl Diagrams {
             PopupView::Overview | PopupView::Zoom | PopupView::Full
         );
         if in_scene && let Some(p) = self.scene_player_mut() {
-            let paused = p.is_paused();
             let shot = p.shot();
+            let paused = p.is_paused();
             s.push_str(&format!(
                 "beat: {} of {}{}: {}\n",
                 shot.beat + 1,
@@ -1594,7 +1623,6 @@ impl Diagrams {
             return;
         };
         let time = p.time_at(p.now_ms());
-        let paused = p.is_paused();
         let name = self.zoom_list().get(*i).map_or("", |(_, l)| *l);
         let block = Block::new()
             .borders(Borders::ALL)
@@ -1602,13 +1630,6 @@ impl Diagrams {
             .title(Span::styled(
                 format!(" {name} \u{00B7} full view "),
                 t.title(),
-            ))
-            .title_bottom(Span::styled(
-                format!(
-                    " hjkl orbit  +/- zoom  HJKL pan  0 reset  {}  esc back ",
-                    if paused { "p resume" } else { "p pause" }
-                ),
-                t.dim(),
             ));
         let inner = block.inner(r);
         frame.render_widget(Clear, r);
@@ -1817,15 +1838,6 @@ impl Diagrams {
         (super::diagrams_nodes::clips(page) && super::diagrams_h264::enabled()).then_some(*page)
     }
 
-    /// The number keys that open sections: 1-9, and 0 as a tenth when the page has one.
-    fn section_keys(&self) -> &'static str {
-        if self.section_build(9).is_some() {
-            "1-0"
-        } else {
-            "1-9"
-        }
-    }
-
     /// Menu index of the zoom bound to `key`.
     fn zoom_for_key(&self, key: char) -> Option<usize> {
         self.zoom_list().iter().position(|(k, _)| *k == key)
@@ -1850,58 +1862,23 @@ impl Diagrams {
             Some((i, _)) => zooms.get(*i).map_or("", |(_, l)| *l).to_string(),
             None => String::new(),
         };
-        let orbit_key = if zooming && self.can_orbit() {
-            "HJKL turn  F full view  "
-        } else if orbit3d {
-            "HJKL turn  0 reset "
-        } else {
-            ""
-        };
         frame.render_widget(Clear, r);
         let paused = self.scene_player().is_some_and(|p| p.is_paused());
-        let play = if paused {
-            "p resume  h/l beat  C chat  space aw ask"
+        let title = if zooming {
+            format!(" {label} \u{00B7} {zoom_name} ")
         } else {
-            "p pause  h/l beat  C chat  space aw ask"
-        };
-        let letters = match (zooms.first(), zooms.last()) {
-            (Some((a, _)), Some((b, _))) if a != b => format!("{a}-{b} zoom"),
-            (Some((a, _)), _) => format!("{a} zoom"),
-            _ => String::new(),
-        };
-        let digits = self.section_keys();
-        let switch = if self.section_build(0).is_some() {
-            format!("{letters}  {digits} section")
-        } else {
-            letters
-        };
-        let (title, hint) = if zooming {
-            (
-                format!(" {label} \u{00B7} {zoom_name} "),
-                format!(" {orbit_key}esc menu  {switch}  {play} "),
-            )
-        } else {
-            let keys = match (zooms.first(), zooms.last()) {
-                (Some((a, _)), Some((b, _))) if a != b => format!(" {a}-{b} zoom in "),
-                (Some((a, _)), _) => format!(" {a} zoom in "),
-                _ => String::new(),
-            };
-            (
-                format!(" {label} "),
-                format!("{keys} {orbit_key} esc menu  {digits} sections  {play} "),
-            )
+            format!(" {label} ")
         };
         // the page's clips are being (re)rendered in the background: frames until they land
-        let hint = if self.h264.rendering() && self.clip_page().is_some() {
-            format!("{hint}\u{00B7} rendering clips ")
+        let title = if self.h264.rendering() && self.clip_page().is_some() {
+            format!("{title}\u{00B7} rendering clips ")
         } else {
-            hint
+            title
         };
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(t.accent())
             .title(Span::styled(title, t.title()))
-            .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::horizontal(1));
         let inner = block.inner(r);
         frame.render_widget(block, r);
@@ -2082,25 +2059,12 @@ impl Diagrams {
     /// item on the right.
     fn draw_menu(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
         frame.render_widget(Clear, r);
-        let lab_hint = if self.has_lab() { "x sandbox  " } else { "" };
         // the zoom keys run from the first zoom-in's key to the last (a-d, a-e, a-f, ...)
         let zooms = self.zoom_list();
-        let zoom_hint = match (zooms.first(), zooms.last()) {
-            (Some((first, _)), Some((last, _))) => format!("{first}-{last} zoom  "),
-            _ => String::new(),
-        };
-        let hint = if self.browse {
-            format!(" j/k move  enter open  {zoom_hint}{lab_hint}1-9 sections  m list  esc close ")
-        } else {
-            format!(
-                " j/k move  enter open  {zoom_hint}{lab_hint}1-9 sections  m preview  esc close "
-            )
-        };
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(t.accent())
             .title(Span::styled(format!(" {label} \u{00B7} menu "), t.title()))
-            .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::new(2, 2, 1, 0));
         let inner = block.inner(r);
         frame.render_widget(block, r);
@@ -2342,16 +2306,10 @@ impl Diagrams {
         }
         self.popup_scroll = self.popup_scroll.min(total.saturating_sub(pane_h));
         frame.render_widget(Clear, r);
-        let hint = if self.hots.is_empty() {
-            " [/] pane  j/k scroll  g/G top/bottom  q close "
-        } else {
-            " [/] pane  h/l/tab spot  j/k spot above/below  enter details  ctrl-d/u scroll  q close "
-        };
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(t.accent())
             .title(Span::styled(format!(" {} ", n.label), t.title()))
-            .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::horizontal(1));
         let inner = block.inner(r);
         frame.render_widget(block, r);
@@ -2425,13 +2383,10 @@ impl Diagrams {
             return;
         };
         let r = area;
-        let hint =
-            " hjkl move (l into the visual)  J/K scroll visual  H/L section  space page  q back ";
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(t.accent())
             .title(Span::styled(format!(" {} ", h.label), t.title()))
-            .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::horizontal(1));
         let inner = block.inner(r);
         frame.render_widget(Clear, r);
@@ -2723,7 +2678,7 @@ impl Diagrams {
     }
 
     fn max_scroll(&self) -> u16 {
-        // title + blank + footer rows are outside the body
+        // title + blank rows are outside the body
         art_size(&DIAGRAMS[self.tab]).1.saturating_sub(self.body_h)
     }
 }
@@ -2734,11 +2689,10 @@ impl Screen for Diagrams {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [tabs, title, body, tickers, foot] = Layout::vertical([
+        let [tabs, title, body, tickers] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(2),
             Constraint::Min(1),
-            Constraint::Length(1),
             Constraint::Length(1),
         ])
         .areas(area);
@@ -2766,7 +2720,6 @@ impl Screen for Diagrams {
             ])),
             tickers,
         );
-        render_footer(frame, foot, KEYS, None, &t);
         // the Claude window goes over the description column on the right of the picture
         // (the Claude window takes the right half of the screen), and nothing else
         if self.popup {
@@ -2774,20 +2727,24 @@ impl Screen for Diagrams {
         }
         if self.popup && self.win.open {
             let label = self.cur_label().unwrap_or_default();
-            let w = ((u32::from(area.width) * 50 / 100) as u16).clamp(40.min(area.width), area.width);
+            let w =
+                ((u32::from(area.width) * 50 / 100) as u16).clamp(40.min(area.width), area.width);
             let r = Rect::new(area.right() - w, area.y, w, area.height);
-            self.win.draw(frame, r, &label, &t);
-        }
-        if self.help {
-            render_overlay(frame, area, "diagrams", KEYS, &t);
+            self.win
+                .draw(frame, r, &label, &t, Borders::TOP | Borders::RIGHT | Borders::BOTTOM);
         }
     }
 
-    fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.help {
-            self.help = false;
-            return Action::None;
+    fn help(&self) -> Help {
+        let mut keys = KEYS.to_vec();
+        if let Some(lab) = self.player.as_ref().and_then(|p| self.labs.get(p.0)) {
+            keys.push(section("sandbox"));
+            keys.extend_from_slice(lab.keys());
         }
+        Help::new("diagrams", &keys)
+    }
+
+    fn on_key(&mut self, key: KeyEvent) -> Action {
         if self.popup && self.chat.focus {
             if let Some(q) = self.chat.key(key) {
                 self.ask(&q);
@@ -3067,7 +3024,6 @@ impl Screen for Diagrams {
         }
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Char('D') => self.start_demo(1),
             KeyCode::Char('L') | KeyCode::Char(']') => self.goto(self.tab + 1),
             KeyCode::Char('H') | KeyCode::Char('[') => self.goto(self.tab + DIAGRAMS.len() - 1),
@@ -3134,6 +3090,11 @@ impl Screen for Diagrams {
             || (self.popup && self.chat.wants_redraw())
             || (self.popup && self.win.open)
             || self.redraw
+    }
+
+    fn takes_text(&self) -> bool {
+        // space and ? are plain characters while a question is being typed
+        self.popup && (self.chat.focus || self.win.open)
     }
 
     fn leader_ok(&self) -> bool {
@@ -3483,10 +3444,7 @@ mod tests {
         assert_eq!(d.view, PopupView::Overview);
         let all = screen_text(&mut d, 170, 50);
         // the beat's notes are gone from the screen: Claude is asked for them
-        assert!(
-            all.contains("space aw ask") && !all.contains("WHAT'S HAPPENING"),
-            "{all}"
-        );
+        assert!(!all.contains("WHAT'S HAPPENING"), "{all}");
 
         // zoom in on the cavity, switch zoom, back to the menu on that row
         assert!(all.contains("zoom in") && all.contains("[a]"), "{all}");
@@ -3494,10 +3452,7 @@ mod tests {
         assert_eq!(d.view, PopupView::Zoom);
         assert!(d.animating() && d.needs_redraw());
         let all = screen_text(&mut d, 170, 50);
-        assert!(
-            all.contains("gas cavity") && all.contains("space aw ask"),
-            "{all}"
-        );
+        assert!(all.contains("gas cavity"), "{all}");
         press(&mut d, KeyCode::Char('c')); // switch straight to the tapping zoom
         assert_eq!(d.zoom.as_ref().map(|z| z.0), Some(2));
         assert!(screen_text(&mut d, 170, 50).contains("tap hole"));
@@ -3554,7 +3509,7 @@ mod tests {
         press(&mut d, KeyCode::Enter);
         press(&mut d, KeyCode::Enter); // menu -> overview
         assert!(d.animating() && d.needs_redraw());
-        assert!(screen_text(&mut d, 170, 50).contains("p pause"));
+        assert!(d.help().keys.iter().any(|k| k.keys == "p"));
 
         press(&mut d, KeyCode::Char('p'));
         assert!(
@@ -3562,7 +3517,7 @@ mod tests {
             "paused: no redraw ticks"
         );
         let a = screen_text(&mut d, 170, 50);
-        assert!(a.contains("PAUSED") && a.contains("p resume"), "{a}");
+        assert!(a.contains("PAUSED"), "{a}");
         std::thread::sleep(std::time::Duration::from_millis(120));
         // a paused picture is on screen already: a redraw sends no image data (the frame cache)
         let b = screen_text(&mut d, 170, 50);
@@ -3604,10 +3559,9 @@ mod tests {
         d
     }
 
-    /// ctrl-] from the Claude window: back to browse mode.
+    /// ctrl-/ from the Claude window: back to browse mode.
     fn browse(d: &mut Diagrams) {
-        use ratatui::crossterm::event::KeyModifiers;
-        d.on_key(KeyEvent::new(KeyCode::Char(']'), KeyModifiers::CONTROL));
+        d.on_key(KeyEvent::new(KeyCode::Char('7'), KeyModifiers::CONTROL));
     }
 
     #[test]
@@ -3616,7 +3570,10 @@ mod tests {
         press(&mut d, KeyCode::Enter);
         press(&mut d, KeyCode::Char('C'));
         let _ = screen_text(&mut d, 175, 48);
-        assert!(d.win.focus && d.animating(), "focus on Claude, picture still plays");
+        assert!(
+            d.win.focus && d.animating(),
+            "focus on Claude, picture still plays"
+        );
         assert!(d.scene_player().is_some_and(|p| !p.is_paused()));
     }
 
@@ -3626,7 +3583,10 @@ mod tests {
         press(&mut d, KeyCode::Char('m'));
         assert_eq!(d.view, PopupView::Menu);
         press(&mut d, KeyCode::Char('C'));
-        assert!(d.win.open && d.win.focus, "C opens the window ready to type");
+        assert!(
+            d.win.open && d.win.focus,
+            "C opens the window ready to type"
+        );
         // keys type into the question, not the menu
         for c in "why cq".chars() {
             press(&mut d, KeyCode::Char(c));
@@ -3663,7 +3623,7 @@ mod tests {
         assert_eq!(d.view, PopupView::Overview);
         assert!(d.popup);
         let all = screen_text(&mut d, 175, 48);
-        assert!(all.contains("a cq") && all.contains("enter ask"), "{all}");
+        assert!(all.contains("a cq"), "{all}");
         press(&mut d, KeyCode::Esc);
         assert!(!d.chat.focus && d.popup);
         assert!(!screen_text(&mut d, 175, 48).contains("enter ask"));
@@ -3704,14 +3664,10 @@ mod tests {
         assert!(d.ask_claude());
         for (w, h) in [(175, 48), (90, 40)] {
             let all = screen_text(&mut d, w, h);
-            assert!(
-                all.contains("enter ask") && all.contains("SECTIONS"),
-                "{w}x{h}: {all}"
-            );
+            assert!(all.contains("SECTIONS"), "{w}x{h}: {all}");
         }
         d.open_pane(0);
         assert_eq!(d.view, PopupView::Pane);
-        assert!(screen_text(&mut d, 175, 48).contains("enter ask"));
     }
 
     #[test]
@@ -4103,7 +4059,6 @@ mod tests {
             assert_eq!(d.view, PopupView::Zoom);
             let all = screen_text(&mut d, 175, 48);
             assert!(all.contains(want), "{key}: {all}");
-            assert!(all.contains("space aw ask"));
         }
     }
 
@@ -4263,7 +4218,10 @@ mod tests {
             assert!(d.zoom_section, "{key}");
             assert_eq!(d.open_key(), Some(key), "{key}");
             let all = screen_text(&mut d, 175, 48);
-            assert!(all.contains("1-0 section"), "{key}: {all}");
+            assert!(
+                d.help().keys.iter().any(|k| k.keys == "1-9, 0"),
+                "{key}: {all}"
+            );
             assert!(!d.can_orbit(), "{key}: section pictures do not orbit");
         }
         press(&mut d, KeyCode::Char('0'));
@@ -4345,7 +4303,10 @@ mod tests {
 
     #[test]
     fn rd_tab_holds_hbf_and_3d_dram_nodes() {
-        let rd = DIAGRAMS.iter().position(|d| d.tab == "R&D").expect("R&D tab");
+        let rd = DIAGRAMS
+            .iter()
+            .position(|d| d.tab == "R&D")
+            .expect("R&D tab");
         assert_eq!(rd, 8, "R&D follows MATH");
         let nodes = find_nodes(DIAGRAMS[rd].art);
         let labels: Vec<_> = nodes.iter().map(|n| n.label.as_str()).collect();

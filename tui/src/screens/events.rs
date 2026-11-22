@@ -36,23 +36,9 @@ use super::catalyst_page::{self, Outcome, Page};
 use crate::app::{Action, Ctx, Screen};
 use crate::pyrun;
 use crate::ui::calendar::{self, Calendar, Event, Tone, View};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
-
-const FOOTER: &[Key] = &[
-    key("?", "help"),
-    key("m/w/d", "view"),
-    key("W", "weekends"),
-    key("h/l", "day"),
-    key("j/k", "week"),
-    key("[ ]", "period"),
-    key("t", "today"),
-    key("T", "tweets"),
-    key("f", "ticker filter"),
-    key("enter", "day / open"),
-    key("q", "quit"),
-];
 
 /// Keys the events screen adds to the calendar's own (for the `?` overlay).
 const EXTRA_KEYS: &[Key] = &[
@@ -66,6 +52,8 @@ const EXTRA_KEYS: &[Key] = &[
         "enter",
         "month/week: day view; day view: open the catalyst page or the tweet",
     ),
+    key("f", "filter the calendar"),
+    key("q", "close"),
 ];
 
 #[derive(Deserialize)]
@@ -297,7 +285,6 @@ fn tweet_events(tweets: &[Tweet], filter: &[String], per_tweet: bool) -> Vec<Eve
 pub struct Events {
     cal: Calendar,
     theme: Theme,
-    help: bool,
     pages: Vec<Page>,
     /// The open catalyst page, if any.
     page: Option<catalyst_page::View>,
@@ -364,7 +351,6 @@ fn open_with(
         built: (cal.view(), false, Vec::new()),
         cal,
         theme: ctx.theme,
-        help: false,
         pages: catalyst_page::load(),
         page: None,
         catalysts: events,
@@ -492,11 +478,20 @@ impl Screen for Events {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [body, foot] =
-            Layout::vertical([Constraint::Min(0), Constraint::Length(1)]).areas(area);
+        // The bottom row exists only while the ticker prompt is open.
+        let (body, foot) = match self.prompt {
+            Some(_) => {
+                let [b, f] =
+                    Layout::vertical([Constraint::Min(0), Constraint::Length(1)]).areas(area);
+                (b, f)
+            }
+            None => (
+                area,
+                ratatui::layout::Rect::new(area.x, area.bottom(), area.width, 0),
+            ),
+        };
         if let Some(page) = &mut self.page {
             page.draw(&self.pages, frame, body, &t);
-            help::render_footer(frame, foot, catalyst_page::KEYS, None, &t);
             return;
         }
         self.cal.draw(frame, body);
@@ -514,13 +509,18 @@ impl Screen for Events {
                 foot.x + (text::width(prefix) + input.visual_cursor()) as u16,
                 foot.y,
             ));
-        } else {
-            help::render_footer(frame, foot, FOOTER, self.flash.as_deref(), &t);
         }
-        if self.help {
-            let keys = [calendar::KEYS, EXTRA_KEYS].concat();
-            help::render_overlay(frame, area, "events keys", &keys, &t);
-        }
+    }
+
+    fn help(&self) -> Help {
+        Help::new(
+            "events",
+            &if self.page.is_some() {
+                catalyst_page::KEYS.to_vec()
+            } else {
+                [calendar::KEYS, EXTRA_KEYS].concat()
+            },
+        )
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -535,17 +535,9 @@ impl Screen for Events {
             }
             return Action::None;
         }
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         match key.code {
             KeyCode::Enter => self.enter(),
             KeyCode::Char('q') | KeyCode::Esc => Action::Quit,
-            KeyCode::Char('?') => {
-                self.help = true;
-                Action::None
-            }
             KeyCode::Char('T') => {
                 self.toggle_tweets();
                 Action::None
@@ -564,6 +556,14 @@ impl Screen for Events {
                 Action::None
             }
         }
+    }
+
+    fn takes_text(&self) -> bool {
+        self.prompt.is_some()
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {
@@ -669,10 +669,6 @@ mod tests {
         let mut s = open_with(&ctx(), None, today(), Vec::new()).unwrap();
         assert_eq!(press(&mut s, 'w'), Action::None);
         assert_eq!(s.cal.view(), View::Week);
-        press(&mut s, '?');
-        assert!(s.help);
-        press(&mut s, 'q'); // closes help, doesn't quit
-        assert!(!s.help);
         assert_eq!(press(&mut s, 'q'), Action::Quit);
     }
 
@@ -878,8 +874,8 @@ mod tests {
         assert!(screen.contains("tweets · all tickers"), "{screen}");
         assert!(screen.contains("@alice MU+1 NVDA"), "{screen}");
         assert!(
-            screen.contains("tweets"),
-            "footer lists the T key:\n{screen}"
+            s.help().keys.iter().any(|k| k.keys == "T"),
+            "the ? menu lists the T key"
         );
         press(&mut s, 'f');
         let screen = render(&mut s, 120, 24);

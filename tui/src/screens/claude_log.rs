@@ -22,6 +22,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Wrap};
 
 use crate::app::{Action, Ctx, Screen};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -243,7 +244,7 @@ impl ClaudeLog {
         }
     }
 
-    /// Sync and remember any error for the footer.
+    /// Sync and remember any error (shown as the flash).
     fn refresh(&mut self) {
         match self.sync() {
             Ok(_) => self.error = None,
@@ -260,18 +261,23 @@ impl ClaudeLog {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("j/k", "scroll"),
+    key("^d/^u", "page down / up"),
+    key("g", "top"),
+    key("G", "follow the newest line"),
+    key("esc", "back"),
+    key("q", "close"),
+];
+
 impl Screen for ClaudeLog {
     fn draw(&mut self, frame: &mut Frame) {
         self.dirty = false;
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, body, foot] = Layout::vertical([
-            Constraint::Length(1),
-            Constraint::Min(1),
-            Constraint::Length(1),
-        ])
-        .areas(area);
+        let [head, body] =
+            Layout::vertical([Constraint::Length(1), Constraint::Min(1)]).areas(area);
         self.page = body.height.max(1) as usize;
         let width = body.width as usize;
 
@@ -311,18 +317,14 @@ impl Screen for ClaudeLog {
                 .collect();
             frame.render_widget(Paragraph::new(rows), body);
         }
+    }
 
-        let mut foot_spans = vec![Span::styled(
-            format!(
-                "{} lines  ·  j/k scroll · ^d/^u page · g top · G follow · esc back",
-                self.total()
-            ),
-            t.dim(),
-        )];
-        if let Some(e) = &self.error {
-            foot_spans.insert(0, Span::styled(format!("read error: {e}  ·  "), t.accent()));
-        }
-        frame.render_widget(Paragraph::new(Line::from(foot_spans)), foot);
+    fn flash_text(&self) -> Option<&str> {
+        self.error.as_deref()
+    }
+
+    fn help(&self) -> Help {
+        Help::new("claude log", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -503,7 +505,8 @@ mod tests {
     fn draws_tail_when_following() {
         let path = temp_file("draw", b"alpha\nbeta\ngamma\ndelta\n");
         let mut s = screen_for(&path);
-        let mut term = Terminal::new(TestBackend::new(40, 5)).unwrap();
+        // header + a 3-row body: the last three lines show, alpha scrolls off
+        let mut term = Terminal::new(TestBackend::new(40, 4)).unwrap();
         term.draw(|f| s.draw(f)).unwrap();
         let buf = format!("{:?}", term.backend().buffer());
         assert!(buf.contains("delta"));

@@ -24,7 +24,7 @@ use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::{Point, Source};
 use crate::ui::charts::LineChart;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::layout::{self, FrameTitles, PaneOpts};
 use crate::ui::source_bar::{self, SourceInspector};
 use crate::ui::theme::Theme;
@@ -38,7 +38,6 @@ const KEYS: &[Key] = &[
     key("y", "copy formula"),
     key("m", "marker braille/octant"),
     key("r", "reload from DuckDB"),
-    key("?", "help"),
     key("q", "close"),
 ];
 
@@ -214,7 +213,6 @@ pub struct ChartScreen {
     /// Index into the current window; None = follow the latest point.
     cursor: Option<usize>,
     marker: Marker,
-    help: bool,
     palette: Palette,
     inspector: SourceInspector,
     flash: Option<(String, Instant)>,
@@ -240,7 +238,6 @@ impl ChartScreen {
             range: Range::ThreeM,
             cursor: None,
             marker: Marker::Braille,
-            help: false,
             palette: Palette::default(),
             inspector: SourceInspector::default(),
             flash: None,
@@ -414,8 +411,6 @@ impl Screen for ChartScreen {
             &titles,
             &t,
         );
-        let flash = self.flash.as_ref().map(|(m, _)| m.as_str());
-        help::render_footer(frame, p.footer, KEYS, flash, &t);
 
         let Some(sel) = self.selected(points.len()) else {
             self.render_empty(frame, p.detail);
@@ -428,12 +423,13 @@ impl Screen for ChartScreen {
         if self.inspector.is_open() {
             self.inspector.render(frame, area, &t);
         }
-        if self.help {
-            help::render_overlay(frame, area, "portfolio history", KEYS, &t);
-        }
         if self.palette.open {
             self.palette.render(frame, area, &t);
         }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("chart", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -468,16 +464,11 @@ impl Screen for ChartScreen {
             self.palette.show(entries);
             return Action::None;
         }
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         if self.inspector.is_open() {
             return self.inspector.on_key(key);
         }
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Char(c @ '1'..='5') => {
                 self.range = Range::ALL[(c as u8 - b'1') as usize];
                 self.cursor = None;
@@ -514,6 +505,14 @@ impl Screen for ChartScreen {
             }
         }
         Action::None
+    }
+
+    fn takes_text(&self) -> bool {
+        self.palette.open
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_ref().map(|(m, _)| m.as_str())
     }
 
     fn set_flash(&mut self, msg: String) {

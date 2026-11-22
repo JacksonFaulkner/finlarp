@@ -33,7 +33,7 @@ use ratatui::widgets::{Block, Paragraph, Tabs};
 use crate::app::{Action, Ctx, Screen};
 use crate::screens::chart::ChartScreen;
 use crate::ui::calendar::{Calendar, Event, Tone};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::layout::{self, PaneOpts};
 use crate::ui::spin::{self, Spin};
 use crate::ui::theme::Theme;
@@ -41,7 +41,6 @@ use data::{Bench, Data, Range};
 
 const KEYS: &[Key] = &[
     key("1-7 H/L", "tab / previous, next tab"),
-    key("?", "help"),
     key("h/l", "cursor (overview, history) / holding (positions)"),
     key("home/end", "cursor to first / latest point"),
     key("j/k", "row (other tabs)"),
@@ -102,7 +101,6 @@ pub struct PortfolioScreen {
     cursor: Option<usize>,
     /// Row cursor for the table tabs.
     row: usize,
-    help: bool,
     flash: Option<(String, Instant)>,
     /// Positions pie rotation.
     spin: Spin,
@@ -173,7 +171,6 @@ impl PortfolioScreen {
             margin: activity::MARGIN_DEFAULT,
             cursor: None,
             row: 0,
-            help: false,
             flash: None,
             spin: Spin::default(),
             status_file: None,
@@ -351,9 +348,6 @@ impl Screen for PortfolioScreen {
             .padding(" ", " ");
         frame.render_widget(strip, p.tabs);
 
-        let flash = self.flash.as_ref().map(|(m, _)| m.as_str());
-        help::render_footer(frame, p.footer, KEYS, flash, &t);
-
         if let Some(e) = &self.load_err {
             let r = p.detail.centered_vertically(Constraint::Length(1));
             let msg = format!("could not read portfolio data: {e}");
@@ -411,16 +405,13 @@ impl Screen for PortfolioScreen {
                 _ => self.history.draw_body(frame, p.detail),
             }
         }
-        if self.help {
-            help::render_overlay(frame, area, "portfolio", KEYS, &t);
-        }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("portfolio", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         // The Signals tab is a calendar: it takes its own keys, except the ones that leave the screen or switch tabs.
         let tab_key = matches!(
             key.code,
@@ -450,7 +441,6 @@ impl Screen for PortfolioScreen {
         };
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Char(c @ '1'..='7') => switch(self, (c as u8 - b'1') as usize),
             KeyCode::Tab | KeyCode::Char('L') => switch(self, (self.tab + 1) % TABS.len()),
             KeyCode::BackTab | KeyCode::Char('H') => {
@@ -499,6 +489,10 @@ impl Screen for PortfolioScreen {
             _ => {}
         }
         Action::None
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_ref().map(|(m, _)| m.as_str())
     }
 
     fn set_flash(&mut self, msg: String) {
@@ -855,10 +849,7 @@ mod tests {
     #[test]
     fn quit_and_help() {
         let mut s = screen(sample());
-        s.on_key(k('?'));
-        assert!(s.help);
-        assert_eq!(s.on_key(k('q')), Action::None); // closes help first
-        assert!(!s.help);
+        assert!(!s.help().keys.is_empty());
         assert_eq!(s.on_key(k('q')), Action::Quit);
     }
 }

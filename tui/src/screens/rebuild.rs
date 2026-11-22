@@ -30,7 +30,7 @@ use ratatui::widgets::{Block, Gauge, Paragraph, Wrap};
 use throbber_widgets_tui::ThrobberState;
 
 use crate::app::{Action, Ctx, Route, Screen};
-use crate::ui::help::{Key, key, render_footer};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::theme::Theme;
 use crate::ui::throbber;
 
@@ -52,7 +52,11 @@ const LINGER: Duration = Duration::from_millis(700);
 /// Lines of cargo output kept for the log pane.
 const LOG_CAP: usize = 400;
 
-const KEYS: &[Key] = &[key("esc", "cancel / back"), key("j/k", "scroll log")];
+const KEYS: &[Key] = &[
+    key("esc", "cancel / back"),
+    key("j/k", "scroll log"),
+    key("q", "close"),
+];
 
 /// One parsed line from cargo, sent from the reader threads.
 #[derive(Debug, PartialEq)]
@@ -306,12 +310,11 @@ impl Screen for Rebuild {
             .style(t.base());
         let inner = block.inner(frame.area());
         frame.render_widget(block, frame.area());
-        let [status, bar, now, log, foot] = Layout::vertical([
+        let [status, bar, now, log] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Min(1),
-            Constraint::Length(1),
         ])
         .spacing(0)
         .areas(inner);
@@ -365,8 +368,10 @@ impl Screen for Rebuild {
             })
             .collect();
         frame.render_widget(Paragraph::new(lines).wrap(Wrap { trim: false }), log);
+    }
 
-        render_footer(frame, foot, KEYS, self.flash.as_deref(), &t);
+    fn help(&self) -> Help {
+        Help::new("rebuild", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -428,6 +433,10 @@ impl Screen for Rebuild {
 
     fn shows_tape(&self) -> bool {
         false
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {

@@ -36,7 +36,7 @@ use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::Source;
 use crate::screens::docview;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
-use crate::ui::help::{Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::theme::Theme;
 
 use client::{Client, Hit, Reply, Request};
@@ -63,13 +63,13 @@ pub const KEYS: &[Key] = &[
     key("tab", "focus input/facets/results/preview"),
     key("^j ^k", "next / prev result"),
     key("y", "copy source url"),
-    key("?", "help"),
     key("esc", "quit"),
     key("↑ ↓", "history (input) / move"),
     key("^a ^e ^w ^u", "line editing (input)"),
     key("space ↵", "toggle facet (facets)"),
     key("^d ^u g G", "scroll (preview)"),
     key("/ i", "back to input"),
+    key("^n", "next result (^j also)"),
 ];
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -139,7 +139,6 @@ pub struct Search {
     /// Jump the preview to the matched chunk once its context arrives.
     preview_jump: bool,
 
-    show_help: bool,
     flash: Option<(String, Instant)>,
     palette: Palette,
     last_width: u16,
@@ -182,7 +181,6 @@ impl Search {
             preview_len: 0,
             preview_height: 0,
             preview_jump: false,
-            show_help: false,
             flash: None,
             palette: Palette::default(),
             last_width: 120,
@@ -542,8 +540,20 @@ impl Screen for Search {
         Action::None
     }
 
+    fn takes_text(&self) -> bool {
+        self.palette.open || self.focus == Pane::Input
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_ref().map(|(m, _)| m.as_str())
+    }
+
     fn set_flash(&mut self, msg: String) {
         self.flash = Some((msg, Instant::now()));
+    }
+
+    fn help(&self) -> Help {
+        Help::new("search", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -567,10 +577,6 @@ impl Screen for Search {
                 }
                 _ => Action::None,
             };
-        }
-        if self.show_help {
-            self.show_help = false;
-            return Action::None;
         }
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
         let alt = key.modifiers.contains(KeyModifiers::ALT);
@@ -610,10 +616,6 @@ impl Screen for Search {
             }
             KeyCode::Char('v') if alt => return self.open_docview(),
             KeyCode::Char('o') if ctrl => return self.open_browser(),
-            KeyCode::Char('?') if !ctrl && !alt => {
-                self.show_help = true;
-                return Action::None;
-            }
             KeyCode::Enter if self.focus != Pane::Facets => return self.open_chunk(),
             _ => {}
         }

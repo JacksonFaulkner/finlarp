@@ -41,7 +41,7 @@ use crate::app::{Action, Ctx, Screen};
 use crate::model::Source;
 use crate::pyrun;
 use crate::ui::doc_blocks::{self, Block};
-use crate::ui::help::{self, Key, key, section};
+use crate::ui::help::{Help, Key, key, section};
 use crate::ui::text_cursor::{Outcome, TextCursor};
 use crate::ui::theme::Theme;
 
@@ -50,9 +50,6 @@ const DOCVIEW_PY: &str = "py/derive/docview.py";
 const SEARCH_PY: &str = "py/derive/search.py";
 /// Marks the hit inside a chunk's neighbourhood.
 const MATCH_MARK: &str = ">>> match";
-const HINT: &str = "? keys  hjkl wbe  v/V select  ␣y copy  n/N match  o browser  y url  q back";
-const BLOCK_HINT: &str =
-    "? keys  hjkl wbe  v/V select  ␣y copy  ]]/[[ item  ]h/[h heading  n/N match  q back";
 
 /// Docview's own keys; the `?` overlay shows these after the cursor's.
 const DOC_KEYS: &[Key] = &[
@@ -63,7 +60,6 @@ const DOC_KEYS: &[Key] = &[
     key("o", "open the source in the browser"),
     key("y", "copy the source URL (normal mode)"),
     key("spc t o", "lazygit in a new tmux window"),
-    key("?", "this help"),
     key("q esc", "back"),
 ];
 
@@ -127,7 +123,6 @@ pub struct Docview {
     /// First key of a `]]` / `[[` / `]h` / `[h` jump.
     bracket: Option<char>,
     /// `?` key overlay showing.
-    help: bool,
     /// Laid-out rows for `wrapped_at` columns: (logical line, styled line).
     rows: Vec<(usize, Line<'static>)>,
     /// First visual row of each logical line.
@@ -176,7 +171,6 @@ impl Docview {
             state,
             cur: TextCursor::skipping_blanks().centered(),
             bracket: None,
-            help: false,
             rows: Vec::new(),
             starts: Vec::new(),
             wrapped_at: 0,
@@ -290,7 +284,7 @@ impl Docview {
         Some(format!("{head}:\n```\n{text}\n```\n"))
     }
 
-    /// The Item and nearest heading above the cursor, for the footer.
+    /// The Item and nearest heading above the cursor, for the status line.
     fn section(&self) -> Option<String> {
         let State::Ready(doc) = &self.state else {
             return None;
@@ -626,16 +620,6 @@ fn gutter(line: &Line<'static>, style: Style) -> Line<'static> {
     Line::from(out)
 }
 
-fn doc_has_blocks(state: &State) -> bool {
-    matches!(
-        state,
-        State::Ready(Doc {
-            blocks: Some(_),
-            ..
-        })
-    )
-}
-
 impl Screen for Docview {
     fn draw(&mut self, frame: &mut Frame) {
         let [head, body, foot] = Layout::vertical([
@@ -727,40 +711,24 @@ impl Screen for Docview {
             }
         }
 
-        let footer = match &self.flash {
-            Some((msg, _)) => msg.clone(),
-            None if self.is_ready() => {
-                let total = self.rows.len().max(1);
-                let pos = format!("{}%", (self.cur.pos.row + 1) * 100 / total);
-                let lead = match self.cur.status() {
-                    Some(st) => st,
-                    None if doc_has_blocks(&self.state) => BLOCK_HINT.to_string(),
-                    None => HINT.to_string(),
-                };
-                match self.section() {
-                    Some(sec) => format!("{lead}  {pos}  § {sec}"),
-                    None => format!("{lead}  {pos}"),
-                }
-            }
-            None => HINT.to_string(),
-        };
-        frame.render_widget(Paragraph::new(Span::styled(footer, dim)), foot);
-        if self.help {
-            let keys: Vec<Key> = [crate::ui::text_cursor::KEYS, DOC_KEYS].concat();
-            help::render_overlay(frame, frame.area(), "reader keys", &keys, &self.theme);
+        let mut parts = Vec::new();
+        if self.is_ready() {
+            let total = self.rows.len().max(1);
+            parts.extend(self.cur.status());
+            parts.push(format!("{}%", (self.cur.pos.row + 1) * 100 / total));
+            parts.extend(self.section().map(|sec| format!("§ {sec}")));
         }
+        frame.render_widget(Paragraph::new(Span::styled(parts.join("  "), dim)), foot);
+    }
+
+    fn help(&self) -> Help {
+        Help::new(
+            "reader keys",
+            &[crate::ui::text_cursor::KEYS, DOC_KEYS].concat(),
+        )
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        // ? opens the key overlay; any key closes it
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
-        if key.code == KeyCode::Char('?') {
-            self.help = true;
-            return Action::None;
-        }
         if !self.is_ready() {
             return match key.code {
                 KeyCode::Esc | KeyCode::Char('q') => Action::Quit,
@@ -852,6 +820,10 @@ impl Screen for Docview {
 
     fn needs_redraw(&self) -> bool {
         self.rx.is_some() || self.flash.is_some()
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_ref().map(|(m, _)| m.as_str())
     }
 
     fn set_flash(&mut self, msg: String) {
@@ -1182,26 +1154,13 @@ mod tests {
     }
 
     #[test]
-    fn question_mark_shows_every_binding() {
-        let mut v = doc(vec!["a".into()], vec![], None);
-        press(&mut v, KeyCode::Char('?'));
-        let text = screen_text(&mut v, 120, 40);
-        for k in [
-            "reader keys",
-            "gh gl",
-            "ip ap",
-            "spc a c",
-            "]] [[",
-            "half page down",
-        ] {
-            assert!(text.contains(k), "{k} missing:\n{text}");
+    fn help_lists_every_binding() {
+        let v = doc(vec!["a".into()], vec![], None);
+        let help = v.help();
+        assert_eq!(help.title, "reader keys");
+        let keys: Vec<&str> = help.keys.iter().map(|k| k.keys).collect();
+        for k in ["]] [[", "gh gl", "ip ap", "n N", "spc t o"] {
+            assert!(keys.contains(&k), "{k} missing: {keys:?}");
         }
-        // any key closes it without acting
-        assert_eq!(press(&mut v, KeyCode::Char('q')), Action::None);
-        assert!(!v.help);
-        // short window: two columns, still everything
-        press(&mut v, KeyCode::Char('?'));
-        let text = screen_text(&mut v, 120, 24);
-        assert!(text.contains("move") && text.contains("document"), "{text}");
     }
 }

@@ -15,6 +15,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph, Wrap};
 
 use crate::app::{Action, Ctx, LEADER_CHORDS, Route, Screen};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -47,12 +48,6 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "universe",
         "browse the sectors and regions",
         'u',
-    ),
-    (
-        "Earnings report",
-        "earnings",
-        "latest earnings research report",
-        'e',
     ),
     (
         "Diagrams",
@@ -94,7 +89,6 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "type a note; answered in the background",
         'N',
     ),
-    ("Godel", "godel", "ranked commands for a question", 'r'),
     (
         "Menu",
         "menu",
@@ -112,12 +106,6 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "transactions",
         "E*TRADE transaction history",
         't',
-    ),
-    (
-        "Watchlists",
-        "watchlists",
-        "watchlist with daily change",
-        'w',
     ),
     (
         "Onboard",
@@ -155,7 +143,7 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         "Jane Street's card game: trade four suits against 3 bots",
         'F',
     ),
-    ("Keys", "keys", "command and key reference", '?'),
+    ("Keys", "keys", "command and key reference", '/'),
 ];
 
 /// The board, unshifted, row by row: number row, then the three letter rows.
@@ -420,6 +408,15 @@ impl Home {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("hjkl", "move the cursor"),
+    key("g/G", "first / last row"),
+    key("letter", "open the screen under that key on the board"),
+    key("↵", "open the highlighted key"),
+    key("^n/^p", "down / up"),
+    key("q/esc", "quit"),
+];
+
 impl Screen for Home {
     fn draw(&mut self, frame: &mut Frame) {
         let t = self.theme;
@@ -488,6 +485,10 @@ impl Screen for Home {
                 inner,
             );
         }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("home", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

@@ -5,12 +5,11 @@ use std::io;
 
 use ratatui::Frame;
 use ratatui::crossterm::event::{KeyCode, KeyEvent};
-use ratatui::layout::{Constraint, Layout};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
 use crate::app::{Action, Ctx, Screen};
-use crate::ui::help::{Key, key, render_footer};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -44,11 +43,6 @@ pub const GROUPS: &[Group] = &[
     Group {
         title: "Screens",
         rows: &[
-            Row {
-                what: "watchlist, full screen",
-                standalone: Yes,
-                cmd: "fl watchlists",
-            },
             Row {
                 what: "catalyst calendar",
                 standalone: Yes,
@@ -218,13 +212,15 @@ impl Screen for Keys {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [body, foot] =
-            Layout::vertical([Constraint::Min(1), Constraint::Length(1)]).areas(area);
+        let body = area;
         let lines = build(&t);
         self.max = (lines.len() as u16).saturating_sub(body.height);
         self.offset = self.offset.min(self.max);
         frame.render_widget(Paragraph::new(lines).scroll((self.offset, 0)), body);
-        render_footer(frame, foot, KEYS, None, &t);
+    }
+
+    fn help(&self) -> Help {
+        Help::new("fl keys", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

@@ -10,7 +10,7 @@
 //
 // Type filters (ticker, title, body, themes, entities) · ^n/^p move ·
 // ^d/^u scroll card · ↵ reopen the Claude chat · ^f follow-up chips (1-9) ·
-// ^o dossier · ^g godel · esc back.
+// ^o dossier · esc back.
 //
 // ↵ reopens the chat in a new tmux window (`claude --resume`, run from the note's
 // cwd) and a follow-up chip saves the follow-up as a new note.
@@ -30,6 +30,7 @@ use serde::{Deserialize, Deserializer};
 use super::note::{CLI, Save};
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::pyrun;
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -497,7 +498,6 @@ impl Notes {
                 Action::None
             }
             KeyCode::Char('o') => self.open_dossier(),
-            KeyCode::Char('c') if ctrl => Action::Quit,
             _ => Action::None,
         }
     }
@@ -538,6 +538,20 @@ impl Notes {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("type", "search the notes"),
+    key("↑/↓", "move"),
+    key("^d/^u", "scroll the card"),
+    key("g/G", "top / bottom"),
+    key("↵", "chat"),
+    key("^f", "follow-up"),
+    key("^o", "dossier"),
+    key("esc", "browse / close"),
+    key("q", "close"),
+    key("^n/^p", "move down / up"),
+    key("1-9", "ask a follow-up (in follow-up mode)"),
+];
+
 impl Screen for Notes {
     fn leader_ok(&self) -> bool {
         false
@@ -545,6 +559,10 @@ impl Screen for Notes {
 
     fn needs_redraw(&self) -> bool {
         self.redraw || self.loading || self.refresh.is_some() || !self.saves.is_empty()
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {
@@ -608,11 +626,10 @@ impl Screen for Notes {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [input, list, card, foot] = Layout::vertical([
+        let [input, list, card] = Layout::vertical([
             Constraint::Length(2),
             Constraint::Percentage(35),
             Constraint::Min(3),
-            Constraint::Length(1),
         ])
         .areas(area);
 
@@ -699,21 +716,14 @@ impl Screen for Notes {
                 card,
             );
         }
+    }
 
-        let foot_text = if self.follow_mode {
-            " follow-up: press 1-9 to ask · esc cancel".to_string()
-        } else if self.browse {
-            self.flash.clone().unwrap_or_else(|| {
-                " j/k move · ^d/^u scroll card · g/G top/bottom · ↵ chat · f follow-up · o dossier · / search · esc close"
-                    .to_string()
-            })
-        } else {
-            self.flash.clone().unwrap_or_else(|| {
-                " ↑/↓ or alt-j/k move · ^d/^u scroll · ↵ chat · ^f follow-up · ^o dossier · ^g godel · esc browse"
-                    .to_string()
-            })
-        };
-        frame.render_widget(Paragraph::new(foot_text).style(t.dim()), foot);
+    fn takes_text(&self) -> bool {
+        !self.browse
+    }
+
+    fn help(&self) -> Help {
+        Help::new("notes", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -783,11 +793,6 @@ impl Screen for Notes {
                 Action::None
             }
             KeyCode::Char('o') if ctrl => self.open_dossier(),
-            KeyCode::Char('g') if ctrl => Action::Route(Route::Screen {
-                screen: "godel".into(),
-                arg: None,
-            }),
-            KeyCode::Char('c') if ctrl => Action::Quit,
             KeyCode::Backspace => {
                 self.query.pop();
                 self.refilter();

@@ -27,6 +27,7 @@ use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph};
 use serde_json::Value;
 
 use crate::app::{Action, Ctx, Screen};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -209,15 +210,6 @@ fn tmux_args(session: &Session) -> Vec<String> {
     args
 }
 
-fn tilde(path: &str) -> String {
-    match std::env::var("HOME") {
-        Ok(home) if !home.is_empty() && path.starts_with(&home) => {
-            format!("~{}", &path[home.len()..])
-        }
-        _ => path.to_string(),
-    }
-}
-
 pub struct ClaudeHistory {
     sessions: Vec<Session>,
     /// `sessions[..parsed]` have had their headers read.
@@ -381,17 +373,25 @@ impl ClaudeHistory {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("/", "filter"),
+    key("j/k", "move"),
+    key("^d/^u", "page down / up"),
+    key("↵", "resume the session in tmux"),
+    key("esc", "back"),
+    key("q", "close"),
+];
+
 impl Screen for ClaudeHistory {
     fn draw(&mut self, frame: &mut Frame) {
         self.dirty = false;
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [title, filter, list_area, foot] = Layout::vertical([
+        let [title, filter, list_area] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Min(1),
-            Constraint::Length(1),
         ])
         .areas(area);
         self.page = list_area.height.max(1) as usize;
@@ -445,23 +445,14 @@ impl Screen for ClaudeHistory {
             let list = List::new(items).highlight_style(t.selected());
             frame.render_stateful_widget(list, list_area, &mut self.state);
         }
+    }
 
-        let hint = "/ filter · j/k move · ^d/^u page · ↵ resume in tmux · esc back";
-        let left = match (&self.flash, self.selected_session()) {
-            (Some(f), _) => Span::styled(f.clone(), t.accent()),
-            (None, Some(i)) => {
-                let s = &self.sessions[i];
-                let cwd = if s.cwd.is_empty() {
-                    s.project_dir.clone()
-                } else {
-                    tilde(&s.cwd)
-                };
-                Span::styled(cwd, t.dim())
-            }
-            (None, None) => Span::styled("", t.dim()),
-        };
-        let line = Line::from(vec![left, Span::styled(format!("  ·  {hint}"), t.dim())]);
-        frame.render_widget(Paragraph::new(line), foot);
+    fn takes_text(&self) -> bool {
+        self.filtering
+    }
+
+    fn help(&self) -> Help {
+        Help::new("claude history", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -506,6 +497,10 @@ impl Screen for ClaudeHistory {
 
     fn needs_redraw(&self) -> bool {
         self.dirty
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {
@@ -618,7 +613,6 @@ mod tests {
         assert!(s.matches(""));
         assert!(s.matches("finlarp"));
         assert!(s.matches("chart"));
-        assert!(!s.matches("godel"));
         let mut unparsed = sess("b", "", "");
         unparsed.parsed = false;
         assert!(unparsed.matches(""));

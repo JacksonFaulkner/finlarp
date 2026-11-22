@@ -24,6 +24,7 @@ use serde::Deserialize;
 
 use crate::app::{Action, Ctx, Screen};
 use crate::pyrun;
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -114,6 +115,16 @@ impl Filings {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("enter", "run the query"),
+    key("tab", "query / results"),
+    key("j/k", "move"),
+    key("↵", "open filing"),
+    key("/", "back to the query"),
+    key("esc", "back / close"),
+    key("q", "close"),
+];
+
 impl Screen for Filings {
     fn tick(&mut self) -> Action {
         if let Some(rx) = &self.pending {
@@ -136,11 +147,10 @@ impl Screen for Filings {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, cols, body, foot] = Layout::vertical([
+        let [head, cols, body] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Min(1),
-            Constraint::Length(1),
         ])
         .areas(area);
 
@@ -212,12 +222,14 @@ impl Screen for Filings {
             }
             frame.render_widget(Paragraph::new(lines).style(t.base()), body);
         }
+    }
 
-        let hint = match self.focus {
-            Focus::Query => " enter run · tab results · esc close",
-            Focus::Results => " j/k move · ↵ open filing · / or tab back to query · esc back",
-        };
-        frame.render_widget(Paragraph::new(Line::styled(hint, t.dim())), foot);
+    fn takes_text(&self) -> bool {
+        self.focus == Focus::Query
+    }
+
+    fn help(&self) -> Help {
+        Help::new("filings", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

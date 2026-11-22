@@ -24,6 +24,7 @@ use tui_input::backend::crossterm::EventHandler;
 
 use crate::app::{Action, Ctx, Screen};
 use crate::pyrun;
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -151,18 +152,24 @@ impl Note {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("type", "the note"),
+    key("↵", "save (it answers in the background)"),
+    key("esc", "back"),
+    key("q", "close"),
+];
+
 impl Screen for Note {
     fn draw(&mut self, frame: &mut Frame) {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, _, input, _, status, foot] = Layout::vertical([
+        let [head, _, input, _, status] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Min(1),
-            Constraint::Length(1),
         ])
         .areas(area);
 
@@ -203,13 +210,14 @@ impl Screen for Note {
                 .wrap(Wrap { trim: false }),
             status,
         );
+    }
 
-        let hint = if self.save.is_some() {
-            " saving…"
-        } else {
-            " ↵ save · esc back"
-        };
-        frame.render_widget(Paragraph::new(hint).style(t.dim()), foot);
+    fn takes_text(&self) -> bool {
+        true
+    }
+
+    fn help(&self) -> Help {
+        Help::new("note", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -364,6 +372,11 @@ mod tests {
         term.draw(|f| n.draw(f)).expect("draw");
         let text = screen_text(term.backend().buffer());
         assert!(text.contains("note · MRVL"), "{text}");
-        assert!(text.contains("esc back"), "{text}");
+        assert!(
+            n.help()
+                .keys
+                .iter()
+                .any(|k| k.keys == "esc" && k.desc == "back")
+        );
     }
 }

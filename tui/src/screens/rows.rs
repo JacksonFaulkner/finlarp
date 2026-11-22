@@ -29,7 +29,7 @@ use tui_input::Input;
 use tui_input::backend::crossterm::EventHandler;
 
 use crate::app::{Action, Ctx, Route, Screen};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -53,7 +53,9 @@ const KEYS: &[Key] = &[
     key("↵", "open the filing in the reader"),
     key("o", "open the filing in the browser"),
     key("y", "copy the filing url"),
+    key("q", "close"),
     key("esc", "back"),
+    key("^n/^p", "move down / up"),
 ];
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -208,7 +210,6 @@ pub struct Rows {
     /// Table rows that fit, from the last frame (for ^d/^u and scrolling).
     page: usize,
     flash: Option<(String, Instant)>,
-    help: bool,
 }
 
 /// "<dataset> [query]" -> (dataset, query).
@@ -245,7 +246,6 @@ impl Rows {
             top: 0,
             page: 10,
             flash: None,
-            help: false,
         }
     }
 
@@ -455,10 +455,6 @@ impl Rows {
                 self.reply.fields.join(": ")
             ));
         }
-        s.push_str(match self.focus {
-            Focus::Input => " · tab table · esc back",
-            Focus::Table => " · ↵ read filing · o browser · / query · esc back",
-        });
         Line::styled(s, t.dim())
     }
 }
@@ -517,9 +513,6 @@ impl Screen for Rows {
             self.draw_detail(frame, detail);
         }
         frame.render_widget(Paragraph::new(self.status()), foot);
-        if self.help {
-            help::render_overlay(frame, area, "row search", KEYS, &t);
-        }
     }
 
     fn tick(&mut self) -> Action {
@@ -546,11 +539,15 @@ impl Screen for Rows {
         self.focus == Focus::Table
     }
 
+    fn takes_text(&self) -> bool {
+        self.focus == Focus::Input
+    }
+
+    fn help(&self) -> Help {
+        Help::new("row search", KEYS)
+    }
+
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
         match key.code {
             KeyCode::Esc => return Action::Quit,
@@ -607,7 +604,6 @@ impl Screen for Rows {
                         self.sel = self.reply.rows.len().saturating_sub(1);
                     }
                     KeyCode::Char('/' | 'i') => self.focus = Focus::Input,
-                    KeyCode::Char('?') => self.help = true,
                     KeyCode::Char('q') => return Action::Quit,
                     KeyCode::Enter => {
                         return match self.url() {

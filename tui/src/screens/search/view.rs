@@ -1,6 +1,6 @@
 // Rendering for the search screen. Geometry comes from ui::layout
 // (render_frame: header = query input, nav = facets, detail = results +
-// preview, source bar, footer); the detail pane is split here into results
+// preview, source bar); the detail pane is split here into results
 // and preview, side by side when wide and stacked when narrow.
 
 use ratatui::Frame;
@@ -11,10 +11,9 @@ use ratatui::widgets::{Block, Borders, List, ListItem, Paragraph};
 
 use super::client::Hit;
 use super::query;
-use super::{FacetRow, KEYS, Pane, Search};
-use crate::ui::help::{render_footer, render_overlay};
+use super::{FacetRow, Pane, Search};
 use crate::ui::layout::{Focus, FrameTitles, PaneOpts, render_frame};
-use crate::ui::source_bar::render_source_bar_with;
+use crate::ui::source_bar::render_source_bar;
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -66,7 +65,6 @@ impl Search {
             nav_width: if compact { 0 } else { 24 },
             source_height: 3,
             header_height: 1,
-            footer_height: 1,
             ..PaneOpts::default()
         };
         let status = match (&self.error, self.loading) {
@@ -123,18 +121,7 @@ impl Search {
         }
 
         let src = self.selected_source();
-        let hints = [
-            ("↵", "chunk"),
-            ("alt-v", "doc"),
-            ("ctrl-o", "browser"),
-            ("y", "copy"),
-        ];
-        render_source_bar_with(frame, panes.source, src.as_ref(), &hints, &theme);
-        let flash = self.flash.as_ref().map(|(m, _)| m.as_str());
-        render_footer(frame, panes.footer, KEYS, flash, &theme);
-        if self.show_help {
-            render_overlay(frame, area, "search", KEYS, &theme);
-        }
+        render_source_bar(frame, panes.source, src.as_ref(), &theme);
         if self.palette.open {
             self.palette.render(frame, area, &theme);
         }
@@ -159,7 +146,7 @@ impl Search {
             Constraint::Length(text::width(&right) as u16),
         ])
         .areas(area);
-        let focused = self.focus == Pane::Input && !self.show_help;
+        let focused = self.focus == Pane::Input;
         let prompt_style = if focused {
             theme.accent().add_modifier(Modifier::BOLD)
         } else {

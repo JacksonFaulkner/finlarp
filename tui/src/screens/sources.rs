@@ -18,7 +18,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
 use crate::app::{Action, Ctx, Route, Screen};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -28,7 +28,6 @@ const KEYS: &[Key] = &[
     key("i", "dataset details"),
     key("/", "search SEC EDGAR text"),
     key("esc", "back"),
-    key("?", "help"),
     key("q", "close"),
 ];
 
@@ -109,7 +108,7 @@ const SOURCES: &[Source] = &[
     Source {
         provider: "SEC EDGAR",
         name: "XBRL companyfacts (15+ years)",
-        feeds: "dossier financials, peers; canslim; godel; MCP",
+        feeds: "dossier financials, peers; canslim; MCP",
         endpoint: "data.sec.gov/api/xbrl/companyfacts",
         pulled_by: "sources/sec_financials.py, edgar.py",
         key: "none (User-Agent needs SEC_CONTACT)",
@@ -449,7 +448,6 @@ pub struct Sources {
     sel: usize,
     /// Tile columns in the last frame; j/k step a whole row by this.
     cols: usize,
-    help: bool,
 }
 
 pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Sources> {
@@ -459,7 +457,6 @@ pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Sources> {
         view: View::Providers,
         sel: 0,
         cols: 1,
-        help: false,
     })
 }
 
@@ -613,38 +610,20 @@ impl Screen for Sources {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, body, foot] = Layout::vertical([
-            Constraint::Length(1),
-            Constraint::Min(1),
-            Constraint::Length(1),
-        ])
-        .areas(area);
+        let [head, body] =
+            Layout::vertical([Constraint::Length(1), Constraint::Min(1)]).areas(area);
         frame.render_widget(Paragraph::new(self.crumb()), head);
-        let hint = match self.view {
-            View::Providers => " hjkl move · ↵ open provider · / search SEC EDGAR · esc close",
-            View::Datasets(_) => {
-                " hjkl move · ↵ search (i details) · / search SEC EDGAR · esc back"
-            }
-            View::Detail(i) => match SOURCES[i].search {
-                Search::Off => " esc back · not searchable yet",
-                _ => " / search this dataset · esc back",
-            },
-        };
-        frame.render_widget(Paragraph::new(Line::styled(hint, t.dim())), foot);
         match self.view {
             View::Detail(i) => self.draw_detail(frame, body, &SOURCES[i]),
             _ => self.draw_tiles(frame, body),
         }
-        if self.help {
-            help::render_overlay(frame, area, "data sources", KEYS, &t);
-        }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("data sources", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         let last = self.tiles().len().saturating_sub(1);
         match key.code {
             KeyCode::Char('q') => return Action::Quit,
@@ -681,7 +660,6 @@ impl Screen for Sources {
                     self.sel = pos;
                 }
             },
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Char('h') | KeyCode::Left => self.sel = self.sel.saturating_sub(1),
             KeyCode::Char('l') | KeyCode::Right => self.sel = (self.sel + 1).min(last),
             KeyCode::Char('k') | KeyCode::Up => self.sel = self.sel.saturating_sub(self.cols),
@@ -723,7 +701,6 @@ mod tests {
             view: View::Providers,
             sel: 0,
             cols: 1,
-            help: false,
         }
     }
 

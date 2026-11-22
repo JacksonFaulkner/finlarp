@@ -247,7 +247,10 @@ pub const DESCS: &[(&str, &str)] = &[
         "Each cell of the answer is one row of A dotted with one column of B, so a (2 x 2) times (2 x 2) takes four dot products. Most of the arithmetic in modern AI models is products like this, which is why GPUs and tensor cores are built around them.",
     ),
     // R&D tab
-    ("3D DRAM", include_str!("diagrams_pages/RND_3D_DRAM.desc.txt")),
+    (
+        "3D DRAM",
+        include_str!("diagrams_pages/RND_3D_DRAM.desc.txt"),
+    ),
     ("HBF", include_str!("diagrams_pages/RND_HBF.desc.txt")),
 ];
 
@@ -337,6 +340,7 @@ pub const VISUALS: &[(&str, &str)] = &[
     ("RACK POWER", include_str!("diagrams_pages/PWR_RACK.txt")),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.txt")),
     ("HBF", include_str!("diagrams_pages/RND_HBF.txt")),
+    ("3D DRAM", include_str!("diagrams_pages/RND_3D_DRAM.txt")),
     // Chip tab
     (
         "TOP METAL",

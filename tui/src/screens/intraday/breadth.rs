@@ -20,7 +20,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Paragraph};
 
 use crate::app::{Action, Ctx, Route, Screen};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::theme::Theme;
 
 use super::data::Series;
@@ -33,8 +33,8 @@ const KEYS: &[Key] = &[
     key("j/k", "move cursor"),
     key("↵", "intraday tapes for the selected name"),
     key("r", "resync from REST"),
-    key("?", "help"),
     key("q/esc", "close"),
+    key("^n/^p", "move down / up"),
 ];
 
 /// `A,B C` -> uppercase symbols, deduped, in the order given; the default basket when empty.
@@ -106,7 +106,6 @@ pub struct Breadth {
     status: String,
     /// Epoch seconds of the bar at which the gate was first seen open this run.
     gate_at: Option<i64>,
-    help: bool,
     flash: Option<String>,
     changed: bool,
 }
@@ -127,7 +126,6 @@ impl Breadth {
             live: false,
             status: "connecting…".into(),
             gate_at: None,
-            help: false,
             flash: None,
             changed: true,
         }
@@ -257,11 +255,10 @@ impl Screen for Breadth {
         let area = frame.area();
         let t = self.theme;
         frame.render_widget(Block::new().style(t.base()), area);
-        let [header, gate, body, footer] = Layout::vertical([
+        let [header, gate, body] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Min(3),
-            Constraint::Length(1),
         ])
         .areas(area);
 
@@ -280,19 +277,13 @@ impl Screen for Breadth {
         );
         frame.render_widget(Paragraph::new(self.gate_line()), gate);
         frame.render_widget(Paragraph::new(self.table()), body);
-        if self.help {
-            help::render_overlay(frame, area, "breadth", KEYS, &t);
-        } else {
-            help::render_footer(frame, footer, KEYS, self.flash.as_deref(), &t);
-        }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("breadth", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.help {
-            self.help = false;
-            self.changed = true;
-            return Action::None;
-        }
         self.changed = true;
         self.flash = None;
         match key.code {
@@ -309,7 +300,6 @@ impl Screen for Breadth {
                 self.stream.resync(&syms);
                 self.flash = Some("resync sent".into());
             }
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Enter => {
                 if let Some(sym) = self.selected_sym() {
                     // Intraday pads its tiles from its own defaults, so the chosen name comes first.
@@ -339,6 +329,10 @@ impl Screen for Breadth {
             self.handle(ev);
         }
         Action::None
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {

@@ -32,7 +32,7 @@ use ratatui_image::{Resize, StatefulImage};
 
 use crate::app::{Action, Ctx, Screen};
 use crate::ui::hcandles::{HBar, HCandles};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::pixels::Palette;
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -56,7 +56,6 @@ const KEYS: &[Key] = &[
     key("esc", "back to grid"),
     key("s", "set ticker"),
     key("r", "resync"),
-    key("?", "help"),
     key("q", "close"),
 ];
 
@@ -114,7 +113,6 @@ pub struct Intraday {
     zoom: bool,
     live: bool,
     status: String,
-    help: bool,
     /// Ticker being typed for the focused tile.
     prompt: Option<String>,
     flash: Option<String>,
@@ -183,7 +181,6 @@ impl Intraday {
             zoom: false,
             live: false,
             status: "connecting…".into(),
-            help: false,
             prompt: None,
             flash: None,
             picker: None,
@@ -636,10 +633,11 @@ impl Screen for Intraday {
         let area = frame.area();
         let t = self.theme;
         frame.render_widget(Block::new().style(t.base()), area);
+        // The bottom row exists only while the ticker prompt is open.
         let [header, grid, footer] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Min(4),
-            Constraint::Length(1),
+            Constraint::Length(u16::from(self.prompt.is_some())),
         ])
         .areas(area);
         frame.render_widget(Paragraph::new(self.header()), header);
@@ -669,22 +667,16 @@ impl Screen for Intraday {
                 Span::raw(format!(": {buf}▏")),
             ]);
             frame.render_widget(Paragraph::new(line), footer);
-        } else {
-            help::render_footer(frame, footer, KEYS, self.flash.as_deref(), &t);
         }
-        if self.help {
-            help::render_overlay(frame, area, "intraday", KEYS, &t);
-        }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("intraday", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         if self.prompt.is_some() {
             return self.prompt_key(key);
-        }
-        if self.help {
-            self.help = false;
-            self.changed = true;
-            return Action::None;
         }
         self.changed = true;
         self.flash = None;
@@ -709,7 +701,6 @@ impl Screen for Intraday {
             KeyCode::Char('q') => return Action::Quit,
             KeyCode::Esc if self.zoom => self.zoom = false,
             KeyCode::Esc => return Action::Quit,
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Tab => self.focus = (self.focus + 1) % n,
             KeyCode::BackTab => self.focus = (self.focus + n - 1) % n,
             KeyCode::Char(c @ '1'..='4') => self.focus = (c as usize - '1' as usize).min(n - 1),
@@ -747,6 +738,14 @@ impl Screen for Intraday {
             self.handle(ev);
         }
         Action::None
+    }
+
+    fn takes_text(&self) -> bool {
+        self.prompt.is_some()
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {

@@ -23,7 +23,7 @@ use ratatui_image::protocol::StatefulProtocol;
 use ratatui_image::{Resize, StatefulImage};
 
 use crate::app::{Action, Ctx, Screen};
-use crate::ui::help::{Key, key, render_footer};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::theme::Theme;
 
 const KEYS: &[Key] = &[
@@ -31,6 +31,7 @@ const KEYS: &[Key] = &[
     key("h/l", "previous / next frame"),
     key("j/k", "next / previous clip"),
     key("q", "back"),
+    key("space / p", "pause / resume"),
 ];
 
 /// Redraw and tick interval while a clip plays (~30 fps polling; frames advance on their own delay).
@@ -185,12 +186,8 @@ impl Screen for Video {
         let area = frame.area();
         let t = self.theme;
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, image, footer] = Layout::vertical([
-            Constraint::Length(1),
-            Constraint::Min(3),
-            Constraint::Length(1),
-        ])
-        .areas(area);
+        let [head, image] =
+            Layout::vertical([Constraint::Length(1), Constraint::Min(3)]).areas(area);
 
         let status = match &self.clip {
             Some(clip) => format!(
@@ -219,7 +216,10 @@ impl Screen for Video {
                 }
             }
         }
-        render_footer(frame, footer, KEYS, None, &t);
+    }
+
+    fn help(&self) -> Help {
+        Help::new("video", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

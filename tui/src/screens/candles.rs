@@ -15,7 +15,7 @@ use ratatui::widgets::{Block, Paragraph, Tabs};
 use crate::app::{Action, Ctx, Screen};
 use crate::model::Candle;
 use crate::ui::candles::{CandleChart, fit};
-use crate::ui::help::{self, Key, key};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::theme::Theme;
 
 const DEFAULT_TICKER: &str = "MRVL";
@@ -28,7 +28,6 @@ const KEYS: &[Key] = &[
     key("1-4", "range 1M/3M/6M/1Y"),
     key("h/l", "move cursor"),
     key("H/L", "first / last bar"),
-    key("?", "help"),
     key("q", "close"),
 ];
 
@@ -39,7 +38,6 @@ pub struct CandlesScreen {
     range: usize,
     /// Index into the drawn (merged) bars; None = follow the latest.
     cursor: Option<usize>,
-    help: bool,
     /// Why there are no bars (no pull yet, unknown ticker); drawn instead of the chart.
     error: Option<String>,
 }
@@ -100,7 +98,6 @@ impl CandlesScreen {
             all,
             range: 1,
             cursor: None,
-            help: false,
             error,
         }
     }
@@ -145,11 +142,10 @@ impl Screen for CandlesScreen {
         let area = frame.area();
         let t = self.theme;
         frame.render_widget(Block::new().style(t.base()), area);
-        let [tabs, header, chart, footer] = Layout::vertical([
+        let [tabs, header, chart] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Length(1),
             Constraint::Min(3),
-            Constraint::Length(1),
         ])
         .areas(area);
 
@@ -173,23 +169,18 @@ impl Screen for CandlesScreen {
             ),
             None => frame.render_widget(CandleChart::new(&bars, &t).selected(sel), chart),
         }
-        help::render_footer(frame, footer, KEYS, None, &t);
-        if self.help {
-            help::render_overlay(frame, area, "candles", KEYS, &t);
-        }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("candles", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         // Cursor moves act on the drawn bars; width is unknown here, so the
         // clamp happens in `selected` on the next draw.
         let len = self.window().len();
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Char(c @ '1'..='4') => {
                 self.range = (c as usize) - ('1' as usize);
                 self.cursor = None;

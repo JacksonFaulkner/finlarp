@@ -16,6 +16,7 @@ use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph, Wrap};
 
 use crate::app::{Action, Ctx, Screen};
 use crate::screens::keys::{self, Standalone};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -116,6 +117,14 @@ impl Menu {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("type", "filter the commands"),
+    key("^n/^p", "move"),
+    key("↵", "show command"),
+    key("^u", "clear the filter"),
+    key("esc", "close"),
+];
+
 impl Screen for Menu {
     fn leader_ok(&self) -> bool {
         false
@@ -129,11 +138,10 @@ impl Screen for Menu {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [input, list, detail, foot] = Layout::vertical([
+        let [input, list, detail] = Layout::vertical([
             Constraint::Length(2),
             Constraint::Min(1),
             Constraint::Length(3),
-            Constraint::Length(1),
         ])
         .areas(area);
 
@@ -188,11 +196,18 @@ impl Screen for Menu {
                 detail,
             );
         }
-        let foot_text = self
-            .flash
-            .clone()
-            .unwrap_or_else(|| " ^n/^p move · ↵ show command · esc close".to_string());
-        frame.render_widget(Paragraph::new(foot_text).style(t.dim()), foot);
+    }
+
+    fn takes_text(&self) -> bool {
+        true
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
+    }
+
+    fn help(&self) -> Help {
+        Help::new("menu", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -217,7 +232,6 @@ impl Screen for Menu {
                 self.step(-1);
                 Action::None
             }
-            KeyCode::Char('c') if ctrl => Action::Quit,
             KeyCode::Char('u') if ctrl => {
                 self.query.clear();
                 self.refilter();

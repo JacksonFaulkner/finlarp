@@ -23,6 +23,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Cell, Paragraph, Row, Table, TableState, Wrap};
 
 use crate::app::{Action, Ctx, Route, Screen};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -240,6 +241,17 @@ impl Transactions {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("/", "filter (type, ↵ keep, esc clear)"),
+    key("j/k", "move"),
+    key("g/G", "first / last row"),
+    key("^d/^u", "page down / up"),
+    key("↵", "dossier"),
+    key("esc", "back"),
+    key("q", "close"),
+    key("^n/^p", "move down / up"),
+];
+
 impl Screen for Transactions {
     fn leader_ok(&self) -> bool {
         !self.editing
@@ -249,10 +261,9 @@ impl Screen for Transactions {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [top, body, status, keys] = Layout::vertical([
+        let [top, body, status] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Min(1),
-            Constraint::Length(1),
             Constraint::Length(1),
         ])
         .areas(area);
@@ -304,15 +315,14 @@ impl Screen for Transactions {
             Paragraph::new(text::truncate(&status_line, status.width as usize)).style(t.dim()),
             status,
         );
-        let hint = if self.editing {
-            " type to filter · ↵ keep · esc clear"
-        } else {
-            " / filter · j/k move · g/G ends · ^d/^u page · ↵ dossier · esc back"
-        };
-        frame.render_widget(
-            Paragraph::new(text::truncate(hint, keys.width as usize)).style(t.dim()),
-            keys,
-        );
+    }
+
+    fn takes_text(&self) -> bool {
+        self.editing
+    }
+
+    fn help(&self) -> Help {
+        Help::new("transactions", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -726,7 +736,7 @@ mod tests {
     }
 
     #[test]
-    fn renders_rows_and_footer() {
+    fn renders_rows_and_status() {
         let mut s = sample();
         let out = render(&mut s, 120, 12);
         assert!(out.contains("MRVL"));

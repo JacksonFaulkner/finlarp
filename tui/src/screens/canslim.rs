@@ -7,8 +7,7 @@
 //   ├ EPS actual vs est ───┼ Revenue ───────────────┤  BlockGrid: hjkl between
 //   │ …                    │ …                      │  containers, j/k through items
 //   ├──────────────────────┴────────────────────────┤
-//   │ source of the cursor item (↵ browser · y copy · i inputs)          │
-//   └ key hints ─────────────────────────────────────┘
+//   └ source of the cursor item ─────────────────────┘
 //
 // Python builds one model::Section per letter with every value sourced
 // (Yahoo page / SEC filing / formula + inputs) and a grade badge; this file
@@ -28,7 +27,7 @@ use crate::app::{Action, Ctx, Route, Screen};
 use crate::model::{Block, Section, Source};
 use crate::ui::block_grid::BlockGrid;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
-use crate::ui::help::{self, Key, SOURCE_KEYS, key};
+use crate::ui::help::{Help, Key, SOURCE_KEYS, key};
 use crate::ui::layout::{self, Focus, FrameTitles, PaneOpts};
 use crate::ui::section_list::SectionList;
 use crate::ui::section_tabs::SectionTabs;
@@ -49,19 +48,7 @@ const SCREEN_KEYS: &[Key] = &[
     key("^d/^u", "down / up 5 items"),
     key("r", "reload from cache"),
     key("s", "back to symbol picker"),
-    key("?", "help"),
     key("q/esc", "quit"),
-];
-const FOOTER_KEYS: &[Key] = &[
-    key("?", "help"),
-    key("H/L", "letter"),
-    key("hjkl", "move"),
-    key("↵", "browser"),
-    key("y", "copy"),
-    key("i", "inputs"),
-    key("a", "audit"),
-    key("s", "picker"),
-    key("q", "quit"),
 ];
 
 /// The parts of the scorecard this screen reads; the flat letter fields
@@ -102,7 +89,6 @@ pub struct Canslim {
     nav: SectionList,
     view: BlockGrid,
     inspector: SourceInspector,
-    help: bool,
     palette: Palette,
     flash: Option<String>,
     theme: Theme,
@@ -149,7 +135,6 @@ impl Canslim {
             nav: SectionList::new(),
             view: BlockGrid::new(),
             inspector: SourceInspector::default(),
-            help: false,
             palette: Palette::default(),
             flash: None,
             theme,
@@ -334,23 +319,16 @@ impl Screen for Canslim {
         frame.render_widget(SectionTabs::new(&card.sections, sel, &theme), p.tabs);
         self.view.render_in_frame(frame, p.detail, blocks, &theme);
         render_source_bar(frame, p.source, self.view.selected_source(blocks), &theme);
-        help::render_footer(frame, p.footer, FOOTER_KEYS, self.flash.as_deref(), &theme);
         if self.inspector.is_open() {
             self.inspector.render(frame, area, &theme);
-        }
-        if self.help {
-            let all: Vec<Key> = SCREEN_KEYS.iter().chain(SOURCE_KEYS).copied().collect();
-            help::render_overlay(
-                frame,
-                area,
-                &format!(" {} CANSLIM keys ", self.symbol),
-                &all,
-                &theme,
-            );
         }
         if self.palette.open {
             self.palette.render(frame, area, &theme);
         }
+    }
+
+    fn help(&self) -> Help {
+        Help::new("canslim", &[SCREEN_KEYS, SOURCE_KEYS].concat())
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -372,10 +350,6 @@ impl Screen for Canslim {
                 }
                 _ => Action::None,
             };
-        }
-        if self.help {
-            self.help = false;
-            return Action::None;
         }
         if self.inspector.is_open() {
             return self.inspector.on_key(key);
@@ -409,7 +383,6 @@ impl Screen for Canslim {
                 );
             }
             _ if self.card.is_none() => {}
-            KeyCode::Char('?') => self.help = true,
             KeyCode::Char('a') => {
                 self.view.audit = !self.view.audit;
             }
@@ -440,6 +413,14 @@ impl Screen for Canslim {
             }
         }
         Action::None
+    }
+
+    fn takes_text(&self) -> bool {
+        self.palette.open
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {

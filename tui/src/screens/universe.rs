@@ -30,6 +30,7 @@ use ratatui::widgets::{Block, Paragraph};
 
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::screens::portfolio::data::parse_closes;
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -1287,6 +1288,17 @@ impl Universe {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("hjkl", "move"),
+    key("g/G", "first / last"),
+    key("↵", "open (dossier for a fund)"),
+    key("H/L", "level (groups)"),
+    key("[ ]", "range"),
+    key("r", "edit the range"),
+    key("w", "weighting"),
+    key("q/esc", "back"),
+];
+
 impl Screen for Universe {
     fn leader_ok(&self) -> bool {
         self.editing.is_none()
@@ -1300,30 +1312,23 @@ impl Screen for Universe {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
+        // The bottom row exists only while the range prompt is open.
         let [head, body, foot] = Layout::vertical([
             Constraint::Length(2),
             Constraint::Min(1),
-            Constraint::Length(1),
+            Constraint::Length(u16::from(self.editing.is_some())),
         ])
         .areas(area);
         frame.render_widget(Paragraph::new(Line::from(self.header())), head);
 
-        let footer = match &self.editing {
-            Some(buf) => Line::from(vec![
+        if let Some(buf) = &self.editing {
+            let line = Line::from(vec![
                 Span::styled(" range > ", t.accent()),
                 Span::styled(buf.clone(), t.base()),
                 Span::styled("_  enter apply | esc cancel", t.dim()),
-            ]),
-            None if !self.flash.is_empty() => Line::styled(format!(" {}", self.flash), t.dim()),
-            None if matches!(self.view, View::Fund(_)) => {
-                Line::styled(" hjkl move | enter dossier | esc back", t.dim())
-            }
-            None => Line::styled(
-                " hjkl move | enter open | [ ] range | r edit | w weighting | H/L level | esc back",
-                t.dim(),
-            ),
-        };
-        frame.render_widget(Paragraph::new(footer), foot);
+            ]);
+            frame.render_widget(Paragraph::new(line), foot);
+        }
 
         if let View::Fund(ticker) = &self.view {
             let ticker = ticker.clone();
@@ -1348,6 +1353,18 @@ impl Screen for Universe {
             return;
         }
         self.draw_body(frame, body);
+    }
+
+    fn takes_text(&self) -> bool {
+        self.editing.is_some()
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        Some(self.flash.as_str()).filter(|s| !s.is_empty())
+    }
+
+    fn help(&self) -> Help {
+        Help::new("universe", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -1786,8 +1803,11 @@ mod tests {
             out.contains("NVDA") && out.contains("+12.0%") && out.contains("n/a"),
             "{out}"
         );
-        // Rows 2..19 are the map (header is 2 rows, footer 1). No line art left in it.
+        // Rows 2..19 are the map (header is 2 rows). No line art left in it.
         let map: String = out.lines().skip(2).take(17).collect::<Vec<_>>().join("\n");
-        assert!(!map.contains(['|', '#']), "line art left in the map:\n{map}");
+        assert!(
+            !map.contains(['|', '#']),
+            "line art left in the map:\n{map}"
+        );
     }
 }

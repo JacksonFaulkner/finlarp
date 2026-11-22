@@ -38,7 +38,7 @@ use tui_input::backend::crossterm::EventHandler;
 
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::screens::search::client::{Client, Hit, Reply, Request};
-use crate::ui::help::{Key, key, render_footer};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::layout::{self, Focus, FrameTitles, PaneOpts};
 use crate::ui::text;
 use crate::ui::theme::Theme;
@@ -61,6 +61,7 @@ const KEYS: &[Key] = &[
     key("/ tab", "type a term"),
     key("j k", "move"),
     key("esc", "back"),
+    key("q", "close"),
 ];
 
 const TYPING_KEYS: &[Key] = &[
@@ -551,7 +552,6 @@ impl Screen for Scratch {
                 nav_width: NAV_WIDTH,
                 source_height: 3,
                 header_height: 2,
-                footer_height: 1,
                 tabs_height: 0,
             },
             &FrameTitles {
@@ -621,9 +621,10 @@ impl Screen for Scratch {
             Paragraph::new(format!(" source: {source}")).style(t.dim()),
             panes.source,
         );
+    }
 
-        let keys = if self.typing { TYPING_KEYS } else { KEYS };
-        render_footer(frame, panes.footer, keys, None, &t);
+    fn help(&self) -> Help {
+        Help::new("scratch", &if self.typing { TYPING_KEYS } else { KEYS })
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -651,6 +652,10 @@ impl Screen for Scratch {
 
     fn leader_ok(&self) -> bool {
         !self.typing
+    }
+
+    fn takes_text(&self) -> bool {
+        self.typing
     }
 }
 

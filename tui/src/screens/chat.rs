@@ -28,6 +28,7 @@ use tui_input::backend::crossterm::EventHandler;
 
 use crate::app::{Action, Ctx, Route, Screen};
 use crate::db;
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -326,6 +327,19 @@ impl Chat {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("i", "type a question"),
+    key("↵", "send"),
+    key("esc", "normal mode / stop"),
+    key("tab", "pick a ticker"),
+    key("d", "dossier"),
+    key("c", "canslim"),
+    key("q", "back"),
+    key("j/k", "scroll"),
+    key("g/G", "top / bottom"),
+    key("[/]", "previous / next ticker"),
+];
+
 impl Screen for Chat {
     fn leader_ok(&self) -> bool {
         self.mode == Mode::Normal
@@ -384,12 +398,6 @@ impl Screen for Chat {
                 spans.push(Span::styled(format!(" {tk} "), t.base()));
             }
         }
-        let hint = match (self.busy(), self.mode) {
-            (true, _) => "  esc stop",
-            (_, Mode::Insert) => "  ↵ send · esc normal",
-            (_, Mode::Normal) => "  tab pick · d dossier · c canslim · i type · q back",
-        };
-        spans.push(Span::styled(hint, t.dim()));
         frame.render_widget(Paragraph::new(Line::from(spans)), tick_row);
 
         let prefix = if self.busy() { " … " } else { " › " };
@@ -406,6 +414,14 @@ impl Screen for Chat {
                 input_row.y,
             ));
         }
+    }
+
+    fn takes_text(&self) -> bool {
+        self.mode == Mode::Insert
+    }
+
+    fn help(&self) -> Help {
+        Help::new("chat", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

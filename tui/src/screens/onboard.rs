@@ -26,7 +26,7 @@ use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph};
 
 use crate::app::{Action, Ctx, Screen};
 use crate::pyrun;
-use crate::screens::watchlists::valid_symbol;
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -136,6 +136,14 @@ fn lock<T>(m: &Mutex<T>) -> MutexGuard<'_, T> {
 }
 
 /// Tickers from the prompt: space or comma separated, uppercased.
+/// Letters, digits, `.` and `-`, starting with a letter or digit (BRK.B, BF-B).
+fn valid_symbol(s: &str) -> bool {
+    s.len() <= 12
+        && s.chars().next().is_some_and(|c| c.is_ascii_alphanumeric())
+        && s.chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '.' || c == '-')
+}
+
 fn parse_tickers(text: &str) -> Result<Vec<String>, String> {
     let mut out: Vec<String> = Vec::new();
     for tok in text
@@ -526,6 +534,14 @@ impl Onboard {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("type", "tickers to onboard"),
+    key("↵", "run / onboard the selected"),
+    key("j/k", "move / scroll"),
+    key("esc", "back / cancel"),
+    key("q", "close"),
+];
+
 impl Screen for Onboard {
     fn leader_ok(&self) -> bool {
         matches!(self.phase, Phase::Done)
@@ -535,12 +551,8 @@ impl Screen for Onboard {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, body, foot] = Layout::vertical([
-            Constraint::Length(2),
-            Constraint::Min(1),
-            Constraint::Length(1),
-        ])
-        .areas(area);
+        let [head, body] =
+            Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).areas(area);
 
         let prompt = " Onboard › ";
         let header_text = match self.phase {
@@ -589,14 +601,14 @@ impl Screen for Onboard {
             Phase::SubPick { .. } => self.draw_subpick(frame, inner),
             Phase::Done => self.draw_done(frame, inner),
         }
+    }
 
-        let keys = match self.phase {
-            Phase::Input => " ↵ run · esc back",
-            Phase::Running => " esc cancel",
-            Phase::SubPick { .. } => " j/k move · ↵ onboard · esc back",
-            Phase::Done => " j/k scroll · esc back",
-        };
-        frame.render_widget(Paragraph::new(keys).style(t.dim()), foot);
+    fn takes_text(&self) -> bool {
+        matches!(self.phase, Phase::Input)
+    }
+
+    fn help(&self) -> Help {
+        Help::new("onboard", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

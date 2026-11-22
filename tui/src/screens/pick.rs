@@ -16,6 +16,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, List, ListItem, ListState, Paragraph};
 
 use crate::app::{Action, Ctx, Route, Screen};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::text;
 use crate::ui::theme::Theme;
 
@@ -102,6 +103,14 @@ impl Pick {
     }
 }
 
+const KEYS: &[Key] = &[
+    key("^n/^p", "move"),
+    key("tab", "next / previous"),
+    key("↵", "open"),
+    key("esc", "back"),
+    key("type", "filter"),
+];
+
 impl Screen for Pick {
     fn leader_ok(&self) -> bool {
         false
@@ -111,12 +120,8 @@ impl Screen for Pick {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [input, list, foot] = Layout::vertical([
-            Constraint::Length(2),
-            Constraint::Min(1),
-            Constraint::Length(1),
-        ])
-        .areas(area);
+        let [input, list] =
+            Layout::vertical([Constraint::Length(2), Constraint::Min(1)]).areas(area);
 
         let prefix = format!(" {} › ", self.prompt);
         frame.render_widget(
@@ -175,11 +180,14 @@ impl Screen for Pick {
                 &mut self.state,
             );
         }
+    }
 
-        frame.render_widget(
-            Paragraph::new(" ^n/^p move · ↵ open · esc back").style(t.dim()),
-            foot,
-        );
+    fn takes_text(&self) -> bool {
+        true
+    }
+
+    fn help(&self) -> Help {
+        Help::new("pick", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {

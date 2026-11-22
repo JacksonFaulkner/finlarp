@@ -627,24 +627,11 @@ impl Chat {
             return;
         }
         frame.render_widget(Clear, r);
-        let hint = if self.focus {
-            " enter ask  esc close "
-        } else if self.prompt.is_some() {
-            " 1-100 then enter  r ask again  s skip  esc end demo "
-        } else {
-            match (&self.quiz, self.busy()) {
-                (Some(Quiz::Choice { .. }), _) => " press the letter  esc skip ",
-                (Some(Quiz::Part { .. }), _) => " h/l move  enter pick  esc skip ",
-                (None, true) => " esc stop  space aw ask ",
-                (None, false) => " space aw ask  X clear ",
-            }
-        };
         let asking = self.focus || self.quiz.is_some() || self.prompt.is_some();
         let block = Block::new()
             .borders(Borders::ALL)
             .border_style(if asking { t.accent() } else { t.border() })
             .title(Span::styled(" claude ", t.title()))
-            .title_bottom(Span::styled(hint, t.dim()))
             .padding(ratatui::widgets::Padding::horizontal(1));
         let inner = block.inner(r);
         frame.render_widget(block, r);

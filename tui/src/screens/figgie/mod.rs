@@ -30,7 +30,7 @@ use ratatui::text::{Line, Span};
 use ratatui::widgets::{Block, Cell, Paragraph, Row, Table};
 
 use crate::app::{Action, Ctx, Screen};
-use crate::ui::help::{Key, key, render_footer};
+use crate::ui::help::{Help, Key, key};
 use crate::ui::theme::Theme;
 use game::{Game, POT, SUITS, Side, Suit};
 
@@ -391,10 +391,9 @@ impl Screen for Figgie {
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
 
-        let [header, body, entry, footer] = Layout::vertical([
+        let [header, body, entry] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Min(0),
-            Constraint::Length(1),
             Constraint::Length(1),
         ])
         .areas(area);
@@ -423,7 +422,10 @@ impl Screen for Figgie {
         }
 
         frame.render_widget(Paragraph::new(self.entry_line()), entry);
-        render_footer(frame, footer, KEYS, self.flash.as_deref(), &t);
+    }
+
+    fn help(&self) -> Help {
+        Help::new("figgie", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -490,6 +492,14 @@ impl Screen for Figgie {
 
     fn set_flash(&mut self, msg: String) {
         self.flash = Some(msg);
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
+    }
+
+    fn takes_text(&self) -> bool {
+        self.entry.is_some()
     }
 
     fn shows_tape(&self) -> bool {

@@ -5,8 +5,7 @@
 //   │ Events      3 │ 2-per-row BlockGrid for GRID_SECTIONS)                 │
 //   │ ...           │                                                        │
 //   ├───────────────┴────────────────────────────────────────────────────────┤
-//   │ source of the cursor item (↵ browser · y copy · i inputs)              │
-//   └ key hints ─────────────────────────────────────────────────────────────┘
+//   └ source of the cursor item ─────────────────────────────────────────────┘
 //
 // The first nav entry is synthesized here: "Latest" collects every dated item
 // across the sections, newest first. `a` swaps each section for an audit view
@@ -29,7 +28,7 @@ use crate::model::{Block, Row, Section, Source};
 use crate::ui::block_grid::BlockGrid;
 use crate::ui::block_view::BlockView;
 use crate::ui::command_palette::{self, Command, Entry, Palette};
-use crate::ui::help::{self, Key, SOURCE_KEYS, key};
+use crate::ui::help::{Help, Key, SOURCE_KEYS, key};
 use crate::ui::layout::{self, FrameTitles, PaneOpts, Panes};
 use crate::ui::section_list::SectionList;
 use crate::ui::source_bar::{SourceInspector, render_source_bar, source_action};
@@ -42,6 +41,12 @@ const LATEST_MAX: usize = 40;
 /// popup); list-like sections stay in the single-column BlockView.
 const GRID_SECTIONS: &[&str] = &["price", "financials", "positioning", "patents"];
 
+/// Extra keys on an interactive map section (Capex & fabs).
+const MAP_KEYS: &[Key] = &[
+    key("[ ]", "site"),
+    key("↵", "fly to the site"),
+    key("o", "overview"),
+];
 const NAV_KEYS: &[Key] = &[
     key("^p", "command palette"),
     key("j/k", "move"),
@@ -49,28 +54,7 @@ const NAV_KEYS: &[Key] = &[
     key("tab h/l", "focus nav / detail / header"),
     key("/", "jump to section"),
     key("c", "CANSLIM for this ticker"),
-    key("?", "help"),
     key("q", "quit"),
-];
-/// Footer on an interactive map section: the map's keys replace the source ones for Enter.
-const MAP_FOOTER_KEYS: &[Key] = &[
-    key("[ ]", "site"),
-    key("↵", "fly"),
-    key("o", "overview"),
-    key("v", "doc"),
-    key("y", "copy"),
-    key("J/K", "section"),
-    key("?", "help"),
-];
-const FOOTER_KEYS: &[Key] = &[
-    key("J/K", "section"),
-    key("↵", "browser"),
-    key("y", "copy"),
-    key("i", "inputs"),
-    key("a", "audit"),
-    key("/", "jump"),
-    key("c", "canslim"),
-    key("?", "help"),
 ];
 
 /// dossier_cache.dossier_json (see py/derive/dossier.py docstring).
@@ -95,8 +79,6 @@ pub struct DossierDoc {
     pub freshness: Vec<Freshness>,
     #[serde(default)]
     pub sections: Vec<Section>,
-    #[serde(default)]
-    pub unsourced: Vec<String>,
 }
 
 #[derive(Debug, Clone, Default, Deserialize)]
@@ -131,7 +113,6 @@ pub struct Dossier {
     focus: Focus,
     /// Active `/` query plus the section to restore on esc.
     filter: Option<(String, usize)>,
-    help: bool,
     palette: Palette,
     flash: Option<String>,
     theme: Theme,
@@ -218,7 +199,6 @@ impl Dossier {
             inspector: SourceInspector::default(),
             focus: Focus::Nav,
             filter: None,
-            help: false,
             palette: Palette::default(),
             flash: None,
             theme,
@@ -482,8 +462,9 @@ impl Screen for Dossier {
         let titles = FrameTitles {
             nav: Line::from("sections"),
             detail: Line::from(title),
-            detail_right: match (self.view.audit, self.audit_notes.get(sel)) {
-                (true, Some(n)) => Line::from(format!("AUDIT · {n}")),
+            detail_right: match (&self.filter, self.view.audit, self.audit_notes.get(sel)) {
+                (Some((q, _)), _, _) => Line::from(format!("/{q}▏")),
+                (None, true, Some(n)) => Line::from(format!("AUDIT · {n}")),
                 _ => Line::default(),
             },
             source: Line::from("source"),
@@ -535,39 +516,23 @@ impl Screen for Dossier {
             self.view.render(frame, detail, blocks, &theme);
         }
         render_source_bar(frame, p.source, self.selected_source(), &theme);
-        let status = match &self.filter {
-            Some((q, _)) => Some(format!("/{q}▏  ↵ go  esc cancel")),
-            None => self.flash.clone().or_else(|| {
-                (self.view.audit).then(|| {
-                    format!(
-                        "AUDIT · values grouped by source document · {} unsourced in dossier",
-                        doc.unsourced.len()
-                    )
-                })
-            }),
-        };
-        let footer = if self.scene.is_map() {
-            MAP_FOOTER_KEYS
-        } else {
-            FOOTER_KEYS
-        };
-        help::render_footer(frame, p.footer, footer, status.as_deref(), &theme);
         if self.inspector.is_open() {
             self.inspector.render(frame, area, &theme);
-        }
-        if self.help {
-            let all: Vec<Key> = NAV_KEYS.iter().chain(SOURCE_KEYS).copied().collect();
-            help::render_overlay(
-                frame,
-                area,
-                &format!("{} dossier keys", self.symbol),
-                &all,
-                &theme,
-            );
         }
         if self.palette.open {
             self.palette.render(frame, area, &theme);
         }
+    }
+
+    fn help(&self) -> Help {
+        Help::new(
+            "dossier",
+            &if self.scene.is_map() {
+                [MAP_KEYS, NAV_KEYS, SOURCE_KEYS].concat()
+            } else {
+                [NAV_KEYS, SOURCE_KEYS].concat()
+            },
+        )
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
@@ -593,10 +558,6 @@ impl Screen for Dossier {
         if self.doc.is_none() {
             return Action::Quit;
         }
-        if self.help {
-            self.help = false;
-            return Action::None;
-        }
         if self.inspector.is_open() {
             return self.inspector.on_key(key);
         }
@@ -614,7 +575,6 @@ impl Screen for Dossier {
         }
         match key.code {
             KeyCode::Char('q') | KeyCode::Esc => return Action::Quit,
-            KeyCode::Char('?') => self.help = true,
             // An interactive map (Capex & fabs): [ ] pick a site, Enter flies to it, o goes home.
             KeyCode::Char('[') if self.scene.is_map() => self.scene.map_step(-1),
             KeyCode::Char(']') if self.scene.is_map() => self.scene.map_step(1),
@@ -685,6 +645,14 @@ impl Screen for Dossier {
             }
         }
         Action::None
+    }
+
+    fn takes_text(&self) -> bool {
+        self.palette.open || self.filter.is_some()
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash.as_deref()
     }
 
     fn set_flash(&mut self, msg: String) {
