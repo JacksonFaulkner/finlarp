@@ -1,12 +1,15 @@
-// Z: diagrams built in the chat. The left pane is a canvas showing the newest diagram in
-// the Z folder (`data/z/*.json`, format in z_spec.rs); the right pane is Claude Code
-// itself, running in a tmux session (one per mode, so switching modes keeps each
-// conversation). Claude writes diagram files while it talks; the canvas hot-reloads them.
+// Z: diagrams built in the chat. The left pane is a canvas showing the ACTIVE diagram, one
+// file in the Z folder (`data/z/*.json`, format in z_spec.rs). The active diagram changes
+// only when the user opens one (f menu, [ ], g/G, b back); Claude writing a file never
+// switches the view, it only flashes "new: ...". The right pane is Claude Code itself,
+// running in a tmux session (one per mode, so switching modes keeps each conversation).
 // The canvas writes `state.json` (what the user is looking at) for Claude to read.
 //
-// Keys mirror the Diagrams screen: hjkl orbit, +/- zoom, 0 reset, 1-9 sections, a-e
-// zooms, o overview, F full picture, [ ] previous/next diagram. `C` gives Claude the keys;
-// ctrl-] takes them back. `M` switches mode (chat, build, quiz).
+// One picture per diagram: no sections or zooms, and no number or letter keys. Explanations
+// are labels on the parts. Keys: hjkl orbit, +/- zoom, 0 reset, F full picture, v art,
+// p pause flows, [ ] previous/next diagram, f diagram menu, b back to the diagram you came
+// from. The chat sits under the picture and is always on screen (F hides it); `C` gives
+// Claude the keys, ctrl-/ takes them back. `M` switches mode.
 
 use std::io;
 use std::path::{Path, PathBuf};
@@ -16,8 +19,11 @@ use image::{DynamicImage, RgbaImage};
 use ratatui::Frame;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::style::Modifier;
 use ratatui::text::{Line, Span};
-use ratatui::widgets::{Block, Borders, Paragraph, Wrap};
+use ratatui::widgets::{
+    Block, Borders, Clear, List, ListItem, ListState, Paragraph, StatefulWidget, Widget, Wrap,
+};
 use ratatui_image::picker::{Picker, ProtocolType};
 use ratatui_image::protocol::StatefulProtocol;
 use ratatui_image::{Resize, StatefulImage};
@@ -25,7 +31,15 @@ use ratatui_image::{Resize, StatefulImage};
 use super::diagrams_window::ClaudeWindow;
 use super::z_spec::{self, Camera, Diagram, Scene};
 use crate::app::{Action, Ctx, Screen};
+use crate::ui::help::{Help, Key, key};
+use crate::ui::layout::popup;
 use crate::ui::theme::Theme;
+
+/// How many earlier diagrams `b` can walk back through.
+const HISTORY: usize = 50;
+/// Claude writes a diagram's file name here when the user asked for it to be shown; the
+/// canvas opens that file and removes the marker. Dot files are not diagrams.
+const OPEN_MARK: &str = ".open";
 
 const SOCKET: &str = "fl-z";
 const RULES: &str = include_str!("z_rules.md");
@@ -38,7 +52,10 @@ const FLOW_SECS: f64 = 2.5;
 const FRAME: Duration = Duration::from_millis(80);
 const WATCH: Duration = Duration::from_millis(300);
 /// Kitty image ids used in turn, so the old frame stays up while the new one uploads.
-const IMAGE_IDS: [u32; 2] = [u32::from_be_bytes([0, 0xF3, 0x2A, 0x01]), u32::from_be_bytes([0, 0xF3, 0x2A, 0x02])];
+const IMAGE_IDS: [u32; 2] = [
+    u32::from_be_bytes([0, 0xF3, 0x2A, 0x01]),
+    u32::from_be_bytes([0, 0xF3, 0x2A, 0x02]),
+];
 
 #[derive(Clone, Copy, PartialEq, Debug)]
 enum Mode {
@@ -69,8 +86,8 @@ impl Mode {
             Mode::Chat => {
                 "Normal conversation. Answer in the chat; draw a diagram only when a picture explains \
                  the idea better than words (a mechanism, a structure, something that flows, a \
-                 geometry). When a diagram carries the explanation, keep the chat reply short and \
-                 point at sections and keys."
+                 geometry). Put the explanation on the picture as part labels and in the diagram's \
+                 text, and keep the chat reply short."
             }
             Mode::Build => {
                 "The user is designing a diagram with you. Every turn changes the canvas: edit the \
@@ -81,17 +98,10 @@ impl Mode {
                 "Teach by asking. Draw the diagram, then quiz the user with AskUserQuestion, one \
                  question at a time, using the picture (\"which part carries the current?\", \"what \
                  happens if this layer is thinner?\"). After each answer say whether it was right and \
-                 why, add a section that explains it, then go on or go deeper."
+                 why, label the part it is about on the picture, then go on or go deeper."
             }
         }
     }
-}
-
-/// Which picture the canvas shows.
-#[derive(Clone, Copy, PartialEq, Debug)]
-enum View {
-    Overview,
-    Zoom(char),
 }
 
 /// The picture on screen and what it was drawn from.
@@ -100,28 +110,40 @@ struct Shown {
     proto: StatefulProtocol,
 }
 
+/// One diagram file in the Z folder, as last listed.
+#[derive(Clone)]
+struct Entry {
+    path: PathBuf,
+    mtime: SystemTime,
+    /// The diagram's title, or the file name when it does not parse.
+    title: String,
+    ok: bool,
+}
+
 pub struct Z {
     theme: Theme,
     dir: PathBuf,
-    /// Diagram files, in name order, with the mtime each had when last listed.
-    files: Vec<(PathBuf, SystemTime)>,
-    cur: usize,
-    /// The diagram on the canvas: the last version of the file that parsed.
+    /// Diagram files, in name order.
+    files: Vec<Entry>,
+    /// The diagram on the canvas. The only place that says which one is open; it is always
+    /// a path in `files` or None (empty folder).
+    active: Option<PathBuf>,
+    /// Diagrams left behind by `open`, most recent last; `b` pops one back.
+    history: Vec<PathBuf>,
+    /// The diagram menu (f) when open: the row under the cursor.
+    menu: Option<usize>,
+    /// The active diagram: the last version of the file that parsed.
     diagram: Option<Diagram>,
     /// Why the current file did not parse, when it did not.
     errors: Vec<String>,
-    view: View,
-    section: Option<usize>,
     camera: poly3d::View,
-    /// Show the art instead of the scene, when a view has both.
+    /// Show the art instead of the scene, when a diagram has both.
     art_first: bool,
     full: bool,
     paused: bool,
     scroll: u16,
     start: Instant,
     last_watch: Instant,
-    /// Newest mtime seen in the folder: a newer file is followed.
-    newest: SystemTime,
     mode: Mode,
     windows: Vec<ClaudeWindow>,
     picker: Option<Picker>,
@@ -163,7 +185,12 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Z> {
         .iter()
         .map(|&m| {
             let prompt = prompt_file(&dir, m)?;
-            Ok(ClaudeWindow::with(ctx.theme.clone(), SOCKET, m.session(), claude_command(&dir, &prompt)))
+            Ok(ClaudeWindow::with(
+                ctx.theme.clone(),
+                SOCKET,
+                m.session(),
+                claude_command(&dir, &prompt),
+            ))
         })
         .collect::<io::Result<Vec<_>>>()?;
     // Must run before the event loop reads stdin: the terminal answers the query on stdin.
@@ -175,11 +202,11 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Z> {
         theme: ctx.theme.clone(),
         dir,
         files: Vec::new(),
-        cur: 0,
+        active: None,
+        history: Vec::new(),
+        menu: None,
         diagram: None,
         errors: Vec::new(),
-        view: View::Overview,
-        section: None,
         camera: poly3d::View::default(),
         art_first: false,
         full: false,
@@ -187,7 +214,6 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Z> {
         scroll: 0,
         start: Instant::now(),
         last_watch: Instant::now(),
-        newest: SystemTime::UNIX_EPOCH,
         mode: Mode::Chat,
         windows,
         picker,
@@ -196,19 +222,37 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Z> {
         last_state: String::new(),
         flash: None,
     };
+    for w in &mut z.windows {
+        w.open = true;
+    }
     z.watch(true);
     if let Some(a) = arg.as_deref().map(str::to_lowercase) {
         if let Some(m) = MODES.iter().find(|m| m.name() == a) {
             z.mode = *m;
-        } else if let Some(i) = z.files.iter().position(|(p, _)| file_name(p).to_lowercase().contains(&a)) {
-            z.select(i);
+        } else if let Some(p) = z
+            .files
+            .iter()
+            .find(|f| file_name(&f.path).to_lowercase().contains(&a))
+            .map(|f| f.path.clone())
+        {
+            z.show(p);
         }
     }
     Ok(z)
 }
 
 fn file_name(p: &Path) -> String {
-    p.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default()
+    p.file_name()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_default()
+}
+
+/// The title a file shows in the menu, and whether it parses.
+fn title_of(path: &Path) -> (String, bool) {
+    match z_spec::load(path) {
+        Ok(d) => (d.title, true),
+        Err(_) => ("does not parse; open it to see why".into(), false),
+    }
 }
 
 fn list(dir: &Path) -> Vec<(PathBuf, SystemTime)> {
@@ -259,75 +303,230 @@ impl Z {
         self.flash = Some((msg.into(), Instant::now()));
     }
 
-    /// Re-lists the folder. Follows a file that is newer than any seen before (Claude just
-    /// wrote it), and reloads the current file when it changed.
+    /// Index of the active diagram in the folder listing.
+    fn cur(&self) -> Option<usize> {
+        let p = self.active.as_deref()?;
+        self.files.iter().position(|f| f.path == p)
+    }
+
+    fn newest_path(&self) -> Option<PathBuf> {
+        self.files
+            .iter()
+            .max_by_key(|f| f.mtime)
+            .map(|f| f.path.clone())
+    }
+
+    /// Re-lists the folder. The active diagram stays active: it reloads when its file was
+    /// edited, and only moves when its file is gone. New files are announced, not opened.
     fn watch(&mut self, first: bool) {
-        let files = list(&self.dir);
-        let cur_path = self.files.get(self.cur).map(|f| f.0.clone());
-        let cur_changed = cur_path.as_ref().is_some_and(|p| {
-            let old = self.files.iter().find(|f| &f.0 == p).map(|f| f.1);
-            let new = files.iter().find(|f| &f.0 == p).map(|f| f.1);
-            old != new
-        });
-        let newest = files.iter().max_by_key(|f| f.1).cloned();
-        self.files = files;
-        if let Some((p, m)) = newest {
-            if m > self.newest {
-                self.newest = m;
-                if first || Some(&p) != cur_path.as_ref() {
-                    let i = self.files.iter().position(|f| f.0 == p).unwrap_or(0);
-                    self.select(i);
-                    if !first {
-                        self.flash(format!("new: {}", file_name(&p)));
+        let old = std::mem::take(&mut self.files);
+        let files: Vec<Entry> = list(&self.dir)
+            .into_iter()
+            .map(|(path, mtime)| match old.iter().find(|e| e.path == path) {
+                Some(e) if e.mtime == mtime => e.clone(),
+                _ => {
+                    let (title, ok) = title_of(&path);
+                    Entry {
+                        path,
+                        mtime,
+                        title,
+                        ok,
                     }
-                    return;
                 }
+            })
+            .collect();
+        let fresh: Vec<String> = files
+            .iter()
+            .filter(|f| !old.iter().any(|o| o.path == f.path))
+            .map(|f| file_name(&f.path))
+            .collect();
+        let mtime_in = |l: &[Entry], p: &Path| l.iter().find(|e| e.path == p).map(|e| e.mtime);
+        let edited = self
+            .active
+            .as_deref()
+            .is_some_and(|p| mtime_in(&old, p) != mtime_in(&files, p));
+        self.files = files;
+
+        let gone = self
+            .active
+            .as_deref()
+            .is_none_or(|p| !self.files.iter().any(|f| f.path == p));
+        if gone {
+            // First start opens the newest file; a vanished active file falls back to it too.
+            let had = self.active.is_some();
+            self.active = self.newest_path();
+            self.reload(false);
+            if had && !first {
+                self.flash("open diagram was removed; showing the newest");
+            }
+        } else if edited {
+            self.reload(true);
+        }
+        let asked = self.take_open_request();
+        if let Some(p) = &asked {
+            self.flash(format!("opened {}", file_name(p)));
+        }
+        if !first {
+            for name in fresh
+                .into_iter()
+                .filter(|n| asked.as_deref().is_none_or(|p| file_name(p) != *n))
+            {
+                self.flash(format!("new: {name}  (f to open)"));
             }
         }
-        match cur_path.and_then(|p| self.files.iter().position(|f| f.0 == p)) {
-            Some(i) => {
-                self.cur = i;
-                if cur_changed {
-                    self.reload(true);
-                }
-            }
-            None if !self.files.is_empty() => self.select(self.cur.min(self.files.len() - 1)),
-            None => {
-                self.diagram = None;
-                self.errors.clear();
-            }
+        if let Some(p) = asked {
+            self.open(p);
         }
     }
 
-    fn select(&mut self, i: usize) {
-        self.cur = i;
+    /// The file Claude asked to show, from `.open`. The marker is removed once the file is
+    /// found, so a request for a file not written yet waits for it.
+    fn take_open_request(&self) -> Option<PathBuf> {
+        let mark = self.dir.join(OPEN_MARK);
+        let name = std::fs::read_to_string(&mark).ok()?;
+        let name = name.trim();
+        let p = self
+            .files
+            .iter()
+            .find(|f| file_name(&f.path) == name)?
+            .path
+            .clone();
+        let _ = std::fs::remove_file(&mark);
+        Some(p)
+    }
+
+    /// Opens `path` and remembers the diagram it replaces, so `b` can return to it.
+    fn open(&mut self, path: PathBuf) {
+        if self.active.as_ref() == Some(&path) {
+            return;
+        }
+        if let Some(prev) = self.active.take() {
+            self.history.push(prev);
+            if self.history.len() > HISTORY {
+                self.history.remove(0);
+            }
+        }
+        self.show(path);
+    }
+
+    /// Makes `path` the active diagram without touching the history.
+    fn show(&mut self, path: PathBuf) {
+        self.active = Some(path);
         self.reload(false);
     }
 
-    /// Loads the current file. `keep` keeps the camera and the open view (the same file
+    /// `b`: back to the diagram open before this one. Skips files that are gone.
+    fn back(&mut self) {
+        while let Some(p) = self.history.pop() {
+            if self.files.iter().any(|f| f.path == p) {
+                self.show(p);
+                return;
+            }
+        }
+        self.flash("no earlier diagram");
+    }
+
+    /// Opens the diagram at listing position `i`, if there is one.
+    fn open_at(&mut self, i: usize) {
+        if let Some(f) = self.files.get(i) {
+            let p = f.path.clone();
+            self.open(p);
+        }
+    }
+
+    /// `[` and `]`: the diagram `delta` places along the folder listing.
+    fn step(&mut self, delta: isize) {
+        let Some(i) = self.cur() else { return };
+        if let Ok(j) = usize::try_from(i as isize + delta) {
+            self.open_at(j);
+        }
+    }
+
+    /// Keys while the f menu is open: move, Enter opens, Esc/f/q close.
+    fn menu_key(&mut self, key: KeyEvent) -> Action {
+        let Some(sel) = self.menu else {
+            return Action::None;
+        };
+        let last = self.files.len().saturating_sub(1);
+        match key.code {
+            KeyCode::Esc | KeyCode::Char('f') | KeyCode::Char('q') => self.menu = None,
+            KeyCode::Up | KeyCode::Char('k') => self.menu = Some(sel.saturating_sub(1)),
+            KeyCode::Down | KeyCode::Char('j') => self.menu = Some((sel + 1).min(last)),
+            KeyCode::Char('g') => self.menu = Some(0),
+            KeyCode::Char('G') => self.menu = Some(last),
+            KeyCode::Enter => {
+                self.menu = None;
+                self.open_at(sel);
+            }
+            _ => {}
+        }
+        Action::None
+    }
+
+    /// The f menu: every diagram in the folder, one line each. The active one is marked; a
+    /// file that does not parse is shown with its file name and a cross.
+    fn draw_menu(&self, frame: &mut Frame, area: Rect) {
+        let Some(sel) = self.menu else { return };
+        let t = &self.theme;
+        let r = popup(area, 72, self.files.len() as u16 + 4);
+        Clear.render(r, frame.buffer_mut());
+        let block = Block::bordered()
+            .title(" diagrams · enter open · esc close ")
+            .border_style(t.accent())
+            .style(t.base());
+        let inner = block.inner(r);
+        frame.render_widget(block, r);
+        if self.files.is_empty() {
+            frame.render_widget(
+                Paragraph::new(Line::styled("  no diagrams in the folder", t.dim())),
+                inner,
+            );
+            return;
+        }
+        let active = self.cur();
+        let items: Vec<ListItem> = self
+            .files
+            .iter()
+            .enumerate()
+            .map(|(i, f)| {
+                let mark = if active == Some(i) { "● " } else { "  " };
+                let title = if f.ok {
+                    f.title.clone()
+                } else {
+                    format!("✗ {}", f.title)
+                };
+                let style = if f.ok { t.title() } else { t.down() };
+                ListItem::new(Line::from(vec![
+                    Span::styled(mark, t.accent()),
+                    Span::styled(format!("{:<22}", file_name(&f.path)), t.dim()),
+                    Span::styled(title, style),
+                ]))
+            })
+            .collect();
+        let list = List::new(items)
+            .highlight_style(t.selected().add_modifier(Modifier::BOLD))
+            .highlight_symbol("▌ ");
+        let mut state = ListState::default().with_selected(Some(sel.min(self.files.len() - 1)));
+        StatefulWidget::render(list, inner, frame.buffer_mut(), &mut state);
+    }
+
+    /// Loads the active file. `keep` keeps the camera and the open view (the same file
     /// was edited); otherwise the view starts at the diagram's own camera.
     fn reload(&mut self, keep: bool) {
-        let Some((path, _)) = self.files.get(self.cur) else {
+        let Some(path) = self.active.clone() else {
+            self.diagram = None;
+            self.errors.clear();
+            self.shown = None;
             return;
         };
-        match z_spec::load(path) {
+        match z_spec::load(&path) {
             Ok(d) => {
                 self.errors.clear();
                 if !keep {
-                    self.view = View::Overview;
-                    self.section = None;
                     self.scroll = 0;
                     self.art_first = false;
-                    self.camera = camera_view(d.scene.as_ref().and_then(|s| s.camera).unwrap_or_default());
-                } else {
-                    if let View::Zoom(k) = self.view {
-                        if !d.zooms.iter().any(|z| z.key.starts_with(k)) {
-                            self.view = View::Overview;
-                        }
-                    }
-                    if self.section.is_some_and(|s| s >= d.sections.len()) {
-                        self.section = None;
-                    }
+                    self.camera =
+                        camera_view(d.scene.as_ref().and_then(|s| s.camera).unwrap_or_default());
                 }
                 self.diagram = Some(d);
             }
@@ -341,76 +540,33 @@ impl Z {
         self.shown = None;
     }
 
-    /// The picture, caption and text of what is open: (title, art, scene, caption, text).
+    /// The picture, caption and text of the active diagram: (title, art, scene, caption, text).
     fn current(&self) -> Option<(String, &[String], Option<&Scene>, &str, &str)> {
         let d = self.diagram.as_ref()?;
-        let zoom_key = match (self.view, self.section.and_then(|i| d.sections.get(i))) {
-            (View::Zoom(k), _) => Some(k),
-            (_, Some(s)) => s.zoom.as_deref().and_then(|z| z.chars().next()),
-            _ => None,
-        };
-        let zoom = zoom_key.and_then(|k| d.zooms.iter().find(|z| z.key.starts_with(k)));
-        let (title, art, scene, caption, mut text) = match zoom {
-            Some(z) => (format!("{} › {}", d.title, z.title), &z.art[..], z.scene.as_ref(), z.caption.as_str(), z.text.as_str()),
-            None => (d.title.clone(), &d.art[..], d.scene.as_ref(), d.caption.as_str(), d.text.as_str()),
-        };
-        if let Some(s) = self.section.and_then(|i| d.sections.get(i)) {
-            text = s.text.as_str();
-        }
-        Some((title, art, scene, caption, text))
-    }
-
-    fn focus(&self) -> Vec<String> {
-        let d = self.diagram.as_ref();
-        self.section
-            .and_then(|i| d?.sections.get(i))
-            .map(|s| s.focus.clone())
-            .unwrap_or_default()
+        Some((
+            d.title.clone(),
+            &d.art[..],
+            d.scene.as_ref(),
+            d.caption.as_str(),
+            d.text.as_str(),
+        ))
     }
 
     fn animating(&self) -> bool {
         !self.paused
-            && self
-                .current()
-                .is_some_and(|(_, art, scene, ..)| scene.is_some_and(|s| !s.flows.is_empty()) && !(self.art_first && !art.is_empty()))
+            && self.current().is_some_and(|(_, art, scene, ..)| {
+                scene.is_some_and(|s| !s.flows.is_empty()) && !(self.art_first && !art.is_empty())
+            })
     }
 
-    fn open_section(&mut self, i: usize) {
-        let Some(d) = self.diagram.as_ref() else { return };
-        let Some(s) = d.sections.get(i) else {
-            self.flash(format!("no section {}", i + 1));
-            return;
-        };
-        if let Some(c) = s.camera {
-            self.camera = camera_view(c);
-        }
-        if s.zoom.is_some() {
-            self.view = View::Overview;
-        }
-        self.section = Some(i);
-        self.scroll = 0;
-        self.shown = None;
-    }
-
-    fn open_zoom(&mut self, k: char) {
-        let Some(d) = self.diagram.as_ref() else { return };
-        let Some(z) = d.zooms.iter().find(|z| z.key.starts_with(k)) else {
-            self.flash(format!("no zoom {k}"));
-            return;
-        };
-        let cam = z.scene.as_ref().and_then(|s| s.camera).unwrap_or_default();
-        self.view = View::Zoom(k);
-        self.section = None;
-        self.scroll = 0;
-        self.camera = camera_view(cam);
-        self.shown = None;
-    }
-
-    fn overview(&mut self) {
-        self.view = View::Overview;
-        self.section = None;
-        self.scroll = 0;
-        self.camera = camera_view(self.diagram.as_ref().and_then(|d| d.scene.as_ref()?.camera).unwrap_or_default());
+    /// Puts the camera back to the diagram's own starting view.
+    fn reset_camera(&mut self) {
+        self.camera = camera_view(
+            self.diagram
+                .as_ref()
+                .and_then(|d| d.scene.as_ref()?.camera)
+                .unwrap_or_default(),
+        );
         self.shown = None;
     }
 
@@ -419,11 +575,9 @@ impl Z {
         let d = self.diagram.as_ref();
         let state = serde_json::json!({
             "mode": self.mode.name(),
-            "file": self.files.get(self.cur).map(|f| f.0.display().to_string()),
+            "file": self.active.as_ref().map(|p| p.display().to_string()),
+            "previous": self.history.last().map(|p| p.display().to_string()),
             "title": d.map(|d| d.title.clone()),
-            "view": match self.view { View::Overview => "overview".to_string(), View::Zoom(k) => k.to_string() },
-            "section": self.section.map(|i| i + 1),
-            "section_title": self.section.and_then(|i| d?.sections.get(i)).map(|s| s.title.clone()),
             "camera": { "yaw": self.camera.yaw.to_degrees().round(), "pitch": self.camera.pitch.to_degrees().round(), "zoom": (self.camera.zoom * 100.0).round() / 100.0 },
             "errors": self.errors,
         });
@@ -437,12 +591,16 @@ impl Z {
     fn render(&mut self, scene: &poly3d::SpecScene, area: Rect) -> Option<RgbaImage> {
         let picker = self.picker.as_ref()?;
         let font = picker.font_size();
-        let (mut w, mut h) = (area.width as u32 * font.width as u32, area.height as u32 * font.height as u32);
-        let k = (MAX_PX.0 as f64 / w as f64).min(MAX_PX.1 as f64 / h as f64).min(1.0);
+        let (mut w, mut h) = (
+            area.width as u32 * font.width as u32,
+            area.height as u32 * font.height as u32,
+        );
+        let k = (MAX_PX.0 as f64 / w as f64)
+            .min(MAX_PX.1 as f64 / h as f64)
+            .min(1.0);
         w = ((w as f64 * k) as u32).max(8);
         h = ((h as f64 * k) as u32).max(8);
         let phase = self.start.elapsed().as_secs_f64() / FLOW_SECS;
-        poly3d::set_user_marks(self.focus());
         let img = poly3d::render_spec(scene, &self.camera, phase, w as usize, h as usize, BG);
         poly3d::set_user_marks(Vec::new());
         Some(img)
@@ -451,8 +609,8 @@ impl Z {
     fn picture_key(&self, area: Rect) -> u64 {
         use std::hash::{Hash, Hasher};
         let mut hs = std::collections::hash_map::DefaultHasher::new();
-        self.cur.hash(&mut hs);
-        format!("{:?}{:?}{:?}", self.view, self.section, self.files.get(self.cur).map(|f| f.1)).hash(&mut hs);
+        self.active.hash(&mut hs);
+        self.cur().map(|i| self.files[i].mtime).hash(&mut hs);
         for v in [self.camera.yaw, self.camera.pitch, self.camera.zoom] {
             ((v * 1000.0).round() as i64).hash(&mut hs);
         }
@@ -467,19 +625,30 @@ impl Z {
         if area.width < 4 || area.height < 2 {
             return;
         }
-        let key = (self.picture_key(area), area.width as u32, area.height as u32);
+        let key = (
+            self.picture_key(area),
+            area.width as u32,
+            area.height as u32,
+        );
         if self.shown.as_ref().is_none_or(|s| s.key != key) {
             let poly = z_spec::to_poly(scene);
             if let Some(img) = self.render(&poly, area) {
                 let id = IMAGE_IDS[(self.frames % 2) as usize];
                 self.frames += 1;
                 if let Some(p) = self.picker.as_ref() {
-                    self.shown = Some(Shown { key, proto: protocol(p, DynamicImage::ImageRgba8(img), id) });
+                    self.shown = Some(Shown {
+                        key,
+                        proto: protocol(p, DynamicImage::ImageRgba8(img), id),
+                    });
                 }
             }
         }
         if let Some(s) = self.shown.as_mut() {
-            frame.render_stateful_widget(StatefulImage::default().resize(Resize::Scale(None)), area, &mut s.proto);
+            frame.render_stateful_widget(
+                StatefulImage::default().resize(Resize::Scale(None)),
+                area,
+                &mut s.proto,
+            );
         }
     }
 
@@ -493,70 +662,64 @@ impl Z {
                 for c in row.chars() {
                     let f = is_frame_glyph(c);
                     if f != frame_run && !buf.is_empty() {
-                        spans.push(Span::styled(std::mem::take(&mut buf), if frame_run { t.accent() } else { t.base() }));
+                        spans.push(Span::styled(
+                            std::mem::take(&mut buf),
+                            if frame_run { t.accent() } else { t.base() },
+                        ));
                     }
                     frame_run = f;
                     buf.push(c);
                 }
                 if !buf.is_empty() {
-                    spans.push(Span::styled(buf, if frame_run { t.accent() } else { t.base() }));
+                    spans.push(Span::styled(
+                        buf,
+                        if frame_run { t.accent() } else { t.base() },
+                    ));
                 }
                 Line::from(spans)
             })
             .collect()
     }
 
-    /// The tab row: overview, zooms, sections; the open one highlighted.
-    fn tabs(&self) -> Line<'static> {
-        let t = &self.theme;
-        let Some(d) = self.diagram.as_ref() else {
-            return Line::default();
-        };
-        let mut spans = Vec::new();
-        let on = |b: bool| if b { t.selected() } else { t.dim() };
-        spans.push(Span::styled(" o overview ", on(self.view == View::Overview && self.section.is_none())));
-        for z in &d.zooms {
-            let k = z.key.chars().next().unwrap_or('?');
-            spans.push(Span::styled(format!(" {k} {} ", z.title), on(self.view == View::Zoom(k))));
-        }
-        if !d.sections.is_empty() {
-            spans.push(Span::styled(" │", t.dim()));
-        }
-        for (i, s) in d.sections.iter().enumerate() {
-            spans.push(Span::styled(format!(" {} {} ", i + 1, s.title), on(self.section == Some(i))));
-        }
-        Line::from(spans)
-    }
-
     fn draw_canvas(&mut self, frame: &mut Frame, area: Rect) {
         let t = self.theme.clone();
         let n = self.files.len();
-        let name = self.files.get(self.cur).map(|f| file_name(&f.0)).unwrap_or_default();
+        let at = self.cur();
+        let name = self.active.as_deref().map(file_name).unwrap_or_default();
         let title = match self.current() {
             Some((title, ..)) => title,
             None => "no diagram yet".into(),
         };
-        let hint = if self.window_ref().open && self.window_ref().focus {
-            " ctrl-] canvas ".to_string()
-        } else {
-            " C claude  M mode  [ ] diagram  hjkl turn  1-9 a-e o  F full  q back ".to_string()
-        };
-        let flash = self.flash.as_ref().filter(|(_, at)| at.elapsed() < Duration::from_secs(3)).map(|(m, _)| m.clone());
         let block = Block::new()
             .borders(Borders::ALL)
-            .border_style(if self.window_ref().focus && self.window_ref().open { t.dim() } else { t.accent() })
-            .title(Span::styled(format!(" Z · {} · {title} ", self.mode.name()), t.title()))
-            .title(Line::from(Span::styled(format!(" {name} {}/{n} ", if n == 0 { 0 } else { self.cur + 1 }), t.dim())).right_aligned())
-            .title_bottom(Span::styled(flash.map(|f| format!(" {f} ")).unwrap_or(hint), t.dim()));
+            .border_style(if self.window_ref().focus && self.window_ref().open {
+                t.dim()
+            } else {
+                t.accent()
+            })
+            .title(Span::styled(
+                format!(" Z · {} · {title} ", self.mode.name()),
+                t.title(),
+            ))
+            .title(
+                Line::from(Span::styled(
+                    format!(" {name} {}/{n} ", at.map_or(0, |i| i + 1)),
+                    t.dim(),
+                ))
+                .right_aligned(),
+            );
         let inner = block.inner(area);
         frame.render_widget(block, area);
 
-        let Some((_, art, scene, caption, text)) = self.current() else {
+        let Some((_, art, scene, caption, _text)) = self.current() else {
             let mut lines = vec![
                 Line::raw(""),
                 Line::styled("  No diagrams yet.", t.title()),
                 Line::raw(""),
-                Line::styled("  Press C and ask Claude something; it draws here when a picture helps.", t.base()),
+                Line::styled(
+                    "  Press C and ask Claude something; it draws here when a picture helps.",
+                    t.base(),
+                ),
                 Line::styled(format!("  Files go in {}", self.dir.display()), t.dim()),
             ];
             for e in &self.errors {
@@ -565,28 +728,31 @@ impl Z {
             frame.render_widget(Paragraph::new(lines).style(t.base()), inner);
             return;
         };
-        let (art, scene, caption, text) = (art.to_vec(), scene.cloned(), caption.to_string(), text.to_string());
+        let (art, scene, caption) = (art.to_vec(), scene.cloned(), caption.to_string());
 
-        let text_h = if self.full || text.trim().is_empty() && self.errors.is_empty() {
+        // Only parse errors go under the picture; the diagram's text is not shown.
+        let text_h = if self.full || self.errors.is_empty() {
             0
         } else {
-            (inner.height / 3).max(4)
+            (inner.height / 4).max(3)
         };
-        let [tabs, pic, cap, body] = Layout::vertical([
-            Constraint::Length(1),
+        let [pic, cap, body] = Layout::vertical([
             Constraint::Min(3),
             Constraint::Length(u16::from(!caption.is_empty())),
             Constraint::Length(text_h),
         ])
         .areas(inner);
-        frame.render_widget(Paragraph::new(self.tabs()).style(t.base()), tabs);
 
         let show_art = !art.is_empty() && (scene.is_none() || self.art_first);
         if show_art {
             let lines = self.art_lines(&art);
             let h = lines.len() as u16;
             let y = pic.y + pic.height.saturating_sub(h) / 2;
-            let w = art.iter().map(|r| unicode_width::UnicodeWidthStr::width(r.as_str())).max().unwrap_or(0) as u16;
+            let w = art
+                .iter()
+                .map(|r| unicode_width::UnicodeWidthStr::width(r.as_str()))
+                .max()
+                .unwrap_or(0) as u16;
             let x = pic.x + pic.width.saturating_sub(w) / 2;
             let r = Rect::new(x, y, w.min(pic.width), h.min(pic.height));
             frame.render_widget(Paragraph::new(lines).style(t.base()), r);
@@ -594,20 +760,24 @@ impl Z {
             self.draw_picture(frame, pic, s);
         }
         if !caption.is_empty() {
-            frame.render_widget(Paragraph::new(Line::styled(caption, t.dim())).centered(), cap);
+            frame.render_widget(
+                Paragraph::new(Line::styled(caption, t.dim())).centered(),
+                cap,
+            );
         }
         if text_h > 0 {
-            let mut lines: Vec<Line> = self.errors.iter().map(|e| Line::styled(format!("✗ {e}"), t.down())).collect();
-            if !lines.is_empty() {
-                lines.push(Line::raw(""));
-            }
-            if let Some(s) = self.section.and_then(|i| self.diagram.as_ref()?.sections.get(i)) {
-                lines.push(Line::styled(format!("{} {}", self.section.unwrap_or(0) + 1, s.title), t.title()));
-            }
-            lines.extend(text.lines().map(|l| Line::styled(l.to_string(), t.base())));
+            let lines: Vec<Line> = self
+                .errors
+                .iter()
+                .map(|e| Line::styled(format!("✗ {e}"), t.down()))
+                .collect();
             let body_block = Block::new().borders(Borders::TOP).border_style(t.dim());
             frame.render_widget(
-                Paragraph::new(lines).block(body_block).wrap(Wrap { trim: false }).scroll((self.scroll, 0)).style(t.base()),
+                Paragraph::new(lines)
+                    .block(body_block)
+                    .wrap(Wrap { trim: false })
+                    .scroll((self.scroll, 0))
+                    .style(t.base()),
                 body,
             );
         }
@@ -620,12 +790,8 @@ impl Z {
             KeyCode::Char('d') if ctrl => self.scroll = self.scroll.saturating_add(8),
             KeyCode::Char('u') if ctrl => self.scroll = self.scroll.saturating_sub(8),
             KeyCode::Esc | KeyCode::Char('q') => {
-                if self.window_ref().open {
-                    self.window().open = false;
-                } else if self.full {
+                if self.full {
                     self.full = false;
-                } else if self.view != View::Overview || self.section.is_some() {
-                    self.overview();
                 } else {
                     return Action::Quit;
                 }
@@ -635,36 +801,26 @@ impl Z {
                 self.window().show();
             }
             KeyCode::Char('M') => {
-                let was_open = self.window_ref().open;
                 let i = MODES.iter().position(|m| *m == self.mode).unwrap_or(0);
-                self.window().open = false;
                 self.mode = MODES[(i + 1) % MODES.len()];
-                if was_open {
-                    self.window().open = true;
-                    self.window().focus = false;
-                }
+                // the new mode's chat is on screen too, with the keys on the canvas
+                self.window().open = true;
+                self.window().focus = false;
                 self.flash(format!("mode: {}", self.mode.name()));
             }
-            KeyCode::Char('[') if self.cur > 0 => self.select(self.cur - 1),
-            KeyCode::Char(']') if self.cur + 1 < self.files.len() => self.select(self.cur + 1),
-            KeyCode::Char('g') if !self.files.is_empty() => self.select(0),
-            KeyCode::Char('G') if !self.files.is_empty() => self.select(self.files.len() - 1),
+            KeyCode::Char('[') => self.step(-1),
+            KeyCode::Char(']') => self.step(1),
+            KeyCode::Char('g') => self.open_at(0),
+            KeyCode::Char('G') => self.open_at(self.files.len().saturating_sub(1)),
+            KeyCode::Char('b') | KeyCode::Backspace => self.back(),
+            KeyCode::Char('f') => self.menu = Some(self.cur().unwrap_or(0)),
             KeyCode::Char('h') | KeyCode::Left => self.camera.orbit(-step, 0.0),
             KeyCode::Char('l') | KeyCode::Right => self.camera.orbit(step, 0.0),
             KeyCode::Char('k') | KeyCode::Up => self.camera.orbit(0.0, step),
             KeyCode::Char('j') | KeyCode::Down => self.camera.orbit(0.0, -step),
             KeyCode::Char('+') | KeyCode::Char('=') => self.camera.zoom_by(1.15),
             KeyCode::Char('-') | KeyCode::Char('_') => self.camera.zoom_by(1.0 / 1.15),
-            KeyCode::Char('0') => {
-                let cam = match self.view {
-                    View::Zoom(k) => self.diagram.as_ref().and_then(|d| d.zooms.iter().find(|z| z.key.starts_with(k))?.scene.as_ref()?.camera),
-                    View::Overview => self.diagram.as_ref().and_then(|d| d.scene.as_ref()?.camera),
-                };
-                self.camera = camera_view(cam.unwrap_or_default());
-            }
-            KeyCode::Char(c @ '1'..='9') => self.open_section(c as usize - '1' as usize),
-            KeyCode::Char(c @ 'a'..='e') => self.open_zoom(c),
-            KeyCode::Char('o') => self.overview(),
+            KeyCode::Char('0') => self.reset_camera(),
             KeyCode::Char('F') => self.full = !self.full,
             KeyCode::Char('p') => self.paused = !self.paused,
             KeyCode::Char('v') => {
@@ -702,24 +858,54 @@ fn protocol(picker: &Picker, img: DynamicImage, id: u32) -> StatefulProtocol {
     )
 }
 
+const KEYS: &[Key] = &[
+    key("C/i/↵", "ask Claude"),
+    key("M", "mode"),
+    key("f", "diagrams menu"),
+    key("b/⌫", "back"),
+    key("[/]", "previous / next diagram"),
+    key("h/j/k/l", "turn"),
+    key("+/=", "zoom in"),
+    key("-/_", "zoom out"),
+    key("0", "reset the camera"),
+    key("v", "art"),
+    key("F", "full screen"),
+    key("p", "pause / resume"),
+    key("J/K", "scroll"),
+    key("^d/^u", "scroll 8 lines"),
+    key("g/G", "first / last diagram"),
+    key("r", "reload"),
+    key("ctrl-/", "canvas (from the chat)"),
+    key("q/esc", "quit"),
+];
+
 impl Screen for Z {
     fn draw(&mut self, frame: &mut Frame) {
         let area = frame.area();
         frame.render_widget(Block::new().style(self.theme.base()), area);
-        let claude = self.window_ref().open && !self.full;
-        if claude {
-            let [left, right] = Layout::horizontal([Constraint::Percentage(56), Constraint::Percentage(44)]).areas(area);
-            self.draw_canvas(frame, left);
+        // The hero picture on top, Claude under it, always on screen; F gives the picture all of it.
+        if !self.full {
+            let [top, chat] =
+                Layout::vertical([Constraint::Min(10), Constraint::Percentage(30)]).areas(area);
+            self.draw_canvas(frame, top);
             let label = self.mode.name();
             let t = self.theme.clone();
-            self.window().draw(frame, right, label, &t);
+            self.window().draw(frame, chat, label, &t, Borders::ALL);
         } else {
             self.draw_canvas(frame, area);
         }
+        self.draw_menu(frame, area);
         self.write_state();
     }
 
+    fn help(&self) -> Help {
+        Help::new("z", KEYS)
+    }
+
     fn on_key(&mut self, key: KeyEvent) -> Action {
+        if self.menu.is_some() {
+            return self.menu_key(key);
+        }
         let w = self.window_ref();
         if w.open && w.focus {
             self.window().key(key);
@@ -737,15 +923,31 @@ impl Screen for Z {
     }
 
     fn poll_interval(&self) -> Duration {
-        if self.animating() { FRAME } else { Duration::from_millis(100) }
+        if self.animating() {
+            FRAME
+        } else {
+            Duration::from_millis(100)
+        }
     }
 
     fn leader_ok(&self) -> bool {
-        !(self.window_ref().open && self.window_ref().focus)
+        !(self.window_ref().open && self.window_ref().focus) && self.menu.is_none()
     }
 
     fn shows_tape(&self) -> bool {
         false
+    }
+
+    fn takes_text(&self) -> bool {
+        // typing goes to the Claude window while it has focus
+        self.window_ref().open && self.window_ref().focus
+    }
+
+    fn flash_text(&self) -> Option<&str> {
+        self.flash
+            .as_ref()
+            .filter(|(_, at)| at.elapsed() < Duration::from_secs(3))
+            .map(|(m, _)| m.as_str())
     }
 
     fn set_flash(&mut self, msg: String) {
@@ -765,11 +967,11 @@ mod tests {
             theme: theme.clone(),
             dir: dir.to_path_buf(),
             files: Vec::new(),
-            cur: 0,
+            active: None,
+            history: Vec::new(),
+            menu: None,
             diagram: None,
             errors: Vec::new(),
-            view: View::Overview,
-            section: None,
             camera: poly3d::View::default(),
             art_first: false,
             full: false,
@@ -777,9 +979,11 @@ mod tests {
             scroll: 0,
             start: Instant::now(),
             last_watch: Instant::now(),
-            newest: SystemTime::UNIX_EPOCH,
             mode: Mode::Chat,
-            windows: MODES.iter().map(|m| ClaudeWindow::with(theme.clone(), SOCKET, m.session(), "true".into())).collect(),
+            windows: MODES
+                .iter()
+                .map(|m| ClaudeWindow::with(theme.clone(), SOCKET, m.session(), "true".into()))
+                .collect(),
             picker: Some(Picker::halfblocks()),
             shown: None,
             frames: 0,
@@ -805,8 +1009,7 @@ mod tests {
         {"shape":"box","name":"base","at":[0,0,0],"size":[4,1,4]},
         {"shape":"cylinder","name":"post","from":[0,0.5,0],"to":[0,3,0],"r":0.3,"color":"copper"}],
         "flows":[{"name":"current","path":[[0,0,0],[0,3,0]]}]},
-        "text":"overview text","sections":[{"title":"Post","text":"post text","focus":["post"],"camera":{"yaw":90}}],
-        "zooms":[{"key":"a","title":"Detail","art":["┌──┐","│ab│","└──┘"],"text":"zoom text"}]}"#;
+        "text":"overview text"}"#;
 
     #[test]
     fn follows_new_files_and_shows_errors_without_losing_the_picture() {
@@ -819,51 +1022,174 @@ mod tests {
 
         // a broken edit keeps the last good diagram on screen, with the errors
         std::thread::sleep(Duration::from_millis(20));
-        std::fs::write(dir.join("01-stack.json"), r#"{"title":"Stack","scene":{"parts":[{"shape":"cone"}]}}"#).unwrap();
+        std::fs::write(
+            dir.join("01-stack.json"),
+            r#"{"title":"Stack","scene":{"parts":[{"shape":"cone"}]}}"#,
+        )
+        .unwrap();
         z.watch(false);
         assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
         assert!(z.errors[0].contains("shape"), "{:?}", z.errors);
 
-        // a newer file is followed
+        // the edit is fixed; the canvas picks it up
         std::thread::sleep(Duration::from_millis(20));
-        std::fs::write(dir.join("02-art.json"), r#"{"title":"Art","art":["┌┐","└┘"]}"#).unwrap();
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
         z.watch(false);
-        assert_eq!(z.diagram.as_ref().unwrap().title, "Art");
+        assert!(z.errors.is_empty());
+
+        // a new file is announced but does not take the canvas
+        std::thread::sleep(Duration::from_millis(20));
+        std::fs::write(
+            dir.join("02-art.json"),
+            r#"{"title":"Art","art":["┌┐","└┘"]}"#,
+        )
+        .unwrap();
+        z.watch(false);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+        assert!(z.flash.as_ref().unwrap().0.contains("02-art.json"));
+
+        // the user moves on with ]; b returns; with no history left, b says so
         z.on_key(key('['));
-        assert_eq!(z.cur, 0);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+        z.on_key(key(']'));
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Art");
+        z.on_key(key('b'));
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+        z.on_key(key('b'));
+        assert!(z.flash.as_ref().unwrap().0.contains("no earlier"));
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
         let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]
-    fn keys_open_sections_and_zooms_and_draw() {
+    fn a_change_request_opens_the_new_file_and_plain_new_files_do_not() {
+        let dir = tmp("open");
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
+        let mut z = screen(&dir);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+
+        // a new file alone stays closed: the user opens it from the menu
+        std::thread::sleep(Duration::from_millis(20));
+        std::fs::write(
+            dir.join("02-art.json"),
+            r#"{"title":"Art","art":["┌┐","└┘"]}"#,
+        )
+        .unwrap();
+        z.watch(false);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+
+        // Claude asked for it: .open names it, the canvas opens it and uses up the request
+        std::fs::write(dir.join(OPEN_MARK), "02-art.json\n").unwrap();
+        z.watch(false);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Art");
+        assert!(!dir.join(OPEN_MARK).exists());
+        z.on_key(key('b'));
+        assert_eq!(
+            z.diagram.as_ref().unwrap().title,
+            "Stack",
+            "b returns to the diagram before"
+        );
+
+        // a request for a file not written yet waits for it
+        std::fs::write(dir.join(OPEN_MARK), "03-later.json").unwrap();
+        z.watch(false);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+        assert!(dir.join(OPEN_MARK).exists());
+        std::fs::write(dir.join("03-later.json"), r#"{"title":"Later","text":"t"}"#).unwrap();
+        z.watch(false);
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Later");
+        assert!(!dir.join(OPEN_MARK).exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    fn code(c: KeyCode) -> KeyEvent {
+        KeyEvent::new(c, KeyModifiers::NONE)
+    }
+
+    #[test]
+    fn f_menu_lists_every_diagram_and_enter_opens_one() {
+        let dir = tmp("menu");
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
+        std::fs::write(
+            dir.join("02-art.json"),
+            r#"{"title":"Art","art":["┌┐","└┘"]}"#,
+        )
+        .unwrap();
+        std::fs::write(dir.join("03-broken.json"), "{ nope").unwrap();
+        let mut z = screen(&dir);
+        z.show(dir.join("01-stack.json"));
+
+        // f opens the menu on the active row; arrows move and clamp; enter opens and closes
+        z.on_key(key('f'));
+        assert_eq!(z.menu, Some(0));
+        for _ in 0..3 {
+            z.on_key(code(KeyCode::Down));
+        }
+        assert_eq!(z.menu, Some(2), "clamps at the last row");
+        z.on_key(code(KeyCode::Enter));
+        assert_eq!(z.menu, None);
+        assert!(z.active.as_ref().unwrap().ends_with("03-broken.json"));
+        assert!(!z.errors.is_empty(), "a broken file opens with its errors");
+
+        // b goes back to the diagram the menu replaced
+        z.on_key(key('b'));
+        assert!(z.active.as_ref().unwrap().ends_with("01-stack.json"));
+        assert_eq!(z.diagram.as_ref().unwrap().title, "Stack");
+
+        // the menu draws every file, marks the active one, and the state file says which it is
+        let mut term = Terminal::new(TestBackend::new(100, 40)).unwrap();
+        z.on_key(key('f'));
+        term.draw(|f| z.draw(f)).unwrap();
+        let s: String = term
+            .backend()
+            .buffer()
+            .content()
+            .iter()
+            .map(|c| c.symbol())
+            .collect();
+        assert!(
+            s.contains("01-stack.json")
+                && s.contains("02-art.json")
+                && s.contains("03-broken.json"),
+            "{s}"
+        );
+        assert!(s.contains("● "), "{s}");
+        let state: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(dir.join("state.json")).unwrap())
+                .unwrap();
+        assert!(state["file"].as_str().unwrap().ends_with("01-stack.json"));
+        assert!(
+            state["previous"].is_null(),
+            "back popped the only entry: {state}"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn draws_one_picture_with_its_caption_and_no_key_labels() {
         let dir = tmp("keys");
         std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
         let mut z = screen(&dir);
         let mut term = Terminal::new(TestBackend::new(100, 40)).unwrap();
         term.draw(|f| z.draw(f)).unwrap();
-        let screen_text = |term: &Terminal<TestBackend>| {
-            term.backend().buffer().content().iter().map(|c| c.symbol()).collect::<String>()
-        };
-        assert!(screen_text(&term).contains("overview text"));
-
-        z.on_key(key('1'));
-        assert_eq!(z.section, Some(0));
-        assert!((z.camera.yaw - 90f64.to_radians()).abs() < 1e-9);
-        assert_eq!(z.focus(), vec!["post".to_string()]);
-        term.draw(|f| z.draw(f)).unwrap();
-        assert!(screen_text(&term).contains("post text"));
-
-        z.on_key(key('a'));
-        assert_eq!(z.view, View::Zoom('a'));
-        term.draw(|f| z.draw(f)).unwrap();
-        let s = screen_text(&term);
-        assert!(s.contains("zoom text") && s.contains("│ab│"), "{s}");
-
-        z.on_key(key('q'));
-        assert_eq!(z.view, View::Overview);
+        let s: String = term
+            .backend()
+            .buffer()
+            .content()
+            .iter()
+            .map(|c| c.symbol())
+            .collect();
+        assert!(s.contains("cap") && !s.contains("overview text"), "{s}");
+        // no section or zoom keys do anything any more: nothing to open, nothing to print
+        for c in ['1', 'a', 'o'] {
+            z.on_key(key(c));
+        }
+        assert!(z.active.is_some());
         assert_eq!(z.on_key(key('q')), Action::Quit);
 
-        let state: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(dir.join("state.json")).unwrap()).unwrap();
+        let state: serde_json::Value =
+            serde_json::from_str(&std::fs::read_to_string(dir.join("state.json")).unwrap())
+                .unwrap();
         assert_eq!(state["title"], "Stack");
         let _ = std::fs::remove_dir_all(&dir);
     }

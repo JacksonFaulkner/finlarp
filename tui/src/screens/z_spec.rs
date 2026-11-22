@@ -3,10 +3,10 @@
 // `fl z check FILE` prints the same errors the screen would show, so Claude can fix a
 // file before the user sees it.
 //
-// A diagram has an overview (2D `art`, a 3D `scene`, or both), its explanation `text`,
-// up to 9 numbered `sections` (each may ring parts and turn the camera), and up to 5
-// lettered `zooms` (a..e), each a view of its own. The full reference Claude gets is
-// z_rules.md; keep the two in step.
+// A diagram is one picture: 2D `art`, a 3D `scene`, or both, with its explanation `text`
+// under it. There are no sections or zooms: everything the user needs is on that one
+// picture, and explanations sit on it as part labels (a part's `name`). The full reference
+// Claude gets is z_rules.md; keep the two in step.
 
 use std::path::Path;
 
@@ -15,38 +15,6 @@ use serde::Deserialize;
 #[derive(Debug, Clone, Deserialize, Default)]
 #[serde(deny_unknown_fields)]
 pub struct Diagram {
-    pub title: String,
-    #[serde(default)]
-    pub caption: String,
-    #[serde(default)]
-    pub art: Vec<String>,
-    pub scene: Option<Scene>,
-    #[serde(default)]
-    pub text: String,
-    #[serde(default)]
-    pub sections: Vec<Section>,
-    #[serde(default)]
-    pub zooms: Vec<Zoom>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Section {
-    pub title: String,
-    #[serde(default)]
-    pub text: String,
-    /// Part names to ring on the picture while the section is open.
-    #[serde(default)]
-    pub focus: Vec<String>,
-    pub camera: Option<Camera>,
-    /// A zoom letter: the section shows that zoom's picture.
-    pub zoom: Option<String>,
-}
-
-#[derive(Debug, Clone, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Zoom {
-    pub key: String,
     pub title: String,
     #[serde(default)]
     pub caption: String,
@@ -163,7 +131,9 @@ pub fn parse_color(s: &str) -> Option<[f32; 3]> {
 }
 
 const MAX_PARTS: usize = 400;
-pub const ZOOM_KEYS: &str = "abcde";
+/// A part's name is its label on the picture. Long explanations make the picture unreadable;
+/// keep the label short and put the detail in the diagram's text.
+pub const MAX_LABEL: usize = 40;
 
 /// The diagram in `json`, checked. Errors name the field and say what is valid, so Claude
 /// can fix the file from the message alone.
@@ -174,7 +144,8 @@ pub fn parse(json: &str) -> Result<Diagram, Vec<String>> {
 }
 
 pub fn load(path: &Path) -> Result<Diagram, Vec<String>> {
-    let text = std::fs::read_to_string(path).map_err(|e| vec![format!("can't read {}: {e}", path.display())])?;
+    let text = std::fs::read_to_string(path)
+        .map_err(|e| vec![format!("can't read {}: {e}", path.display())])?;
     parse(&text)
 }
 
@@ -189,59 +160,37 @@ fn check(d: &Diagram) -> Vec<String> {
     if let Some(s) = &d.scene {
         check_scene(s, "scene", &mut errs);
     }
-    if d.sections.len() > 9 {
-        errs.push(format!("sections: at most 9 (keys 1-9), got {}", d.sections.len()));
-    }
-    let mut seen = String::new();
-    for (i, z) in d.zooms.iter().enumerate() {
-        let at = format!("zooms[{i}]");
-        let k = z.key.as_str();
-        if k.len() != 1 || !ZOOM_KEYS.contains(k) {
-            errs.push(format!("{at}.key: one of a, b, c, d, e; got {k:?}"));
-        } else if seen.contains(k) {
-            errs.push(format!("{at}.key: {k:?} used twice"));
-        } else {
-            seen.push_str(k);
-        }
-        if z.art.is_empty() && z.scene.is_none() && z.text.trim().is_empty() {
-            errs.push(format!("{at}: needs at least one of art, scene or text"));
-        }
-        if let Some(s) = &z.scene {
-            check_scene(s, &format!("{at}.scene"), &mut errs);
-        }
-    }
-    let names = part_names(d);
-    for (i, s) in d.sections.iter().enumerate() {
-        let at = format!("sections[{i}]");
-        if let Some(z) = &s.zoom {
-            if !d.zooms.iter().any(|x| &x.key == z) {
-                errs.push(format!("{at}.zoom: no zoom {z:?}; zooms: {seen:?}"));
-            }
-        }
-        for f in &s.focus {
-            if !names.iter().any(|n| poly3d::match_name(std::slice::from_ref(n), f).is_some()) {
-                errs.push(format!("{at}.focus: no part named {f:?}; parts: {}", names.join(", ")));
-            }
-        }
-    }
     errs
 }
 
 fn check_scene(s: &Scene, at: &str, errs: &mut Vec<String>) {
-    let total: usize = s.parts.iter().map(|p| p.repeat.map_or(1, |r| r.n.max(1))).sum();
+    let total: usize = s
+        .parts
+        .iter()
+        .map(|p| p.repeat.map_or(1, |r| r.n.max(1)))
+        .sum();
     if total > MAX_PARTS {
-        errs.push(format!("{at}: {total} parts after repeats; at most {MAX_PARTS}"));
+        errs.push(format!(
+            "{at}: {total} parts after repeats; at most {MAX_PARTS}"
+        ));
     }
     if s.parts.is_empty() && s.flows.is_empty() {
         errs.push(format!("{at}: no parts or flows"));
     }
     for (i, p) in s.parts.iter().enumerate() {
         let at = format!("{at}.parts[{i}]");
+        if let Some(n) = &p.name {
+            if n.chars().count() > MAX_LABEL {
+                errs.push(format!("{at}.name: {} characters; labels are at most {MAX_LABEL}. Shorten it and put the detail in the caption", n.chars().count()));
+            }
+        }
         let pos = |v: Option<f64>| v.is_some_and(|x| x > 0.0 && x.is_finite());
         match p.shape.as_str() {
             "box" => {
                 if p.at.is_none() || !p.size.is_some_and(|s| s.iter().all(|&x| pos(Some(x)))) {
-                    errs.push(format!("{at}: a box needs at [x,y,z] (its centre) and size [w,h,d], all sizes > 0"));
+                    errs.push(format!(
+                        "{at}: a box needs at [x,y,z] (its centre) and size [w,h,d], all sizes > 0"
+                    ));
                 }
             }
             "cylinder" => {
@@ -254,11 +203,16 @@ fn check_scene(s: &Scene, at: &str, errs: &mut Vec<String>) {
                     errs.push(format!("{at}: a sphere needs at [x,y,z] and r > 0"));
                 }
             }
-            other => errs.push(format!("{at}.shape: one of box, cylinder, sphere; got {other:?}")),
+            other => errs.push(format!(
+                "{at}.shape: one of box, cylinder, sphere; got {other:?}"
+            )),
         }
         if let Some(c) = &p.color {
             if parse_color(c).is_none() {
-                errs.push(format!("{at}.color: #rrggbb or one of {}; got {c:?}", color_names()));
+                errs.push(format!(
+                    "{at}.color: #rrggbb or one of {}; got {c:?}",
+                    color_names()
+                ));
             }
         }
         if !(0.0..=1.0).contains(&p.glow) {
@@ -274,7 +228,10 @@ fn check_scene(s: &Scene, at: &str, errs: &mut Vec<String>) {
         }
         if let Some(c) = &f.color {
             if parse_color(c).is_none() {
-                errs.push(format!("{at}.flows[{i}].color: #rrggbb or one of {}; got {c:?}", color_names()));
+                errs.push(format!(
+                    "{at}.flows[{i}].color: #rrggbb or one of {}; got {c:?}",
+                    color_names()
+                ));
             }
         }
     }
@@ -284,21 +241,6 @@ fn color_names() -> String {
     COLORS.iter().map(|(n, _)| *n).collect::<Vec<_>>().join(" ")
 }
 
-/// Every name a section's `focus` may use: part names (repeats expanded) and flow names.
-pub fn part_names(d: &Diagram) -> Vec<String> {
-    let mut out = Vec::new();
-    let scenes = d.scene.iter().chain(d.zooms.iter().filter_map(|z| z.scene.as_ref()));
-    for s in scenes {
-        let poly = to_poly(s);
-        for n in poly.parts.iter().filter_map(|p| p.name.clone()).chain(poly.flows.iter().filter_map(|f| f.name.clone())) {
-            if !out.contains(&n) {
-                out.push(n);
-            }
-        }
-    }
-    out
-}
-
 /// The scene as the renderer takes it. Repeats expand here: a name with `{i}` becomes one
 /// label per copy (1-based); a plain name labels only the first copy.
 pub fn to_poly(s: &Scene) -> poly3d::SpecScene {
@@ -306,13 +248,18 @@ pub fn to_poly(s: &Scene) -> poly3d::SpecScene {
     let mut parts = Vec::new();
     for p in &s.parts {
         let color = p.color.as_deref().and_then(parse_color).unwrap_or(default);
-        let rep = p.repeat.unwrap_or(Repeat { n: 1, step: [0.0; 3] });
+        let rep = p.repeat.unwrap_or(Repeat {
+            n: 1,
+            step: [0.0; 3],
+        });
         for i in 0..rep.n.max(1) {
             let off = rep.step.map(|v| v * i as f64);
             let mv = |q: [f64; 3]| [q[0] + off[0], q[1] + off[1], q[2] + off[2]];
             let shape = match p.shape.as_str() {
                 "box" => {
-                    let (Some(c), Some(sz)) = (p.at, p.size) else { continue };
+                    let (Some(c), Some(sz)) = (p.at, p.size) else {
+                        continue;
+                    };
                     let c = mv(c);
                     poly3d::SpecShape::Box {
                         lo: [c[0] - sz[0] / 2.0, c[1] - sz[1] / 2.0, c[2] - sz[2] / 2.0],
@@ -320,11 +267,19 @@ pub fn to_poly(s: &Scene) -> poly3d::SpecScene {
                     }
                 }
                 "cylinder" => {
-                    let (Some(a), Some(b), Some(r)) = (p.from, p.to, p.r) else { continue };
-                    poly3d::SpecShape::Cyl { a: mv(a), b: mv(b), r }
+                    let (Some(a), Some(b), Some(r)) = (p.from, p.to, p.r) else {
+                        continue;
+                    };
+                    poly3d::SpecShape::Cyl {
+                        a: mv(a),
+                        b: mv(b),
+                        r,
+                    }
                 }
                 "sphere" => {
-                    let (Some(c), Some(r)) = (p.at, p.r) else { continue };
+                    let (Some(c), Some(r)) = (p.at, p.r) else {
+                        continue;
+                    };
                     poly3d::SpecShape::Sphere { c: mv(c), r }
                 }
                 _ => continue,
@@ -351,7 +306,11 @@ pub fn to_poly(s: &Scene) -> poly3d::SpecScene {
         .iter()
         .map(|f| poly3d::SpecFlow {
             path: f.path.clone(),
-            color: f.color.as_deref().and_then(parse_color).unwrap_or([1.0, 0.85, 0.35]),
+            color: f
+                .color
+                .as_deref()
+                .and_then(parse_color)
+                .unwrap_or([1.0, 0.85, 0.35]),
             name: f.name.clone(),
         })
         .collect();
@@ -367,7 +326,11 @@ pub fn run_check(args: &[String]) -> i32 {
     let mut bad = false;
     for a in args {
         match load(Path::new(a)) {
-            Ok(d) => println!("ok  {a}: {:?}, {} sections, {} zooms", d.title, d.sections.len(), d.zooms.len()),
+            Ok(d) => println!(
+                "ok  {a}: {:?}, {} parts",
+                d.title,
+                d.scene.as_ref().map_or(0, |s| s.parts.len())
+            ),
             Err(errs) => {
                 bad = true;
                 println!("bad {a}:");
@@ -380,11 +343,11 @@ pub fn run_check(args: &[String]) -> i32 {
     i32::from(bad)
 }
 
-/// `fl z render FILE OUT.png [zoom-letter]`: the scene as the canvas draws it (default
-/// camera), so Claude can look at its own picture before the user does.
+/// `fl z render FILE OUT.png`: the scene as the canvas draws it (default camera), so Claude
+/// can look at its own picture before the user does.
 pub fn run_render(args: &[String]) -> i32 {
     let (Some(file), Some(out)) = (args.first(), args.get(1)) else {
-        eprintln!("usage: fl z render FILE.json OUT.png [a-e]");
+        eprintln!("usage: fl z render FILE.json OUT.png");
         return 2;
     };
     let d = match load(Path::new(file)) {
@@ -396,12 +359,8 @@ pub fn run_render(args: &[String]) -> i32 {
             return 1;
         }
     };
-    let scene = match args.get(2) {
-        Some(k) => d.zooms.iter().find(|z| &z.key == k).and_then(|z| z.scene.as_ref()),
-        None => d.scene.as_ref(),
-    };
-    let Some(scene) = scene else {
-        eprintln!("no scene in that view (art-only views draw as text)");
+    let Some(scene) = d.scene.as_ref() else {
+        eprintln!("no scene in this diagram (art-only diagrams draw as text)");
         return 1;
     };
     let c = scene.camera.unwrap_or_default();
@@ -440,9 +399,7 @@ mod tests {
         ],
         "flows": [{"name":"data","path":[[3,0,0],[3,9,0]],"color":"#ffcc33"}]
       },
-      "text": "why it matters",
-      "sections": [{"title":"TSVs","text":"...","focus":["TSV","DRAM 3"]}],
-      "zooms": [{"key":"a","title":"bump","art":["[ bump ]"]}]
+      "text": "why it matters"
     }"##;
 
     #[test]
@@ -450,22 +407,47 @@ mod tests {
         let d = parse(GOOD).unwrap();
         let poly = to_poly(d.scene.as_ref().unwrap());
         assert_eq!(poly.parts.len(), 1 + 8 + 1 + 1);
-        let names = part_names(&d);
+        let names: Vec<String> = poly.parts.iter().filter_map(|p| p.name.clone()).collect();
         assert!(names.contains(&"DRAM 8".to_string()), "{names:?}");
-        assert!(names.contains(&"data".to_string()));
+        assert!(poly.flows.iter().any(|f| f.name.as_deref() == Some("data")));
     }
 
     #[test]
     fn errors_name_the_field_and_what_is_valid() {
-        let errs = parse(r#"{"title":"x","scene":{"parts":[{"shape":"cone","at":[0,0,0]}]}}"#).unwrap_err();
-        assert!(errs[0].contains("scene.parts[0].shape") && errs[0].contains("cylinder"), "{errs:?}");
+        let errs = parse(r#"{"title":"x","scene":{"parts":[{"shape":"cone","at":[0,0,0]}]}}"#)
+            .unwrap_err();
+        assert!(
+            errs[0].contains("scene.parts[0].shape") && errs[0].contains("cylinder"),
+            "{errs:?}"
+        );
         let errs = parse(r#"{"title":"x","scene":{"parts":[{"shape":"box","at":[0,0,0],"size":[1,1,1],"colour":"red"}]}}"#)
             .unwrap_err();
         assert!(errs[0].contains("unknown field `colour`"), "{errs:?}");
-        let errs = parse(r#"{"title":"x","text":"t","sections":[{"title":"s","focus":["nope"]}]}"#).unwrap_err();
-        assert!(errs[0].contains("no part named \"nope\""), "{errs:?}");
-        let errs = parse(r#"{"title":"x","text":"t","zooms":[{"key":"z","title":"q","text":"t"}]}"#).unwrap_err();
-        assert!(errs[0].contains("one of a, b, c, d, e"), "{errs:?}");
+        // sections and zooms are gone from the format: a file that still has them says so
+        let errs = parse(r#"{"title":"x","text":"t","sections":[{"title":"s"}]}"#).unwrap_err();
+        assert!(errs[0].contains("unknown field `sections`"), "{errs:?}");
+        let errs =
+            parse(r#"{"title":"x","text":"t","zooms":[{"key":"a","title":"q","text":"t"}]}"#)
+                .unwrap_err();
+        assert!(errs[0].contains("unknown field `zooms`"), "{errs:?}");
+    }
+
+    #[test]
+    fn labels_are_short_and_say_so() {
+        let long = "x".repeat(MAX_LABEL + 1);
+        let errs = parse(&format!(
+            r#"{{"title":"x","scene":{{"parts":[{{"shape":"box","name":"{long}","at":[0,0,0],"size":[1,1,1]}}]}}}}"#
+        ))
+        .unwrap_err();
+        assert!(
+            errs[0].contains(".name:") && errs[0].contains("labels are at most"),
+            "{errs:?}"
+        );
+        let ok = format!(
+            r#"{{"title":"x","scene":{{"parts":[{{"shape":"box","name":"{}","at":[0,0,0],"size":[1,1,1]}}]}}}}"#,
+            "x".repeat(MAX_LABEL)
+        );
+        assert!(parse(&ok).is_ok());
     }
 
     #[test]
@@ -481,7 +463,19 @@ mod tests {
     #[test]
     fn rules_document_the_format() {
         let rules = include_str!("z_rules.md");
-        for word in ["box", "cylinder", "sphere", "repeat", "glow", "glass", "flows", "focus", "zooms", "sections", "camera", "fl z check"] {
+        for word in [
+            "box",
+            "cylinder",
+            "sphere",
+            "repeat",
+            "glow",
+            "glass",
+            "flows",
+            "label",
+            "camera",
+            "fl z check",
+            "one picture",
+        ] {
             assert!(rules.contains(word), "z_rules.md lacks {word}");
         }
         for (n, _) in COLORS {

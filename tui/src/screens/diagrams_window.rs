@@ -3,9 +3,9 @@
 // the picture. The session keeps running when the window closes, so the next `C` shows
 // the same conversation.
 //
-// Keys: while the window has focus every key goes to Claude, except ctrl-] which hands
-// the keys back to browse mode. Browse mode: `i` or enter gives Claude the keys again,
-// esc or q closes the window.
+// Keys: while the window has focus every key goes to Claude, except ctrl-/, which hands the
+// keys back to browse mode. Browse mode: `i` or enter gives Claude the keys again, esc or q
+// closes the window.
 
 use std::env;
 
@@ -23,7 +23,10 @@ use crate::ui::tmux_pane::TmuxPane;
 const SOCKET: &str = "fl-diagram";
 const SESSION: &str = "finlarp-diagram-claude";
 /// The quiz rules, passed to Claude as an appended system prompt when the session starts.
-const QUIZ_RULES: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/src/screens/diagrams_quiz_rules.md");
+const QUIZ_RULES: &str = concat!(
+    env!("CARGO_MANIFEST_DIR"),
+    "/src/screens/diagrams_quiz_rules.md"
+);
 
 /// The command the window's tmux session runs: Claude in quiz mode. tmux runs it through a
 /// shell, so the rules file is read with `$(cat ...)`.
@@ -52,7 +55,12 @@ impl ClaudeWindow {
     }
 
     /// A window on its own tmux session, running `command` (the Z screen keeps one per mode).
-    pub fn with(theme: Theme, socket: &'static str, session: &'static str, command: String) -> Self {
+    pub fn with(
+        theme: Theme,
+        socket: &'static str,
+        session: &'static str,
+        command: String,
+    ) -> Self {
         Self {
             theme,
             open: false,
@@ -73,9 +81,8 @@ impl ClaudeWindow {
     /// Keys while the window is open.
     pub fn key(&mut self, key: KeyEvent) {
         if self.focus {
-            // ctrl-] arrives as `]` or, on some terminals, as the digit `5` with ctrl
-            let leave = matches!(key.code, KeyCode::Char(']' | '5'));
-            if leave && key.modifiers.contains(KeyModifiers::CONTROL) {
+            // ctrl-/ is byte 0x1f, which crossterm reports as `7` with ctrl
+            if key.code == KeyCode::Char('7') && key.modifiers.contains(KeyModifiers::CONTROL) {
                 self.focus = false;
             } else {
                 self.pane.send_key(key);
@@ -89,26 +96,27 @@ impl ClaudeWindow {
         }
     }
 
-    /// Draws the window over `r`, the right-hand description column.
-    pub fn draw(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme) {
+    /// Draws the window over `r` with `borders` (the diagrams screen's right-hand column
+    /// leaves out the left edge; the Z screen's chat sits under the canvas, all four).
+    pub fn draw(&mut self, frame: &mut Frame, r: Rect, label: &str, t: &Theme, borders: Borders) {
         frame.render_widget(Clear, r);
-        let hint = if self.focus {
-            " ctrl-] browse "
-        } else {
-            " i type  esc close "
-        };
         let block = Block::new()
-            .borders(Borders::TOP | Borders::RIGHT | Borders::BOTTOM)
+            .borders(borders)
             .border_style(t.accent())
-            .title(Span::styled(format!(" claude \u{00b7} {label} "), t.title()))
-            .title_bottom(Span::styled(hint, t.dim()))
+            .title(Span::styled(
+                format!(" claude \u{00b7} {label} "),
+                t.title(),
+            ))
             .padding(ratatui::widgets::Padding::new(1, 0, 0, 0));
         let inner = block.inner(r);
         frame.render_widget(block, r);
 
         if self.error.is_none() {
             let dir = env::current_dir().unwrap_or_default();
-            if let Err(e) = self.pane.ensure(&dir, &self.command, inner.width, inner.height) {
+            if let Err(e) = self
+                .pane
+                .ensure(&dir, &self.command, inner.width, inner.height)
+            {
                 self.error = Some(format!("can't start claude: {e}"));
             }
         }
@@ -152,6 +160,40 @@ impl ClaudeWindow {
 /// diagrams screen never shows the real one.
 pub(super) fn block_cursor(frame: &mut Frame, x: u16, y: u16) {
     if let Some(cell) = frame.buffer_mut().cell_mut((x, y)) {
-        cell.set_style(ratatui::style::Style::default().add_modifier(ratatui::style::Modifier::REVERSED));
+        cell.set_style(
+            ratatui::style::Style::default().add_modifier(ratatui::style::Modifier::REVERSED),
+        );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn window() -> ClaudeWindow {
+        let mut w = ClaudeWindow::with(Theme::default(), "fl-test", "fl-test", "true".into());
+        w.show();
+        w
+    }
+
+    fn ctrl_slash() -> KeyEvent {
+        KeyEvent::new(KeyCode::Char('7'), KeyModifiers::CONTROL)
+    }
+
+    #[test]
+    fn ctrl_slash_hands_the_keys_back() {
+        let mut w = window();
+        w.key(ctrl_slash());
+        assert!(!w.focus, "ctrl-/ leaves the chat");
+        assert!(w.open, "the window stays on screen");
+    }
+
+    #[test]
+    fn plain_j_and_space_are_typed_into_claude() {
+        let mut w = window();
+        w.key(KeyEvent::new(KeyCode::Char('j'), KeyModifiers::NONE));
+        w.key(KeyEvent::new(KeyCode::Char(' '), KeyModifiers::NONE));
+        w.key(KeyEvent::new(KeyCode::Char('k'), KeyModifiers::NONE));
+        assert!(w.focus, "plain keys never leave the chat");
     }
 }
