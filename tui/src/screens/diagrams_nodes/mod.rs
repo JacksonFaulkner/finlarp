@@ -15,6 +15,7 @@ mod coat;
 mod deposit;
 mod develop;
 mod dice;
+mod dram3d;
 mod etch;
 mod expose;
 mod fiber;
@@ -98,6 +99,7 @@ const NODES: &[Node] = &[
     final_test::NODE,
     ship::NODE,
     hbf::NODE,
+    dram3d::NODE,
 ];
 
 fn node(page: &str) -> Option<&'static Node> {

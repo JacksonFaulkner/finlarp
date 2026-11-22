@@ -1,0 +1,68 @@
+# 1. What it is: DRAM cells built upward
+
+3D DRAM builds the memory cell upward instead of flat, so each bit takes less floor space. It comes in two steps. First, the transistor stands up: a vertical channel transistor (VCT) gives a 4F2 cell. Samsung showed a 16 Gb chip built this way at ISSCC 2026 [1]. Second, whole layers of cells are stacked, the way 3D NAND stacks flash. Samsung's slides put that in the early 2030s [3].
+
+# 2. The parts
+
+1T1C CELL       one transistor and one capacitor: the capacitor holds the bit as charge
+6F2 / 4F2       cell area in units of F, the smallest feature: 2F x 3F today, 2F x 2F next
+VCT             vertical channel transistor: source, channel and drain stacked in a pillar
+VG              vertical gate: SK hynix's name for its vertical transistor
+CAPACITOR       in a VCT cell it sits directly on top of the transistor
+PERIPHERY       the sense amps, decoders and I/O that run the cell array
+COP / PUC       cell on periphery: the periphery wafer bonded under the array wafer
+HYBRID BOND     copper pads and oxide joined face to face, wafer to wafer
+VS-DRAM         Samsung's stacked DRAM: layers of sideways cells on a vertical bit line
+FLOATING BODY   a transistor body with no tie to the substrate, so charge piles up in it
+IGZO            indium gallium zinc oxide: an oxide channel that leaks very little
+
+# 3. From planar to stacked, in order
+
+1. today's cell lies flat: transistor in the silicon, tall capacitor on top, 6F2
+2. shrinking stalls: a narrower capacitor has to grow taller to hold the same charge
+3. the transistor stands up as a pillar, capacitor on top: a 4F2 cell
+4. the periphery moves to its own wafer and is bonded under the array
+5. the cells are laid on their sides and stacked in layers sharing a vertical bit line
+
+# 4. Why DRAM has to go vertical
+
+A DRAM cell stores its bit in a tall, narrow capacitor. When the cell shrinks, the capacitor's radius shrinks too, so it must grow taller to keep its charge, and tall capacitors are hard to make with good yield [4]. Today's cells take about 6F2 (2F x 3F). A 4F2 cell (2F x 2F) is a third smaller, which fits about 50% more cells at the same F [5]. The Elec estimates 30-50% more density per die [2]. Samsung's 10a node, the first below the 10 nm class, is estimated at 9.5-9.7 nm [2].
+
+# 5. The 4F2 cell: a vertical channel transistor
+
+In a VCT the source, channel and drain sit in one upright pillar, so the transistor takes no more floor space than the capacitor above it [2][5]. The word line wraps the pillar as the gate; the bit line connects at the source [6]. Samsung is reported to be moving the channel from silicon to IGZO to cut leakage, and to be weighing molybdenum to replace titanium nitride in the word line [2].
+
+# 6. Wafer-to-wafer bonding: periphery under the array
+
+Samsung's ISSCC 2026 paper is a 16 Gb, 10 nm-class test chip with 4F2 VCT cells built on one wafer and the periphery on another, joined by wafer-to-wafer hybrid copper bonding (cell-on-peripheral). Samsung says this gives over 20% more dies per wafer under the same design rules; the chip reads and writes [1]. The periphery wafer is made with a logic process [2]. SK hynix plans the same split, with circuits bonded below the cell area [7].
+
+# 7. Stacked 3D DRAM: layers of sideways cells
+
+Stacked 3D DRAM turns the 1T1C cell on its side: horizontal capacitors, gate-all-around transistors, horizontal word lines, and vertical bit lines running down through the layers. Samsung's VLSI 2026 paper shows 16 layers this way, with the periphery on a separate bonded wafer [8]. SK hynix showed 5 layers at VLSI 2024 with 56.1% yield and said 32-192 layers are needed for wide use [9]. A Micron engineer estimated in 2021 that 200-300 layers are needed to beat planar DRAM on cost [4].
+
+# 8. The weak spot: the floating body
+
+In a vertical pillar the transistor body is cut off from the silicon below, so charge can build up in it and change how the transistor switches [5]. One fix is a back gate: SK hynix's VLSI 2026 4F2 VG cell adds a shared back-gate transistor to control the threshold voltage [8]. Another is an oxide channel: Kioxia and Nanya's junctionless IGZO vertical transistor is reported immune to the floating-body effect, with leakage below 1 aA and retention over 100 seconds (IEDM 2024) [10].
+
+# 9. Who is building it, timing and risks
+
+Samsung (005930.KS) reportedly made working 10a dies in March 2026; the reported plan is development in 2026, qualification in 2027 and mass production in 2028, with 3D DRAM from 10d [2]. Samsung has not committed to it [5]. SK hynix (000660.KS) reportedly plans 4F2 at 10b [2]. Micron (MU) skips 4F2: "It's the capacitor pitch that defines the DRAM" [5]. CXMT plans 4F2 DDR5 RDIMMs by end of 2026, possibly only partly 4F2 [11]. NEO Semiconductor claims IGZO 3D X-DRAM up to 128 layers [12].
+
+- The dates are company targets or press reports; no 4F2 or stacked DRAM is on sale.
+- Extra steps and new materials can eat the density gain, so smaller cells may not mean cheaper bits [5].
+- Stacked DRAM needs dozens to hundreds of layers before it pays [4][9].
+
+# 10. Sources
+
+  [1] Samsung, VCT 4F2 DRAM with cell-on-peripheral and W2W hybrid copper bonding (ISSCC 2026, pp. 272-274): pure.skku.edu/en/publications/a-vertical-cell-transistor-based-4fsup2sup-dram-with-cell-on-peri/
+  [2] Samsung reportedly makes 10a 4F2 VCT working die, targets 2028 (TrendForce, Apr 2026): trendforce.com/news/2026/04/24/news-samsung-reportedly-produces-sub-10nm-10a-dram-working-die-using-4f-square-and-vct-targets-2028-production/
+  [3] Samsung puts 3D DRAM on the roadmap, stacked DRAM to follow (Tom's Hardware): tomshardware.com/pc-components/dram/samsung-outlines-plans-for-3d-dram-which-will-come-in-the-second-half-of-the-decade
+  [4] Will monolithic 3D DRAM happen? (Semiconductor Engineering, Sep 2021): semiengineering.com/will-monolithic-3d-dram-happen
+  [5] The great DRAM divide (Bits&Chips, Oct 2026): bits-chips.com/article/the-great-dram-divide-different-paths-to-denser-memory/
+  [6] SK hynix developing 4F2 DRAM (TweakTown, Aug 2024): tweaktown.com/news/99871/sk-hynix-developing-3d-dram-it-calls-4f2-joins-south-korean-competitor-samsungs/index.html
+  [7] SK hynix DRAM roadmap at VLSI 2025: storagenewsletter.com/2025/06/10/ieee-vlsi-2025-sk-hynix-presents-future-dram-technology-roadmap/
+  [8] VLSI 2026 preview: Samsung VS-DRAM, SK hynix 4F2 VG (Mynavi): news.mynavi.jp/techplus/article/vlsi2026-5/
+  [9] SK hynix 5-layer 3D DRAM yield 56.1% (TrendForce, Jun 2024): trendforce.com/news/2024/06/24/news-sk-hynixs-5-layer-3d-dram-yield-reportedly-hits-56-1/
+  [10] Kioxia and Nanya OCTRAM, IGZO vertical transistor (IEDM 2024): kioxia.com/en-jp/rd/technology/topics/topics-77.html
+  [11] CXMT 4F2 DDR5 RDIMM by year-end (TrendForce, Oct 2026): trendforce.com/news/2026/10/12/news-cxmt-accelerates-4f%C2%B2-dram-push-eyes-year-end-server-ddr5-rdimm-launch/
+  [12] NEO 3D X-DRAM 1T1C and 3T0C (Blocks and Files, May 2025): blocksandfiles.com/architecture/2025/05/12/neo-expands-3d-x-dram-tech-for-denser-faster-memory/1597517
