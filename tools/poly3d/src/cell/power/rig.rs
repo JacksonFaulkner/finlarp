@@ -151,6 +151,8 @@ const ASIC: Col = [0.52, 0.44, 0.78];
 const SUBSTRATE: Col = [0.42, 0.36, 0.22];
 const INDUCTOR: Col = [0.55, 0.56, 0.60];
 const STAGEC: Col = [0.14, 0.14, 0.16];
+/// a board's layered edge, top to bottom: copper foil, dark core, tan prepreg
+const EDGE: [Col; 3] = [[0.78, 0.56, 0.32], [0.30, 0.30, 0.32], [0.62, 0.48, 0.28]];
 /// power in flight
 pub(super) const AMPS: Col = YELLOW;
 const DCOL: Col = ORANGE;
@@ -506,12 +508,20 @@ fn rack(s: &PwrState, m: &mut Vec<Tri>) {
             let ac = 1.0 - s.hvdc;
             let (c, e, part) = match kind {
                 0 => (stage::mix(METAL, QUIET, s.hvdc * 0.6), stage::scaled(YELLOW, 0.12 * ac * s.flow), PwrPart::Shelf),
-                1 => (stage::mix(RACKC, ASIC, 0.35), stage::scaled(ASIC, 0.15 * s.flow), PwrPart::Tray),
+                1 => (PCB, stage::scaled(ASIC, 0.15 * s.flow), PwrPart::Tray),
                 _ => ([0.22, 0.42, 0.44], NO_GLOW, PwrPart::Tray),
             };
             let h = if kind == 0 { 26.0 * (1.0 - 0.7 * s.hvdc) } else { 24.0 };
             let hot = if kind == 1 { stage::scaled(HOT, 0.2 * s.heat) } else { NO_GLOW };
             push_box(m, [ox - 138.0, y, z - 255.0], [ox + 138.0, y + h * kk, z + 255.0], col(s, part, c), [e[0] + hot[0] + glow(s, part, c)[0], e[1] + hot[1], e[2] + hot[2]]);
+            // a compute tray is a board: its layered edge runs along the short side, as on the BOARD page
+            if kind == 1 {
+                let lh = h * kk / EDGE.len() as f64;
+                for (j, ec) in EDGE.iter().enumerate() {
+                    let y0 = y + j as f64 * lh;
+                    push_box(m, [ox + 138.0, y0, z - 255.0], [ox + 141.0, y0 + lh, z + 255.0], col(s, part, *ec), NO_GLOW);
+                }
+            }
         }
         // DC busbar down the back
         let bw = 18.0 * (1.0 - 0.6 * s.hvdc);
