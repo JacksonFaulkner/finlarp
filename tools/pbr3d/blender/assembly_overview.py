@@ -132,13 +132,21 @@ def build():
     c4g = empty("c4_grp", root)
     show(c4g, between(3, 6))
     K.c4(m, c4g, half=20.0)
+    # The green board under the substrate, with its BGA balls, from the same beat.
+    bd = empty("board_grp", root)
+    show(bd, between(3, 6))
+    K.board(m, bd)
+    K.bga(m, bd, half=20.0)
 
     # Beat 6: finished packages in a row, each with substrate, interposer, die, stacks and lid.
     row = empty("finished_row", root)
     show(row, from_beat(6))
+    # One long board under the row, with each package's BGA balls on it.
+    box("row_board", (-110.0, -14.0, -30.0), (110.0, K.BOARD_TOP, 30.0), m["board"], row)
     for k, x in enumerate((-80.0, -40.0, 0.0, 40.0, 80.0)):
         f = empty(f"finished_{k}", row)
         f.location = P(x, 0.0, 0.0)
+        K.bga(m, f, half=18.0)
         K.substrate(m, f, half=18.0)
         K.interposer(m, f, half=14.0)
         K.die(m, f, x0=-6.0, x1=6.0, z0=-8.0, z1=8.0)

@@ -107,6 +107,17 @@ def build():
     ip = empty("interposer", root)
     show(ip, from_3)
     box("interposer_plate", (-45.0, -2.0, -40.0), (45.0, 0.0, 40.0), interposer, ip)
+    # The stack under the interposer, from beat 3 with it: substrate (its top meets the
+    # interposer's underside at y = -2), BGA balls, and the green board the power rail rises from.
+    mk = K.materials()
+    sub = empty("substrate_grp", root)
+    show(sub, from_3)
+    K.substrate(mk, sub, half=50.0)
+    bd = empty("board_grp", root)
+    show(bd, from_3)
+    # Wider than the kit's 120 mm board: this substrate is 100 mm, so the kit board showed only a rim.
+    box("board", (-80.0, -14.0, -80.0), (80.0, K.BOARD_TOP, 80.0), mk["board"], bd)
+    K.bga(mk, bd, half=20.0)
 
     for side in (-1, 1):
         inner, outer = side * 14.5, side * 22.25

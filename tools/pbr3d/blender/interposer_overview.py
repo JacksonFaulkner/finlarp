@@ -120,7 +120,7 @@ def build():
     for k, zc in enumerate((-12.0, -4.0, 4.0, 12.0)):
         box(f"bridge_{"abcd"[k]}", (-3.5, 1.5, zc - 2.5), (3.5, 2.4, zc + 2.5), m["bridge"], bridges)
 
-    # Substrate, C4 and board for the full package: beats 3-6; board and BGA from beat 6.
+    # Substrate, C4, board and BGA for the package: beats 3-6, the board from the same beat.
     sub = empty("substrate_grp", root)
     show(sub, from_beat(3))
     K.substrate(m, sub, half=50.0)
@@ -128,7 +128,7 @@ def build():
     show(c4, from_beat(3))
     K.c4(m, c4, half=30.0)
     board_grp = empty("board_grp", root)
-    show(board_grp, from_beat(6))
+    show(board_grp, from_beat(3))
     K.board(m, board_grp)
     K.bga(m, board_grp, half=40.0)
 

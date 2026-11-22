@@ -202,9 +202,9 @@ def build():
     K.stacks(m, top, zs=(-9.0, 9.0))
     _lift(top, TOP_STEPS)
 
-    # Board and BGA below the substrate: beats 3-4.
+    # Board and BGA below the substrate, in every beat: the substrate always sits on its board.
     board_grp = empty("board_grp", root)
-    show(board_grp, [(F(3, 0), F(5, 0))])
+    show(board_grp, [(F(0, 0), F(BEATS, 0))])
     K.board(m, board_grp)
     bga(m, board_grp)
 
