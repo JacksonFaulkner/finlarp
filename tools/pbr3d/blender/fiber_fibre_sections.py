@@ -295,15 +295,25 @@ def section_1(root, m):
     grow_ray("mm_ray", ray, 0.32, m["ray"], root, F(1, 0.05), F(1, 0.75), END)
     ray2 = zigzag(-60, 60, -30, 5.0, 0.18, up=False)
     grow_ray("mm_ray2", ray2, 0.32, m["ray"], root, F(2, 0.05), F(2, 0.6), END)
+    # more modes: each bouncing path carries its own photons; steeper paths arrive later
+    for i, sl in enumerate((0.45, 0.12)):
+        rz = zigzag(-60, 60, -30, 5.0, sl, z=0.3 + 0.05 * i, up=bool(i))
+        grow_ray(f"mm_ray_m{i}", rz, 0.26, m["ray"], root, F(1, 0.25 + 0.1 * i), F(1, 0.85), END)
+    for b in (1, 2):
+        for i, sl in enumerate((0.3, 0.18, 0.45)):
+            rz = zigzag(-60, 60, -30, 5.0, sl, z=0.4, up=(i != 1))
+            pulses(root, f"mm_ph{b}_{i}", 4, rz[0], rel_path(rz), 0.9, m["spark"], b, 0.1, 0.7, 60 + 12 * i,
+                   steps=len(rz) * 2)
 
     label("CORE: ~8 µm, the light rides here", (40, 30, 0.2), root, beat(0))
     label("CLADDING: 125 µm, acts as a mirror", (48, 38, 0.2), root, beat(0))
     label("COATING: plastic, 242 µm", (10, 52, -2), root, beat(0))
     label("MULTIMODE: 50 µm core", (45, -30, 0.2), root, beat(1))
     label("TOTAL INTERNAL REFLECTION", (ray[2][0], ray[2][1], 0.25), root, beat(1))
+    label("each path a different length: pulses smear", (20, -36, 0.4), root, beat(1))
     label("SINGLE-MODE: one beam", (-20, 30, 0.2), root, beat(2))
     label("MULTIMODE: many paths bounce", (-20, -30, 0.2), root, beat(2))
-    glide(root, [((5, 32, 0), 175, 0.40, 0.25), ((5, -28, 0), 175, 0.40, 0.25), ((5, 0, 0), 250, 0.40, 0.25)])
+    glide(root, [((5, 32, 0), 175, 0.40, 0.25), ((5, -30, 0), 150, 0.30, -0.10), ((5, 0, 0), 260, 0.35, 0.12)])
 
 
 # ---- 2 The parts ---------------------------------------------------------------------------------
@@ -316,6 +326,7 @@ def section_2(root, m):
     x_shell("clad", -50, 40, 0.82, 12.5, m["clad"], g)
     x_shell("primary", -50, 10, 12.5, 19.0, m["primary"], g)
     x_shell("secondary", -50, 3, 19.0, 24.2, m["secondary"], g)
+    x_shell("ink", -50, -8, 24.2, 25.2, m["jacket"], g)
     ring = empty("mode_ring", root)
     shell("mode_end", (40, 0, 0), (40.3, 0, 0), 0.82, 4.6, m["glow"], ring, half=False, n=32)
     for b in range(3):
@@ -330,6 +341,7 @@ def section_2(root, m):
     label("PRIMARY: soft, cushions the glass", (7, 16.0, 0.2), root, beat(2))
     label("SECONDARY: hard, takes scratches", (-8, 22.0, 0.2), root, beat(2))
     label("242 µm (or 200 µm) outside", (-30, -24.2, 0.2), root, beat(2))
+    label("INK: ~5 µm colour code (TIA-598)", (-30, 25.2, -1), root, beat(2))
     glide(root, [((-8, 0, 0), 190, 0.45, 0.30), ((35, 0, 0), 80, 0.75, 0.20), ((0, 6, 0), 130, 0.35, 0.28)])
 
 
@@ -485,24 +497,44 @@ def section_5(root, m):
 def section_6(root, m):
     """Single-mode fibre between two power meters (glass to scale, 1 mm = 5 um; meters not)."""
     g = empty("fibre", root)
-    sm_fibre(m, g, -55, 55, coat=(-55, 55))
-    for sx in (-1, 1):
-        shell(f"boot_{sx}", (sx * 55, 0, 0), (sx * 60, 0, 0), 0, 27.0, m["black"], g, half=False)
+    sm_fibre(m, g, -55, 55, coat=(-55, 40))
+    # the last 15 mm of coating sits where the beat-3 ferrule goes; show it only before then
+    ct = empty("coat_end", root)
+    x_shell("coat_end_pri", 40, 55, 12.5, 19.0, m["primary"], ct)
+    x_shell("coat_end_sec", 40, 55, 19.0, 24.2, m["secondary"], ct)
+    show(ct, beat(0) + beat(1))
+    shell("boot_-1", (-55, 0, 0), (-60, 0, 0), 0, 27.0, m["black"], g, half=False)
+    bt = empty("boot_r", root)
+    shell("boot_1", (55, 0, 0), (60, 0, 0), 0, 27.0, m["black"], bt, half=False)
+    show(bt, beat(0) + beat(1))
+    # beat 3: the right connector opened up, cut in half: two zirconia ferrules butted with a
+    # tiny air gap; light escapes the gap (Fresnel reflection, misalignment)
+    cx = empty("conn_cut", root)
+    for nm, a, b2 in (("fer_l", 40, 55), ("fer_r", 57.5, 72)):
+        shell(nm, (a, 0, 0), (b2, 0, 0), 12.5, 25.0, m["zirconia"], cx)
+    shell("sleeve", (36, 0, 0), (76, 0, 0), 25.0, 27.5, m["sleeve"], cx)
+    sm_fibre(m, cx, 57.5, 76)
+    show(cx, beat(2))
     meter(m, root, -80, "m_in")
-    meter(m, root, 80, "m_out")
+    show(meter(m, root, 80, "m_out"), beat(0) + beat(1))  # out of the way of the beat-3 cut-away
     bar(m, root, "bar_in", -80, 28.0, m["bar"])
-    bar(m, root, "bar_out", 80, 26.1, m["bar"])
+    show(bar(m, root, "bar_out", 80, 26.1, m["bar"]), beat(0) + beat(1))
 
     import random
     rnd = random.Random(6)
+    # frozen-in density ripples in the glass: the scatterers (Rayleigh, ~1/wavelength^4)
+    for k in range(60):
+        ball(f"grain{k}", (rnd.uniform(-50, 50), rnd.uniform(-0.7, 0.7), rnd.uniform(-0.6, 0.2)), 0.22,
+             m["core"], g, 6)
     for b in (0, 2):
-        for k in range(20):
-            x = rnd.uniform(-45, 45)
+        for k in range(36 if b == 0 else 14):
+            x = rnd.uniform(-45, 45) if b == 0 else rnd.uniform(55.2, 57.3)
             up = 1 if k % 2 else -1
             e = empty(f"sp{b}_{k}", root)
-            ball(f"sp{b}_{k}_s", (x, 0, 1.0), 1.1, m["spark"], e, 8)
+            ball(f"sp{b}_{k}_s", (x, 0, 1.0), 1.0 if b == 0 else 0.8, m["spark"], e, 8)
             f0 = F(b, rnd.uniform(0.05, 0.8))
-            D.fly(e, [(0, 0, 0), (rnd.uniform(-4, 4), up * 26, 0)], f0, f0 + 30, steps=2)
+            D.fly(e, [(0, 0, 0), (rnd.uniform(-4, 4), up * rnd.uniform(18, 30), rnd.uniform(0, 14))],
+                  f0, f0 + 30, steps=2)
             show(e, [(f0, f0 + 30)])
     for b in range(3):
         pulses(root, f"pk{b}", 3, (-55, 0, 0), [(0, 0, 0), (110, 0, 0)], 1.6, m["spark"], b, 0.0, 0.55, 80,
@@ -510,12 +542,15 @@ def section_6(root, m):
 
     label("SCATTERING in the glass itself", (-20, 0, 0.3), root, beat(0))
     label("light thrown out of the core", (14, 12, 0.3), root, beat(0))
+    label("density ripples frozen into the glass", (-38, -0.5, 0.3), root, beat(0))
     label("IN: full power", (-80, 34, 7), root, beat(1))
     label("OUT after 1 km: −0.32 dB, ~7% lost", (80, 32, 7), root, beat(1))
     label("FIBRE: 1 km at 1310 nm", (0, 24.2, -1), root, beat(1))
     label("2 km in glass: under 1 dB", (30, 24.2, -1), root, beat(2))
     label("CONNECTOR: loses more than the glass", (57, 27, 0), root, beat(2))
-    glide(root, [((0, 0, 0), 145, 0.30, 0.25), ((0, 0, 0), 380, 0.25, 0.18), ((50, 4, 0), 200, 0.30, 0.18)])
+    label("AIR GAP: ~0.3 dB per mated pair", (56.2, 0, 0.5), root, beat(2))
+    label("ZIRCONIA ferrules, aligned in a sleeve", (65, -25, 0), root, beat(2))
+    glide(root, [((-5, 0, 0), 120, 0.25, 0.12), ((0, 0, 0), 380, 0.25, 0.18), ((52, 0, 0), 130, 0.45, 0.15)])
 
 
 # ---- 7 Latency: the speed of light in glass -------------------------------------------------------
@@ -542,7 +577,15 @@ def section_7(root, m):
         show(e, [(F(1, 0.05 + 0.8 * k / 26), END)])
     rp = [tuple(p[j] - hp[0][j] for j in range(3)) for p in hp[::4]]
     for b in (0, 1):
-        pulses(root, f"run{b}", 2, hp[0], rp, 2.0, m["lit"], b, 0.0, 0.5, 100, steps=len(rp) - 1)
+        # photons riding the outer turn, just proud of the winding so they show
+        op = [(q[0], q[1] * 1.06, q[2] * 1.06) for q in hp[::4]]
+        orp = [tuple(q[j] - op[0][j] for j in range(3)) for q in op]
+        pulses(root, f"run{b}", 8, op[0], orp, 1.5, m["spark"], b, 0.0, 0.75, 110, steps=len(orp) - 1)
+        # a pulse front stepping turn by turn across the face of the reel (each turn ~ 0.23 m here)
+        for k in range(26):
+            e = empty(f"front{b}_{k}", root)
+            ball(f"front{b}_{k}_s", (-31.0 + 62.0 * (k + 0.5) / 26, 0, 38.0), 1.6, m["spark"], e, 10)
+            show(e, [(F(b, c * 0.25 + 0.25 * k / 26), F(b, c * 0.25 + 0.25 * k / 26) + 8) for c in range(4)])
 
     # Beat 2: two cut samples on stands. Hollow core: glass tubes round an air core. Solid: glass.
     hx0, hx1, yh, yg = 95.0, 165.0, 25.0, -32.0
@@ -601,6 +644,14 @@ def section_9(root, m):
         f0 = F(1, rnd.uniform(0.15, 0.85))
         D.fly(e, [(0, 0, 0), out], f0, f0 + 30, steps=2)
         show(e, [(f0, f0 + 30)])
+
+    lk = empty("leak_rays", root)
+    for k in range(9):
+        t = 0.5 + k * (2 * math.pi - 1.0) / 8
+        p0 = (r * math.sin(t), yb + r - r * math.cos(t), 3.2)
+        p1 = (p0[0] + math.cos(t) * 30, p0[1] + math.sin(t) * 30, 3.2)
+        grow_ray(f"lray{k}", [p0, p1], 0.25, m["leak"], lk, F(1, 0.15 + 0.06 * k), F(1, 0.35 + 0.06 * k), F(2, 0))
+    show(lk, beat(1))
 
     # Beat 2: an LC ferrule tip with dust on its end face; light scatters at the dirt.
     yd = -520.0

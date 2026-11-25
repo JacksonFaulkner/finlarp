@@ -56,13 +56,21 @@ FIBRE_JACKET = -300.0
 TRACE_Y = BOARD_TOP + 1.0
 FLEX_X = D.PIN_X1
 TRACE_Z = -20.0
+TRACE_Z_N = -34.0                          # OUT- runs beside OUT+ (a differential pair)
+CAP_X = D.PIN_X1 + 70.0                    # the AC-coupling caps on the pair
 
 
 def out_path():
     """OUT pin -> flex -> board trace -> into the transceiver's cage (absolute points)."""
     py, pz = D.PINS["OUT"]
     return [(D.HEAD_X1, py, pz), (D.PIN_X1, py, pz), (FLEX_X + 2.0, py, TRACE_Z),
-            (FLEX_X + 2.0, TRACE_Y + 1.0, TRACE_Z), (CAGE_X0 + 20.0, TRACE_Y + 1.0, TRACE_Z)]
+            (FLEX_X + 2.0, TRACE_Y + 1.0, TRACE_Z), (CAGE_X0 - 30.0, TRACE_Y + 1.0, TRACE_Z),
+            (CAGE_X0 - 18.0, BOARD_TOP + 16.0, TRACE_Z)]
+
+
+def out_path_n():
+    """OUT- : the complement, from the flex along the second trace."""
+    return [(FLEX_X + 2.0, TRACE_Y + 1.0, TRACE_Z_N), (CAGE_X0 - 30.0, TRACE_Y + 1.0, TRACE_Z_N), (CAGE_X0 - 18.0, BOARD_TOP + 16.0, TRACE_Z_N)]
 
 
 def fibre_pts():
@@ -87,12 +95,38 @@ def link(m, root):
     # Flex from the pins down to the board, and the copper trace into the cage.
     flex = mat("pd_flex", (0.85, 0.50, 0.12), rough=0.5)
     box("flex_v", (FLEX_X, BOARD_TOP, -40.0), (FLEX_X + 3.0, 36.0, -12.0), flex, root)
-    box("trace_rx", (FLEX_X, BOARD_TOP, TRACE_Z - 4.0), (CAGE_X0 + 20.0, TRACE_Y, TRACE_Z + 4.0), m["copper"], root)
+    # copper traces printed on the flex, one per pin, and solder fillets where the pins land
+    for nm, (py, pz) in D.PINS.items():
+        box(f"flex_tr_{nm}", (FLEX_X + 3.0, BOARD_TOP, pz - 1.2), (FLEX_X + 3.4, py, pz + 1.2), m["copper"], root)
+        tube(f"fillet_{nm}", (FLEX_X - 1.0, py, pz), (FLEX_X + 3.6, py, pz), 2.6, m["solder"], root, 12)
+    # the receive pair on the board: OUT+ and OUT-, AC-coupling caps, a ground via fence
+    for k, z in enumerate((TRACE_Z, TRACE_Z_N)):
+        box(f"trace_rx{k}", (FLEX_X, BOARD_TOP, z - 3.0), (CAGE_X0 - 30.0, TRACE_Y, z + 3.0), m["copper"], root)
+        cx = CAP_X
+        box(f"accap{k}", (cx - 6.0, TRACE_Y, z - 4.0), (cx + 6.0, TRACE_Y + 5.0, z + 4.0), m["mlcc"], root)
+        for e in (-1, 1):
+            box(f"accap_end{k}{e}", (cx + e * 6.0 - 2.0, TRACE_Y - 0.1, z - 4.2), (cx + e * 6.0 + 2.0, TRACE_Y + 5.2, z + 4.2),
+                m["solder"], root)
+    box("trace_gap", (CAP_X - 2.0, BOARD_TOP - 0.2, TRACE_Z_N - 4.0), (CAP_X + 2.0, TRACE_Y + 0.2, TRACE_Z + 4.0),
+        m["pcb_dark"], root)
+    for k in range(9):
+        x = FLEX_X + 30.0 + k * (CAGE_X0 - FLEX_X - 40.0) / 8
+        for z in (TRACE_Z + 12.0, TRACE_Z_N - 12.0):
+            tube(f"via_{k}_{z}", (x, BOARD_TOP - 0.5, z), (x, TRACE_Y + 0.3, z), 1.8, m["solder"], root, 10)
+    # the cage's mouth: a dark opening and the host's card-edge connector inside it
+    box("cage_mouth", (CAGE_X0 - 1.0, BOARD_TOP, -60.0), (CAGE_X0 + 1.0, BOARD_TOP + 30.0, 30.0), m["pcb_dark"], root)
+    box("edge_conn", (CAGE_X0 - 32.0, BOARD_TOP, -55.0), (CAGE_X0 - 4.0, BOARD_TOP + 14.0, 5.0), m["ink"], root)
+    for k in range(10):
+        z = -50.0 + k * 5.5
+        box(f"edge_pin{k}", (CAGE_X0 - 30.0, BOARD_TOP + 14.0, z), (CAGE_X0 - 6.0, BOARD_TOP + 15.0, z + 2.5), m["gold"], root)
 
 
 def build(camera=None):
     _, root = start(NAME, beats=BEATS, page=PAGE)
     m = D.materials(K.materials())
+    m["solder"] = mat("pd_solder", (0.78, 0.78, 0.80), metal=0.9, rough=0.25)
+    m["mlcc"] = mat("pd_mlcc", (0.55, 0.42, 0.28), rough=0.5)
+    m["pcb_dark"] = mat("pd_pcb_dark", (0.04, 0.05, 0.06), rough=0.8)
     link(m, root)
     whole = D.photodiode(m, root, cut_open=False)
     cut = D.photodiode(m, root, cut_open=True)
@@ -125,16 +159,24 @@ def build(camera=None):
     # 4: a bright burst, then a dim one; thick then thin current down the path.
     D.photons(root, "bright_ph", m, 4, 0.02, 0.25, n=10, life=40, spread=8.0)
     D.photons(root, "dim_ph", m, 4, 0.5, 0.62, n=3, life=40, spread=3.0)
-    run(root, "bright_i", out_path(), 8, 4.0, m["volt"], 4, 0.15, 0.4, 60)
-    run(root, "dim_i", out_path(), 3, 1.8, m["volt"], 4, 0.62, 0.75, 60)
+    run(root, "bright_i", out_path(), 14, 4.0, m["volt"], 4, 0.15, 0.4, 60)
+    run(root, "dim_i", out_path(), 4, 1.8, m["volt"], 4, 0.62, 0.75, 60)
+    run(root, "bright_n", out_path_n(), 10, 3.0, m["elec"], 4, 0.25, 0.45, 40)
+    run(root, "dim_n", out_path_n(), 3, 1.5, m["elec"], 4, 0.68, 0.78, 40)
 
     # 5: two short light pulses; a current pulse follows each.
     for k, u in enumerate((0.05, 0.5)):
         D.photons(root, f"pulse_ph{k}", m, 5, u, u + 0.04, n=4, life=34, spread=4.0)
-        run(root, f"pulse_i{k}", out_path(), 4, 3.0, m["volt"], 5, u + 0.18, u + 0.24, 60)
+        run(root, f"pulse_i{k}", out_path(), 6, 3.0, m["volt"], 5, u + 0.18, u + 0.24, 60)
+        run(root, f"pulse_n{k}", out_path_n(), 5, 2.4, m["elec"], 5, u + 0.26, u + 0.32, 40)
 
     # 6: pulled back; the current runs down the flex and the trace into the transceiver's cage.
-    run(root, "to_mod", out_path(), 10, 4.0, m["volt"], 6, 0.0, 0.8, 70)
+    run(root, "to_mod", out_path(), 16, 4.0, m["volt"], 6, 0.0, 0.8, 70)
+    run(root, "to_mod_n", out_path_n(), 14, 3.2, m["elec"], 6, 0.05, 0.85, 50)
+    for k in range(6):
+        blip(root, f"edge_glow{k}", [(CAGE_X0 - 30.0, BOARD_TOP + 16.5, -45.0 + k * 8.0),
+                                     (CAGE_X0 - 6.0, BOARD_TOP + 16.5, -45.0 + k * 8.0)], 2.2, m["volt"],
+             F(6, 0.2 + k * 0.1), 30)
     run(root, "link_ph6", fp, 6, 6.0, m["light"], 6, 0.0, 0.7, 70)
 
     labels = {
@@ -145,11 +187,13 @@ def build(camera=None):
             ("TO-CAN", (0.0, D.CAN_R, 0.0))],
         2: [("p-InP", (D.P_X[0] + 1.2, 6.0, 0.0)), ("InGaAs ABSORBER", (19.0, -8.0, 0.0)),
             ("n-InP", ((D.N_X[0] + D.N_X[1]) / 2, 8.0, 0.0))],
+        4: [("BRIGHT BURST", (-60.0, 8.0, 0.0)), ("THICK CURRENT", (100.0, *D.PINS["OUT"])),
+            ("AC CAPS", (CAP_X, TRACE_Y + 5.0, TRACE_Z))],
         3: [("BOND WIRE", r["p_to_tia"][5]), ("TIA", ((D.TIA_LO[0] + D.TIA_HI[0]) / 2, D.TIA_HI[1], 0.0)),
             ("OUT PIN", (100.0, *D.PINS["OUT"]))],
-        4: [("BRIGHT BURST", (-60.0, 8.0, 0.0)), ("THICK CURRENT", (100.0, *D.PINS["OUT"]))],
         5: [("LIGHT PULSES", (-60.0, 6.0, 0.0)), ("CURRENT PULSES", (100.0, *D.PINS["OUT"]))],
-        6: [("TRACE", ((FLEX_X + CAGE_X0) / 2, TRACE_Y, TRACE_Z)), ("TRANSCEIVER", kit(K.MOD_X, 13.0, 0.0)),
+        6: [("OUT+ / OUT- PAIR", ((FLEX_X + CAGE_X0) / 2, TRACE_Y, TRACE_Z)), ("AC CAPS", (CAP_X, TRACE_Y + 5.0, TRACE_Z)),
+            ("CAGE CONNECTOR", (CAGE_X0 - 18.0, BOARD_TOP + 15.0, -25.0)), ("TRANSCEIVER", kit(K.MOD_X, 13.0, 0.0)),
             ("PHOTODIODE", (0.0, D.CAN_R, 0.0))],
     }
     for i, items in labels.items():
@@ -161,9 +205,9 @@ def build(camera=None):
         frame((-170.0, -50.0, -20.0), (44.0, 50.0, 50.0), yaw=-0.2, pitch=0.22),
         frame(*D_CHIP, yaw=-0.2, pitch=0.12, pad=1.1),
         frame((5.0, -30.0, -35.0), (130.0, 42.0, 0.0), yaw=-0.5, pitch=0.25, pad=1.1),
-        frame((-110.0, -50.0, -50.0), (135.0, 50.0, 0.0), yaw=0.1, pitch=0.25, pad=1.0),
+        frame((-110.0, -55.0, -50.0), (CAP_X + 20.0, 50.0, 0.0), yaw=0.15, pitch=0.3, pad=1.0),
         frame((-110.0, -50.0, -50.0), (135.0, 50.0, 0.0), yaw=0.15, pitch=0.25, pad=1.0),
-        frame((-170.0, -60.0, -130.0), (CAGE_X0 + 540.0, 160.0, 130.0), yaw=0.15, pitch=0.4, pad=1.0),
+        frame((-60.0, -60.0, -70.0), (CAGE_X0 + 160.0, 80.0, 40.0), yaw=0.35, pitch=0.5, pad=1.0),
     ]
     (camera or D.glide_camera)(root, poses)
     return root

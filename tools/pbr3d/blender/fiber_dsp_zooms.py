@@ -45,17 +45,29 @@ def zoom_a(m, root):
     lid = G["lid"]
     key(lid, F(1, 0.10), "location", P(0, 0, 0))
     key(lid, F(1, 0.45), "location", P(0, LID_UP, 0))
-    for k, z in enumerate((-1.1, -5.5, -9.9)):
-        D.run(root, f"air{k}", [(18.0, LID_UP + 2.4, z), (-18.0, LID_UP + 2.4, z)], 4, 0.4, m["air"], 2,
-              0.05 + 0.05 * k, 0.6 + 0.05 * k, 60)
+    for k, z in enumerate((-9.9, -5.5, -1.1, 3.3, 7.7)):
+        D.run(root, f"air{k}", [(18.0, LID_UP + 2.4, z + 1.1), (-18.0, LID_UP + 2.4, z + 1.1)], 6, 0.45, m["air"], 2,
+              0.02 + 0.04 * k, 0.7 + 0.04 * k, 50)
+    for k, x in enumerate((-6.0, -2.0, 2.0, 6.0)):
+        D.run(root, f"heat_up{k}", [(x, DIE_Y1, 0.4), (x, LID_Y1, 0.4), (x, FIN_Y1 + 2.5, 0.4)], 4, 0.45,
+              m["heat"], 0, 0.05 + 0.05 * k, 0.7 + 0.05 * k, 50)
+    for k, x in enumerate((-5.0, 0.0, 5.0)):
+        D.run(root, f"heat_trap{k}", [(x, TIM_Y1, 0.4), (x, TIM_Y1 + 1.6, 0.4)], 3, 0.4, m["heat"], 1,
+              0.45 + 0.04 * k, 0.85, 30)
+    hot = group("die_hot", root, span(0, 1))
+    lbox("die_hot_b", (DIE[0] + 0.1, DIE_Y0 + 0.05, DIE[1] + 0.1), (DIE[2] - 0.1, DIE_Y1 - 0.05, 0.3),
+         m["hot"], hot, None, 0.0)
     tags(root, [
         (0, "metal lid, cut open", (10, -0.55, 0)),
         (0, "fins on the lid", (-6, FIN_Y1, 8)),
         (0, "skirt on a sealant bead", (13.5, -3.0, 0)),
+        (0, "heat: die -> paste -> lid", (-4, DIE_Y1, 0.4)),
         (1, "lid lifts off", (10, LID_UP - 0.55, 0)),
         (1, "paste stays on the die", (5, TIM_Y1 - 0.15, 0)),
+        (1, "lid off: heat has nowhere to go", (0, TIM_Y1 + 1.2, 0.4)),
         (2, "fins stand on the plate", (-4, LID_Y1 + LID_UP + 4.0, -6.6)),
         (2, "plate spreads the heat", (10, LID_UP - 0.55, 0)),
+        (2, "fan air through the gaps", (-12, LID_UP + 2.4, 2.2)),
     ])
     return [
         frame((-14, -7.5, -12), (14, FIN_Y1, 12), 0.60, 0.35),
@@ -118,8 +130,15 @@ def zoom_c(m, root):
         tube(f"glow{b}", (SCOPE_X0 + 0.5, y, -0.9), (SCOPE_X1 - 0.5, y, -0.9), 0.45, m["hl"], g, 12)
         D.run(root, f"dot{b}", [(SCOPE_X0 + 1, y, -0.3), (SCOPE_X1 - 1, y, -0.3)], 3, 0.7, m["path"], b,
               0.02, 0.5, 90)
+    seqs = (["10", "11", "10", "01", "11", "10", "00", "10"],
+            ["00", "01", "00", "11", "00", "10", "01", "00"],
+            ["11", "01", "11", "10", "11", "00", "11", "01"])
+    for b, seq in enumerate(seqs):
+        path = S.waveform(m, empty(f"wave{b}", root), LEVELS, seq, b, f"w{b}", "path")
+        S.ride(m, root, path, b, f"wdot{b}")
     x = SCOPE_X0 + 1
     tags(root, [
+        (0, "4 levels: 00 01 11 10, low to high", (SCOPE_X1 - 1.5, LEVELS["01"], -0.9)),
         (0, "top level: 10", (x, LEVELS["10"], -0.9)),
         (0, "Gray code: next levels differ by 1 bit", (x + 16, LEVELS["11"], -0.9)),
         (1, "bottom level: 00", (x, LEVELS["00"], -0.9)),
@@ -128,8 +147,8 @@ def zoom_c(m, root):
         (2, "levels 1/3 as far apart as NRZ's", (x + 16, (LEVELS["01"] + LEVELS["11"]) / 2, -0.9)),
     ])
     return [
-        frame((SCOPE_X0 - 1, 3, -1), (SCOPE_X1 + 1, 14, 0), 0.15, 0.20, fill=0.95),
-        frame((SCOPE_X0 - 1, -3.8, -1), (SCOPE_X1 + 1, 8, 0), 0.15, 0.05, fill=0.95),
+        frame((SCOPE_X0 - 1, -3.8, -1), (SCOPE_X1 + 1, 14.3, 0), 0.15, 0.15, fill=0.97),
+        frame((SCOPE_X0 - 1, -3.8, -1), (SCOPE_X1 + 1, 14.3, 0), 0.05, 0.08, fill=0.97),
         frame((SCOPE_X0 - 1, -3.8, -1), (SCOPE_X1 + 1, 14.3, 0), 0.10, 0.10, fill=0.98),
     ]
 
@@ -141,11 +160,11 @@ def zoom_d(m, root):
     y = BOARD_Y1
     pair = [(IN_X1, y + 0.4, 0.3), (IN_BALL_X + 0.3, y + 0.4, 0.3)]
     pair_n = [(IN_X1, y + 0.4, 1.3), (IN_BALL_X + 1.3, y + 0.4, 1.3)]
-    for b in (1, 2):
-        D.run(root, f"p{b}", pair, 5, 0.42, m["noise"], b, 0.0, 0.5, 70)
-        D.run(root, f"n{b}", pair_n, 5, 0.42, m["noise"], b, 0.03, 0.53, 70)
+    for b in (0, 1, 2):
+        D.run(root, f"p{b}", pair, 8, 0.42, m["noise"], b, 0.0, 0.6, 70)
+        D.run(root, f"n{b}", pair_n, 8, 0.42, m["noise"], b, 0.03, 0.63, 70)
     up = [(IN_BALL_X, y + 0.4, 0.4), (IN_BALL_X, -4.1, 0.4), (IN_BUMP_X, -4.1, 0.4), (IN_BUMP_X, -2.9, 0.4)]
-    D.run(root, "up", up, 5, 0.35, m["path"], 2, 0.2, 0.8, 50)
+    D.run(root, "up", up, 8, 0.35, m["path"], 2, 0.1, 0.85, 50)
     lit = group("in_lit", root, span(2, 3))
     S.overlay("lit_via", (IN_BALL_X - 0.3, -5.9, 0.28), (IN_BALL_X + 0.3, -3.9, 0.34), m, lit)
     S.overlay("lit_sub", (IN_BUMP_X, -4.22, 0.02), (IN_BALL_X, -4.06, 0.08), m, lit)

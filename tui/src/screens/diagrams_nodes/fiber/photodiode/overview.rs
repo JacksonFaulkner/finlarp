@@ -59,7 +59,7 @@ const BEATS: &[Beat] = &[
     Beat::new("PHOTODIODE: more light, more current", BEAT_MS)
         .note(
             "A bright burst of light frees many pairs and gives a big current; a dim burst gives a small one. Responsivity close to 1 A/W means a milliwatt of light gives about a milliamp, so the current is a copy of the light's power.",
-            "A dense burst of photons into the can, then a sparse one; big amber beads run out the OUT pin and down the board trace, then small ones.",
+            "A dense burst of photons into the can, then a sparse one; big amber beads run out the OUT pin and down the board trace (blue on the OUT- trace beside it), then small ones.",
         )
         .detail(
             "The light's level is the signal.",
@@ -76,8 +76,8 @@ const BEATS: &[Beat] = &[
         ),
     Beat::new("PHOTODIODE: on to the transceiver", BEAT_MS)
         .note(
-            "The voltage leaves the pins through a flex circuit, runs along a copper trace on the board and into the transceiver's cage, where the DSP equalizes it and decides each PAM4 level.",
-            "Pulled back: the sealed can on its mount, the orange flex behind its pins, amber beads running along the copper trace into the finned transceiver in its cage.",
+            "The voltage leaves the pins through a flex circuit and runs as a differential pair (OUT+ and OUT-) through AC-coupling capacitors, between rows of ground vias, to the connector at the mouth of the transceiver's cage, where the DSP equalizes it and decides each PAM4 level.",
+            "Pulled back and angled: the sealed can, the flex with its copper traces, amber beads on OUT+ and blue on OUT- past the brown caps and silver vias, lighting across the gold contacts of the connector at the cage.",
         )
         .detail(
             "Next stop: the DSP, then the switch.",

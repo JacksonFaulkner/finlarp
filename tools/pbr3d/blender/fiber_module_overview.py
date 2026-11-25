@@ -30,6 +30,14 @@ from pbr_kit import empty  # noqa: E402
 import fiber_module_detail as D  # noqa: E402
 from fiber_module_detail import frame, glide_camera, glow, grp, run  # noqa: E402
 
+# Denser bead flows (2026-11 enhancement): twice the beads, slightly smaller, so each stream reads as a flow.
+_run0 = run
+
+
+def run(parent, name, pts, n, size, m, b, u0, u1, life):
+    return _run0(parent, name, pts, max(3, 2 * n), size * 0.85, m, b, u0, u1, life)
+
+
 PAGE = "fiber_module"
 NAME = "overview"
 BEATS = 7
@@ -139,6 +147,7 @@ def build():
     label("fibre to the next switch", CABLE[3], root, b[0])
     label("card-edge fingers lead", (36.5, TOP, 4.0), mod, b[1])
     label("OSFP cage", (8.0, 12.5, -12.0), root, b[1])
+    label("isolator + TEC: EMLs need both", (-24.4, BY + 0.6, -5.0), mod, b[2])
     label("TOSA: transmit", (-22.5, TOP + 3.2, -5.0), mod, b[2])
     label("ROSA: receive", (-22.5, TOP + 3.2, 5.0), mod, b[2])
     label("PAM4 DSP", (3.5, TOP + 2.6, 3.3), mod, b[2])
@@ -154,13 +163,13 @@ def build():
     label("the pluggable today", (-6.0, D.FIN_TOP, 0.0), root, b[6])
 
     glide_camera(root, [
-        frame((-110, -20, -28), (160, 25, 28), 0.75, 0.75, pad=0.92),
-        frame((-100, -7, -14), (42, 13, 12), -0.90, 0.60, pad=0.98),
+        frame((-110, -20, -28), (160, 25, 28), 0.75, 0.75, pad=0.80),
+        frame((-100, -7, -14), (42, 13, 12), -0.90, 0.60, pad=0.84),
         frame((-40, -5, -10), (38, 2, 10), 0.10, 0.90, pad=1.0),
         frame((-70, -14, -9), (-14, 0, 9), -0.15, 0.80, pad=1.0),
         frame((-28, -5, -9), (38, -1, 9), 0.10, 0.90, pad=1.0),
-        frame((-62, -6, -12), (46, 24, 12), 0.45, 0.50, pad=0.98),
-        frame((-40, -10, -40), (178, 25, 40), 0.55, 0.85, pad=0.95),
+        frame((-62, -6, -12), (46, 24, 12), 0.45, 0.50, pad=0.86),
+        frame((-40, -10, -40), (178, 25, 40), 0.55, 0.85, pad=0.80),
     ])
     return root
 

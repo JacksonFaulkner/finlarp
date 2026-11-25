@@ -36,6 +36,14 @@ from pbr_kit import empty  # noqa: E402
 import fiber_module_detail as D  # noqa: E402
 from fiber_module_detail import frame, glide_camera, glow, grp  # noqa: E402
 
+_so0 = stream_of
+
+
+def stream_of(parent, name, n, start_pt, path, size, m, b, u0, u1, life):
+    """Denser flows: twice the beads, slightly smaller."""
+    return _so0(parent, name, max(3, 2 * n), start_pt, path, size * 0.85, m, b, u0, u1, life)
+
+
 PAGE = "fiber_module"
 BEATS = 3
 END = F(BEATS, 0)
@@ -308,6 +316,8 @@ def sec3():
     label("1. 8 lanes arrive at the edge", (30.0, TOP, 3.5), mo, B0)
     label("2. the DSP retimes them", (3.5, TOP + 2.6, 3.3), mo, B0)
     label("3. drivers and lasers", (-19.75, TOP + 1.5, -2.1), mo, B1)
+    label("EML: laser + modulator pads, monitor PD", (-19.75, TOP + 1.6, -6.5), mo, B1)
+    label("isolator: blocks reflections", (-24.4, BY + 0.6, -6.0), mo, B1)
     label("4. lenses couple into the MPO", (D.LENS_X, BY + 0.4, -8.1), mo, B1)
     label("5. photodiodes and TIAs", (-20.25, TOP + 1.6, 8.5), mo, B2)
     label("6. controller reports to host", (17.0, TOP + 0.9, 8.0), mo, B2)
@@ -359,9 +369,17 @@ def sec4():
     for k, z in enumerate((-3.2, 0.0, 3.2)):
         ax = -SIDE_X - ASIC_X + 22.0
         stream_of(root, f"board_{k}", 4, (ax, -6.6, z), [(0, 0, 0), (-SIDE_X - 40.5 - ax, 0, 0)], 0.9, m["elec"], 0, 0.02 + 0.05 * k, 0.45, 60)
-    stream_of(root, "dac_sig", 5, dac[0], rel(dac), 2.9, m["elec"], 0, 0.3, 0.75, 50)
-    stream_of(root, "mmf_light", 6, mmf[0], rel(mmf), 1.7, m["light"], 1, 0.05, 0.6, 70)
-    stream_of(root, "smf_light", 6, smf[0], rel(smf), 1.7, m["light"], 2, 0.05, 0.6, 70)
+    for k in range(3):
+        stream_of(root, f"dac_sig_{k}", 6, dac[0], rel(dac), 2.8, m["elec"], 0, 0.25 + 0.08 * k, 0.75, 50)
+        stream_of(root, f"mmf_light_{k}", 8, mmf[0], rel(mmf), 1.1, m["light"], 1, 0.05 + 0.1 * k, 0.6, 70)
+        stream_of(root, f"smf_light_{k}", 8, smf[0], rel(smf), 1.1, m["light"], 2, 0.05 + 0.1 * k, 0.6, 70)
+    # fibre end faces in cross-section: multimode's wide 50 um core vs single-mode's 9 um core
+    for name, core, ivl, mat_ in (("mm_face", 0.9, B1, m["aqua"]), ("sm_face", 0.25, B2, m["jacket"])):
+        g = grp(name, root, ivl)
+        tube(f"{name}_clad", (0.0, BY + 5.0, -6.0), (0.0, BY + 5.0, -5.6), 2.4, m["lens"], g, 24)
+        tube(f"{name}_core", (0.0, BY + 5.0, -5.65), (0.0, BY + 5.0, -5.45), core, m["light"], g, 16)
+    label("50 um core: modes smear by ~100 m", (0.0, BY + 7.6, -6.0), root, B1)
+    label("9 um core: one mode, km reach", (0.0, BY + 7.6, -6.0), root, B2)
     label("on a board: copper traces", (75.0, -6.8, 4.0), a, B0)
     label("DAC copper: a few metres", (0.0, BY - 8.0, 0.0), root, B0)
     label("AOC or SR8 multimode: ~100 m", (0.0, BY - 22.0, 0.0), root, B1)
@@ -369,7 +387,7 @@ def sec4():
     label("DR8 500 m, 2xFR4 2 km", (0.0, BY - 22.0, 0.0), root, B2)
     label("single-mode fibre", (20.0, BY - 14.0, 0.0), root, B2)
     glide_camera(root, [
-        frame((-200, -18, -28), (45, 23, 28), 0.55, 0.65, pad=0.97),
+        frame((-200, -14, -28), (45, 14, 28), 0.55, 0.55, pad=0.92),
         frame((-62, -30, -14), (62, 13, 14), 0.0, 0.25, pad=1.05),
         frame((-62, -30, -14), (62, 13, 14), 0.35, 0.35, pad=1.0),
     ])
@@ -442,9 +460,9 @@ def sec6():
         D.cut_x(o, SEC_X)
     rot.rotation_euler = (0.0, 0.0, -math.pi / 2)
     glow(rot, "dsp_hot", D.DSP_DIE[0], (SEC_X, D.DSP_PAD[1][1], D.DSP_DIE[1][2]), m["hot"], [(F(0, 0.1), F(1, 0))], 0.04)
-    for k, z in enumerate((-2.4, 0.0, 2.4)):
-        stream_of(rot, f"heat_up_{k}", 4, (SEC_X + 0.2, TOP + 2.4, z), [(0, 0, 0), (0, D.LID[1] - TOP - 2.4, 0), (0, D.FIN_TOP - TOP - 2.0, 3.0 * (k - 1))],
-                  0.4, m["heat"], 0, 0.10 + 0.08 * k, 0.8, 60)
+    for k, z in enumerate((-2.4, -1.2, 0.0, 1.2, 2.4)):
+        stream_of(rot, f"heat_up_{k}", 6, (SEC_X + 0.2, TOP + 2.4, z), [(0, 0, 0), (0, D.LID[1] - TOP - 2.4, 0), (0, D.FIN_TOP - TOP - 2.0, 1.5 * (k - 2))],
+                  0.3, m["heat"], 0, 0.08 + 0.05 * k, 0.85, 60)
     label("DSP: the hottest chip", (SEC_X, TOP + 2.2, 3.5), rot, B0)
     label("heat up into the finned shell", (SEC_X, D.FIN_TOP, -8.0), rot, B0)
 
@@ -552,14 +570,14 @@ def sec7():
             up.append((leaf[li][4 + k], spine[k // 2][li * 2 + k % 2]))
     for n, (a, b) in enumerate(down):
         pts = link(m, g, f"down{n}", a, b)
-        stream_of(root, f"down_light_{n}", 2, pts[0], rel(pts), 1.4, m["light"], 0, 0.05 + 0.04 * n, 0.7, 60)
-        stream_of(root, f"down_light2_{n}", 1, pts[0], rel(pts), 1.4, m["light"], 2, 0.05 + 0.04 * n, 0.4, 60)
+        stream_of(root, f"down_light_{n}", 2, pts[0], rel(pts), 3.2, m["light"], 0, 0.05 + 0.04 * n, 0.7, 60)
+        stream_of(root, f"down_light2_{n}", 1, pts[0], rel(pts), 3.2, m["light"], 2, 0.05 + 0.04 * n, 0.4, 60)
         for e, p in enumerate((a, b)):
             nose_glow(g, m, f"down_glow_{n}_{e}", p, [(F(0, 0.2), F(1, 0)), (F(2, 0.1), END)])
     for n, (a, b) in enumerate(up):
         pts = link(m, g, f"up{n}", a, b)
-        stream_of(root, f"up_light_{n}", 2, pts[0], rel(pts), 1.4, m["light"], 1, 0.05 + 0.04 * n, 0.7, 60)
-        stream_of(root, f"up_light2_{n}", 1, pts[0], rel(pts), 1.4, m["light"], 2, 0.45 + 0.04 * n, 0.85, 60)
+        stream_of(root, f"up_light_{n}", 2, pts[0], rel(pts), 3.2, m["light"], 1, 0.05 + 0.04 * n, 0.7, 60)
+        stream_of(root, f"up_light2_{n}", 1, pts[0], rel(pts), 3.2, m["light"], 2, 0.45 + 0.04 * n, 0.85, 60)
         for e, p in enumerate((a, b)):
             nose_glow(g, m, f"up_glow_{n}_{e}", p, [(F(1, 0.2), F(2, 0)), (F(2, 0.1), END)])
     label("GPU servers", (SERVERS[0][0], 18.0, -40.0), root, B0)
@@ -669,10 +687,14 @@ def sec9():
         box(f"cpo_fin_{k}", (-15.0, D.BOARD_Y + 6.5, z - 0.5), (15.0, D.BOARD_Y + 26.0, z + 0.5), m["alu"], b2)
     for i, (x, z, axis) in enumerate(OES):
         oe(m, b2, i, x, z, axis)
-    for k, z in enumerate((-7.0, 7.0, 21.0)):
-        stream_of(root, f"cpo_light_{k}", 3, (-32.0, D.BOARD_Y + 3.5, z), [(0, 0, 0), (-30.0, 0, 0)], 1.0, m["light"], 2, 0.05 + 0.1 * k, 0.7, 50)
+    for k, z in enumerate((-21.0, -7.0, 7.0, 21.0)):
+        stream_of(root, f"cpo_light_{k}", 4, (-32.0, D.BOARD_Y + 3.5, z), [(0, 0, 0), (-30.0, 0, 0)], 2.2, m["light"], 2, 0.05 + 0.08 * k, 0.7, 50)
+        stream_of(root, f"cpo_elec_{k}", 3, (-16.0, D.BOARD_Y + 2.4, z * 0.6), [(0, 0, 0), (-8.0, 0, z * 0.4)], 0.5, m["elec"], 2, 0.1 + 0.08 * k, 0.75, 30)
+    for i, (x, z, axis) in enumerate(OES):
+        glow(b2, f"oe_lit_{i}", (x - OE_W, D.BOARD_Y + 2.0, z - OE_W), (x + OE_W, D.BOARD_Y + 2.8, z + OE_W), m["light_soft"], [(F(2, 0.2 + 0.04 * i), END)], 0.1)
     label("CPO: optics on the package", (-27.0, D.BOARD_Y + 3.6, 21.0), root, B2)
     label("switch ASIC under its heat sink", (0.0, D.BOARD_Y + 26.0, 0.0), root, B2)
+    label("ASIC SerDes: millimetres to the optics", (-12.0, D.BOARD_Y + 2.4, 0.0), root, B2)
     label("no module, no module DSP", (-55.0, D.BOARD_Y + 3.5, -21.0), root, B2)
     glide_camera(root, [
         frame((-30, -5, -10), (12, 0, 10), 0.10, 0.90, pad=1.05),

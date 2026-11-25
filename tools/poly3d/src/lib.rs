@@ -255,6 +255,8 @@ struct Canvas {
     names: Vec<(String, (f64, f64))>,
     /// Pixel rectangles (x0, y0, x1, y1) already holding text, which later text keeps off.
     plates: Vec<(i64, i64, i64, i64)>,
+    /// How much bigger than usual text is drawn (the camera zoom, on Z diagrams; 1 elsewhere).
+    text_zoom: f64,
 }
 
 impl Canvas {
@@ -294,6 +296,7 @@ impl Canvas {
             z: vec![f32::INFINITY; w * h],
             names: Vec::new(),
             plates: Vec::new(),
+            text_zoom: 1.0,
         }
     }
 

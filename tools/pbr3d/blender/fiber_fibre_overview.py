@@ -107,18 +107,31 @@ def build():
     seg = empty("segment", root)
     S.x_shell("seg_core", SEG_X0, SEG_X1, 0, 10.0, m["core"], seg, y=SEG_Y)
     S.x_shell("seg_clad", SEG_X0, SEG_X1, 10.0, 25.0, m["clad"], seg, y=SEG_Y)
+    # the coating, stripped back in steps so every layer shows: soft primary, hard secondary
+    S.x_shell("seg_pri", SEG_X0, SEG_X0 + 85, 25.0, 31.0, m["primary"], seg, y=SEG_Y)
+    S.x_shell("seg_sec", SEG_X0, SEG_X0 + 55, 31.0, 36.0, m["secondary"], seg, y=SEG_Y)
+    # frozen-in density ripples in the glass (what scatters the light, beat 3)
+    rg = random.Random(7)
+    for k in range(70):
+        ball(f"seg_grain{k}", (rg.uniform(SEG_X0 + 2, SEG_X1 - 2), SEG_Y + rg.uniform(-9, 9), rg.uniform(-3, 0.3)),
+             0.35, m["normal"], seg, 6)
     ray = S.zigzag(SEG_X0, SEG_X1, SEG_Y, 10.0, 0.3)
     grow_ray("seg_ray", ray, 0.6, m["ray"], root, F(2, 0.05), F(2, 0.7), END)
+    for i, sl in enumerate((0.5, 0.17)):
+        rz = S.zigzag(SEG_X0, SEG_X1, SEG_Y, 10.0, sl, z=0.4 + 0.1 * i, up=bool(i))
+        grow_ray(f"seg_ray_m{i}", rz, 0.45, m["ray"], root, F(2, 0.2 + 0.1 * i), F(2, 0.8), END)
+        for b in (2, 3):
+            pulses(root, f"seg_ph{b}_{i}", 3, rz[0], S.rel_path(rz), 1.3, m["spark"], b, 0.1, 0.7, 60, steps=len(rz) * 2)
     pulses(root, "seg_pk2", 3, ray[0], S.rel_path(ray), 1.6, m["lit"], 2, 0.3, 0.75, 60, steps=24)
     pulses(root, "seg_pk3", 4, (SEG_X0, SEG_Y, 0.8), [(0, 0, 0), (SEG_X1 - SEG_X0, 0, 0)], 2.6, m["lit"], 3,
            0.0, 0.6, 90, scale_to=(0.4, 0.4, 0.4))
     rnd = random.Random(4)
-    for k in range(14):
+    for k in range(30):
         x = rnd.uniform(SEG_X0 + 10, SEG_X1 - 10)
         e = empty(f"sp_{k}", root)
         ball(f"sp_{k}_s", (x, SEG_Y, 1.2), 1.4, m["spark"], e, 8)
         f0 = F(3, rnd.uniform(0.05, 0.8))
-        D.fly(e, [(0, 0, 0), (rnd.uniform(-4, 4), (1 if k % 2 else -1) * 34, 0)], f0, f0 + 30, steps=2)
+        D.fly(e, [(0, 0, 0), (rnd.uniform(-4, 4), (1 if k % 2 else -1) * 44, rnd.uniform(0, 18))], f0, f0 + 30, steps=2)
         show(e, [(f0, f0 + 30)])
 
     # light down the whole link, every beat (through the lenses, along the core)
@@ -146,9 +159,11 @@ def build():
             ("FERRULE tip: the glass end", (TIP_A, 12, 0))],
         2: [("MAGNIFIED: core drawn wide", (SEG_X0 + 15, SEG_Y + 25, -1)),
             ("CORE: rays turn back at the wall", (ray[2][0], ray[2][1], 0.6)),
-            ("CLADDING: lower index", (SEG_X1 - 15, SEG_Y - 18, 0.2))],
+            ("CLADDING: lower index", (SEG_X1 - 15, SEG_Y - 18, 0.2)),
+            ("COATING: soft primary, hard secondary", (SEG_X0 + 30, SEG_Y - 33, 0.2))],
         3: [("packets dim as they run", (SEG_X1 - 20, SEG_Y, 0.8)),
-            ("a little scatters out", (SEG_X0 + 30, SEG_Y + 16, 0.2))],
+            ("a little scatters out", (SEG_X0 + 30, SEG_Y + 16, 0.2)),
+            ("density ripples in the glass scatter it", (SEG_X0 + 70, SEG_Y - 6, 0.3))],
         4: [("drawn short: real runs are km", (25, 5, -1)),
             ("light end to end", (TIP_B - 60, 0, 0.6))],
         5: [("FERRULE: holds the glass end", (TIP_B - 20, 25, -1)),

@@ -89,6 +89,61 @@ def build():
     solid(die, "die_solid", (-HALF_X, 0.0, -HALF_Z), (HALF_X, DIE_TOP, HALF_Z), solid_intervals, root)
     solid(die_test, "die_test", (-HALF_X, 0.0, -HALF_Z), (HALF_X, DIE_TOP, HALF_Z), test_intervals, root)
 
+    # 0-3: the die's side face shows its layers: device (transistor) layer at the bottom, then
+    # copper metal levels, so the slab reads as a stack of real silicon and wiring, not a block.
+    device = mat("device_layer", (0.15, 0.55, 0.60), metal=0.1, rough=0.5)
+    copper = mat("metal_cu", (0.85, 0.45, 0.20), metal=0.9, rough=0.3)
+    stack = empty("metal_stack", root)
+    show(stack, solid_intervals)
+    edge_x0, edge_x1 = HALF_X, HALF_X + 0.3
+    box("layer_device", (edge_x0, 0.0, -HALF_Z), (edge_x1, 0.12, HALF_Z), device, stack)
+    for k, y in enumerate((0.20, 0.36, 0.52, 0.68, 0.84, 1.00)):
+        box(f"layer_metal_{k}", (edge_x0, y, -HALF_Z), (edge_x1, y + 0.10, HALF_Z), copper, stack)
+
+    # 0-3: a die-shot floorplan on the top face, H100-style: HBM PHY strips along the long edges
+    # (where the stacks sit), an L2 band across the middle, and a grid of SM tiles grouped into GPCs (144,
+    # 132 enabled on H100) in the two halves. A bright seal ring runs round the edge.
+    sm = mat("sm_tile", (0.62, 0.48, 0.88), metal=0.3, rough=0.3)
+    l2 = mat("l2_cache", (0.30, 0.45, 0.85), metal=0.4, rough=0.3)
+    phy = mat("hbm_phy", (0.95, 0.75, 0.30), metal=0.8, rough=0.3)
+    seal = mat("seal_ring", (0.85, 0.85, 0.95), metal=0.9, rough=0.2, emit=(0.6, 0.6, 0.8), strength=0.8)
+    fp = empty("floorplan", root)
+    show(fp, solid_intervals)
+    top, skin = DIE_TOP, DIE_TOP + 0.06
+    for side in (-1, 1):
+        x0, x1 = sorted((side * 11.5, side * 12.4))
+        box(f"phy_{side}", (x0, top, -15.2), (x1, skin, 15.2), phy, fp)
+    # L2 is two 25 MB partitions with a crossbar between them (GH100).
+    xbar = mat("l2_xbar", (0.55, 0.85, 1.0), emit=(0.4, 0.8, 1.0), strength=1.2)
+    box("l2_left", (-11.0, top, -1.2), (-0.5, skin, 1.2), l2, fp)
+    box("l2_right", (0.5, top, -1.2), (11.0, skin, 1.2), l2, fp)
+    box("l2_xbar", (-0.5, top, -1.2), (0.5, skin, 1.2), xbar, fp)
+    # 8 GPCs (4 per half, 2 x 2), each a darker plate holding 18 SMs (9 TPCs x 2) in 6 x 3:
+    # 144 SMs on the full GH100, 132 enabled on H100.
+    gpc = mat("gpc_plate", (0.30, 0.20, 0.50), metal=0.2, rough=0.5)
+    gw, gd, ggap = 10.6, 6.5, 0.8
+    sw, sd = gw / 6, gd / 3
+    for half in (-1, 1):
+        for gc in range(2):
+            for gr in range(2):
+                gx0 = -11.0 + gc * (gw + ggap)
+                gz = 1.6 + gr * (gd + 0.6)
+                gz0, gz1 = sorted((half * gz, half * (gz + gd)))
+                box(f"gpc_{half}_{gc}_{gr}", (gx0, top, gz0), (gx0 + gw, top + 0.03, gz1), gpc, fp)
+                for c in range(6):
+                    for r in range(3):
+                        x = gx0 + c * sw + 0.12
+                        z = gz + r * sd + 0.12
+                        z0, z1 = sorted((half * z, half * (z + sd - 0.24)))
+                        box(f"sm_{half}_{gc}_{gr}_{c}_{r}", (x, top, z0), (x + sw - 0.24, skin, z1), sm, fp)
+    for name, lo, hi in (
+        ("seal_l", (-HALF_X, top, -HALF_Z), (-HALF_X + 0.25, skin + 0.02, HALF_Z)),
+        ("seal_r", (HALF_X - 0.25, top, -HALF_Z), (HALF_X, skin + 0.02, HALF_Z)),
+        ("seal_f", (-HALF_X, top, HALF_Z - 0.25), (HALF_X, skin + 0.02, HALF_Z)),
+        ("seal_b", (-HALF_X, top, -HALF_Z), (HALF_X, skin + 0.02, -HALF_Z + 0.25)),
+    ):
+        box(name, lo, hi, seal, fp)
+
     # 1: reticle field, four bars around the die at 26 x 33 mm.
     ret = empty("reticle", root)
     show(ret, [(F(1, 0), F(2, 0))])

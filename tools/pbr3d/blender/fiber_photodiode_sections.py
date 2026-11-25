@@ -155,6 +155,8 @@ def sec2(m, root):
     label("p-InP", (D.P_X[0] + 1.2, 6.0, 0.0), root, beat(0))
     label("i: InGaAs ABSORBER", ((D.I_X[0] + D.I_X[1]) / 2, -8.0, 0.0), root, beat(0))
     label("n-InP", ((D.N_X[0] + D.N_X[1]) / 2, 8.0, 0.0), root, beat(0))
+    label("SiN PASSIVATION + BCB", (D.P_X[0], -D.MESA - 2.0, 0.0), root, beat(0))
+    label("DEPLETION FIELD", ((D.I_X[0] + D.I_X[1]) / 2, 10.0, 0.3), root, beat(0))
     label("InP SUBSTRATE", ((D.S_X[0] + D.S_X[1]) / 2, -12.0, 0.0), root, beat(0))
     r = D.routes()
     D.pairs(root, "pt1", m, 1, 0.1, 0.6, 3)
@@ -167,6 +169,7 @@ def sec2(m, root):
     label("GERMANIUM", (D.GX + 32.0, -5.0, 0.0), root, beat(2))
     label("SILICON WAVEGUIDE", (D.GX - 40.0, -14.0, 0.0), root, beat(2))
     label("SILICON CHIP", (D.GX - 20.0, -36.0, 0.0), root, beat(2))
+    label("W PLUGS + Cu METAL", (D.GX + 34.0, 6.0, 0.0), root, beat(2))
     label("CONTACT", (D.GX + 24.0, 15.0, -7.0), root, beat(2))
     D.glide_camera(root, [
         frame(*CHIP, yaw=-0.2, pitch=0.12, pad=1.1),
@@ -218,24 +221,24 @@ def sec4(m, root):
     # Silicon: a plain slab. The light passes straight through it.
     box("si_slab", (SI_X[0], -40.0, -40.0), (SI_X[1], 40.0, 0.0), m["si"], root)
     for b in range(BEATS):
-        for k in range(8):
-            y = [-6.0, 4.0, -2.0, 7.0, 0.0, -5.0, 3.0, 6.0][k]
-            f0 = F(b, 0.05 + 0.8 * k / 7)
+        for k in range(18):
+            y = [-6.0, 4.0, -2.0, 7.0, 0.0, -5.0, 3.0, 6.0, -8.0][k % 9] * (1.0 if k < 9 else 0.6)
+            f0 = F(b, 0.03 + 0.82 * k / 17)
             blip(root, f"si_ph{b}_{k}", [front((-250.0, y * 0.3, 0)), front((SI_X[0], y, 0)),
-                                         front((-40.0, y * 1.3, 0))], 1.2, m["light"], f0, 70)
+                                         front((-40.0, y * 1.3, 0))], 2.0, m["light"], f0, 70)
     # InGaAs on InP: the light stops in the InGaAs and frees pairs.
     box("ig_inp", (IG_X[1], -40.0, -40.0), (IG_X[1] + 30.0, 40.0, 0.0), m["inp_sub"], root)
     box("ig_layer", (IG_X[0], -40.0, -40.0), (IG_X[1], 40.0, 0.0), m["ingaas"], root)
     for b in range(BEATS):
-        for k in range(8):
-            y = [-6.0, 4.0, -2.0, 7.0, 0.0, -5.0, 3.0, 6.0][k]
-            x = IG_X[0] + [6.0, 14.0, 9.0, 20.0, 4.0, 16.0, 11.0, 24.0][k]
-            f0 = F(b, 0.05 + 0.8 * k / 7)
-            blip(root, f"ig_ph{b}_{k}", [front((50.0, y * 0.3, 0)), front((x, y, 0))], 1.2, m["light"],
+        for k in range(16):
+            y = [-6.0, 4.0, -2.0, 7.0, 0.0, -5.0, 3.0, 6.0][k % 8] * (1.0 if k < 8 else 1.8)
+            x = IG_X[0] + [6.0, 14.0, 9.0, 20.0, 4.0, 16.0, 11.0, 24.0][k % 8]
+            f0 = F(b, 0.03 + 0.82 * k / 15)
+            blip(root, f"ig_ph{b}_{k}", [front((50.0, y * 0.3, 0)), front((x, y, 0))], 2.0, m["light"],
                  f0, 22)
-            flash(root, f"ig_f{b}_{k}", front((x, y, 0)), m["flash"], f0 + 22)
-            blip(root, f"ig_e{b}_{k}", [front((x, y, 0)), front((x, y + 12.0, 0))], 1.0, m["elec"], f0 + 26, 30)
-            blip(root, f"ig_h{b}_{k}", [front((x, y, 0)), front((x, y - 12.0, 0))], 1.0, m["hole"], f0 + 26, 30)
+            flash(root, f"ig_f{b}_{k}", front((x, y, 0)), m["flash"], f0 + 22, r=2.6)
+            blip(root, f"ig_e{b}_{k}", [front((x, y, 0)), front((x, y + 22.0, 0))], 1.6, m["elec"], f0 + 26, 34)
+            blip(root, f"ig_h{b}_{k}", [front((x, y, 0)), front((x, y - 22.0, 0))], 1.6, m["hole"], f0 + 26, 34)
     label("SILICON", (sum(SI_X) / 2, 40.0, 0.0), root, beat(0))
     label("1310 nm LIGHT IN", (-240.0, 0.0, 0.0), root, beat(0))
     label("PASSES STRAIGHT THROUGH", (-70.0, 0.0, 0.0), root, beat(0))
@@ -252,11 +255,28 @@ def sec4(m, root):
     yph = BARS_Y0 + 0.95 * EV
     tube("photon_line", (205.0, yph, 1.0), (415.0, yph, 1.0), 1.0, m["light"], root, 12)
     run(root, "line_ph", [(205.0, yph, 1.5), (415.0, yph, 1.5)], 6, 2.0, m["light"], 2, 0.05, 0.85, 50)
+    # a photon dropping onto each bar: bounces off silicon (red), is absorbed by InGaAs and Ge (flash + pair)
+    for k in range(5):
+        for text, x, ev, mt in bars:
+            f0 = F(2, 0.1 + 0.16 * k) + int(x) % 7
+            top = BARS_Y0 + ev * EV
+            cx = x + 20.0
+            if ev > 0.95:
+                blip(root, f"bar_ph{x}_{k}", [(cx, yph + 25.0, 2.0), (cx, yph + 2.0, 2.0), (cx + 18.0, yph + 25.0, 2.0)],
+                     2.0, m["light"], f0, 30)
+                flash(root, f"bar_x{x}_{k}", (cx, yph, 2.0), m["red"], f0 + 15, r=3.0, life=8)
+            else:
+                blip(root, f"bar_ph{x}_{k}", [(cx, yph + 25.0, 2.0), (cx, top, 2.0)], 2.0, m["light"], f0, 18)
+                flash(root, f"bar_f{x}_{k}", (cx, top, 2.0), m["flash"], f0 + 18, r=3.0, life=8)
+                blip(root, f"bar_e{x}_{k}", [(cx, top, 2.0), (cx - 12.0, top - 25.0, 2.0)], 1.6, m["elec"], f0 + 20, 26)
+                blip(root, f"bar_h{x}_{k}", [(cx, top, 2.0), (cx + 12.0, top - 25.0, 2.0)], 1.6, m["hole"], f0 + 20, 26)
+    label("PHOTON ABOVE THE GAP: ABSORBED", (310.0, BARS_Y0 + 0.75 * EV, 0.0), root, beat(2))
+    label("BELOW SILICON'S GAP: PASSES", (240.0, BARS_Y0 + 1.12 * EV + 15.0, 0.0), root, beat(2))
     label("1310 nm PHOTON: 0.95 eV", (415.0, yph, 1.0), root, beat(2))
     D.glide_camera(root, [
         frame((-310.0, -44.0, -50.0), (-40.0, 45.0, 0.0), yaw=0.0, pitch=0.2),
         frame((-10.0, -44.0, -50.0), (165.0, 45.0, 0.0), yaw=0.0, pitch=0.2),
-        frame((200.0, -44.0, -50.0), (425.0, 80.0, 0.0), yaw=0.0, pitch=0.2),
+        frame((195.0, -44.0, -50.0), (425.0, 95.0, 0.0), yaw=0.2, pitch=0.2),
     ])
 
 
@@ -356,13 +376,28 @@ def sec6(m, root):
         for i, ly in enumerate(LEVELS[b]):
             gl = tube(f"lvl{b}_{i}", (160.0, ly, zf - 0.5), (280.0, ly, zf - 0.5), 0.7, m["guide"], root, 8)
             show(gl, beat(b) if b == 2 else ([(0, F(2, 0))] if b == 0 else []))
-            for k in range(12):
+            for k in range(22):
                 xs = [160.0 + 20.0 * j for j in range(7)]
                 pts = [(x, ly + rng.uniform(-1, 1) * JITTER[b], zf) for x in xs]
-                f0 = F(b, 0.02 + 0.8 * k / 11) + i * 3
+                f0 = F(b, 0.02 + 0.8 * k / 21) + i * 3
                 blip(root, f"smp{b}_{i}_{k}", pts, 1.8, m["volt"], f0, 44)
         run(root, f"n_out{b}", pin_pts("OUT", D.HEAD_X1, D.PIN_X1), 5, 2.4, m["volt"], b, 0.05, 0.85, 40)
     D.pairs(root, "n_p1", m, 1, 0.15, 0.85, 4)
+    # the DSP's three decision thresholds sit between the levels; red when noise crosses them
+    for b in range(BEATS):
+        lv = LEVELS[b]
+        for i in range(3):
+            ty = (lv[i] + lv[i + 1]) / 2
+            th = tube(f"thr{b}_{i}", (160.0, ty, zf - 0.3), (280.0, ty, zf - 0.3), 0.5,
+                      m["red"] if b == 2 else m["field_line"], root, 8)
+            show(th, beat(b))
+        if b == 2:
+            for k in range(10):
+                i = k % 3
+                ty = (lv[i] + lv[i + 1]) / 2
+                flash(root, f"err{k}", (175.0 + k * 11.0, ty, zf + 0.5), m["red"], F(2, 0.1 + 0.075 * k), r=2.8, life=10)
+    label("DECISION THRESHOLDS", (160.0, (LEVELS[0][0] + LEVELS[0][1]) / 2, zf), root, beat(0))
+    label("RED: SYMBOL ERRORS", (225.0, 40.0, zf), root, beat(2))
     label("TIA OUTPUT", (215.0, 70.0, -70.0), root, beat(0))
     label("4 PAM4 LEVELS", (280.0, 55.0, zf), root, beat(0))
     label("TIA NOISE", TIA_MID, root, beat(1))
@@ -373,7 +408,7 @@ def sec6(m, root):
     D.glide_camera(root, [
         frame((-56.0, -54.0, -90.0), (295.0, 75.0, 0.0), yaw=0.1, pitch=0.2, pad=1.02),
         frame((0.0, -50.0, -85.0), (295.0, 75.0, 0.0), yaw=0.0, pitch=0.18, pad=1.02),
-        frame((145.0, -46.0, -82.0), (295.0, 72.0, -68.0), yaw=0.0, pitch=0.1, pad=1.05),
+        frame((145.0, -50.0, -90.0), (295.0, 75.0, -60.0), yaw=-0.15, pitch=0.12, pad=1.3),
     ])
 
 
@@ -408,7 +443,10 @@ def sec7(m, root):
     for c in (C1, C2):
         connector(m, root, c)
     for b in range(BEATS):
-        run(root, f"lb_ph{b}", [(lx, 0.0, 5.0), (-50.0, 0.0, 5.0)], 8, 2.6, m["light"], b, 0.0, 0.85, 60)
+        run(root, f"lb_ph{b}", [(lx, 0.0, 5.0), (-50.0, 0.0, 5.0)], 16, 2.6, m["light"], b, 0.0, 0.85, 60)
+        for k in range(5):
+            for c in (C1, C2):
+                flash(root, f"loss{b}_{c}_{k}", (c, 12.0 + 4.0 * (k % 3), 6.0), m["red"], F(b, 0.1 + 0.17 * k), r=2.4, life=10)
     lv1 = L0 - 0.5 * DB
     lv2 = lv1 - 0.25 * DB
     lv3 = lv2 - 0.5 * DB
@@ -430,6 +468,7 @@ def sec7(m, root):
     label("LASER", (LASER_X, D.CAN_R, 0.0), root, beat(0))
     label("LASER OUT", (lx, L0, 0.0), root, beat(0))
     label("CONNECTOR: ~0.5 dB", (C1, (L0 + lv1) / 2, 0.0), root, beat(0))
+    label("RED: LIGHT SCATTERED AT THE JOINT", (C1, 22.0, 6.0), root, beat(0))
     label("FIBRE: 0.32 dB/km @1310", ((C1 + C2) / 2, (lv1 + lv2) / 2, 0.0), root, beat(1))
     label("CONNECTOR: ~0.5 dB", (C2, (lv2 + lv3) / 2, 0.0), root, beat(1))
     label("RECEIVER SENSITIVITY", (-200.0, SENS, 0.0), root, beat(2))
@@ -491,7 +530,12 @@ def sec9(m, root):
     # Beat 1: LPO. The DSP vanishes; the TIA's output runs straight to the card edge.
     lpo = to_dsp_path()[:-1] + [(MOD_X1 - 30.0, Y_TR, -20.0), (MOD_X1 - 30.0, Y_TR, -60.0),
                                 (MOD_X1 + 38.0, Y_TR, -60.0)]
-    run(root, "ck_lpo", lpo, 9, 4.5, m["volt"], 1, 0.3, 0.85, 80)
+    run(root, "ck_lpo", lpo, 16, 4.5, m["volt"], 1, 0.3, 0.9, 70)
+    gh = D.halo(m, root, "ck_ghost", DSP[0], DSP[1], [(F(1, 0.3), F(2, 0))], pad=4.0, r=1.2)
+    for k in range(6):
+        flash(root, f"ck_gone{k}", ((DSP[0][0] + DSP[1][0]) / 2 + (k - 2.5) * 16.0, -12.0, -70.0), m["red"],
+              F(1, 0.22 + k * 0.015), r=4.0, life=14)
+    label("THE DSP'S POWER AND LATENCY SAVED", ((DSP[0][0] + DSP[1][0]) / 2, -8.0, -20.0), root, beat(1))
     label("LPO: NO DSP", ((DSP[0][0] + DSP[1][0]) / 2, -18.0, -70.0), root, beat(1))
     label("TIA DRIVES THE HOST SerDes", (MOD_X1 + 20.0, PCB_Y[1], -100.0), root, beat(1))
     # Beat 2: a patch cord plugged into the port, dust on its ferrule's end face.
@@ -504,9 +548,9 @@ def sec9(m, root):
     dust = [(-1.6, 0.8), (1.2, 1.1), (3.5, 0.7), (-4.0, 1.0)]
     for k, (y, r) in enumerate(dust):
         ball(f"dust{k}", (FER_A[1] + 0.6, y, 1.0), r, m["dust"], root, 10)
-    for k in range(10):
-        y = [-1.6, 0.4, 1.2, -0.6, 3.5, 0.0, -1.6, 1.2, -0.3, 0.8][k]
-        f0 = F(2, 0.05 + 0.8 * k / 9)
+    for k in range(20):
+        y = [-1.6, 0.4, 1.2, -0.6, 3.5, 0.0, -1.6, 1.2, -0.3, 0.8][k % 10] + (0.15 if k >= 10 else 0.0)
+        f0 = F(2, 0.05 + 0.8 * k / 19)
         blocked = any(abs(y - dy) < dr for dy, dr in dust)
         end = FER_A[1] - 0.5 if blocked else FER_B[1]
         blip(root, f"cd_ph{k}", [front((-470.0, y, 0)), front((end, y, 0))], 0.9, m["light"], f0, 30 if blocked else 50)
@@ -518,7 +562,7 @@ def sec9(m, root):
     D.glide_camera(root, [
         frame(*CHIP_TIA, yaw=-0.5, pitch=0.15, pad=1.2),
         frame((120.0, -70.0, MOD_Z), (MOD_X1 + 40.0, 50.0, 0.0), yaw=0.2, pitch=0.6, pad=1.0),
-        frame((-445.0, -12.0, -10.0), (-375.0, 12.0, 0.0), yaw=0.0, pitch=0.15, pad=1.2),
+        frame((-470.0, -14.0, -12.0), (-360.0, 14.0, 2.0), yaw=-0.35, pitch=0.3, pad=1.15),
     ])
 
 

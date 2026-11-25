@@ -31,18 +31,18 @@ OUT_TAG = (100.0, *D.PINS["OUT"])
 # letter -> (box lo, box hi, yaw, pitch, tag text, tag position, overview beat per zoom beat).
 ZOOMS = {
     # the window: the ball lens in the sealed can's cap, light from the fibre; a burst; pulses
-    "a": ((-125.0, -30.0, -12.0), (-25.0, 30.0, 40.0), -0.55, 0.2, "WINDOW", (D.LENS_X, D.LENS_R, 0.0),
+    "a": ((-110.0, -22.0, -12.0), (-30.0, 22.0, 30.0), -0.7, 0.18, "WINDOW", (D.LENS_X, D.LENS_R, 0.0),
           [1, 4, 5]),
     # the chip: cut open, its layers; pairs freed; current leaving up the bond wire
     "b": ((8.0, -24.0, -20.0), (36.0, 40.0, 0.0), -0.45, 0.14, "CHIP", (20.0, D.MESA, 0.0), [2, 2, 3]),
     # the pins: the header's back and the four pins; current out; a bright burst; on to the board
-    "c": ((30.0, -50.0, -50.0), (140.0, 50.0, 50.0), 0.8, 0.25, "PINS", OUT_TAG, [3, 4, 6]),
+    "c": ((40.0, -50.0, -45.0), (140.0, 45.0, 10.0), 1.0, 0.3, "PINS + GLASS SEALS", OUT_TAG, [3, 4, 5]),
     # the current path: OUT pin, flex, board trace toward the cage
-    "d": ((40.0, -55.0, -60.0), (OV.CAGE_X0 + 40.0, 50.0, 10.0), 0.2, 0.45, "CURRENT PATH",
-          ((OV.FLEX_X + OV.CAGE_X0) / 2, OV.TRACE_Y, OV.TRACE_Z), [4, 4, 6]),
+    "d": ((OV.FLEX_X - 5.0, -52.0, -42.0), (OV.CAP_X + 10.0, -40.0, -12.0), 0.25, 0.55, "AC-COUPLED PAIR",
+          (OV.CAP_X, OV.TRACE_Y + 5.0, OV.TRACE_Z), [4, 5, 6]),
     # the module cage: the transceiver in its cage, the trace running in
-    "e": ((OV.CAGE_X0 - 60.0, -55.0, -130.0), (OV.CAGE_X0 + 530.0, 160.0, 130.0), 0.25, 0.4, "MODULE CAGE",
-          OV.kit(OV.K.MOD_X, 13.0, 0.0), [6, 6, 6]),
+    "e": ((OV.CAGE_X0 - 110.0, -55.0, -60.0), (OV.CAGE_X0, -30.0, 10.0), -0.4, 0.85, "CAGE CONNECTOR",
+          (OV.CAGE_X0 - 18.0, OV.BOARD_TOP + 15.0, -25.0), [4, 5, 6]),
 }
 
 

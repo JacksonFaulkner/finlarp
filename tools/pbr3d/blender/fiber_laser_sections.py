@@ -515,6 +515,13 @@ def sec7(m, root):
         key(cn, F(2, i / 4.0) if i < 4 else F(3, 0) - 1, "location", P(0, 2.0 * (i % 2), 0))
     D.wedge("s7_pie_rest", pie, 30.0, 4.0, 2 * math.pi * 0.7, 2 * math.pi, m["pie_rest"], root)
     del ing
+    # the InP crystal grown with that indium (plus phosphorus), and wafers sliced off it
+    D.rod("s7_boule", (IN7 - 30.0, 9.0, -34.0), (IN7 + 2.0, 9.0, -34.0), 9.0, m["wafer_inp"], root, False, 48)
+    D.cone("s7_boule_tip", (IN7 - 30.0, 9.0, -34.0), (IN7 - 38.0, 9.0, -34.0), 9.0, 2.0, m["wafer_inp"], root, 48)
+    for k in range(4):
+        x = IN7 + 6.0 + 3.0 * k
+        D.rod(f"s7_slice{k}", (x, 9.0, -34.0), (x + 0.8, 9.0, -34.0), 9.0, m["wafer_inp"], root, False, 48)
+    box("s7_boule_base", (IN7 - 40.0, -3.0, -46.0), (IN7 + 22.0, 0.0, -22.0), m["tray"], root)
 
     label("InP wafer of EML dies", (-30.0, 0.3, 25.0), root, beat(0))
     label("EML capacity locked up", (0.0, 0.6, 0.0), root, beat(0))
@@ -524,6 +531,7 @@ def sec7(m, root):
     label("silicon modulator", pp["arm_a"], root, beat(1))
     label("indium: the In in InP", (IN7 - 10.0, 10.0, 0.0), root, beat(2))
     label("China: ~70% (one report)", (pie[0] - 4.0, 6.0, -16.0), root, beat(2))
+    label("InP crystal, sliced into wafers", (IN7 - 14.0, 18.0, -34.0), root, beat(2))
     label("rest of the world", (pie[0] + 12.0, 4.0, 16.0), root, beat(2))
 
     camera_path(root, [
@@ -622,6 +630,10 @@ def sec9(m, root):
         for f in (-1, 1):
             o = (x + dx * hx + (f * 3.0 if ax == "z" else 0.0), 1.5, z + dz * hz + (f * 3.0 if ax == "x" else 0.0))
             tube(f"s9_fib{i}_{f}", o, (o[0] + dx * 30.0, 1.5, o[2] + dz * 30.0), 0.9, m["clad"], root, 12)
+            # light pulses leave down every fibre; the failed engine's stop when its laser dies
+            u1 = 0.42 if i == fail_i else 0.95
+            stream_of(root, f"s9_puls{i}_{f}", 5, (o[0], 2.6, o[2]), [(0, 0, 0), (dx * 30.0, 0, dz * 30.0)],
+                      0.8, m["light"], 2, 0.0, u1, 40)
         if i == fail_i:
             show(g, span(0, 0.0, 2, 0.45))
             bad = empty("s9_fail", root)
@@ -639,6 +651,7 @@ def sec9(m, root):
     label("every route needs InP lasers", (R9 + 60.0, -12.0, 0.0), root, beat(1))
     label("switch ASIC", (C9, 4.0, 0.0), root, beat(2))
     label("optical engines with lasers", (C9 - 44.0, 3.0, 16.0), root, beat(2))
+    label("its fibres go dark", (oes[fail_i][0], 1.5, oes[fail_i][1] + 24.0), root, after(2, 0.5))
     label("a laser fails inside", (oes[fail_i][0], 6.0, oes[fail_i][1]), root, after(2, 0.45))
 
     camera_path(root, [

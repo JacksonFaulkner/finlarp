@@ -53,7 +53,7 @@ const S2_B: &[Beat] = &[
     Beat::new("co-packaged optics: engines around the chip", BEAT_MS)
         .note(
             "Co-packaged optics means optical engines on the same package as the switch chip. Here eight engines sit around the chip, two per side, on one substrate. Fibre runs from each engine to a connector on the board.",
-            "The grey-blue switch chip in the middle of the brown-grey substrate, the eight lavender engines around it, and aqua fibre connectors on the green board.",
+            "The grey-blue switch chip in the middle of the brown-grey substrate, the eight lavender engines around it, and aqua fibre connectors on the green board. Every engine is busy: cyan electrons cross from the chip and orange light beads leave down all eight fibre arrays.",
         )
         .detail(
             "Watts per port is the reason to do this.",
@@ -62,7 +62,7 @@ const S2_B: &[Beat] = &[
     Beat::new("the optical engine up close", BEAT_MS)
         .note(
             "An optical engine is a photonic chip (modulators and photodiodes) with an electronic chip stacked on it. The modulators are micro-rings: ring-shaped waveguides a few microns across, each tuned to one wavelength. Photodiodes catch incoming light on the receive lanes.",
-            "The lavender photonic chip with white waveguides: gold rings are the micro-ring modulators, small gold pads are the photodiodes, and the dark block on the inner end is the electronic chip.",
+            "The lavender photonic chip with white waveguides, the laser bus glowing pink: the gold rings flash as micro-ring modulators, the photodiode pads light up as received light lands on them, and the dark block on the inner end is the electronic chip.",
         )
         .detail(
             "TSMC's COUPE process stacks the electronic chip on the photonic chip.",
@@ -146,7 +146,7 @@ const S5_B: &[Beat] = &[
     Beat::new("an electronic chip stacked on a photonic one", BEAT_MS)
         .note(
             "NVIDIA's engines are made on TSMC's COUPE process, which stacks an electronic chip on a photonic chip. The photonic chip carries the light; the electronic chip on top drives the modulators and amplifies what the photodiodes receive.",
-            "The engine cut open: the dark electronic chip sits on top of the lavender photonic chip, joined by a row of tiny silver bonds, all on the brown-grey substrate.",
+            "The engine cut open down one lane: the dark electronic chip on a row of silver microbumps, copper vias running down through the lavender photonic chip, a thin dark buried-oxide layer and a white waveguide core. Cyan electrons climb from the substrate up into the electronic chip while orange light runs out along the waveguide.",
         )
         .detail(
             "Stacking keeps the driver right over the optics.",
@@ -226,7 +226,7 @@ const S7_B: &[Beat] = &[
     Beat::new("~100 Tb/s per switch; Broadcom too", BEAT_MS)
         .note(
             "Either way that is about 100 Tb/s of switching. NVIDIA's Quantum-X Photonics switch is liquid-cooled. Broadcom also builds CPO versions of its Tomahawk switch chips.",
-            "A steel cold plate over the package, cut away at the front so the engines still show.",
+            "A steel cold plate over the package with its front quadrant cut away to show the microchannel fins over the die; blue coolant beads flow in through the inlet pipe and along the channels, and warm orange beads leave through the outlet.",
         )
         .detail(
             "Two switch makers so far.",
@@ -257,7 +257,7 @@ const S8_B: &[Beat] = &[
     Beat::new("fibre and connectors", BEAT_MS)
         .note(
             "Corning (GLW) and others supply the fibre and connectors: the cable from the package to the panel, the panel ports and the cable out.",
-            "A cyan highlight along the cable connector, the aqua cable, the panel adapter and the cable leaving the panel.",
+            "A cyan highlight on the passive cable connector at the package edge; outside the panel, orange-white light beads run out along the aqua fibre cable.",
         )
         .detail(
             "Fibre and connectors: GLW and others.",
@@ -270,7 +270,7 @@ const S9_B: &[Beat] = &[
     Beat::new("serviceability: a failed engine", BEAT_MS)
         .note(
             "With pluggables a failed transceiver is one module out of the panel. With CPO the engine is part of the switch package, so a failed engine means replacing the whole switch board, not one module.",
-            "One engine glows red (failed); the cyan wash over the whole board shows what has to be replaced with it.",
+            "One engine pulses red and sends no light; the other seven keep firing orange beads down their fibres. Because the engine is bonded to the package, fixing it means swapping the whole switch board.",
         )
         .detail(
             "The biggest operational risk.",

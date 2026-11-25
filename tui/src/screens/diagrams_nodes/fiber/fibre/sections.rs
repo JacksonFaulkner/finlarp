@@ -70,7 +70,7 @@ const S2_B: &[Beat] = &[
     Beat::new("COATING: protects the glass", BEAT_MS)
         .note(
             "Bare glass this thin scratches easily, and a scratch can grow into a break. The acrylate coating goes on in two layers: a soft inner one that cushions the glass against bends, and a harder outer one that resists scratches.",
-            "The step where the coating ends: the cream inner layer against the grey glass, the blue outer layer over it, and the bare cladding running on to the right with the lit core inside.",
+            "The step where the coating ends: the cream inner layer against the grey glass, the blue outer layer over it, and the bare cladding running on to the right with the lit core inside. A thin yellow band on the outside is the ~5 µm colour ink that tells one fibre from the next (TIA-598).",
         )
         .detail(
             "Coating is applied as the fibre is drawn (section 8).",
@@ -193,8 +193,8 @@ const S6_B: &[Beat] = &[
         ),
     Beat::new("the connectors cost more than the glass", BEAT_MS)
         .note(
-            "A 2 km data-center link loses under 1 dB in the glass. That is less than its connectors, so in a building it is the joints, not the fibre, that use up most of the loss.",
-            "The output end close up: the fibre running into the black connector boot on the meter, with the output bar on the screen.",
+            "A 2 km data-center link loses under 1 dB in the glass. That is less than its connectors, so in a building it is the joints, not the fibre, that use up most of the loss. A mated connector is two zirconia ferrules pressed end to end in a sleeve; any air gap, tilt or offset between the two cores costs a few tenths of a dB.",
+            "The output connector cut open: two zirconia ferrules butted in a split sleeve, a hairline air gap between them, and light sparking out of that gap while the rest carries on into the next fibre.",
         )
         .detail(
             "Inside a data center the glass is almost lossless.",
@@ -278,7 +278,7 @@ const S9_B: &[Beat] = &[
     Beat::new("tight bends leak light", BEAT_MS)
         .note(
             "Bend a fibre too tightly and the light meets the core wall too steeply to be reflected, so it leaks out. Dense cabling makes tight bends common, so it needs bend-insensitive fiber.",
-            "A yellow-jacketed fibre with a tight loop round a dark peg: pulses run along its glowing core, and bright sparks fly outward from the loop where light escapes. Not to scale.",
+            "A yellow-jacketed fibre with a tight loop round a dark peg: pulses run along its glowing core, and blue rays fan out from all round the loop where light escapes the core. Not to scale.",
         )
         .detail(
             "Bend-insensitive fibre tolerates tighter bends.",

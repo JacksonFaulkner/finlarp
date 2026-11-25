@@ -292,17 +292,26 @@ def sec_parts(m, root):
     glow("rx_pll", -0.8, -0.4, 0.8, 0.4, m["hl"], rx, y=0.31)
     for k in range(4):
         z = -5.6 + 3.2 * k
-        stream_of(root, f"lane_h{k}", 3, (-9.5, 0.7, z), [(0, 0, 0), (3.0, 0, 0)], 0.3, m["path"], 0,
+        stream_of(root, f"lane_h{k}", 5, (-9.5, 0.7, z), [(0, 0, 0), (3.0, 0, 0)], 0.3, m["path"], 0,
                   0.05 + 0.05 * k, 0.6 + 0.05 * k, 40)
-        stream_of(root, f"lane_l{k}", 3, (6.5, 0.7, z), [(0, 0, 0), (3.0, 0, 0)], 0.3, m["path"], 0,
+        stream_of(root, f"lane_l{k}", 5, (6.5, 0.7, z), [(0, 0, 0), (3.0, 0, 0)], 0.3, m["path"], 0,
                   0.1 + 0.05 * k, 0.65 + 0.05 * k, 40)
     for k in range(3):
         z = -5.0 + 1.6 * k
-        stream_of(root, f"tx{k}", 4, (-7.0, 0.7, z), [(0, 0, 0), (14.0, 0, 0)], 0.35, m["path"], 1,
+        stream_of(root, f"tx{k}", 6, (-7.0, 0.7, z), [(0, 0, 0), (14.0, 0, 0)], 0.35, m["path"], 1,
                   0.05 + 0.04 * k, 0.6 + 0.04 * k, 70)
         z = 2.0 + 1.6 * k
-        stream_of(root, f"rx{k}", 4, (7.0, 0.7, z), [(0, 0, 0), (-14.0, 0, 0)], 0.35, m["noise"], 2,
+        stream_of(root, f"rx{k}", 6, (7.0, 0.7, z), [(0, 0, 0), (-14.0, 0, 0)], 0.35, m["noise"], 2,
                   0.05 + 0.04 * k, 0.6 + 0.04 * k, 70)
+    # the PLL's recovered clock fans out to every lane (beat 2)
+    for k, (dx, dz) in enumerate(((-6.5, -5.5), (-6.5, 0.0), (-6.5, 5.5), (6.5, -5.5), (6.5, 0.0), (6.5, 5.5))):
+        stream_of(root, f"clk{k}", 4, (0.0, 0.55, 0.0), [(0, 0, 0), (dx, 0, 0), (dx, 0, dz)], 0.25, m["hl"], 2,
+                  0.05 + 0.03 * k, 0.75 + 0.03 * k, 45)
+    # beat 1: cleaned symbols leave the DAC for the line lanes; beat 2: blurred symbols enter the ADC
+    for k in range(4):
+        z = -5.6 + 1.4 * k
+        stream_of(root, f"dac{k}", 4, (5.2, 0.7, z), [(0, 0, 0), (2.4, 0, 0), (5.0, 0, 0)], 0.28, m["lit_tx"], 1,
+                  0.1 + 0.05 * k, 0.8, 30)
     tags(root, [
         (0, "SerDes: 8 host lanes", (-6.6, 0.3, 5.0)),
         (0, "SerDes: 8 line lanes", (6.6, 0.3, -5.0)),
@@ -595,14 +604,29 @@ def sec_fec(m, root):
     for k in range(CELLS):
         x, y = cell_xy(k)
         check = k >= CELLS - 2
-        g = group(f"cell{k}", root, [(F(0, 0.05 + 0.7 * k / CELLS), F(3, 0))])
+        g = group(f"cell{k}", root, [(F(0, 0.05 + 0.4 * k / CELLS), F(3, 0))])
         box(f"cell{k}_b", (x, y, -1.1), (x + CW, y + CH, -0.7), m["gold" if check else "sram"], g)
-    for k in BAD:
+
+    def at_sweep(b, x):
+        # the frame where a bar keyed 0.05->0.95 of beat b over x in [-1.3, x1 - 0.8] reaches x
+        u = 0.05 + 0.9 * max(0.0, min(1.0, (x + 1.3) / (x1 - 0.5)))
+        return F(b, min(u, 0.97))
+
+    for i, k in enumerate(BAD):
         x, y = cell_xy(k)
-        g = group(f"bad{k}", root, [(F(1, 0.25 + 0.15 * BAD.index(k)), F(2, 0.15 + 0.25 * BAD.index(k)))])
+        hit, fix = at_sweep(1, x + CW / 2), at_sweep(2, x + CW / 2)
+        g = group(f"bad{k}", root, [(hit, fix)])
         box(f"bad{k}_b", (x - 0.1, y - 0.1, -0.68), (x + CW + 0.1, y + CH + 0.1, -0.55), m["thresh"], g)
-        f = group(f"fixed{k}", root, [(F(2, 0.15 + 0.25 * BAD.index(k)), F(3, 0))])
+        f = group(f"fixed{k}", root, [(fix, F(3, 0))])
         box(f"fixed{k}_b", (x - 0.1, y - 0.1, -0.68), (x + CW + 0.1, y + CH + 0.1, -0.6), m["lit_rx"], f)
+    # beat 0: data symbols stream in from the left into the codeword; check symbols computed last
+    for r, yr in enumerate(ROW_Y):
+        stream_of(root, f"din{r}", 10, (-6.0, yr + CH / 2, -0.4), [(0, 0, 0), (x1 + 4.0, 0, 0)],
+                  0.32, m["path"], 0, 0.02 + 0.03 * r, 0.6, F(0, 0.35) - F(0, 0))
+    # beat 2: corrected symbols leave on the right, on to the PAM4 encoder
+    for r, yr in enumerate(ROW_Y):
+        stream_of(root, f"dout{r}", 10, (x1 - 1.0, yr + CH / 2, -0.4), [(0, 0, 0), (6.0, 0, 0)],
+                  0.3, m["lit_rx"], 2, 0.3 + 0.03 * r, 0.9, F(0, 0.12) - F(0, 0))
     # beat 1: a band of noise sweeps across the codeword (the link)
     sweep = group("sweep_g", root, span(1, 2))
     sw = empty("sweep", sweep)
@@ -613,23 +637,25 @@ def sec_fec(m, root):
     dec = group("dec_g", root, span(2, 3))
     dh = empty("dec", dec)
     box("dec_bar", (-1.6, -1.0, -0.5), (-1.0, 11.5, -0.4), m["path"], dh)
-    key(dh, F(2, 0.02), "location", P(0, 0, 0), linear=True)
+    key(dh, F(2, 0.05), "location", P(0, 0, 0), linear=True)
     key(dh, F(2, 0.95), "location", P(x1 + 0.5, 0, 0), linear=True)
     xd, yd = cell_xy(4)
     xc, yc = cell_xy(CELLS - 1)
     tags(root, [
         (0, "data: 514 symbols", (xd + CW / 2, yd + CH, -0.7)),
         (0, "check: 30 symbols, ~5%", (xc + CW / 2, yc + CH, -0.7)),
+        (0, "10-bit symbols in", (-4.0, ROW_Y[0] + CH / 2, -0.4)),
         (0, "RS(544,514), 'KP4'", (xd, ROW_Y[1], -0.7)),
         (1, "the link flips a few", (cell_xy(BAD[1])[0] + CW / 2, cell_xy(BAD[1])[1] + CH, -0.6)),
         (1, "~2 in 10,000 raw", (cell_xy(BAD[2])[0] + CW / 2, cell_xy(BAD[2])[1], -0.6)),
         (2, "decoder fixes them", (cell_xy(BAD[1])[0] + CW / 2, cell_xy(BAD[1])[1] + CH, -0.6)),
-        (2, "near error-free out", (cell_xy(BAD[2])[0] + CW / 2, cell_xy(BAD[2])[1], -0.6)),
+        (2, "fixes up to 15 bad symbols", (cell_xy(BAD[2])[0] + CW / 2, cell_xy(BAD[2])[1], -0.6)),
+        (2, "near error-free out", (x1 + 2.0, ROW_Y[1] + CH / 2, -0.4)),
     ])
     return [
-        frame((-3.8, -3.8, -1), (x1 + 2.3, 14.3, 0), 0.15, 0.12, fill=0.95),
+        frame((-6.5, -3.8, -1), (x1 + 2.3, 14.3, 0), 0.15, 0.12, fill=0.95),
         frame((-2, -1, -1), (x1 + 1, 11.5, 0), 0.12, 0.10, fill=0.95),
-        frame((-2, -1, -1), (x1 + 1, 11.5, 0), 0.20, 0.10, fill=0.95),
+        frame((-2, -1, -1), (x1 + 4, 11.5, 0), 0.20, 0.10, fill=0.95),
     ]
 
 
@@ -667,13 +693,20 @@ def sec_power(m, root):
     lpo = group("lpo", root, [(F(1, 0.40), F(2, 0.0))])
     box("bypass_a", (DRV_X0 + 2.5, y + 0.18, 0.05), (IN_X1, y + 0.26, 0.55), m["path"], lpo)
     box("bypass_b", (DRV_X0 + 2.5, y, 0.05), (DRV_X0 + 3.0, y + 0.26, OUT_Z - 3.0), m["path"], lpo)
-    stream_of(root, "lpo_in", 5, IN_START, [(0, 0, 0), (DRV_X0 + 2.75 - IN_X1 + 1, 0, 0),
+    stream_of(root, "lpo_in", 8, IN_START, [(0, 0, 0), (DRV_X0 + 2.75 - IN_X1 + 1, 0, 0),
                                              (DRV_X0 + 2.75 - IN_X1 + 1, 0, OUT_Z - 3.6)],
-              0.45, m["path"], 1, 0.45, 0.8, 40)
+              0.45, m["path"], 1, 0.42, 0.85, 40)
+    stream_of(root, "lpo_in_n", 8, (IN_START[0], IN_START[1], IN_START[2] + 0.6),
+              [(0, 0, 0), (DRV_X0 + 2.75 - IN_X1 + 1, 0, 0), (DRV_X0 + 2.75 - IN_X1 + 1, 0, OUT_Z - 4.2)],
+              0.38, m["noise"], 1, 0.44, 0.87, 40)
+    laser_on(m, root, [(F(1, 0.5), F(2, 0))])
+    fibre_pulses(m, root, 1, n=5, name="lpo_pulse")
     # LRO: only the transmit path is lit through the DSP
     lro = group("lro", root, [(F(2, 0.3), F(3, 0))])
     out_lit(m, lro)
     out_streams(m, root, 2, 0.35)
+    laser_on(m, root, [(F(2, 0.5), F(3, 0))])
+    fibre_pulses(m, root, 2, n=5, name="lro_pulse")
     tags(root, [
         (0, "DSP module: hot", (4, -2.3, 0)),
         (0, "~18.75 pJ/bit (5 nm DSP)", (-6, FIN_Y1 + 3, 6)),
@@ -681,6 +714,7 @@ def sec_power(m, root):
         (1, "LPO: no DSP, ~6.25 pJ/bit", (DRV_X0 + 2.75, y + 0.3, 1.0)),
         (1, "empty DSP footprint", (-5, y, 5)),
         (1, "host lane drives the optics", (30, y + 0.3, 0.3)),
+        (1, "laser still lit", (LASER_HX + 3, D.AXIS_Y + 2.5, OUT_Z)),
         (2, "LRO: DSP on transmit only", (0, -5.0, OUT_Z)),
         (2, "trade: host SerDes must be good", (30, y + 0.3, 0.3)),
     ])
@@ -838,8 +872,26 @@ def sec_risks(m, root):
     D.driver(m, drv, mx0 + 12, mx0 + 17, 0.0, name="lpo_drv")
     drv.location = P(0, 1.0, 0)
     box("lpo_drv_trace", (mx0 + 9, yb + 1.0, -0.25), (mx0 + 12, yb + 1.18, 0.25), m["copper"], root)
-    stream_of(root, "host_drive", 6, (LPO_X + 16, yb + 0.6, 0), [(0, 0, 0), (mx0 + 12 - LPO_X - 16, 0, 0)], 0.45,
-              m["path"], 2, 0.05, 0.7, 60)
+    # the module's optics: the linear driver feeds a laser, the laser a fibre (no DSP to retime)
+    opt = empty("lpo_optics", root)
+    opt.location = P(0, 1.0, 0)
+    D.laser(m, opt, mx0 + 21.0, 0.0, name="lpo_laser")
+    D.fibre(m, opt, mx0 + 27.5, mx1 + 6.0, 0.0, name="lpo_fibre")
+    box("lpo_las_trace", (mx0 + 17, yb + 1.0, -0.25), (mx0 + 18.5, yb + 1.18, 0.25), m["copper"], root)
+    lit = group("lpo_lit", root, span(2, 3))
+    box("host_trace_lit", (LPO_X + 15.5, yb + 0.18, -0.3), (mx0 + 9, yb + 0.3, 0.3), m["path"], lit)
+    box("lpo_drv_lit", (mx0 + 9, yb + 1.18, -0.3), (mx0 + 12, yb + 1.3, 0.3), m["path"], lit)
+    die_edge = group("host_serdes_lit", root, span(2, 3))
+    box("host_serdes_bar", (6.6 + LPO_X, -2.9, -6.8), (8.0 + LPO_X, -2.6, 6.8), m["hl"], die_edge)
+    for k, dz in enumerate((-0.25, 0.25)):
+        stream_of(root, f"host_drive{k}", 9, (LPO_X + 16, yb + 0.6, dz), [(0, 0, 0), (mx0 + 9 - LPO_X - 16, 0, 0),
+                  (mx0 + 9 - LPO_X - 16, 1.0, 0), (mx0 + 12 - LPO_X - 16, 1.0, 0)], 0.4,
+                  m["path"] if k == 0 else m["noise"], 2, 0.02 + 0.02 * k, 0.75, 70)
+    stream_of(root, "drv_las", 6, (mx0 + 17, yb + 1.6, 0), [(0, 0, 0), (1.8, 0, 0), (1.8, 1.0, 0)], 0.3,
+              m["path"], 2, 0.2, 0.85, 20)
+    lpo_light = empty("lpo_light", root)
+    lpo_light.location = P(0, 1.0, 0)
+    fibre_pulses(m, lpo_light, 2, n=7, zc=0.0, x0=mx0 + 27.5, x1=mx1 + 6.0, name="lpo_pulse")
     tags(root, [
         (0, "100G/lane DSP: 5 nm", (TRAY_X - 14, y0 + 1.8, 4)),
         (0, "200G/lane: 3 nm (Sian3)", (TRAY_X, y0 + 1.8, 4)),
@@ -849,11 +901,12 @@ def sec_risks(m, root):
         (2, "host chip's SerDes", (LPO_X + 4, -2.95, 0)),
         (2, "LPO module: no DSP", (mx0 + 6, yb + 1.15, 3)),
         (2, "link rests on the host", (LPO_X + 22, yb + 0.6, 0)),
+        (2, "linear driver: amplifies only", (mx0 + 14.5, -5.2, 0)),
     ])
     return [
         frame((TRAY_X - 22, y0, -9), (TRAY_X + 22, y0 + 2.5, 9), 0.20, 0.75, fill=0.95),
         frame((FACE_X0, y0, -2), (FACE_X0 + 52, y0 + 22, 19), 0.35, 0.30, fill=0.97),
-        frame((LPO_X - 15, -10, -13), (mx1, FIN_Y1, 13), 0.35, 0.50, fill=0.97),
+        frame((LPO_X + 14, -8.5, -7), (mx1 + 2, -2, 7), 0.28, 0.38, fill=0.99),
     ]
 
 

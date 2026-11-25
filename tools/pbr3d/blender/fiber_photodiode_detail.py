@@ -83,6 +83,13 @@ def materials(m):
     m["red"] = mat("pd_red", (1.0, 0.15, 0.12), emit=(1.0, 0.12, 0.10), strength=5.0)
     m["dust"] = mat("pd_dust", (0.12, 0.10, 0.08), rough=0.95)
     m["halo"] = mat("pd_halo2", (1.0, 0.85, 0.35), emit=(1.0, 0.85, 0.35), strength=1.5, alpha=0.18)
+    m["field"] = mat("pd_field", (1.0, 0.85, 0.35), emit=(1.0, 0.75, 0.25), strength=1.0, alpha=0.22)
+    m["field_line"] = mat("pd_field_line", (0.6, 0.9, 1.0), emit=(0.5, 0.85, 1.0), strength=2.0)
+    m["sin"] = mat("pd_sin", (0.55, 0.30, 0.65), rough=0.25, alpha=0.75)
+    m["bcb"] = mat("pd_bcb", (0.78, 0.55, 0.25), rough=0.3, alpha=0.6)
+    m["w"] = mat("pd_tungsten", (0.62, 0.62, 0.66), metal=0.9, rough=0.3)
+    m["cu"] = mat("pd_cu", (0.85, 0.50, 0.30), metal=0.9, rough=0.3)
+    m["red_dim"] = mat("pd_pplus", (0.9, 0.35, 0.40), rough=0.4)
     m["guide"] = mat("pd_guide", (0.55, 0.57, 0.62), rough=0.6)
     return m
 
@@ -231,6 +238,23 @@ def chip(m, parent):
     ring_x("ar_coat", AR_X[0], AR_X[1], 0.0, RING_IN, m["ar"], g, True, 40)
     # The n contact: a gold pad on the n layer's step beside the mesa.
     box("n_contact", (NC[0], NC[2], -6.0), (NC[1], NC[3], 0.0), m["gold"], g)
+    # Real anatomy the camera can read in the cut: a p+ InGaAs contact cap under the ring, the
+    # depletion field glowing faintly through the absorber, SiN passivation down the mesa walls,
+    # BCB planarising round the mesa, a Ti/Pt/Au stack on the n contact, AuSn die attach.
+    box("p_cap", (RING_X[1] - 0.1, MESA - 5.0, -MESA + 1.0), (P_X[0] + 0.5, MESA - 1.0, 0.0), m["ingaas"], g)
+    box("p_cap_lo", (RING_X[1] - 0.1, -MESA + 1.0, -MESA + 1.0), (P_X[0] + 0.5, -MESA + 5.0, 0.0), m["ingaas"], g)
+    box("depletion", (I_X[0] + 0.2, -MESA + 0.6, -0.15), (I_X[1] - 0.2, MESA - 0.6, 0.05), m["field"], g)
+    for s in (-1, 1):
+        y0, y1 = sorted((s * MESA, s * (MESA + 0.7)))
+        box(f"sin_wall{s}", (RING_X[0], y0, -MESA), (N_X[0], y1, 0.0), m["sin"], g)
+        y0, y1 = sorted((s * (MESA + 0.7), s * (MESA + 2.5)))
+        box(f"bcb{s}", (P_X[0], y0, -MESA), (N_X[0], y1, 0.0), m["bcb"], g)
+    for k, (mt, t) in enumerate(((m["steel"], 0.4), (m["dark_steel"], 0.4))):
+        box(f"nstack{k}", (NC[0] - 0.4 * (k + 1), NC[2], -6.0), (NC[0] - 0.4 * k, NC[3], 0.0), mt, g)
+    box("ausn", (S_X[1] + 0.2, -BASE - 1.0, -BASE), (SUB_X[0], BASE + 1.0, 0.0), m["gold"], g)
+    # field lines across the absorber: thin glowing rods p -> n
+    for k, y in enumerate((-10.0, -5.0, 0.0, 5.0, 10.0)):
+        tube(f"efield{k}", (I_X[0] + 0.3, y, 0.3), (I_X[1] - 0.3, y, 0.3), 0.18, m["field_line"], g, 6)
     return g
 
 
@@ -338,6 +362,7 @@ def pairs(parent, name, m, b, u0, u1, n, life=50, photon_life=24):
     """`n` photons, each landing in the absorber and freeing a pair, spread between u0 and u1 of
     beat `b`. The photon comes in from the lens's exit through the ring's aperture."""
     g = empty(name, parent)
+    n = n * 2
     for k in range(n):
         f0 = F(b, u0 + (u1 - u0) * k / max(1, n - 1))
         y = [-4.0, 3.0, -1.0, 5.0, -5.5, 1.5, -2.5, 4.0, 0.5, -3.5][k % 10]
@@ -467,6 +492,14 @@ def ge_pd(m, parent, gx=GX):
     box("ge_npad", (gx + 16, 12.0, -15.0), (gx + 32, 15.0, 0.0), m["gold"], g)
     tube("ge_pvia", (gx + 48, -20.0, -26.0), (gx + 48, 12.0, -26.0), 2.4, m["gold"], g, 12)
     box("ge_ppad", (gx + 40, 12.0, -34.0), (gx + 56, 15.0, -18.0), m["gold"], g)
+    # p+ and n+ implants, oxide cladding over the device, tungsten plugs and copper metal-1
+    box("ge_pplus", (gx + 42, -24.2, -30.0), (gx + 54, -19.8, 0.0), m["red_dim"], g)
+    box("ge_clad", (gx - 90, -14.0, -50.0), (gx + 80, -10.0, -16.0), m["oxide"], g)
+    for k, x in enumerate((gx + 20, gx + 28)):
+        tube(f"ge_wplug{k}", (x, -3.5, -2.0), (x, 4.0, -2.0), 1.1, m["w"], g, 10)
+    box("ge_m1", (gx + 14, 4.0, -4.0), (gx + 34, 6.0, 0.0), m["cu"], g)
+    box("ge_m1p", (gx + 42, 4.0, -30.0), (gx + 56, 6.0, -22.0), m["cu"], g)
+    box("ge_taper", (gx - 30, -20.0, -10.0), (gx + 12, -14.0, -6.0), m["si_wg"], g)
     return g
 
 

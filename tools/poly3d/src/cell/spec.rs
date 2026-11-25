@@ -6,7 +6,7 @@
 
 use image::RgbaImage;
 
-use super::stage::{glass_box, label, text_scale, text_w};
+use super::stage::{glass_box, label_w, text_scale, text_w};
 use super::push_box;
 use crate::{add, cross, mul, norm, sub, Cam, Canvas, Tri, View, V3};
 
@@ -206,13 +206,31 @@ fn solids(fit: &Fit, s: &SpecScene) -> Vec<Tri> {
     m
 }
 
-/// The light grey labels use, matching the hand-built scenes.
-const LABEL: [f32; 3] = [0.86, 0.88, 0.92];
+/// How thick, in pixels, the line from a label to its part is: thin ones got lost.
+const LEADER: i64 = 3;
+
+/// How bright a label must be (relative luminance) to read on the dark background.
+const LABEL_LUMA: f32 = 0.6;
+
+/// A part's label colour: the part's own colour, so the name says which part it is, lifted
+/// toward white until it reads on the dark background (a dark blue part gets a light blue name).
+fn label_col(c: [f32; 3]) -> [f32; 3] {
+    let c = c.map(|v| v.clamp(0.0, 1.0));
+    let luma = |c: [f32; 3]| 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    let l = luma(c);
+    if l >= LABEL_LUMA {
+        return c;
+    }
+    let k = (LABEL_LUMA - l) / (1.0 - l);
+    c.map(|v| v + (1.0 - v) * k)
+}
 
 /// One frame of `s` seen from `view`. `phase` (0..1, wrapping) moves the flow dashes.
 pub fn render_spec(s: &SpecScene, view: &View, phase: f64, w: usize, h: usize, bg: [u8; 3]) -> RgbaImage {
     let fit = Fit::new(s);
     let mut cv = Canvas::new(w, h, bg.map(|c| c as f32 / 255.0));
+    // part names grow and shrink with the zoom, as the parts do
+    cv.text_zoom = view.zoom;
     let cam = framed_cam(s, &fit, view, w, h);
     crate::rasterize(&mut cv, &cam, solids(&fit, s));
     for part in s.parts.iter().filter(|p| p.glass) {
@@ -226,7 +244,8 @@ pub fn render_spec(s: &SpecScene, view: &View, phase: f64, w: usize, h: usize, b
     let mut names: Vec<(V3, &str, [f32; 3], Option<(f64, f64)>)> = Vec::new();
     for part in &s.parts {
         if let Some(name) = part.name.as_deref() {
-            names.push((fit.p(part.shape.center()), name, LABEL, part.label_off));
+            let col = label_col(part.color);
+            names.push((fit.p(part.shape.center()), name, col, part.label_off));
         }
     }
     for f in &s.flows {
@@ -238,7 +257,7 @@ pub fn render_spec(s: &SpecScene, view: &View, phase: f64, w: usize, h: usize, b
     for (at, name, col, fixed) in names {
         let off = fixed.or_else(|| free_spot(&cv, &cam, at, name, &placed));
         if let Some(off) = off {
-            if let Some(r) = label(&mut cv, &cam, at, off, name, col, 1.0) {
+            if let Some(r) = label_w(&mut cv, &cam, at, off, name, col, 1.0, LEADER) {
                 placed.push(r);
             }
         }
@@ -346,6 +365,19 @@ mod tests {
             name: Some(name.into()),
             label_off: None,
         }
+    }
+
+    #[test]
+    fn labels_take_their_parts_colour_bright_enough_to_read() {
+        // a light part keeps its colour exactly
+        assert_eq!(label_col([0.4, 0.85, 0.95]), [0.4, 0.85, 0.95]);
+        // a dark blue part's name stays blue (blue still leads) but bright enough to read
+        let c = label_col([0.27, 0.45, 0.78]);
+        let luma = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        assert!(luma >= LABEL_LUMA - 1e-4, "{c:?}");
+        assert!(c[2] > c[1] && c[1] > c[0], "{c:?}");
+        // different parts get different label colours
+        assert_ne!(label_col([0.55, 0.35, 0.75]), label_col([1.0, 0.65, 0.25]));
     }
 
     #[test]

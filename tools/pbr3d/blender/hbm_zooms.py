@@ -1,9 +1,9 @@
-"""The five HBM STACK zoom-ins, authored in Blender and exported for pbr3d in the SAND template
+"""The six HBM STACK zoom-ins, authored in Blender and exported for pbr3d in the SAND template
 (docs/diagram-pages.md), built from the stack pieces in hbm_kit.py.
 
 Run from the repo root:
 
-    blender -b --factory-startup --python tools/pbr3d/blender/hbm_zooms.py [-- tsv base channels bond cowos]
+    blender -b --factory-startup --python tools/pbr3d/blender/hbm_zooms.py [-- tsv base channels bond cowos die]
 
 For each zoom it writes blender/hbm_<name>.blend and assets/hbm_<name>.glb.
 
@@ -17,6 +17,8 @@ For each zoom it writes blender/hbm_<name>.blend and assets/hbm_<name>.glb.
               from 720 to 775 um
   e cowos     the GPU and stacks on one interposer, more stacks on a bigger one, fewer
               interposers per wafer, and the package on its substrate
+  f die       inside one DRAM core die: lifted out of the stack and laid flat, the TSV field
+              down its middle, banks grouped into channels, one bank tiled into mats, and cells
 
 One beat is SEC (8) seconds at 24 fps; every zoom is four beats (diagrams_nodes/hbm/zoom.rs).
 """
@@ -232,7 +234,133 @@ def cowos():
     finish("cowos", page="hbm")
 
 
-ZOOMS = {"tsv": tsv, "base": base, "channels": channels, "bond": bond, "cowos": cowos}
+# ---- f: inside one DRAM die ---------------------------------------------------------------
+# One core die out of the stack, laid flat and seen from above. The floor plan is schematic
+# (layouts differ by maker): a TSV field down the middle, banks either side, the banks grouped
+# into channels; then one bank opened up into mats with sense-amp stripes, and one mat's cells.
+
+DX0, DX1 = -1200.0, 1200.0  # the flat die, x
+DZ0, DZ1 = -1700.0, -100.0  # and z (the camera looks down from +z, above)
+DT = 40.0  # its thickness
+STRIP = 120.0  # half width of the TSV field
+BANK_W, BANK_GAP = 480.0, 25.0
+ROWS = 4
+CHANNEL_KEYS = ("ch0", "ch1", "ch2", "ch3")
+
+
+def bank_boxes():
+    """(side, col, row) -> (x0, x1, z0, z1) of each bank: 2 columns x 4 rows on each side."""
+    out = {}
+    row_h = (DZ1 - DZ0 - (ROWS + 1) * BANK_GAP) / ROWS
+    for side in (-1, 1):
+        for col in range(2):
+            a = STRIP + BANK_GAP + col * (BANK_W + BANK_GAP)
+            x0, x1 = sorted((side * a, side * (a + BANK_W)))
+            for row in range(ROWS):
+                z0 = DZ0 + BANK_GAP + row * (row_h + BANK_GAP)
+                out[(side, col, row)] = (x0, x1, z0, z0 + row_h)
+    return out
+
+
+def die():
+    m, root = begin("die")
+    from sand_overview import mat
+
+    m["ch0"] = mat("hbm_ch0", (0.35, 0.60, 0.95), rough=0.45)
+    m["ch1"] = mat("hbm_ch1", (0.35, 0.80, 0.50), rough=0.45)
+    m["ch2"] = mat("hbm_ch2", (0.70, 0.50, 0.95), rough=0.45)
+    m["ch3"] = mat("hbm_ch3", (0.95, 0.45, 0.55), rough=0.45)
+    m["mat_tile"] = mat("hbm_mat_tile", (0.78, 0.52, 0.30), rough=0.5)
+    m["sense"] = mat("hbm_sense", (0.30, 0.95, 1.0), emit=(0.25, 0.9, 1.0), strength=1.6)
+    m["wld"] = mat("hbm_wordline_drv", (0.55, 0.58, 0.66), metal=0.3, rough=0.5)
+    m["cap"] = mat("hbm_cap", (0.70, 0.74, 0.80), metal=0.7, rough=0.3)
+
+    # beat 0: an 8-high stack; die 4 rises out of it
+    st = K.stack(root, m, 0.0, 8, "st")
+    show(st.g, beat(0))
+    d = st.dies[4]
+    for f, dx in ((F(0, 0.0), 0.0), (F(0, 0.25), 0.0), (F(0, 0.75), 520.0)):  # slides out sideways
+        key(d, f, "location", P(dx, 0, 0))
+    label("8 DRAM dies on a base die", (-260.0, 300.0, 0.0), root, [(F(0, 0.05), F(0, 0.5))])
+    label("one core die, 30-50 um thick", (520.0 + 170.0, die_top(4), 0.0), root, [(F(0, 0.55), F(1, 0))])
+
+    # beats 1-3: the same die, flat and large, seen from above
+    flat = gbox("die_flat", (DX0, -DT, DZ0), (DX1, 0.0, DZ1), m["dram"], root)
+    show(flat, [(F(1, 0), END)])
+    # the TSV field: copper ends in three columns down the middle
+    tsv_g = []
+    for r in range(14):
+        z = DZ0 + 70.0 + r * (DZ1 - DZ0 - 140.0) / 13
+        for c, x in enumerate((-70.0, 0.0, 70.0)):
+            t = disc(f"tsv_end{r}_{c}", (x, 4.0, z), 22.0, 10.0, m["copper"], root, verts=16)
+            show(t, [(F(1, 0.05 + 0.02 * r), END)])
+            tsv_g.append((r, t))
+    strip = gbox("tsv_field", (-STRIP, 0.0, DZ0), (STRIP, 2.0, DZ1), m["grey"], root)
+    show(strip, [(F(1, 0.0), END)])
+    # signals: cyan dots light the TSV ends row by row, top to bottom, twice
+    for r in range(14):
+        z = DZ0 + 70.0 + r * (DZ1 - DZ0 - 140.0) / 13
+        dot = disc(f"sig{r}", (0.0, 12.0, z), 30.0, 6.0, m["data"], root, verts=16)
+        a = 0.15 + 0.03 * r
+        show(dot, [(F(1, a), F(1, a + 0.12)), (F(1, a + 0.42), F(1, a + 0.54))])
+    label("TSV field: data, command and power", (0.0, 20.0, DZ1 + 40.0), root, beat(1))
+    label("TSVs pass down through the die", (90.0, 20.0, (DZ0 + DZ1) / 2), root, [(F(1, 0.4), F(2, 0))])
+
+    # beat 2: the banks either side, coloured by the channel they belong to
+    boxes = bank_boxes()
+    detail_key = (-1, 1, 3)  # the bank opened up in beat 3: left side, outer column, top row
+    for (side, col, row), (x0, x1, z0, z1) in boxes.items():
+        ch = (0 if side < 0 else 2) + (0 if row < 2 else 1)
+        b = gbox(f"bank{side}_{col}_{row}", (x0, 0.0, z0), (x1, 14.0, z1), m[CHANNEL_KEYS[ch]], root)
+        u = 0.05 + 0.04 * (row + 4 * col + (0 if side < 0 else 2))
+        show(b, [(F(2, min(u, 0.6)), END)])
+    label("16 banks drawn, each its own array", (-700.0, 30.0, DZ1 - 10.0), root, beat(2))
+    label("banks grouped into channels", (700.0, 30.0, DZ0 + 380.0), root, [(F(2, 0.45), F(3, 0))])
+    label("schematic floor plan", (0.0, 30.0, DZ0 - 10.0), root, [(F(2, 0.7), F(3, 0))])
+
+    # beat 3: inside one bank: a 4 x 4 grid of mats, sense-amp stripes between mat rows,
+    # word-line drivers between mat columns; then one mat's cells (capacitors)
+    x0, x1, z0, z1 = boxes[detail_key]
+    nm, gap = 4, 18.0
+    mw = (x1 - x0 - (nm + 1) * gap) / nm
+    mh = (z1 - z0 - (nm + 1) * gap) / nm
+    for i in range(nm):
+        for j in range(nm):
+            mx0 = x0 + gap + i * (mw + gap)
+            mz0 = z0 + gap + j * (mh + gap)
+            t = gbox(f"mat{i}{j}", (mx0, 14.0, mz0), (mx0 + mw, 22.0, mz0 + mh), m["mat_tile"], root)
+            show(t, [(F(3, 0.08 + 0.01 * (i + nm * j)), END)])
+    for j in range(nm + 1):
+        z = z0 + j * (mh + gap)
+        s = gbox(f"sense{j}", (x0 + gap, 14.0, z + 2), (x1 - gap, 24.0, z + gap - 2), m["sense"], root)
+        show(s, [(F(3, 0.2), END)])
+    for i in range(nm + 1):
+        x = x0 + i * (mw + gap)
+        w = gbox(f"wld{i}", (x + 2, 14.0, z0 + gap), (x + gap - 2, 23.0, z1 - gap), m["wld"], root)
+        show(w, [(F(3, 0.25), END)])
+    # one mat's cells: a grid of capacitors standing on the top-left mat
+    cx0, cz0 = x0 + gap, z0 + gap + (nm - 1) * (mh + gap)
+    for i in range(6):
+        for j in range(6):
+            c = disc(f"cap{i}{j}", (cx0 + (i + 0.5) * mw / 6, 30.0, cz0 + (j + 0.5) * mh / 6), mw / 22, 16.0,
+                     m["cap"], root, verts=12)
+            show(c, [(F(3, 0.55 + 0.004 * (i + 6 * j)), END)])
+    bx, bz = (x0 + x1) / 2, (z0 + z1) / 2
+    label("one bank: tiled into mats", (bx, 40.0, z1), root, [(F(3, 0.05), F(3, 0.5))])
+    label("sense-amp stripes: the row buffer", (x1, 30.0, bz), root, [(F(3, 0.25), F(4, 0))])
+    label("a mat: about 512 x 512 cells", (cx0 + mw / 2, 40.0, cz0 + mh), root, [(F(3, 0.5), F(4, 0))])
+    label("each cell: 1 transistor + 1 capacitor", (cx0 + mw, 40.0, cz0 + mh / 2), root, [(F(3, 0.65), F(4, 0))])
+
+    camera(root, [
+        ((260.0, 300.0, 0.0), 1700.0, 0.45, 0.25),
+        ((0.0, 0.0, (DZ0 + DZ1) / 2), 3300.0, 0.0, 1.15),
+        ((0.0, 0.0, (DZ0 + DZ1) / 2), 4000.0, 0.05, 1.10),
+        ((bx, 0.0, bz), 1100.0, 0.10, 1.05),
+    ])
+    finish("die", page="hbm")
+
+
+ZOOMS = {"tsv": tsv, "base": base, "channels": channels, "bond": bond, "cowos": cowos, "die": die}
 
 if __name__ == "__main__":
     which = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else list(ZOOMS)

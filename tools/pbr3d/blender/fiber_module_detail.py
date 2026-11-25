@@ -206,10 +206,23 @@ def tosa(m, g, lid, fau=True):
         box("tosa_fau", (FAU_X[0], TOP + 0.4, -8.5), (FAU_X[1], TOP + 1.9, -1.7), m["lens"], g)
     for i, z in enumerate(LASER_Z):
         box(f"laser_{i}", (LASER_X[0], TOP + 1.0, z - 0.25), (LASER_X[1], TOP + 1.5, z + 0.25), m["inp"], g)
+        # EML anatomy: the electro-absorption modulator's own gold electrode at the output (front)
+        # end, the DFB laser's electrode behind it, and a monitor photodiode on the rear facet
+        box(f"laser_ea_pad_{i}", (LASER_X[0] + 0.05, TOP + 1.5, z - 0.13), (LASER_X[0] + 0.45, TOP + 1.56, z + 0.13), m["gold"], g)
+        box(f"laser_dfb_pad_{i}", (LASER_X[0] + 0.65, TOP + 1.5, z - 0.13), (LASER_X[1] - 0.1, TOP + 1.56, z + 0.13), m["gold"], g)
+        box(f"laser_mpd_{i}", (LASER_X[1] + 0.05, TOP + 1.0, z - 0.2), (LASER_X[1] + 0.4, TOP + 1.4, z + 0.2), m["die"], g)
         ball(f"tosa_lens_{i}", (LENS_X, BEAM_Y, z), 0.36, m["lens"], g)
         # RF feedthrough: a gold lead from the driver through the back wall to each laser
         box(f"tosa_lead_{i}", (-18.5, TOP + 0.4, z - 0.12), (-15.0, TOP + 0.5, z + 0.12), m["gold"], g)
         bond_pair(m, g, f"tosa_bond_{i}", i, rx=False)
+    # optical isolator between the lens row and the fibre block: stops reflections re-entering the lasers
+    box("tosa_isolator", (-24.7, BEAM_Y - 0.55, -8.3), (-24.1, BEAM_Y + 0.55, -1.9), m["ceramic"], g)
+    for s in (-1, 1):
+        box(f"tosa_isolator_magnet_{s}", (-24.8, BEAM_Y + s * 0.55 - (0.2 if s < 0 else 0.0), -8.3), (-24.0, BEAM_Y + s * 0.55 + (0.2 if s > 0 else 0.0), -1.9), m["dark_steel"], g)
+    # thermoelectric cooler under the laser submount: EMLs hold their wavelength only at a fixed temperature
+    for k in range(6):
+        z = -8.2 + 1.2 * k
+        box(f"tosa_tec_pellet_{k}", (-21.5, TOP + 0.4, z), (-21.1, TOP + 0.95, z + 0.5), m["ceramic"], g)
     return zc
 
 
@@ -349,6 +362,10 @@ def module(m, parent, lid="full", pkg_lid=True, name="module", optics="dr8", wit
             zt = (-6.5 + 1.1 * (k % 4)) * (1 if k < 4 else -1)
             box(f"tr_lpo_join_{k}", (DSP_SUB[1][0] + 0.1, TOP, min(z, zt) - 0.15), (DSP_SUB[1][0] + 0.5, TOP + 0.04, max(z, zt) + 0.15), m["copper"], g)
     chips(m, g)
+    if lid == "full":
+        # gap pads from the driver and TIA up into the lid: their heat path, like the DSP's pad
+        for tag, (lo, hi) in (("driver", DRIVER), ("tia", TIA)):
+            box(f"{tag}_gap_pad", (lo[0] + 0.3, hi[1], lo[2] + 0.3), (hi[0] - 0.3, LID[0], hi[2] - 0.3), m["pad"], g)
     fr4 = optics == "fr4"
     tosa(m, g, pkg_lid, fau=not fr4)
     rosa(m, g, pkg_lid, fau=not fr4)

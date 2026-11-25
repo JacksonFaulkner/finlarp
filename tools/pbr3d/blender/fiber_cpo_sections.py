@@ -245,6 +245,12 @@ def finish_n(n):
 def sec1():
     m, root = begin(1)
     rows(m, root)
+    zf = ZP + 21.0  # beat 0: inside the cut-open front module the DSP works hard on every lane
+    halo(m, root, (PX - 18.3, 2.8, zf - 4.3), (PX - 7.7, 4.8, zf + 0.1), upto(0, 0), "warm")
+    stream_of(root, "dsp_in", 8, (PX - 28.0, 3.2, zf - 2.0), [(0, 0, 0), (10.0, 0, 0)], 0.5,
+              m["elec"], 0, 0.0, 0.85, 24)
+    stream_of(root, "dsp_out", 8, (PX - 8.0, 3.2, zf - 2.0), [(0, 0, 0), (16.0, 1.6, 0)], 0.5,
+              m["elec"], 0, 0.1, 0.9, 24)
     W1 = lambda u, y, v: W(u, y, v, dz=ZC)  # noqa: E731
     tags(root, {
         0: [("SWITCH CHIP", (0.0, 6.0, ZP)),
@@ -269,7 +275,15 @@ def sec1():
 
 def sec2():
     m, root = begin(2)
-    link(m, root)
+    pk, oe, _ = link(m, root)
+    for (s_, lat), d in pk["oes"].items():  # beat 0: every engine busy, copper in and light out
+        for v in D.TX:
+            stream_of(d["g"], f"b0_{s_}_{lat}_{v}", 4, (7.5, D.FIB_Y + 0.5, v), [(0, 0, 0), (18.0, 0, 0)],
+                      0.7, m["light"], 0, 0.0, 0.85, 36)
+        stream_of(d["g"], f"b0e_{s_}_{lat}", 5, (-12.6, D.SUB_Y1 + 0.2, -1.5), [(0, 0, 0), (6.8, 0, 0)],
+                  0.35, m["elec"], 0, 0.0, 0.85, 30)
+    rings_on(m, oe, 1)
+    pd_glow(m, oe, 1)
     tags(root, {
         0: [("CO-PACKAGED OPTICS", (-24.0, 2.8, 39.0)),
             ("SWITCH CHIP", (-4.0, 4.05, 2.0)),
@@ -296,10 +310,11 @@ def sec2():
 def sec3():
     m, root = begin(3)
     pk, oe, _ = link(m, root)
-    for i, v in enumerate(D.TX):  # 1: SerDes to the EIC over a few mm of package wiring
-        u0 = 0.05 * i
-        stream_of(oe["g"], f"data_{v}", 6, (-12.6, D.SUB_Y1 + 0.2, v), [(0, 0, 0), (6.8, 0, 0)], 0.3,
-                  m["elec"], 0, u0, u0 + 0.8, 44)
+    for i, v in enumerate(D.LANES):  # 1: SerDes to the EIC over a few mm of package wiring, every lane
+        u0 = 0.025 * ((i * 3) % 5)
+        a_, b_ = (-12.6, -5.8) if v < 0 else (-5.8, -12.6)  # TX lanes out to the EIC, RX lanes back
+        stream_of(oe["g"], f"data_{v}", 10, (a_, D.SUB_Y1 + 0.2, v), [(0, 0, 0), (b_ - a_, 0, 0)], 0.32,
+                  m["elec"], 0, u0, u0 + 0.85, 30)
     rings_on(m, oe, 1)  # 2-3: the EIC drives the rings, which imprint data on the laser light
     for v in D.TX:  # 4: out in fibre to the panel
         stream_of(oe["g"], f"out_{v}", 5, (7.5, D.FIB_Y, v), [(0, 0, 0), (44.0, 0, 0)], 0.42,
@@ -309,7 +324,7 @@ def sec3():
                   0.42, m["light"], 2, 0.0, 0.8, 54)
     pd_glow(m, oe, 2)
     tags(root, {
-        0: [("1 SERDES EDGE", (12.0, 4.05, 4.0)),
+        0: [("1 SERDES EDGE: 8 LANES EACH WAY", (12.0, 4.05, 4.0)),
             ("A FEW MM OF PACKAGE WIRING", W(-9.5, 2.95, -1.5)),
             ("ELECTRONIC CHIP", W(-4.0, 4.4, 1.0))],
         1: [("2 EIC DRIVES THE RING", W(-4.0, 4.4, -2.0)),
@@ -338,6 +353,11 @@ def sec4():
         u0 = 0.03 * ((i * 3) % 5)
         stream_of(d["g"], f"hop_{v}", 6, (a, D.SUB_Y1 + 0.2, v), [(0, 0, 0), (b - a, 0, 0)], 0.3,
                   m["elec"], 1, u0, u0 + 0.8, 44)
+    for i, dz in enumerate((-21.0, -7.0, 7.0, 21.0)):  # beat 2: every pluggable runs hot (its DSP)
+        halo(m, root, (PX - 30.5, 0.4, ZP + dz - 6.5), (PX + 26.5, 12.5, ZP + dz + 6.5), upto(2, 2), "warm")
+    for lat in D.OE_LAT:  # the CPO engines run only a little warm
+        h = group(pk["oes"][("+x", lat)]["g"], f"cool_oe_{lat}", upto(2, 2))
+        box(f"cool_oe_box_{lat}", (-6.6, D.EIC_Y0, -4.1), (-1.4, D.EIC_Y1 + 0.3, 4.1), m["warm"], h)
     W1 = lambda u, y, v: W(u, y, v, dz=ZC)  # noqa: E731
     tags(root, {
         0: [("200G PER LANE, LONG TRACE", (80.0, 0.06, ZP + 22.2)),
@@ -352,7 +372,7 @@ def sec4():
     cam(root, [
         pose((88.0, 4.0, ZP + 4.0), 165.0, 0.20, 1.00),
         pose(W1(-7.0, 3.2, 0.0), 22.0, 0.10, 1.05),
-        pose((65.0, 4.0, -15.0), 290.0, 0.25, 0.85),
+        pose((95.0, 4.0, (ZP + ZC) / 2.0), 215.0, 0.30, 0.80),
     ])
     finish_n(4)
 
@@ -375,6 +395,18 @@ def sec5():
     for i in range(12):
         x = 17.8 + 0.4 * i
         tube(f"eb_{i}", (x, D.PIC_Y1, z), (x, D.EIC_Y0, z), 0.07, m["solder"], cutg, 6)
+    # The deeper cut: buried oxide under the photonic layer, copper TSVs through the PIC, a waveguide
+    # core running along the cut, and electrons climbing substrate -> PIC -> EIC while light runs out.
+    box("box_oxide", (17.3, D.PIC_Y0 + 0.05, z - 0.05), (31.3, D.PIC_Y0 + 0.2, z + 0.05), m["eic"], cutg)
+    box("wg_core_cut", (23.0, D.PIC_Y1 - 0.25, z - 0.06), (31.3, D.PIC_Y1 - 0.12, z + 0.06), m["wg"], cutg)
+    for i in range(5):
+        x = 18.3 + 1.0 * i
+        tube(f"tsv_{i}", (x, D.PIC_Y0, z + 0.02), (x, D.PIC_Y1, z + 0.02), 0.09, m["copper"], cutg, 6)
+    stream_of(cutg, "cut_elec", 10, (18.3, D.SUB_Y1 - 0.6, z + 0.25),
+              [(0, 0, 0), (0, 1.6, 0), (0, 2.5, 0), (2.5, 2.6, 0), (5.0, 1.7, 0)], 0.16,
+              m["elec"], 0, 0.05, 0.9, 40)
+    stream_of(cutg, "cut_light", 8, (23.5, D.PIC_Y1 - 0.18, z + 0.25), [(0, 0, 0), (8.0, 0, 0)], 0.16,
+              m["light"], 0, 0.1, 0.9, 30)
     D.CLIP = None
     whole = group(root, "intact", upto(1, 2))
     D.board(m, whole)
@@ -382,6 +414,9 @@ def sec5():
     oe = pk["oes"][FRONT]
     D.lit_lanes(m, oe, D.LASER, 7.0, D.FERRULE_U)
     rings_on(m, oe, 1)
+    for i, v in enumerate(D.TX):  # the drive voltage: electrons from the EIC edge out to each ring
+        stream_of(oe["g"], f"drive_{v}", 5, (-1.5, D.PIC_Y1 + 0.12, v), [(0, 0, 0), (2.7 + 1.1 * i, 0, 0)],
+                  0.12, m["elec"], 1, 0.05, 0.85, 22)
     # Beat 2: the rings warm up; each sits in a heater loop (copper arcs) that holds its resonance.
     for i, v in enumerate(D.TX):
         D.ring(f"heater_{v}", (1.2 + 1.1 * i, D.PIC_Y1 + 0.02, v + 0.45), 0.52, m["copper"], oe["g"], 0.05)
@@ -392,9 +427,9 @@ def sec5():
     box("warm_box", rel(at, (0.4, D.PIC_Y1, -3.0)), rel(at, (4.3, 4.3, 0.2)), m["heat"], pv)
     flicker(pv, F(2, 0), F(3, 0), every=8)
     tags(root, {
-        0: [("ELECTRONIC CHIP", (20.0, 4.15, z)),
-            ("STACKED ON THE PHOTONIC CHIP", (19.0, 3.78, z)),
-            ("PHOTONIC CHIP", (27.0, 3.35, z))],
+        0: [("ELECTRONIC CHIP ON MICROBUMPS", (20.0, 4.15, z)),
+            ("COPPER VIAS THROUGH THE PIC", (19.3, 3.35, z)),
+            ("WAVEGUIDE CORE: LIGHT OUT", (28.0, 3.5, z))],
         1: [("200G MICRO-RING MODULATORS", W(2.3, D.PIC_Y1 + 0.05, -1.05)),
             ("LASER LIGHT IN", W(4.0, D.PIC_Y1 + 0.05, -3.5)),
             ("VOLTAGE FROM THE EIC", W(-4.0, 4.4, -2.0))],
@@ -415,6 +450,12 @@ def sec5():
 def sec6():
     m, root = begin(6)
     pk, oe, g = link(m, root, els_open=2)
+    y = D.FIB_Y + 1.2
+    for b in range(3):  # the lasers' steady light riding the PM fibres to the engine, every beat
+        for s_, zl in zip((-1, 1), LZ):
+            stream_of(root, f"cw_{b}_{zl}", 6, (64.5, y, -19.0 + 3.0 * s_),
+                      [(0, 0, 0), (-4.5, 0, 0), (-4.5, 0, zl + 19.0 - 3.0 * s_ - 4.0), (-2.0, 0, zl + 19.0 - 3.0 * s_)],
+                      0.45, m["cw"], b, 0.0, 0.85, 40)
     # Beat 1: the module slides out of the panel and back, like any pluggable.
     fly(g, [(0, 0, 0), (0, 0, 0)], 0, F(1, 0.1), steps=1)
     fly(g, [(0, 0, 0), (26.0, 0, 0), (26.0, 0, 0), (0, 0, 0)], F(1, 0.1) + 1, F(1, 0.9), steps=6)
@@ -459,14 +500,26 @@ def sec7():
     cp = group(root, "cold_plate", upto(2, 2))  # liquid cooled, quadrant cut away
     box("plate_back", (-34.0, 4.5, -34.0), (34.0, 7.0, 0.0), m["plate"], cp)
     box("plate_front", (-34.0, 4.5, 0.0), (0.0, 7.0, 34.0), m["plate"], cp)
+    for i in range(12):  # microchannel fins in the cut-away quadrant
+        x = 1.5 + 2.7 * i
+        box(f"fin_{i}", (x, 4.5, 0.5), (x + 0.9, 6.4, 33.5), m["plate"], cp)
+    tube("cool_in", (-20.0, 7.0, -20.0), (-20.0, 7.0, -60.0), 1.4, m["cool"], cp, 12)
+    tube("cool_out", (20.0, 7.0, -20.0), (20.0, 7.0, -60.0), 1.4, m["plate"], cp, 12)
+    stream_of(cp, "coolant_in", 10, (-20.0, 8.6, -60.0), [(0, 0, 0), (0, 0, 40.0)], 0.6,
+              m["cool"], 2, 0.0, 0.85, 40)
+    stream_of(cp, "coolant_ch", 14, (3.0, 6.6, 1.0), [(0, 0, 0), (0, 0, 32.0)], 0.4,
+              m["cool"], 2, 0.0, 0.9, 30)
+    stream_of(cp, "coolant_out", 10, (20.0, 8.6, -20.0), [(0, 0, 0), (0, 0, -40.0)], 0.6,
+              m["heat"], 2, 0.1, 0.9, 40)
     tags(root, {
         0: [("SPECTRUM-X / QUANTUM-X PHOTONICS", (-4.0, 4.05, 2.0)),
-            ("FROM 2H 2026 (SCHEDULED)", (-24.0, 2.8, 39.0)),
+            ("BROADCOM TOMAHAWK CPO TOO", (-24.0, 2.8, 39.0)),
             ("8 ENGINES ON THE PACKAGE", W(-4.0, 4.4, 0.0))],
         1: [("128 x 800G OR 512 x 200G", (81.0, 10.0, 20.0)),
             ("FIBRE PORTS ON THE PANEL", (81.0, 4.0, -28.0))],
         2: [("~100 TB/S IN TOTAL", (-20.0, 7.0, 0.0)),
-            ("BROADCOM: CPO TOMAHAWK TOO", (-24.0, 2.8, 39.0))],
+            ("COLD WATER IN, WARM OUT", (-20.0, 8.6, -45.0)),
+            ("MICROCHANNEL FINS OVER THE DIE", (12.0, 6.6, 16.0))],
     })
     cam(root, [
         pose((10.0, 3.0, 4.0), 115.0, 0.40, 0.75),
@@ -487,8 +540,12 @@ def sec8():
     for (s, lat), d in pk["oes"].items():
         h = group(d["g"], f"oe_halo_{s}_{lat}", upto(0, 0))
         box(f"oe_halo_box_{s}_{lat}", (-7.3, 2.9, -4.8), (12.3, 4.7, 4.8), m["hl"], h)
-    halo(m, root, (65.0, -0.3, -27.0), (107.0, 14.0, -11.0), upto(1, 1))
-    halo(m, root, (52.0, -0.3, 3.0), (130.0, 8.5, 14.0), upto(2, 2))
+    halo(m, root, (66.0, 0.0, -26.2), (100.2, 13.2, -11.8), upto(1, 1))
+    halo(m, root, (52.0, 1.5, 4.5), (78.0, 7.0, 12.5), upto(2, 2))
+    stream_of(root, "cable_light", 10, (79.0, D.FIB_Y + 4.8, 8.5), [(0, 0, 0), (90.0, 0, 0)], 0.7,
+              m["light"], 2, 0.0, 0.85, 50)
+    stream_of(root, "laser_cw", 6, (64.5, D.FIB_Y + 1.2, -19.0), [(0, 0, 0), (0, 0, -6.0)], 0.5,
+              m["cw"], 1, 0.0, 0.85, 30)
     tags(root, {
         0: [("NVIDIA, BROADCOM: SWITCH", (-4.0, 4.05, 2.0)),
             ("TSMC: CHIPS AND PACKAGING", W(-4.0, 4.4, 0.0))],
@@ -511,13 +568,23 @@ def sec9():
     m, root = begin(9)
     pk, oe, g = link(m, root)
     bad = group(oe["g"], "bad_engine", upto(0, 0))
-    box("bad_box", (-7.3, 2.9, -4.8), (7.3, 4.7, 4.8), m["bad"], bad)
-    halo(m, root, (-75.5, -3.3, -75.5), (82.5, 5.5, 75.5), upto(0, 0))
+    bpv = pivot("bad_pulse", (0.0, 3.8, 0.0), bad)
+    box("bad_box", (-7.3, 2.9, -4.8), (7.3, 4.7, 4.8), m["bad"], bpv)
+    flicker(bpv, F(0, 0), F(1, 0) - 1, amps=(1.0, 1.06, 1.0, 1.0, 1.06), every=6)
+    for (s, lat), d in pk["oes"].items():  # healthy engines keep sending; the failed one goes dark
+        if (s, lat) == FRONT:
+            continue
+        for v in D.TX:
+            stream_of(d["g"], f"ok_{s}_{lat}_{v}", 4, (7.5, D.FIB_Y, v), [(0, 0, 0), (16.0, 0, 0)], 0.6,
+                      m["light"], 0, 0.0, 0.85, 30)
     fau = group(oe["g"], "fau_halo", upto(1, 1))
     box("fau_halo_box", (6.8, 2.8, -4.8), (16.0, 4.4, 4.8), m["hl"], fau)
-    halo(m, root, (-40.5, -0.3, -40.5), (40.5, 5.0, 40.5), upto(2, 2))
+    rim = group(root, "vendor_rim", upto(2, 2))  # an outline round the package, not a wash over it
+    for k, (lo, hi) in enumerate((((-41.0, -41.0), (41.0, -39.5)), ((-41.0, 39.5), (41.0, 41.0)),
+                                  ((-41.0, -41.0), (-39.5, 41.0)), ((39.5, -41.0), (41.0, 41.0)))):
+        box(f"rim_{k}", (lo[0], D.SUB_Y1, lo[1]), (hi[0], D.SUB_Y1 + 1.2, hi[1]), m["hl"], rim)
     tags(root, {
-        0: [("FAILED ENGINE", W(0.0, 4.7, 0.0)),
+        0: [("FAILED ENGINE: NO LIGHT OUT", W(0.0, 4.7, 0.0)),
             ("MEANS A NEW SWITCH BOARD", (-24.0, 2.8, 39.0))],
         1: [("FIBRE ATTACH: A NEW STEP", W(10.0, 4.05, 0.0)),
             ("LOW LOSS, AT SCALE", W(14.0, D.FIB_Y + 0.35, 2.0))],

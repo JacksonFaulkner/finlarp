@@ -102,6 +102,14 @@ def build():
     key(lid, F(4, 0.02), "location", P(0, LID_UP, 0))
     key(lid, F(4, 0.25), "location", P(0, 0, 0))
 
+    # 2 (cont.): with the lid up, signals still climb the bumps into the die and heat leaves its back
+    for k, x in enumerate((1.8, 4.2, 6.6)):
+        D.run(root, f"bump2_{k}", [(x, -3.9, 0.35), (x, DIE_Y0 + 0.1, 0.35)], 3, 0.22, m["path"], 2,
+              0.35 + 0.08 * k, 0.85, 25)
+    for k, x in enumerate((-5.0, -1.0, 3.0, 7.0)):
+        D.run(root, f"tim2_{k}", [(x, TIM_Y1, 0.4), (x, TIM_Y1 + 2.0, 0.4)], 3, 0.35, m["heat"], 2,
+              0.45 + 0.04 * k, 0.9, 30)
+
     # 3: a scope on the bench, probing host lane 5 through an arched probe lead
     sg = empty("scope_at", root)
     sg.location = P(*SCOPE_AT)
@@ -134,8 +142,16 @@ def build():
     lbox("hot_die", (dx0 - o, DIE_Y0 - o, dz0 - o), (dx1 + o, DIE_Y1 + o, dz1 + o), m["heat"], hot, None, o)
     lbox("hot_tim", (dx0 + 0.15, DIE_Y1, dz0 + 0.15), (dx1 - 0.15, TIM_Y1 + o, dz1 - 0.15), m["heat"], hot, None, o)
     for k, (dx, dz) in enumerate(((-9.0, -6.6), (-4.0, -2.2), (3.0, -4.4), (8.0, -8.8), (-6.0, 4.4), (-2.0, 8.8))):
-        stream_of(root, f"puff{k}", 3, (dx, FIN_Y1 + 0.3, dz), [(0, 0, 0), (dx * 0.15, 9.0, 0)], 0.8, m["heat"], 5,
-                  0.03 + 0.05 * k, 0.55 + 0.05 * k, 70)
+        stream_of(root, f"puff{k}", 4, (dx, FIN_Y1 + 0.3, dz), [(0, 0, 0), (dx * 0.15, 9.0, 0)], 0.8, m["heat"], 5,
+                  0.03 + 0.05 * k, 0.65 + 0.05 * k, 70)
+    # the heat's path on the cut face: die -> paste -> lid plate -> fins
+    for k, x in enumerate((-6.0, -2.0, 2.0, 6.0)):
+        D.run(root, f"climb5_{k}", [(x, DIE_Y0 + 0.2, 0.3), (x, D.LID_Y1, 0.3), (x, FIN_Y1 + 0.5, 0.3)], 4, 0.4,
+              m["heat"], 5, 0.02 + 0.04 * k, 0.7 + 0.04 * k, 45)
+    # fan air sweeping through the fin gaps
+    for k, z in enumerate((-7.7, -3.3, 1.1, 5.5, 9.9)):
+        D.run(root, f"air5_{k}", [(18.0, FIN_Y1 - 1.2, z), (-18.0, FIN_Y1 - 1.2, z)], 5, 0.4, m["air"], 5,
+              0.05 + 0.04 * k, 0.75 + 0.04 * k, 50)
 
     # 6: clean symbols ride the whole chain to the laser chip; it lights; light runs down the fibre
     D.run(root, "clean6", chain, 6, 0.4, m["path"], 6, 0.0, 0.6, 110)
@@ -153,7 +169,8 @@ def build():
         2: [("lid + fins lifted", (8, LID_UP + 1, 0)),
             ("die, face down", (4, -2.2, 0)),
             ("thermal paste", (6, TIM_Y1 - 0.1, 0)),
-            ("C4 bumps", (3.0, -3.5, 0))],
+            ("C4 bumps", (3.0, -3.5, 0)),
+            ("heat leaves the die's back", (-5.0, TIM_Y1 + 1.5, 0.4))],
         3: [("4 levels: 2 bits a symbol", world((WAVE_X0 + SYM_W * 0.5, LEVELS["10"], -0.6))),
             ("one symbol at a time", world((WAVE_X0 + SYM_W * 4.5, LEVELS["00"], -0.6))),
             ("probe on a host lane", (-42.0, y + 0.3, PROBE_LANE))],
@@ -161,7 +178,9 @@ def build():
             ("DSP: equalise + FEC", (4, -2.95, 0)),
             ("clean symbols out", (DRV_X0 - 6, y + 0.4, OUT_Z))],
         5: [("die: most of the power", (4, -2.3, 0)),
-            ("heat off the fins", (0, FIN_Y1 + 6, 0))],
+            ("heat off the fins", (0, FIN_Y1 + 6, 0)),
+            ("die -> paste -> lid -> fins", (-2.0, D.LID_Y1, 0.3)),
+            ("fan air through the fins", (-14.0, FIN_Y1 - 1.2, 9.9))],
         6: [("driver's bond wires", ((DRV_X0 + DRV_X1) / 2, -6.0, OUT_Z)),
             ("next: the laser", (LASER_HX + 3, D.AXIS_Y + 0.2, OUT_Z)),
             ("light into the fibre", (54, D.AXIS_Y, OUT_Z))],
@@ -174,7 +193,7 @@ def build():
     poses = [
         frame((M_X0, -11, -21), (M_X1, 12, 16), 0.45, 0.55, fill=0.98),
         frame((M_X0 - 2, -10, -12), (10, 3, 12), 0.40, 0.55, fill=0.95),
-        frame((-15, -10, -13), (15, FIN_Y1 + LID_UP, 13), 0.55, 0.35, fill=0.95),
+        frame((-12, -8, -8), (14, FIN_Y1 + LID_UP, 12), 0.60, 0.30, fill=0.97),
         frame((sx0, BENCH_TOP, -2), (-40, 12, 6), 0.30, 0.15, fill=0.97),
         frame((M_X0 - 2, -10, -12), (DRV_X1 + 2, 3, 12), 0.40, 0.50, fill=0.95),
         frame((-15, -10, -13), (15, FIN_Y1 + 9, 13), 0.55, 0.40, fill=0.95),

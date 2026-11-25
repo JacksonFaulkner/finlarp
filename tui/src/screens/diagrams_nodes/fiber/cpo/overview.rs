@@ -50,8 +50,8 @@ pub const BEATS: &[Beat] = &[
         ),
     Beat::new("OPTICAL ENGINE: bits to light", BEAT_MS)
         .note(
-            "Steady light arrives from the external laser on fibre. The electronic chip drives micro-ring modulators, rings a few microns across that pass light only at their resonant wavelength; the drive voltage shifts that resonance and imprints the data on the light. NVIDIA's engines use 200 Gb/s rings on TSMC's COUPE process.",
-            "Red-pink beads ride in on the arched laser fibres and glow along the bus on the lavender photonic chip. The gold rings flash, and orange-white beads leave them into the fibre array.",
+            "Steady light arrives from the external laser on fibre. The electronic chip drives micro-ring modulators, rings a few microns across that pass light only at their resonant wavelength; the drive voltage shifts that resonance and imprints the data on the light. NVIDIA's engines use 200 Gb/s rings on TSMC's COUPE process. Receive runs the other way: light from the far switch lands on germanium photodiodes, and the electronic chip amplifies the photocurrent back into electrical lanes.",
+            "Red-pink beads ride in on the arched laser fibres and glow along the bus on the lavender photonic chip. The gold rings flash, and orange-white beads leave them into the fibre array; on the receive lanes, beads arrive from the fibres, stop at the gold photodiode pads and turn into cyan electrons heading to the dark electronic chip.",
         )
         .detail(
             "Rings are tiny and efficient but need heater control.",
@@ -69,7 +69,7 @@ pub const BEATS: &[Beat] = &[
     Beat::new("SHARED HEAT: optics beside the chip", BEAT_MS)
         .note(
             "The engines sit right beside the hottest chip in the switch. Rings drift with temperature, so each needs heater control. The lasers, which fail more often than silicon and run best cool, stay out at the panel. A failed engine, though, means replacing the whole switch board.",
-            "A red-orange glow pulses over the switch chip; a lighter orange covers all eight engines around it.",
+            "A red-orange glow pulses on the switch chip's lid; orange heat beads spread outward through the substrate on all four sides, and the electronic chips of all eight engines warm.",
         )
         .detail(
             "Serviceability is the main trade-off.",

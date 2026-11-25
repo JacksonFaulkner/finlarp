@@ -26,6 +26,14 @@ from pbr_kit import empty  # noqa: E402
 import fiber_module_detail as D  # noqa: E402
 from fiber_module_detail import frame, glide_camera, glow, grp, run  # noqa: E402
 
+# Denser bead flows (2026-11 enhancement): twice the beads, slightly smaller, so each stream reads as a flow.
+_run0 = run
+
+
+def run(parent, name, pts, n, size, m, b, u0, u1, life):
+    return _run0(parent, name, pts, max(3, 2 * n), size * 0.85, m, b, u0, u1, life)
+
+
 PAGE = "fiber_module"
 BEATS = 3
 END = F(BEATS, 0)

@@ -126,7 +126,7 @@ const S4_B: &[Beat] = &[
     Beat::new("across a row: multimode, ~100 m", BEAT_MS)
         .note(
             "Across a row of racks, up to about 100 m, links switch to light: an AOC, or SR8 modules over multimode fibre. Multimode fibre has a wide core and uses cheap short-wave lasers, but the light spreads, which caps the reach.",
-            "The DAC is gone. MPO plugs sit in both modules and an aqua multimode cable hangs between them, orange light running along it.",
+            "The DAC is gone. MPO plugs sit in both modules and an aqua multimode cable hangs between them, orange light running along it. Below the cable, a fibre end face shows the wide 50 um core that lets light take many paths and smear.",
         )
         .detail(
             "Multimode: cheaper optics, shorter reach.",
@@ -135,7 +135,7 @@ const S4_B: &[Beat] = &[
     Beat::new("across a building: single-mode, 500 m and 2 km", BEAT_MS)
         .note(
             "Across a building the link needs single-mode fibre: DR8 to 500 m, 2xFR4 to 2 km. Between buildings and cities, coherent modules (ZR) reach 80 km and beyond.",
-            "A yellow single-mode cable between the two modules, orange light travelling along it.",
+            "A yellow single-mode cable between the two modules, orange light travelling along it. The end face below now shows a tiny 9 um core: one path, so pulses stay sharp for kilometres.",
         )
         .detail(
             "Reach decides the module, and the module decides the fibre.",
@@ -290,7 +290,7 @@ const S9_B: &[Beat] = &[
     Beat::new("power pushes toward LPO and CPO", BEAT_MS)
         .note(
             "Module power at cluster scale pushes the industry toward LPO modules, without a DSP, and toward co-packaged optics (CPO), where optical engines sit on the switch chip's package and no pluggable module is needed.",
-            "A CPO package: the switch ASIC under its heat sink, blue optical engines around it on the tan substrate, yellow fibre leaving them with orange light.",
+            "A CPO package: the switch ASIC under its heat sink, blue optical engines around it on the tan substrate, the engines light up in turn, cyan signal runs millimetres from the ASIC into them, and orange light leaves on every yellow ribbon.",
         )
         .detail(
             "The pluggable's own power is its biggest long-run risk.",

@@ -367,9 +367,11 @@ fn blend(cv: &mut Canvas, x: i64, y: i64, col: Col, a: f32) {
     }
 }
 
-/// Text pixel size for this frame: labels stay a similar size on the screen.
+/// Text pixel size for this frame: labels stay a similar size on the screen, times the
+/// canvas's text zoom (at most 3x the usual size, at least one pixel per font pixel).
 pub(super) fn text_scale(cv: &Canvas) -> i64 {
-    ((cv.h as f64 / 300.0).round() as i64).max(1)
+    let base = (cv.h as f64 / 300.0).max(1.0);
+    ((base * cv.text_zoom).round() as i64).clamp(1, (base * 3.0).round() as i64)
 }
 
 pub(super) fn text_w(s: &str, scale: i64) -> i64 {
@@ -452,6 +454,21 @@ pub(super) fn label(
     col: Col,
     alpha: f64,
 ) -> Option<Rect> {
+    label_w(cv, cam, at, off, s, col, alpha, 1)
+}
+
+/// As `label`, with a leader `leader` pixels thick (centred on the line).
+#[allow(clippy::too_many_arguments)]
+pub(super) fn label_w(
+    cv: &mut Canvas,
+    cam: &Cam,
+    at: V3,
+    off: (f64, f64),
+    s: &str,
+    col: Col,
+    alpha: f64,
+    leader: i64,
+) -> Option<Rect> {
     let (ax, ay, _) = cam.project(at)?;
     // a part out of frame keeps its name off, rather than piling it on the edge
     if ax < 0.0 || ay < 0.0 || ax >= cv.w as f64 || ay >= cv.h as f64 {
@@ -478,7 +495,8 @@ pub(super) fn label(
     let end_x = if (ax as i64) < x { x - 2 * scale } else { x + w + scale };
     let end = (end_x as f64, (y + tall / 2) as f64);
     if (end.0 - ax).abs() + (end.1 - ay).abs() > 4.0 {
-        screen_line(cv, (ax, ay), end, col, 0.55 * alpha, 1);
+        let h = (leader / 2) as f64;
+        screen_line(cv, (ax - h, ay - h), (end.0 - h, end.1 - h), col, 0.55 * alpha, leader);
     }
     text(cv, x, y, s, col, alpha);
     if alpha > 0.3 {

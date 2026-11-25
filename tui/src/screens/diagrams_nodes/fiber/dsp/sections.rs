@@ -193,7 +193,7 @@ const S6_B: &[Beat] = &[
         ),
     Beat::new("the decoder fixes them", BEAT_MS)
         .note(
-            "The decoder uses the check symbols to find and correct the wrong ones, turning that raw error rate into a near-error-free link. The cost is the ~5% overhead and some added delay.",
+            "The decoder uses the check symbols to find and correct the wrong ones (up to 15 bad 10-bit symbols per codeword), turning that raw error rate into a near-error-free link. The cost is the ~5% overhead and some added delay.",
             "A cyan bar sweeps across; as it passes each pink-red cell, the cell turns pale blue (fixed).",
         )
         .detail(

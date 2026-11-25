@@ -22,7 +22,7 @@ from bpy_extras import anim_utils  # noqa: E402
 from sand_overview import BEAT_FRAMES, F, label, beat  # noqa: E402
 from sand_zooms import finish  # noqa: E402
 import fiber_laser_overview as ov  # noqa: E402
-from fiber_laser_overview import at, pose, C, S, PIN_BIAS, PIN_DATA, PIN_MON, DRV_X, LENS_X, FER_X  # noqa: E402
+from fiber_laser_overview import at, pose, C, S, FIB_END, PIN_BIAS, PIN_DATA, PIN_MON, DRV_X, LENS_X, FER_X  # noqa: E402
 from fiber_laser_detail import camera_path  # noqa: E402
 
 PAGE = "fiber_laser"
@@ -57,18 +57,19 @@ ZOOMS = {
     ],
     "c": [
         ((1, 0.6), pose((7.0, -2.0, 0.0), 30.0, 0.35, 0.28),
-         [("monitor photodiode", PD), ("blue active face", PD_FACE), ("chip's back facet", (BACK, 1.5, 0.0))]),
+         [("monitor photodiode", PD), ("thermistor", (25.7, -4.5, -7.5)), ("blue active face", PD_FACE), ("chip's back facet", (BACK, 1.5, 0.0))]),
         ((4, 0.3), pose((0.0, 4.0, -4.0), 36.0, 0.35, 0.30),
          [("back light lands on it", PD_FACE), ("photocurrent up its wire", (2.0, 8.0, -5.0)), ("monitor pin", (4.0, PIN_MON[0], PIN_MON[1]))]),
         ((4, 0.6), pose((-24.0, 4.0, -8.0), 80.0, 0.30, 0.30),
-         [("back to the driver IC", (DRV_X - 13.0, 26.0, -13.0)), ("monitor pin", (-24.0, PIN_MON[0], PIN_MON[1])),
+         [("into the driver die", (DRV_X - 13.0, 13.0, -4.4)), ("monitor pin", (-24.0, PIN_MON[0], PIN_MON[1])),
           ("bias pin back to the chip", (-24.0, PIN_BIAS[0], PIN_BIAS[1]))]),
     ],
     "d": [
         ((1, 0.6), pose((40.0, 0.0, 0.0), 48.0, 0.40, 0.22),
          [("glass window", (39.6, 7.0, 0.0)), ("cap welded shut", (1.5, 28.0, 0.0)), ("lens", (LENS_X, 9.0, 0.0))]),
         ((3, 0.35), pose((56.0, 0.0, 0.0), 64.0, 0.32, 0.22),
-         [("beam crosses the window", (40.5, 3.5, 0.0)), ("lens focuses it", (LENS_X, 9.0, 0.0)), ("into the ferrule", (FER_X, 1.5, 0.0))]),
+         [("beam crosses the window", (40.5, 3.5, 0.0)), ("lens focuses it", (LENS_X, 9.0, 0.0)), ("into the ferrule", (FER_X, 1.5, 0.0)),
+          ("isolator: garnet in a magnet", (68.0, 10.0, 0.0))]),
         ((3, 0.8), pose((104.0, 0.0, 0.0), 70.0, 0.35, 0.22),
          [("gold sleeve", (FER_X + 12.0, 7.5, 0.0)), ("ceramic ferrule", (FER_X + 18.0, -5.0, 0.0)), ("pigtail fibre, lit core", (130.0, 0.5, 0.0))]),
     ],
@@ -76,9 +77,11 @@ ZOOMS = {
         ((5, 0.3), pose((FER_X - 2.0, 0.0, 0.0), 26.0, 0.45, 0.22),
          [("rays converge on the core", (FER_X - 6.0, 2.0, 0.0)), ("fibre end in the ferrule", (FER_X, 1.4, 0.0))]),
         ((5, 0.6), pose((FER_X + 10.0, 0.0, 0.0), 36.0, 0.35, 0.22),
-         [("light enters the ~9 um core", (FER_X + 2.0, 0.5, 0.0)), ("glass cladding round it", (FER_X + 14.0, 1.4, 0.0))]),
+         [("light enters the ~9 um core", (FER_X + 2.0, 0.5, 0.0)), ("glass cladding round it", (FER_X + 14.0, 1.4, 0.0)),
+          ("isolator just behind", (68.0, 10.0, 0.0))]),
         ((5, 0.85), pose((FER_X + 40.0, 0.0, 0.0), 60.0, 0.35, 0.22),
-         [("light runs down the core", (FER_X + 50.0, 0.5, 0.0)), ("coating outside", (FER_X + 44.0, 4.0, 0.0))]),
+         [("light runs down the core", (FER_X + 50.0, 0.5, 0.0)), ("acrylate coating", (FIB_END - 18.0, 4.0, 0.0)),
+          ("buffer, then jacket", (FER_X + 32.0, 7.0, 0.0))]),
     ],
 }
 

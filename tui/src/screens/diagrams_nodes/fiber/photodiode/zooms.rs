@@ -135,72 +135,72 @@ const C_B: &[Beat] = &[
             "Output level follows light level.",
             &["~1 A/W: 1 mW -> ~1 mA"],
         ),
-    Beat::new("PINS: on to the board", BEAT_MS)
+    Beat::new("PINS: pulse, gap, pulse", BEAT_MS)
         .note(
-            "The pins solder into a flex circuit that carries the signal down to the board, where a copper trace leads to the transceiver.",
-            "The sealed can from behind; amber beads leave the OUT pin, drop down the flex and run along the board.",
+            "Two short light pulses reach the chip; a current pulse follows each one out of the OUT pin, past the solder fillet on the flex and down its copper trace.",
+            "The pins from behind at an angle: two short groups of amber beads run out along the OUT pin and drop down the flex.",
         )
         .detail(
-            "Flex absorbs the mechanical tolerance.",
-            &["Flex: polyimide with copper traces"],
+            "Pins, seals and flex carry 100G symbols.",
+            &["Flex: polyimide with copper traces", "Pin-to-flex joint: solder fillet"],
         ),
 ];
 
-/// d current path: OUT pin, flex, board trace toward the transceiver's cage.
+/// d rx pair: OUT+/OUT- traces, AC caps and via fence on the board.
 const D_B: &[Beat] = &[
-    Beat::new("CURRENT PATH: a bright burst", BEAT_MS)
+    Beat::new("PAIR: a bright burst", BEAT_MS)
         .note(
-            "The signal runs out of the OUT pin, down the flex and along a copper trace on the board. A bright burst shows up as a big signal along the whole path.",
-            "Big amber beads leave the can's top pin, drop down the orange flex and run along the copper trace toward the cage at right.",
+            "The TIA drives two wires, OUT+ and OUT-, that swing in opposite directions. Both pass through small AC-coupling capacitors that block the DC bias and pass the symbols. A bright burst is a big swing on both.",
+            "From above the flex: big amber beads on OUT+, blue beads on OUT- beside it, both crossing the brown capacitors; a row of silver ground vias fences the pair.",
         )
         .detail(
-            "A short, controlled-impedance path.",
-            &["Trace: ~100 Ohm differential (typical)"],
+            "Differential pair, AC coupled.",
+            &["Trace: ~100 Ohm differential (typical)", "AC caps: tiny 0201-size MLCCs"],
         ),
-    Beat::new("CURRENT PATH: bright, then dim", BEAT_MS)
+    Beat::new("PAIR: pulse, gap, pulse", BEAT_MS)
         .note(
-            "Every burst takes this same path; a dim burst follows the bright one as a smaller signal.",
-            "Big beads, then small beads, along the same pin, flex and trace.",
+            "Each light pulse becomes a pulse on both wires. Noise that hits both wires equally cancels when the receiver takes the difference.",
+            "Two short groups of beads on each trace, one after the other.",
         )
         .detail(
-            "The path doesn't change; the level does.",
+            "Common noise cancels in the difference.",
             &["Level carries the PAM4 symbol"],
         ),
-    Beat::new("CURRENT PATH: into the cage", BEAT_MS)
+    Beat::new("PAIR: on toward the cage", BEAT_MS)
         .note(
-            "The trace runs under the transceiver's cage, where the DSP equalizes the signal and decides each PAM4 level.",
-            "A steady stream of amber beads along the trace into the cage at right.",
+            "A steady stream on both traces runs on toward the transceiver's cage.",
+            "Dense amber and blue beads along both traces past the caps and vias.",
         )
         .detail(
-            "Next: the DSP decides the levels.",
-            &["DSP decides each PAM4 level"],
+            "Next: the cage's connector.",
+            &["Ground vias keep the return path close"],
         ),
 ];
 
-/// e module cage: the transceiver in its cage at the board edge, the trace running in.
+/// e cage: the pair ending at the cage's connector.
 const E_B: &[Beat] = &[
-    Beat::new("TRANSCEIVER: the cage", BEAT_MS)
+    Beat::new("CAGE: a bright burst arrives", BEAT_MS)
         .note(
-            "The signal from the photodiode runs along the board into a metal cage at the board's edge, which holds a pluggable transceiver module.",
-            "The grey cage on the green board; the photodiode can, flex and trace at left, amber beads running in.",
+            "The pair ends at a connector in front of the cage with rows of gold contacts carries the signal into the module.",
+            "From above, close on the black connector in front of the cage with gold contacts, the two traces running in, big beads arriving.",
         )
         .detail(
             "The cage is the socket for a pluggable.",
             &["Pluggables: QSFP-DD, OSFP"],
         ),
-    Beat::new("TRANSCEIVER: the module in its cage", BEAT_MS)
+    Beat::new("CAGE: pulse, gap, pulse", BEAT_MS)
         .note(
-            "A finned module slides into the cage; the fins carry its heat away. Inside it sit the optics and the DSP; its gold card edge plugs into the switch.",
-            "The finned housing on top of the cage, the trace running in under it.",
+            "Pulse after pulse crosses into the connector. Inside sit the optics and the DSP; the module's gold card edge plugs into the switch.",
+            "Short groups of beads on both traces reach the connector.",
         )
         .detail(
             "Optics, DSP and card edge in one box.",
             &["800G module: 8 lanes x 100G"],
         ),
-    Beat::new("TRANSCEIVER: most of the volume", BEAT_MS)
+    Beat::new("CAGE: across the contacts", BEAT_MS)
         .note(
-            "Pluggable modules are the usual way to put optics on a switch, so module makers ship most of the volume.",
-            "The same cage and module, the signal still flowing in.",
+            "The stream crosses the connector's contacts. Pluggable modules are the usual way to put optics on a switch, so module makers ship most of the volume.",
+            "Amber beads light across the gold contacts one row after another.",
         )
         .detail(
             "Module makers ship most of the volume.",
@@ -226,12 +226,12 @@ pub const ZOOMS: &[Zoom] = &[
     },
     Zoom {
         key: 'd',
-        label: "current path",
+        label: "rx pair",
         build: zoom_d,
     },
     Zoom {
         key: 'e',
-        label: "module cage",
+        label: "cage",
         build: zoom_e,
     },
 ];

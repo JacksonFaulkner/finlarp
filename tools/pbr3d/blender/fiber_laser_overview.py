@@ -75,6 +75,8 @@ def bench(m, root):
     """The detailed close-up. Built at the origin under one group, then moved up by OFF.
     Returns the group and the points the labels and streams need (bench coordinates)."""
     g = empty("laser_bench", root)
+    e_iso = {"garnet": mat("lzo_garnet", (0.75, 0.25, 0.15), rough=0.25, alpha=0.6),
+             "jacket": mat("lzo_jacket", (0.85, 0.68, 0.12), rough=0.95)}
     D.header(m, g, -4.0, 0.0, 30.0, True, [PIN_BIAS, PIN_DATA, PIN_MON], "ovhdr")
     box("ov_post", (0.0, -22.0, -10.0), (30.0, -6.5, 0.0), m["post"], g)
     cp, lit = D.chip(m, g, C, S, name="ovchip")
@@ -83,11 +85,31 @@ def bench(m, root):
     for k, (y, z) in enumerate((PIN_BIAS, PIN_DATA, PIN_MON)):
         D.pin(f"ov_pin{k}", [(DRV_X, y, z), (4.0, y, z)], m, g, 1.0)
     # the laser driver IC the pins run to (standing on the board edge, leads on its face)
-    box("ov_drv", (DRV_X - 26.0, -26.0, -26.0), (DRV_X, 26.0, 0.0), m["ic"], g)
+    # the driver package, its top front corner cut away to show the die and its bond wires
+    box("ov_drv", (DRV_X - 26.0, -26.0, -26.0), (DRV_X, 26.0, -6.0), m["ic"], g)
+    box("ov_drv_t0", (DRV_X - 26.0, -26.0, -6.0), (DRV_X, 4.0, 0.0), m["ic"], g)
+    box("ov_drv_t1", (DRV_X - 26.0, 22.0, -6.0), (DRV_X, 26.0, 0.0), m["ic"], g)
+    box("ov_drv_t2", (DRV_X - 26.0, 4.0, -6.0), (DRV_X - 22.0, 22.0, 0.0), m["ic"], g)
+    box("ov_drv_t3", (DRV_X - 4.0, 4.0, -6.0), (DRV_X, 22.0, 0.0), m["ic"], g)
+    box("ov_drv_pad", (DRV_X - 20.0, 6.0, -6.0), (DRV_X - 6.0, 20.0, -5.6), m["gold"], g)
+    box("ov_drv_die", (DRV_X - 18.0, 8.0, -5.6), (DRV_X - 8.0, 18.0, -4.4), m["si"], g)
+    for i, y in enumerate((9.5, 12.0, 14.5, 17.0)):
+        box(f"ov_drv_cell{i}", (DRV_X - 16.0, y - 0.6, -4.4), (DRV_X - 10.0, y + 0.6, -4.25), m["grid"], g)
+        wire(f"ov_drv_bw{i}", (DRV_X - 8.0, y, -4.4), (DRV_X - 2.0, y, -2.0), 1.5, m["gold"], g, 0.2)
+    for i, z in enumerate((-8.0, -14.0, -20.0)):
+        box(f"ov_cap{i}", (DRV_X + 2.0, -26.0, z - 1.5), (DRV_X + 6.0, -23.5, z + 1.5), m["ic"], g)
+        box(f"ov_cap{i}_a", (DRV_X + 1.6, -26.0, z - 1.6), (DRV_X + 2.6, -23.4, z + 1.6), m["steel"], g)
+        box(f"ov_cap{i}_b", (DRV_X + 5.4, -26.0, z - 1.6), (DRV_X + 6.4, -23.4, z + 1.6), m["steel"], g)
+    for i in range(4):
+        box(f"ov_trace{i}", (DRV_X - 33.0, -26.0, -5.0 - 5.0 * i), (DRV_X - 26.0, -25.8, -4.0 - 5.0 * i), m["gold"], g)
+    # thermistor on the post beside the submount (the bias loop reads it to hold wavelength)
+    box("ov_ntc", (24.0, -6.5, -9.0), (27.5, -4.5, -6.0), m["zirconia"], g)
+    box("ov_ntc_a", (23.6, -6.5, -9.1), (24.4, -4.3, -5.9), m["gold"], g)
+    box("ov_ntc_b", (27.1, -6.5, -9.1), (27.9, -4.3, -5.9), m["gold"], g)
     for i in range(7):
         y = -21.0 + 7.0 * i
         box(f"ov_drv_lead{i}", (DRV_X - 0.3, y - 1.0, -4.0), (DRV_X + 1.4, y + 1.0, 0.0), m["gold"], g)
-    tube("ov_drv_dot", (DRV_X - 22.0, 22.0, 0.0), (DRV_X - 22.0, 22.0, 0.15), 1.4, m["steel"], g, 12)
+    tube("ov_drv_dot", (DRV_X - 22.0, -20.0, 0.0), (DRV_X - 22.0, -20.0, 0.15), 1.4, m["steel"], g, 12)
     box("ov_board", (DRV_X - 34.0, -34.0, -30.0), (DRV_X + 10.0, -26.0, 0.0), m["pcb"], g)
     wb = wire("ov_bias_w", (4.0, *PIN_BIAS), cp["dfb_pad"], 3.0, m["gold"], g, 0.3)
     wd = wire("ov_data_w", (4.0, *PIN_DATA), cp["eam_pad"], 6.0, m["gold"], g, 0.3)
@@ -100,7 +122,15 @@ def bench(m, root):
     D.pipe_x("ov_sleeve", FER_X - 2.0, FER_X + 24.0, 7.5, 5.0, m["gold"], g)
     D.pipe_x("ov_ferrule", FER_X, FER_X + 24.0, 5.0, 1.4, m["zirconia"], g)
     D.rod("ov_glass", (FER_X, 0.0, 0.0), (FIB_END, 0.0, 0.0), 1.4, m["clad"], g, True, 24)
-    D.pipe_x("ov_coat", FER_X + 24.0, FIB_END, 4.0, 1.4, m["coating"], g)
+    # stripped back in steps so every layer shows: glass, acrylate coating, buffer, jacket
+    D.pipe_x("ov_coat", FER_X + 24.0, FIB_END - 14.0, 4.0, 1.4, m["coating"], g)
+    D.pipe_x("ov_buffer", FER_X + 24.5, FIB_END - 26.0, 5.2, 4.0, m["zirconia"], g)
+    D.pipe_x("ov_jacket", FER_X + 25.0, FIB_END - 38.0, 7.0, 5.2, e_iso["jacket"], g)
+    # optical isolator between lens and ferrule: magnet ring round a Faraday garnet and polarisers
+    D.pipe_x("ov_iso_mag", 65.5, 70.5, 8.4, 7.2, m["ic"], g)
+    for k, (x0, x1, mt) in enumerate(((64.6, 65.2, "glass"), (67.4, 68.8, "garnet"), (70.8, 71.4, "glass"))):
+        D.rod(f"ov_iso{k}", (x0, 0.0, 0.0), (x1, 0.0, 0.0), 7.0, e_iso[mt] if mt == "garnet" else m[mt], g, True, 32)
+    box("ov_iso_post", (65.5, -40.0, -10.0), (70.5, -8.4, 0.0), m["post"], g)
     box("ov_fer_post", (FER_X + 4.0, -40.0, -10.0), (FER_X + 20.0, -7.5, 0.0), m["post"], g)
     box("ov_bench_plate", (DRV_X - 34.0, -44.0, -30.0), (FIB_END, -40.0, 0.0), m["dark_steel"], g)
     box("ov_can_post", (-4.0, -40.0, -10.0), (30.0, -30.0, 0.0), m["post"], g)
@@ -115,9 +145,9 @@ def bench(m, root):
     # beat 2: bias (blue) and data (pink) from the driver; the facet glow steps through four sizes
     bias = [(DRV_X, *PIN_BIAS), (4.0, *PIN_BIAS)] + wb[1:]
     data = [(DRV_X, *PIN_DATA), (4.0, *PIN_DATA)] + wd[1:]
-    for b in (2, 4):
-        stream_of(g, f"ov_bias{b}", 6, bias[0], offsets(bias), 1.0, m["elec"], b, 0.0, 0.7, 60)
-    stream_of(g, "ov_data", 7, data[0], offsets(data), 1.0, m["rf"], 2, 0.0, 0.75, 60)
+    for b in (1, 2, 4):
+        stream_of(g, f"ov_bias{b}", 12, bias[0], offsets(bias), 1.0, m["elec"], b, 0.0, 0.7, 60)
+    stream_of(g, "ov_data", 14, data[0], offsets(data), 1.0, m["rf"], 2, 0.0, 0.75, 60)
     for k, r in enumerate((0.6, 1.1, 1.6, 2.1)):
         lv = empty(f"ov_level{k}", g)
         ball(f"ov_level{k}_glow", (fx, 0.0, 0.0), r, m["light"], lv, 16)
@@ -127,7 +157,7 @@ def bench(m, root):
     D.cone("ov_beam_a", (fx, 0, 0), (LENS_X - 1.0, 0, 0), 0.3, 8.0, m["beam"], beam, 32, half=True)
     D.cone("ov_beam_b", (LENS_X + 1.0, 0, 0), (FER_X, 0, 0), 8.0, 0.4, m["beam"], beam, 32, half=True)
     show(beam, [(F(3, 0.05), F(4, 0)), (F(5, 0), F(6, 0))])
-    stream_of(g, "ov_ray3", 5, (fx, 0.0, 0.6), [(0, 0, 0), (LENS_X - fx, 0, 0), (FER_X - fx, 0, 0), (FIB_END - fx, 0, 0)],
+    stream_of(g, "ov_ray3", 10, (fx, 0.0, 0.6), [(0, 0, 0), (LENS_X - fx, 0, 0), (FER_X - fx, 0, 0), (FIB_END - fx, 0, 0)],
               0.8, m["light"], 3, 0.05, 0.75, 70)
     # beat 4: back light on the monitor photodiode; its current back to the driver
     back = empty("ov_back", g)
@@ -135,7 +165,7 @@ def bench(m, root):
     show(back, beat(4))
     show(sp["pd_lit"], beat(4))
     mon = wm + [(DRV_X, *PIN_MON)]
-    stream_of(g, "ov_mon", 7, mon[0], offsets(mon), 1.0, m["elec"], 4, 0.05, 0.8, 60)
+    stream_of(g, "ov_mon", 12, mon[0], offsets(mon), 1.0, m["elec"], 4, 0.05, 0.8, 60)
     # beat 5: four rays converge on the core at the ferrule's face
     rays = empty("ov_rays", g)
     show(rays, beat(5))
@@ -143,7 +173,7 @@ def bench(m, root):
         tube(f"ov_rayline{k}", (LENS_X + 1.0, dy, dz), (FER_X, 0.0, 0.0), 0.25, m["light"], rays, 8)
         stream_of(g, f"ov_conv{k}", 2, (LENS_X + 1.0, dy, dz), [(0, 0, 0), (FER_X - LENS_X - 1.0, -dy, -dz)],
                   0.6, m["light"], 5, 0.05 + 0.1 * k, 0.5 + 0.1 * k, 30)
-    stream_of(g, "ov_core5", 4, (FER_X, 0.0, 0.3), [(0, 0, 0), (FIB_END - FER_X, 0, 0)], 0.55, m["light"], 5, 0.3, 0.9, 50)
+    stream_of(g, "ov_core5", 8, (FER_X, 0.0, 0.3), [(0, 0, 0), (FIB_END - FER_X, 0, 0)], 0.55, m["light"], 5, 0.3, 0.9, 50)
     g.location = P(*OFF)
     pts = {"cp": cp, "sp": sp, "wb": wb, "wd": wd, "wm": wm, "fx": fx}
     return g, pts
@@ -168,9 +198,9 @@ def build():
     show(core, [(F(6, 0), F(7, 0))])
     hl = box("lz_highlight", (28.0, -10.0, -9.0), (58.0, 7.0, 9.0), e["highlight"], root)
     show(hl, beat(0))
-    stream_of(root, "beam_fib_s", 4, (LX + 14.0, K.FIBRE_Y, 0.0), [(0, 0, 0), (K.FIBRE_X1 - (LX + 14.0), 0, 0)],
+    stream_of(root, "beam_fib_s", 8, (LX + 14.0, K.FIBRE_Y, 0.0), [(0, 0, 0), (K.FIBRE_X1 - (LX + 14.0), 0, 0)],
               1.2, m["light"], 6, 0.05, 0.6, 40)
-    stream_of(root, "dsp_to_laser", 4, (K.DSP_X + 14.0, -6.3, -9.0), [(0, 0, 0), (LX - K.DSP_X - 18.0, 0, 0)],
+    stream_of(root, "dsp_to_laser", 8, (K.DSP_X + 14.0, -6.3, -9.0), [(0, 0, 0), (LX - K.DSP_X - 18.0, 0, 0)],
               1.2, m["elec"], 0, 0.05, 0.7, 40)
 
     g, p = bench(m, root)
@@ -178,10 +208,12 @@ def build():
     tags = {
         0: [("PAM4 DSP", (K.DSP_X, 3.0, 11.0)), ("LASER", (LX, 0.5, 0.0)), ("OPTICAL FIBER", (80.0, -2.4, 0.0))],
         1: [("cap, cut open", at((24.0, 25.0, 0.0))), ("laser chip on its submount", at((C[0] + S * 30, cp["top"], 0.0))),
+            ("thermistor", at((25.7, -4.5, -7.5))),
             ("glass window", at((39.6, 7.0, 0.0))), ("gold pins to the driver IC", at((-24.0, PIN_BIAS[0], PIN_BIAS[1])))],
-        2: [("laser driver IC", at((DRV_X - 13.0, 26.0, -13.0))), ("bias + data up the pins", at(wd[6])),
+        2: [("laser driver IC", at((DRV_X - 13.0, 26.0, -13.0))), ("driver die, package cut open", at((DRV_X - 13.0, 13.0, -4.4))), ("bias + data up the pins", at(wd[6])),
             ("4 light levels at the facet", at((fx + 0.5, 1.8, 0.0)))],
         3: [("beam crosses the window", at((40.5, 3.5, 0.0))), ("lens focuses it", at((LENS_X, 9.0, 0.0))),
+            ("isolator: blocks reflections", at((68.0, 10.0, 0.0))),
             ("gold sleeve + ceramic ferrule", at((FER_X + 12.0, 7.5, 0.0)))],
         4: [("monitor photodiode", at(sp["pd"])), ("back light lands on it", at(sp["pd_face"])),
             ("its current back to the driver", at((-24.0, PIN_MON[0], PIN_MON[1])))],

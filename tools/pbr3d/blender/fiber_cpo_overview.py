@@ -106,6 +106,26 @@ def scene(m, root):
         D.ride(oe["g"], f"hop_{v}", [(a, D.SUB_Y1 + 0.2, v), (b, D.SUB_Y1 + 0.2, v)], 8, 0.3, m["elec"],
                2, 0.026 * i, 0.85, 40)
 
+    # Beats 1-2: every engine is busy, not just the front one: data beads on all eight engines'
+    # copper hops (beat 2) and light leaving through all eight fibre arrays (beat 1).
+    for (s_, lat), d in pk["oes"].items():
+        if (s_, lat) != FRONT:
+            for v in D.LANES[::2]:
+                a, b = (-12.6, -5.8) if v < 0 else (-5.8, -12.6)
+                D.ride(d["g"], f"hop_{s_}_{lat}_{v}", [(a, D.SUB_Y1 + 0.2, v), (b, D.SUB_Y1 + 0.2, v)], 5,
+                       0.3, m["elec"], 2, 0.0, 0.85, 40)
+        for v in D.TX:
+            D.ride(d["g"], f"busy_{s_}_{lat}_{v}", [(7.2, D.FIB_Y + 0.6, v), (D.FERRULE_U + 11.0, D.FIB_Y + 0.6, v)], 6,
+                   1.0, m["light"], 1, 0.0, 0.9, 45)
+
+    # Beat 3, receive side: light arriving from the far switch on the RX fibres lands on the
+    # germanium photodiodes, which hand electrons back to the EIC.
+    for v in D.RX:
+        D.ride(oe["g"], f"rx_{v}", [(22.0, D.FIB_Y, v), (7.2, D.FIB_Y, v), (7.0, D.PIC_Y1 + 0.12, v),
+                                    (3.4, D.PIC_Y1 + 0.12, v)], 7, 0.3, m["light"], 3, 0.0, 0.85, 50)
+        D.ride(oe["g"], f"rxe_{v}", [(3.0, D.PIC_Y1 + 0.15, v), (-1.5, D.PIC_Y1 + 0.15, v)], 5, 0.18,
+               m["elec"], 3, 0.15, 0.9, 25)
+
     # Beat 3: laser light rides in on the PM fibres; the rings flash; data light leaves into the fibres.
     for k, pts in enumerate(lanes):
         D.ride(root, f"cw_{k}", pts, 9, 0.38, m["cw"], 3, 0.0, 0.85, 70)
@@ -136,12 +156,17 @@ def scene(m, root):
     show(hot, beat(5))
     at = (0.0, 4.0, 0.0)
     pv = pivot("heat_pulse", at, hot)
-    box("heat_asic", rel(at, (-13.6, 3.2, -13.6)), rel(at, (13.6, 8.0, 13.6)), m["heat"], pv)
+    box("heat_asic", rel(at, (-13.6, 3.2, -13.6)), rel(at, (13.6, 4.6, 13.6)), m["warm"], pv)
+    for k, (dx, dz) in enumerate(((1, 0), (-1, 0), (0, 1), (0, -1))):  # heat beads spreading outward
+        for j in (-6.0, 6.0):
+            st = (14.0 * dx + j * abs(dz), D.SUB_Y1 + 0.3, 14.0 * dz + j * abs(dx))
+            D.ride(hot, f"hflow_{k}_{j:.0f}", [st, (st[0] + 9.0 * dx, st[1], st[2] + 9.0 * dz)], 5, 0.45,
+                   m["heat"], 5, 0.0, 0.85, 35)
     flicker(pv, F(5, 0), F(6, 0), every=8)
     for (s_, lat), d in pk["oes"].items():
         h = empty(f"oe_heat_{s_}_{lat}", d["g"])
         show(h, beat(5))
-        box(f"oe_heat_box_{s_}_{lat}", (-7.3, 3.0, -4.8), (7.3, 5.6, 4.8), m["warm"], h)
+        box(f"oe_heat_box_{s_}_{lat}", (-7.3, 3.0, -4.8), (-1.2, 4.6, 4.8), m["warm"], h)
 
     # Beat 6: the light leaves the panel on the cable, toward the next switch.
     D.ride(root, "next", [(79.0, D.FIB_Y + 1.7, 8.5), (OUT_X1, D.FIB_Y + 1.7, 8.5)], 10, 0.9, m["light"],
@@ -164,12 +189,14 @@ TAGS = {
         ("ELECTRONIC CHIP", W(-4.0, 4.4, 1.0))],
     3: [("LASER LIGHT IN", W(4.0, D.PIC_Y1 + 0.05, -3.5)),
         ("RING MODULATORS", W(2.3, D.PIC_Y1 + 0.05, -1.05)),
-        ("INTO THE FIBRE ARRAY", W(10.0, 4.05, 0.0))],
+        ("INTO THE FIBRE ARRAY", W(10.0, 4.05, 0.0)),
+        ("RX LIGHT TO PHOTODIODES", W(3.4, D.PIC_Y1 + 0.05, 1.5))],
     4: [("PASSIVE CONNECTOR", W(30.0, 5.2, -1.0)),
         ("NO ELECTRONICS INSIDE", W(32.0, 2.0, -4.8)),
         ("CABLE TO THE PANEL", W(48.0, D.FIB_Y + 0.45, 0.0))],
-    5: [("CHIP HEAT", (0.0, 8.0, 0.0)),
-        ("REACHES THE ENGINES", W(0.0, 5.6, 0.0))],
+    5: [("HUNDREDS OF WATTS OF CHIP HEAT", (0.0, 8.0, 0.0)),
+        ("SPREADS THROUGH THE SUBSTRATE", (-24.0, 2.8, 30.0)),
+        ("WARMS THE ENGINES' RINGS", W(-4.0, 4.6, 0.0))],
     6: [("FRONT PANEL", (77.0, 14.0, -2.0)),
         ("ON TO THE NEXT SWITCH", (150.0, D.FIB_Y + 1.6, 8.5))],
 }
