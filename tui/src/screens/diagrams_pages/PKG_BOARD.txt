@@ -12,6 +12,9 @@ COLD PLATE       a copper block with fins or channels pressed onto the lid
 LIQUID COOLING   coolant pumped through cold plates instead of air
 NVLINK           NVIDIA's GPU-to-GPU link (other vendors have their own)
 RACK             many modules, power shelves and switches in one cabinet
+TIM              thermal interface material: TIM1 between die and lid, TIM2 between lid and cold plate
+LID              a nickel-plated copper cover glued to the substrate that spreads the die's heat
+MLCC             small ceramic capacitors under the package that cover fast load steps
 
 # 3. Power in, heat out, in order
 
@@ -23,11 +26,11 @@ RACK             many modules, power shelves and switches in one cabinet
 
 # 4. Power delivery
 
-Every level of the package drops voltage by I x R, and at hundreds of amps small resistances matter. VRMs sit right beside the package; backside power on the die (see TOP METAL) shortens the last step.
+A Blackwell-class GPU draws roughly 1,000 W at a core voltage near 0.8 V, which is over a thousand amps. The VRM's phases switch 12 V and smooth it into a thick copper power plane; from there the current climbs a via, many BGA BALLS in parallel, plated through-holes in the substrate core, stacked microvias, C4 bumps, the interposer's TSVs and microbumps. Every level drops voltage by I x R: at 1,000 A a tenth of a milliohm costs 0.1 V, an eighth of the supply. MLCC capacitors on the board's back, right under the package, cover load steps faster than the regulator can react. VRMs sit as close as possible; vertical power (Power tab, VRM) puts them under the package, and backside power on the die (see TOP METAL) shortens the last step.
 
 # 5. Cooling
 
-The logic die is the main heat source. A lid spreads its heat into a COLD PLATE; at AI power densities, LIQUID COOLING through the plate replaces air, which also lets racks hold more GPUs. Future packages are expected to need thousands of watts (Tom's Hardware, TSMC roadmap coverage).
+The logic die is the main heat source. Heat crosses TIM1 (a metal or gel layer), spreads in the LID, crosses TIM2 (grease or a pad) and enters a copper COLD PLATE whose skived fins give the coolant a large area. Each interface adds thermal resistance, so the TIMs matter as much as the plate; at AI power densities, LIQUID COOLING through the plate replaces air, which also lets racks hold more GPUs. Future packages are expected to need thousands of watts (Tom's Hardware, TSMC roadmap coverage).
 
 # 6. Modules and links
 
@@ -39,13 +42,14 @@ Many modules, power shelves, network switches and cooling manifolds fill a RACK 
 
 # 8. Who makes it
 
-NVIDIA (NVDA) and AMD design modules; board makers and ODMs assemble them; VRM, connector and cooling suppliers fill in (not sourced here).
+NVIDIA (NVDA) and AMD design the GPUs and reference modules; TSMC builds the dies and CoWoS; SK hynix, Samsung and Micron (MU) supply HBM; Ibiden and Unimicron make large substrates. ODMs such as Foxconn, Quanta, Wistron and Supermicro (SMCI) build boards, trays and racks; Supermicro sells liquid-cooled GB200/GB300 NVL72 racks with its own CDUs and manifolds (SMCI 10-K, 2026). Flex (FLEX) sells cold plates and CDUs through JetCool, rated over 3,000 W (FLEX 10-K, 2025); AAON's BASX makes CDUs for racks over 100 kW (AAON 10-K, 2026). Regulators come from Infineon, MPS and Renesas, MLCCs from Murata and Samsung Electro-Mechanics, high-speed connectors and cables from Amphenol (APH); other maker names are textbook, not sourced here.
 
 # 9. Chokepoints and risks
 
 - Power per package keeps rising; delivery losses rise with it.
 - Air cooling runs out; liquid cooling needs new infrastructure.
-- Larger packages mean larger boards and more warpage at assembly.
+- Larger packages mean larger boards and more warpage at assembly; corner BGA joints take the most strain.
+- Liquid cooling adds leak risk and needs CDUs, manifolds and facility water.
 - Notes: power and cooling figures are not sourced here; see the Power tab for facility numbers.
 
 # 10. Sources
@@ -53,3 +57,6 @@ NVIDIA (NVDA) and AMD design modules; board makers and ODMs assemble them; VRM, 
   [1] Package power growth: tomshardware.com/tech-industry/semiconductors/tsmcs-details-next-gen-cowos-roadmap-over-14-reticle-packages-and-48x-leap-in-compute-power-expected-by-2029-massive-size-enables-24-hbm5e-stacks-and-additional-memory-bandwidth-jump
   [2] Power delivery stages: see the TOP METAL node (Chip tab) sources
   [3] BGA and C4 context: image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/8896118
+  [4] Liquid-cooled NVL72 racks, CDUs and manifolds: SMCI 10-K (2026-08-31)
+  [5] JetCool cold plates over 3,000 W: FLEX 10-K (2025-05-21)
+  [6] CDUs for racks over 100 kW: AAON 10-K (2026-03-02)

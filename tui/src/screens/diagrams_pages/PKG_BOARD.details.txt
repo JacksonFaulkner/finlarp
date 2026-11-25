@@ -61,3 +61,27 @@ A rack holds many modules with power shelves, network switches and cooling manif
 See the Power and Network+Cool tabs for the facility side.
 # Source
 See those tabs.
+
+== TIM
+# What it does
+Thermal interface material fills the microscopic gaps between surfaces: TIM1 between the die and the lid (metal or gel), TIM2 between the lid and the cold plate (grease or a pad).
+# Why it matters
+Each interface adds thermal resistance; at ~1,000 W a poor TIM costs many degrees at the die.
+# Source
+Textbook.
+
+== LID
+# What it does
+A nickel-plated copper cover glued to the substrate over the dies; it spreads their heat and protects them.
+# Why it matters
+It sets how evenly heat reaches the cold plate, and it stiffens the package against warpage.
+# Source
+Textbook.
+
+== MLCC
+# What it does
+Multilayer ceramic capacitors placed under the package on the board's back, and on the substrate, that hold charge close to the die.
+# Why it matters
+They cover load steps in microseconds, faster than the regulator can respond.
+# Source
+Textbook.

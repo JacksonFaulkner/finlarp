@@ -163,6 +163,13 @@ pub const DESCS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/PWR_RACK.desc.txt"),
     ),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.desc.txt")),
+    ("SPINE", include_str!("diagrams_pages/NET_SPINE.desc.txt")),
+    ("LEAF", include_str!("diagrams_pages/NET_LEAF.desc.txt")),
+    ("COLD PLATE", include_str!("diagrams_pages/NET_COLD_PLATE.desc.txt")),
+    ("CDU", include_str!("diagrams_pages/NET_CDU.desc.txt")),
+    ("SERVER", include_str!("diagrams_pages/NET_SERVER.desc.txt")),
+    ("CHILLER PLANT", include_str!("diagrams_pages/NET_CHILLER.desc.txt")),
+    ("COOLING TOWERS", include_str!("diagrams_pages/NET_COOLING_TOWER.desc.txt")),
     // Chip tab
     (
         "TOP METAL",
@@ -339,6 +346,13 @@ pub const VISUALS: &[(&str, &str)] = &[
     ("UPS", include_str!("diagrams_pages/PWR_UPS.txt")),
     ("RACK POWER", include_str!("diagrams_pages/PWR_RACK.txt")),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.txt")),
+    ("SPINE", include_str!("diagrams_pages/NET_SPINE.txt")),
+    ("LEAF", include_str!("diagrams_pages/NET_LEAF.txt")),
+    ("COLD PLATE", include_str!("diagrams_pages/NET_COLD_PLATE.txt")),
+    ("CDU", include_str!("diagrams_pages/NET_CDU.txt")),
+    ("SERVER", include_str!("diagrams_pages/NET_SERVER.txt")),
+    ("CHILLER PLANT", include_str!("diagrams_pages/NET_CHILLER.txt")),
+    ("COOLING TOWERS", include_str!("diagrams_pages/NET_COOLING_TOWER.txt")),
     ("HBF", include_str!("diagrams_pages/RND_HBF.txt")),
     ("3D DRAM", include_str!("diagrams_pages/RND_3D_DRAM.txt")),
     // Chip tab
@@ -396,6 +410,14 @@ pub const VISUALS: &[(&str, &str)] = &[
     ),
 ];
 
+use super::diagrams_terms_gen::{TERM_DESCS, TERM_VISUALS};
+
+/// Terms tab entries match their label exactly (no prefix fallback).
+fn exact(table: &'static [(&str, &str)], label: &str) -> Option<&'static str> {
+    let label = label.trim();
+    table.iter().find(|(k, _)| *k == label).map(|(_, d)| *d)
+}
+
 fn lookup(table: &'static [(&str, &str)], label: &str) -> Option<&'static str> {
     let label = label.trim();
     if let Some((_, d)) = table.iter().find(|(k, _)| *k == label) {
@@ -411,6 +433,9 @@ fn lookup(table: &'static [(&str, &str)], label: &str) -> Option<&'static str> {
 /// The VISUALS key a node label resolves to (the page's stable name).
 pub fn page_key(label: &str) -> Option<&'static str> {
     let label = label.trim();
+    if let Some((k, _)) = TERM_VISUALS.iter().find(|(k, _)| *k == label) {
+        return Some(k);
+    }
     if let Some((k, _)) = VISUALS.iter().find(|(k, _)| *k == label) {
         return Some(k);
     }
@@ -422,11 +447,13 @@ pub fn page_key(label: &str) -> Option<&'static str> {
 }
 
 pub fn describe(label: &str) -> Option<&'static str> {
-    lookup(DESCS, label).map(str::trim)
+    lookup(DESCS, label)
+        .or_else(|| exact(TERM_DESCS, label))
+        .map(str::trim)
 }
 
 pub fn visual(label: &str) -> Option<&'static str> {
-    lookup(VISUALS, label)
+    exact(TERM_VISUALS, label).or_else(|| lookup(VISUALS, label))
 }
 
 /// Per-page hotspot cards (`diagrams_pages/<SLUG>.details.txt`): a header line
@@ -583,6 +610,13 @@ pub const DETAILS: &[(&str, &str)] = &[
         include_str!("diagrams_pages/PWR_RACK.details.txt"),
     ),
     ("VRM", include_str!("diagrams_pages/PWR_VRM.details.txt")),
+    ("SPINE", include_str!("diagrams_pages/NET_SPINE.details.txt")),
+    ("LEAF", include_str!("diagrams_pages/NET_LEAF.details.txt")),
+    ("COLD PLATE", include_str!("diagrams_pages/NET_COLD_PLATE.details.txt")),
+    ("CDU", include_str!("diagrams_pages/NET_CDU.details.txt")),
+    ("SERVER", include_str!("diagrams_pages/NET_SERVER.details.txt")),
+    ("CHILLER PLANT", include_str!("diagrams_pages/NET_CHILLER.details.txt")),
+    ("COOLING TOWERS", include_str!("diagrams_pages/NET_COOLING_TOWER.details.txt")),
     // Chip tab
     (
         "TOP METAL",

@@ -6,18 +6,23 @@ Under the interposer sits the package substrate, a laminate of copper wiring lay
 
 ABF FILM           Ajinomoto Build-up Film, the dielectric between substrate copper layers
 BUILD-UP LAYERS    alternating ABF and copper, laminated layer by layer; 12-20 for AI GPUs
-CORE               the stiff centre the build-up layers are laminated onto
+CORE               the stiff centre (glass cloth in epoxy, copper clad) the build-up layers sit on
+PTH                plated through-hole: a drilled, copper-lined, resin-plugged hole through the core
+MICROVIA           a laser-drilled, copper-filled via through one ABF film, often stacked
+POWER PLANES       solid copper layers that spread power and ground with low resistance
+C4                 the fine-pitch solder bumps (~150 um) that join the interposer on top
 WARPAGE            the large, thin laminate bends as it heats and cools
-BGA                ball grid array: solder balls joining the substrate to the board
+BGA                ball grid array: solder balls (~1 mm pitch) joining the substrate to the board
+LAND-SIDE CAPS     capacitors on the underside between the balls, a charge reserve near the die
 FAN-OUT            spreading fine-pitch connections out to coarse board pitch
 GLASS CORE         a stiffer, flatter core material under development
 SUBSTRATE MAKERS   Ibiden, Unimicron, Shinko, AT&S, Nan Ya and others
 
 # 3. A substrate, in order
 
-1. start from a core with plated through-holes
+1. start from a copper-clad core; drill, plate and resin-plug its through-holes
 2. laminate a layer of ABF film
-3. drill vias and plate copper wiring
+3. laser-drill microvias, then plate and pattern copper wiring
 4. repeat for each build-up layer, both sides
 5. finish with solder resist, then the C4 pads on top and BGA pads below
 
@@ -35,7 +40,7 @@ WARPAGE: a big, thin organic laminate bends during reflow and in use, stressing 
 
 # 7. Fan-out to the board
 
-FAN-OUT: the substrate spreads tens of thousands of fine bumps out to the BGA balls at board pitch, routing power planes and high-speed signals on the way.
+FAN-OUT: the substrate spreads tens of thousands of fine bumps out to the BGA balls at board pitch, routing power planes and high-speed signals on the way. A signal drops from its bump down stacked microvias to a signal layer, runs outward, drops through a PTH in the core and lands on a ball; bumps nearer the middle use deeper layers so routes do not cross. Power climbs the other way, from many balls through the core onto wide copper planes.
 
 # 8. Who makes it
 

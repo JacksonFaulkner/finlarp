@@ -12,6 +12,9 @@ GERMANIUM        absorber grown on silicon for silicon-photonics receivers
 BANDWIDTH        how fast the photodiode and TIA can follow the light; set by size and capacitance
 NOISE            thermal and shot noise from the TIA and photodiode that blur the levels
 LINK BUDGET      transmit power minus losses must stay above the receiver's sensitivity
+DEPLETION FIELD  the reverse bias empties the InGaAs of free carriers, so a field across it sweeps each pair out in picoseconds
+PASSIVATION      silicon nitride on the mesa walls and BCB polymer round it; bare walls leak dark current
+CONTACTS         a gold ring on a p+ InGaAs cap (light enters through its hole, under an AR coat); an n contact on the step beside the mesa
 
 # 3. Light becomes a voltage, in order
 
@@ -24,11 +27,11 @@ LINK BUDGET      transmit power minus losses must stay above the receiver's sens
 
 # 4. Why InGaAs (and germanium)
 
-Silicon is transparent to light longer than about 1.1 um, so it can't detect 1310 or 1550 nm. INGAAS, grown on InP, absorbs them strongly. Silicon photonics instead grows GERMANIUM on the silicon chip, which absorbs at 1310 nm and is made in the same fab as the modulators.
+Silicon is transparent to light longer than about 1.1 um, so it can't detect 1310 or 1550 nm. INGAAS, grown on InP, absorbs them strongly. Silicon photonics instead grows GERMANIUM on the silicon chip, which absorbs at 1310 nm and is made in the same fab as the modulators. The light runs along a silicon waveguide and into the germanium from the side, so the absorber can be long (good responsivity) while staying thin (fast). Tungsten plugs and copper wiring connect it like any other transistor-fab device.
 
 # 5. Responsivity and speed
 
-RESPONSIVITY near 1 A/W means a milliwatt of light gives about a milliamp. To follow 106 GBd symbols the photodiode must be tiny, so its capacitance is small, and the TIA must have BANDWIDTH to match. A smaller photodiode is faster but harder to hit with the light.
+RESPONSIVITY near 1 A/W means a milliwatt of light gives about a milliamp. To follow 106 GBd symbols the photodiode must be tiny, so its capacitance is small, and the TIA must have BANDWIDTH to match. A smaller photodiode is faster but harder to hit with the light: for 100G-per-lane PAM4 the active area is only tens of microns across, so the lens must land the spot inside the ring's window.
 
 # 6. Noise and sensitivity
 

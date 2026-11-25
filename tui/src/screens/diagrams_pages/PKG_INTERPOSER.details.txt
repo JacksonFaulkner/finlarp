@@ -32,7 +32,7 @@ Tom's Hardware on CoWoS-L.
 
 == TSV
 # What it does
-Through-silicon vias are copper columns through the interposer that carry power and signals down to the C4 bumps and substrate.
+Through-silicon vias are copper columns through the interposer (about 100 um of silicon), each in an oxide liner with a thin Ta/TaN barrier, carrying power and signals down to the C4 bumps and substrate.
 # Why it matters
 Every amp the logic die draws comes up through the TSV array.
 # Source
@@ -56,7 +56,7 @@ Tom's Hardware, TSMC CoWoS roadmap.
 
 == WIRING DENSITY
 # What it does
-Silicon wiring is fine enough to route a 1024-bit HBM3 bus per stack across a few millimetres to the GPU.
+Silicon wiring (sub-micron lines) is fine enough to route a 1024-bit HBM3 bus per stack (2048-bit in HBM4) across a few millimetres to the GPU; organic RDL is about 2 um and substrate film about 10 um.
 # Why it matters
 That density is what makes HBM bandwidth possible and why a silicon interposer or bridge is needed.
 # Source

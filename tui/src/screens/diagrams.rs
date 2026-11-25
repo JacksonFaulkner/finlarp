@@ -878,7 +878,11 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         poly3d::set_beat_notes(false);
         poly3d::set_user_notes(Vec::new());
     }
-    Ok(Diagrams {
+    let node = arg
+        .as_deref()
+        .and_then(|a| a.trim().strip_prefix("node:"))
+        .map(str::to_string);
+    let mut d = Diagrams {
         theme: ctx.theme,
         picker,
         orbit: poly3d::View::default(),
@@ -933,7 +937,12 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Diagrams> {
         mol: None,
         card: None,
         mol_cur: 0,
-    })
+    };
+    // `node:NAME` (the filing reader's go-to-definition) opens that node straight away
+    if let Some(n) = node.filter(|n| d.find_node(n).is_some()) {
+        d.exec(Step::Open(n));
+    }
+    Ok(d)
 }
 
 fn class_style(c: char, in_note: bool, t: &Theme) -> Style {
@@ -1175,7 +1184,10 @@ impl Diagrams {
                 scene_for(page).map(|sc| Player::new(sc, self.anim_start)),
             )
         });
-        self.view = if self.has_scene() {
+        // a term's overview opens straight away: its only picture, no menu between
+        self.view = if self.is_term() && self.has_scene() {
+            PopupView::Overview
+        } else if self.has_scene() {
             PopupView::Menu
         } else {
             PopupView::Pane
@@ -1418,7 +1430,17 @@ impl Diagrams {
     }
 
     /// Section titles of the open page, in menu order.
+    /// The open page is a Terms-tab term (its overview is its only picture).
+    fn is_term(&self) -> bool {
+        self.cur_label()
+            .is_some_and(|l| super::diagrams_terms_nodes::NODES.iter().any(|n| n.page == l))
+    }
+
     fn pane_titles(&self) -> Vec<String> {
+        // a term's write-up is its overview alone: no SECTIONS list
+        if self.is_term() {
+            return Vec::new();
+        }
         let art = self.cur_label().and_then(|l| visual(&l)).unwrap_or("");
         pane_ranges(art)
             .iter()
@@ -2842,6 +2864,12 @@ impl Screen for Diagrams {
                         self.camera_step(hit, Instant::now());
                     }
                 }
+                // a term has only its overview: leaving it returns to the grid, no menu
+                KeyCode::Char('m') | KeyCode::Esc | KeyCode::Enter | KeyCode::Char(' ')
+                    if self.is_term() =>
+                {
+                    self.popup = false;
+                }
                 KeyCode::Char('m') | KeyCode::Esc | KeyCode::Enter | KeyCode::Char(' ') => {
                     self.browse = key.code == KeyCode::Char('m');
                     self.menu_sel = 0;
@@ -3051,8 +3079,8 @@ impl Screen for Diagrams {
             }
             KeyCode::Char('g') | KeyCode::Home => self.scroll = 0,
             KeyCode::Char('G') | KeyCode::End => self.scroll = self.max_scroll(),
-            KeyCode::Char(c @ '1'..='9') => {
-                let i = c as usize - '1' as usize;
+            KeyCode::Char(c @ '0'..='9') => {
+                let i = (c as usize - '0' as usize + 9) % 10;
                 if i < DIAGRAMS.len() {
                     self.goto(i);
                 }

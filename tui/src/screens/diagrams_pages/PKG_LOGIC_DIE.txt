@@ -12,6 +12,8 @@ DIE-TO-DIE        the link between chiplets; Blackwell's two dies need about 10 
 KNOWN GOOD DIE    each die is tested before packaging, since one bad die spoils the package
 HEAT              the logic die makes most of the package's heat
 HBM SHORELINE     HBM can only connect along the die's edges, so edge length limits memory
+FLIP-CHIP         the die is mounted wiring-side down: metal stack on the bumps, bulk silicon on top
+METAL STACK       about 15 copper levels, thick near the bumps for power, finest next to the transistors
 
 # 3. One die, in order
 
@@ -20,6 +22,8 @@ HBM SHORELINE     HBM can only connect along the die's edges, so edge length lim
 3. wafer test marks the good dies
 4. dies are cut out and only known-good ones go on
 5. each is bonded beside its HBM stacks on an interposer
+
+The die goes on FLIP-CHIP: its METAL STACK faces down onto microbumps on the interposer, the transistor layer sits just above, and the bare silicon backside faces up into the thermal interface and lid. Power and signals climb from the board through BGA balls, the substrate, C4 bumps and the interposer's TSVs to reach it.
 
 # 4. The reticle limit and die size
 
@@ -31,7 +35,7 @@ Defects land at random. On an 800 mm2 die each defect scraps 800 mm2; on a 200 m
 
 # 6. Chiplets and the die-to-die link
 
-CHIPLETS split one design across dies joined in the package. NVIDIA's B100/B200 use two compute dies that need roughly 10 TB/s between them, which is why they moved to CoWoS-L with silicon bridges (Tom's Hardware). The DIE-TO-DIE link must be wide and short enough that software sees one GPU.
+CHIPLETS split one design across dies joined in the package. NVIDIA's B100/B200 use two compute dies that need roughly 10 TB/s between them, which is why they moved to CoWoS-L, where small silicon bridges sunk in the interposer carry fine-pitch wiring under the two dies' facing edges (Tom's Hardware). The DIE-TO-DIE link must be wide and short enough that software sees one GPU.
 
 # 7. Edges for memory, and heat
 

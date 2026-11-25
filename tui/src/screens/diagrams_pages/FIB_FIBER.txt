@@ -31,7 +31,7 @@ MULTIMODE fiber's 50 um core accepts light easily from cheap 850 nm VCSELs, but 
 
 # 6. Attenuation: how little light is lost
 
-Corning's SMF-28 Ultra loses at most 0.32 dB per km at 1310 nm and 0.18 dB at 1550 nm. 0.32 dB is about 7% of the light; a 2 km data-center link loses under 1 dB in the glass, less than its connectors. ATTENUATION comes from scattering in the glass itself and residual absorption.
+Corning's SMF-28 Ultra loses at most 0.32 dB per km at 1310 nm and 0.18 dB at 1550 nm. 0.32 dB is about 7% of the light; a 2 km data-center link loses under 1 dB in the glass, less than its connectors. ATTENUATION comes mostly from Rayleigh scattering off tiny density ripples frozen into the glass as it cooled (it falls as 1/wavelength^4, which is why 1550 nm loses less than 1310 nm), plus residual absorption. Each mated connector typically costs 0.2-0.5 dB, and a fusion splice under 0.1 dB.
 
 # 7. Latency: the speed of light in glass
 
@@ -44,7 +44,7 @@ Corning (GLW) is the largest maker of optical fiber, with Prysmian, Fujikura, Su
 # 9. Chokepoints and risks
 
 - AI data centers use many times more fiber per rack than cloud ones, straining cable and connector capacity.
-- Tight bends leak light; dense cabling needs bend-insensitive fiber.
+- Tight bends leak light; dense cabling needs bend-insensitive fiber (ITU-T G.657, rated for bends down to 7.5-5 mm radius).
 - Dirty connector end faces are a leading cause of link failures.
 
 # 10. Sources

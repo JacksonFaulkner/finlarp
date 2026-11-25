@@ -32,7 +32,7 @@ Overlay many symbols on top of each other and the levels form "eyes": open gaps 
 
 # 6. FEC: fixing errors after the fact
 
-Even an open eye has errors. FEC adds redundant bits so the receiver can correct them. Ethernet at 100G per lane uses a Reed-Solomon code, RS(544,514) ("KP4"), which turns a raw error rate of about 2 in 10,000 into a near-error-free link. The cost is about 5% overhead and some added delay.
+Even an open eye has errors. FEC adds redundant bits so the receiver can correct them. Ethernet at 100G per lane uses a Reed-Solomon code, RS(544,514) ("KP4"): 514 data symbols of 10 bits get 30 check symbols, enough to correct up to 15 bad symbols per codeword. That turns a raw error rate of about 2 in 10,000 into a near-error-free link. The cost is about 5% overhead and some added delay.
 
 # 7. Power, and taking the DSP out
 

@@ -27,6 +27,7 @@ mod ingot;
 mod litho;
 mod math;
 mod melt;
+mod netcool;
 mod package;
 mod packaging;
 mod pick;
@@ -96,6 +97,13 @@ const NODES: &[Node] = &[
     power::ups::NODE,
     power::rack::NODE,
     power::vrm::NODE,
+    netcool::spine::NODE,
+    netcool::leaf::NODE,
+    netcool::cold_plate::NODE,
+    netcool::cdu::NODE,
+    netcool::server::NODE,
+    netcool::chiller::NODE,
+    netcool::cooling_tower::NODE,
     final_test::NODE,
     ship::NODE,
     hbf::NODE,
@@ -108,6 +116,7 @@ fn node(page: &str) -> Option<&'static Node> {
         .find(|n| n.page == page)
         .or_else(|| chip::NODES.iter().copied().find(|n| n.page == page))
         .or_else(|| math::NODES.iter().find(|n| n.page == page))
+        .or_else(|| crate::screens::diagrams_terms_nodes::NODES.iter().find(|n| n.page == page))
 }
 
 /// The overview scene for a node page, when its module has one.

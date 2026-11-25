@@ -61,3 +61,19 @@ Data-center single-mode links run at 1310 nm (the O-band), where standard fiber 
 Wavelength decides the fiber, the laser material and the reach; long-haul coherent links use 1550 nm where loss is lowest.
 # Source
 Corning SMF-28 Ultra; textbook.
+
+== OPTICAL ISOLATOR
+# What it does
+A Faraday-rotator garnet inside a ring magnet, between two polarisers, sits between the lens and the fibre. Light passes forward; light reflected back from connectors is rotated the wrong way and blocked.
+# Why it matters
+A DFB laser is very sensitive to its own reflected light: even a small amount makes it jump wavelength and adds noise. Single-mode EML transmitters carry an isolator for that reason.
+# Source
+Textbook (Faraday isolators); standard TOSA construction.
+
+== THERMISTOR AND DRIVER LOOP
+# What it does
+A small thermistor next to the laser reports temperature, and the monitor photodiode reports power. The driver IC uses both to set the bias current so output power stays steady.
+# Why it matters
+Laser output and wavelength drift with temperature and age. Some EML packages also add a thermoelectric cooler to hold the wavelength.
+# Source
+Textbook; laser driver datasheets (APC loop).

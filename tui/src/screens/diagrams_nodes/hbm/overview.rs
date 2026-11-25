@@ -104,6 +104,11 @@ const ZOOMS: &[Zoom] = &[
         label: "CoWoS: more stacks, bigger interposer",
         build: || -> Box<dyn Scene> { zoom::cowos() },
     },
+    Zoom {
+        key: 'f',
+        label: "inside one DRAM die: TSVs, banks, mats, cells",
+        build: || -> Box<dyn Scene> { zoom::die() },
+    },
 ];
 
 static OVERVIEW: Cell = std::sync::OnceLock::new();
@@ -127,7 +132,7 @@ mod tests {
         assert_eq!(s.beats().len(), 7);
         super::super::super::blender::explained(s.as_ref(), "HBM STACK overview");
         let keys: String = s.zooms().iter().map(|z| z.key).collect();
-        assert_eq!(keys, "abcde");
+        assert_eq!(keys, "abcdef");
     }
 
     #[test]

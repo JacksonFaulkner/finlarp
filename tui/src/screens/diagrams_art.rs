@@ -65,6 +65,12 @@ pub const DIAGRAMS: &[Diagram] = &[
         tickers: "MU SNDK 005930.KS 000660.KS",
         art: RND,
     },
+    Diagram {
+        title: "Terms: every filing word with its own page",
+        tab: "Terms",
+        tickers: "",
+        art: super::diagrams_terms_gen::TERMS_ART,
+    },
 ];
 
 const FAB: &str = r#"# Wafer making
@@ -202,41 +208,25 @@ const POWER: &str = r#"# From the utility to the GPU: every hop loses a little a
 
 const NETWORK: &str = r#"# Data path: GPU to GPU across the building (leaf-spine fabric)
 
-      ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-      │     SPINE 1      │    │     SPINE 2      │    │     SPINE 3      │    │     SPINE 4      │        ◀ 51.2T switch ASICs (AVGO, MRVL)
-      └──────────────────┘    └──────────────────┘    └──────────────────┘    └──────────────────┘          inside ANET / CSCO boxes
-          │    ╲     ╲    ╲      ╱    │    ╲     ╲     ╱     ╱    │    ╲      ╱    ╱     ╱    │
-          │       ╲        ╲  ╱    ╲  │       ╲  ╱     ╲  ╱       │  ╱    ╲  ╱        ╱       │
-          │          ╲     ╱    ╲     │    ╲╱    ╲     ╱    ╲╱    │     ╱    ╲     ╱          │
-          │             ╱             ╱             ╱             ╱             ╱             │           ◀ every leaf links to every spine
-          │          ╱     ╲    ╱     │    ╱╲    ╱     ╲    ╱╲    │     ╲    ╱     ╲          │             over 800G single-mode fiber
-          │       ╱        ╱  ╲    ╱  │       ╱  ╲     ╱  ╲       │  ╲    ╱  ╲        ╲       │
-          │    ╱     ╱    ╱      ╲    │    ╱     ╱     ╲     ╲    │    ╱      ╲    ╲     ╲    │
-      ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-      │      LEAF 1      │    │      LEAF 2      │    │      LEAF 3      │    │      LEAF 4      │        ◀ one leaf per rack row
-      └──────────────────┘    └──────────────────┘    └──────────────────┘    └──────────────────┘
-           │        │              │        │              │        │              │        │
-           │        │              │        │              │        │              │        │             ◀ copper DAC / short AOC (<3m)
-           │        │              │        │              │        │              │        │
-      ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐
-      │ GPU GPU GPU GPU  │    │ GPU GPU GPU GPU  │    │ GPU GPU GPU GPU  │    │ GPU GPU GPU GPU  │
-      │ GPU GPU GPU GPU  │    │ GPU GPU GPU GPU  │    │ GPU GPU GPU GPU  │    │ GPU GPU GPU GPU  │        ◀ NVLink: GPU to GPU in a node
-      │  NVLink in node  │    │  NVLink in node  │    │  NVLink in node  │    │  NVLink in node  │
-      └──────────────────┘    └──────────────────┘    └──────────────────┘    └──────────────────┘
+ ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
+ │      SERVER       │──────▶│       LEAF        │──────▶│       SPINE       │
+ │ 8 GPUs, NVLink    │ DAC / │ one per rack row  │ 800G  │ 51.2T switch ASIC │
+ └───────────────────┘  AOC  └───────────────────┘ fiber └───────────────────┘
 
-       server 1 (8 GPUs)       server 2 (8 GPUs)       server 3 (8 GPUs)       server 4 (8 GPUs)
+ every leaf links to every spine; a flow is hashed across all spines (ECMP); lose a spine, keep 75%
 
 
 # Cooling loop: every watt in is a watt out
 
- ┌────────────────┐            ┌──────────────────────┐      ┌───────────────┐      ┌───────────────┐      ┌────────────────┐
- │ COLD PLATE     │ hot water  │ CDU                  │      │ CHILLER       │      │ COOLING TOWER │      │ HEAT OUT       │
- │ on GPU, liquid │───────────▶│ coolant distribution │─────▶│ or dry cooler │─────▶│ evaporative   │─────▶│ to ambient air │
- └────────────────┘  45-60 C   └──────────────────────┘      └───────────────┘      └───────────────┘      └────────────────┘
-          ▲                                                                                 │
-          │                                                                                 │
-          └─────────────────────────────────────────────────────────────────────────────────┘
-                cool water returns to the racks (VRT, nVent, SMCI racks)
+ ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐       ┌───────────────────┐
+ │    COLD PLATE     │──────▶│        CDU        │──────▶│   CHILLER PLANT   │──────▶│  COOLING TOWERS   │
+ │ on GPU, liquid    │ 45-60C│ coolant loop + HX │       │ or dry cooler     │       │ heat out to air   │
+ └───────────────────┘       └───────────────────┘       └───────────────────┘       └───────────────────┘
+
+ one NVL72 rack ~120-130 kW of heat; cool water returns to the racks
+
+ (enter opens a node's page; h/l moves between nodes)
+ (AVGO/MRVL the switch ASICs, ANET/CSCO the boxes, NVDA the NICs; VRT/nVent/SMCI the cooling, TT/CARR the chillers)
 "#;
 
 const MATH: &str = r#"# 1. Four basic operations on one pair of numbers

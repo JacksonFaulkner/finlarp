@@ -1,6 +1,6 @@
 # 1. What happens: chip on wafer, then on substrate
 
-CoWoS assembly happens in two stages. CHIP ON WAFER: known-good logic and HBM dies are bonded face down onto a whole interposer wafer, underfilled, and the wafer is thinned to expose its TSVs. ON SUBSTRATE: the wafer is cut into interposers, each is bonded to an organic substrate by C4 REFLOW, underfilled again (UNDERFILL FLOW), lidded and tested (TEST). Every step multiplies yield (YIELD STACKUP), and CAPACITY at this stage has limited AI GPU output.
+CoWoS assembly happens in two stages. CHIP ON WAFER: known-good logic and HBM dies are bonded face down onto a whole 300 mm interposer wafer (thermocompression or mass reflow of ~40 um microbumps), underfilled and molded, and the wafer is thinned from ~775 um to ~100 um to expose its TSVs, which then get C4 bumps. ON SUBSTRATE: the wafer is cut into interposers, each is bonded to an organic substrate by C4 REFLOW, underfilled again (UNDERFILL FLOW), lidded and tested (TEST). Every step multiplies yield (YIELD STACKUP), and CAPACITY at this stage has limited AI GPU output.
 
 # 2. The parts
 
@@ -15,11 +15,11 @@ OSAT              outsourced assembly and test houses, such as ASE and Amkor
 
 # 3. One package, in order
 
-1. dies placed face down on the interposer wafer, bonded
-2. underfill and mold, then the wafer thinned to reveal TSVs
-3. the wafer cut into interposers
-4. each bonded to a substrate by C4 reflow and underfilled
-5. lid, test, ship
+1. dies placed face down on the interposer wafer, bonded (logic first, then HBM)
+2. underfill and mold, then the wafer back-ground to reveal TSVs and C4 bumps formed
+3. the wafer diced along its scribe streets into interposers
+4. each bonded to an organic (ABF) substrate by C4 reflow (~250 C peak) and underfilled again
+5. TIM and lid, final test and burn-in, ship
 
 # 4. Yield stacks up
 
@@ -27,7 +27,7 @@ A package with one logic die, eight HBM stacks and an interposer is only good if
 
 # 5. Capacity: the bottleneck
 
-Almost every high-end AI accelerator uses CoWoS, so monthly CoWoS CAPACITY strongly limits how many ship. NVIDIA reportedly took 40-50% of capacity in 2024; TSMC planned to double capacity in 2023 and, on its Q1 2026 call, said advanced packaging remained strained (secondary reports). Blackwell-class parts use more capacity per package because their interposers are bigger.
+Almost every high-end AI accelerator uses CoWoS, so monthly CoWoS CAPACITY strongly limits how many ship. A 300 mm wafer holds only about 15-20 of the largest interposers (illustrative), so bigger packages use more capacity each. In August 2026 Cerebras still described CoWoS packaging and HBM as supply limited (8-K). NVIDIA reportedly took 40-50% of capacity in 2024; TSMC planned to double capacity in 2023 and, on its Q1 2026 call, said advanced packaging remained strained (secondary reports). Blackwell-class parts use more capacity per package because their interposers are bigger.
 
 # 6. Outsourced assembly
 
@@ -35,7 +35,7 @@ OSAT houses add capacity: ASE (ASX) and Amkor (AMKR) take substrate attach and t
 
 # 7. Test
 
-TEST happens at wafer sort (known-good dies), after chip-on-wafer, and on the finished package; a defect found late scraps the whole assembly with all its HBM.
+TEST happens at wafer sort (probe cards on every logic die, so only known-good dies are assembled), after chip-on-wafer (probing the interposer site to check die-to-HBM links), and on the finished package in a socket at full power, with burn-in to weed out early failures. A defect found late scraps the whole assembly with all its HBM.
 
 # 8. Who makes it
 
@@ -46,6 +46,7 @@ TSMC (TSM) does most CoWoS; ASE (ASX) and Amkor (AMKR) as OSATs; UMC for interpo
 - Packaging capacity, not wafers, has limited accelerator shipments.
 - One supplier does most CoWoS.
 - Late defects scrap expensive parts.
+- Warpage: silicon and organic substrate expand differently, so large packages bow at reflow and stress the edge joints.
 - Notes: capacity and share figures are press reports and estimates.
 
 # 10. Sources
@@ -54,3 +55,4 @@ TSMC (TSM) does most CoWoS; ASE (ASX) and Amkor (AMKR) as OSATs; UMC for interpo
   [2] Capacity shares: trendforce.com/news/2024/02/19/insights-cowos-capacity-shortage-challenges-ai-chip-demand-while-taiwanese-manufacturers-expand-to-seize-opportunities/ ; emsnow.com/?p=40232
   [3] 2026 status: penchan.co/en/market/ai/supply-chain/cowos/ (secondary)
   [4] TSMC CoWoS: 3dfabric.tsmc.com/english/dedicatedFoundry/technology/cowos.htm
+  [5] CoWoS still supply limited (Aug 2026): Cerebras 8-K, sec.gov/Archives/edgar/data/1628280/000162828026056186/

@@ -27,7 +27,7 @@ At 200G per lane, a long trace from the switch chip to the FRONT PANEL loses so 
 
 # 5. Inside the optical engine
 
-NVIDIA's engines use 200 Gb/s MICRO-RING modulators made on TSMC's COUPE process, which stacks an electronic chip on a photonic one. A ring a few microns across couples light only at its resonant wavelength; a voltage shifts that resonance, turning the light up or down. Rings are tiny and efficient but sensitive to temperature, so each needs heater control.
+NVIDIA's engines use 200 Gb/s MICRO-RING modulators made on TSMC's COUPE process, which stacks an electronic chip on a photonic one. A ring a few microns across couples light only at its resonant wavelength; a voltage shifts that resonance, turning the light up or down. Rings are tiny and efficient but sensitive to temperature, so each needs heater control. In cross-section the engine is a stack: the electronic chip sits on microbumps on top of the photonic chip; the photonic chip's silicon waveguides sit on a buried-oxide layer, and copper through-silicon vias carry power and signals down through it to the substrate. Receive uses germanium photodiodes grown on the same silicon, with transimpedance amplifiers (TIAs) in the electronic chip.
 
 # 6. Lasers stay pluggable
 
@@ -35,7 +35,7 @@ Lasers fail more often than silicon and run best cool, so CPO keeps them out at 
 
 # 7. The switches
 
-NVIDIA's Spectrum-X and Quantum-X Photonics switches are scheduled from the second half of 2026, in configurations such as 128 ports of 800 Gb/s or 512 ports of 200 Gb/s, about 100 Tb/s in total. Broadcom also builds CPO versions of its Tomahawk switch chips.
+NVIDIA's Spectrum-X and Quantum-X Photonics switches are scheduled from the second half of 2026, in configurations such as 128 ports of 800 Gb/s or 512 ports of 200 Gb/s, about 100 Tb/s in total. Broadcom also builds CPO versions of its Tomahawk switch chips. A switch chip in the ~100 Tb/s class puts out hundreds of watts and sits next to optics whose rings shift with temperature, so these switches use liquid cooling: a cold plate over the package with coolant running through microchannels.
 
 # 8. Who makes it
 

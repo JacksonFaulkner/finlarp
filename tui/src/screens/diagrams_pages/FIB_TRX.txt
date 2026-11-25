@@ -16,8 +16,8 @@ MPO       multi-fiber connector: 12 or 16 fibers in one plug
 # 3. One module's job, in order
 
 1. the host's eight SerDes lanes arrive at the edge connector
-2. the DSP retimes them
-3. drivers and lasers turn each lane into light
+2. the DSP recovers each lane's clock, equalizes the loss of the host traces and retimes it (at 200G lanes it also adds an inner FEC)
+3. drivers and lasers turn each lane into light. Each EML is a laser plus an electro-absorption modulator on one chip, with a monitor photodiode behind it, held at a fixed temperature by a thermoelectric cooler (TEC); an isolator stops reflections getting back into the lasers [5]
 4. lenses couple the light into fibers in the MPO connector
 5. in the other direction, photodiodes and TIAs turn light back into lanes
 6. the module's controller reports power, temperature and light levels to the host
@@ -26,17 +26,19 @@ MPO       multi-fiber connector: 12 or 16 fibers in one plug
 
 On a board, copper traces. In the rack, a few metres: DAC copper, cheap but heavy and limited in reach. Across a row, up to about 100 m: AOC or SR8 multimode. Across a building, up to 500 m and 2 km: DR8 and 2xFR4 single-mode. Between buildings and cities: coherent modules (ZR) at 80 km and beyond.
 
+Why multimode stops near 100 m: its fiber core is about 50 um wide, so light takes many paths (modes) of slightly different length and each pulse smears into the next. Single-mode fiber has a core of about 9 um that carries one path, so a pulse stays sharp for kilometres.
+
 # 5. Lanes and speeds
 
 800G modules carry eight 100G PAM4 lanes; 1.6T modules carry eight 200G lanes using 3 nm DSPs. A DR8 module needs a separate fiber per lane, 16 in all, through an MPO connector; 2xFR4 multiplexes four wavelengths onto each fiber to use only four.
 
 # 6. Power and heat
 
-Listings put 1.6T DSP modules at up to about 25-26 W each. A big switch has 64 such ports, so the optics can draw over a kilowatt; the OSFP shell's fins and the switch's fans carry it away. Linear (LPO) modules cut that roughly in half or more.
+Most of a DSP module's power is the DSP itself. Its heat goes up through a thermal pad into the lid, which is also the heat sink: the OSFP's fins are cast into the top cover. Listings put 1.6T DSP modules at up to about 25-26 W each. A big switch has 64 such ports, so the optics can draw over a kilowatt; the OSFP shell's fins and the switch's fans carry it away. Linear (LPO) modules cut that roughly in half or more.
 
 # 7. Scale: modules per GPU
 
-Large AI clusters connect every GPU through several tiers of switches, and every switch-to-switch link has a module at each end, so clusters use several modules per GPU. Volume, not just speed, is what drives the market.
+Large AI clusters connect every GPU through several tiers of switches, and every switch-to-switch link has a module at each end, so clusters use several modules per GPU. In a simple two-tier example with eight GPUs, four leaf ports per server pair and eight uplinks, 16 links need 32 modules; bigger clusters add a third tier and more. Volume, not just speed, is what drives the market.
 
 # 8. Who makes it
 
@@ -44,13 +46,14 @@ LightCounting's 2024 ranking had Innolight first (revenue up 114% to over $3.3 b
 
 # 9. Chokepoints and risks
 
-- Lasers (EMLs) and DSPs set how many modules can ship.
+- Lasers (EMLs) and DSPs set how many modules can ship. EMLs are grown on indium phosphide (InP) wafers; Coherent's FY2026 10-K cites an industry-wide shortage and is expanding InP capacity in Sherman, Texas [5].
 - Most volume is made in China and Southeast Asia, exposed to trade policy.
-- Module power at cluster scale pushes toward LPO and co-packaged optics.
+- Module power at cluster scale pushes toward LPO and co-packaged optics (CPO), which put optical engines on the switch package and drop the module and its DSP.
 
 # 10. Sources
 
   [1] Vendor ranking: lightcounting.com/newsletter/en/may-2025-optical-vendor-landscape-333 ; m.c114.com.cn/w5472-1290362.html
   [2] 1.6T power and DSP: resource.naddod.com (OSFP 1.6T 2xFR4 datasheet)
   [3] LPO power: nokia.com/asset/f/215574/
+  [5] Coherent 10-K FY2026 (R&D areas: EMLs, isolators, thermoelectric coolers; InP shortage, Sherman TX), sec.gov accn 0000820318-26-000020
   [4] Reach tiers and module types: IEEE 802.3 PMD definitions (textbook summary)

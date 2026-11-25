@@ -78,6 +78,12 @@ impl ClaudeWindow {
         self.focus = true;
     }
 
+    /// Types `text` into Claude's prompt (no Enter), opening the window with focus.
+    pub fn type_text(&mut self, text: &str) -> bool {
+        self.show();
+        self.pane.send_text(text)
+    }
+
     /// Keys while the window is open.
     pub fn key(&mut self, key: KeyEvent) {
         if self.focus {

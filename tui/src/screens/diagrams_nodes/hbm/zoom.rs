@@ -1,6 +1,6 @@
-// HBM STACK zoom-ins a-e in the picture-and-panel template, from the Blender scenes in
+// HBM STACK zoom-ins a-f in the picture-and-panel template, from the Blender scenes in
 // tools/pbr3d/blender/hbm_zooms.py: a a copper TSV cut open, b the base logic die, c the channels
-// of one stack, d microbumps against hybrid bonding, e CoWoS packaging. Four beats each.
+// of one stack, d microbumps against hybrid bonding, e CoWoS packaging, f inside one DRAM die. Four beats each.
 
 use super::super::blender::{BEAT_MS, Cell, page};
 use crate::ui::anim::{Beat, Scene};
@@ -200,6 +200,45 @@ const COWOS_BEATS: &[Beat] = &[
         ),
 ];
 
+const DIE_BEATS: &[Beat] = &[
+    Beat::new("one core die out of the stack", BEAT_MS)
+        .note(
+            "An 8-high stack of DRAM dies on its base die; one core die slides out to be looked at on its own.",
+            "The orange stack with copper TSVs and yellow microbumps; the middle die slides out to the right.",
+        )
+        .detail(
+            "Every DRAM die in the stack is a full memory chip of its own, thinned so the stack stays short.",
+            &["Dies thinned to 30-50 um (SemiEngineering)", "Each die has its own banks and arrays (page section 2)"],
+        ),
+    Beat::new("a TSV field down the middle", BEAT_MS)
+        .note(
+            "Seen from above, the die has a strip of TSVs: the copper wires that carry data, commands and power down through it to the dies below.",
+            "The die lies flat; a grey strip of copper TSV ends runs down its middle, and cyan signals light the TSVs row by row.",
+        )
+        .detail(
+            "The floor plan here is schematic: makers place the TSVs differently, but every die needs a field of them.",
+            &["TSVs: copper wires straight through each thinned die (page section 2)"],
+        ),
+    Beat::new("banks either side, grouped into channels", BEAT_MS)
+        .note(
+            "The rest of the die is banks. Each bank is a full array with its own row buffer, and groups of banks belong to the channels the stack exposes.",
+            "Sixteen bank blocks appear either side of the strip, in four colours: each colour is one channel's banks.",
+        )
+        .detail(
+            "Channels work independently, which is how one stack keeps a very wide bus busy.",
+            &["Bank: a full array with its own row buffer (BANK node)", "HBM3 16 channels, HBM4 32 per stack (JEDEC)"],
+        ),
+    Beat::new("inside one bank: mats and cells", BEAT_MS)
+        .note(
+            "One bank opened up: it is tiled into mats, with sense-amp stripes between mat rows and word-line drivers between mat columns. Each mat is a grid of 1T1C cells.",
+            "The bank splits into a 4 x 4 grid of mats with cyan sense-amp stripes and grey driver stripes; metal capacitors stand up on one mat.",
+        )
+        .detail(
+            "Short bit lines keep the signal strong, so the array is cut into small mats with their own sense amps.",
+            &["Mat: about 512 x 512 cells (ARRAY node)", "Cell: 1 transistor + 1 capacitor (CELL node)"],
+        ),
+];
+
 fn tsv_glb() -> &'static [u8] {
     include_bytes!("../../../../../tools/pbr3d/assets/hbm_tsv.glb")
 }
@@ -209,6 +248,7 @@ static BASE: Cell = std::sync::OnceLock::new();
 static CHANNELS: Cell = std::sync::OnceLock::new();
 static BOND: Cell = std::sync::OnceLock::new();
 static COWOS: Cell = std::sync::OnceLock::new();
+static DIE: Cell = std::sync::OnceLock::new();
 
 pub fn tsv() -> Box<dyn Scene> {
     page(&TSV, tsv_glb(), TSV_BEATS)
@@ -246,6 +286,14 @@ pub fn cowos() -> Box<dyn Scene> {
     )
 }
 
+pub fn die() -> Box<dyn Scene> {
+    page(
+        &DIE,
+        include_bytes!("../../../../../tools/pbr3d/assets/hbm_die.glb"),
+        DIE_BEATS,
+    )
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -258,6 +306,7 @@ mod tests {
             ("channels", channels),
             ("bond", bond),
             ("cowos", cowos),
+            ("die", die),
         ] {
             let s = build();
             assert_eq!(s.beats().len(), 4, "{name}");

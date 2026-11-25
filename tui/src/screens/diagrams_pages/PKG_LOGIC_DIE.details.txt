@@ -61,3 +61,19 @@ HBM stacks connect along the die's edges through the interposer, so the length o
 More memory needs more edge: one reason packages and interposers keep growing.
 # Source
 TSMC roadmap via Tom's Hardware.
+
+== FLIP-CHIP
+# What it does
+The die is turned over and bonded wiring-side down, so its metal stack lands on the microbumps and its bare silicon backside faces up.
+# Why it matters
+Signals and power reach the transistors through short vertical paths, and heat leaves straight up through the backside into the lid.
+# Source
+TSMC CoWoS overview (3dfabric.tsmc.com).
+
+== METAL STACK
+# What it does
+Above the transistors sit roughly a dozen or more copper wiring levels, finest at the bottom and thickest at the top, where they meet the bumps.
+# Why it matters
+The thick top levels carry over a thousand amps of power across the die; the fine lower levels wire individual gates.
+# Source
+General process knowledge; level counts vary by node and product.

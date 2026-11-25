@@ -15,8 +15,8 @@ WIRING DENSITY    silicon wiring is fine enough for a 1024-bit bus per HBM stack
 
 # 3. A signal from HBM to GPU, in order
 
-1. data leaves the HBM base die through microbumps
-2. it runs across the interposer's fine wiring
+1. data leaves the HBM base die through microbumps (copper pillars with solder caps)
+2. it steps down through vias and runs across the interposer's fine wiring (four copper levels in oxide on CoWoS-S)
 3. and rises through microbumps into the GPU
 4. power climbs the other way, from the substrate through the TSV array
 5. thousands of these wires run in parallel
@@ -35,17 +35,18 @@ Interposer size is counted as a RETICLE MULTIPLE. TSMC's roadmap (Tom's Hardware
 
 # 7. Why silicon wiring
 
-WIRING DENSITY: only silicon (or bridges of it) can route the lines fine enough for a 1024-bit HBM3 bus per stack over a few millimetres; organic RDL is coarser but cheaper.
+WIRING DENSITY: silicon wiring is drawn with fab lithography, with lines and gaps well under a micron (about 0.4 um on the drawing). Organic RDL manages about 2 um and substrate build-up film about 10 um, so a 40 um strip holds roughly 50, 10 or 2 wires. Only silicon (or bridges of it) can route a 1024-bit HBM3 bus (2048-bit in HBM4) per stack over a few millimetres; organic RDL is coarser but cheaper.
 
 # 8. Who makes it
 
-TSMC (TSM) makes CoWoS interposers and does most of the assembly; UMC supplies outsourced interposers (TrendForce); ASE (ASX) and Amkor (AMKR) add assembly capacity.
+TSMC (TSM) makes CoWoS interposers and does most of the assembly; NVIDIA's 10-K names TSMC and CoWoS for its packaging. UMC supplies outsourced interposers (TrendForce). ASE (ASX, with SPIL) lists CoWoS among its packaging services and Amkor (AMKR) builds 2.5D packages on silicon interposers; both add assembly capacity. The HBM beside the GPU comes from SK hynix, Samsung and Micron.
 
 # 9. Chokepoints and risks
 
-- CoWoS capacity has limited AI accelerator output.
-- Larger interposers lower packages per wafer.
+- CoWoS capacity has limited AI accelerator output; Cerebras' August 2026 results still call CoWoS and HBM supply-limited.
+- Larger interposers lower packages per wafer: on the drawing about eleven 3.3-reticle slabs fit on a 300 mm wafer but only about five at 9.5 reticles.
 - One supplier does most of it.
+- Bigger slabs warp more with heat, straining the bumps and yield.
 
 # 10. Sources
 
@@ -55,3 +56,4 @@ TSMC (TSM) makes CoWoS interposers and does most of the assembly; UMC supplies o
   [4] Roadmap: tomshardware.com/tech-industry/semiconductors/tsmcs-details-next-gen-cowos-roadmap-over-14-reticle-packages-and-48x-leap-in-compute-power-expected-by-2029-massive-size-enables-24-hbm5e-stacks-and-additional-memory-bandwidth-jump
   [5] Capacity: tomshardware.com/tech-industry/tsmc-struggles-meet-demand-for-cowos-packaging-holding-back-ai-and-hpc-silicon-production-report ; trendforce.com/news/2024/02/19/insights-cowos-capacity-shortage-challenges-ai-chip-demand-while-taiwanese-manufacturers-expand-to-seize-opportunities/
   [6] HBM3 1024-bit: businesswire.com/news/home/20220127005320/en/JEDEC-Publishes-HBM3-Update-to-High-Bandwidth-Memory-HBM-Standard
+  [7] NVIDIA 10-K (Feb 2025), ASE 20-F (Apr 2026), Amkor 10-K (Feb 2025), Cerebras 8-K (Aug 2026), via local SEC data

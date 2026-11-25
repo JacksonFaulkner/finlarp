@@ -61,3 +61,19 @@ SoIC is TSMC's system-on-integrated-chips stacking, which bonds dies on top of e
 It is TSMC's route past microbump pitch limits for die-on-die stacking.
 # Source
 TSMC 3DFabric.
+
+== IMC
+# What it does
+Intermetallic compounds (Cu6Sn5 at a copper pad, Ni3Sn4 under a nickel barrier) grow where molten solder meets the metal during reflow.
+# Why it matters
+They are what bonds the joint, but they are brittle: thermal-cycling cracks and electromigration voids tend to start along them.
+# Source
+Textbook solder metallurgy.
+
+== UBM
+# What it does
+Under-bump metallisation: the seed and barrier layers (titanium, copper) laid over the die's aluminium pad before the pillar is plated.
+# Why it matters
+It gives the plating a base and keeps the pillar's metals from mixing with the pad.
+# Source
+Textbook flip-chip bumping.

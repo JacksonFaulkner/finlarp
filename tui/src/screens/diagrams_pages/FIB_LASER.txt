@@ -12,6 +12,8 @@ MACH-ZEHNDER        a modulator that splits light into two arms and recombines i
 CW LASER            continuous-wave: a steady laser with no data, feeding a silicon modulator
 INDIUM PHOSPHIDE    InP, the semiconductor single-mode lasers are made of
 WAVELENGTH          1310 nm (O-band) for data-center single-mode, 850 nm for VCSELs
+OPTICAL ISOLATOR    a one-way gate that stops reflected light from destabilizing the laser
+THERMISTOR AND DRIVER LOOP  a temperature sensor plus driver control that hold the laser steady
 
 # 3. A symbol becomes light, in order
 

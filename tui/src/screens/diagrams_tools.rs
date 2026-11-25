@@ -141,6 +141,10 @@ impl Diagrams {
     /// holding it.
     pub(super) fn find_node(&self, name: &str) -> Option<(usize, usize)> {
         let want = name.trim();
+        let want = crate::screens::diagrams_terms_gen::TERM_SLUGS
+            .iter()
+            .find(|(s, _)| s.eq_ignore_ascii_case(want))
+            .map_or(want, |(_, l)| *l);
         let find = |exact: bool| {
             self.nodes.iter().enumerate().find_map(|(tab, nodes)| {
                 nodes
