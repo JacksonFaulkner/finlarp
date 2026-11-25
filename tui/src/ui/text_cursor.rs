@@ -10,6 +10,8 @@
 //             f t F T {char}, ; and , to repeat
 //             ^d ^u (half page)  ^f ^b / space (page)  ^e ^y (scroll view)
 //             counts: 5j, 3w, 10G
+//   search    / {pattern} enter (smartcase), n N next / previous hit, esc cancels;
+//             n/N are Unhandled while no pattern is set (owners may fall back)
 //   visual    v (characters)  V (lines)  o (other end)  esc (leave)
 //             text objects: iw aw iW aW ip ap (ip = the paragraph / table / list)
 //             y  yank: on_key returns Outcome::Yank(text)
@@ -55,6 +57,9 @@ pub const KEYS: &[Key] = &[
     key("^f ^b spc", "page down / up"),
     key("^e ^y", "scroll the view one line"),
     key("zz zt zb", "cursor line to centre / top / bottom"),
+    section("search"),
+    key("/", "search (smartcase); enter jumps, esc cancels"),
+    key("n N", "next / previous hit"),
     section("select"),
     key("v V", "visual / visual line (again: leave)"),
     key("o", "jump to the other end"),
@@ -117,6 +122,29 @@ pub struct TextCursor {
     /// Last f/t/F/T and its char, for ; and ,
     last_find: Option<(char, char)>,
     rows: Vec<Vec<char>>,
+    /// `/` prompt being typed.
+    typing: Option<String>,
+    /// Last committed `/` pattern.
+    pattern: Option<String>,
+    /// Result of the last search jump, for the owner's status line.
+    found: Option<String>,
+}
+
+/// Char columns where `pat` starts in `text`; smartcase (an uppercase letter
+/// in the pattern makes it case-sensitive).
+pub fn find_all(text: &[char], pat: &str) -> Vec<usize> {
+    if pat.is_empty() {
+        return Vec::new();
+    }
+    let fold = !pat.chars().any(char::is_uppercase);
+    let low = |c: char| if fold { c.to_lowercase().next().unwrap_or(c) } else { c };
+    let needle: Vec<char> = pat.chars().map(low).collect();
+    if needle.len() > text.len() {
+        return Vec::new();
+    }
+    (0..=text.len() - needle.len())
+        .filter(|&i| needle.iter().enumerate().all(|(k, c)| low(text[i + k]) == *c))
+        .collect()
 }
 
 impl Default for TextCursor {
@@ -135,6 +163,9 @@ impl Default for TextCursor {
             center: false,
             last_find: None,
             rows: Vec::new(),
+            typing: None,
+            pattern: None,
+            found: None,
         }
     }
 }
@@ -295,6 +326,16 @@ impl TextCursor {
             .get(row)
             .and_then(|r| r.iter().position(|c| !c.is_whitespace()))
             .unwrap_or(0)
+    }
+
+    /// `goto_row`, then the cursor on char column `col` (a `/` search hit).
+    pub fn goto(&mut self, row: usize, col: usize) {
+        self.goto_row(row);
+        if self.pos.row == row {
+            let len = self.rows.get(row).map_or(0, |r| r.len());
+            self.pos.col = col.min(len.saturating_sub(1));
+            self.want = self.pos.col;
+        }
     }
 
     /// Jumps the cursor to a row (first non-blank) and puts that row near the
@@ -718,9 +759,134 @@ impl TextCursor {
         self.want = self.pos.col;
     }
 
+    /// True (and the prefix dropped) when `p` is the pending prefix key: lets an owner
+    /// add its own pairs, like the reader's `gd` / `gr`.
+    pub fn take_prefix_if(&mut self, p: char) -> bool {
+        if self.prefix == Some(p) {
+            self.prefix = None;
+            self.count = None;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Whether a two-key command is half typed (`f`, `g`, …), so the next key is its
+    /// argument, not a command of the owner's.
+    pub fn pending(&self) -> bool {
+        self.prefix.is_some()
+    }
+
+    /// Whether the `/` prompt is open (printable keys are text).
+    pub fn takes_text(&self) -> bool {
+        self.typing.is_some()
+    }
+
+    /// The `/` prompt while typing, else the last search result.
+    pub fn search_status(&self) -> Option<String> {
+        match &self.typing {
+            Some(q) => Some(format!("/{q}█")),
+            None => self.found.clone(),
+        }
+    }
+
+    /// Jumps to the next (or previous) hit of the pattern, wrapping. False
+    /// when no pattern is set.
+    pub fn search_next(&mut self, forward: bool) -> bool {
+        let Some(pat) = self.pattern.clone() else {
+            return false;
+        };
+        let hits: Vec<(usize, usize)> = self
+            .rows
+            .iter()
+            .enumerate()
+            .flat_map(|(r, row)| find_all(row, &pat).into_iter().map(move |c| (r, c)))
+            .collect();
+        let at = (self.pos.row, self.pos.col);
+        let target = if forward {
+            hits.iter().copied().find(|h| *h > at).or(hits.first().copied())
+        } else {
+            hits.iter().copied().rev().find(|h| *h < at).or(hits.last().copied())
+        };
+        self.found = Some(match target {
+            Some((r, c)) => {
+                let wrapped = if forward { (r, c) <= at } else { (r, c) >= at };
+                if self.mode == Mode::Normal {
+                    self.goto(r, c);
+                } else {
+                    // extend the selection: move without goto_row's re-centring jumps
+                    self.pos = Pos { row: r, col: c };
+                    self.want = c;
+                    self.settle(forward);
+                    self.pos = Pos { row: r, col: c };
+                    self.scroll_to_cursor();
+                }
+                let i = hits.iter().position(|h| *h == (r, c)).unwrap_or(0) + 1;
+                let mut msg = format!("/{pat} [{i}/{}]", hits.len());
+                if wrapped && hits.len() > 1 {
+                    msg.push_str(if forward { " wrapped to top" } else { " wrapped to bottom" });
+                }
+                msg
+            }
+            None => format!("not found: {pat}"),
+        });
+        true
+    }
+
+    fn scroll_to_cursor(&mut self) {
+        let h = self.height.max(1);
+        if self.pos.row < self.top || self.pos.row >= self.top + h {
+            self.top = self.pos.row.saturating_sub(h / 2).min(self.max_top());
+        }
+    }
+
+    fn prompt_key(&mut self, key: KeyEvent) -> Outcome {
+        let Some(buf) = self.typing.as_mut() else {
+            return Outcome::Unhandled;
+        };
+        match key.code {
+            KeyCode::Esc => self.typing = None,
+            KeyCode::Enter => {
+                let q = self.typing.take().unwrap_or_default();
+                if !q.is_empty() {
+                    self.pattern = Some(q);
+                }
+                self.search_next(true);
+            }
+            KeyCode::Backspace => {
+                if buf.pop().is_none() {
+                    self.typing = None;
+                }
+            }
+            KeyCode::Char(c) => buf.push(c),
+            _ => {}
+        }
+        Outcome::Handled
+    }
+
     pub fn on_key(&mut self, key: KeyEvent) -> Outcome {
+        if self.typing.is_some() {
+            return self.prompt_key(key);
+        }
         if self.rows.is_empty() {
             return Outcome::Unhandled;
+        }
+        if key.modifiers.difference(KeyModifiers::SHIFT).is_empty() && self.prefix.is_none() {
+            match key.code {
+                KeyCode::Char('/') => {
+                    self.count = None;
+                    self.typing = Some(String::new());
+                    return Outcome::Handled;
+                }
+                KeyCode::Char(c @ ('n' | 'N')) => {
+                    self.count = None;
+                    if self.search_next(c == 'n') {
+                        return Outcome::Handled;
+                    }
+                    return Outcome::Unhandled;
+                }
+                _ => {}
+            }
         }
         let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
         if key.modifiers.contains(KeyModifiers::ALT) {
@@ -979,9 +1145,17 @@ impl TextCursor {
             })
         });
         let cursor = (row == self.pos.row).then_some(self.pos.col);
-        if sel.is_none() && cursor.is_none() {
+        let hits: Vec<(usize, usize)> = match (&self.pattern, self.rows.get(row)) {
+            (Some(p), Some(text)) => {
+                let n = p.chars().count();
+                find_all(text, p).into_iter().map(|c| (c, c + n)).collect()
+            }
+            _ => Vec::new(),
+        };
+        if sel.is_none() && cursor.is_none() && hits.is_empty() {
             return line;
         }
+        let hit_style = theme.on_cursor(Style::default()).add_modifier(Modifier::UNDERLINED);
         let sel_style = |s: Style| theme.on_cursor(s);
         let cur_style = |s: Style| s.add_modifier(Modifier::REVERSED);
         let mut out: Vec<Span<'static>> = Vec::new();
@@ -1004,6 +1178,9 @@ impl TextCursor {
             let base = line_style.patch(span.style);
             for c in span.content.chars() {
                 let mut st = base;
+                if hits.iter().any(|&(a, b)| a <= idx && idx < b) {
+                    st = st.patch(hit_style);
+                }
                 if sel.is_some_and(|(f, t)| idx >= f && idx <= t) {
                     st = sel_style(st);
                 }

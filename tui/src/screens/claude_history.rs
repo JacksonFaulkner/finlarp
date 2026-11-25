@@ -43,20 +43,33 @@ const PROJECT_COL: usize = 22;
 const DATE_FMT: &str = "%Y-%m-%d %H:%M";
 
 #[derive(Debug, Clone)]
-struct Session {
-    id: String,
-    path: PathBuf,
+pub(super) struct Session {
+    pub(super) id: String,
+    pub(super) path: PathBuf,
     /// Encoded project dir name (e.g. `-Users-me-code-x`), shown when cwd is unknown.
     project_dir: String,
-    modified: SystemTime,
-    cwd: String,
-    prompt: String,
+    pub(super) modified: SystemTime,
+    pub(super) cwd: String,
+    pub(super) prompt: String,
     /// Header (cwd + first prompt) has been read.
     parsed: bool,
 }
 
 impl Session {
-    fn load(&mut self) {
+    /// A transcript at `path` whose header is not read yet.
+    pub(super) fn at(path: PathBuf, id: &str) -> Self {
+        Session {
+            id: id.to_string(),
+            path,
+            project_dir: String::new(),
+            modified: SystemTime::UNIX_EPOCH,
+            cwd: String::new(),
+            prompt: String::new(),
+            parsed: false,
+        }
+    }
+
+    pub(super) fn load(&mut self) {
         self.parsed = true;
         let Ok(file) = File::open(&self.path) else {
             return;
@@ -145,7 +158,7 @@ fn user_prompt(v: &Value) -> Option<String> {
 
 /// Top-level `<projects>/<dir>/<id>.jsonl` files, newest first, capped.
 /// Subagent transcripts live one level deeper and are skipped.
-fn list_sessions(root: &Path) -> Vec<Session> {
+pub(super) fn list_sessions(root: &Path) -> Vec<Session> {
     let Ok(projects) = std::fs::read_dir(root) else {
         return Vec::new();
     };
@@ -186,7 +199,7 @@ fn list_sessions(root: &Path) -> Vec<Session> {
     found
 }
 
-fn projects_dir() -> PathBuf {
+pub(super) fn projects_dir() -> PathBuf {
     std::env::var_os("HOME")
         .map(PathBuf::from)
         .unwrap_or_default()
@@ -195,7 +208,7 @@ fn projects_dir() -> PathBuf {
 }
 
 /// Session ids are UUIDs; anything else never reaches the tmux command line.
-fn valid_session_id(id: &str) -> bool {
+pub(super) fn valid_session_id(id: &str) -> bool {
     !id.is_empty() && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
 }
 

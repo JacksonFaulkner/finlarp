@@ -12,7 +12,9 @@ is on that one picture, and explanations go on it as part labels.
 After writing or editing a diagram, ALWAYS run `fl z check <file>` and fix every error
 before you reply. The user sees the same errors on the canvas. For a new or changed 3D
 scene, also run `fl z render <file> <png>` and look at the PNG with Read: fix overlapping
-labels, parts lost inside others, or a scene that reads badly before the user sees it.
+labels, parts lost inside others, or a scene that reads badly before the user sees it. An optional third
+argument multiplies the camera zoom (`fl z render <file> <png> 2`); part names grow and shrink
+with the zoom, so check labels still fit when the user zooms in.
 
 `state.json` in the Z folder says what the user is looking at right now: `file` is the
 active diagram, `previous` the one `b` goes back to, plus the camera and any errors. Read it
@@ -71,6 +73,10 @@ Where each field shows:
 To explain something, put the explanation on the part it is about: the part's `name` is its
 label. Keep each label short: at most 40 characters, which `fl z check` enforces. Put the
 longer reasoning in the chat, not the file.
+
+A label is drawn in its part's colour (lightened on dark parts), so the colour tells the user
+which part it names. Give labelled parts colours that differ from their neighbours; two
+labelled parts in one colour read as one thing.
 
 ```json
 { "shape": "box", "name": "busway: I2R, ~90 C", "at": [-0.25, 3.5, 0], "size": [8.5, 1.1, 1.6],

@@ -343,11 +343,26 @@ pub fn run_check(args: &[String]) -> i32 {
     i32::from(bad)
 }
 
+/// A diagram file drawn at `w` x `h` pixels with its own camera (the filing reader's
+/// diagram panel). Err: the file does not load, or it has no 3D scene.
+pub fn render_file(path: &Path, w: u32, h: u32, bg: [u8; 3]) -> Result<image::RgbaImage, String> {
+    let d = load(path).map_err(|e| e.join("; "))?;
+    let scene = d.scene.as_ref().ok_or("art-only diagram (no 3D scene)")?;
+    let c = scene.camera.unwrap_or_default();
+    let view = poly3d::View {
+        yaw: c.yaw.to_radians(),
+        pitch: c.pitch.to_radians().clamp(-0.3, 1.3),
+        zoom: c.zoom.clamp(0.3, 6.0),
+        pan: [0.0, 0.0],
+    };
+    Ok(poly3d::render_spec(&to_poly(scene), &view, 0.3, w as usize, h as usize, bg))
+}
+
 /// `fl z render FILE OUT.png`: the scene as the canvas draws it (default camera), so Claude
 /// can look at its own picture before the user does.
 pub fn run_render(args: &[String]) -> i32 {
     let (Some(file), Some(out)) = (args.first(), args.get(1)) else {
-        eprintln!("usage: fl z render FILE.json OUT.png");
+        eprintln!("usage: fl z render FILE.json OUT.png [ZOOM]");
         return 2;
     };
     let d = match load(Path::new(file)) {
@@ -364,10 +379,12 @@ pub fn run_render(args: &[String]) -> i32 {
         return 1;
     };
     let c = scene.camera.unwrap_or_default();
+    // ZOOM multiplies the diagram's own zoom, as + and - do on the canvas
+    let k = args.get(2).and_then(|z| z.parse::<f64>().ok()).unwrap_or(1.0);
     let view = poly3d::View {
         yaw: c.yaw.to_radians(),
         pitch: c.pitch.to_radians().clamp(-0.3, 1.3),
-        zoom: c.zoom.clamp(0.3, 6.0),
+        zoom: (c.zoom * k).clamp(0.3, 6.0),
         pan: [0.0, 0.0],
     };
     let img = poly3d::render_spec(&to_poly(scene), &view, 0.3, 1200, 700, [0x28, 0x2a, 0x36]);

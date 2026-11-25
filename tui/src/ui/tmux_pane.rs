@@ -173,4 +173,12 @@ impl TmuxPane {
         args.push(&name);
         self.run(&args).is_ok()
     }
+
+    /// Types `text` into the program as it is (no Enter).
+    pub fn send_text(&self, text: &str) -> bool {
+        self.started
+            && self
+                .run(&["send-keys", "-t", self.session, "-l", text])
+                .is_ok()
+    }
 }

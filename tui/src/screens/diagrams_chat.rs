@@ -225,6 +225,8 @@ enum Ev {
     Text(String),
     Tool(String),
     Failed(String),
+    /// The turn's cost and tokens (in, out), from the `result` line.
+    Usage(f64, u64, u64),
     Done,
 }
 
@@ -257,6 +259,8 @@ pub struct Chat {
     dirty: bool,
     /// The node whose write-up the session has already been sent.
     pub sent_page: Option<String>,
+    /// The question last asked (titles the chat in the registry).
+    asked: String,
 }
 
 /// How soon `k` must follow `j` to count as `jk`.
@@ -291,6 +295,13 @@ fn parse_line(line: &str) -> Vec<Ev> {
             }
         }
         Some("result") => {
+            let u = &v["usage"];
+            let tok = |k: &str| u[k].as_u64().unwrap_or(0);
+            out.push(Ev::Usage(
+                v["total_cost_usd"].as_f64().unwrap_or(0.0),
+                tok("input_tokens") + tok("cache_read_input_tokens") + tok("cache_creation_input_tokens"),
+                tok("output_tokens"),
+            ));
             if v["is_error"] == true {
                 out.push(Ev::Failed(
                     v["result"].as_str().unwrap_or("claude failed").to_string(),
@@ -322,6 +333,7 @@ impl Chat {
             last_j: None,
             dirty: false,
             sent_page: None,
+            asked: String::new(),
         }
     }
 
@@ -426,6 +438,7 @@ impl Chat {
     pub fn send(&mut self, question: &str, context: &str, sock: &Path) {
         // a new question drops an answer still on its way
         self.cancel();
+        self.asked = question.to_string();
         self.say.clear();
         self.failed = false;
         self.status = "thinking".to_string();
@@ -523,7 +536,11 @@ impl Chat {
 
     fn apply(&mut self, ev: Ev) {
         match ev {
-            Ev::Session(s) => self.session = Some(s),
+            Ev::Session(s) => {
+                self.session = Some(s);
+                self.register(None);
+            }
+            Ev::Usage(c, i, o) => self.register(Some((c, i, o))),
             Ev::Message => self.raw.clear(),
             Ev::Text(t) => {
                 self.raw.push_str(&t);
@@ -545,6 +562,18 @@ impl Chat {
                 self.status.clear();
             }
         }
+    }
+
+    /// Records this chat in the shared registry (the `L` screen).
+    fn register(&self, turn: Option<(f64, u64, u64)>) {
+        let Some(session) = &self.session else { return };
+        crate::chats::record(crate::chats::Note {
+            session,
+            source: "x diagrams",
+            title: &self.asked,
+            turn,
+            ..Default::default()
+        });
     }
 
     /// The bar's rows, top to bottom, wrapped to `w`.

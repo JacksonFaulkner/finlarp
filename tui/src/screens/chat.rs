@@ -52,6 +52,8 @@ pub(super) enum Ev {
     Text(String),
     Tool(String),
     Failed(String),
+    /// The turn's totals, from the final `result` line.
+    Usage { cost: f64, input: u64, output: u64 },
     Done,
 }
 
@@ -163,6 +165,15 @@ pub(super) fn parse_line(line: &str) -> Vec<Ev> {
             }
         }
         Some("result") => {
+            let u = &v["usage"];
+            let tok = |k: &str| u[k].as_u64().unwrap_or(0);
+            out.push(Ev::Usage {
+                cost: v["total_cost_usd"].as_f64().unwrap_or(0.0),
+                input: tok("input_tokens")
+                    + tok("cache_read_input_tokens")
+                    + tok("cache_creation_input_tokens"),
+                output: tok("output_tokens"),
+            });
             if v["is_error"] == true {
                 out.push(Ev::Failed(
                     v["result"].as_str().unwrap_or("claude failed").to_string(),
@@ -233,6 +244,24 @@ impl Chat {
         self.rx = Some(rx);
     }
 
+    /// Records this chat in the shared registry (the `L` screen).
+    fn register(&self, turn: Option<(f64, u64, u64)>) {
+        let Some(session) = &self.session else { return };
+        let title = self
+            .log
+            .iter()
+            .find(|(r, _)| *r == Role::User)
+            .map(|(_, t)| t.as_str())
+            .unwrap_or("");
+        crate::chats::record(crate::chats::Note {
+            session,
+            source: "chat",
+            title,
+            turn,
+            ..Default::default()
+        });
+    }
+
     fn cancel(&mut self) {
         if let Some(mut c) = self.child.take() {
             let _ = c.kill();
@@ -244,7 +273,10 @@ impl Chat {
 
     fn apply(&mut self, ev: Ev) {
         match ev {
-            Ev::Session(s) => self.session = Some(s),
+            Ev::Session(s) => {
+                self.session = Some(s);
+                self.register(None);
+            }
             Ev::Message => {
                 if self.log.last().is_none_or(|(r, _)| *r != Role::Claude) {
                     self.log.push((Role::Claude, String::new()));
@@ -264,6 +296,11 @@ impl Chat {
             }
             Ev::Tool(n) => self.log.push((Role::Tool, format!("⚙ {n}"))),
             Ev::Failed(m) => self.log.push((Role::Error, m)),
+            Ev::Usage {
+                cost,
+                input,
+                output,
+            } => self.register(Some((cost, input, output))),
             Ev::Done => {
                 if let Some(mut c) = self.child.take() {
                     let _ = c.wait();

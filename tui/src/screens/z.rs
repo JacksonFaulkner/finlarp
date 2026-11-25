@@ -8,9 +8,14 @@
 // One picture per diagram: no sections or zooms, and no number or letter keys. Explanations
 // are labels on the parts. Keys: hjkl orbit, +/- zoom, 0 reset, F full picture, v art,
 // p pause flows, [ ] previous/next diagram, f diagram menu, b back to the diagram you came
-// from. The chat sits under the picture and is always on screen (F hides it); `C` gives
-// Claude the keys, ctrl-/ takes them back. `M` switches mode.
+// from. `M` switches mode.
+//
+// Two ways to talk (t switches): by default Claude runs headless, the picture moves to the
+// right and the reply flows down the left, hugging the model's outline (z_flow.rs), typed into a one-line prompt under it (C/i/enter, enter
+// sends, esc leaves; esc stops a reply). The other is Claude Code itself in a pane under the
+// picture (F hides it); `C` gives it the keys, ctrl-/ takes them back.
 
+use std::collections::BTreeSet;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant, SystemTime};
@@ -19,7 +24,7 @@ use image::{DynamicImage, RgbaImage};
 use ratatui::Frame;
 use ratatui::crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 use ratatui::layout::{Constraint, Layout, Rect};
-use ratatui::style::Modifier;
+use ratatui::style::{Modifier, Style};
 use ratatui::text::{Line, Span};
 use ratatui::widgets::{
     Block, Borders, Clear, List, ListItem, ListState, Paragraph, StatefulWidget, Widget, Wrap,
@@ -27,12 +32,16 @@ use ratatui::widgets::{
 use ratatui_image::picker::{Picker, ProtocolType};
 use ratatui_image::protocol::StatefulProtocol;
 use ratatui_image::{Resize, StatefulImage};
+use tui_input::Input;
+use tui_input::backend::crossterm::EventHandler;
 
 use super::diagrams_window::ClaudeWindow;
+use super::z_flow::{self, Settle, Talk};
 use super::z_spec::{self, Camera, Diagram, Scene};
 use crate::app::{Action, Ctx, Screen};
 use crate::ui::help::{Help, Key, key};
 use crate::ui::layout::popup;
+use crate::ui::text_cursor::{self, Outcome, TextCursor};
 use crate::ui::theme::Theme;
 
 /// How many earlier diagrams `b` can walk back through.
@@ -108,6 +117,8 @@ impl Mode {
 struct Shown {
     key: (u64, u32, u32),
     proto: StatefulProtocol,
+    /// The cells the picture covers, for the text to wrap around.
+    mask: z_flow::Mask,
 }
 
 /// One diagram file in the Z folder, as last listed.
@@ -151,23 +162,94 @@ pub struct Z {
     frames: u32,
     last_state: String,
     flash: Option<(String, Instant)>,
+    /// The chat flows around the picture (headless Claude) instead of the Claude Code pane.
+    flow: bool,
+    /// One headless conversation per mode, as MODES.
+    talks: Vec<Talk>,
+    /// The prompt line while the user types into it.
+    input: Option<Input>,
+    /// Newest paragraphs hidden (J/K scroll back through the flowing chat).
+    back: usize,
+    settle: Settle,
+    /// A picture of the current view (P), sent with the next message.
+    view: Option<PathBuf>,
+    /// Where the 3D picture was last drawn, so P renders the same shape.
+    pic_area: Rect,
+    /// Labels the user turned off (D), by name; cleared when another diagram opens.
+    hidden: BTreeSet<String>,
+    /// The labels menu (D) when open: the row under the cursor.
+    labels_menu: Option<usize>,
+    /// `o`: the LSP terms in the chat, and the row under the cursor.
+    terms_menu: Option<(Vec<usize>, usize)>,
+    /// R: read mode. The picture stays still and the chat is one plain column under a
+    /// vim cursor (the reader's keys: hjkl, w/b, gg/G, ^d/^u, v/V y, / n N).
+    read: Option<TextCursor>,
+    /// Read mode's laid-out rows, and what they were laid out from
+    /// (paragraph count, text length, width) so new text relays them.
+    read_rows: Vec<Line<'static>>,
+    read_from: (usize, usize, u16),
 }
 
 pub fn z_dir() -> PathBuf {
     crate::data_dir().join("z")
 }
 
-/// The system prompt for `mode`, written next to the diagrams so tmux can `cat` it.
-fn prompt_file(dir: &Path, mode: Mode) -> io::Result<PathBuf> {
-    let path = dir.join(format!(".prompt-{}.md", mode.name()));
-    let text = format!(
+/// The system prompt for `mode`.
+fn prompt_text(dir: &Path, mode: Mode) -> String {
+    format!(
         "{RULES}\n\n## Z folder\n\n{}\n\n## Mode: {}\n\n{}\n",
         dir.display(),
         mode.name(),
         mode.brief()
-    );
-    std::fs::write(&path, text)?;
+    )
+}
+
+/// The system prompt for `mode`, written next to the diagrams so tmux can `cat` it.
+fn prompt_file(dir: &Path, mode: Mode) -> io::Result<PathBuf> {
+    let path = dir.join(format!(".prompt-{}.md", mode.name()));
+    std::fs::write(&path, prompt_text(dir, mode))?;
     Ok(path)
+}
+
+/// Added to the prompt when the chat flows around the picture.
+const FLOW_NOTE: &str = "## How your replies are shown\n\n\
+Your replies are not in a chat window: they stream as plain text into the empty space around \
+the picture, in narrow columns, and only the newest part fits. Keep each reply short (a few \
+sentences, under about 100 words) and in plain prose: no headings, tables, code blocks or long \
+lists. AskUserQuestion is not available here: ask in plain text and the user answers in their \
+next message. Tools outside the Z folder and `fl z` are denied without asking.";
+
+/// The headless chat's system prompt for `mode`.
+fn flow_prompt(dir: &Path, mode: Mode) -> String {
+    format!("{}\n{FLOW_NOTE}\n", prompt_text(dir, mode))
+}
+
+/// For the filing reader's `A`: the system prompt and tools for drawing one diagram of a
+/// filing excerpt into `file` (inside `dir`), headless, with the Z rules.
+pub fn filing_prompt(dir: &Path, file: &Path) -> (String, Vec<String>) {
+    let system = format!(
+        "{RULES}\n\n## Z folder\n\n{}\n\n## Mode: filing\n\nThe user is reading a company filing \
+         and wants a picture of the excerpt they send, shown beside the text. Write exactly one \
+         diagram, with a 3D scene, to {} (create or overwrite that file, nothing else), run \
+         `fl z check` on it and fix every error, then reply with one plain sentence saying what \
+         the picture shows. Label the parts with the filing's own words.\n",
+        dir.display(),
+        file.display(),
+    );
+    (system, allowed_tools(dir))
+}
+
+/// The tools Claude may use without asking: the Z folder, `fl z`, and its own renders.
+fn allowed_tools(dir: &Path) -> Vec<String> {
+    let d = dir.display();
+    vec![
+        format!("Write(/{d}/**)"),
+        format!("Edit(/{d}/**)"),
+        format!("Read(/{d}/**)"),
+        "Bash(fl z check:*)".into(),
+        "Bash(fl z render:*)".into(),
+        "Read(//tmp/**)".into(),
+    ]
 }
 
 fn claude_command(dir: &Path, prompt: &Path) -> String {
@@ -198,6 +280,7 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Z> {
     let picker = Some(super::diagrams::query_picker());
     #[cfg(test)]
     let picker = Some(Picker::halfblocks());
+    let dir_for_talks = dir.clone();
     let mut z = Z {
         theme: ctx.theme.clone(),
         dir,
@@ -221,6 +304,22 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Z> {
         frames: 0,
         last_state: String::new(),
         flash: None,
+        flow: true,
+        talks: MODES
+            .iter()
+            .map(|m| Talk::kept(dir_for_talks.join(format!(".chat-{}.json", m.name()))))
+            .collect(),
+        input: None,
+        back: 0,
+        settle: Settle::default(),
+        view: None,
+        pic_area: Rect::default(),
+        hidden: BTreeSet::new(),
+        labels_menu: None,
+        terms_menu: None,
+        read: None,
+        read_rows: Vec::new(),
+        read_from: (0, 0, 0),
     };
     for w in &mut z.windows {
         w.open = true;
@@ -297,6 +396,362 @@ impl Z {
     fn window_ref(&self) -> &ClaudeWindow {
         let i = MODES.iter().position(|m| *m == self.mode).unwrap_or(0);
         &self.windows[i]
+    }
+    fn talk(&mut self) -> &mut Talk {
+        let i = MODES.iter().position(|m| *m == self.mode).unwrap_or(0);
+        &mut self.talks[i]
+    }
+    fn talk_ref(&self) -> &Talk {
+        let i = MODES.iter().position(|m| *m == self.mode).unwrap_or(0);
+        &self.talks[i]
+    }
+
+    /// Sends the prompt line to this mode's headless Claude.
+    fn send(&mut self) {
+        let Some(input) = self.input.take() else {
+            return;
+        };
+        let mut text = input.value().trim().to_string();
+        let view = self.view.take();
+        if text.is_empty() {
+            if view.is_none() {
+                return;
+            }
+            text = "This is what I'm looking at.".into();
+        }
+        let (system, tools) = (flow_prompt(&self.dir, self.mode), allowed_tools(&self.dir));
+        self.back = 0;
+        match view {
+            Some(p) => {
+                let prompt = format!("{text}\n\n{}", self.view_note(&p));
+                self.talk()
+                    .send_shown(&format!("[view] {text}"), &prompt, &system, &tools);
+            }
+            None => self.talk().send(&text, &system, &tools),
+        }
+    }
+
+    /// Tells Claude where the picture of the user's view is and how it was framed.
+    fn view_note(&self, path: &Path) -> String {
+        format!(
+            "[Attached view: a picture of exactly what I see on the canvas right now (camera yaw \
+             {:.0}°, pitch {:.0}°, zoom {:.2}). Read {} to look at it before answering.]",
+            self.camera.yaw.to_degrees(),
+            self.camera.pitch.to_degrees(),
+            self.camera.zoom,
+            path.display()
+        )
+    }
+
+    /// Renders the 3D picture as the user sees it (same camera, same shape) to a PNG under
+    /// the Z folder, where Claude may read it.
+    fn capture_view(&mut self) -> Result<PathBuf, String> {
+        let scene = match self.current() {
+            Some((_, art, Some(s), ..)) if art.is_empty() || !self.art_first => s.clone(),
+            Some(_) => return Err("no 3D view to capture (v shows the scene)".into()),
+            None => return Err("no diagram open".into()),
+        };
+        let area = if self.pic_area.width >= 4 {
+            self.pic_area
+        } else {
+            Rect::new(0, 0, 100, 40)
+        };
+        let poly = self.poly(&scene);
+        let (img, _) = self
+            .render(&poly, area)
+            .ok_or_else(|| "can't render".to_string())?;
+        let dir = self.dir.join(".views");
+        std::fs::create_dir_all(&dir).map_err(|e| e.to_string())?;
+        let stamp = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map_or(0, |d| d.as_millis());
+        let path = dir.join(format!("view-{stamp}.png"));
+        img.save(&path).map_err(|e| e.to_string())?;
+        // keep the last few
+        let mut old: Vec<PathBuf> = std::fs::read_dir(&dir)
+            .into_iter()
+            .flatten()
+            .filter_map(|e| e.ok().map(|e| e.path()))
+            .filter(|p| p.extension().is_some_and(|x| x == "png"))
+            .collect();
+        old.sort();
+        for p in old.iter().rev().skip(20) {
+            let _ = std::fs::remove_file(p);
+        }
+        Ok(path)
+    }
+
+    /// P: captures the view and attaches it to the next message.
+    fn attach_view(&mut self) {
+        let path = match self.capture_view() {
+            Ok(p) => p,
+            Err(e) => return self.flash(e),
+        };
+        self.full = false;
+        if self.flow {
+            self.view = Some(path);
+            if self.input.is_none() {
+                self.input = Some(Input::default());
+            }
+            self.flash("view attached");
+        } else {
+            let note = format!("{} ", self.view_note(&path));
+            if self.window().type_text(&note) {
+                self.flash("view attached");
+            } else {
+                self.flash("Claude pane not running");
+            }
+        }
+    }
+
+    /// Keys while the prompt line is open: typing, enter sends, esc closes it.
+    fn input_key(&mut self, key: KeyEvent) -> Action {
+        match key.code {
+            KeyCode::Enter => self.send(),
+            KeyCode::Esc => {
+                self.input = None;
+                self.view = None;
+            }
+            _ => {
+                if let Some(i) = self.input.as_mut() {
+                    i.handle_event(&ratatui::crossterm::event::Event::Key(key));
+                }
+            }
+        }
+        Action::None
+    }
+
+    /// The prompt line under the picture: what is being typed, or that Claude is answering.
+    fn draw_prompt(&self, frame: &mut Frame, r: Rect) {
+        let t = &self.theme;
+        if let Some(i) = &self.input {
+            let tag = if self.view.is_some() { "[view] " } else { "" };
+            let lead = 3 + tag.len() as u16;
+            let w = r.width.saturating_sub(lead + 1) as usize;
+            let scroll = i.visual_scroll(w);
+            let line = Line::from(vec![
+                Span::styled(" › ", t.accent()),
+                Span::styled(tag, t.dim()),
+                Span::styled(i.value().chars().skip(scroll).collect::<String>(), t.base()),
+            ]);
+            frame.render_widget(Paragraph::new(line), r);
+            let x = (i.visual_cursor().max(scroll) - scroll) as u16;
+            frame.set_cursor_position((r.x + lead + x.min(r.width.saturating_sub(lead + 1)), r.y));
+        } else if self.talk_ref().busy() {
+            frame.render_widget(Paragraph::new(Line::styled(" … ", t.dim())), r);
+        }
+    }
+
+    /// Lays the chat into the free cells of `area` (`mask`) and draws it.
+    /// Lays the chat into the free cells of `area` (`mask`) and draws it; `img` is where the
+    /// picture is. With the picture on the right the text is one column on the left.
+    fn draw_flow(&self, frame: &mut Frame, area: Rect, img: Rect, mask: &z_flow::Mask) {
+        let paras = self.talk_ref().paras(&self.theme);
+        let slots = if img.x > area.x {
+            z_flow::left_slots(mask)
+        } else {
+            z_flow::slots(mask)
+        };
+        let placed = z_flow::fit(&paras, &slots, self.back);
+        z_flow::draw(frame.buffer_mut(), area, img, &placed);
+    }
+
+    /// Read mode: the chat as one column left of the picture (all of `pic` when the
+    /// picture has no room beside it), the cursor drawn over it.
+    fn draw_read(&mut self, frame: &mut Frame, pic: Rect, img: Rect) {
+        let area = if img.x > pic.x {
+            Rect {
+                width: (img.x - pic.x).saturating_sub(1).max(1),
+                ..pic
+            }
+        } else {
+            pic
+        };
+        let paras = self.talk_ref().paras(&self.theme);
+        let from = (
+            paras.len(),
+            paras.iter().map(|p| p.text.len()).sum::<usize>(),
+            area.width,
+        );
+        let Some(cur) = self.read.as_mut() else { return };
+        if from != self.read_from {
+            let fresh = self.read_from == (0, 0, 0);
+            let at_end = cur.pos.row + 1 >= self.read_rows.len();
+            let rows = z_flow::column(&paras, area.width);
+            let texts: Vec<&str> = rows.iter().map(|(t, _)| t.as_str()).collect();
+            cur.set_rows(&texts);
+            cur.set_height(area.height.max(1) as usize);
+            self.read_rows = rows
+                .into_iter()
+                .map(|(t, st)| Line::styled(t, st))
+                .collect();
+            self.read_from = from;
+            if (fresh || at_end) && !cur.is_visual() {
+                cur.goto_row(self.read_rows.len().saturating_sub(1));
+            }
+        }
+        cur.set_height(area.height.max(1) as usize);
+        let idx = super::lsp::index();
+        let term = Style::default().add_modifier(Modifier::UNDERLINED);
+        let lines: Vec<Line> = cur
+            .visible()
+            .map(|r| {
+                // LSP terms underlined, as in the flowing chat
+                let row = &self.read_rows[r];
+                let text = TextCursor::line_text(row);
+                let mut spans = Vec::new();
+                let mut at = 0;
+                let chars: Vec<char> = text.chars().collect();
+                for h in idx.hits(&text) {
+                    if h.start < at {
+                        continue;
+                    }
+                    spans.push(Span::styled(chars[at..h.start].iter().collect::<String>(), row.style));
+                    spans.push(Span::styled(chars[h.start..h.end].iter().collect::<String>(), row.style.patch(term)));
+                    at = h.end;
+                }
+                spans.push(Span::styled(chars[at..].iter().collect::<String>(), row.style));
+                cur.decorate(r, Line::from(spans), &self.theme)
+            })
+            .collect();
+        frame.render_widget(ratatui::widgets::Clear, area);
+        frame.render_widget(Paragraph::new(lines).style(self.theme.base()), area);
+    }
+
+    /// The LSP term under the read-mode cursor.
+    fn read_term(&self) -> Option<usize> {
+        let cur = self.read.as_ref()?;
+        let text = TextCursor::line_text(self.read_rows.get(cur.pos.row)?);
+        super::lsp::index().at(&text, cur.pos.col).map(|h| h.term)
+    }
+
+    /// `]` / `[`: the cursor to the next (previous) LSP term in the chat, wrapping.
+    fn jump_term(&mut self, forward: bool) {
+        let idx = super::lsp::index();
+        let hits: Vec<(usize, usize, usize)> = self
+            .read_rows
+            .iter()
+            .enumerate()
+            .flat_map(|(r, row)| {
+                let text = TextCursor::line_text(row);
+                idx.hits(&text)
+                    .iter()
+                    .map(|h| (r, h.start, h.term))
+                    .collect::<Vec<_>>()
+            })
+            .collect();
+        let Some(cur) = self.read.as_mut() else { return };
+        let at = (cur.pos.row, cur.pos.col);
+        let pick = if forward {
+            hits.iter().position(|h| (h.0, h.1) > at).or((!hits.is_empty()).then_some(0))
+        } else {
+            hits.iter().rposition(|h| (h.0, h.1) < at).or(hits.len().checked_sub(1))
+        };
+        let Some(i) = pick else {
+            self.flash("no terms in the chat");
+            return;
+        };
+        let (r, c, t) = hits[i];
+        cur.goto(r, c);
+        let name = &idx.terms[t].term;
+        self.flash(format!("term {}/{} · {name}", i + 1, hits.len()));
+    }
+
+    /// Read mode's status in the prompt row.
+    fn draw_read_status(&self, frame: &mut Frame, r: Rect) {
+        if self.input.is_some() {
+            return self.draw_prompt(frame, r);
+        }
+        let Some(cur) = &self.read else { return };
+        let t = &self.theme;
+        let mut parts = vec!["-- READ --".to_string()];
+        parts.extend(cur.status());
+        parts.extend(cur.search_status());
+        let total = self.read_rows.len().max(1);
+        parts.push(format!("{}%", (cur.pos.row + 1).min(total) * 100 / total));
+        frame.render_widget(Paragraph::new(Line::styled(parts.join("  "), t.dim())), r);
+    }
+
+    /// Keys in read mode: the cursor's first; what it leaves goes to a few chat keys.
+    fn read_key(&mut self, key: KeyEvent) -> Action {
+        let Some(cur) = self.read.as_mut() else {
+            return Action::None;
+        };
+        if !cur.takes_text() && matches!(key.code, KeyCode::Char('R' | 'q')) {
+            self.read = None;
+            return Action::None;
+        }
+        // gd / gr: the LSP's go-to pairs, ahead of the cursor's own g pairs
+        if let KeyCode::Char(c @ ('d' | 'r')) = key.code {
+            if cur.take_prefix_if('g') {
+                let Some(i) = self.read_term() else {
+                    self.flash("no term under the cursor");
+                    return Action::None;
+                };
+                let t = &super::lsp::index().terms[i];
+                return match (&t.node, c) {
+                    (Some(node), 'd') => Action::Route(crate::app::Route::Screen {
+                        screen: "diagrams".into(),
+                        arg: Some(format!("node:{node}")),
+                    }),
+                    (None, 'd') => {
+                        self.terms_menu = Some((vec![i], 0));
+                        self.flash("no diagram for this term yet (R for references)");
+                        Action::None
+                    }
+                    _ => Action::Route(crate::app::Route::Screen {
+                        screen: "search".into(),
+                        arg: Some(super::lsp::refs_query(t)),
+                    }),
+                };
+            }
+        }
+        if let KeyCode::Char(c @ (']' | '[')) = key.code {
+            if !cur.takes_text() && !cur.pending() {
+                self.jump_term(c == ']');
+                return Action::None;
+            }
+        }
+        if key.code == KeyCode::Char('K') && !cur.takes_text() {
+            match self.read_term() {
+                Some(i) => self.terms_menu = Some((vec![i], 0)),
+                None => self.flash("no term under the cursor"),
+            }
+            return Action::None;
+        }
+        match cur.on_key(key) {
+            Outcome::Handled => return Action::None,
+            Outcome::Yank(text) => return Action::Copy(text),
+            Outcome::Unhandled => {}
+        }
+        match key.code {
+            KeyCode::Esc => self.read = None,
+            // asking, stopping, the mode and the menu still work from here
+            KeyCode::Char('C' | 'i' | 's' | 'M' | 'f' | 'o') | KeyCode::Enter => {
+                return self.browse_key(key);
+            }
+            _ => {}
+        }
+        Action::None
+    }
+
+    /// Where the picture goes in `pic`: the right part while the chat flows (the text reads
+    /// down the left), all of it otherwise or when the canvas is too narrow to split.
+    fn picture_rect(&self, pic: Rect) -> Rect {
+        if !self.flowing() || pic.width < 80 {
+            return pic;
+        }
+        let left = (pic.width * 2 / 5).clamp(30, 80);
+        Rect {
+            x: pic.x + left,
+            width: pic.width - left,
+            ..pic
+        }
+    }
+
+    /// Whether the chat flows around the picture right now.
+    fn flowing(&self) -> bool {
+        self.flow && !self.full
     }
 
     fn flash(&mut self, msg: impl Into<String>) {
@@ -463,6 +918,221 @@ impl Z {
         Action::None
     }
 
+    /// The scene as the renderer takes it, without the labels the user turned off.
+    fn poly(&self, scene: &Scene) -> poly3d::SpecScene {
+        let mut p = z_spec::to_poly(scene);
+        let off = |n: &mut Option<String>| {
+            if n.as_ref().is_some_and(|s| self.hidden.contains(s)) {
+                *n = None;
+            }
+        };
+        p.parts.iter_mut().for_each(|x| off(&mut x.name));
+        p.flows.iter_mut().for_each(|x| off(&mut x.name));
+        p
+    }
+
+    /// Every label the 3D picture can show, once each, in the order they are drawn.
+    fn label_names(&self) -> Vec<String> {
+        let Some((_, art, Some(scene), ..)) = self.current() else {
+            return Vec::new();
+        };
+        if self.art_first && !art.is_empty() {
+            return Vec::new();
+        }
+        let p = z_spec::to_poly(scene);
+        let mut out: Vec<String> = Vec::new();
+        let names = p
+            .parts
+            .iter()
+            .map(|x| &x.name)
+            .chain(p.flows.iter().map(|x| &x.name));
+        for n in names.flatten() {
+            if !out.contains(n) {
+                out.push(n.clone());
+            }
+        }
+        out
+    }
+
+    /// Keys while the labels menu (D) is open.
+    fn labels_key(&mut self, key: KeyEvent) -> Action {
+        let Some(sel) = self.labels_menu else {
+            return Action::None;
+        };
+        let names = self.label_names();
+        let last = names.len().saturating_sub(1);
+        match key.code {
+            KeyCode::Esc | KeyCode::Char('D') | KeyCode::Char('q') => self.labels_menu = None,
+            KeyCode::Up | KeyCode::Char('k') => self.labels_menu = Some(sel.saturating_sub(1)),
+            KeyCode::Down | KeyCode::Char('j') => self.labels_menu = Some((sel + 1).min(last)),
+            KeyCode::Char('g') => self.labels_menu = Some(0),
+            KeyCode::Char('G') => self.labels_menu = Some(last),
+            KeyCode::Char(' ') | KeyCode::Enter | KeyCode::Char('x') => {
+                if let Some(n) = names.get(sel) {
+                    if !self.hidden.remove(n) {
+                        self.hidden.insert(n.clone());
+                    }
+                }
+            }
+            KeyCode::Char('a') => {
+                if names.iter().all(|n| self.hidden.contains(n)) {
+                    self.hidden.clear();
+                } else {
+                    self.hidden.extend(names);
+                }
+            }
+            _ => {}
+        }
+        Action::None
+    }
+
+    /// L: hides every label, or shows them all again when they are all hidden.
+    fn toggle_all_labels(&mut self) {
+        let names = self.label_names();
+        if names.is_empty() {
+            self.flash("no labels on this picture");
+        } else if names.iter().all(|n| self.hidden.contains(n)) {
+            self.hidden.clear();
+        } else {
+            self.hidden.extend(names);
+        }
+    }
+
+    /// o: the LSP terms the chat mentions, newest reply first, once each.
+    fn open_terms(&mut self) {
+        let idx = super::lsp::index();
+        let mut seen: Vec<usize> = Vec::new();
+        for (_, text) in self.talk_ref().log.iter().rev() {
+            for line in text.lines() {
+                for h in idx.hits(line) {
+                    if !seen.contains(&h.term) {
+                        seen.push(h.term);
+                    }
+                }
+            }
+        }
+        if seen.is_empty() {
+            self.flash("no known terms in the chat yet");
+        } else {
+            self.terms_menu = Some((seen, 0));
+        }
+    }
+
+    /// Keys while the terms menu (o) is open: ↵ goes to the term's diagram, R to its references.
+    fn terms_key(&mut self, key: KeyEvent) -> Action {
+        let Some((list, sel)) = self.terms_menu.as_mut() else {
+            return Action::None;
+        };
+        let last = list.len().saturating_sub(1);
+        let term = list.get(*sel).copied();
+        match key.code {
+            KeyCode::Esc | KeyCode::Char('o') | KeyCode::Char('q') => self.terms_menu = None,
+            KeyCode::Char('j') | KeyCode::Down => *sel = (*sel + 1).min(last),
+            KeyCode::Char('k') | KeyCode::Up => *sel = sel.saturating_sub(1),
+            KeyCode::Enter => {
+                let Some(i) = term else { return Action::None };
+                match &super::lsp::index().terms[i].node {
+                    Some(node) => {
+                        self.terms_menu = None;
+                        return Action::Route(crate::app::Route::Screen {
+                            screen: "diagrams".into(),
+                            arg: Some(format!("node:{node}")),
+                        });
+                    }
+                    None => self.flash("no diagram for this term yet (R for references)"),
+                }
+            }
+            KeyCode::Char('R') => {
+                if let Some(i) = term {
+                    self.terms_menu = None;
+                    return Action::Route(crate::app::Route::Screen {
+                        screen: "search".into(),
+                        arg: Some(super::lsp::refs_query(&super::lsp::index().terms[i])),
+                    });
+                }
+            }
+            _ => {}
+        }
+        Action::None
+    }
+
+    /// The o menu: each term with its diagram and how many filings mention it.
+    fn draw_terms_menu(&self, frame: &mut Frame, area: Rect) {
+        let Some((list, sel)) = &self.terms_menu else { return };
+        let t = &self.theme;
+        let idx = super::lsp::index();
+        let rows: Vec<String> = list
+            .iter()
+            .map(|&i| {
+                let term = &idx.terms[i];
+                let node = term.node.as_deref().unwrap_or("no diagram");
+                let docs = if term.docs > 0 {
+                    format!(" · {} filings", term.docs)
+                } else {
+                    String::new()
+                };
+                format!("{} · {node}{docs}", term.term)
+            })
+            .collect();
+        let w = rows.iter().map(|r| r.chars().count()).max().unwrap_or(0) as u16 + 6;
+        let r = popup(area, w.clamp(40, 80), rows.len() as u16 + 2);
+        Clear.render(r, frame.buffer_mut());
+        let items: Vec<ListItem> = rows.into_iter().map(ListItem::new).collect();
+        let list = List::new(items)
+            .block(
+                Block::bordered()
+                    .border_style(t.accent())
+                    .title(" terms · ↵ diagram · R references · esc "),
+            )
+            .highlight_style(t.selected().add_modifier(Modifier::BOLD))
+            .highlight_symbol("▌ ");
+        let mut state = ListState::default().with_selected(Some(*sel));
+        StatefulWidget::render(list, r, frame.buffer_mut(), &mut state);
+    }
+
+    /// D: opens the labels menu when the 3D picture is up.
+    fn open_labels(&mut self) {
+        if self.label_names().is_empty() {
+            self.flash("no labels on this picture");
+        } else {
+            self.labels_menu = Some(0);
+        }
+    }
+
+    /// The D menu: every label on the picture with whether it shows.
+    fn draw_labels_menu(&self, frame: &mut Frame, area: Rect) {
+        let Some(sel) = self.labels_menu else { return };
+        let t = &self.theme;
+        let names = self.label_names();
+        if names.is_empty() {
+            return;
+        }
+        let w = names.iter().map(|n| n.chars().count()).max().unwrap_or(0) as u16 + 12;
+        let r = popup(area, w.clamp(40, 70), names.len() as u16 + 2);
+        Clear.render(r, frame.buffer_mut());
+        let block = Block::bordered()
+            .title(" labels · space toggle · a all · esc close ")
+            .border_style(t.accent())
+            .style(t.base());
+        let inner = block.inner(r);
+        frame.render_widget(block, r);
+        let items: Vec<ListItem> = names
+            .iter()
+            .map(|n| {
+                let on = !self.hidden.contains(n);
+                ListItem::new(Line::from(vec![
+                    Span::styled(if on { "[x] " } else { "[ ] " }, t.accent()),
+                    Span::styled(n.clone(), if on { t.title() } else { t.dim() }),
+                ]))
+            })
+            .collect();
+        let list = List::new(items)
+            .highlight_style(t.selected().add_modifier(Modifier::BOLD))
+            .highlight_symbol("▌ ");
+        let mut state = ListState::default().with_selected(Some(sel.min(names.len() - 1)));
+        StatefulWidget::render(list, inner, frame.buffer_mut(), &mut state);
+    }
+
     /// The f menu: every diagram in the folder, one line each. The active one is marked; a
     /// file that does not parse is shown with its file name and a cross.
     fn draw_menu(&self, frame: &mut Frame, area: Rect) {
@@ -525,6 +1195,8 @@ impl Z {
                 if !keep {
                     self.scroll = 0;
                     self.art_first = false;
+                    self.hidden.clear();
+                    self.labels_menu = None;
                     self.camera =
                         camera_view(d.scene.as_ref().and_then(|s| s.camera).unwrap_or_default());
                 }
@@ -588,7 +1260,8 @@ impl Z {
         }
     }
 
-    fn render(&mut self, scene: &poly3d::SpecScene, area: Rect) -> Option<RgbaImage> {
+    /// The picture for `area`, and how many of its pixels make one cell.
+    fn render(&mut self, scene: &poly3d::SpecScene, area: Rect) -> Option<(RgbaImage, (f64, f64))> {
         let picker = self.picker.as_ref()?;
         let font = picker.font_size();
         let (mut w, mut h) = (
@@ -603,7 +1276,21 @@ impl Z {
         let phase = self.start.elapsed().as_secs_f64() / FLOW_SECS;
         let img = poly3d::render_spec(scene, &self.camera, phase, w as usize, h as usize, BG);
         poly3d::set_user_marks(Vec::new());
-        Some(img)
+        let cell = (font.width as f64 * k, font.height as f64 * k);
+        Some((img, cell))
+    }
+
+    /// What the picture looks like apart from its animation: changes when the text must re-wrap.
+    fn geom_key(&self, area: Rect) -> u64 {
+        use std::hash::{Hash, Hasher};
+        let mut hs = std::collections::hash_map::DefaultHasher::new();
+        self.active.hash(&mut hs);
+        self.cur().map(|i| self.files[i].mtime).hash(&mut hs);
+        for v in [self.camera.yaw, self.camera.pitch, self.camera.zoom] {
+            ((v * 1000.0).round() as i64).hash(&mut hs);
+        }
+        (area, self.art_first, &self.hidden).hash(&mut hs);
+        hs.finish()
     }
 
     fn picture_key(&self, area: Rect) -> u64 {
@@ -617,7 +1304,7 @@ impl Z {
         if self.animating() {
             (self.start.elapsed().as_millis() / FRAME.as_millis()).hash(&mut hs);
         }
-        (area.width, area.height).hash(&mut hs);
+        (area.width, area.height, &self.hidden).hash(&mut hs);
         hs.finish()
     }
 
@@ -625,20 +1312,23 @@ impl Z {
         if area.width < 4 || area.height < 2 {
             return;
         }
+        self.pic_area = area;
         let key = (
             self.picture_key(area),
             area.width as u32,
             area.height as u32,
         );
         if self.shown.as_ref().is_none_or(|s| s.key != key) {
-            let poly = z_spec::to_poly(scene);
-            if let Some(img) = self.render(&poly, area) {
+            let poly = self.poly(scene);
+            if let Some((img, cell)) = self.render(&poly, area) {
                 let id = IMAGE_IDS[(self.frames % 2) as usize];
                 self.frames += 1;
+                let mask = z_flow::image_mask(&img, cell, area.width, area.height, BG);
                 if let Some(p) = self.picker.as_ref() {
                     self.shown = Some(Shown {
                         key,
                         proto: protocol(p, DynamicImage::ImageRgba8(img), id),
+                        mask,
                     });
                 }
             }
@@ -725,7 +1415,19 @@ impl Z {
             for e in &self.errors {
                 lines.push(Line::styled(format!("  {e}"), t.down()));
             }
-            frame.render_widget(Paragraph::new(lines).style(t.base()), inner);
+            let flowing = self.flowing();
+            let [body, prompt] =
+                Layout::vertical([Constraint::Min(1), Constraint::Length(u16::from(flowing))])
+                    .areas(inner);
+            frame.render_widget(Paragraph::new(lines).style(t.base()), body);
+            if flowing && self.read.is_some() {
+                self.draw_read(frame, body, body);
+                self.draw_read_status(frame, prompt);
+            } else if flowing {
+                let mask = z_flow::buffer_mask(frame.buffer_mut(), body);
+                self.draw_flow(frame, body, body, &mask);
+                self.draw_prompt(frame, prompt);
+            }
             return;
         };
         let (art, scene, caption) = (art.to_vec(), scene.cloned(), caption.to_string());
@@ -736,10 +1438,11 @@ impl Z {
         } else {
             (inner.height / 4).max(3)
         };
-        let [pic, cap, body] = Layout::vertical([
+        let [pic, cap, body, prompt] = Layout::vertical([
             Constraint::Min(3),
             Constraint::Length(u16::from(!caption.is_empty())),
             Constraint::Length(text_h),
+            Constraint::Length(u16::from(self.flowing())),
         ])
         .areas(inner);
 
@@ -753,11 +1456,40 @@ impl Z {
                 .map(|r| unicode_width::UnicodeWidthStr::width(r.as_str()))
                 .max()
                 .unwrap_or(0) as u16;
-            let x = pic.x + pic.width.saturating_sub(w) / 2;
-            let r = Rect::new(x, y, w.min(pic.width), h.min(pic.height));
+            let room = self.picture_rect(pic);
+            let x = room.x + room.width.saturating_sub(w) / 2;
+            let r = Rect::new(x, y, w.min(room.width), h.min(room.height));
             frame.render_widget(Paragraph::new(lines).style(t.base()), r);
+            if self.flowing() && self.read.is_some() {
+                self.draw_read(frame, pic, room);
+            } else if self.flowing() {
+                let mask = z_flow::buffer_mask(frame.buffer_mut(), pic);
+                self.draw_flow(frame, pic, room, &mask);
+            }
         } else if let Some(s) = &scene {
-            self.draw_picture(frame, pic, s);
+            let img = self.picture_rect(pic);
+            let reading = self.flowing() && self.read.is_some();
+            if !(reading && img == pic) {
+                self.draw_picture(frame, img, s);
+            }
+            if reading {
+                self.draw_read(frame, pic, img);
+            } else if self.flowing() {
+                let geom = self.geom_key(img);
+                let latest = self
+                    .shown
+                    .as_ref()
+                    .map(|s| s.mask.placed_in(pic.width, pic.height, img.x - pic.x));
+                if let Some(latest) = latest {
+                    let mask = self.settle.update(&latest, geom).clone();
+                    self.draw_flow(frame, pic, img, &mask);
+                }
+            }
+        }
+        if self.flowing() && self.read.is_some() {
+            self.draw_read_status(frame, prompt);
+        } else if self.flowing() {
+            self.draw_prompt(frame, prompt);
         }
         if !caption.is_empty() {
             frame.render_widget(
@@ -789,6 +1521,9 @@ impl Z {
         match key.code {
             KeyCode::Char('d') if ctrl => self.scroll = self.scroll.saturating_add(8),
             KeyCode::Char('u') if ctrl => self.scroll = self.scroll.saturating_sub(8),
+            // Esc never stops Claude's reply: leaving keeps it going in the background
+            // (Talk's drop), and s stops it.
+            KeyCode::Char('s') if self.flow && self.talk_ref().busy() => self.talk().cancel(),
             KeyCode::Esc | KeyCode::Char('q') => {
                 if self.full {
                     self.full = false;
@@ -798,7 +1533,24 @@ impl Z {
             }
             KeyCode::Char('C') | KeyCode::Char('i') | KeyCode::Enter => {
                 self.full = false;
-                self.window().show();
+                if self.flow {
+                    self.input = Some(Input::default());
+                } else {
+                    self.window().show();
+                }
+            }
+            KeyCode::Char('t') => {
+                self.flow = !self.flow;
+                self.input = None;
+                if !self.flow {
+                    self.window().open = true;
+                    self.window().focus = false;
+                }
+                self.flash(if self.flow {
+                    "chat around the picture"
+                } else {
+                    "Claude Code pane"
+                });
             }
             KeyCode::Char('M') => {
                 let i = MODES.iter().position(|m| *m == self.mode).unwrap_or(0);
@@ -823,13 +1575,27 @@ impl Z {
             KeyCode::Char('0') => self.reset_camera(),
             KeyCode::Char('F') => self.full = !self.full,
             KeyCode::Char('p') => self.paused = !self.paused,
+            KeyCode::Char('P') => self.attach_view(),
+            KeyCode::Char('D') => self.open_labels(),
+            KeyCode::Char('L') => self.toggle_all_labels(),
+            KeyCode::Char('o') => self.open_terms(),
             KeyCode::Char('v') => {
                 self.art_first = !self.art_first;
                 self.shown = None;
             }
+            KeyCode::Char('J') if self.flowing() => self.back = self.back.saturating_sub(1),
+            KeyCode::Char('K') if self.flowing() => {
+                let n = self.talk_ref().paras(&self.theme).len();
+                self.back = (self.back + 1).min(n.saturating_sub(1));
+            }
             KeyCode::Char('J') => self.scroll = self.scroll.saturating_add(1),
             KeyCode::Char('K') => self.scroll = self.scroll.saturating_sub(1),
             KeyCode::Char('r') => self.reload(true),
+            KeyCode::Char('R') if self.flowing() => {
+                self.read = Some(TextCursor::skipping_blanks());
+                self.read_from = (0, 0, 0);
+            }
+            KeyCode::Char('R') => self.flash("read mode needs the chat around the picture (t)"),
             _ => {}
         }
         Action::None
@@ -860,6 +1626,8 @@ fn protocol(picker: &Picker, img: DynamicImage, id: u32) -> StatefulProtocol {
 
 const KEYS: &[Key] = &[
     key("C/i/↵", "ask Claude"),
+    key("t", "chat around the picture / Claude Code pane"),
+    key("s", "stop Claude's reply (esc leaves it running)"),
     key("M", "mode"),
     key("f", "diagrams menu"),
     key("b/⌫", "back"),
@@ -871,7 +1639,13 @@ const KEYS: &[Key] = &[
     key("v", "art"),
     key("F", "full screen"),
     key("p", "pause / resume"),
-    key("J/K", "scroll"),
+    key("P", "send Claude a picture of this view"),
+    key("D", "labels menu: hide / show each label"),
+    key("L", "hide / show all labels"),
+    key("o", "terms in the chat (underlined): ↵ diagram, R references, esc close"),
+    key("R", "in the terms menu: every filing that mentions it"),
+    key("R", "read mode: vim cursor over the chat, / n N search (R/q/esc leave)"),
+    key("J/K", "scroll (the chat, or errors)"),
     key("^d/^u", "scroll 8 lines"),
     key("g/G", "first / last diagram"),
     key("r", "reload"),
@@ -879,12 +1653,26 @@ const KEYS: &[Key] = &[
     key("q/esc", "quit"),
 ];
 
+/// Read mode's own keys, ahead of the cursor's.
+const READ_KEYS: &[Key] = &[
+    key("R/q/esc", "leave read mode"),
+    key("C/i/↵", "ask Claude"),
+    key("s", "stop Claude's reply"),
+    key("M", "mode"),
+    key("f", "diagrams menu"),
+    key("gd", "go to definition: the diagram for the term under the cursor"),
+    key("gr", "references: every filing that mentions it"),
+    key("] [", "next / previous term (underlined word)"),
+    key("K", "the term's card (↵ diagram, R references)"),
+    key("o", "terms in the chat (underlined)"),
+];
+
 impl Screen for Z {
     fn draw(&mut self, frame: &mut Frame) {
         let area = frame.area();
         frame.render_widget(Block::new().style(self.theme.base()), area);
         // The hero picture on top, Claude under it, always on screen; F gives the picture all of it.
-        if !self.full {
+        if !self.full && !self.flow {
             let [top, chat] =
                 Layout::vertical([Constraint::Min(10), Constraint::Percentage(30)]).areas(area);
             self.draw_canvas(frame, top);
@@ -895,19 +1683,36 @@ impl Screen for Z {
             self.draw_canvas(frame, area);
         }
         self.draw_menu(frame, area);
+        self.draw_labels_menu(frame, area);
+        self.draw_terms_menu(frame, area);
         self.write_state();
     }
 
     fn help(&self) -> Help {
+        if self.read.is_some() && self.flowing() {
+            return Help::new("z read mode", &[READ_KEYS, text_cursor::KEYS].concat());
+        }
         Help::new("z", KEYS)
     }
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
+        if self.terms_menu.is_some() {
+            return self.terms_key(key);
+        }
+        if self.labels_menu.is_some() {
+            return self.labels_key(key);
+        }
         if self.menu.is_some() {
             return self.menu_key(key);
         }
+        if self.input.is_some() {
+            return self.input_key(key);
+        }
+        if self.read.is_some() && self.flowing() {
+            return self.read_key(key);
+        }
         let w = self.window_ref();
-        if w.open && w.focus {
+        if !self.flow && w.open && w.focus {
             self.window().key(key);
             return Action::None;
         }
@@ -919,11 +1724,14 @@ impl Screen for Z {
             self.last_watch = Instant::now();
             self.watch(false);
         }
+        for t in &mut self.talks {
+            t.poll();
+        }
         Action::None
     }
 
     fn poll_interval(&self) -> Duration {
-        if self.animating() {
+        if self.animating() || self.talk_ref().busy() || self.settle.pending() {
             FRAME
         } else {
             Duration::from_millis(100)
@@ -931,7 +1739,7 @@ impl Screen for Z {
     }
 
     fn leader_ok(&self) -> bool {
-        !(self.window_ref().open && self.window_ref().focus) && self.menu.is_none()
+        !self.takes_text() && self.menu.is_none()
     }
 
     fn shows_tape(&self) -> bool {
@@ -939,8 +1747,10 @@ impl Screen for Z {
     }
 
     fn takes_text(&self) -> bool {
-        // typing goes to the Claude window while it has focus
-        self.window_ref().open && self.window_ref().focus
+        // typing goes to the prompt line, or to the Claude window while it has focus
+        self.input.is_some()
+            || self.read.as_ref().is_some_and(TextCursor::takes_text)
+            || (!self.flow && self.window_ref().open && self.window_ref().focus)
     }
 
     fn flash_text(&self) -> Option<&str> {
@@ -952,6 +1762,10 @@ impl Screen for Z {
 
     fn set_flash(&mut self, msg: String) {
         self.flash(msg);
+    }
+
+    fn take_selection(&mut self) -> Option<String> {
+        self.read.as_mut()?.take_selection()
     }
 }
 
@@ -989,6 +1803,19 @@ mod tests {
             frames: 0,
             last_state: String::new(),
             flash: None,
+            flow: true,
+            talks: MODES.iter().map(|_| Talk::new()).collect(),
+            input: None,
+            back: 0,
+            settle: Settle::default(),
+            view: None,
+            pic_area: Rect::default(),
+            hidden: BTreeSet::new(),
+            labels_menu: None,
+            terms_menu: None,
+            read: None,
+            read_rows: Vec::new(),
+            read_from: (0, 0, 0),
         };
         z.watch(true);
         z
@@ -1191,6 +2018,199 @@ mod tests {
             serde_json::from_str(&std::fs::read_to_string(dir.join("state.json")).unwrap())
                 .unwrap();
         assert_eq!(state["title"], "Stack");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn read_mode_puts_a_vim_cursor_and_search_on_the_chat() {
+        use super::z_flow::Role;
+        let dir = tmp("read");
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
+        let mut z = screen(&dir);
+        z.talk().log.push((Role::User, "what is a wafer".into()));
+        z.talk().log.push((Role::Claude, "A wafer is a thin slice.\n\nWafers are cut from an ingot.".into()));
+        let mut term = Terminal::new(TestBackend::new(120, 40)).unwrap();
+        z.on_key(key('R'));
+        term.draw(|f| z.draw(f)).unwrap();
+        let yaw = z.camera.yaw;
+        let end = z.read.as_ref().unwrap().pos.row;
+        assert!(end > 0, "starts on the newest line");
+        z.on_key(key('g'));
+        z.on_key(key('g'));
+        assert_eq!(z.read.as_ref().unwrap().pos.row, 0);
+        // j/k move the cursor, never the camera
+        z.on_key(key('j'));
+        z.on_key(key('l'));
+        assert_eq!(z.camera.yaw, yaw);
+        z.on_key(key('/'));
+        assert!(z.takes_text());
+        for c in "ingot".chars() {
+            z.on_key(key(c));
+        }
+        z.on_key(code(KeyCode::Enter));
+        assert_eq!(z.read.as_ref().unwrap().pos.row, end);
+        term.draw(|f| z.draw(f)).unwrap();
+        z.on_key(code(KeyCode::Esc));
+        assert!(z.read.is_none());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn read_mode_keeps_the_lsp() {
+        use super::z_flow::Role;
+        let dir = tmp("readlsp");
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
+        let mut z = screen(&dir);
+        z.talk().log.push((Role::Claude, "Our HBM revenue grew.".into()));
+        let mut term = Terminal::new(TestBackend::new(120, 40)).unwrap();
+        z.on_key(key('R'));
+        term.draw(|f| z.draw(f)).unwrap();
+        // HBM is drawn underlined
+        let buf = term.backend().buffer().clone();
+        let underlined = buf.content().iter().any(|c| {
+            c.symbol() == "H" && c.modifier.contains(Modifier::UNDERLINED)
+        });
+        assert!(underlined, "terms underlined in read mode");
+        z.on_key(key('0'));
+        z.on_key(key('w'));
+        z.on_key(key('g'));
+        assert_eq!(
+            z.on_key(key('d')),
+            Action::Route(crate::app::Route::Screen {
+                screen: "diagrams".into(),
+                arg: Some("node:MEM_HBM_STACK".into())
+            })
+        );
+        z.on_key(key('g'));
+        assert_eq!(
+            z.on_key(key('r')),
+            Action::Route(crate::app::Route::Screen {
+                screen: "search".into(),
+                arg: Some("HBM".into())
+            })
+        );
+        // ] / [ walk the terms, wrapping
+        z.talk().log.push((Role::Claude, "Then CoWoS and HBM again.".into()));
+        term.draw(|f| z.draw(f)).unwrap();
+        z.on_key(key('g'));
+        z.on_key(key('g'));
+        let mut seen = Vec::new();
+        for _ in 0..4 {
+            z.on_key(key(']'));
+            let c = z.read.as_ref().unwrap();
+            seen.push((c.pos.row, c.pos.col));
+        }
+        assert_eq!(seen[0], seen[3], "wraps after 3 terms: {seen:?}");
+        z.on_key(key('['));
+        assert_eq!(seen[2], { let c = z.read.as_ref().unwrap(); (c.pos.row, c.pos.col) });
+        z.on_key(key('f'));
+        z.on_key(key(']'));
+        z.on_key(key('K'));
+        assert!(z.terms_menu.is_some());
+        z.on_key(code(KeyCode::Esc));
+        assert!(z.terms_menu.is_none() && z.read.is_some(), "esc closes the card, stays reading");
+        z.on_key(key('o'));
+        assert!(z.terms_menu.is_some());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn shift_p_attaches_a_picture_of_the_view_to_the_next_message() {
+        let dir = tmp("view");
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
+        let mut z = screen(&dir);
+        let mut term = Terminal::new(TestBackend::new(100, 40)).unwrap();
+        term.draw(|f| z.draw(f)).unwrap();
+        z.on_key(key('l'));
+        z.on_key(key('P'));
+        let path = z.view.clone().expect("view attached");
+        assert!(path.starts_with(dir.join(".views")), "{path:?}");
+        let img = image::open(&path).unwrap();
+        assert!(img.width() > 8 && img.height() > 8);
+        assert!(z.input.is_some(), "prompt opens to say something with it");
+        let note = z.view_note(&path);
+        assert!(note.contains(&path.display().to_string()) && note.contains("yaw"));
+        // esc drops the attachment with the prompt
+        z.on_key(code(KeyCode::Esc));
+        assert!(z.view.is_none() && z.input.is_none());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn esc_never_interrupts_claudes_reply() {
+        let dir = tmp("esc");
+        let mut z = screen(&dir);
+        let _tx = z.talk().fake_busy();
+        // esc in the prompt line only closes it; the reply keeps going
+        z.on_key(key('C'));
+        z.on_key(code(KeyCode::Esc));
+        assert!(z.input.is_none());
+        assert!(z.talk_ref().busy());
+        // s stops it
+        z.on_key(key('s'));
+        assert!(!z.talk_ref().busy());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn leaving_mid_reply_lets_it_finish_and_coming_back_picks_it_up() {
+        let dir = tmp("away");
+        use super::super::chat::Ev;
+        let file = dir.join(".chat-chat.json");
+        let mut t = Talk::kept(file.clone());
+        let tx = t.fake_busy();
+        tx.send(Ev::Text("drawing the".into())).unwrap();
+        t.poll();
+        drop(t); // the screen closed: the reply is not killed
+        tx.send(Ev::Text(" chip".into())).unwrap();
+        let mut back = Talk::kept(file.clone());
+        assert!(back.busy(), "still running when the screen opens again");
+        back.poll();
+        let said = back.log.iter().any(|(_, s)| s.contains("drawing the chip"));
+        assert!(said, "{:?}", back.log);
+        tx.send(Ev::Done).unwrap();
+        back.poll();
+        assert!(!back.busy());
+        let saved = std::fs::read_to_string(&file).unwrap();
+        assert!(saved.contains("drawing the chip"), "{saved}");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn d_menu_hides_and_shows_each_label() {
+        let dir = tmp("labels");
+        std::fs::write(dir.join("01-stack.json"), SCENE).unwrap();
+        let mut z = screen(&dir);
+        assert_eq!(z.label_names(), ["base", "post", "current"]);
+        z.on_key(key('D'));
+        assert_eq!(z.labels_menu, Some(0));
+        // menu keys stay in the menu: j moves, it does not turn the camera
+        let yaw = z.camera.yaw;
+        z.on_key(key('j'));
+        assert_eq!(z.camera.yaw, yaw);
+        z.on_key(key(' '));
+        assert!(z.hidden.contains("post"));
+        let poly = z.poly(z.diagram.as_ref().unwrap().scene.as_ref().unwrap());
+        let shown: Vec<_> = poly.parts.iter().filter_map(|p| p.name.clone()).collect();
+        assert_eq!(shown, ["base"]);
+        // the menu draws, listing the off label unticked
+        let mut term = Terminal::new(TestBackend::new(100, 40)).unwrap();
+        term.draw(|f| z.draw(f)).unwrap();
+        let s: String = term
+            .backend()
+            .buffer()
+            .content()
+            .iter()
+            .map(|c| c.symbol())
+            .collect();
+        assert!(s.contains("[ ] post") && s.contains("[x] base"), "{s}");
+        // a: all off, a again: all on
+        z.on_key(key('a'));
+        assert_eq!(z.hidden.len(), 3);
+        z.on_key(key('a'));
+        assert!(z.hidden.is_empty());
+        z.on_key(code(KeyCode::Esc));
+        assert!(z.labels_menu.is_none());
         let _ = std::fs::remove_dir_all(&dir);
     }
 

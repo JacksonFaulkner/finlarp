@@ -100,8 +100,49 @@ pub fn open(text: Option<&str>) -> io::Result<()> {
         Some(t) => tmux(&["send-keys", "-t", SESSION, "-l", t])?,
         None => {}
     }
+    show(SESSION)
+}
+
+/// Resumes Claude session `id` (from the `L` screen) in a popup of its own: a detached
+/// tmux session `finlarp-claude-<id prefix>` on the Claude server, started in `cwd`
+/// with `claude --resume` unless it already runs.
+pub fn resume(id: &str, cwd: &str) -> io::Result<()> {
+    if id.is_empty() || !id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-') {
+        return Err(io::Error::other("bad session id"));
+    }
+    let name = format!("{SESSION}-{}", &id[..id.len().min(8)]);
+    let exists = server()
+        .args(["has-session", "-t", &name])
+        .status()?
+        .success();
+    if !exists {
+        let dir = if cwd.is_empty() {
+            env::current_dir()?.to_string_lossy().into_owned()
+        } else {
+            cwd.to_string()
+        };
+        let claude = format!("claude --resume {id}");
+        tmux(&[
+            "new-session",
+            "-d",
+            "-s",
+            &name,
+            "-c",
+            &dir,
+            "-e",
+            "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1",
+            &claude,
+        ])?;
+        source_keys()?;
+    }
+    show(&name)
+}
+
+/// Brings tmux session `session` (on the Claude server) up: a popup inside tmux, the
+/// whole terminal outside it.
+fn show(session: &str) -> io::Result<()> {
     if env::var_os("TMUX").is_none() {
-        return attach_here();
+        return attach_here(session);
     }
     // Popup targets the pane fl runs in, so it lands on the right client.
     let mut args = vec![
@@ -119,7 +160,7 @@ pub fn open(text: Option<&str>) -> io::Result<()> {
         args.extend(["-t", p]);
     }
     // The popup inherits TMUX from the server; unset it so attach nests cleanly.
-    let attach = format!("env -u TMUX tmux -L {SOCKET} attach -t {SESSION}");
+    let attach = format!("env -u TMUX tmux -L {SOCKET} attach -t {session}");
     args.push(&attach);
     let status = Command::new("tmux").args(&args).status()?;
     if status.success() {
@@ -132,7 +173,7 @@ pub fn open(text: Option<&str>) -> io::Result<()> {
 /// No outer tmux: hand the terminal to `tmux attach` until the session
 /// detaches, then take it back. The caller clears the terminal so the next
 /// draw repaints everything.
-fn attach_here() -> io::Result<()> {
+fn attach_here(session: &str) -> io::Result<()> {
     use ratatui::crossterm::execute;
     use ratatui::crossterm::terminal::{
         EnterAlternateScreen, LeaveAlternateScreen, disable_raw_mode, enable_raw_mode,
@@ -140,7 +181,7 @@ fn attach_here() -> io::Result<()> {
     let mut out = io::stdout();
     execute!(out, LeaveAlternateScreen)?;
     disable_raw_mode()?;
-    let status = server().args(["attach", "-t", SESSION]).status();
+    let status = server().args(["attach", "-t", session]).status();
     enable_raw_mode()?;
     execute!(out, EnterAlternateScreen)?;
     if status?.success() {
@@ -161,6 +202,9 @@ fn ensure_session() -> io::Result<()> {
     }
     let dir = env::current_dir()?;
     let dir = dir.to_string_lossy();
+    // a known id puts the popup's chat in the registry (the `L` screen) from the start
+    let id = crate::chats::new_id();
+    let claude = format!("claude --session-id {id}");
     // Keep Claude out of the alternate screen so its output lands in tmux's
     // scrollback; otherwise there is no history to scroll with copy-mode.
     tmux(&[
@@ -172,8 +216,14 @@ fn ensure_session() -> io::Result<()> {
         &dir,
         "-e",
         "CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1",
-        "claude",
+        &claude,
     ])?;
+    crate::chats::record(crate::chats::Note {
+        session: &id,
+        source: "ac",
+        title: "",
+        ..Default::default()
+    });
     source_keys()
 }
 
