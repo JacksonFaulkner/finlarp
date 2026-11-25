@@ -1,20 +1,20 @@
 // CELL sections 1-10 in the picture-and-panel template, from the Blender scenes in
 // tools/pbr3d/blender/cell_sections.py. One picture per `# ` heading of MEM_CELL.txt, in order:
-// 1 what happens (3 beats), 2 the parts (5), 3 one read (5), 4 refresh (3), 5 leakage (3),
-// 6 by the numbers (3), 7 shrinking (3), 8 who makes it (3), 9 chokepoints and risks (3),
+// 1 what happens (3 beats), 2 the parts (6), 3 one read (5), 4 refresh (3), 5 leakage (5),
+// 6 by the numbers (3), 7 shrinking (4), 8 who makes it (3), 9 chokepoints and risks (3),
 // 10 sources (4).
 
-use super::super::blender::{BEAT_MS, Cell, page};
+use super::super::blender::{page, Cell, BEAT_MS};
 use crate::ui::anim::{Beat, Scene};
 
 const SEC1: &[Beat] = &[
     Beat::new("a full capacitor reads as 1", BEAT_MS)
         .note(
-            "A DRAM bit is a packet of charge on one tiny capacitor. The cell is one transistor and one capacitor, so it is called 1T1C.",
-            "the full orange capacitor on its storage node, the transistor beside it, and the bit line above with the gauge at the VDD/2 ring",
+            "A DRAM bit is a packet of charge on one tiny capacitor. One transistor plus one capacitor makes the 1T1C cell.",
+            "today's cell cut open: the buried word line in its trench, the tall cylinder capacitor on top with orange charge on its inner electrode",
         )
         .detail(
-            "An array is this one small part, repeated.",
+            "The cell is a switch and a bucket. The rest of the page is about filling, reading and keeping that bucket.",
             &[
                 "The cell is 1 transistor and 1 capacitor, 1T1C (page text, section 1)",
                 "Full charge reads as 1, empty as 0 (page text, section 1)",
@@ -22,23 +22,23 @@ const SEC1: &[Beat] = &[
         ),
     Beat::new("an empty capacitor reads as 0", BEAT_MS)
         .note(
-            "The same cell holds a 0 when its capacitor is empty. A bit is an amount of charge, and a read pulls the line the other way.",
-            "the capacitor empty and dark, the transistor and bit line as before, the gauge dipping below the ring",
+            "The same cell holds a 0 when its capacitor is empty. The bit is an amount of charge, not a latch.",
+            "the orange charge drains down the electrode until the capacitor is dark",
         )
         .detail(
-            "A bit is not a switch that stays set. It is an amount of charge, which is why the rest of this page is about keeping it.",
+            "Because the bit is charge, it leaks, and has to be refreshed (section 5).",
             &[
                 "Empty = 0 (page text, section 1)",
                 "The bit is charge that leaks, so it needs refresh (page text, section 5)",
             ],
         ),
-    Beat::new("every cell in the array holds its own bit", BEAT_MS)
+    Beat::new("a field of cells, each its own bit", BEAT_MS)
         .note(
-            "Zoom out and the cell is one of many, each with its own transistor and capacitor, each storing its own 1 or 0.",
-            "a 3 by 3 block of storage capacitors with alternate ones full and empty; the picture is schematic, not to scale",
+            "Zoom out: a forest of tall capacitors, each on its own transistor, each holding its own 1 or 0. A silicon-nitride lattice braces them so they do not lean into each other.",
+            "a 4 by 3 block of cells, front row cut open with alternate capacitors charged; nitride rings at two heights",
         )
         .detail(
-            "Each bit gets its own transistor and capacitor.",
+            "The capacitors are so tall and thin that they need a support lattice.",
             &[
                 "A typical array is 512 wordlines by 512 bitlines (Jacob, DRAM Circuits, slide 5)",
                 "Each bit has its own transistor and capacitor (page text, section 1)",
@@ -47,127 +47,136 @@ const SEC1: &[Beat] = &[
 ];
 
 const SEC2: &[Beat] = &[
-    Beat::new("word line: the row select", BEAT_MS)
+    Beat::new("word line: buried in a trench", BEAT_MS)
         .note(
-            "The word line runs along a row. Driving it high turns on every access transistor in that row at once.",
-            "the pink word line lit, the channel glowing under its gate, and the drain and source blocks either side",
+            "The word line is a metal rod buried in a trench in the silicon, running into the page along a row. A nitride cap seals its top. Driving it high turns on every transistor in the row.",
+            "the word line lit pink inside its oxide-lined trench, nitride cap above it, a passing word line in the isolation to the right",
         )
         .detail(
-            "One word line opens a whole row, not a single cell.",
+            "Burying the gate makes the channel longer without making the cell wider, which cuts leakage.",
             &[
                 "Word line: high turns on every access transistor in its row (page text, section 2)",
-                "Word line: a row select (page text, section 2)",
+                "Buried-channel array transistor (BCAT) is the 6F2 standard (R&D 3D DRAM page)",
             ],
         ),
     Beat::new("access transistor: the switch", BEAT_MS)
         .note(
-            "The access transistor is a switch between the bit line and the storage node. Off, the cell is cut off. On, charge can move.",
-            "the channel lit under the gate, with dots crossing from the capacitor toward the bit line",
+            "The transistor is the switch. Charge never goes through the gate oxide: the gate's voltage pulls a thin conducting channel into the silicon, and charge flows through that channel between drain and source.",
+            "close-up of the trench: the thin oxide liner, and the cyan U-shaped channel lit round the trench bottom between the drain n+ and source n+",
         )
         .detail(
-            "While it is off the transistor is meant to hold the charge in, but it still leaks a little.",
+            "Oxide insulates; the channel conducts. The U shape is the buried gate's trick for a long channel.",
             &[
                 "Access transistor: a switch between the bit line and the storage node (page text, section 2)",
-                "Its leakage when off sets how long the charge lasts (page text, section 5)",
+                "Chip tab, NMOS page (access transistor)",
             ],
         ),
     Beat::new("storage capacitor: the bit itself", BEAT_MS)
         .note(
-            "The storage capacitor holds the bit as charge on its plate. Everything else in the cell exists to read or refill it.",
-            "the inner plate filled with orange charge, the outer plate and the dielectric around it",
+            "The capacitor is a tall cylinder: a TiN storage electrode, a thin high-k dielectric (ZrO2 stacks), and a TiN plate. It sits on a landing pad and a storage-node contact down to the source.",
+            "the capacitor cut open: plate, yellow dielectric layers, storage electrode, with orange charge on it; the contact and pad underneath",
         )
         .detail(
-            "Nearly all of the bit is here, so its size sets how strong a read can be.",
+            "High-k beats SiO2 here: more charge in the same area.",
             &[
-                "Storage capacitor holds the bit as charge on its plate (page text, section 2)",
-                "The capacitance sets the swing the sense amp sees (page text, section 7)",
+                "Storage capacitor: holds the bit as charge (page text, section 2)",
+                "Cell capacitance on the order of 10 fF (Jacob, DRAM Circuits)",
             ],
         ),
     Beat::new("bit line: the column wire", BEAT_MS)
         .note(
-            "The bit line is the column wire that carries charge to and from the cell. It is precharged to VDD/2 before each read.",
-            "the cyan bit line running across the top, its plug down to the drain, and the green precharge block at its far end",
+            "The bit line runs across the word lines, behind the cut. A contact drops from it to the drain. One bit line serves every cell in its column.",
+            "the bit line glowing cyan behind the cell, its contact down to the drain, and running left to the sense amp",
         )
         .detail(
-            "The cell is tiny, so its charge moves a much bigger bit line only a little. The sense amp has to detect that move.",
+            "Word lines pick the row, bit lines carry the data: a grid, one cell at each crossing.",
             &[
-                "Bit line precharged to VDD/2 before each read (Jacob, DRAM Circuits, slides 4 and 11)",
                 "Bit line: the column wire (page text, section 2)",
+                "Precharged to VDD/2 before each read (page text, section 2)",
             ],
         ),
-    Beat::new("sense amp: the latch", BEAT_MS)
+    Beat::new("sense amp: two cross-coupled inverters", BEAT_MS)
         .note(
-            "The sense amp is two cross-coupled inverters on a bit line pair. It sees a small difference and latches to a full rail.",
-            "the purple sense amp block lit at the end of the bit line",
+            "The sense amp sits between two lines: BL from this mat and BL-bar from the next. It is two inverters wired in a loop, so any small difference between the lines snowballs into a full 1 or 0.",
+            "the sense amp lit violet with its two inverter symbols and crossed wires; the BL and BL-bar gauges above it",
         )
         .detail(
-            "It turns a tiny bump into a full 1 or 0, and it writes the cell back.",
+            "It is a comparator plus a latch in one.",
             &[
-                "Sense amp: two cross-coupled inverters on a bit line pair (Jacob, DRAM Circuits, slides 12-14)",
-                "The sense amp latches to a full rail (page text, section 2)",
+                "Sense amp: two cross-coupled inverters on a bit line pair (page text, section 2)",
+                "Open bit line: BL and BL-bar come from mats on either side (Jacob, DRAM Circuits)",
+            ],
+        ),
+    Beat::new("BL-bar and the equaliser", BEAT_MS)
+        .note(
+            "BL-bar is the twin line. It runs to cells that are not being read, so it stays at VDD/2 and serves as the reference. The equaliser shorts BL to BL-bar to set both to exactly VDD/2 before each read.",
+            "BL-bar lit to the left with its unread cells, and the green equaliser under the sense amp",
+        )
+        .detail(
+            "The comparison is BL against BL-bar, not against a stored charge in the sense amp.",
+            &[
+                "Precharge holds the bit line at VDD/2 between accesses (page text, section 2)",
+                "Reference comes from the twin bit line (Jacob, DRAM Circuits)",
             ],
         ),
 ];
 
 const SEC3: &[Beat] = &[
-    Beat::new("1. precharge: the bit line sits at VDD/2", BEAT_MS)
+    Beat::new("1. precharge: BL and BL-bar at VDD/2", BEAT_MS)
         .note(
-            "Before the read the bit line waits at the middle, VDD/2, and the cell is full. Every read starts from this same state.",
-            "the green precharge block lit, the gauge on the VDD/2 ring, the capacitor full and the word line low",
+            "Before the read, the equaliser holds both lines at exactly half the supply. Both gauges sit on the white VDD/2 line.",
+            "the green equaliser lit under the sense amp; both gauge bars at the half line",
         )
         .detail(
-            "Every read starts from this same state, so the swing is always small and centred.",
+            "Starting both lines equal means any difference after is from the cell.",
             &[
-                "The bit line is precharged to VDD/2 (page text, section 3)",
-                "Precharge to Vcc/2 before a read (Jacob, DRAM Circuits, slides 4 and 11)",
+                "Precharge: the bit line sits at VDD/2 (page text, section 3)",
             ],
         ),
-    Beat::new("2. word line rises: the access transistor switches on", BEAT_MS)
+    Beat::new("2. word line rises: the channel opens", BEAT_MS)
         .note(
-            "The word line goes high and the transistor switches on. Nothing else has moved yet, but the cell is now joined to the bit line.",
-            "the pink word line lit, the channel glowing under the gate",
+            "The word line goes high. The buried gate pulls a channel round the trench, and the cell's capacitor is now connected to the bit line.",
+            "close-up: the word line lit, the U channel glowing cyan",
         )
         .detail(
-            "The word line opens the whole row, so all its cells start a read together.",
+            "Every cell on this row connects to its own bit line at once.",
             &[
-                "High turns on every access transistor in the row (page text, section 3)",
-                "A typical array is 512 by 512 (Jacob, DRAM Circuits, slide 5)",
+                "Word line rises: the access transistor switches on (page text, section 3)",
             ],
         ),
-    Beat::new("3. charge sharing: the bit line moves a small amount", BEAT_MS)
+    Beat::new("3. charge sharing: BL moves a little", BEAT_MS)
         .note(
-            "Charge moves between the cell and the bit line. The bit line moves a small amount, up for a 1 and down for a 0.",
-            "cyan dots crossing from the storage node to the bit line, and the gauge bumping just off the VDD/2 ring",
+            "The cell's charge spreads onto the bit line. The bit line has about ten times the capacitance, so it only moves a little: up about 60 mV for a 1, down for a 0. BL-bar stays put.",
+            "beads flow from the capacitor down through the channel and out along the bit line; the BL gauge creeps just above the half line",
         )
         .detail(
-            "The read has already put the stored bit at risk here; the restore in step 5 puts it back.",
+            "Swing = (Vcell - VDD/2) x Cc / (Cc + Cb): a small cell on a big line gives a small signal.",
             &[
-                "The bit line moves up for a 1, down for a 0 (page text, section 3)",
-                "Final voltage (Cb VBL + Cc Vcell) / (Cb + Cc) (Jacob, DRAM Circuits, slides 4 and 11)",
+                "Charge sharing: the bit line moves a small amount (page text, section 3)",
+                "Swing formula (page text, section 7)",
             ],
         ),
-    Beat::new("4. sense amp: the latch drives the bit line to a full rail", BEAT_MS)
+    Beat::new("4. sense: compare, then slam apart", BEAT_MS)
         .note(
-            "The sense amp detects the small move and drives the bit line all the way to full VDD, or to GND for a 0. This is where the bit is read.",
-            "the purple sense amp lit and the gauge climbing to the top",
+            "The sense amp compares BL with BL-bar. BL is a hair higher, so the latch drives BL all the way to VDD and BL-bar to ground.",
+            "the sense amp lit violet; the BL gauge shoots to full, the BL-bar gauge drops to zero",
         )
         .detail(
-            "The latch is the read. Everything before it only made the difference big enough to see.",
+            "Now the bit is a full-size 1 on the bit line, ready to send out.",
             &[
-                "The latch drives the bit line to a full VDD or full GND (page text, section 3)",
-                "Sense amp latches the bit line to full VDD or GND (Jacob, DRAM Circuits, slides 12-14)",
+                "Sense amp: the latch drives the bit line to a full rail (page text, section 3)",
             ],
         ),
-    Beat::new("5. restore: the still-connected cell returns to full charge", BEAT_MS)
+    Beat::new("5. restore: the cell refills", BEAT_MS)
         .note(
-            "The cell is still connected, so the driven bit line pushes it back to full charge. The read drains the cell, so the restore is part of every read.",
-            "violet dots refilling the capacitor to full height, the gauge at the top, and then the word line falling",
+            "The read drained the cell, but the transistor is still on, so the full VDD on the bit line flows back into the capacitor. Then the word line drops and the equaliser resets both lines.",
+            "beads flow back from the bit line into the capacitor, which glows full again; then the gauges return to VDD/2",
         )
         .detail(
-            "A DRAM read destroys what it reads and then writes it back.",
+            "Every read is also a write-back. Refresh is the same thing, done on a timer.",
             &[
-                "The restore step is part of every read (page text, section 3)",
-                "Restore: the read drains the cell and the sense amp writes it back (HiRA, arXiv 2209.10198, p. 2)",
+                "Restore: the still-connected cell returns to full charge (page text, section 3)",
+                "The read drains the cell, so restore is part of every read (page text, section 3)",
             ],
         ),
 ];
@@ -212,40 +221,61 @@ const SEC4: &[Beat] = &[
 ];
 
 const SEC5: &[Beat] = &[
-    Beat::new("charge drains from every cell", BEAT_MS)
+    Beat::new("charge leaks out four ways", BEAT_MS)
         .note(
-            "Charge drains from the storage node through the dielectric, the junction and the off transistor. The loss is slow and differs from cell to cell.",
-            "three cylinders of charge, each one falling at its own speed",
+            "A charged cell is not sealed. Charge escapes through four paths, each shown in its own colour.",
+            "the cell with all four bead streams at once, the charge level dropping",
         )
         .detail(
-            "The leak rates in the picture are illustrative. The point is that they vary.",
+            "No path is ever fully off, so the cell always fades.",
             &[
-                "Retention varies cell to cell (Mutlu, arXiv 2306.16037, p. 1)",
-                "Leak paths: dielectric, junction, off transistor (general knowledge; the split is not sourced here)",
+                "Leakage through the dielectric, the junction and the off transistor (page text, section 5)",
+            ],
+        ),
+    Beat::new("subthreshold: the off transistor trickles", BEAT_MS)
+        .note(
+            "With the word line low the transistor is off, but not perfectly. A tiny current leaks from the storage node round the channel to the drain and the bit line.",
+            "cyan beads run from the capacitor down, round the trench bottom and out the drain",
+        )
+        .detail(
+            "This is usually the biggest leak, and it rises as transistors shrink.",
+            &[
+                "Access transistor leaks while off (page text, section 5)",
+            ],
+        ),
+    Beat::new("junction and GIDL", BEAT_MS)
+        .note(
+            "The source n+ sits in p-type silicon, a diode; charge leaks across it into the substrate. GIDL is leakage pulled out by the strong field where the gate edge meets the drain. Both get worse with heat.",
+            "red beads leave the source down into the substrate; pink beads leave the drain edge beside the gate",
+        )
+        .detail(
+            "Hot DRAM refreshes twice as often (32 ms above 85 C).",
+            &[
+                "Storage-node junction leakage (page text, section 5)",
+                "GIDL at the gate-drain overlap (Mutlu, retention retrospective)",
+            ],
+        ),
+    Beat::new("dielectric: through the thin high-k", BEAT_MS)
+        .note(
+            "Some charge tunnels straight through the capacitor's thin dielectric to the plate.",
+            "close-up on the capacitor wall: yellow beads cross the dielectric",
+        )
+        .detail(
+            "Thinner dielectric holds more charge but leaks more: a trade-off.",
+            &[
+                "Leakage through the capacitor dielectric (page text, section 5)",
             ],
         ),
     Beat::new("the weakest cell sets the deadline", BEAT_MS)
         .note(
-            "Most cells could wait longer. The weakest cannot, and one refresh window applies to them all, so the window has to cover the weakest.",
-            "the lowest cylinder falling fastest toward the floor of the chart",
+            "Three cells drain at different rates. The refresh window (64 ms) has to be short enough for the leakiest cell, then refresh fills them all back up.",
+            "three cut cells draining to different levels, then all refilled to full",
         )
         .detail(
-            "One rule for all the cells means the worst cell sets the pace for the rest.",
+            "Most cells could wait far longer; a few weak ones set the rule.",
             &[
-                "The minimum retention time sets the refresh rate (Mutlu, arXiv 2306.16037, p. 1)",
-                "The refresh window has to cover the weakest cells (page text, section 5)",
-            ],
-        ),
-    Beat::new("refresh arrives just in time", BEAT_MS)
-        .note(
-            "The refresh rewrites every cell before the weakest crosses the line. Cells that still had charge left get rewritten too.",
-            "all three columns rising back to full, the weakest one just above the floor when the refresh arrives",
-        )
-        .detail(
-            "Most of the refresh work goes to cells that did not need it yet.",
-            &[
-                "The refresh window has to cover the weakest cells (page text, section 5)",
-                "tREFW = 64 ms (DDR4; PROTEAS, arXiv 2404.16256, Table I)",
+                "Retention differs cell to cell; refresh covers the weakest (page text, section 5)",
+                "tREFW = 64 ms (PROTEAS, Table I)",
             ],
         ),
 ];
@@ -290,40 +320,49 @@ const SEC6: &[Beat] = &[
 ];
 
 const SEC7: &[Beat] = &[
-    Beat::new("a wide cell: a big capacitor, a big swing", BEAT_MS)
+    Beat::new("6F2 today: a 3F x 2F cell", BEAT_MS)
         .note(
-            "The bit line's move on a read is (Vcell - VDD/2) x Cc / (Cc + Cb). Cc is the cell's capacitance and Cb the bit line's. A wide cell has a big Cc, so the swing is big.",
-            "the wide grey outer plate, the orange charge in the inner plate, and the storage node below",
+            "Today's cell takes 6F2 of floor space. The capacitor must hold about 10 fF no matter how small the cell gets, so it stands tall on that small footprint.",
+            "the planar cell with its glowing 3F x 2F footprint tile above the capacitor",
         )
         .detail(
-            "Cb is much bigger than Cc, so the swing is a small fraction of the voltage.",
+            "Charge capacity comes from surface area, so the only spare direction is up.",
             &[
-                "Swing = (Vcell - VDD/2) x Cc / (Cc + Cb) (Jacob, DRAM Circuits, slides 4 and 11)",
-                "Cell area 6F^2 with an open bit line (Jacob, DRAM Circuits, slide 9)",
-            ],
-        ),
-    Beat::new("shrink the cell and the swing shrinks", BEAT_MS)
-        .note(
-            "A smaller feature size F means a smaller capacitor, so a smaller Cc. Cb has not changed, so the swing drops and the sense amp has less to work with.",
-            "the plates narrowing inside their old outline and the orange fill getting smaller",
-        )
-        .detail(
-            "Less signal is what shrinking the cell costs.",
-            &[
-                "A smaller storage capacitor gives a smaller swing (page text, section 7)",
-                "Cell area is set by F, the minimum feature size (page text, section 7)",
-            ],
-        ),
-    Beat::new("a taller capacitor brings the swing back", BEAT_MS)
-        .note(
-            "Designs keep Cc up with a taller capacitor or a better dielectric. The cell's footprint stays small, and the capacitance returns.",
-            "the orange cell growing upward, the plates stretching, and the footprint at the base staying narrow",
-        )
-        .detail(
-            "The footprint keeps shrinking while the height does the work.",
-            &[
+                "6F2 with an open bit line (page text, section 6)",
                 "Designs keep Cc up with a taller capacitor or a better dielectric (page text, section 7)",
-                "The swing depends on Cc against Cb (page text, section 7)",
+            ],
+        ),
+    Beat::new("thinner cap, same charge: grow taller", BEAT_MS)
+        .note(
+            "Shrink the footprint and the capacitor has to get thinner, so it grows taller to keep its wall area. Real ones are about 40 times taller than wide; they can lean and touch.",
+            "the capacitor squeezes thinner and stretches upward",
+        )
+        .detail(
+            "This is why DRAM scaling has slowed: the capacitor, not the transistor, is the wall.",
+            &[
+                "Smaller storage capacitor gives a smaller swing (page text, section 7)",
+            ],
+        ),
+    Beat::new("4F2: the transistor stands up", BEAT_MS)
+        .note(
+            "The next step stands the transistor upright: a silicon pillar, the gate wrapped round it, the bit line buried below and the capacitor on top. The cell shrinks to 2F x 2F.",
+            "the vertical-channel cell: buried bit line, pillar with glowing channel, word line wrapped round it, capacitor above",
+        )
+        .detail(
+            "4F2 is the smallest square cell possible. Leakage in the pillar and aligning the cap are the hard parts.",
+            &[
+                "4F2 vertical channel transistor (R&D 3D DRAM page)",
+            ],
+        ),
+    Beat::new("3D DRAM: lay the cells down and stack them", BEAT_MS)
+        .note(
+            "3D DRAM stops shrinking and starts stacking: each cell lies on its side, capacitor horizontal, and dozens of layers stack up like NAND. The bit line runs vertically through all the layers.",
+            "a five-layer stack, word lines lighting layer by layer, sideways capacitors either side of the vertical bit line",
+        )
+        .detail(
+            "This stacks cells inside one die. HBM stacks whole dies: a different level.",
+            &[
+                "Stacked 3D DRAM (R&D 3D DRAM page)",
             ],
         ),
 ];
@@ -496,7 +535,7 @@ mod tests {
     #[test]
     fn sections_match_the_blender_beats_and_draw() {
         let counts: Vec<usize> = SECTIONS.iter().map(|f| f().beats().len()).collect();
-        assert_eq!(counts, [3, 5, 5, 3, 3, 3, 3, 3, 3, 4]);
+        assert_eq!(counts, [3, 6, 5, 3, 5, 3, 4, 3, 3, 4]);
         for (i, f) in SECTIONS.iter().enumerate() {
             let s = f();
             super::super::super::blender::explained(s.as_ref(), &format!("section {}", i + 1));

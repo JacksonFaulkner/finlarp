@@ -4,19 +4,26 @@ A DRAM bit is a packet of charge on one tiny capacitor. Full charge reads as 1, 
 
 # 2. The parts
 
-word line            row select: high turns on every access transistor in its row
-access transistor    a switch between the bit line and the storage node
-storage capacitor    holds the bit as charge on its plate
-bit line             the column wire; precharged to VDD/2 before each read
-sense amp            two cross-coupled inverters on a bit line pair; latches to a full rail
-precharge            holds the bit line at VDD/2 between accesses
+word line            row select, buried in a trench under a nitride cap; high turns on every
+                     access transistor in its row
+access transistor    a switch between the bit line and the storage node; the gate pulls a
+                     U-shaped channel round the trench bottom, and charge flows through that
+                     channel (never through the gate oxide)
+storage capacitor    a tall cylinder: TiN electrode, high-k dielectric (ZrO2 stacks), TiN plate,
+                     on a landing pad and storage-node contact; holds the bit as charge
+bit line             the column wire, across the word lines; one cell at each crossing
+sense amp            two cross-coupled inverters between BL and its twin BL-bar; latches to a
+                     full rail
+BL-bar               the twin line from the neighbouring mat (open bit line); its cells are not
+                     read, so it stays at VDD/2 as the reference
+precharge            the equaliser shorts BL to BL-bar, holding both at VDD/2 between accesses
 
 # 3. One read, in order
 
 1. precharge: the bit line sits at VDD/2
 2. word line rises: the access transistor switches on
-3. charge sharing: charge moves between the cell and the bit line; the bit line moves a small amount, up for a 1, down for a 0
-4. sense amp: the latch drives the bit line to a full VDD or full GND
+3. charge sharing: charge moves between the cell and the bit line; the bit line moves a small amount (tens of mV), up for a 1, down for a 0; BL-bar stays at VDD/2
+4. sense amp: compares BL with BL-bar, then drives BL to a full VDD or GND and BL-bar the other way
 5. restore: the still-connected cell is driven back to its full charge
 
 The read drains the cell, so the restore step is part of every read, not an extra.
@@ -27,7 +34,14 @@ The cell leaks, so every row is read and rewritten on a timer. In DDR4 the refre
 
 # 5. Leakage: why the charge fades
 
-The leakage drains charge out of the storage node through the capacitor dielectric, the storage-node junction and the access transistor while it is off. The loss is slow and differs from cell to cell, so the refresh window has to cover the weakest cells.
+Charge leaves the storage node four ways:
+
+subthreshold         through the access transistor while it is off, out the drain to the bit line
+junction             from the source n+ into the p-type substrate (a reverse-biased diode)
+GIDL                 gate-induced drain leakage, pulled out by the strong field at the gate edge
+dielectric           tunnelling through the thin capacitor dielectric
+
+Junction leakage and GIDL grow with temperature, so hot DRAM refreshes twice as often (32 ms above 85 C). The loss is slow and differs from cell to cell, so the refresh window has to cover the weakest cells.
 
 # 6. By the numbers
 
@@ -39,7 +53,9 @@ typical array        512 wordlines x 512 bitlines
 
 # 7. Shrinking the cell: less area means less signal
 
-The cell area is set by F, the minimum feature size (see the LITHO node). The swing on the bit line is (Vcell - VDD/2) x Cc / (Cc + Cb). A smaller storage capacitor gives a smaller swing, so the sense amp has less to work with. Designs keep Cc up with a taller capacitor or a better dielectric.
+The cell area is set by F, the minimum feature size (see the LITHO node). The swing on the bit line is (Vcell - VDD/2) x Cc / (Cc + Cb). A smaller storage capacitor gives a smaller swing, so the sense amp has less to work with. Designs keep Cc up with a taller capacitor or a better dielectric. Today's capacitors are about 40 times taller than wide and lean on a silicon-nitride support lattice.
+
+The next steps change the cell's shape rather than its size. 4F2 stands the transistor up: a vertical silicon pillar with the gate wrapped round it, the bit line buried below and the capacitor on top, a 2F x 2F cell. 3D DRAM lays each cell on its side and stacks dozens of layers inside one die, like NAND, with the bit line running vertically through them. That is different from HBM, which stacks whole finished dies with TSVs. See the R&D 3D DRAM page.
 
 # 8. Who makes it
 

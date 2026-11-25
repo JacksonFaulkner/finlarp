@@ -331,7 +331,220 @@ def sec10():
     finish("sec10", page="cell")
 
 
-SECTIONS = [sec1, sec2, sec3, sec4, sec5, sec6, sec7, sec8, sec9, sec10]
+# ==== detailed rebuild (cell_detail.py on rnd_3d_dram_kit.planar_cell) =========================
+
+import rnd_3d_dram_kit as R  # noqa: E402
+import cell_detail as D  # noqa: E402
+from rnd_3d_dram_kit import on  # noqa: E402
+
+
+def dbegin(n, beats):
+    m, root = start(f"sec{n}", beats, page="cell")
+    R.mats(m)
+    D.mats(m)
+    return m, root
+
+
+def dfinish(n):
+    R.finish(f"sec{n}", page="cell")
+
+
+def b(i, u0=0.0, u1=1.0):
+    return [(F(i, u0), F(i, u1))]
+
+
+def span(b0, u0, b1, u1):
+    return [(F(b0, u0), F(b1, u1))]
+
+
+# The rig's camera targets: the cell at the origin, the sense amp at SA_X.
+CELL_T = (-60.0, 300.0, 0.0)
+CAP_T = (45.0, 1250.0, 0.0)
+SA_T = (D.SA_X, 700.0, 0.0)
+WIDE_T = (-600.0, 800.0, 0.0)
+
+
+def sec2_d():
+    """The parts: one beat per row of the parts table."""
+    m, root = dbegin(2, 6)
+    r = D.read_rig(root, m)
+    c = r.cell
+    on(c.wl_on, b(0) + b(1))
+    on(c.chan_on, b(1))
+    on(r.charge, span(2, 0.0, 6, 0.0))
+    on(c.bl_on, b(3))
+    on(r.bl_bar_on, b(5))
+    on(r.sa_on, b(4))
+    on(r.eq_on, b(5))
+    label("word line: buried in a trench, runs into the page", c.pts["wl"], root, b(0))
+    label("nitride cap insulates it from above", (c.pts["wl"][0], -40.0, 0.0), root, b(0))
+    label("gate oxide: the thin insulator", (-170.0, -300.0, 0.0), root, b(1))
+    label("channel: a U round the trench bottom", c.pts["chan"], root, b(1))
+    label("drain n+: to the bit line", c.pts["drain"], root, b(1))
+    label("source n+: to the capacitor", c.pts["source"], root, b(1))
+    label("TiN / high-k / TiN cylinder: the bit", c.pts["cap"], root, b(2))
+    label("storage-node contact + landing pad", c.pts["snc"], root, b(2))
+    label("bit line: the column wire, behind", r.pts["bl_mid"], root, b(3))
+    label("bit-line contact down to the drain", c.pts["blc"], root, b(3))
+    label("sense amp: two cross-coupled inverters", r.pts["sa"], root, b(4))
+    label("BL on one side", r.pts["g_bl"], root, b(4))
+    label("BL-bar: the twin line, the reference", r.pts["blb"], root, b(5))
+    label("equaliser holds both at VDD/2", r.pts["eq"], root, b(5))
+    camera(root, [
+        (CELL_T, 2300.0, 0.35, 0.10),
+        ((-100.0, -150.0, 0.0), 1500.0, 0.20, 0.06),
+        (CAP_T, 4000.0, 0.40, 0.10),
+        ((-700.0, 500.0, 0.0), 3600.0, 0.45, 0.25),
+        (SA_T, 2400.0, 0.30, 0.10),
+        ((-1500.0, 600.0, 0.0), 3400.0, 0.35, 0.15),
+    ])
+    dfinish(2)
+
+
+def sec3_d():
+    """One read: precharge, word line, charge sharing, sense, restore."""
+    m, root = dbegin(3, 5)
+    r = D.read_rig(root, m)
+    c = r.cell
+    on(r.eq_on, b(0) + b(4, 0.75))
+    on(c.wl_on, span(1, 0.0, 4, 0.7))
+    on(c.chan_on, span(1, 0.3, 4, 0.7))
+    on(c.bl_on, span(2, 0.2, 4, 0.75))
+    on(r.sa_on, span(3, 0.15, 4, 0.75))
+    on(r.charge, span(0, 0.0, 2, 0.45) + span(4, 0.55, 5, 0.0))
+    D.gauge_keys(r.g_bl, [(0, 0.5), (F(2, 0.2), 0.5), (F(2, 0.6), 0.56), (F(3, 0.15), 0.56), (F(3, 0.5), 1.0),
+                          (F(4, 0.75), 1.0), (F(4, 0.95), 0.5)])
+    D.gauge_keys(r.g_blb, [(0, 0.5), (F(3, 0.15), 0.5), (F(3, 0.5), 0.0), (F(4, 0.75), 0.0), (F(4, 0.95), 0.5)])
+    R.beads(root, m, "share", r.share, 8, 2, 0.15, 0.45, life=60, size=30.0)
+    R.beads(root, m, "restore", r.restore, 8, 4, 0.10, 0.40, life=60, size=30.0, mk="lk_sub")
+    label("precharge: BL and BL-bar both at VDD/2", r.pts["eq"], root, b(0))
+    label("both gauges on the VDD/2 line", r.pts["half"], root, b(0))
+    label("word line high: the U channel opens", c.pts["chan"], root, b(1))
+    label("cell charge spills onto the bit line", c.pts["cap"], root, b(2))
+    label("BL rises a little: about +60 mV", r.pts["g_bl"], root, b(2))
+    label("sense amp compares BL with BL-bar", r.pts["sa"], root, b(3))
+    label("and slams them apart: BL to VDD, BL-bar to 0", r.pts["g_blb"], root, b(3))
+    label("restore: full VDD flows back into the cell", c.pts["cap"], root, b(4))
+    camera(root, [
+        (SA_T, 2600.0, 0.30, 0.10),
+        ((-100.0, -150.0, 0.0), 1500.0, 0.20, 0.06),
+        (WIDE_T, 3600.0, 0.25, 0.10),
+        (SA_T, 2400.0, 0.25, 0.08),
+        (WIDE_T, 3600.0, 0.25, 0.10),
+    ])
+    dfinish(3)
+
+
+def sec1_d():
+    """A bit is charge: full reads 1, empty reads 0, then a field of cells, each its own bit."""
+    m, root = dbegin(1, 3)
+    one = wrap(root, "one", span(0, 0.0, 2, 0.0))
+    c = R.planar_cell(one, m, (0.0, 0.0, 0.0), "c1", cutp=True, tile=False)
+    sw, lv = D.q_strips(one, m, (0.0, 0.0, 0.0), "q1")
+    on(sw, span(0, 0.0, 2, 0.0))
+    D.level_keys(lv, [(0, 1.0), (F(1, 0.0), 1.0), (F(1, 0.4), 0.02)])
+    fld = wrap(root, "fld", span(2, 0.0, 3, 0.0))
+    a = D.field(fld, m, (0.0, 0.0, 0.0), 4, 3, name="f1")
+    for i in range(4):
+        o = (a.cells[(i, 0)].pts["cap_top"][0] - R.PL_SN_X, 0.0, 0.0)
+        qs, ql = D.q_strips(fld, m, o, f"fq{i}")
+        if i % 2 == 0:
+            on(qs, b(2))
+    label("full capacitor: a 1", c.pts["cap"], root, b(0))
+    label("one transistor + one capacitor = 1T1C", c.pts["wl"], root, b(0))
+    label("charge drains out: now it reads 0", c.pts["cap"], root, b(1))
+    label("a field of cells: 1 0 1 0", a.cells[(0, 0)].pts["cap"], root, b(2))
+    label("nitride lattice props the tall caps", (a.cells[(3, 0)].pts["cap_top"][0] + 150, R.PL_CAP0 + R.PL_CAP_H * 0.9, 0.0), root, b(2))
+    camera(root, [
+        ((0.0, 900.0, 0.0), 4400.0, 0.45, 0.12),
+        ((0.0, 900.0, 0.0), 4400.0, 0.45, 0.12),
+        ((0.0, 1100.0, -200.0), 4600.0, 0.50, 0.22),
+    ])
+    dfinish(1)
+
+
+def sec5_d():
+    """Leakage: the four exits from the storage node, then cells draining at their own rates."""
+    m, root = dbegin(5, 5)
+    one = wrap(root, "one", span(0, 0.0, 4, 0.0))
+    c = R.planar_cell(one, m, (0.0, 0.0, 0.0), "c5", cutp=True, tile=False)
+    sw, lv = D.q_strips(one, m, (0.0, 0.0, 0.0), "q5")
+    on(sw, span(0, 0.0, 4, 0.0))
+    D.level_keys(lv, [(0, 1.0), (F(3, 0.95), 0.55)])
+    lp = D.leak_paths(c)
+    for kind in ("sub", "jn", "gidl", "diel"):
+        D.leak(root, m, lp, kind, 4, 0, 0.1, 0.8)
+    D.leak(root, m, lp, "sub", 10, 1, 0.05, 0.85, size=20.0)
+    D.leak(root, m, lp, "jn", 8, 2, 0.05, 0.85, size=20.0)
+    D.leak(root, m, lp, "gidl", 8, 2, 0.05, 0.85, size=20.0)
+    D.leak(root, m, lp, "diel", 8, 3, 0.05, 0.85, size=20.0)
+    label("charge leaks out four ways", c.pts["cap"], root, b(0))
+    label("subthreshold: the off transistor still trickles", c.pts["chan"], root, b(1))
+    label("out the drain to the bit line", c.pts["drain"], root, b(1))
+    label("junction: n+ source into the p substrate", (30.0, -330.0, 0.0), root, b(2))
+    label("GIDL: strong field at the gate edge", (-200.0, -150.0, 0.0), root, b(2))
+    label("hotter chip, faster leaks", c.pts["si"], root, b(2))
+    label("through the thin high-k dielectric", lp["diel"][-1], root, b(3))
+    rows = wrap(root, "rows", b(4))
+    a = R.planar_array(rows, m, (0.0, 0.0, 0.0), 3, 1, name="r5", tile_at=None)
+    rates = [0.85, 0.62, 0.30]
+    for i, v in enumerate(rates):
+        o = (a.cells[(i, 0)].pts["cap_top"][0] - R.PL_SN_X, 0.0, 0.0)
+        qs, ql = D.q_strips(rows, m, o, f"rq{i}")
+        on(qs, b(4))
+        D.level_keys(ql, [(F(4, 0.0), 1.0), (F(4, 0.7), v), (F(4, 0.8), v), (F(4, 0.95), 1.0)])
+    label("every cell leaks at its own rate", a.cells[(0, 0)].pts["cap"], root, b(4, 0.0, 0.5))
+    label("the weakest sets the 64 ms refresh", a.cells[(2, 0)].pts["cap"], root, b(4, 0.3, 0.8))
+    label("refresh: all back to full", a.cells[(1, 0)].pts["cap_top"], root, b(4, 0.8, 1.0))
+    camera(root, [
+        ((0.0, 500.0, 0.0), 3600.0, 0.30, 0.10),
+        ((-100.0, -150.0, 0.0), 1500.0, 0.20, 0.06),
+        ((-60.0, -250.0, 0.0), 1600.0, 0.20, 0.06),
+        ((100.0, 1300.0, 0.0), 1800.0, 0.30, 0.08),
+        ((0.0, 900.0, 0.0), 4200.0, 0.20, 0.10),
+    ])
+    dfinish(5)
+
+
+X6, XV, XS = 0.0, 2600.0, 6000.0
+
+
+def sec7_d():
+    """Shrinking: 6F2 today, a thinner cap must grow taller, 4F2 vertical transistor, 3D DRAM."""
+    m, root = dbegin(7, 4)
+    g6 = wrap(root, "g6", span(0, 0.0, 2, 0.0))
+    c = R.planar_cell(g6, m, (X6, 0.0, 0.0), "c7", cutp=True, tile=True)
+    show(c.tile, b(0))
+    scale_keys(c.cap, [(0, (1, 1, 1)), (F(1, 0.15), (1, 1, 1)), (F(1, 0.7), (0.6, 0.6, 1.45))])
+    gv = wrap(root, "gv", b(2))
+    v = R.vct_cell(gv, m, (XV, 0.0, 0.0), "v7", cutp=True, tile=True)
+    on(v.wl_on, b(2, 0.3, 1.0))
+    on(v.chan_on, b(2, 0.3, 1.0))
+    gs = wrap(root, "gs", b(3))
+    st = R.stacked_3d(gs, m, (XS, 0.0, 0.0), n=5, nz=2, name="s7")
+    for k, lg in enumerate(st.wl_on):
+        on(lg, b(3, 0.2 + 0.12 * k, 1.0))
+    label("6F2 today: 3F x 2F footprint", c.pts["tile"], root, b(0))
+    label("cap must hold ~10 fF, so it stands tall", c.pts["cap"], root, b(0))
+    label("thinner cap, same charge: grow taller", c.pts["cap"], root, b(1))
+    label("real ratio ~40:1; they lean and touch", c.pts["cap_top"], root, b(1))
+    label("4F2: the transistor stands up", v.pts["tile"], root, b(2))
+    label("vertical channel pillar", v.pts["pillar"], root, b(2))
+    label("gate wraps the pillar", v.pts["gate"], root, b(2))
+    label("buried bit line underneath", v.pts["bl"], root, b(2))
+    label("3D DRAM: caps lie sideways, layers stack", st.pts["cap"], root, b(3))
+    label("bit line runs up through the layers", st.pts["bl"], root, b(3))
+    label("one word line per layer", st.pts["wl"], root, b(3))
+    camera(root, [
+        ((X6, 1100.0, 0.0), 4000.0, 0.40, 0.14),
+        ((X6, 1300.0, 0.0), 4600.0, 0.40, 0.14),
+        ((XV, 1000.0, 0.0), 4000.0, 0.45, 0.16),
+        ((XS, 700.0, -200.0), 4400.0, 0.45, 0.18),
+    ])
+    dfinish(7)
+
+
+SECTIONS = [sec1_d, sec2_d, sec3_d, sec4, sec5_d, sec6, sec7_d, sec8, sec9, sec10]
 
 if __name__ == "__main__":
     which = [int(a) for a in sys.argv[sys.argv.index("--") + 1:]] if "--" in sys.argv else list(range(1, 11))
