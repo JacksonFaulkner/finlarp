@@ -179,7 +179,8 @@ fn focus_interval_extended_and_zoom_keys() {
     let (mut s, _tx) = loaded();
     press(&mut s, KeyCode::Tab);
     assert_eq!(s.focus, 1);
-    press(&mut s, KeyCode::Char('4'));
+    press(&mut s, KeyCode::Tab);
+    press(&mut s, KeyCode::Tab);
     assert_eq!(s.focus, 3);
     press(&mut s, KeyCode::BackTab);
     assert_eq!(s.focus, 2);
@@ -266,7 +267,7 @@ fn cursor_scrolls_through_history_and_g_returns_to_live() {
 #[test]
 fn setting_a_ticker_clears_the_tile_and_resubscribes() {
     let (mut s, _tx) = loaded();
-    press(&mut s, KeyCode::Char('2')); // focus WDC
+    press(&mut s, KeyCode::Tab); // focus WDC
     press(&mut s, KeyCode::Char('s'));
     assert!(!s.leader_ok(), "space is a plain character while typing");
     for c in "nvda".chars() {
@@ -383,23 +384,31 @@ fn tiles_draw_as_pictures_when_the_terminal_has_graphics() {
         .map(|t| t.pic.as_ref().unwrap().key)
         .collect();
     assert_eq!(before, after);
-    // g flips back to the ASCII tapes
-    press(&mut s, KeyCode::Char('g'));
-    assert!(!s.pictures);
-    assert!(render(&mut s, 160, 45).contains("MKSI"));
 }
 
 #[test]
-fn g_says_so_when_there_is_no_graphics_protocol() {
+fn gg_goes_to_the_first_bar_and_g_alone_does_nothing() {
     let (mut s, _tx) = loaded();
+    render(&mut s, 120, 40);
     press(&mut s, KeyCode::Char('g'));
-    assert!(!s.pictures);
+    s.apply_pending_cursor();
+    assert_eq!(s.tiles[0].cursor, None, "one g waits for the second");
     assert!(
-        s.flash
-            .as_deref()
-            .unwrap_or("")
-            .contains("no graphics protocol")
+        !s.pictures || s.picker.is_some(),
+        "g no longer toggles pictures"
     );
+    press(&mut s, KeyCode::Char('g'));
+    assert_eq!(s.tiles[0].cursor, Some(0), "gg: the first bar");
+    let out = render(&mut s, 120, 40);
+    assert!(out.contains("MKSI"), "{out}");
+    // G is back to the latest bar, following live
+    press(&mut s, KeyCode::Char('G'));
+    assert_eq!(s.tiles[0].cursor, None);
+    // g then something else is not gg
+    press(&mut s, KeyCode::Char('g'));
+    press(&mut s, KeyCode::Char('e'));
+    press(&mut s, KeyCode::Char('g'));
+    assert_eq!(s.tiles[0].cursor, None);
 }
 
 /// Cost of one cursor move with pictures on: `cargo test --release move_cost -- --ignored --nocapture`.
@@ -583,4 +592,350 @@ fn bench_combo() {
         pct(0.5),
         pct(0.95),
     );
+}
+
+#[test]
+fn visual_selects_bars_and_i_zooms_onto_them() {
+    let (mut s, _tx) = loaded();
+    render(&mut s, 120, 40);
+    let len = s.bars(&s.tiles[0]).len();
+    press(&mut s, KeyCode::Char('V'));
+    assert_eq!(
+        s.tiles[0].anchor,
+        Some(len - 1),
+        "V anchors on the cursor (the latest bar)"
+    );
+    for _ in 0..5 {
+        press(&mut s, KeyCode::Char('H'));
+    }
+    let out = render(&mut s, 120, 40);
+    assert!(
+        out.contains("-- VISUAL --") && out.contains("6 bars"),
+        "{out}"
+    );
+    let step = s.step;
+    press(&mut s, KeyCode::Char('i'));
+    assert_eq!(
+        s.step, step,
+        "in visual mode i zooms, it does not change the interval"
+    );
+    assert_eq!(s.tiles[0].span, Some((len - 6, len)));
+    assert_eq!(s.tiles[0].anchor, None, "zooming leaves visual mode");
+    let out = render(&mut s, 120, 40);
+    assert!(out.contains("zoom "), "{out}");
+    // the cursor can't leave the zoomed bars
+    for _ in 0..20 {
+        press(&mut s, KeyCode::Char('H'));
+    }
+    render(&mut s, 120, 40);
+    assert_eq!(s.tiles[0].cursor, Some(len - 6));
+    // esc zooms back out, then i is the interval again
+    press(&mut s, KeyCode::Esc);
+    assert_eq!(s.tiles[0].span, None);
+    press(&mut s, KeyCode::Char('i'));
+    assert_ne!(s.step, step);
+}
+
+#[test]
+fn changing_the_interval_drops_a_selection() {
+    let (mut s, _tx) = loaded();
+    render(&mut s, 120, 40);
+    press(&mut s, KeyCode::Char('V'));
+    press(&mut s, KeyCode::Char('e'));
+    assert_eq!(s.tiles[0].anchor, None);
+}
+
+/// Where the time goes when `i` changes the interval with pictures on, stage by stage:
+/// `cargo test --release interval_cost -- --ignored --nocapture`.
+#[test]
+#[ignore]
+fn interval_cost() {
+    use ratatui::widgets::StatefulWidget;
+    use ratatui_image::protocol::kitty::StatefulKitty;
+    use ratatui_image::protocol::{StatefulProtocol, StatefulProtocolType};
+    use ratatui_image::{FontSize, Resize, StatefulImage};
+    use std::time::{Duration, Instant};
+
+    // 390 one-minute bars per tile: a full regular session
+    let (mut s, tx) = screen();
+    for (sym, base) in [
+        ("MKSI", 240.0),
+        ("WDC", 370.0),
+        ("WULF", 12.0),
+        ("APLD", 22.0),
+    ] {
+        seed(&tx, sym, base, 390);
+    }
+    s.tick();
+    let (cols, rows) = (200u16, 62u16);
+    for (font, label) in [
+        ((10u16, 20u16), "1x cells 10x20"),
+        ((20, 40), "retina cells 20x40"),
+    ] {
+        for zoomed in [false, true] {
+            // tile chart area in cells, as draw lays it out
+            let (cw, ch) = if zoomed {
+                (cols - 2, rows - 5)
+            } else {
+                (cols / 2 - 2, (rows - 1) / 2 - 4)
+            };
+            let n_tiles = if zoomed { 1 } else { 4 };
+            let px = (
+                u32::from(cw) * u32::from(font.0),
+                u32::from(ch) * u32::from(font.1),
+            );
+            println!(
+                "\n== {label}, {} ({} tile{}, {}x{} px each)",
+                if zoomed { "full screen" } else { "2x2 grid" },
+                n_tiles,
+                if n_tiles == 1 { "" } else { "s" },
+                px.0,
+                px.1
+            );
+            for (mode, compress, shm) in [
+                ("base64 raw", false, false),
+                ("zlib+base64", true, false),
+                ("shared memory", false, true),
+            ] {
+                let (mut agg, mut raster, mut clone, mut encode) = (
+                    Duration::ZERO,
+                    Duration::ZERO,
+                    Duration::ZERO,
+                    Duration::ZERO,
+                );
+                let mut bytes = 0usize;
+                s.step = (s.step + 1) % STEPS.len(); // what `i` does: a new interval, every cache cold
+                for idx in 0..n_tiles {
+                    let t0 = Instant::now();
+                    let bars = s.bars(&s.tiles[idx]);
+                    agg += t0.elapsed();
+                    let pal = Palette::from_theme(&s.theme);
+                    let pic = picture::Pic {
+                        bars: &bars,
+                        vwap: s.tiles[idx].series.vwap(),
+                        prev_close: s.tiles[idx].series.prev_close,
+                        sel: None,
+                        range: None,
+                    };
+                    let mut img = image::RgbaImage::new(px.0, px.1);
+                    let t0 = Instant::now();
+                    picture::render_into(&mut img, &pic, &pal);
+                    raster += t0.elapsed();
+                    let t0 = Instant::now();
+                    let dynimg = image::DynamicImage::ImageRgba8(img.clone());
+                    clone += t0.elapsed();
+                    let mut proto = StatefulProtocol::new(
+                        dynimg,
+                        FontSize::new(font.0, font.1),
+                        None,
+                        StatefulProtocolType::Kitty(StatefulKitty::new(
+                            tile_image_id(idx, 0),
+                            false,
+                            compress,
+                            shm,
+                        )),
+                    );
+                    let area = Rect::new(0, 0, cw, ch);
+                    let mut buf = ratatui::buffer::Buffer::empty(area);
+                    let t0 = Instant::now();
+                    StatefulImage::default()
+                        .resize(Resize::Fit(None))
+                        .render(area, &mut buf, &mut proto);
+                    encode += t0.elapsed();
+                    bytes += buf.content.iter().map(|c| c.symbol().len()).sum::<usize>();
+                }
+                let total = agg + raster + clone + encode;
+                println!(
+                    "  {mode:<14} total {:>7.1?}  | aggregate {:>7.1?}  raster {:>7.1?}  copy {:>7.1?}  encode {:>7.1?}  | {:>6} KB to the terminal",
+                    total,
+                    agg,
+                    raster,
+                    clone,
+                    encode,
+                    bytes / 1024
+                );
+            }
+        }
+    }
+    // The real draw path end to end (test picker: no compression, no shm caps => raw base64)
+    with_graphics(&mut s);
+    render(&mut s, cols, rows);
+    let t0 = Instant::now();
+    let mut t = Terminal::new(TestBackend::new(cols, rows)).unwrap();
+    press(&mut s, KeyCode::Char('i'));
+    t.draw(|f| s.draw(f)).unwrap();
+    println!(
+        "\nfull Intraday::draw after `i` (2x2, 10x20 cells, raw base64): {:?}",
+        t0.elapsed()
+    );
+}
+
+#[test]
+fn the_visual_band_follows_the_cursor_without_waiting_for_the_live_refresh() {
+    let (mut s, _tx) = loaded();
+    with_graphics(&mut s);
+    render(&mut s, 160, 45);
+    press(&mut s, KeyCode::Char('V'));
+    render(&mut s, 160, 45);
+    for _ in 0..3 {
+        let before = s.tiles[0].pic.as_ref().unwrap().key;
+        press(&mut s, KeyCode::Char('H'));
+        render(&mut s, 160, 45);
+        let slot = s.tiles[0].pic.as_ref().unwrap();
+        assert_ne!(
+            slot.key, before,
+            "the picture with the wider band went out this frame"
+        );
+        assert!(!s.deferred, "nothing left waiting for LIVE_REFRESH");
+    }
+}
+
+#[test]
+fn a_tile_alternates_between_its_two_image_ids() {
+    // the old picture keeps its id (and stays on screen) while the new one arrives
+    let ids: Vec<u32> = (0..4)
+        .flat_map(|i| [tile_image_id(i, 0), tile_image_id(i, 1)])
+        .collect();
+    let mut unique = ids.clone();
+    unique.sort();
+    unique.dedup();
+    assert_eq!(
+        unique.len(),
+        ids.len(),
+        "no two tiles or generations share an id"
+    );
+    let (mut s, _tx) = loaded();
+    with_graphics(&mut s);
+    render(&mut s, 160, 45);
+    let first = s.tiles[0].which;
+    press(&mut s, KeyCode::Char('i'));
+    render(&mut s, 160, 45);
+    assert_ne!(s.tiles[0].which, first, "a resend switches to the other id");
+}
+
+#[test]
+fn counts_repeat_motions_like_vim() {
+    let (mut s, _tx) = loaded();
+    s.step = STEPS.iter().position(|&m| m == 1).unwrap(); // 1m: all 90 bars
+    render(&mut s, 120, 40);
+    let len = s.bars(&s.tiles[0]).len();
+    for c in "50H".chars() {
+        press(&mut s, KeyCode::Char(c));
+    }
+    s.apply_pending_cursor();
+    assert_eq!(s.tiles[0].cursor, Some(len - 51), "50H: fifty candles left");
+    for c in "12L".chars() {
+        press(&mut s, KeyCode::Char(c));
+    }
+    s.apply_pending_cursor();
+    assert_eq!(s.tiles[0].cursor, Some(len - 39));
+    // the count shows while it's typed, and esc drops it
+    press(&mut s, KeyCode::Char('7'));
+    assert!(
+        render(&mut s, 120, 40)
+            .lines()
+            .next()
+            .unwrap()
+            .contains("7")
+    );
+    press(&mut s, KeyCode::Esc);
+    assert_eq!(s.count, None);
+    assert!(!s.zoom || s.zoom, "esc only cleared the count");
+    // 10G and 10gg: bar ten
+    for c in "10G".chars() {
+        press(&mut s, KeyCode::Char(c));
+    }
+    assert_eq!(s.tiles[0].cursor, Some(9));
+    s.follow_latest();
+    for c in "10gg".chars() {
+        press(&mut s, KeyCode::Char(c));
+    }
+    assert_eq!(s.tiles[0].cursor, Some(9));
+    // a leading 0 is not a count; digits no longer focus tiles
+    press(&mut s, KeyCode::Char('3'));
+    press(&mut s, KeyCode::Tab);
+    assert_eq!(s.focus, 1, "the count is used up by the next key");
+    assert_eq!(s.count, None);
+}
+
+#[test]
+fn braces_jump_between_stops_and_tag_them() {
+    let (mut s, _tx) = loaded();
+    s.step = STEPS.iter().position(|&m| m == 1).unwrap();
+    render(&mut s, 120, 40);
+    let bars = s.bars(&s.tiles[0]);
+    let all: Vec<usize> = stops::stops(&bars).iter().map(|x| x.idx).collect();
+    assert!(all.len() > 3, "the sine-wave fixture has turns: {all:?}");
+    press(&mut s, KeyCode::Char('g'));
+    press(&mut s, KeyCode::Char('g'));
+    press(&mut s, KeyCode::Char('}'));
+    let first_after_0 = *all.iter().find(|&&i| i > 0).unwrap();
+    assert_eq!(s.tiles[0].cursor, Some(first_after_0));
+    let line = s.readout(&bars, Some(first_after_0), None);
+    let text: String = line.spans.iter().map(|sp| sp.content.as_ref()).collect();
+    assert!(
+        text.contains("swing") || text.contains("vol"),
+        "the readout says why it stopped: {text}"
+    );
+    press(&mut s, KeyCode::Char('2'));
+    press(&mut s, KeyCode::Char('}'));
+    let k = all.iter().position(|&i| i == first_after_0).unwrap();
+    assert_eq!(s.tiles[0].cursor, Some(all[k + 2]), "2}} skips one stop");
+    press(&mut s, KeyCode::Char('{'));
+    assert_eq!(s.tiles[0].cursor, Some(all[k + 1]));
+}
+
+#[test]
+fn space_w_splits_eats_and_closes_tiles() {
+    let (mut s, _tx) = loaded();
+    let k = |c: char| KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE);
+    assert!(s.leader_window(k('l')));
+    assert_eq!(s.tiles.len(), 5);
+    assert_eq!(s.focus, 4);
+    // straight back to normal keys, the new tile on the copied ticker
+    assert!(s.prompt.is_none());
+    assert_eq!(s.tiles[4].sym, s.tiles[0].sym);
+    let out = render(&mut s, 120, 30);
+    assert!(out.contains(&s.tiles[1].sym));
+    // eat: the new tile grows down over the bottom row's middle
+    s.on_key(k('m'));
+    s.on_key(k('j'));
+    assert!(render(&mut s, 120, 30).contains("eat"));
+    s.on_key(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+    assert!(s.eat.is_none());
+    assert_eq!(s.tiles.len(), s.grid.cells.len());
+    // close it again
+    let before = s.tiles.len();
+    assert!(s.leader_window(k('c')));
+    assert_eq!(s.tiles.len(), before - 1);
+    render(&mut s, 120, 30);
+}
+
+#[test]
+fn edits_save_the_layout_and_f_loads_one() {
+    let p = std::env::temp_dir().join(format!("fl-layouts-{}.json", std::process::id()));
+    let _ = std::fs::remove_file(&p);
+    // SAFETY: only this test sets this variable
+    unsafe { std::env::set_var(super::layouts::FILE_ENV, &p) };
+    let (mut s, _tx) = loaded();
+    let k = |c: char| KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE);
+    s.leader_window(k('j'));
+    let mine = s.layout_id.expect("an edit saves a layout");
+    let saved = super::layouts::load();
+    let l = saved.iter().find(|l| l.id == mine).unwrap();
+    assert_eq!(l.cells.len(), 5);
+    // a fresh screen opens the menu and loads it
+    let (mut t, _tx2) = loaded();
+    t.on_key(k('f'));
+    assert!(render(&mut t, 120, 30).contains("layouts"));
+    let at = t.menu.as_ref().unwrap().0.iter().position(|l| l.id == mine).unwrap();
+    for _ in 0..at {
+        t.on_key(k('j'));
+    }
+    t.on_key(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
+    assert!(t.menu.is_none());
+    assert_eq!(t.tiles.len(), 5);
+    assert_eq!(t.grid, s.grid);
+    super::layouts::delete(mine);
+    let _ = std::fs::remove_file(p);
 }

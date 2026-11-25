@@ -38,7 +38,7 @@ import duckdb
 from databento.common.error import BentoClientError, BentoServerError
 
 from core import db as cache_db
-from sources import keys, universe
+from sources import databento_guard, keys, universe
 
 OUT_ROOT = universe.DATA_ROOT / "market" / "databento"
 BATCH = 40  # symbols per request
@@ -290,8 +290,15 @@ def cost(client: db.Historical, ch: dict) -> float | None:
 
 def fetch(client: db.Historical, ch: dict) -> int:
     def go():
-        store = client.timeseries.get_range(
-            dataset=ch["dataset"], symbols=ch["symbols"], schema=ch["schema"], start=ch["start"], end=ch["end"], stype_in="raw_symbol"
+        store = databento_guard.get_range(
+            client,
+            cost=ch.get("cost"),
+            dataset=ch["dataset"],
+            symbols=ch["symbols"],
+            schema=ch["schema"],
+            start=ch["start"],
+            end=ch["end"],
+            stype_in="raw_symbol",
         )
         return store.to_df().reset_index()
 
@@ -329,6 +336,12 @@ def pull(tables: list[str], max_cost: float, plan_only: bool) -> None:
         return
     if total > max_cost:
         sys.exit(f"estimate ${total:.2f} is over --max-cost ${max_cost:.2f}; nothing pulled")
+    left = databento_guard.remaining()
+    if total > left:
+        sys.exit(
+            f"estimate ${total:.2f} is over the ${left:.2f} left in today's Databento budget "
+            f"(cap ${databento_guard.cap():.2f}, FL_DATABENTO_DAILY_CAP raises it); nothing pulled"
+        )
     t0, rows, spent = time.time(), 0, 0.0
     with ThreadPoolExecutor(WORKERS) as pool:
         for ch, n in zip(pending, pool.map(lambda ch: fetch(client, ch), pending)):

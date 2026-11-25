@@ -5,6 +5,17 @@ import struct
 
 from sources.intraday_stream import Feed, decode_tick, minute_of
 
+import pytest
+
+import sources.intraday_stream as stream_mod
+
+
+@pytest.fixture(autouse=True)
+def _db_cache(tmp_path, monkeypatch):
+    """Every test gets its own Databento cache directory, never the real one."""
+    monkeypatch.setattr(stream_mod, "DB_CACHE", tmp_path / "intraday_cache")
+    monkeypatch.setattr(stream_mod, "USE_DATABENTO", True)
+
 
 def _varint(n: int) -> bytes:
     out = bytearray()
@@ -139,3 +150,61 @@ def test_seed_does_not_ask_databento_past_its_license_and_falls_back_to_yahoo(mo
     seed = json.loads(capsys.readouterr().out.strip().splitlines()[-1])
     assert fetched == []  # no request the license would reject
     assert {b[0]: b for b in seed["bars"]}[yahoo_minute][1] == 1.0  # Yahoo alone
+
+
+def _fill_env(monkeypatch, now, start, calls):
+    mod = stream_mod
+    monkeypatch.setattr(mod.time, "time", lambda: now)
+    monkeypatch.setattr(mod, "session_start_epoch", lambda: start)
+    monkeypatch.setattr(mod, "db_available_end", lambda: now + 10**9)
+
+    def fake(sym, a, b):
+        calls.append((sym, a, b))
+        return {t: [t, 1.0, 1.0, 1.0, 1.0, 10] for t in range(a, b, 60)}
+
+    monkeypatch.setattr(mod, "databento_minutes", fake)
+
+
+def test_databento_minutes_are_bought_once_across_processes(monkeypatch):
+    now, start, calls = 1_700_040_000, 1_700_000_000, []
+    _fill_env(monkeypatch, now, start, calls)
+    Feed()._databento_fill("MU")
+    assert len(calls) == 1
+    # A new process (a new Feed) starts from the disk cache: nothing new to buy yet.
+    Feed()._databento_fill("MU")
+    assert len(calls) == 1
+    # Ten minutes later it asks only for the new minutes.
+    _fill_env(monkeypatch, now + 600, start, calls)
+    f = Feed()
+    f._databento_fill("MU")
+    assert len(calls) == 2
+    assert calls[1][1] == calls[0][2], "starts where the cache ends"
+    bought = [t for _, a, b in calls for t in range(a, b, 60)]
+    assert sorted(f.db_bars["MU"]) == bought, "the cached and the new minutes, each once"
+
+
+def test_a_few_new_minutes_wait_for_the_next_resync(monkeypatch):
+    now, start, calls = 1_700_040_000, 1_700_000_000, []
+    _fill_env(monkeypatch, now, start, calls)
+    f = Feed()
+    f._databento_fill("MU")
+    _fill_env(monkeypatch, now + 120, start, calls)  # two minutes later: under DB_MIN_NEW_S
+    f._databento_fill("MU")
+    assert len(calls) == 1
+
+
+def test_yahoo_only_never_asks_databento(monkeypatch):
+    now, start, calls = 1_700_040_000, 1_700_000_000, []
+    _fill_env(monkeypatch, now, start, calls)
+    monkeypatch.setattr(stream_mod, "USE_DATABENTO", False)
+    Feed()._databento_fill("MU")
+    assert calls == []
+
+
+def test_old_cache_days_are_pruned(tmp_path):
+    for day in ("2026-11-01", "2026-11-02", "2026-11-03"):
+        d = stream_mod.DB_CACHE / day
+        d.mkdir(parents=True)
+        (d / "MU.json").write_text("{}")
+    stream_mod.prune_db_cache(keep=2)
+    assert sorted(p.name for p in stream_mod.DB_CACHE.iterdir()) == ["2026-11-02", "2026-11-03"]

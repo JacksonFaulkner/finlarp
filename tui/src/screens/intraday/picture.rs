@@ -21,6 +21,8 @@ pub struct Pic<'a> {
     pub prev_close: Option<f64>,
     /// Index into `bars` of the cursor bar, if any.
     pub sel: Option<usize>,
+    /// Visual-mode selection: first and last index into `bars`, inclusive.
+    pub range: Option<(usize, usize)>,
 }
 
 /// Faint column behind a pre- or post-market bar; candles keep their up/down colours.
@@ -92,6 +94,20 @@ pub fn render_into(img: &mut RgbaImage, pic: &Pic, pal: &Palette) {
     let half = (body / 2.0).floor() as u32;
     let vmax = bars.iter().map(|b| b.volume).max().unwrap_or(0).max(1) as f64;
     let vol_h = (h - vol_top) as f64;
+    // Visual selection: a faint band behind the selected bars, under the candles.
+    if let Some((r0, r1)) = pic.range {
+        let off = pic.bars.len() - n;
+        let (r0, r1) = (r0.saturating_sub(off), r1.saturating_sub(off).min(n - 1));
+        if r0 <= r1 && r1 < n {
+            let x0 = (r0 as f64 * slot) as u32;
+            let x1 = (((r1 + 1) as f64 * slot) as u32).saturating_sub(1).max(x0);
+            fill_rect(raw, w, h, x0, 0, x1, h - 1, blend(pal.accent, pal.bg, 0.12));
+            // crisp edges, so the selection reads as a span rather than a smudge
+            let edge = blend(pal.accent, pal.bg, 0.55);
+            fill_rect(raw, w, h, x0, 0, x0, h - 1, edge);
+            fill_rect(raw, w, h, x1, 0, x1, h - 1, edge);
+        }
+    }
     for (i, b) in bars.iter().enumerate() {
         let cx = ((i as f64 + 0.5) * slot) as u32;
         if let Some(tint) = session_tint(b.session, pal) {
@@ -360,6 +376,7 @@ mod tests {
                         vwap,
                         prev_close,
                         sel: sel.filter(|s| *s < n.max(1)),
+                        range: None,
                     };
                     let want = render_reference(&pic, w, h, &p).to_rgba8();
                     let got = render(&pic, w, h, &p).to_rgba8();
@@ -385,6 +402,7 @@ mod tests {
                 vwap: None,
                 prev_close: None,
                 sel: None,
+                range: None,
             },
             40,
             40,
@@ -408,6 +426,7 @@ mod tests {
                 vwap,
                 prev_close: None,
                 sel: None,
+                range: None,
             },
             40,
             40,
@@ -433,6 +452,7 @@ mod tests {
                 vwap: None,
                 prev_close: None,
                 sel: None,
+                range: None,
             },
             30,
             30,
@@ -449,6 +469,7 @@ mod tests {
                 vwap: None,
                 prev_close: None,
                 sel: None,
+                range: None,
             },
             20,
             10,
@@ -490,6 +511,7 @@ mod tests {
                 vwap: Some(100.6),
                 prev_close: Some(99.5),
                 sel: Some(40),
+                range: None,
             },
             480,
             260,

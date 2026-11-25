@@ -302,7 +302,7 @@ def cmd_transactions_cached() -> dict:
     return {"transactions": db.get_all_cached_transactions()}
 
 
-def cmd_transactions(session) -> dict:
+def cmd_transactions(session, fresh: bool = False) -> dict:
     accounts_resp = session.get(BASE_URL + "/v1/accounts/list.json", params={})
     accounts_resp.raise_for_status()
     accounts = (
@@ -319,7 +319,7 @@ def cmd_transactions(session) -> dict:
         if not account_id_key or not account_id:
             continue
 
-        cached = db.get_cached_transactions(account_id)
+        cached = None if fresh else db.get_cached_transactions(account_id)
         if cached is not None:
             result.extend(cached)
             continue
@@ -456,6 +456,9 @@ def _dispatch(cmd: str, session) -> dict:
         return cmd_quote(session, sys.argv[2])
     if cmd == "transactions":
         return cmd_transactions(session)
+    if cmd == "transactions_fresh":
+        # the TUI's R: skip the cache TTL and pull from E*TRADE now
+        return cmd_transactions(session, fresh=True)
     print(f"unknown command: {cmd}", file=sys.stderr)
     sys.exit(1)
 

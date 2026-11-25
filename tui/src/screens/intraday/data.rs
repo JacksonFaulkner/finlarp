@@ -26,7 +26,7 @@ pub const STEPS: [i64; 3] = [1, 5, 15];
 /// the regular-session open Yahoo reports (no tz database needed).
 const OPEN_SECS: i64 = 9 * 3600 + 1800;
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Series {
     bars: BTreeMap<i64, Bar1>,
     pub prev_close: Option<f64>,
@@ -188,6 +188,27 @@ impl Series {
         }
         let (pv, v) = self.sum_pv(self.bars.values());
         (v > 0.0).then(|| pv / v)
+    }
+
+    /// Every minute's close, oldest first: (minute start, close).
+    pub fn closes(&self) -> Vec<(i64, f64)> {
+        self.bars.values().map(|b| (b.t, b.c)).collect()
+    }
+
+    /// The regular session's low and high so far; before the open, over whatever has traded.
+    pub fn day_range(&self) -> Option<(f64, f64)> {
+        let span = |it: &mut dyn Iterator<Item = &Bar1>| {
+            it.fold(None, |acc: Option<(f64, f64)>, b| {
+                Some(acc.map_or((b.l, b.h), |(l, h)| (l.min(b.l), h.max(b.h))))
+            })
+        };
+        let regular = span(
+            &mut self
+                .bars
+                .values()
+                .filter(|b| self.reg.is_some() && self.in_session(b.t)),
+        );
+        regular.or_else(|| span(&mut self.bars.values()))
     }
 
     fn sum_pv<'a>(&self, bars: impl Iterator<Item = &'a Bar1>) -> (f64, f64) {

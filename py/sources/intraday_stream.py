@@ -6,6 +6,12 @@ bars here. A slow REST resync (RESYNC_S) heals anything the socket missed. The R
 aggregates 1m into 5m/15m, so switching interval never touches the network.
 
     uv run python -m sources.intraday_stream --serve
+    uv run python -m sources.intraday_stream --serve --yahoo-only    (never asks Databento)
+
+Databento minutes are bought once: every fetch is saved to a per-day cache
+(data/market/databento/intraday_cache/<ET date>/<SYM>.json), a new process starts from it,
+and a symbol is asked again only once DB_MIN_NEW_S of new minutes are available (Yahoo covers
+the tail meanwhile). Every request goes through sources.databento_guard ($5/day kill switch).
 
 stdin (one JSON object per line):
     {"cmd": "set", "symbols": ["MKSI", "WDC"]}     replace the watched symbols
@@ -27,12 +33,14 @@ import sys
 import threading
 import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import Any
 from zoneinfo import ZoneInfo
 
 import certifi
 import websocket
 
+from core.paths import DATA_ROOT
 from sources import yahoo, yahoo_live
 
 WS_URL = "wss://streamer.finance.yahoo.com/?version=2"
@@ -44,7 +52,52 @@ PING_S = 20
 DB_DATASET = "XNAS.BASIC"
 DB_SCHEMA = "ohlcv-1m"
 DB_LAG_S = 10 * 60
+# Ask Databento again only when this much new history is out; Yahoo fills the gap meanwhile.
+DB_MIN_NEW_S = 5 * 60
+DB_CACHE = DATA_ROOT / "market" / "databento" / "intraday_cache"
+DB_CACHE_DAYS = 5
+# --yahoo-only: screens that only need quotes (the universe monitor) never pay Databento.
+USE_DATABENTO = True
 _db_client: Any = None
+
+
+def _today_et() -> str:
+    return datetime.now(ZoneInfo("America/New_York")).date().isoformat()
+
+
+def _cache_file(sym: str) -> Path:
+    return DB_CACHE / _today_et() / f"{sym.replace('/', '_')}.json"
+
+
+def load_db_cache(sym: str) -> tuple[int, dict[int, list]] | None:
+    """Today's cached Databento minutes for `sym`: (covered up to, bars by minute), or None."""
+    try:
+        data = json.loads(_cache_file(sym).read_text())
+        return int(data["until"]), {int(t): row for t, row in data["bars"].items()}
+    except (OSError, ValueError, KeyError):
+        return None
+
+
+def save_db_cache(sym: str, until: int, bars: dict[int, list]) -> None:
+    path = _cache_file(sym)
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        tmp = path.with_suffix(".tmp")
+        tmp.write_text(json.dumps({"until": until, "bars": {str(t): r for t, r in bars.items()}}))
+        tmp.replace(path)
+    except OSError as e:  # a cache that can't be written just means asking again next run
+        print(f"databento cache {sym}: {e}", file=sys.stderr, flush=True)
+
+
+def prune_db_cache(keep: int = DB_CACHE_DAYS) -> None:
+    """Drops cache days beyond the newest `keep`."""
+    if not DB_CACHE.exists():
+        return
+    days = sorted(p for p in DB_CACHE.iterdir() if p.is_dir())
+    for old in days[:-keep] if keep else days:
+        for f in old.iterdir():
+            f.unlink(missing_ok=True)
+        old.rmdir()
 
 
 def session_start_epoch() -> int:
@@ -88,7 +141,10 @@ def databento_minutes(sym: str, start: int, end: int) -> dict[int, list]:
 
     if _db_client is None:
         _db_client = db.Historical(keys.require("DATABENTO_API_KEY"))
-    df = _db_client.timeseries.get_range(
+    from sources import databento_guard
+
+    df = databento_guard.get_range(
+        _db_client,
         dataset=DB_DATASET,
         schema=DB_SCHEMA,
         symbols=[sym],
@@ -186,12 +242,20 @@ class Feed:
 
     # ---- REST seed / resync --------------------------------------------------
     def _databento_fill(self, sym: str) -> None:
-        """Extend the Databento minute cache for `sym` up to DB_LAG_S ago; fetches only new minutes."""
+        """Extend the Databento minute cache for `sym` up to DB_LAG_S ago. Asks only for minutes
+        not already bought (in memory or in today's disk cache), and only once DB_MIN_NEW_S of them
+        are out."""
+        if not USE_DATABENTO:
+            return
+        if sym not in self.db_until and (cached := load_db_cache(sym)):
+            with self.lock:
+                self.db_until[sym], self.db_bars[sym] = cached[0], dict(cached[1])
+        known = sym in self.db_until
         start = self.db_until.get(sym, session_start_epoch())
         try:
             # never ask past what the license covers: an out-of-range request is rejected every resync
             end = min(minute_of(time.time() - DB_LAG_S), minute_of(db_available_end()))
-            if end <= start:
+            if end <= start or (known and end - start < DB_MIN_NEW_S):
                 return
             rows = databento_minutes(sym, start, end)
         except Exception as e:  # no key, network, or Databento error: the seed falls back to Yahoo
@@ -200,6 +264,8 @@ class Feed:
         with self.lock:
             self.db_bars.setdefault(sym, {}).update(rows)
             self.db_until[sym] = end
+            snapshot = dict(self.db_bars[sym])
+        save_db_cache(sym, end, snapshot)
 
     def seed(self, sym: str) -> None:
         try:
@@ -358,9 +424,12 @@ class Feed:
 
 
 def main() -> None:
+    global USE_DATABENTO
     if "--serve" not in sys.argv:
         print(__doc__)
         return
+    USE_DATABENTO = "--yahoo-only" not in sys.argv
+    prune_db_cache()
     Feed().run()
 
 

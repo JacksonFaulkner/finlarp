@@ -51,11 +51,22 @@ pub struct Stream {
 impl Stream {
     /// Spawn the feed. Never fails: spawn errors arrive as an `Event::Status`.
     pub fn spawn() -> Self {
+        Self::spawn_with(&[])
+    }
+
+    /// A feed that never asks Databento: Yahoo's quotes only, for screens that need prices
+    /// and day ranges but not the minute history (the universe monitor).
+    pub fn spawn_yahoo_only() -> Self {
+        Self::spawn_with(&["--yahoo-only"])
+    }
+
+    fn spawn_with(extra: &[&str]) -> Self {
         let (tx, rx) = mpsc::channel();
         let plugin = crate::pyrun::plugin_dir();
         let child = Command::new(crate::pyrun::python(&plugin))
             .arg(plugin.join("py/sources/intraday_stream.py"))
             .arg("--serve")
+            .args(extra)
             .current_dir(&plugin)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

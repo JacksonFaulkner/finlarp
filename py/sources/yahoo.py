@@ -16,6 +16,8 @@ import json
 import sys
 import time
 
+from zoneinfo import ZoneInfo
+
 import requests
 
 from core import db
@@ -30,6 +32,7 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 # 401 that triggers one fresh handshake.
 CRUMB_CACHE_PATH = YAHOO_CRUMB_PATH
 CRUMB_CACHE_TTL_SECONDS = 12 * 60 * 60
+NY = ZoneInfo("America/New_York")
 
 
 def new_session() -> requests.Session:
@@ -125,6 +128,49 @@ def cmd_quote(symbols: str) -> dict:
         resp.raise_for_status()
         rows.extend(parse_quotes(resp.json()))
     return {"quotes": rows}
+
+
+def since_close(row: dict, today) -> dict | None:
+    """One parse_quotes row -> the move from the last regular close before `today` (an ET
+    date) to the latest print, pre/post-market included. On a Monday morning that is Friday's
+    close to the pre-market print; once Monday's session has traded, Friday's close is the
+    previous close and the base stays put through the regular and after-hours sessions."""
+    from datetime import datetime
+
+    def day(ts):
+        return datetime.fromtimestamp(ts, NY).date() if ts else None
+
+    reg_t = row.get("regular_time")
+    last = row.get("last_trade")
+    if not last or not reg_t:
+        return None
+    traded_today = day(reg_t) == today
+    base = row.get("previous_close") if traded_today else last
+    price, price_t = last, reg_t
+    # an extended-hours print newer than the regular one is the latest price
+    for p, t in ((row.get("pre_price"), row.get("pre_time")), (row.get("post_price"), row.get("post_time"))):
+        if p and t and t > price_t:
+            price, price_t = p, t
+    if not base or base <= 0:
+        return None
+    return {
+        "symbol": row["symbol"],
+        "base": base,
+        "price": price,
+        "price_time": price_t,
+        "pct": (price / base - 1) * 100,
+        "session": row.get("session"),
+    }
+
+
+def cmd_since_close(symbols: str) -> dict:
+    """Every symbol's move from the last close before today to now (see since_close)."""
+    from datetime import datetime
+
+    today = datetime.now(NY).date()
+    rows = cmd_quote(symbols)["quotes"]
+    out = [m for r in rows if (m := since_close(r, today))]
+    return {"asof": int(time.time()), "moves": out}
 
 
 def cmd_history(symbol: str, range_: str, interval: str, max_age_hours: float | None = None) -> dict:
@@ -244,6 +290,9 @@ def main() -> None:
     quote_p = sub.add_parser("quote")
     quote_p.add_argument("symbols")
 
+    since_p = sub.add_parser("since-close", help="move from the last close before today to the latest print")
+    since_p.add_argument("symbols")
+
     screen_p = sub.add_parser("screen")
     screen_p.add_argument("--sector")
     screen_p.add_argument("--industry")
@@ -269,6 +318,8 @@ def main() -> None:
 
     if args.cmd == "quote":
         output = cmd_quote(args.symbols)
+    elif args.cmd == "since-close":
+        output = cmd_since_close(args.symbols)
     elif args.cmd == "screen":
         output = cmd_screen(args.sector, args.industry, args.top)
     elif args.cmd == "history":
