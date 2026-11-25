@@ -22,10 +22,14 @@ without a source is treated as a bug. See [`tui/ARCHITECTURE.md`](tui/ARCHITECTU
 | `canslim` | CANSLIM scorecard, each letter graded with its evidence |
 | `search` | Full-text search over 10-K/20-F text, earnings releases, guidance and patents |
 | `filings` | EDGAR 8-K / 6-K index, filtered with `t:`, `item:` and `form:`. Enter opens the filing in the browser |
-| `earnings` | Structured earnings report (proof of concept, MRVL only) |
+| `scratch` | Research pad for a term with no screen of its own (HBF, CoWoS): every ticker whose filings, releases or patents match, ranked, with pins kept per term |
+| `candles` | Daily OHLC candles and volume for one ticker |
 | `events` | AI-stock catalyst calendar (month / week / day). `T` adds the tweets that name a ticker, `f` filters them by ticker, Enter on a tweet opens it |
 | `universe` | AI universe heatmap: sectors, sub-sectors, regions and funds, tiles coloured by price move over a chosen window. `p` switches to a pie |
-| `diagrams` | Animated process diagrams: chip fab flow, memory, packaging, fiber, power, network and cooling. A page per node, zoom-ins per page, and a 3D bell jar in the polysilicon zoom |
+| `diagrams` | Animated process diagrams: chip fab flow, memory, packaging, fiber, power, network and cooling. A page per node, zoom-ins per page, and 3D cut-aways (bell jar, DRAM, packaging, fiber) |
+| `z` | Diagrams built in the chat: Claude writes a diagram file (`data/z/*.json`), the canvas renders it in 3D beside the conversation. `t` switches between inline replies and a Claude Code pane |
+| `figgie` | The Figgie card-trading game against 3 or 4 bots |
+| `video` | Plays the recordings in `docs/screens` inside the terminal |
 | `sources` | The providers and datasets behind the screens. Enter searches a dataset |
 | `portfolio` | Your account: equity vs benchmark, drawdown, positions, daily % change history (E*TRADE; some tabs are placeholders) |
 | `chart` | Daily portfolio value over time, from the E*TRADE snapshots |
@@ -40,7 +44,7 @@ Screens that show your account, notes or a live feed (`portfolio`, `chart`, `tra
 | ![home: the keyboard is the menu](docs/screens/home.gif) | ![filings: EDGAR 8-K index, filtered by ticker](docs/screens/filings.gif) |
 | ![canslim: each letter graded with its evidence](docs/screens/canslim.gif) | ![search: full-text search with a preview of the matching passage](docs/screens/search.gif) |
 | ![universe: AI universe heatmap](docs/screens/universe.gif) | ![events: catalyst calendar](docs/screens/events.gif) |
-| ![earnings: structured earnings report](docs/screens/earnings.gif) | ![diagrams: polysilicon overview, then the fluidized-bed close-up](docs/screens/diagrams.gif) |
+| ![diagrams: polysilicon overview, then the fluidized-bed close-up](docs/screens/diagrams.gif) | ![dossier: one-ticker briefing](docs/screens/dossier.gif) |
 
 The Siemens bell jar from the polysilicon diagram (zoom `c`), in 3D:
 
@@ -65,7 +69,8 @@ rasterizer, at a finer resolution.
 
 ```
 tui/                 Rust: terminal UI (ratatui); reads the DuckDB file
-tools/poly3d/        Rust: 3D bell-jar rasterizer (shared with the TUI) and the offline clip for the docs
+tools/poly3d/        Rust: CPU 3D rasterizer for the diagram rigs (shared with the TUI) and the offline clips for the docs
+tools/pbr3d/         Rust: headless wgpu PBR renderer for the realistic machine overviews (glTF in, PNG out)
 docs/screens/        GIFs of the screens above: py/jobs/record_screens.py, plus tools/poly3d for the bell jar
 py/                  Python: everything that fetches or computes data
   core/                DuckDB cache (db.py) and pydantic schemas
@@ -104,6 +109,7 @@ fl                        # home menu
 fl dossier MRVL           # open a screen directly
 fl search t:MRVL guidance # the rest of the line is the screen argument
 fl video                  # play the recordings in docs/screens inside the terminal
+fl z check data/z/*.json  # validate Z diagram files (fl z render draws one to a PNG)
 ```
 
 Press `?` on any screen for its keys.
