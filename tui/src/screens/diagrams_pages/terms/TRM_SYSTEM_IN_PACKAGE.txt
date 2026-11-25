@@ -1,0 +1,11 @@
+# 1. What it is: several chips in one module
+
+   ┌───────────────────────────┐
+   │ [logic]   [memory]        │
+   │ [RF]      [passives]      │
+   │ one module, one footprint │
+   └───────────────────────────┘
+
+# 2. Why AI cares
+
+Putting memory and logic in one module shortens the wiring between them. Its main limit is that each die in the module must pass test before the whole module is built.

@@ -1,0 +1,13 @@
+# 1. What it is: kilowatts in one rack
+
+   ┌────────────┐     ┌───────────────┐     ┌─────────────┐
+   │ ENTERPRISE │     │ AI (H100)     │     │ GB200 NVL72 │
+   │ 5-15 kW    │ ──▶ │ 40-60 kW      │ ──▶ │ ~120-130 kW │
+   │ air cooled │     │ air or liquid │     │ liquid only │
+   └────────────┘     └───────────────┘     └─────────────┘
+
+  (next-gen racks are planned at several hundred kW)
+
+# 2. Why AI cares
+
+Density sets how much cooling and power gear each rack needs and which buildings can host it. It drives the shift to liquid cooling and higher-voltage power.

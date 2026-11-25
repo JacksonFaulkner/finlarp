@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HARDWARE_ROOT_OF_TRUST",
+ "script": "terms/trm_hardware_root_of_trust.py",
+ "beats": [
+  {
+   "caption": "A small security chip on the board checks everything first",
+   "text": "Every AI server carries a hardware root of trust: a separate chip that holds keys and checks the rest of the board before any of it runs. It is typically a trusted platform module (TPM), a secure element, or an on-die security processor, and it is the one part the system is told to believe."
+  },
+  {
+   "caption": "Cut open: unchangeable boot code, fused keys and a crypto engine",
+   "text": "On the die, the ROM holds the first boot code and cannot be rewritten. Key fuses are burned once at the factory, so the keys cannot be read out or changed. The crypto engine does the hashing and signature checks, and keeps the measurement registers that record what has run."
+  },
+  {
+   "caption": "Each stage is measured into the root before it runs",
+   "text": "The boot runs as a chain: ROM, firmware, bootloader, operating system. Before each stage runs, its hash is folded into a measurement register in the root. The register can only be extended, never reset, so it records the exact sequence of code that started."
+  },
+  {
+   "caption": "A changed stage fails its check, and the boot stops",
+   "text": "If a firmware image has been altered, its signature or hash no longer matches and the chain halts. The machine does not run the bad code, and the mismatch is reported to the verifier. Attackers gain nothing by flashing it."
+  },
+  {
+   "caption": "The signed report lets a buyer check the hardware before trusting it",
+   "text": "The root signs its measurements into a report. The buyer's verifier checks the signature against the chip maker's certificate and only then releases model weights or keys. Makers: Infineon (IFX.DE), NXP (NXPI), Microchip (MCHP), and NVIDIA (NVDA) for its accelerator roots."
+  }
+ ]
+}

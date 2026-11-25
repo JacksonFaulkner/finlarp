@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SYSTEM_IN_PACKAGE",
+ "script": "terms/trm_system_in_package.py",
+ "beats": [
+  {
+   "caption": "A system in package puts a whole circuit into one module",
+   "text": "A normal board builds a function from separate packages: a processor, memory, a radio chip, a crystal and dozens of small capacitors, each soldered on with board traces between them. A system in package (SiP) puts all of those inside one module, so the board just sees one part. The module can take a fraction of the area."
+  },
+  {
+   "caption": "Inside: several dies and passives on one small substrate",
+   "text": "The base is a thin laminate substrate with its own copper layers. Bare dies sit on it: a processor flipped onto solder bumps, memory dies stacked and wire-bonded in steps, an RF die, plus capacitors and inductors soldered straight on. Each die can come from a different fab and process, which one big chip cannot do."
+  },
+  {
+   "caption": "The module wires its own dies together",
+   "text": "Signals run die to die through the substrate's traces and bond wires that are only millimetres long, instead of centimetres of board. Shorter paths mean less power, less noise and faster links, and the maker tests the finished function before it ships."
+  },
+  {
+   "caption": "Mold and a metal shield seal it; balls connect it to the board",
+   "text": "Everything is encapsulated in mold compound, and a sputtered metal shield over the top and internal fence walls keep radio noise in and out. Solder balls underneath connect the module to the main board in one reflow step, saving assembly steps for the phone or device maker."
+  },
+  {
+   "caption": "Phones, wearables and networking use it; AI packages use cousins",
+   "text": "Watches, earbuds and phone radio front-ends are mostly SiP. Optical modules and edge devices use it too, and multi-die AI packages (chiplets on interposers) are related heterogeneous integration done at finer pitch. Related: Amkor (AMKR), ASE (ASX)."
+  }
+ ]
+}

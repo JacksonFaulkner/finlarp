@@ -1,0 +1,13 @@
+# 1. What it is: DORA
+
+   ┌────────────────────────┐       ┌─────────────────────────┐       ┌──────────────────────┐
+   │ DORA                   │       │ banks, insurers, funds: │       │ cloud and AI vendors │
+   │ EU rule on ICT         │──────▶│ ICT risk and            │──────▶│ critical third-party │
+   │ operational resilience │       │ incident reporting      │       │ oversight            │
+   └────────────────────────┘       └─────────────────────────┘       └──────────────────────┘
+
+  (applies from January 2025)
+
+# 2. Why AI cares
+
+EU financial firms must govern their cloud and AI providers under DORA, so those vendors face extra contract terms such as audit rights and exit plans. Providers designated as critical third parties can be supervised directly by EU authorities. That adds compliance work for hyperscalers selling into European banks.

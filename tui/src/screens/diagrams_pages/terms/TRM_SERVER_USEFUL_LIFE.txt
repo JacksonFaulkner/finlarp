@@ -1,0 +1,12 @@
+# 1. What it is: how many years a server's cost is spread over
+
+   ┌─────────────┐    ┌─────────────────┐    ┌────────────────┐
+   │ SERVER COST │───▶│ USEFUL LIFE     │───▶│ DEPRECIATION   │
+   │ $ capex     │    │ 3 / 5 / 6 years │    │ yearly expense │
+   └─────────────┘    └─────────────────┘    └────────────────┘
+
+  (cost / life = yearly expense; longer life = lower expense, higher profit)
+
+# 2. Why it matters
+
+Depreciation is becoming the largest cost line for AI clouds. A one-year change in useful life can move operating income by billions.

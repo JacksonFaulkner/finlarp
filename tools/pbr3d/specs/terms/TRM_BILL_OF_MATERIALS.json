@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BILL_OF_MATERIALS",
+ "script": "terms/trm_bill_of_materials.py",
+ "beats": [
+  {
+   "caption": "A BOM lists every part that goes into a product",
+   "text": "A bill of materials names each component, how many are needed and who supplies it. For an AI server board that means the GPU, HBM memory stacks, voltage regulators, capacitors, connectors and optics. Purchasing, planning and costing all run off this list."
+  },
+  {
+   "caption": "Add up the lines and you get the BOM cost",
+   "text": "Each line has a unit price, and quantity times price summed over the list is the BOM cost. In an AI server the GPU and memory dominate: they can be most of the bill, while hundreds of small parts add only a few percent."
+  },
+  {
+   "caption": "One long-lead part caps how many systems get built",
+   "text": "A board cannot ship until every line is in hand. If memory or optics take months to arrive, finished boards stop at the count the scarcest part allows, and the rest sit half built on the floor."
+  },
+  {
+   "caption": "A BOM change moves margin without changing the product",
+   "text": "If one line gets dearer, say memory prices rise, the BOM cost goes up while the selling price may not. The margin shrinks even though the product looks the same. Swapping a supplier or part can push the other way."
+  },
+  {
+   "caption": "Read BOM cost and long-lead parts behind server margins",
+   "text": "When builders talk about component costs, memory pricing or supply-gated shipments, they are talking about the BOM. Pass-through GPU cost can raise revenue while thinning margin. Related: Jabil (JBL), Flex (FLEX), Super Micro (SMCI)."
+  }
+ ]
+}

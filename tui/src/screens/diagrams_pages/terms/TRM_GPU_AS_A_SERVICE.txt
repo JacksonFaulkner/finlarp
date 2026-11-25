@@ -1,0 +1,13 @@
+# 1. What it is: rent GPUs instead of buying them
+
+   ┌─────────────┐    ┌────────────────┐    ┌─────────────┐
+   │ GPU CLOUD   │───▶│ DATA CENTER    │───▶│ CUSTOMER    │
+   │ buys GPUs,  │    │ power, cooling │    │ AI lab pays │
+   │ debt funded │    │                │    │ $/GPU-hour  │
+   └─────────────┘    └────────────────┘    └─────────────┘
+
+  (contract backlog and utilization drive the economics)
+
+# 2. Risk
+
+If rental prices fall faster than the GPUs depreciate, returns shrink. Customer concentration is high: a few labs account for most revenue.

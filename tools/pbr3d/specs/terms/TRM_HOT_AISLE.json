@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HOT_AISLE",
+ "script": "terms/trm_hot_aisle.py",
+ "beats": [
+  {
+   "caption": "Servers breathe front to back, and the hall has to keep the air apart",
+   "text": "Air-cooled servers pull cool air in at the front and push hot air out the back. Racks are lined up in rows with fronts facing fronts (cold aisles) and backs facing backs (hot aisles). Left open, hot exhaust spills over the tops and round the row ends back into the server intakes, so the cooling plant has to over-chill everything to make up for it."
+  },
+  {
+   "caption": "Containment seals one aisle with a roof and doors",
+   "text": "Aisle containment closes off either the hot or the cold aisle with roof panels and sliding end doors. Here the hot aisle is sealed and a chimney ducts it straight into the ceiling return plenum. Blanking panels in empty rack slots stop air sneaking through the racks themselves."
+  },
+  {
+   "caption": "One clean loop: cold under the floor, hot through the ceiling",
+   "text": "The CRAH (computer room air handler) blows cold air into the raised floor; it rises through perforated tiles into the cold aisle, through the servers, into the sealed hot aisle, up to the ceiling and back to the CRAH's coils, which dump the heat into chilled water. No stream mixes with the other."
+  },
+  {
+   "caption": "Kept apart, the air can run warmer and the fans slower",
+   "text": "Without mixing, supply air can be 24-27 C instead of 18 C and the return comes back hotter, which makes the chillers and economisers far more efficient and lets fans slow down. That trims PUE (total facility power over IT power) by a tenth or more, a large saving at tens of megawatts."
+  },
+  {
+   "caption": "In AI halls, liquid takes the GPUs and air handles the rest",
+   "text": "An AI rack at 130 kW sends most of its heat to liquid through cold plates and a CDU, but some heat is still air-side, and network switches, storage and older servers stay air-cooled. So contained aisles remain, beside liquid loops. Related: Vertiv (VRT), Schneider Electric, nVent (NVT)."
+  }
+ ]
+}

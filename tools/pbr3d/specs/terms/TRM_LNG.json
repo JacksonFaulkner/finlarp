@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_LNG",
+ "script": "terms/trm_lng.py",
+ "beats": [
+  {
+   "caption": "LNG is natural gas chilled to -162 C until it turns liquid",
+   "text": "Gas from the field is cleaned of water, CO2 and heavy parts, then compressed and run through a cold box where refrigerant loops pull it down to about -162 C. At that temperature methane condenses into a clear liquid. A big liquefaction train burns roughly a tenth of its gas just running the compressors."
+  },
+  {
+   "caption": "As a liquid it takes about 600 times less space",
+   "text": "The same molecules that fill 600 cubic meters as gas fit in one cubic meter as liquid. That shrink is the whole point: a pipeline cannot cross an ocean, but a tank of liquid can. The liquid must stay cold, so tanks are heavily insulated and a little boils off every day."
+  },
+  {
+   "caption": "Carriers with insulated tanks ship it across oceans",
+   "text": "An LNG carrier holds about 170,000 cubic meters, in spherical Moss tanks or membrane tanks inside the hull. Boil-off gas often fuels the ship's own engines. A trip from the US Gulf to Europe takes around two weeks, to Asia about a month."
+  },
+  {
+   "caption": "Terminals warm it back to gas for turbines and the grid",
+   "text": "At the import terminal, seawater or burners warm the liquid back into gas in vaporizers, and it enters the pipeline grid. Gas turbines turn it into electricity, and many new AI data centers are planned around gas-fired power, either from the grid or from turbines on site."
+  },
+  {
+   "caption": "A long chain with few plants, so LNG prices reach power bills",
+   "text": "Liquefaction trains cost billions and take years to build, so supply is lumpy and a few export plants set the market. When LNG prices jump, power prices in importing regions follow, and that reaches the cost of running data centers. Related: Cheniere Energy (LNG), Venture Global (VG), Sempra (SRE)."
+  }
+ ]
+}

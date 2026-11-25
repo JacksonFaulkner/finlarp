@@ -1,0 +1,13 @@
+# 1. What it is: a tax on goods crossing the border
+
+   ┌───────────────┐    ┌───────────────┐    ┌─────────────────┐
+   │ FOREIGN MAKER │───▶│ US CUSTOMS    │───▶│ US BUYER        │
+   │ server / chip │    │ tariff % paid │    │ higher cost     │
+   │               │    │ by importer   │    │ or lower margin │
+   └───────────────┘    └───────────────┘    └─────────────────┘
+
+  (exemptions and country-of-origin rules decide who actually pays)
+
+# 2. Business effect
+
+Companies either pass tariffs on in price or absorb them in margin. Watch for pull-ahead demand before a tariff date and a dip after.

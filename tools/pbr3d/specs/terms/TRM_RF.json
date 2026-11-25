@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RF",
+ "script": "terms/trm_rf.py",
+ "beats": [
+  {
+   "caption": "RF chips sit between the antenna and the modem",
+   "text": "This GPU board has no radio: RF (radio-frequency) chips live in phones, base stations, Wi-Fi gear and satellites. Beside the board is a phone's RF front-end module, the block between antenna and modem, drawn large with its shield lifted off."
+  },
+  {
+   "caption": "Inside: amplifiers, a switch and a row of filters",
+   "text": "On a small laminate sit a power amplifier (PA, often gallium arsenide) to transmit, a low-noise amplifier (LNA) to receive, an antenna switch to pick the band, and acoustic filters (BAW/SAW) that pass only one band each. A 5G phone needs dozens of bands, so it carries many filters."
+  },
+  {
+   "caption": "Transmit: the PA boosts the signal out through a filter",
+   "text": "The transceiver's weak signal enters the PA, leaves a few hundred milliwatts strong, passes the band's filter so it does not spill into neighbours, then the switch routes it to the antenna, which radiates it."
+  },
+  {
+   "caption": "Receive: a faint signal, cleaned and amplified",
+   "text": "Incoming signals can be a billionth of a milliwatt. The switch sends them through the right filter to the LNA, which lifts them while adding as little noise as possible before the transceiver digitizes them."
+  },
+  {
+   "caption": "A BAW filter: a vibrating sliver of crystal",
+   "text": "Each filter is built from bulk acoustic wave (BAW) resonators: a thin piezoelectric film (aluminium nitride) between metal electrodes, over a mirror stack. It rings mechanically at one GHz frequency, so only that band passes. Revenue tracks handset cycles and band counts. Makers: Qorvo (QRVO), Skyworks (SWKS), Broadcom (AVGO), Qualcomm (QCOM), Murata."
+  }
+ ]
+}

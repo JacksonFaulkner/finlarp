@@ -1,0 +1,10 @@
+{
+  "label": "WFE",
+  "term": "WFE",
+  "aliases": [
+    "wafer fab equipment",
+    "fab equipment",
+    "wafer fabrication equipment"
+  ],
+  "kind": "fab"
+}

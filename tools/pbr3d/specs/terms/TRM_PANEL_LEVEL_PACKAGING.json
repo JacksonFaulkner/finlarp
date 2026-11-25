@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_PANEL_LEVEL_PACKAGING",
+ "script": "terms/trm_panel_level_packaging.py",
+ "beats": [
+  {
+   "caption": "A 300 mm wafer fits only ~12 big AI packages",
+   "text": "Advanced AI packages such as CoWoS put a GPU and several HBM stacks on a silicon or organic interposer that can be 50-80 mm across. Square sites that size tile badly inside a 300 mm circle: here only 12 of 55 mm fit, and the curved edge is wasted. As packages grow, the waste grows."
+  },
+  {
+   "caption": "A 510 x 515 mm panel holds 64: ~5x more",
+   "text": "Panel-level packaging builds the same packages on a large rectangle, glass or organic, borrowed from PCB and display-glass tooling. A 510 x 515 mm panel has about 3.7x the area of a 300 mm wafer and wastes almost no edge, so it fits 64 of these sites against 12."
+  },
+  {
+   "caption": "One pass treats every site: cost per package falls",
+   "text": "Most steps (coating, exposure, plating, molding, placement) take roughly the same time per substrate, whatever its size. More packages per substrate means more packages per tool-hour and less edge scrap, which is why TSMC, ASE and others see panels as the way to cut the cost of big AI packages."
+  },
+  {
+   "caption": "Big thin panels warp, and every defect costs more",
+   "text": "A half-metre sheet of thin mold or glass bends as it heats and cools, so features at the edges drift out of focus and alignment. Panel lithography and handling tools are less mature than wafer tools, and a bad panel scraps more packages at once. Yield, warpage and tooling are the hurdles."
+  },
+  {
+   "caption": "Early volume now: pilots across OSATs and foundries",
+   "text": "Samsung and PTI already run fan-out panels for smaller chips; for AI-size packages TSMC (CoPoS), ASE, Amkor and Intel (glass core) are building pilot lines, with volume expected late in the decade. Related: Amkor (AMKR), ASE (ASX), TSMC (TSM)."
+  }
+ ]
+}

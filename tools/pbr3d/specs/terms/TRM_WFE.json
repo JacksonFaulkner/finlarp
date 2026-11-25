@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_WFE",
+ "script": "terms/trm_wfe.py",
+ "beats": [
+  {
+   "caption": "WFE is the tools that make chips, inside every fab",
+   "text": "Wafer fab equipment (WFE) is the machinery that processes wafers: lithography, deposition, etch, cleaning, implant, polishing and process control. A leading-edge fab holds a thousand or more tools, and wafers shuttle between them in sealed pods on overhead rails for months. Equipment is most of what a new fab costs."
+  },
+  {
+   "caption": "Lithography prints each layer's pattern",
+   "text": "A scanner shines light through a photomask and shrinks the pattern onto the wafer's resist, field by field. EUV scanners use 13.5nm light made by blasting tin droplets with a laser and steered by mirrors, cost roughly $200M+ each, and come from one company: ASML (ASML). Litho is about a fifth to a quarter of WFE."
+  },
+  {
+   "caption": "Deposition lays films down; etch carves them",
+   "text": "Deposition chambers grow thin films of metal or insulator a few atoms at a time (CVD, ALD, PVD). Etch chambers use plasma to cut the printed pattern into those films. Each chip layer cycles through both, so they are the biggest slice of WFE: Applied Materials (AMAT), Lam Research (LRCX) and Tokyo Electron lead."
+  },
+  {
+   "caption": "Process control inspects and measures every step",
+   "text": "Inspection and metrology tools scan wafers with light and electron beams to find defects and check film thickness and overlay. Catching a problem early saves whole lots of wafers, so spending here rises with each node's complexity. KLA (KLAC) dominates this segment."
+  },
+  {
+   "caption": "About $100B a year, driven by foundry and memory capex",
+   "text": "WFE is the bulk of chipmakers' capital spending, roughly $100B+ a year. It follows foundry and memory capex: AI demand for leading-edge logic (TSMC) and HBM memory (SK hynix, Micron, Samsung) lifts orders, and China has been a large buyer. Related: ASML (ASML), AMAT, LRCX, KLAC, Tokyo Electron."
+  }
+ ]
+}

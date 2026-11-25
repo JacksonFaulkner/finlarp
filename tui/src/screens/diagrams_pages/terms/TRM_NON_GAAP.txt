@@ -1,0 +1,16 @@
+# 1. What it is: GAAP profit with items added back
+
+ ┌───────────────┐
+ │ GAAP NET      │  $1.0B as filed
+ │ INCOME        │
+ └───────┬───────┘
+         │ add back: stock comp,
+         │ amortization, restructuring
+ ┌───────┴───────┐
+ │ NON-GAAP NET  │  $1.6B company-defined
+ │ INCOME        │
+ └───────────────┘
+
+# 2. Why it matters
+
+The add-backs are chosen by management. Check the reconciliation table in each earnings release to see how big each item is, and whether it recurs every quarter.

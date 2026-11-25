@@ -1,0 +1,15 @@
+# 1. What it is: the thin insulator electrons tunnel through
+
+┌──────────────────────────────┐
+│        FLOATING GATE         │  electrons stored here
+├──────────────────────────────┤
+│     tunnel oxide, ~8 nm      │  electrons pass by tunneling
+├──────────────────────────────┤
+│       silicon channel        │  source and drain sit beside it
+└──────────────────────────────┘
+
+(a voltage across the oxide pulls electrons through; the layer must stay intact or the cell wears out)
+
+# 2. Why it matters
+
+Tunnel oxide sets the write and erase voltage and the endurance of a flash cell. Each program and erase cycle stresses it, so its thickness and quality are central to flash yield.

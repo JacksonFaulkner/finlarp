@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MEMORY_LATENCY",
+ "script": "terms/trm_memory_latency.py",
+ "beats": [
+  {
+   "caption": "A cache miss sends a read out to memory",
+   "text": "When data is not in the GPU's caches, a read request leaves the die for an HBM stack. Every thread that needs that data waits until it comes back. Memory latency is that round-trip time."
+  },
+  {
+   "caption": "First the request waits in the memory controller",
+   "text": "The controller holds a queue of requests and reorders them to reuse open rows and avoid bank conflicts. Under heavy load this queueing can be the largest piece of the delay."
+  },
+  {
+   "caption": "Inside the DRAM: open the row, then read the column",
+   "text": "If the row is closed the chip needs ACTIVATE (tRCD, about 14 ns) and then a column read (CAS latency, about 14 ns more). A row that another request left open costs a PRECHARGE on top."
+  },
+  {
+   "caption": "Then the data rides back; the total is around 100 ns",
+   "text": "Add the bus or link trip both ways and the result is typically 80-120 ns for local DRAM, hundreds of GPU clock cycles. GPUs hide it by keeping thousands of threads in flight."
+  },
+  {
+   "caption": "Bandwidth is not latency",
+   "text": "A system can move terabytes per second and still stall on each miss: bandwidth is how wide the pipe is, latency is how long it is. CXL memory adds capacity but also adds a link hop, often 100+ ns more. Related: Micron (MU), Astera Labs (ALAB), Intel (INTC)."
+  }
+ ]
+}

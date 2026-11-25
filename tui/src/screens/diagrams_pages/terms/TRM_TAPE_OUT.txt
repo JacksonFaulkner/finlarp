@@ -1,0 +1,13 @@
+# 1. What it is: design done, sent to the fab
+
+   ┌─────────────┐   ┌────────────┐   ┌───────────────┐
+   │ DESIGN      │   │ TAPE-OUT   │   │ FIRST SILICON │
+   │ RTL, layout │──▶│ GDS to fab │──▶│ ~3 months     │
+   │ verify      │   │ masks made │   │ bring-up      │
+   └─────────────┘   └────────────┘   └───────────────┘
+
+  (a respin (fixing bugs and taping out again) adds months and mask cost)
+
+# 2. Why it matters
+
+Tape-out dates anchor product timelines. Slips push revenue out.

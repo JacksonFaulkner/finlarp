@@ -1,0 +1,13 @@
+# 1. What it is: NRC
+
+   ┌────────────────────┐       ┌───────────────────────┐       ┌──────────────────┐
+   │ NRC                │       │ construction permit   │       │ plant runs under │
+   │ Nuclear Regulatory │──────▶│ and operating license │──────▶│ NRC inspection   │
+   │ Commission         │       │ for each reactor      │       └──────────────────┘
+   └────────────────────┘       └───────────────────────┘
+
+  (restarts of closed plants and new SMR designs also need NRC approval)
+
+# 2. Why AI cares
+
+Nuclear is one of the few firm, carbon-free power sources that AI campuses can contract for, and new reactors cannot be built without NRC licensing. Licensing timelines decide when small modular reactor power can actually reach a site. Plant restarts and power uprates also depend on NRC approvals.

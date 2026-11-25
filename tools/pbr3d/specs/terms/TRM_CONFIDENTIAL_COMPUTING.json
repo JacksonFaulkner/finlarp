@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CONFIDENTIAL_COMPUTING",
+ "script": "terms/trm_confidential_computing.py",
+ "beats": [
+  {
+   "caption": "An AI server's CPU and GPU run other tenants' work on shared hardware",
+   "text": "In a cloud AI server, many customers' jobs share the same machines. Model weights and customer prompts sit in memory that the cloud operator's hypervisor and host software control. Confidential computing removes that operator from the trust boundary for data while it is being used."
+  },
+  {
+   "caption": "The whole virtual machine is the protected unit",
+   "text": "The CPU encrypts the memory of one virtual machine with a key the hypervisor never sees. Below it, the host hypervisor and operating system manage the hardware, but everything they read from guest memory is ciphertext. A TEE protects a small sealed region; this protects a whole VM, so existing software runs without changes."
+  },
+  {
+   "caption": "Data is decrypted only inside the CPU, while it is being processed",
+   "text": "A prompt arrives encrypted and is decrypted inside the protected VM, where the model can use it. Anything that leaves the VM, to memory or back to the host, is encrypted again. That is the 'data in use' gap this closes: encryption at rest and in transit were already standard."
+  },
+  {
+   "caption": "The CPU-to-GPU link and the GPU memory are protected too",
+   "text": "Newer accelerators add a confidential mode: the bus between CPU and GPU is encrypted, and model weights in GPU memory are shielded from the host. Without this, the weights would be exposed the moment they reach the accelerator."
+  },
+  {
+   "caption": "Intel, AMD and NVIDIA ship it; clouds sell it",
+   "text": "Intel TDX and AMD SEV-SNP protect the VM on the CPU, and NVIDIA's confidential GPU mode covers the accelerator. Microsoft (MSFT) and other clouds offer it as a product. Vendors: Intel (INTC), AMD (AMD), NVIDIA (NVDA), Microsoft (MSFT). Performance cost and attestation work are the trade-offs."
+  }
+ ]
+}

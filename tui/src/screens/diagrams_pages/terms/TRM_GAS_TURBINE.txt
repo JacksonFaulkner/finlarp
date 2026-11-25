@@ -1,0 +1,17 @@
+# 1. What it is: fuel to firm power
+
+   ┌─────────────┐   ┌─────────────┐   ┌─────────────┐   ┌───────────┐
+   │ NATURAL GAS │──▶│ GAS TURBINE │──▶│ STEAM CYCLE │──▶│ GENERATOR │
+   │ pipeline    │   │ compressor  │   │ waste heat  │   │ AC power  │
+   └─────────────┘   │ combustor   │   │ (combined)  │   └───────────┘
+                     └─────────────┘   └─────────────┘                
+
+  (simple cycle ~35-40% efficient; combined cycle ~60%)
+
+# 2. Why AI cares
+
+Gas plants run around the clock, unlike wind or solar. Hyperscalers and developers are reserving turbines to power campuses that cannot wait for grid hookups.
+
+# 3. Bottleneck
+
+Large frame turbines are made by only a few firms, so lead times and pricing have climbed.

@@ -1,0 +1,12 @@
+# 1. What it is: a high-voltage power switch
+
+   ┌───────────┐    ┌────────────────┐    ┌──────────────┐
+   │ DC bus    │    │ IGBT module    │    │ motor / grid │
+   │ 600-6500V │───▶│ switch + diode │───▶│ AC out       │
+   └───────────┘    └────────────────┘    └──────────────┘
+
+  (slower switching than SiC, but lower cost per amp)
+
+# 2. Why it matters
+
+IGBT modules sit in industrial drives, grid equipment and UPS systems that back up data centers. Demand tracks industrial capex and renewables.

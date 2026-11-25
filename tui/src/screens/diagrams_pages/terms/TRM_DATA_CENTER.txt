@@ -1,0 +1,16 @@
+# 1. What it is: power and cooling wrapped around servers
+
+   ┌───────────────────┐     ┌──────────────────┐     ┌──────────────────┐     ┌──────────────────┐
+   │ GRID / SUBSTATION │ ──▶ │ UPS + SWITCHGEAR │ ──▶ │ IT HALL          │ ──▶ │ COOLING          │
+   │ utility power     │     │ backup gensets   │     │ racks of servers │     │ chillers, towers │
+   └───────────────────┘     └──────────────────┘     └──────────────────┘     └──────────────────┘
+
+  (sized in MW of IT load; AI campuses now plan 300 MW - 1 GW+)
+
+# 2. Why AI cares
+
+Every GPU needs power, cooling and a rack slot. Data center capacity, mostly limited by grid connections, gates how fast AI compute can be deployed.
+
+# 3. Who builds them
+
+Hyperscalers self-build; colocation REITs and neoclouds lease or build for others. Suppliers include electrical, cooling and construction firms.

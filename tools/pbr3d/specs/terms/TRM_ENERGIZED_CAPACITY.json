@@ -1,0 +1,161 @@
+{
+ "slug": "TRM_ENERGIZED_CAPACITY",
+ "beats": [
+  {
+   "boxes": [
+    {
+     "name": "permit",
+     "lo": [
+      -360,
+      -50,
+      -40
+     ],
+     "hi": [
+      -240,
+      50,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "permitted MW",
+     "at": [
+      -300,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "power rights only",
+     "at": [
+      -300,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "permit"
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "contract",
+     "lo": [
+      -100,
+      -50,
+      -40
+     ],
+     "hi": [
+      20,
+      50,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "c1",
+     "from": [
+      -235,
+      0,
+      -20
+     ],
+     "to": [
+      -105,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "contracted MW",
+     "at": [
+      -40,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "no revenue yet",
+     "at": [
+      -40,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "permit",
+    "contract",
+    "c1"
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "energ",
+     "lo": [
+      160,
+      -50,
+      -40
+     ],
+     "hi": [
+      340,
+      50,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "c2",
+     "from": [
+      25,
+      0,
+      -20
+     ],
+     "to": [
+      155,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "energized: revenue starts",
+     "at": [
+      250,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "substation + switchgear done",
+     "at": [
+      250,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "permit",
+    "contract",
+    "c1",
+    "energ",
+    "c2"
+   ]
+  }
+ ]
+}

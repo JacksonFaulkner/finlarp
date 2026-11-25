@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FLOATING_GATE",
+ "script": "terms/trm_floating_gate.py",
+ "beats": [
+  {
+   "caption": "NAND stores each bit as charge on a hidden gate",
+   "text": "A NAND flash package holds the bits for an SSD or an AI server's storage. Inside it, each cell is one transistor with a second gate sitting between the usual gate and the channel. That second gate stores the bit as a charge."
+  },
+  {
+   "caption": "Cut through: a floating gate sealed in oxide",
+   "text": "The floating gate is a conductive poly island with nowhere to go: oxide wraps it on every side, from the thin tunnel oxide below to the inter-poly dielectric above. The control gate sits on top, and the n+ source and drain sit either side of the channel."
+  },
+  {
+   "caption": "Program: electrons tunnel up and get stuck",
+   "text": "A high voltage on the control gate pulls electrons up from the channel through the tunnel oxide. Each one that lands on the floating gate stays there, because the oxide around it is a good insulator."
+  },
+  {
+   "caption": "Read: the stored charge shifts the threshold",
+   "text": "Trapped electrons repel the control gate's field, so the cell needs a higher voltage to switch on. The controller reads that threshold: a charged cell is a 0 and an empty one is a 1 (or the reverse, by convention)."
+  },
+  {
+   "caption": "Erase: charge is pulled back out, block by block",
+   "text": "Erase reverses the field, so electrons tunnel back out. It happens to a whole block at once, which is why NAND wears out with cycling. Makers: Micron (MU), Kioxia (285A.T), SanDisk (SNDK), Samsung (005930.KS)."
+  }
+ ]
+}

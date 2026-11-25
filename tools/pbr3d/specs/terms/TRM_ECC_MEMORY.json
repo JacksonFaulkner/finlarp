@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ECC_MEMORY",
+ "script": "terms/trm_ecc_memory.py",
+ "beats": [
+  {
+   "caption": "Server memory stores extra check bits with every word",
+   "text": "ECC memory adds check bits beside the data. A common scheme stores 8 check bits per 64 data bits, so a module carries 72 bits per word and spends 12.5 percent of its raw capacity on protection. GPU HBM and server DIMMs use it."
+  },
+  {
+   "caption": "The check bits are computed from the data on write",
+   "text": "When the controller writes a word it computes the check bits from the data (a Hamming-style code) and stores both. In the bank they look like one more column of ordinary cells."
+  },
+  {
+   "caption": "A stray particle or row hammer flips a bit",
+   "text": "Cosmic-ray neutrons, alpha particles and row hammer can flip a cell's charge. On large clusters with petabytes of DRAM this happens many times a day, and without ECC the wrong value would be read back silently."
+  },
+  {
+   "caption": "On read, the controller finds and fixes the bad bit",
+   "text": "The controller recomputes the check bits from the data it read and compares them with the stored ones. The mismatch (the syndrome) points to the exact flipped bit, which is corrected before the GPU sees it. This costs a few nanoseconds."
+  },
+  {
+   "caption": "Two flips are detected, not fixed",
+   "text": "Standard SECDED ECC corrects one bad bit and detects two, so the system can retire the page or stop the job rather than train on corrupt data. Stronger chipkill codes survive a whole failed chip. Related: Micron (MU), Samsung (005930.KS), SK hynix (000660.KS), Dell (DELL)."
+  }
+ ]
+}

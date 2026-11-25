@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RACK_DENSITY",
+ "script": "terms/trm_rack_density.py",
+ "beats": [
+  {
+   "caption": "An AI rack draws ten times what an old server rack did",
+   "text": "Rack density is the power one rack pulls, in kilowatts. A typical enterprise rack of 2U servers ran 5-15 kW, and data halls were built around that. An Nvidia GB200 NVL72 rack draws about 120-130 kW, and the next generations are planned at several hundred kW up to around 1 MW per rack."
+  },
+  {
+   "caption": "Inside: 72 GPUs packed into one cabinet",
+   "text": "The NVL72 holds 18 compute trays with four Blackwell GPUs and two Grace CPUs each, nine NVLink switch trays between them, and power shelves top and bottom. Packing them this close lets all 72 GPUs talk over copper NVLink as one big GPU, which is the whole point, and it is also why the power ends up in one place."
+  },
+  {
+   "caption": "Air cannot carry 130 kW out of a rack; liquid has to",
+   "text": "An old rack pulls cool air in the front and blows warm air out the back, and fans handle 10-20 kW fine. At 130 kW the air would have to move impossibly fast, so cold plates sit on every GPU and CPU and a coolant distribution unit (CDU) pumps water-glycol through manifolds at the back of the rack. Water holds about 3,500 times more heat than the same volume of air."
+  },
+  {
+   "caption": "Power and weight both concentrate",
+   "text": "Power comes from an overhead busway through a tap box into power shelves that turn AC into ~50 V DC on a copper busbar down the back. A full rack weighs around 1.4 tonnes, more than many raised floors were rated for, so new halls put racks on slab and run power and pipes overhead."
+  },
+  {
+   "caption": "One AI rack = a whole row of old racks: halls need retrofits",
+   "text": "A 130 kW rack draws what thirteen 10 kW racks did, in one floor tile, so older sites run out of power, cooling and floor strength long before space. That drives retrofits and new builds: Nvidia (NVDA) sets the rack spec, Super Micro (SMCI) builds racks, Vertiv (VRT) supplies power and cooling, and Equinix (EQIX) re-fits halls."
+  }
+ ]
+}

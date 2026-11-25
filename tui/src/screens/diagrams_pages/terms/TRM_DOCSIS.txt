@@ -1,0 +1,12 @@
+# 1. What it is: internet over the cable TV plant
+
+   ┌──────────────┐  fiber  ┌──────────┐  coax  ┌──────────────┐
+   │ HEADEND      │────────▶│ NODE     │───────▶│ CABLE MODEM  │
+   │ CMTS         │◀────────│ HFC      │◀───────│ in the home  │
+   └──────────────┘         └──────────┘        └──────────────┘
+
+  (CMTS = cable modem termination system; HFC = hybrid fiber-coax)
+
+# 2. Why it matters
+
+DOCSIS upgrades are capex for cable operators and a market for headend and node gear. Upstream speed limits set how far they can compete with fiber.

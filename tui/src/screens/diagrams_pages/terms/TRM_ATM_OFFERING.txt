@@ -1,0 +1,18 @@
+# 1. What it is: shares sold a little at a time
+
+ ┌───────────────┐
+ │ BOARD         │  authorizes up to $2.0B
+ │ AUTHORIZATION │
+ └───────┬───────┘
+         │ company sells through a broker
+ ┌───────┴───────┐
+ │ NEW SHARES    │  sold into the open market
+ └───────┬───────┘
+         │ cash in, share count up
+ ┌───────┴───────┐
+ │ DILUTION      │  existing holders own less
+ └───────────────┘
+
+# 2. Why it matters
+
+ATM sales are disclosed in the prospectus supplement and the quarterly filings, with the shares sold and cash raised. They are a steady funding source, so they show up as a growing share count rather than a single equity event.

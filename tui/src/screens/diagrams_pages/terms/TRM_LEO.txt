@@ -1,0 +1,17 @@
+# 1. What it is: broadband satellites close to the ground
+
+   ┌───────┐      ┌───────┐      ┌───────┐
+   │ SAT A │◀────▶│ SAT B │◀────▶│ SAT C │   laser crosslinks
+   └───┬───┘      └───┬───┘      └───┬───┘
+       ╲              │              ╱
+        ╲ ~550 km     │             ╱
+   ┌─────▼─────┐  ┌────▼─────┐  ┌────▼──────┐
+   │ USER      │  │ GATEWAY  │  │ TERMINAL  │
+   │ dish      │  │ ground   │  │ backhaul  │
+   └───────────┘  └──────────┘  └───────────┘
+
+  (~550 km orbit: latency tens of ms vs ~600 ms geo)
+
+# 2. Why it matters
+
+LEO needs many satellites, launches and ground gateways, so the economics depend on launch cost and constellation capex.

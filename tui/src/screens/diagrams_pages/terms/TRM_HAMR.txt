@@ -1,0 +1,13 @@
+# 1. What it is: a laser heats the bit before writing it
+
+   ┌────────────┐   ┌───────────┐   ┌────────────┐
+   │ LASER      │──▶│ HOT SPOT  │──▶│ SMALL BIT  │
+   │ near-field │   │ ~400 C    │   │ written    │
+   │ transducer │   │ for ~1 ns │   │ then cools │
+   └────────────┘   └───────────┘   └────────────┘
+
+  (heat lowers the medium's coercivity so a weak head field can flip it)
+
+# 2. Why it matters
+
+More terabytes per drive lowers cost per TB and power per TB, which is what hyperscale buyers pay for.

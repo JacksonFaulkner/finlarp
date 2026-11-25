@@ -1,0 +1,12 @@
+# 1. What it is: the grid asks a large load to cut power
+
+   ┌────────────┐     ┌────────────┐     ┌────────────┐
+   │ grid peak  │────▶│ ISO signal │────▶│ miner goes │
+   │ demand     │     │ curtail    │     │ idle       │
+   └────────────┘     └────────────┘     └────────────┘
+
+  (the miner is paid for the power it did not use, or sells it back)
+
+# 2. Why it matters
+
+Curtailment income can offset part of the lost mining revenue. Frequent or long curtailment, though, cuts uptime for hosting customers who need continuous power.

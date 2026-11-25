@@ -1,0 +1,209 @@
+{
+ "slug": "TRM_TIME_OF_FLIGHT",
+ "beats": [
+  {
+   "caption": "IR pulse leaves the sensor",
+   "boxes": [
+    {
+     "name": "ir_pulse",
+     "lo": [
+      -380,
+      -40,
+      -40
+     ],
+     "hi": [
+      -290,
+      40,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "scene",
+     "lo": [
+      -240,
+      -100,
+      -40
+     ],
+     "hi": [
+      -120,
+      100,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "photon_return",
+     "lo": [
+      -60,
+      -40,
+      -40
+     ],
+     "hi": [
+      40,
+      40,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "depth_map",
+     "lo": [
+      120,
+      -100,
+      -40
+     ],
+     "hi": [
+      240,
+      100,
+      0
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "out",
+     "from": [
+      -280,
+      0,
+      -20
+     ],
+     "to": [
+      -240,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "back",
+     "from": [
+      -120,
+      0,
+      -20
+     ],
+     "to": [
+      -60,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "IR pulse",
+     "at": [
+      -335,
+      70,
+      20
+     ]
+    },
+    {
+     "text": "depth = c x t / 2",
+     "at": [
+      -20,
+      -70,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Round-trip time becomes a depth per pixel",
+   "boxes": [
+    {
+     "name": "ir_pulse",
+     "lo": [
+      -380,
+      -40,
+      -40
+     ],
+     "hi": [
+      -290,
+      40,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "scene",
+     "lo": [
+      -240,
+      -100,
+      -40
+     ],
+     "hi": [
+      -120,
+      100,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "photon_return",
+     "lo": [
+      -60,
+      -40,
+      -40
+     ],
+     "hi": [
+      40,
+      40,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "depth_map",
+     "lo": [
+      120,
+      -100,
+      -40
+     ],
+     "hi": [
+      240,
+      100,
+      0
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "to_map",
+     "from": [
+      60,
+      0,
+      -20
+     ],
+     "to": [
+      120,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "per-pixel timer",
+     "at": [
+      -50,
+      70,
+      20
+     ]
+    },
+    {
+     "text": "cheap depth channel",
+     "at": [
+      170,
+      120,
+      20
+     ]
+    }
+   ]
+  }
+ ]
+}

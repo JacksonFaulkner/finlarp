@@ -1,0 +1,11 @@
+{
+ "label": "ASIC",
+ "term": "ASIC",
+ "aliases": [
+  "custom silicon",
+  "custom accelerator",
+  "XPU",
+  "application-specific integrated circuit"
+ ],
+ "kind": "compute"
+}

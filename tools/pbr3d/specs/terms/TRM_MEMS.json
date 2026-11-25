@@ -1,0 +1,139 @@
+{
+ "slug": "TRM_MEMS",
+ "beats": [
+  {
+   "caption": "A drive voltage tilts a silicon mirror",
+   "boxes": [
+    {
+     "name": "drive",
+     "lo": [
+      -380,
+      -40,
+      -20
+     ],
+     "hi": [
+      -260,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "mirror",
+     "lo": [
+      -160,
+      -60,
+      -20
+     ],
+     "hi": [
+      -20,
+      60,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "drive_arrow",
+     "from": [
+      -260,
+      0,
+      -10
+     ],
+     "to": [
+      -160,
+      0,
+      -10
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "drive voltage",
+     "at": [
+      -320,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "silicon mirror",
+     "at": [
+      -90,
+      90,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "The mirror sweeps the laser beam across the field",
+   "boxes": [
+    {
+     "name": "mirror",
+     "lo": [
+      -160,
+      -60,
+      -20
+     ],
+     "hi": [
+      -20,
+      60,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "beam",
+     "lo": [
+      60,
+      -8,
+      -12
+     ],
+     "hi": [
+      300,
+      8,
+      -6
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "sweep",
+     "from": [
+      20,
+      -90,
+      -10
+     ],
+     "to": [
+      20,
+      90,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "scanning mirror",
+     "at": [
+      -90,
+      120,
+      0
+     ]
+    },
+    {
+     "text": "beam across the field",
+     "at": [
+      180,
+      40,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

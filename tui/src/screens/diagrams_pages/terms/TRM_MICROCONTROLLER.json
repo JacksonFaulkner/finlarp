@@ -1,0 +1,10 @@
+{
+ "label": "MICROCONTROLLER",
+ "term": "microcontroller",
+ "aliases": [
+  "microcontrollers",
+  "MCU",
+  "MCUs"
+ ],
+ "kind": "analog"
+}

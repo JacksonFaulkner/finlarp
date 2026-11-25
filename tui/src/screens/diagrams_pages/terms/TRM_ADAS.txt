@@ -1,0 +1,11 @@
+# 1. What it is: sensors feed one computer that acts
+
+   ┌─────────┐   ┌──────────┐   ┌───────────────┐
+   │ SENSORS │──▶│ ADAS SOC │──▶│ BRAKE / STEER │
+   └─────────┘   └──────────┘   └───────────────┘
+
+  (levels: L0 warnings only, L2 hands-on steering assist, L3+ eyes-off)
+
+# 2. Why it matters
+
+Every new car ships with some ADAS, so camera, radar and chip content per vehicle is a volume market. Higher levels need more compute and redundant sensing, and that is where the spend per car grows.

@@ -1,0 +1,11 @@
+# 1. What it is: a silicon mirror that tilts and scans
+
+   ┌───────────────┐   ┌────────────────┐   ┌────────────┐
+   │ DRIVE VOLTAGE │──▶│ SILICON MIRROR │──▶│ LASER BEAM │
+   └───────────────┘   └────────────────┘   └────────────┘
+
+  (a scanning mirror sweeps the beam across the field of view)
+
+# 2. Why it matters
+
+MEMS parts are made in fabs with the same processes as logic chips, so cost falls with volume. The same device class handles motion sensing in phones, microphones in earbuds and beam scanning in LiDAR.

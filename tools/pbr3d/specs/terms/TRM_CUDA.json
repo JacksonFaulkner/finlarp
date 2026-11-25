@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CUDA",
+ "script": "terms/trm_cuda.py",
+ "beats": [
+  {
+   "caption": "CUDA is how code reaches the thousands of cores in this GPU",
+   "text": "The GPU package in the middle of this board holds one or two big dies with tens of thousands of simple cores. A CPU can't drive them one by one. CUDA is NVIDIA's platform for doing it: a C++ dialect and compiler (nvcc), a runtime and driver, and a large set of tuned libraries."
+  },
+  {
+   "caption": "A kernel launch spreads a grid of thread blocks over the SMs",
+   "text": "The die is tiled into streaming multiprocessors (SMs), about 130-150 on a data-center GPU. A CUDA program launches a kernel as a grid of thread blocks; the hardware hands each block to a free SM, and each SM runs its threads 32 at a time (a warp) in lockstep. Millions of threads can be in flight at once."
+  },
+  {
+   "caption": "AI is mostly matrix multiplies, fed from HBM into tensor cores",
+   "text": "Training and inference are dominated by multiplying big matrices. Tiles of the matrices stream in from the HBM stacks beside the die into each SM's shared memory, and tensor cores multiply small blocks in one step. Libraries like cuBLAS and cuDNN pick the tile sizes and memory moves that keep these units busy."
+  },
+  {
+   "caption": "Frameworks sit on a deep stack of NVIDIA software",
+   "text": "A line of PyTorch becomes a call into cuDNN or cuBLAS (or a kernel compiled by Triton or nvcc), then into the CUDA runtime, then the driver, which schedules work on the GPU. NCCL adds multi-GPU communication and TensorRT optimizes inference. Each layer has had nearly two decades of tuning on NVIDIA chips."
+  },
+  {
+   "caption": "That stack is the moat rivals have to cross",
+   "text": "Models, kernels, tools and millions of developers' habits are built on CUDA first, so switching chips means porting and re-tuning software, not just buying hardware. AMD answers with ROCm and HIP, Intel with oneAPI, and compilers like Triton try to stay hardware-neutral. Related: NVIDIA (NVDA), AMD (AMD), Intel (INTC)."
+  }
+ ]
+}

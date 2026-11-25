@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_AEC",
+ "script": "terms/trm_aec.py",
+ "beats": [
+  {
+   "caption": "Inside an AI rack, thick copper cables tie every server to the switch",
+   "text": "Each GPU server has several 400G or 800G network ports, and they all run up to a top-of-rack switch a metre or two away. These short hops are the most numerous links in a cluster. For years they were passive copper (DAC) cables, but at 100G+ per lane passive copper stops reaching."
+  },
+  {
+   "caption": "An AEC is copper cable with a small chip in each plug",
+   "text": "An active electrical cable keeps the cheap twinax copper in the middle and adds a retimer or DSP chip inside each connector shell. The plug looks and fits like any other QSFP or OSFP module, so the switch and NIC need no changes."
+  },
+  {
+   "caption": "The chip in the plug cleans up and resends every lane",
+   "text": "Signals arriving over the copper are blurred and weak. The chip equalizes them, recovers the clock and retransmits a fresh signal, in both directions, for every lane. It draws a few watts per end, much less than the lasers and DSP in an optical module."
+  },
+  {
+   "caption": "Passive copper reaches 1-2 m at 100G+; an AEC reaches 3-7 m",
+   "text": "Loss in copper grows with length and frequency, so passive cables shrink with each speed step: about 2 m at 100G per lane and roughly 1 m at 200G. The retimer resets the loss budget, stretching copper to around 7 m, enough to span a rack or reach the neighbour."
+  },
+  {
+   "caption": "Cheaper and lower power than optics for short links",
+   "text": "Optics would work over any distance but cost more, use more power and fail more often. For in-rack and rack-to-rack links AECs win, and hyperscalers now buy them by the million. Related: Credo (CRDO), Marvell (MRVL), Astera Labs (ALAB), Amphenol (APH)."
+  }
+ ]
+}

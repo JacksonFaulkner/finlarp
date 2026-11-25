@@ -1,0 +1,17 @@
+# 1. What it is: water and cold plates instead of fans
+
+   ┌─────────────┐     ┌────────────────┐     ┌───────────────┐
+   │ GPU / CPU   │     │ CDU            │     │ FACILITY      │
+   │ cold plate  │ ──▶ │ pumps +        │ ──▶ │ WATER LOOP    │
+   │ on the chip │     │ heat exchanger │     │ chiller/tower │
+   └─────────────┘     └────────────────┘     └───────────────┘
+
+  (warm coolant ~40-45 C leaves the rack; immersion puts the whole server in fluid)
+
+# 2. Why AI cares
+
+GB200-class racks run 120 kW or more. Air cooling tops out around 30-40 kW per rack, so dense GPU clusters need liquid at the chip.
+
+# 3. Who sells it
+
+Vertiv, Schneider, nVent and Modine sell CDUs, manifolds and heat rejection gear; server makers ship liquid-ready racks.

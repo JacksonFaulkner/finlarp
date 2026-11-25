@@ -1,0 +1,13 @@
+# 1. What it is: CMMC
+
+   ┌───────────────┐       ┌──────────────────────┐       ┌─────────────────────┐
+   │ DoD contract  │       │ contractors and subs │       │ CMMC level 1-3      │
+   │ requires CMMC │──────▶│ that handle CUI      │──────▶│ level 2 often needs │
+   └───────────────┘       └──────────────────────┘       │ a third-party audit │
+                                                          └─────────────────────┘
+
+  (CUI = controlled unclassified information)
+
+# 2. Why AI cares
+
+Chip, cloud, and AI vendors that handle controlled unclassified information for the Defense Department must meet CMMC to keep eligibility for that work. The phase-in began in late 2025, so certification cost and timing matter for contractors. A failed assessment can remove a vendor from a defense contract.

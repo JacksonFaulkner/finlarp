@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_INFERENCE",
+ "script": "terms/trm_inference.py",
+ "beats": [
+  {
+   "caption": "Inference runs a model that is already trained",
+   "text": "Training is finished: the model is now a fixed file of weights, billions of numbers, loaded into the high-bandwidth memory (HBM) stacks beside the GPU. Inference means using those weights to answer requests: text, images, predictions. Nothing is learned while it runs."
+  },
+  {
+   "caption": "The prompt goes in all at once: every matrix unit lights",
+   "text": "First the GPU reads the whole prompt in one pass, called prefill. All its tokens are multiplied through every layer in parallel, so the matrix units on the die are busy and the chip is compute-bound. This sets how long you wait for the first word."
+  },
+  {
+   "caption": "Then one token per pass, and each pass reads every weight",
+   "text": "The answer comes out one token at a time (decode). To make each new token the GPU has to pull essentially all the weights out of HBM again, so speed is set by memory bandwidth more than raw compute. A 70B-parameter model at 8 bits moves ~70 GB per token, which is why HBM capacity and bandwidth matter so much."
+  },
+  {
+   "caption": "Batching many users into each pass keeps the chip busy",
+   "text": "Since every pass reads the weights anyway, servers stack dozens or hundreds of users' requests into one batch and share that read. Requests arrive over the network card, wait briefly to be grouped, and stream back token by token. Cost per token falls as batches and utilisation rise."
+  },
+  {
+   "caption": "Every request costs compute, so inference grows with usage",
+   "text": "Training is a one-off bill; inference is paid on every query, forever, so its spend scales with users and with longer answers and reasoning. Cost and energy per token are the competitive metric, driving GPUs, custom accelerators, HBM and networking: NVIDIA (NVDA), AMD (AMD), Broadcom (AVGO), Marvell (MRVL)."
+  }
+ ]
+}

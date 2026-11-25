@@ -1,0 +1,20 @@
+# 1. What it is: a mirror array that patches fibers
+
+   ┌──────────┐                                     ┌──────────┐
+   │ FIBER IN │──▶ ┌─────────────────────────────┐ ─▶│ FIBER OUT│
+   │ port 1   │    │ MEMS MIRROR ARRAY           │   │ port 7   │
+   └──────────┘    │ mirrors tilt to aim light   │   └──────────┘
+   ┌──────────┐    │ from any input to any output│   ┌──────────┐
+   │ FIBER IN │──▶ │ (no light-to-electric step) │ ─▶│ FIBER OUT│
+   │ port 2   │    └─────────────────────────────┘   │ port 3   │
+   └──────────┘                                     └──────────┘
+
+  (reconfigures in milliseconds; packet switches decide per packet in nanoseconds)
+
+# 2. Why AI cares
+
+Large training jobs want a fixed, huge-bandwidth topology for hours. An OCS can rewire racks of accelerators into that shape and route around failed parts, at low power.
+
+# 3. Limits
+
+It cannot buffer or inspect traffic, so it sits alongside electrical switches rather than replacing them.

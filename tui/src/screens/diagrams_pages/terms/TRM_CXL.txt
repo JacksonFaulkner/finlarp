@@ -1,0 +1,13 @@
+# 1. What it is: more memory over the PCIe wires
+
+   ┌──────────┐   PCIe/CXL link   ┌───────────────┐
+   │ CPU      │──────────────────▶│ CXL MEMORY    │
+   │ local    │                   │ extra DRAM    │
+   │ DDR5     │◀──────────────────│ on a card     │
+   └──────────┘                   └───────────────┘
+
+  (local DRAM: ~100 ns; CXL memory: ~200-300 ns, but far more capacity)
+
+# 2. Why AI cares
+
+Large models and their KV caches outgrow the DRAM a server board can hold. CXL adds or pools memory without adding CPUs.

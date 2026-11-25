@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BUSWAY",
+ "script": "terms/trm_busway.py",
+ "beats": [
+  {
+   "caption": "Busway carries power overhead from switchgear to the racks",
+   "text": "Instead of pulling separate cables from the switchgear to every rack, many data halls hang a busway above each row: a factory-built run of copper or aluminium bars inside a steel housing. Sections bolt together into one long trunk, rated from a few hundred to several thousand amps."
+  },
+  {
+   "caption": "Inside: flat copper bars, insulated and packed tight",
+   "text": "Cut a section open and there are flat bars for the three phases (L1, L2, L3) and neutral, each wrapped in insulation and stacked close together. Tight spacing keeps impedance and voltage drop low and the housing doubles as the ground path. A 400 V, 800 A run can feed a row of racks over 500 kW."
+  },
+  {
+   "caption": "Tap-off boxes plug into the run and feed each rack",
+   "text": "Openings along the housing accept plug-in tap-off units. Spring stabs inside the tap grip the bars, a breaker or fuses in the box protect the drop, and a short cord runs to the rack's PDU. Many taps include metering, so operators see each rack's draw."
+  },
+  {
+   "caption": "Add or move a rack: clip on a tap, no new cable",
+   "text": "When a new rack arrives, an electrician plugs a tap into the next free opening, often while the busway stays energised. No conduit, no cable pull back to the switchgear, minutes instead of days. That flexibility matters as AI racks jump from 15 kW to 100 kW+ and layouts change every hardware generation."
+  },
+  {
+   "caption": "Higher rack power pushes busway into more halls",
+   "text": "Dense AI rows need hundreds of amps per row, which is bulky to do with cable. Busway suppliers include Eaton (ETN), Schneider Electric (SU.PA), Siemens (SIE.DE), nVent (NVT), plus Legrand (Starline) and Vertiv. It is sold with the switchgear and PDUs on either end."
+  }
+ ]
+}

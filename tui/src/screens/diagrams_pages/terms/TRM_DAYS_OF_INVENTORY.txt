@@ -1,0 +1,17 @@
+# 1. What it is: how many days of cost are on the shelf
+
+ ┌───────────────┐
+ │ INVENTORY     │  $5.0B ending balance
+ └───────┬───────┘
+         │ divided by
+ ┌───────┴───────┐
+ │ COGS PER DAY  │  $8.0B / 365 = $22M
+ └───────┬───────┘
+         │ result
+ ┌───────┴───────┐
+ │ DAYS OF INV.  │  $5.0B / $22M = ~228
+ └───────────────┘
+
+# 2. Why it matters
+
+The number depends on the period used. Compare the same quarter year over year, since seasonal builds and ramps distort a single quarter.

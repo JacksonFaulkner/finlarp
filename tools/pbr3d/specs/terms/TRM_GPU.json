@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GPU",
+ "script": "terms/trm_gpu.py",
+ "beats": [
+  {
+   "caption": "The GPU is the big package in the middle of an AI board",
+   "text": "On an AI accelerator board the GPU package sits in the centre: one or two large silicon dies with stacks of high-bandwidth memory (HBM) beside them on a shared interposer. Dozens of power phases crowd round it because it draws around 1,000 W."
+  },
+  {
+   "caption": "Inside: over a hundred copies of the same small processor",
+   "text": "Open the die and it is a grid of streaming multiprocessors (SMs), around 130 to 150 on a modern data-center GPU. Each SM holds 128 simple arithmetic lanes plus a few tensor cores, its own registers and a scratchpad. A big L2 cache runs through the middle and memory controllers line the edges next to the HBM."
+  },
+  {
+   "caption": "One instruction, thousands of numbers at once",
+   "text": "A CPU runs a few complex threads fast. A GPU issues one instruction to groups of 32 threads (a warp) and runs tens of thousands of threads at once across all SMs, each on different data. Graphics needed this for pixels; neural networks need it because they are mostly the same multiply-add repeated billions of times."
+  },
+  {
+   "caption": "Tensor cores do the matrix math that AI runs on",
+   "text": "Since 2017 each SM also carries tensor cores: small matrix engines that multiply whole tiles of numbers in one step, at low precision (FP16, FP8, FP4). They supply most of a GPU's AI throughput. HBM streams weights in at several TB/s to keep them fed; without that bandwidth they would sit idle."
+  },
+  {
+   "caption": "Thousands of watts and dollars per chip, millions of chips",
+   "text": "A top GPU sells for tens of thousands of dollars, burns about a kilowatt, and is sold in racks of 72 linked by NVLink. GPU supply, price and power draw set much of AI data-center spending. TSMC (TSM) makes the dies. Related: NVIDIA (NVDA), AMD (AMD), Intel (INTC), TSM."
+  }
+ ]
+}

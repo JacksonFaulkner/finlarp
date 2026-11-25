@@ -1,0 +1,185 @@
+{
+ "slug": "TRM_POWER_COST_PER_KWH",
+ "beats": [
+  {
+   "caption": "All-in cost stacks up per kWh",
+   "boxes": [
+    {
+     "name": "energy",
+     "lo": [
+      -380,
+      -60,
+      -60
+     ],
+     "hi": [
+      -260,
+      60,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "trans",
+     "lo": [
+      -200,
+      -60,
+      -60
+     ],
+     "hi": [
+      -80,
+      60,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "capacity",
+     "lo": [
+      -20,
+      -60,
+      -60
+     ],
+     "hi": [
+      100,
+      60,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "allin",
+     "lo": [
+      140,
+      -60,
+      -60
+     ],
+     "hi": [
+      260,
+      60,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "e1",
+     "from": [
+      -260,
+      0,
+      -40
+     ],
+     "to": [
+      -200,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "e2",
+     "from": [
+      -80,
+      0,
+      -40
+     ],
+     "to": [
+      -20,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "e3",
+     "from": [
+      100,
+      0,
+      -40
+     ],
+     "to": [
+      140,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "energy $/kWh",
+     "at": [
+      -320,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "transmission",
+     "at": [
+      -140,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "all-in $/kWh",
+     "at": [
+      200,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "energy",
+    "trans",
+    "capacity",
+    "allin",
+    "e1",
+    "e2",
+    "e3"
+   ]
+  },
+  {
+   "caption": "Margin is revenue per kWh minus this cost",
+   "boxes": [
+    {
+     "name": "margin",
+     "lo": [
+      -100,
+      -200,
+      -60
+     ],
+     "hi": [
+      160,
+      -120,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "margin = BTC revenue/kWh - cost",
+     "at": [
+      -160,
+      -240,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "energy",
+    "trans",
+    "capacity",
+    "allin",
+    "e1",
+    "e2",
+    "e3",
+    "margin"
+   ]
+  }
+ ]
+}

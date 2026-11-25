@@ -1,0 +1,11 @@
+{
+  "label": "PROCESS NODE",
+  "term": "process node",
+  "aliases": [
+    "leading-edge node",
+    "advanced node",
+    "advanced process node",
+    "process technology node"
+  ],
+  "kind": "fab"
+}

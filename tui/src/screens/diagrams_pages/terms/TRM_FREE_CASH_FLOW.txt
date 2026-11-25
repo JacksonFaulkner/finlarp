@@ -1,0 +1,18 @@
+# 1. What it is: cash left after the buildout
+
+ ┌───────────────┐
+ │ OPERATING     │  $6.0B
+ │ CASH FLOW     │
+ └───────┬───────┘
+         │ minus
+ ┌───────┴───────┐
+ │ CAPEX         │  $2.5B property and equipment
+ └───────┬───────┘
+         │ equals
+ ┌───────┴───────┐
+ │ FREE CASH FLOW│  $3.5B
+ └───────────────┘
+
+# 2. Why AI cares
+
+Capex for data centers and accelerators is the main swing factor. Operating cash flow can look strong while free cash flow falls, so read the two together.

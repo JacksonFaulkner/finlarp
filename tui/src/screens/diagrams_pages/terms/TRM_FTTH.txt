@@ -1,0 +1,13 @@
+# 1. What it is: one fiber, split to many homes
+
+   ┌──────────────┐  feeder  ┌──────────┐  splitter 1:32   ┌──────────┐
+   │ CENTRAL      │─────────▶│ FIBER    │─┬───────────────▶│ HOME 1   │
+   │ OFFICE OLT   │          │ DISTR.   │ ├───────────────▶│ HOME 2   │
+   └──────────────┘          └──────────┘ └──── ... ───────▶│ HOME 32  │
+                                                           └──────────┘
+
+  (passive optical network: no powered gear in the field)
+
+# 2. Why it matters
+
+FTTH is a large fiber build-out with splitter and drop-cable demand, and it competes directly with cable on speed.

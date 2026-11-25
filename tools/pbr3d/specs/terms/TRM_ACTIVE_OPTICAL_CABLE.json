@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ACTIVE_OPTICAL_CABLE",
+ "script": "terms/trm_active_optical_cable.py",
+ "beats": [
+  {
+   "caption": "An AOC is a fibre cable with the optics built into both plugs",
+   "text": "An active optical cable plugs into a port like a copper cable, but inside each plug is a small transceiver that turns electrical signals into light and back. The fibre between the plugs is permanently attached. In AI rows they commonly join GPU servers to leaf switches a few racks away."
+  },
+  {
+   "caption": "Each plug holds a laser driver, lasers, photodiodes and an amplifier",
+   "text": "Cut open, the plug has a small circuit board with gold edge fingers for the port, a driver chip that switches an array of tiny lasers (VCSELs for multimode fibre), a row of photodiodes for the return path, and a transimpedance amplifier (TIA) that turns their weak current into voltage. The fibre ribbon is glued to the optics at the factory, so there is no connector to clean or misalign."
+  },
+  {
+   "caption": "Bits become light at one end and bits again at the other",
+   "text": "The host's SerDes drives electrical lanes into the plug. The driver flashes the lasers, the light crosses the fibre with almost no loss over tens of metres, and the far plug's photodiodes and TIA rebuild the electrical signal. Each direction has its own fibres, so an 800G AOC runs eight lanes each way."
+  },
+  {
+   "caption": "Fibre reaches much farther than copper at today's speeds",
+   "text": "At 100-200 Gb/s per lane a passive copper cable (DAC) works only to about 2-3 m, and an active electrical cable (AEC) with retimers stretches that to about 7 m. An AOC reaches 30-100 m, enough to cross a row. It is also thinner and lighter, which matters when thousands of cables run through one rack."
+  },
+  {
+   "caption": "Sealed and simple, but the whole cable is one part",
+   "text": "Because the vendor tunes the two ends and the fibre together, AOCs are cheap per link and plug-and-play. The tradeoff: a dead laser means replacing the whole cable, and the length is fixed. Longer or structured runs use separate transceivers and patch fibre instead. Coherent (COHR), Nvidia (NVDA), Amphenol (APH) and Credo (CRDO) sell into this market."
+  }
+ ]
+}

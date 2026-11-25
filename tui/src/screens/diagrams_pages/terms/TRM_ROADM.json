@@ -1,0 +1,11 @@
+{
+ "label": "ROADM",
+ "term": "reconfigurable optical add-drop multiplexer",
+ "aliases": [
+  "ROADM",
+  "ROADMs",
+  "wavelength selective switch",
+  "WSS"
+ ],
+ "kind": "optics"
+}

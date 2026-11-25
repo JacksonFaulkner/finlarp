@@ -1,0 +1,15 @@
+{"slug": "TRM_HPC_COLOCATION_LEASE", "beats": [
+ {"caption": "A tenant rents powered space and owns its servers",
+  "boxes": [
+   {"name": "tenant", "lo": [-300, -60, -60], "hi": [-120, 60, -10], "mat": "steel"},
+   {"name": "landlord", "lo": [120, -60, -60], "hi": [300, 60, -10], "mat": "quartz"}],
+  "arrows": [{"name": "rent", "from": [-120, 0, -35], "to": [120, 0, -35], "mat": "accent"}],
+  "tags": [{"text": "TENANT runs own AI servers", "at": [-210, 110, 0]}, {"text": "LANDLORD power + cooling + space", "at": [210, 110, 0]}]},
+ {"caption": "Rent is set per kW of critical IT load",
+  "boxes": [
+   {"name": "tenant", "lo": [-300, -60, -60], "hi": [-120, 60, -10], "mat": "steel"},
+   {"name": "landlord", "lo": [120, -60, -60], "hi": [300, 60, -10], "mat": "quartz"},
+   {"name": "power_pass", "lo": [-100, -120, -40], "hi": [100, -80, -20], "mat": "glow"}],
+  "arrows": [{"name": "pass_through", "from": [120, -100, -30], "to": [-120, -100, -30], "mat": "glow"}],
+  "tags": [{"text": "$ per kW/mo", "at": [0, 110, 0]}, {"text": "power pass-through", "at": [0, -160, 0]}]}
+]}

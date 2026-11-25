@@ -1,0 +1,175 @@
+{
+ "slug": "TRM_NERC",
+ "beats": [
+  {
+   "caption": "NERC writes reliability standards that FERC approves",
+   "boxes": [
+    {
+     "name": "nerc",
+     "lo": [
+      -380,
+      40,
+      -20
+     ],
+     "hi": [
+      -150,
+      160,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "ferc",
+     "lo": [
+      -40,
+      40,
+      -20
+     ],
+     "hi": [
+      180,
+      160,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "utils",
+     "lo": [
+      -200,
+      -140,
+      -20
+     ],
+     "hi": [
+      200,
+      0,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "approve",
+     "from": [
+      -150,
+      100,
+      -10
+     ],
+     "to": [
+      -40,
+      100,
+      -10
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "comply",
+     "from": [
+      -265,
+      40,
+      -10
+     ],
+     "to": [
+      -100,
+      -60,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "reliability body",
+     "at": [
+      -270,
+      190,
+      0
+     ]
+    },
+    {
+     "text": "FERC approval",
+     "at": [
+      70,
+      190,
+      0
+     ]
+    },
+    {
+     "text": "utilities must comply",
+     "at": [
+      0,
+      -170,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Large data center loads are a grid risk",
+   "boxes": [
+    {
+     "name": "utils",
+     "lo": [
+      -200,
+      -140,
+      -20
+     ],
+     "hi": [
+      200,
+      0,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "load",
+     "lo": [
+      -120,
+      120,
+      -20
+     ],
+     "hi": [
+      120,
+      200,
+      0
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "drop",
+     "from": [
+      0,
+      120,
+      -10
+     ],
+     "to": [
+      0,
+      0,
+      -10
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "tags": [
+    {
+     "text": "hundreds of MW, sudden drop",
+     "at": [
+      0,
+      240,
+      0
+     ]
+    },
+    {
+     "text": "CIP cybersecurity rules",
+     "at": [
+      0,
+      -170,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

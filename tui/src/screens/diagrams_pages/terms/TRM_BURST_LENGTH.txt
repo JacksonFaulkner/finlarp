@@ -1,0 +1,12 @@
+# 1. What it is: words moved per memory access
+
+  ┌────┬────┬────┬────┬────┬────┬────┬────┐
+  │ W0 │ W1 │ W2 │ W3 │ W4 │ W5 │ W6 │ W7 │
+  └────┴────┴────┴────┴────┴────┴────┴────┘
+  one READ command returns the whole burst (BL8 = 8 transfers)
+
+(DDR5 moves 16 transfers per access on each 32-bit subchannel, which is also 64 bytes)
+
+# 2. Why it matters
+
+Burst length sets the smallest useful transfer per access. Streaming reads of weights and KV cache use whole bursts well, while scattered small reads waste part of one.

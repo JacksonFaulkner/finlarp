@@ -1,0 +1,30 @@
+{
+ "slug": "TRM_YIELD",
+ "script": "terms/trm_yield.py",
+ "beats": [
+  {
+   "caption": "Yield is the share of dies on a wafer that work",
+   "text": "A 300 mm wafer is printed with a grid of identical chips (dies), then each is probed electrically before it is cut out. Yield is good dies divided by all dies. A mature process on a small chip can pass well over 90%; a new node or a huge chip can start far lower."
+  },
+  {
+   "caption": "Random defects land on the wafer during hundreds of steps",
+   "text": "Particles, scratches, pattern flaws and contamination hit the wafer at some rate per square centimetre, called defect density (D0). Over hundreds of process steps a few dozen killer defects per wafer is normal. Where they land is close to random."
+  },
+  {
+   "caption": "At wafer sort, any die with a killer defect fails",
+   "text": "A probe card touches every die's pads and runs tests. One killer defect anywhere in a die usually scraps it, or forces it to be sold as a cut-down part with blocks disabled. The failing dies are inked out in the wafer map and never packaged. Here the small-die wafer passes 379 of 392 (97%)."
+  },
+  {
+   "caption": "The same defects kill far more big dies",
+   "text": "Yield falls roughly exponentially with die area times defect density. The same defects that cost a few small dies wipe out a large share of big ones: here only 55 of 68 big dies survive (81%). That is why reticle-size AI chips are expensive and why makers split designs into chiplets."
+  },
+  {
+   "caption": "Wafer cost divided by good dies is the real cost per chip",
+   "text": "A leading-edge wafer costs around $20k or more whether its dies work or not. Fewer dies per wafer and lower yield multiply together, so a big die can cost many times more per good unit than its area alone suggests. Yield gains drop straight into gross margin."
+  },
+  {
+   "caption": "Inspection finds the defect sources and yield climbs as a node matures",
+   "text": "Fabs scan wafers with optical and e-beam inspection tools, trace defects back to the step and tool that caused them, and fix them. Cut the defects to a third and the big-die yield here rises to 93%. That learning curve is why new nodes ramp slowly. Related: Taiwan Semiconductor (TSM), Intel (INTC), KLA (KLAC), NVIDIA (NVDA)."
+  }
+ ]
+}

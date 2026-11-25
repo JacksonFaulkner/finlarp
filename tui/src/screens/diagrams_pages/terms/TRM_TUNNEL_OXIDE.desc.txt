@@ -1,0 +1,1 @@
+The tunnel oxide is a thin silicon dioxide layer between the transistor channel and the floating gate. A high voltage across it lets electrons tunnel through during write and erase. Repeated cycling damages it, which is a main limit on flash endurance. Related: Applied Materials (AMAT), Lam Research (LRCX), Micron (MU), Samsung (005930.KS).

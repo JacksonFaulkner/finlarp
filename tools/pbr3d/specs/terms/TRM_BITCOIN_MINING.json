@@ -1,0 +1,192 @@
+{
+ "slug": "TRM_BITCOIN_MINING",
+ "beats": [
+  {
+   "caption": "Grid power runs miner rigs",
+   "boxes": [
+    {
+     "name": "power",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "rigs",
+     "lo": [
+      -100,
+      -70,
+      -40
+     ],
+     "hi": [
+      100,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "reward",
+     "lo": [
+      220,
+      -50,
+      -40
+     ],
+     "hi": [
+      360,
+      50,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "p",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -110,
+      0,
+      -20
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "tags": [
+    {
+     "text": "grid power $/kWh",
+     "at": [
+      -320,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "miner rigs hashing",
+     "at": [
+      -10,
+      100,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "power",
+    "rigs",
+    "p"
+   ]
+  },
+  {
+   "caption": "Rigs earn BTC reward and fees",
+   "boxes": [
+    {
+     "name": "power",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "rigs",
+     "lo": [
+      -100,
+      -70,
+      -40
+     ],
+     "hi": [
+      100,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "reward",
+     "lo": [
+      220,
+      -50,
+      -40
+     ],
+     "hi": [
+      360,
+      50,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "r",
+     "lo": [
+      120,
+      -6,
+      -20
+     ],
+     "hi": [
+      200,
+      6,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "p",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -110,
+      0,
+      -20
+     ],
+     "mat": "alarm"
+    },
+    {
+     "name": "r",
+     "from": [
+      110,
+      0,
+      -20
+     ],
+     "to": [
+      210,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "BTC reward + fees",
+     "at": [
+      290,
+      90,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

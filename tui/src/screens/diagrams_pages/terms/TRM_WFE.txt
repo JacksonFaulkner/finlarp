@@ -1,0 +1,17 @@
+# 1. What it is: the tools that make chips
+
+   ┌────────────┐   ┌────────────┐   ┌──────────────┐
+   │ LITHO      │   │ DEP / ETCH │   │ PROCESS CTRL │
+   │ ASML       │──▶│ AMAT, LRCX │──▶│ KLA          │
+   │ patterning │   │ TEL        │   │ inspection   │
+   └────────────┘   └────────────┘   └──────────────┘
+
+  (market sized by chipmaker capex; memory, foundry/logic and China are the swing buckets)
+
+# 2. Why it matters
+
+WFE vendor revenue tracks chipmaker capex with a lag. Guidance like 'WFE up mid-single digits' is how the industry frames the cycle.
+
+# 3. Export controls
+
+Restrictions on tool sales to China shift the mix and affect vendor growth.

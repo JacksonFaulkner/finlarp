@@ -1,0 +1,19 @@
+# 1. What it is: NERC
+
+   ┌──────────────────┐       ┌──────────────┐
+   │ NERC             │       │ FERC         │
+   │ reliability body │──────▶│ approves the │
+   │ writes standards │       │ standards    │
+   └──────────────────┘       └──────────────┘
+                   ▼
+   ┌────────────────────────────┐
+   │ utilities, grid operators, │
+   │ generators: must comply,   │
+   │ fines apply                │
+   └────────────────────────────┘
+
+  (standards cover planning, operations, and CIP cybersecurity)
+
+# 2. Why AI cares
+
+Data center campuses can draw hundreds of megawatts and can drop off the grid suddenly, which NERC has flagged as a reliability concern. Compliance adds cost and lead time for the utilities and generators that serve these sites. The CIP cybersecurity standards add another compliance layer on top.

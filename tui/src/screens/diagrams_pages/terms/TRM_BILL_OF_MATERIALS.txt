@@ -1,0 +1,12 @@
+# 1. What it is: the parts list that sets cost and supply
+
+   ┌──────────────────────────────┐
+   │ Part      Qty   Supplier     │
+   │ HBM stack    8    vendor A   │
+   │ PCB           1    EMS plant │
+   │ Power module  2    vendor B  │
+   └──────────────────────────────┘
+
+# 2. Why AI cares
+
+One missing long-lead part can hold up a whole rack. Tracking the BOM shows which suppliers gate a builder's output.

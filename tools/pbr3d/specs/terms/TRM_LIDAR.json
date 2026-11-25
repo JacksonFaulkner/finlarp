@@ -1,0 +1,15 @@
+{"slug": "TRM_LIDAR", "beats": [
+ {"caption": "A laser pulse's return time gives range to each point",
+  "boxes": [
+   {"name": "laser", "lo": [-370, -50, -40], "hi": [-260, 50, -10], "mat": "accent"},
+   {"name": "point_cloud", "lo": [-190, -50, -40], "hi": [-70, 50, -10], "mat": "glow"},
+   {"name": "object_list", "lo": [70, -50, -40], "hi": [190, 50, -10], "mat": "steel"},
+   {"name": "planner", "lo": [260, -50, -40], "hi": [370, 50, -10], "mat": "quartz"}],
+  "arrows": [{"name": "pulse", "from": [-260, 0, -25], "to": [-190, 0, -25], "mat": "accent"}, {"name": "cloud_to_objs", "from": [-70, 0, -25], "to": [70, 0, -25], "mat": "glow"}, {"name": "objs_to_plan", "from": [190, 0, -25], "to": [260, 0, -25], "mat": "steel"}],
+  "tags": [{"text": "LASER pulses", "at": [-315, 110, 0]}, {"text": "POINT CLOUD 3D map", "at": [-130, 110, 0]}, {"text": "PLANNER", "at": [315, 110, 0]}]},
+ {"caption": "Range comes from light speed times round-trip time over two",
+  "boxes": [
+   {"name": "laser", "lo": [-370, -50, -40], "hi": [-260, 50, -10], "mat": "accent"},
+   {"name": "range_bar", "lo": [-260, -150, -40], "hi": [260, -120, -20], "mat": "glow"}],
+  "tags": [{"text": "distance = c x t / 2", "at": [0, -180, 0]}, {"text": "direct range, works in dark", "at": [0, 110, 0]}]}
+]}

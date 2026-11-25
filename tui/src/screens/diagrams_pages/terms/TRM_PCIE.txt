@@ -1,0 +1,13 @@
+# 1. What it is: the server's internal device bus
+
+   ┌──────────────┐        ┌─────────────┐             ┌──────────┐
+   │ CPU          │──x16──▶│ PCIe SWITCH │──x16 each──▶│ GPU      │
+   │ root complex │        │ fan-out     │             │ NIC      │
+   │              │        │             │             │ NVMe SSD │
+   └──────────────┘        └─────────────┘             └──────────┘
+
+  (Gen5 x16 ~ 64 GB/s each way; Gen6 x16 ~ 128 GB/s)
+
+# 2. Why AI cares
+
+Data loaded to a GPU and traffic to the NIC both cross PCIe. CXL runs on the same physical wires.

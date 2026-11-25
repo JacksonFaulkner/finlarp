@@ -1,0 +1,8 @@
+{"slug":"TRM_FERC","beats":[
+{"boxes":[{"name":"ferc","lo":[-360,-60,-40],"hi":[-120,60,0],"mat":"accent"},{"name":"rto","lo":[120,-60,-40],"hi":[360,60,0],"mat":"steel"}],
+"arrows":[{"name":"x1","from":[-120,0,-20],"to":[120,0,-20],"mat":"accent"}],
+"tags":[{"text":"FERC: approves tariffs","at":[-240,90,0]},{"text":"RTO/ISO: PJM, MISO, SPP","at":[240,90,0]}]},
+{"boxes":[{"name":"campus","lo":[-100,-150,-40],"hi":[100,-90,0],"mat":"glow"},{"name":"grid","lo":[-360,-40,-40],"hi":[360,-20,0],"mat":"steel"}],
+"arrows":[{"name":"x2","from":[0,-90,-20],"to":[0,-40,-20],"mat":"glow"}],
+"tags":[{"text":"Data center interconnection","at":[0,-180,0]},{"text":"Transmission FERC oversees","at":[200,20,0]}]}
+]}

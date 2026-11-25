@@ -1,0 +1,11 @@
+{"slug":"TRM_CONSUMPTION_PRICING","beats":[
+ {"caption":"fees track metered usage","boxes":[
+   {"name":"usage","lo":[-300,-40,-40],"hi":[-120,40,0],"mat":"steel"},
+   {"name":"bill","lo":[120,-40,-40],"hi":[300,40,0],"mat":"accent"}],
+  "arrows":[{"name":"meter","from":[-120,0,-20],"to":[120,0,-20],"mat":"accent"}],
+  "tags":[{"text":"tokens, GPU-hours, GB","at":[-200,100,-20]},{"text":"billed on usage","at":[210,100,-20]}]},
+ {"caption":"a committed minimum sets a floor","boxes":[
+   {"name":"floor","lo":[-300,-150,-60],"hi":[300,-120,0],"mat":"dim"}],
+  "tags":[{"text":"committed minimum spend","at":[0,-180,-20]},{"text":"revenue follows volume","at":[0,-80,-20]}],
+  "show":["usage","bill","meter","floor"]}
+]}

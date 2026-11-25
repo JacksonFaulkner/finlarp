@@ -1,0 +1,177 @@
+{
+ "slug": "TRM_OPEN_RAN",
+ "beats": [
+  {
+   "caption": "Radio, DU and CU from different vendors",
+   "boxes": [
+    {
+     "name": "ru",
+     "lo": [
+      -360,
+      -50,
+      -60
+     ],
+     "hi": [
+      -200,
+      50,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "du",
+     "lo": [
+      -40,
+      -50,
+      -60
+     ],
+     "hi": [
+      120,
+      50,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "cu",
+     "lo": [
+      240,
+      -50,
+      -60
+     ],
+     "hi": [
+      380,
+      50,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "fh",
+     "from": [
+      -200,
+      0,
+      -40
+     ],
+     "to": [
+      -40,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "if",
+     "from": [
+      120,
+      0,
+      -40
+     ],
+     "to": [
+      240,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "RU = radio unit",
+     "at": [
+      -280,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "DU = baseband",
+     "at": [
+      40,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "CU / RIC software",
+     "at": [
+      300,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "ru",
+    "du",
+    "cu",
+    "fh",
+    "if"
+   ]
+  },
+  {
+   "caption": "Open interfaces link the software",
+   "boxes": [
+    {
+     "name": "ric",
+     "lo": [
+      240,
+      -200,
+      -60
+     ],
+     "hi": [
+      380,
+      -120,
+      -20
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "ric_l",
+     "from": [
+      310,
+      -120,
+      -40
+     ],
+     "to": [
+      310,
+      -50,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "open fronthaul",
+     "at": [
+      -120,
+      -90,
+      0
+     ]
+    },
+    {
+     "text": "RIC = RAN controller",
+     "at": [
+      220,
+      -240,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "ru",
+    "du",
+    "cu",
+    "fh",
+    "if",
+    "ric",
+    "ric_l"
+   ]
+  }
+ ]
+}

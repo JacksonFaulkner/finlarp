@@ -1,0 +1,10 @@
+{
+ "label": "GPU",
+ "term": "GPU",
+ "aliases": [
+  "graphics processing unit",
+  "GPUs",
+  "accelerated computing"
+ ],
+ "kind": "compute"
+}

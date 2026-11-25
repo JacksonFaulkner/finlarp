@@ -1,0 +1,224 @@
+{
+ "slug": "TRM_URANIUM_ENRICH",
+ "beats": [
+  {
+   "caption": "Mined ore becomes UF6 gas",
+   "boxes": [
+    {
+     "name": "mined_u3o8",
+     "lo": [
+      -380,
+      -60,
+      -40
+     ],
+     "hi": [
+      -280,
+      60,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "conversion",
+     "lo": [
+      -230,
+      -60,
+      -40
+     ],
+     "hi": [
+      -130,
+      60,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "centrifuges",
+     "lo": [
+      -80,
+      -60,
+      -40
+     ],
+     "hi": [
+      40,
+      60,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "fuel",
+     "lo": [
+      90,
+      -60,
+      -40
+     ],
+     "hi": [
+      190,
+      60,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "a",
+     "from": [
+      -280,
+      0,
+      -20
+     ],
+     "to": [
+      -230,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "b",
+     "from": [
+      -130,
+      0,
+      -20
+     ],
+     "to": [
+      -80,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "c",
+     "from": [
+      40,
+      0,
+      -20
+     ],
+     "to": [
+      90,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "0.7% U-235",
+     "at": [
+      -330,
+      90,
+      20
+     ]
+    },
+    {
+     "text": "UF6 gas",
+     "at": [
+      -180,
+      90,
+      20
+     ]
+    },
+    {
+     "text": "3-20% U-235",
+     "at": [
+      -30,
+      90,
+      20
+     ]
+    },
+    {
+     "text": "fuel assemblies",
+     "at": [
+      140,
+      90,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Centrifuges are the tightest step",
+   "boxes": [
+    {
+     "name": "mined_u3o8",
+     "lo": [
+      -380,
+      -60,
+      -40
+     ],
+     "hi": [
+      -280,
+      60,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "conversion",
+     "lo": [
+      -230,
+      -60,
+      -40
+     ],
+     "hi": [
+      -130,
+      60,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "centrifuges",
+     "lo": [
+      -80,
+      -60,
+      -40
+     ],
+     "hi": [
+      40,
+      60,
+      0
+     ],
+     "mat": "alarm"
+    },
+    {
+     "name": "fuel",
+     "lo": [
+      90,
+      -60,
+      -40
+     ],
+     "hi": [
+      190,
+      60,
+      0
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "HALEU 5-20% for SMRs",
+     "at": [
+      -40,
+      -120,
+      20
+     ]
+    },
+    {
+     "text": "capacity in few firms",
+     "at": [
+      -40,
+      130,
+      20
+     ]
+    }
+   ]
+  }
+ ]
+}

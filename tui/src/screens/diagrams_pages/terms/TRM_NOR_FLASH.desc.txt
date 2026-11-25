@@ -1,0 +1,1 @@
+NOR flash is a non-volatile memory with random byte-level reads, used to hold boot code and firmware rather than bulk data. It is much less dense than NAND but code can be read from it directly and reliably. Every server, GPU board, SSD and network switch carries NOR chips for firmware. Related: Winbond (2344.TW), Macronix (2337.TW), GigaDevice (603986.SS), Infineon (IFX.DE).

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CPU",
+ "script": "terms/trm_cpu.py",
+ "beats": [
+  {
+   "caption": "The CPU is the general-purpose host that runs the server",
+   "text": "A CPU runs the operating system, the drivers and most ordinary software. In an AI server one or two CPUs sit beside the accelerators: they start jobs, load data, handle networking and storage, and tell the GPUs what to do next. Outside AI, CPUs still run most cloud workloads."
+  },
+  {
+   "caption": "Inside: a few dozen to a few hundred big, independent cores",
+   "text": "Each core is a complete processor with its own instruction decoder, branch predictor, integer and vector units and private L1/L2 cache. A large shared L3 cache and an on-die mesh connect them. Memory controllers drive many channels of DDR DRAM, and I/O blocks provide PCIe and chip-to-chip links."
+  },
+  {
+   "caption": "Each core runs its own instruction stream, fast and out of order",
+   "text": "Cores pull instructions and data from DRAM through the cache levels, guess which way branches will go and run several instructions per clock at 3-5 GHz. That makes them good at messy, branchy, serial code, the opposite of the GPU's thousands of simple lanes doing the same maths in lockstep."
+  },
+  {
+   "caption": "It stages the data and feeds the accelerators",
+   "text": "In training and inference the CPU loads and preprocesses batches, then ships them to the GPUs over PCIe or a coherent link such as NVIDIA's NVLink-C2C on Grace. A slow host leaves expensive GPUs idle, so AI servers pair them with high-memory-bandwidth CPUs, typically one CPU for every two to four GPUs."
+  },
+  {
+   "caption": "Two camps: x86 from Intel and AMD, Arm designs from everyone else",
+   "text": "x86 (Intel Xeon, AMD EPYC) still holds most server sockets, and AMD has been gaining share. Arm-based chips are rising: NVIDIA Grace, AWS Graviton, Google Axion and Microsoft Cobalt license designs from Arm Holdings. Related: Intel (INTC), AMD (AMD), Arm (ARM), NVIDIA (NVDA), Amazon (AMZN)."
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+# 1. What it is: cash spent on buildings and machines
+
+   ┌──────────────┐    ┌────────────────┐    ┌───────────────┐
+   │ HYPERSCALER  │───▶│ SUPPLIERS      │───▶│ BALANCE SHEET │
+   │ capex budget │    │ GPUs, memory,  │    │ PP&E, then    │
+   │              │    │ network, power │    │ depreciation  │
+   └──────────────┘    └────────────────┘    └───────────────┘
+
+  (shows as 'purchases of property and equipment' in cash flow from investing)
+
+# 2. Why it matters
+
+One company's capex is another company's revenue. Rising hyperscaler capex guidance usually lifts the AI supply chain; cuts do the opposite.
+
+# 3. Cash vs profit
+
+Heavy capex lowers free cash flow now but only lowers earnings later as assets depreciate.

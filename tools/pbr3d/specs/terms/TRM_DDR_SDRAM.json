@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_DDR_SDRAM",
+ "script": "terms/trm_ddr_sdram.py",
+ "beats": [
+  {
+   "caption": "Servers keep most of their RAM in DDR5 DIMMs",
+   "text": "A server CPU has eight to twelve memory channels, and each channel ends in one or two DIMM slots beside the socket. Those DIMMs are DDR SDRAM: cheap, dense memory that holds the operating system, the data a job is working on, and the model weights a CPU or GPU loads next. A two-socket server often carries 1 to 4 TB of it."
+  },
+  {
+   "caption": "A DIMM is a strip of DRAM chips behind one buffer",
+   "text": "A DDR5 RDIMM carries 16 to 40 DRAM chips on both faces. The RCD chip in the middle re-drives the address and command lines so the CPU sees one load instead of dozens, and a PMIC on the module turns 12 V into the chips' 1.1 V. Data runs straight from the chips to the gold fingers on 2 x 32-bit subchannels."
+  },
+  {
+   "caption": "Double data rate: data moves on both clock edges",
+   "text": "Plain SDRAM sent one word per clock cycle. DDR sends one on the rising edge and one on the falling edge, so a 3.2 GHz clock gives 6400 million transfers per second (MT/s). At 6400 MT/s a 64-bit channel moves about 51 GB/s."
+  },
+  {
+   "caption": "Inside each chip: banks of one-transistor, one-capacitor cells",
+   "text": "Every bit is a charge on a tiny capacitor, switched by one transistor. A row is opened into the sense amps, then columns stream out to the pins. The charge leaks, so every row is refreshed every 32 ms or so, and that is why it is called dynamic RAM."
+  },
+  {
+   "caption": "Each generation raises the rate and drops the voltage",
+   "text": "DDR3 topped out near 2133 MT/s at 1.5 V, DDR4 at 3200 MT/s at 1.2 V, and DDR5 starts at 4800 and is shipping 6400-8000 MT/s at 1.1 V. CPUs and modules must match generation, so each change drives a server refresh cycle. AI GPUs use stacked HBM instead for bandwidth, while servers fill capacity with DDR5. Related: Micron (MU), Samsung (005930.KS), SK hynix (000660.KS), AMD (AMD)."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+# 1. What it is: Pillar Two
+
+   ┌──────────────────┐       ┌────────────────┐       ┌────────────────────┐
+   │ GloBE rules      │       │ effective rate │       │ top-up tax to a    │
+   │ 15% minimum tax  │──────▶│ below 15%?     │──────▶│ parent or backstop │
+   │ per jurisdiction │       └────────────────┘       │ country            │
+   └──────────────────┘                                └────────────────────┘
+
+  (applies to groups with revenue above EUR 750 million)
+
+# 2. Why AI cares
+
+Hyperscalers and chipmakers that book profits in low-tax countries can owe top-up tax, which raises their effective tax rate. The rules apply country by country, so the impact depends on where a company runs its operations and data centers. Incentives that push a country's rate below 15 percent are partly reversed by the top-up.

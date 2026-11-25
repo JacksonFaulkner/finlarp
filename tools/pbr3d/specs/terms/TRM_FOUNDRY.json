@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FOUNDRY",
+ "script": "terms/trm_foundry.py",
+ "beats": [
+  {
+   "caption": "A foundry builds chips that other companies design",
+   "text": "A foundry is a chip factory for hire. Companies like Nvidia, AMD, Apple and Broadcom design chips but own no fabs; they send finished layouts to a foundry, which turns them into wafers. One fab serves hundreds of customers, so a single $20B+ building is shared instead of every designer paying for its own."
+  },
+  {
+   "caption": "Lithography prints each layer: light through a mask onto the wafer",
+   "text": "The scanner shines extreme-ultraviolet (or deep-UV) light through a reticle (the mask holding one layer of the customer's design), shrinks it through a lens column and exposes the wafer one die field at a time. A leading-edge chip needs 60-plus mask layers, and each EUV scanner costs over $150M."
+  },
+  {
+   "caption": "Wafers ride pods between hundreds of tools for about three months",
+   "text": "Between exposures, wafers travel in sealed pods (FOUPs) on an overhead rail to deposition, etch, polishing and implant tools, then back to litho. A modern chip takes over a thousand process steps and roughly 3-4 months from bare wafer to finished. Yield, the share of good dies, is what the foundry is really selling."
+  },
+  {
+   "caption": "Leading-edge capacity is scarce, and AI chips queue for it",
+   "text": "Only a few fabs on Earth can make 3 nm and 2 nm chips, and nearly all of them belong to TSMC. Every AI accelerator, phone chip and server CPU wants the same newest node, so the line runs full and customers book capacity years ahead and prepay. That pricing power is why TSMC earns gross margins near 60%."
+  },
+  {
+   "caption": "Finished wafers go to packaging; TSMC leads, others chase",
+   "text": "Finished wafers are tested and shipped to packaging (TSMC's own CoWoS lines or OSATs) where dies become chips. TSMC (TSM) has about two thirds of foundry revenue and almost all leading-edge AI work. Samsung, Intel Foundry (INTC), GlobalFoundries (GFS), UMC (UMC) and SMIC mostly compete on older, cheaper nodes."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+# 1. What it is: six-transistor memory on the logic die
+
+   ┌──────────────┐   ┌────────────┐   ┌─────────────┐
+   │ COMPUTE      │──▶│ SRAM       │──▶│ HBM / DRAM  │
+   │ tensor cores │   │ ~1 ns      │   │ ~100 ns     │
+   └──────────────┘   │ MBs on die │   │ GBs off die │
+                      └────────────┘   └─────────────┘
+
+  (SRAM bit cells shrink slowly at new nodes, so cache area grows as a share of die)
+
+# 2. Why AI cares
+
+Keeping weights and activations in SRAM avoids slow trips to HBM; chip designs trade SRAM area against compute area.

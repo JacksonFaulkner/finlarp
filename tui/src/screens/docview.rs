@@ -23,8 +23,21 @@
 // selection. Here: n/N next/previous match of the quote, ]]/[[ next/previous
 // Item, ]h/[h next/previous heading, o open in browser, y copy url (normal
 // mode), q/esc back.
+//
+// The diagram LSP (screens::lsp): known terms (HBM, CoWoS, EUV…) are underlined.
+// On one, gd goes to its definition (the x-diagrams node that explains it), gr
+// to its references (every filing that mentions it, through search), K shows
+// what is known about it (filings, tickers, whether a diagram exists). u turns
+// the underlines off for plain reading.
+//
+// Diagram mode (D, off by default): a panel beside the text shows the diagram
+// attached to the paragraph you are in. A draws one for the paragraph (or the
+// visual selection): Claude writes a Z diagram (data/z/filings/), and it stays
+// attached to that spot (data/lsp/attachments.json) for the next visit.
+// ]d / [d jump between attached diagrams.
 
 use std::io;
+use std::path::PathBuf;
 use std::sync::mpsc::{self, Receiver, TryRecvError};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -43,7 +56,11 @@ use crate::pyrun;
 use crate::ui::doc_blocks::{self, Block};
 use crate::ui::help::{Help, Key, key, section};
 use crate::ui::text_cursor::{Outcome, TextCursor};
+use crate::ui::pic_chart::PicChart;
 use crate::ui::theme::Theme;
+
+use super::lsp;
+use super::z_flow::Talk;
 
 const FLASH_FOR: Duration = Duration::from_secs(2);
 const DOCVIEW_PY: &str = "py/derive/docview.py";
@@ -56,7 +73,18 @@ const DOC_KEYS: &[Key] = &[
     section("document"),
     key("]] [[", "next / previous Item"),
     key("]h [h", "next / previous heading"),
-    key("n N", "next / previous quote match"),
+    key("n N", "no / search: next / previous quote match"),
+    section("diagram lsp"),
+    key("gd", "go to definition: the diagram that explains the term"),
+    key("gr", "references: every filing that mentions the term"),
+    key("K", "what is known about the term under the cursor"),
+    key("d", "in the K card: open the diagram"),
+    key("r", "in the K card: references"),
+    key("u", "underline terms on / off"),
+    key("D", "diagram mode: the paragraph's diagram beside the text"),
+    key("A", "draw a diagram for this paragraph (or the selection)"),
+    key("]d [d", "next / previous attached diagram"),
+    section("reader"),
     key("o", "open the source in the browser"),
     key("y", "copy the source URL (normal mode)"),
     key("spc t o", "lazygit in a new tmux window"),
@@ -131,6 +159,90 @@ pub struct Docview {
     /// Logical line to centre on at the next draw.
     pending: Option<usize>,
     flash: Option<(String, Instant)>,
+    /// Underline the LSP terms (u).
+    lsp_on: bool,
+    /// K: the term whose card is open.
+    hover: Option<usize>,
+    /// D: the diagram panel beside the text.
+    diagrams: bool,
+    /// Diagrams attached to this document: (logical line, file).
+    attached: Vec<(usize, PathBuf)>,
+    /// A: Claude drawing a diagram for logical line `.2` into `.1`.
+    drawing: Option<(Talk, PathBuf, usize, String)>,
+    /// The panel's picture (made when diagram mode first turns on).
+    pic: Option<PicChart>,
+}
+
+/// One attached diagram, as kept in data/lsp/attachments.json under its document's url.
+#[derive(Clone, Debug, Deserialize, serde::Serialize)]
+struct Attach {
+    line: usize,
+    file: String,
+    #[serde(default)]
+    excerpt: String,
+}
+
+fn attachments_path() -> PathBuf {
+    crate::data_dir().join("lsp/attachments.json")
+}
+
+fn load_attachments(url: &str) -> Vec<(usize, PathBuf)> {
+    let all: std::collections::HashMap<String, Vec<Attach>> = std::fs::read_to_string(attachments_path())
+        .ok()
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or_default();
+    let mut v: Vec<(usize, PathBuf)> = all
+        .get(url)
+        .into_iter()
+        .flatten()
+        .map(|a| (a.line, PathBuf::from(&a.file)))
+        .filter(|(_, f)| f.is_file())
+        .collect();
+    v.sort_by_key(|a| a.0);
+    v
+}
+
+fn save_attachment(url: &str, a: Attach) {
+    let p = attachments_path();
+    let mut all: std::collections::HashMap<String, Vec<Attach>> = std::fs::read_to_string(&p)
+        .ok()
+        .and_then(|s| serde_json::from_str(&s).ok())
+        .unwrap_or_default();
+    let v = all.entry(url.to_string()).or_default();
+    v.retain(|x| x.line != a.line);
+    v.push(a);
+    if let Some(d) = p.parent() {
+        let _ = std::fs::create_dir_all(d);
+    }
+    let _ = std::fs::write(p, serde_json::to_string_pretty(&all).unwrap_or_default());
+}
+
+/// `line` with chars [start, end) of each range underlined (styles kept).
+fn underline(line: Line<'static>, ranges: &[(usize, usize)], extra: Style) -> Line<'static> {
+    if ranges.is_empty() {
+        return line;
+    }
+    let mut out: Vec<Span<'static>> = Vec::new();
+    let mut at = 0usize;
+    for span in line.spans {
+        let mut buf = String::new();
+        let mut buf_on = false;
+        for ch in span.content.chars() {
+            let on = ranges.iter().any(|&(a, b)| a <= at && at < b);
+            if on != buf_on && !buf.is_empty() {
+                let st = if buf_on { span.style.patch(extra) } else { span.style };
+                out.push(Span::styled(std::mem::take(&mut buf), st));
+            }
+            buf_on = on;
+            buf.push(ch);
+            at += 1;
+        }
+        if !buf.is_empty() {
+            let st = if buf_on { span.style.patch(extra) } else { span.style };
+            out.push(Span::styled(buf, st));
+        }
+    }
+    Line::from(out).style(line.style)
 }
 
 pub fn open(_ctx: &Ctx, arg: Option<String>) -> io::Result<Docview> {
@@ -176,7 +288,267 @@ impl Docview {
             wrapped_at: 0,
             pending: None,
             flash: None,
+            lsp_on: true,
+            hover: None,
+            diagrams: false,
+            attached: Vec::new(),
+            drawing: None,
+            pic: None,
         }
+    }
+
+    /// The LSP term under the cursor, as an index into `lsp::index().terms`.
+    fn term_here(&self) -> Option<usize> {
+        let (_, line) = self.rows.get(self.cur.pos.row)?;
+        let text = TextCursor::line_text(line);
+        lsp::index().at(&text, self.cur.pos.col).map(|h| h.term)
+    }
+
+    /// gd: the term's diagram; a term with no diagram yet opens its card instead.
+    fn goto_definition(&mut self) -> Action {
+        let Some(i) = self.term_here() else {
+            self.flash_msg("no term under the cursor".into());
+            return Action::None;
+        };
+        match &lsp::index().terms[i].node {
+            Some(node) => Action::Route(crate::app::Route::Screen {
+                screen: "diagrams".into(),
+                arg: Some(format!("node:{node}")),
+            }),
+            None => {
+                self.hover = Some(i);
+                self.flash_msg("no diagram for this term yet (A draws one here)".into());
+                Action::None
+            }
+        }
+    }
+
+    /// gr: every filing that mentions the term, in search.
+    fn goto_references(&mut self, term: Option<usize>) -> Action {
+        let Some(i) = term.or_else(|| self.term_here()) else {
+            self.flash_msg("no term under the cursor".into());
+            return Action::None;
+        };
+        Action::Route(crate::app::Route::Screen {
+            screen: "search".into(),
+            arg: Some(lsp::refs_query(&lsp::index().terms[i])),
+        })
+    }
+
+    /// The logical line the cursor is on.
+    fn line_here(&self) -> usize {
+        self.rows.get(self.cur.pos.row).map_or(0, |(l, _)| *l)
+    }
+
+    /// The attached diagram for where the cursor is: the nearest one at or above it.
+    fn attached_here(&self) -> Option<&PathBuf> {
+        let here = self.line_here();
+        self.attached
+            .iter()
+            .rev()
+            .find(|(l, _)| *l <= here)
+            .or_else(|| self.attached.first())
+            .map(|(_, f)| f)
+    }
+
+    /// A: asks Claude for a diagram of the selection, or of the paragraph under the cursor.
+    fn draw_diagram(&mut self) {
+        if self.drawing.is_some() {
+            self.flash_msg("already drawing one".into());
+            return;
+        }
+        let State::Ready(doc) = &self.state else { return };
+        let line = self.line_here();
+        let excerpt = match self.cur.selected_text() {
+            Some(t) => t,
+            None => {
+                let lines: Vec<String> = match &doc.blocks {
+                    Some(_) => {
+                        // the block's rows, as laid out
+                        self.rows
+                            .iter()
+                            .filter(|(l, _)| *l == line)
+                            .map(|(_, t)| TextCursor::line_text(t))
+                            .collect()
+                    }
+                    None => doc.lines.iter().skip(line).take(6).cloned().collect(),
+                };
+                lines.join(" ")
+            }
+        };
+        let excerpt: String = excerpt.chars().take(2500).collect();
+        if excerpt.trim().is_empty() {
+            self.flash_msg("nothing here to draw".into());
+            return;
+        }
+        let url = self.open_url().unwrap_or_default();
+        let slug = {
+            use std::hash::{Hash, Hasher};
+            let mut h = std::collections::hash_map::DefaultHasher::new();
+            url.hash(&mut h);
+            format!("{:012x}", h.finish() & 0xffff_ffff_ffff)
+        };
+        let dir = super::z::z_dir().join("filings");
+        let _ = std::fs::create_dir_all(&dir);
+        let file = dir.join(format!("{slug}-{line}.json"));
+        let (system, tools) = super::z::filing_prompt(&dir, &file);
+        let prompt = format!(
+            "From {} ({url}):\n\n{excerpt}\n\nDraw this as one diagram.",
+            doc.title
+        );
+        let mut talk = Talk::new();
+        talk.send(&prompt, &system, &tools);
+        self.flash_msg("drawing a diagram for this paragraph…".into());
+        self.drawing = Some((talk, file, line, excerpt));
+    }
+
+    /// The drawing finished: attach the diagram, or say why not.
+    fn drawing_done(&mut self) {
+        let Some((talk, file, line, excerpt)) = self.drawing.take() else {
+            return;
+        };
+        match super::z_spec::load(&file) {
+            Ok(_) => {
+                let url = self.open_url().unwrap_or_default();
+                save_attachment(
+                    &url,
+                    Attach {
+                        line,
+                        file: file.to_string_lossy().into_owned(),
+                        excerpt: excerpt.chars().take(200).collect(),
+                    },
+                );
+                self.attached.retain(|(l, _)| *l != line);
+                self.attached.push((line, file));
+                self.attached.sort_by_key(|a| a.0);
+                self.diagrams = true;
+                self.flash_msg("diagram attached (D hides the panel)".into());
+            }
+            Err(e) => {
+                let said = talk
+                    .log
+                    .iter()
+                    .rev()
+                    .find(|(r, _)| matches!(r, super::z_flow::Role::Error | super::z_flow::Role::Claude))
+                    .map(|(_, t)| t.clone())
+                    .unwrap_or_else(|| e.join("; "));
+                self.flash_msg(format!("no diagram: {}", said.chars().take(120).collect::<String>()));
+            }
+        }
+    }
+
+    /// ]d / [d: the cursor to the next / previous attached diagram's line.
+    fn jump_attached(&mut self, forward: bool) {
+        let here = self.line_here();
+        let next = if forward {
+            self.attached.iter().map(|a| a.0).find(|&l| l > here)
+        } else {
+            self.attached.iter().rev().map(|a| a.0).find(|&l| l < here)
+        };
+        match next {
+            Some(l) => {
+                let row = self.starts.get(l).copied().unwrap_or(0);
+                self.cur.goto_row(row);
+            }
+            None => self.flash_msg("no more diagrams that way".into()),
+        }
+    }
+
+    /// Diagram mode's panel: the attached diagram for where the cursor is.
+    fn draw_panel(&mut self, frame: &mut Frame, area: ratatui::layout::Rect) {
+        let dim = Style::default().fg(self.theme.dim);
+        let block = ratatui::widgets::Block::bordered()
+            .border_style(Style::default().fg(self.theme.border))
+            .title(" diagram ");
+        let inner = block.inner(area);
+        frame.render_widget(block, area);
+        let Some(file) = self.attached_here().cloned() else {
+            let msg = if self.drawing.is_some() {
+                "drawing…"
+            } else {
+                "no diagram here yet: A draws one for this paragraph"
+            };
+            frame.render_widget(Paragraph::new(Span::styled(msg, dim)).wrap(Wrap { trim: true }), inner);
+            return;
+        };
+        let caption = super::z_spec::load(&file)
+            .ok()
+            .map(|d| d.title.clone())
+            .unwrap_or_default();
+        let [img, cap] =
+            Layout::vertical([Constraint::Min(3), Constraint::Length(1)]).areas(inner);
+        frame.render_widget(Paragraph::new(Span::styled(caption, dim)), cap);
+        let key = {
+            use std::hash::{Hash, Hasher};
+            let mut h = std::collections::hash_map::DefaultHasher::new();
+            file.hash(&mut h);
+            std::fs::metadata(&file).and_then(|m| m.modified()).ok().hash(&mut h);
+            h.finish()
+        };
+        let bg = self.theme.bg.map_or([0x28, 0x2a, 0x36], |c| match c {
+            ratatui::style::Color::Rgb(r, g, b) => [r, g, b],
+            _ => [0x28, 0x2a, 0x36],
+        });
+        let drawn = self.pic.as_mut().is_some_and(|p| {
+            p.draw_image(frame, img, key, |w, h| {
+                super::z_spec::render_file(&file, w.min(1600), h.min(1000), bg).ok()
+            })
+        });
+        if !drawn {
+            frame.render_widget(
+                Paragraph::new(Span::styled(
+                    format!("{} (pictures need kitty / sixel)", file.display()),
+                    dim,
+                ))
+                .wrap(Wrap { trim: true }),
+                img,
+            );
+        }
+    }
+
+    /// The K card: what is known about the term.
+    fn draw_hover(&self, frame: &mut Frame, area: ratatui::layout::Rect, i: usize) {
+        let t = &lsp::index().terms[i];
+        let dim = Style::default().fg(self.theme.dim);
+        let accent = Style::default().fg(self.theme.accent).add_modifier(Modifier::BOLD);
+        let mut lines = vec![Line::from(vec![
+            Span::styled(t.term.clone(), accent),
+            Span::styled(format!("  {}", t.kind), dim),
+        ])];
+        if !t.aliases.is_empty() {
+            lines.push(Line::styled(format!("also: {}", t.aliases.join(", ")), dim));
+        }
+        lines.push(Line::raw(match &t.node {
+            Some(n) => format!("diagram: {n}  (d opens it)"),
+            None => "diagram: none yet  (A draws one for this paragraph)".to_string(),
+        }));
+        if t.docs > 0 {
+            lines.push(Line::raw(format!(
+                "in {} filings from {} companies",
+                t.docs, t.tickers
+            )));
+            if !t.top.is_empty() {
+                lines.push(Line::raw(format!("most: {}", t.top.join(" "))));
+            }
+        } else {
+            lines.push(Line::styled("counts: run py/derive/lsp_terms.py", dim));
+        }
+        lines.push(Line::styled("d diagram · r references · esc close", dim));
+        let w = 64.min(area.width.saturating_sub(2));
+        let h = (lines.len() as u16 + 2).min(area.height);
+        let r = ratatui::layout::Rect::new(
+            area.x + area.width.saturating_sub(w) / 2,
+            area.y + area.height.saturating_sub(h) / 3,
+            w,
+            h,
+        );
+        frame.render_widget(ratatui::widgets::Clear, r);
+        frame.render_widget(
+            Paragraph::new(lines)
+                .wrap(Wrap { trim: true })
+                .block(ratatui::widgets::Block::bordered().border_style(accent)),
+            r,
+        );
     }
 
     fn is_ready(&self) -> bool {
@@ -335,6 +707,23 @@ struct Located {
 }
 
 fn load_url(url: &str, quote: Option<&str>) -> Result<Doc, String> {
+    // a filing already downloaded parses in-process (crate::filing_blocks): no Python start
+    let docs = crate::data_dir().join("docs");
+    if let Some(c) = crate::filing_blocks::cached::open(&docs, url, quote)
+        && let Ok(blocks) = doc_blocks::from_value(c.doc)
+        && !blocks.is_empty()
+    {
+        let matches: Vec<usize> = c.block.into_iter().collect();
+        return Ok(Doc {
+            title: c.title,
+            subtitle: c.url.clone(),
+            url: Some(c.url),
+            lines: Vec::new(),
+            jump: matches.first().copied(),
+            matches,
+            blocks: Some(blocks),
+        });
+    }
     let mut args = vec![url];
     if let Some(q) = quote {
         args.extend(["--quote", q]);
@@ -628,6 +1017,14 @@ impl Screen for Docview {
             Constraint::Length(1),
         ])
         .areas(frame.area());
+        // diagram mode: the panel takes the right two fifths
+        let (body, panel) = if self.diagrams && body.width >= 60 {
+            let [b, p] = Layout::horizontal([Constraint::Percentage(60), Constraint::Percentage(40)])
+                .areas(body);
+            (b, Some(p))
+        } else {
+            (body, None)
+        };
         let width = body.width.max(1) as usize;
 
         if let State::Ready(doc) = &self.state {
@@ -665,6 +1062,7 @@ impl Screen for Docview {
         let accent = Style::default()
             .fg(self.theme.accent)
             .add_modifier(Modifier::BOLD);
+        let term_style = Style::default().add_modifier(Modifier::UNDERLINED);
         let (title, subtitle) = match &self.state {
             State::Ready(doc) => (doc.title.as_str(), doc.subtitle.as_str()),
             State::Loading => (self.label.as_str(), "loading…"),
@@ -699,11 +1097,25 @@ impl Screen for Docview {
                     .map(|r| {
                         let (line, text) = &self.rows[r];
                         let hit = doc.matches.binary_search(line).is_ok() && text.width() > 0;
-                        let drawn = match (hit, blocks) {
+                        let mut drawn = match (hit, blocks) {
                             (true, true) => gutter(text, accent),
                             (true, false) => text.clone().style(accent),
                             _ => text.clone(),
                         };
+                        if self.lsp_on {
+                            let plain = TextCursor::line_text(&drawn);
+                            let hits: Vec<(usize, usize)> = lsp::index()
+                                .hits(&plain)
+                                .iter()
+                                .map(|h| (h.start, h.end))
+                                .collect();
+                            drawn = underline(drawn, &hits, term_style);
+                        }
+                        // a paragraph with a diagram: its first row in italics (no extra
+                        // columns, so the cursor's columns stay true)
+                        if self.attached.iter().any(|(l, _)| self.starts.get(*l) == Some(&r)) {
+                            drawn = drawn.patch_style(Style::default().add_modifier(Modifier::ITALIC));
+                        }
                         self.cur.decorate(r, drawn, &self.theme)
                     })
                     .collect();
@@ -711,7 +1123,18 @@ impl Screen for Docview {
             }
         }
 
+        if let Some(p) = panel {
+            self.draw_panel(frame, p);
+        }
+        if let Some(i) = self.hover {
+            self.draw_hover(frame, body, i);
+        }
+
         let mut parts = Vec::new();
+        parts.extend(self.cur.search_status());
+        if self.drawing.is_some() {
+            parts.push("drawing…".to_string());
+        }
         if self.is_ready() {
             let total = self.rows.len().max(1);
             parts.extend(self.cur.status());
@@ -737,14 +1160,48 @@ impl Screen for Docview {
                 _ => Action::None,
             };
         }
+        if self.cur.takes_text() {
+            self.cur.on_key(key);
+            return Action::None;
+        }
         if let Some(first) = self.bracket.take() {
             let forward = first == ']';
             match key.code {
                 KeyCode::Char(c) if c == first => self.jump_heading(forward, 1),
                 KeyCode::Char('h') => self.jump_heading(forward, 3),
+                KeyCode::Char('d') => self.jump_attached(forward),
                 _ => {}
             }
             return Action::None;
+        }
+        if let Some(i) = self.hover {
+            match key.code {
+                KeyCode::Char('d') => {
+                    self.hover = None;
+                    if let Some(node) = &lsp::index().terms[i].node {
+                        return Action::Route(crate::app::Route::Screen {
+                            screen: "diagrams".into(),
+                            arg: Some(format!("node:{node}")),
+                        });
+                    }
+                }
+                KeyCode::Char('r') => {
+                    self.hover = None;
+                    return self.goto_references(Some(i));
+                }
+                _ => self.hover = None,
+            }
+            return Action::None;
+        }
+        // gd / gr: the LSP's go-to pairs, ahead of the cursor's own g pairs
+        if let KeyCode::Char(c @ ('d' | 'r')) = key.code {
+            if self.cur.take_prefix_if('g') {
+                return if c == 'd' {
+                    self.goto_definition()
+                } else {
+                    self.goto_references(None)
+                };
+            }
         }
         if matches!(key.code, KeyCode::Char('[' | ']')) && key.modifiers.is_empty() {
             if let KeyCode::Char(c) = key.code {
@@ -761,16 +1218,42 @@ impl Screen for Docview {
             KeyCode::Esc | KeyCode::Char('q') => Action::Quit,
             KeyCode::Char('o') => self.open_browser(),
             KeyCode::Char('y') => self.copy_url(),
-            KeyCode::Char('n') => {
-                self.jump_match(true);
+            KeyCode::Char(c @ ('n' | 'N')) => {
+                self.jump_match(c == 'n');
                 Action::None
             }
-            KeyCode::Char('N') => {
-                self.jump_match(false);
+            KeyCode::Char('K') => {
+                match self.term_here() {
+                    Some(i) => self.hover = Some(i),
+                    None => self.flash_msg("no term under the cursor".into()),
+                }
+                Action::None
+            }
+            KeyCode::Char('u') => {
+                self.lsp_on = !self.lsp_on;
+                Action::None
+            }
+            KeyCode::Char('D') => {
+                self.diagrams = !self.diagrams;
+                if self.diagrams && self.pic.is_none() {
+                    self.pic = Some(PicChart::probe(&self.theme, 3));
+                }
+                Action::None
+            }
+            KeyCode::Char('A') => {
+                self.draw_diagram();
                 Action::None
             }
             _ => Action::None,
         }
+    }
+
+    fn takes_text(&self) -> bool {
+        self.cur.takes_text()
+    }
+
+    fn leader_ok(&self) -> bool {
+        !self.cur.takes_text()
     }
 
     fn take_selection(&mut self) -> Option<String> {
@@ -802,10 +1285,19 @@ impl Screen for Docview {
                     Ok(doc) => {
                         self.pending = doc.jump;
                         self.wrapped_at = 0;
+                        if let Some(u) = doc.url.clone().or_else(|| self.source.clone()) {
+                            self.attached = load_attachments(&u);
+                        }
                         State::Ready(doc)
                     }
                     Err(e) => State::Failed(e),
                 };
+            }
+        }
+        if let Some((talk, ..)) = self.drawing.as_mut() {
+            talk.poll();
+            if !talk.busy() {
+                self.drawing_done();
             }
         }
         if self
@@ -819,7 +1311,7 @@ impl Screen for Docview {
     }
 
     fn needs_redraw(&self) -> bool {
-        self.rx.is_some() || self.flash.is_some()
+        self.rx.is_some() || self.flash.is_some() || self.drawing.is_some()
     }
 
     fn flash_text(&self) -> Option<&str> {
@@ -1154,6 +1646,30 @@ mod tests {
     }
 
     #[test]
+    fn slash_search_then_n_and_shift_n() {
+        let lines = vec!["alpha".into(), "Beta gamma".into(), "beta two".into(), "end".into()];
+        let mut v = doc(lines, vec![], None);
+        screen_text(&mut v, 40, 10);
+        press(&mut v, KeyCode::Char('/'));
+        assert!(v.takes_text());
+        for c in "beta".chars() {
+            press(&mut v, KeyCode::Char(c));
+        }
+        press(&mut v, KeyCode::Enter);
+        assert!(!v.takes_text());
+        let first = (v.cur.pos.row, v.cur.pos.col);
+        press(&mut v, KeyCode::Char('n'));
+        let second = (v.cur.pos.row, v.cur.pos.col);
+        assert!(second.0 > first.0);
+        press(&mut v, KeyCode::Char('N'));
+        assert_eq!((v.cur.pos.row, v.cur.pos.col), first);
+        // esc cancels a prompt without quitting
+        press(&mut v, KeyCode::Char('/'));
+        assert_eq!(press(&mut v, KeyCode::Esc), Action::None);
+        assert!(!v.takes_text());
+    }
+
+    #[test]
     fn help_lists_every_binding() {
         let v = doc(vec!["a".into()], vec![], None);
         let help = v.help();
@@ -1162,5 +1678,70 @@ mod tests {
         for k in ["]] [[", "gh gl", "ip ap", "n N", "spc t o"] {
             assert!(keys.contains(&k), "{k} missing: {keys:?}");
         }
+    }
+
+    #[test]
+    fn lsp_go_to_definition_references_and_card() {
+        let mut v = doc(vec!["Our HBM revenue grew on CoWoS demand.".into()], vec![], None);
+        screen_text(&mut v, 80, 10);
+        // cursor at col 0 ("Our"): no term
+        press(&mut v, KeyCode::Char('g'));
+        assert_eq!(press(&mut v, KeyCode::Char('d')), Action::None);
+        // onto HBM
+        press(&mut v, KeyCode::Char('w'));
+        press(&mut v, KeyCode::Char('g'));
+        assert_eq!(
+            press(&mut v, KeyCode::Char('d')),
+            Action::Route(crate::app::Route::Screen {
+                screen: "diagrams".into(),
+                arg: Some("node:MEM_HBM_STACK".into())
+            })
+        );
+        press(&mut v, KeyCode::Char('g'));
+        assert_eq!(
+            press(&mut v, KeyCode::Char('r')),
+            Action::Route(crate::app::Route::Screen {
+                screen: "search".into(),
+                arg: Some("HBM".into())
+            })
+        );
+        press(&mut v, KeyCode::Char('K'));
+        assert!(v.hover.is_some());
+        assert!(screen_text(&mut v, 80, 14).contains("MEM_HBM_STACK"));
+        press(&mut v, KeyCode::Esc);
+        assert!(v.hover.is_none());
+        // gg still works with the LSP pairs in front of it
+        press(&mut v, KeyCode::Char('g'));
+        press(&mut v, KeyCode::Char('g'));
+        assert_eq!(v.cur.pos.col, 0);
+    }
+
+    #[test]
+    fn underline_marks_char_ranges_across_spans() {
+        let line = Line::from(vec![Span::raw("ab"), Span::raw("cdef")]);
+        let u = underline(line, &[(1, 3)], Style::default().add_modifier(Modifier::UNDERLINED));
+        let parts: Vec<(String, bool)> = u
+            .spans
+            .iter()
+            .map(|s| (s.content.to_string(), s.style.add_modifier.contains(Modifier::UNDERLINED)))
+            .collect();
+        assert_eq!(
+            parts,
+            vec![
+                ("a".into(), false),
+                ("b".into(), true),
+                ("c".into(), true),
+                ("def".into(), false)
+            ]
+        );
+    }
+
+    #[test]
+    fn diagram_mode_shows_a_panel() {
+        let mut v = doc(vec!["Line one about EUV.".into(), "two".into()], vec![], None);
+        press(&mut v, KeyCode::Char('D'));
+        assert!(v.diagrams);
+        let out = screen_text(&mut v, 100, 12);
+        assert!(out.contains("diagram") && out.contains("A draws one"));
     }
 }

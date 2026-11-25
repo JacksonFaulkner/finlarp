@@ -1,0 +1,17 @@
+# 1. What it is: logic you can rewire after it ships
+
+   ┌─────────────┐   ┌───────────────────┐   ┌─────────┐
+   │ BITSTREAM   │   │ FPGA FABRIC       │   │ CUSTOM  │
+   │ config file │──▶│ LUTs, DSP slices, │──▶│ circuit │
+   └─────────────┘   │ block RAM         │   └─────────┘
+                     └───────────────────┘
+
+  (reload the bitstream to change the circuit)
+
+# 2. Why AI cares
+
+Useful where protocols or models change faster than an ASIC can be built, and in SmartNICs and edge devices.
+
+# 3. Business angle
+
+A smaller, steady market tied to communications, industrial and defense more than to AI training.

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FAB_UTILIZATION",
+ "script": "terms/trm_fab_utilization.py",
+ "beats": [
+  {
+   "caption": "Utilization is the share of a fab's capacity that is running",
+   "text": "A fab is a hall of process tools (lithography, etch, deposition, clean, metrology) that wafers visit hundreds of times. Utilization is how many wafer starts it is actually running against what it could run, usually quoted as a percentage. Full fabs run near 90-100%; in a slump they can drop to 60-70% or lower."
+  },
+  {
+   "caption": "A fab's costs are mostly fixed, so they are spread over every wafer",
+   "text": "A leading-edge fab costs $20B+ to build and is written off over about five years whether it runs or not. Depreciation, staff and upkeep are fixed; only materials and power scale with output. When the hall is full those fixed costs spread across many wafers and each one is cheap to make."
+  },
+  {
+   "caption": "When tools sit idle, each wafer carries more of the fixed cost",
+   "text": "If orders fall and half the tools go quiet, the same depreciation lands on half as many wafers, so cost per wafer jumps and gross margin falls fast. Companies often book the idle part as an underutilization charge. Memory makers and integrated chip makers call these out in downturns; it is why their margins swing so hard."
+  },
+  {
+   "caption": "AI keeps leading-edge lines full while mature nodes sit underused",
+   "text": "Demand for AI accelerators keeps leading-edge logic, HBM and advanced packaging (CoWoS) lines running flat out, with pricing power. Older, mature-node fabs that make analog, auto and industrial chips can sit well below capacity at the same time, so utilization is a per-node story, not one number for the industry."
+  },
+  {
+   "caption": "Watch utilization to read the margin swing before it reports",
+   "text": "Management comments on utilization and loadings are an early read on gross margin. Related: TSMC (TSM), Micron (MU), Texas Instruments (TXN), GlobalFoundries (GFS). Fabless designers don't carry this cost directly, but feel it as foundry price changes."
+  }
+ ]
+}

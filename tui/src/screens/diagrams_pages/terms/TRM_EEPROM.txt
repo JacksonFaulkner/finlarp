@@ -1,0 +1,14 @@
+# 1. What it is: chip that rewrites one byte at a time
+
+┌────────────────────────┐
+│ EEPROM                 │
+│ electrically erasable  │
+│ programmable read-only │
+│ memory                 │
+└────────────────────────┘
+
+(keeps data with power off; erased by electrical charge, not UV light)
+
+# 2. Why it matters
+
+EEPROM holds settings, calibration data, serial numbers and small firmware parameters on boards and modules. Erase is per byte, so it is smaller and slower than NAND or NOR flash.

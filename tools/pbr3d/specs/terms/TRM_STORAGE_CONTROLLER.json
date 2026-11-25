@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_STORAGE_CONTROLLER",
+ "script": "terms/trm_storage_controller.py",
+ "beats": [
+  {
+   "caption": "The controller is the processor inside every SSD",
+   "text": "Between the server's PCIe link and the NAND packages sits one chip: the controller. It turns simple host commands like 'read block 7' into the exact die, plane and page operations flash needs."
+  },
+  {
+   "caption": "Opened up: PHYs, CPU cores, ECC and channel engines",
+   "text": "The die holds a PCIe/NVMe front end, several Arm-class CPU cores, a DRAM controller, an error-correction engine and 8 to 16 flash-channel PHYs round the edge. Data-center controllers are built on 7 to 12 nm logic."
+  },
+  {
+   "caption": "The FTL maps every logical block to a physical page",
+   "text": "Flash cannot overwrite in place, so the flash translation layer writes new data to a fresh page and updates a map. The map, about 1 GB of DRAM per TB of flash, lives in the DRAM cache beside the controller."
+  },
+  {
+   "caption": "LDPC error correction cleans every read",
+   "text": "Cells storing 3 or 4 bits drift, so raw reads come back with errors. The LDPC engine fixes them on the fly using parity stored with each page; stronger ECC lets makers use denser, cheaper NAND."
+  },
+  {
+   "caption": "Wear leveling spreads writes; that sets endurance",
+   "text": "Each block survives a few thousand erase cycles, so the controller rotates writes across all blocks and moves cold data. Merchant controllers: Marvell (MRVL), Silicon Motion (SIMO), Phison (8299.TWO); Samsung (005930.KS) builds its own."
+  }
+ ]
+}

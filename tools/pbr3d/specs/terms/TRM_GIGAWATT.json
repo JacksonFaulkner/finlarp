@@ -1,0 +1,7 @@
+{"slug":"TRM_GIGAWATT","beats":[
+{"boxes":[{"name":"mw1","lo":[-340,-30,-40],"hi":[-200,40,0],"mat":"steel"},{"name":"mw100","lo":[-60,-30,-40],"hi":[80,40,0],"mat":"accent"},{"name":"gw","lo":[160,-60,-40],"hi":[340,60,0],"mat":"glow"}],
+"arrows":[{"name":"w1","from":[-200,5,-20],"to":[-60,5,-20],"mat":"accent"},{"name":"w2","from":[80,5,-20],"to":[160,5,-20],"mat":"accent"}],
+"tags":[{"text":"1 MW: ~10 racks","at":[-270,80,0]},{"text":"100 MW: large data center","at":[10,80,0]},{"text":"1 GW: AI campus","at":[250,90,0]}]},
+{"boxes":[{"name":"rack","lo":[-260,-130,-40],"hi":[-80,-80,0],"mat":"dim"},{"name":"camp","lo":[-40,-130,-40],"hi":[260,-80,0],"mat":"glow"}],
+"tags":[{"text":"GB200 NVL72 rack ~120-130 kW","at":[-90,-170,0]},{"text":"Capacity in MW, not floor space","at":[120,-170,0]}]}
+]}

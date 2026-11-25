@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_POWER_MOSFET",
+ "script": "terms/trm_power_mosfet.py",
+ "beats": [
+  {
+   "caption": "Power MOSFETs sit in every phase round the GPU",
+   "text": "Each of the 16 phases round the GPU has a power stage: a small black package holding two power MOSFETs and their driver. Together they turn 12 V into the ~0.8 V the GPU core runs on, at more than a thousand amps."
+  },
+  {
+   "caption": "Cut through: millions of trench cells in parallel",
+   "text": "Inside, a power MOSFET is not one transistor but millions of identical cells side by side. Each cell has a gate (doped polysilicon in a trench, wrapped in thin oxide), an n+ source on top, a p-type body, a thick lightly doped drift region that holds the voltage when off, and the n+ substrate and drain metal underneath."
+  },
+  {
+   "caption": "Gate on: a channel opens and electrons pour down to the drain",
+   "text": "Put a few volts on the gate and the p-body next to each trench inverts into a thin n-type channel. Electrons flow from the source, down the channel, through the drift region to the drain. Gate off, the channel vanishes and the drift region blocks. The lower the on-resistance (Rds(on)), the less power is lost as heat."
+  },
+  {
+   "caption": "The phases fire in turn, hundreds of thousands of times a second",
+   "text": "The controller switches each phase's MOSFETs on and off at hundreds of kHz to MHz, staggered so the phases take turns. The inductor smooths the pulses into steady current; the more phases, the smaller the ripple and the more total current the GPU can draw."
+  },
+  {
+   "caption": "Every milliohm becomes heat",
+   "text": "Losses come from on-resistance (I^2 R) and from each switching edge. At 1,000+ A, tiny resistances add up to tens of watts, so FETs, packaging and cooling all matter. Makers: Infineon (IFNNY), onsemi (ON), Vishay (VSH), Alpha and Omega (AOSL), and power-stage vendors like Monolithic Power (MPWR)."
+  }
+ ]
+}

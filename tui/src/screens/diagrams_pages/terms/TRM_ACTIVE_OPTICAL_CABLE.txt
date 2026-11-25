@@ -1,0 +1,12 @@
+# 1. What it is: fiber with the transceivers built on
+
+   ┌──────────┐  ┌──────────┐                      ┌──────────┐  ┌──────────┐
+   │ GPU/NIC  │──│ OPTICS   │══════ fiber ═════════│ OPTICS   │──│ SWITCH   │
+   │ port     │  │ (fixed)  │   3 m to ~100 m      │ (fixed)  │  │ port     │
+   └──────────┘  └──────────┘                      └──────────┘  └──────────┘
+
+  (copper DAC: < ~3 m; AEC: < ~7 m; AOC: tens of meters)
+
+# 2. Why AI cares
+
+At 400G-800G per lane group, copper reach shrinks to a few meters, so links that span racks move to optics. AOCs are the simplest way to do that.

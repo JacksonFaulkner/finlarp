@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_DATA_CENTER",
+ "script": "terms/trm_data_center.py",
+ "beats": [
+  {
+   "caption": "A data center is a building of servers plus power, cooling and fiber",
+   "text": "Inside the hall, servers sit in rows of racks. Around it sits the plant that keeps them alive: a substation and backup generators for power, chillers for cooling, and fiber links to the outside world. The building is mostly that plant; the racks take up a surprisingly small share of the site."
+  },
+  {
+   "caption": "Capacity is counted in megawatts, and the grid sets the limit",
+   "text": "Power arrives at high voltage, is stepped down by transformers, passes through UPS batteries that bridge the seconds before diesel generators start, and runs along busways to every rack. Sites are sized by IT load: a classic hall is 5-30 MW, while new AI campuses plan for hundreds of MW to over a gigawatt. Getting a grid connection now takes years, so power is the main bottleneck."
+  },
+  {
+   "caption": "AI racks pack far more power into the same floor",
+   "text": "A traditional cloud rack draws 5-15 kW. A rack of current Nvidia GPUs draws 100-150 kW, and designs for 2027 aim at several hundred. Nearly every watt in becomes heat out, which is pushed out of the back of each rack into a closed hot aisle."
+  },
+  {
+   "caption": "Cooling carries that heat out: air for old halls, liquid for AI",
+   "text": "Chillers outside make cold water. Coolant distribution units (CDUs) at the rows pass it to cold plates on the chips, and the warm water returns to be cooled again. Air alone cannot remove 100+ kW from one rack, so AI halls are being built or refitted for direct liquid cooling."
+  },
+  {
+   "caption": "Fiber ties the hall to the internet and the racks to each other",
+   "text": "Carrier fiber enters a meet-me room, where networks cross-connect, then runs in overhead trays to every row. Inside an AI cluster far more fiber links GPU to GPU than goes to the outside. Related: Equinix (EQIX) and Digital Realty (DLR) rent space, Vertiv (VRT) sells power and cooling gear, Nvidia (NVDA) the GPUs, and Microsoft (MSFT) is among the largest builders."
+  }
+ ]
+}

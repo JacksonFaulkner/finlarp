@@ -1,0 +1,13 @@
+# 1. What it is: malware that encrypts data and demands payment
+
+   ┌───────────┐            ┌──────────┐            ┌───────────────┐
+   │ attacker  │───────────▶│ foothold │───────────▶│ files locked  │
+   └───────────┘            └──────────┘            └───────────────┘
+                                  │
+                                  ▼ steal data first, then encrypt
+
+(double extortion: publish stolen data if the victim does not pay)
+
+# 2. Why it matters
+
+Ransomware outages can stop plants and hospitals for days. Backup, endpoint detection and exposure management are the main defenses sold against it.

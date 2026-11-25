@@ -1,0 +1,1 @@
+ROM is read-only memory whose contents are set during manufacture, usually by a mask pattern, or once by blowing fuses in a PROM. It keeps data with power off and cannot be changed in normal use, which suits boot code and fixed microcode. Most new designs use updatable flash or EEPROM for firmware. Related: Macronix (2337.TW), Winbond (2344.TW), Micron (MU).

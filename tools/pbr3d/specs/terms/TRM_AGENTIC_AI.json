@@ -1,0 +1,214 @@
+{
+ "slug": "TRM_AGENTIC_AI",
+ "beats": [
+  {
+   "caption": "A goal enters the LLM agent",
+   "boxes": [
+    {
+     "name": "goal",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "agent",
+     "lo": [
+      -150,
+      -70,
+      -40
+     ],
+     "hi": [
+      80,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "actions",
+     "lo": [
+      160,
+      -70,
+      -40
+     ],
+     "hi": [
+      360,
+      70,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "in",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -160,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "user goal",
+     "at": [
+      -320,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "LLM agent",
+     "at": [
+      -40,
+      90,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "goal",
+    "agent",
+    "in"
+   ]
+  },
+  {
+   "caption": "The agent loops: model call, tool call, result",
+   "boxes": [
+    {
+     "name": "goal",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "agent",
+     "lo": [
+      -150,
+      -70,
+      -40
+     ],
+     "hi": [
+      80,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "actions",
+     "lo": [
+      160,
+      -70,
+      -40
+     ],
+     "hi": [
+      360,
+      70,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "loop",
+     "lo": [
+      -60,
+      -110,
+      -20
+     ],
+     "hi": [
+      -20,
+      -90,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "in",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -160,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "out",
+     "from": [
+      90,
+      0,
+      -20
+     ],
+     "to": [
+      150,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "back",
+     "from": [
+      90,
+      -30,
+      -20
+     ],
+     "to": [
+      -150,
+      -30,
+      -20
+     ],
+     "mat": "dim"
+    }
+   ],
+   "tags": [
+    {
+     "text": "many model calls",
+     "at": [
+      -40,
+      -140,
+      0
+     ]
+    },
+    {
+     "text": "apps, code, APIs",
+     "at": [
+      260,
+      90,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

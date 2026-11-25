@@ -1,0 +1,12 @@
+# 1. What it is: paid load reduction on request
+
+   ┌────────────┐   event call   ┌────────────┐   payment   ┌────────────┐
+   │ utility /  │───────────────▶│ site cuts  │────────────▶│ $ per MW   │
+   │ grid       │                │ load       │             │ credit     │
+   └────────────┘                └────────────┘             └────────────┘
+
+  (usually a notice window plus an hour cap per year)
+
+# 2. Why it matters
+
+Demand response turns flexible load into a revenue line. Its value depends on how fast a site can shut down and how often it is called.

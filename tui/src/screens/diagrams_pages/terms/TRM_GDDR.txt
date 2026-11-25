@@ -1,0 +1,12 @@
+# 1. What it is: graphics DRAM soldered beside the GPU
+
+┌─────┐   ┌──────┐
+│ GPU │═══▶│ GDDR │
+│ die │   │ chip │
+└─────┘   └──────┘
+
+(GDDR6 and GDDR7 run tens of gigabits per second per pin on a 32-bit chip interface)
+
+# 2. Why it matters
+
+GDDR gives GPU cards high bandwidth without HBM packaging, which is cheaper and easier to build. Each package still has a narrow bus, so a card needs many chips to match an HBM stack.

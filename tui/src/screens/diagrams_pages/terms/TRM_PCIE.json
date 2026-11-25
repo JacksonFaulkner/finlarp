@@ -1,0 +1,10 @@
+{
+  "label": "PCIE",
+  "term": "PCIe",
+  "aliases": [
+    "PCI Express",
+    "PCIe Gen5",
+    "PCIe Gen6"
+  ],
+  "kind": "networking"
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ROADM",
+ "script": "terms/trm_roadm.py",
+ "beats": [
+  {
+   "caption": "A ROADM is a node that routes colours of light",
+   "text": "Long-haul and metro fibre carries dense WDM: 64 to 96+ colours on one fibre, each a separate 400G-1.6T channel. At every junction a ROADM (reconfigurable optical add-drop multiplexer) decides, colour by colour, what goes where. Light that just passes through never gets turned back into electrons, which saves power and cost."
+  },
+  {
+   "caption": "Each colour passes through, drops out, or is added",
+   "text": "Inside the node a colour can carry on to the next site (express), drop to a local transponder that turns it into data, or be added from a local transponder onto the outgoing fibre. Here the red channel is dropped and a new green one is added in its slot, while the rest sail straight through."
+  },
+  {
+   "caption": "The core part is a wavelength selective switch",
+   "text": "A wavelength selective switch (WSS) takes light from an input fibre, spreads it into its colours with a diffraction grating, and lands each colour on its own stripe of a liquid-crystal-on-silicon (LCoS) panel. Each stripe acts as a tiny tilted mirror that steers its colour back to the chosen output fibre. Older designs use MEMS micro-mirrors instead."
+  },
+  {
+   "caption": "Software changes the route without a truck roll",
+   "text": "To reroute a channel, the network controller just rewrites the phase pattern on one LCoS stripe; the colour lands on a different output port within milliseconds. Carriers and cloud operators use this to shift capacity, restore around a fibre cut, or light a new data-centre link without sending anyone to the site."
+  },
+  {
+   "caption": "WSS modules are a big line for optical suppliers",
+   "text": "A large ROADM node holds several WSS modules, each costing thousands of dollars, so they are a major product for component makers. Lumentum (LITE) and Coherent (COHR) dominate WSS supply; Ciena (CIEN) and Nokia (NOK) build the ROADM systems and line cards around them. AI data-centre interconnect is adding new demand."
+  }
+ ]
+}

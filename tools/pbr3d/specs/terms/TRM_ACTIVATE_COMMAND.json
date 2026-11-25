@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ACTIVATE_COMMAND",
+ "script": "terms/trm_activate_command.py",
+ "beats": [
+  {
+   "caption": "HBM stacks sit beside the GPU and feed it",
+   "text": "AI accelerators pull their data from HBM, stacks of DRAM dies next to the GPU package. Each die is split into many banks, and each bank is a grid of tiny cells: one capacitor and one transistor per bit."
+  },
+  {
+   "caption": "A bank is a grid: wordlines run along rows, bitlines down columns",
+   "text": "Each cell holds its bit as charge on a tiny capacitor. A wordline (one per row) switches the access transistors in that row, and a bitline (one per column) carries the charge out. Before ACTIVATE the row is closed: the sense amps are idle and no cell can be read."
+  },
+  {
+   "caption": "ACTIVATE opens one whole row onto the sense amps",
+   "text": "The controller sends ACTIVATE with a row address. That wordline rises, every cell in the row shares its small charge onto its bitline, and the sense amps push each bitline to a full 0 or 1. The row buffer now holds the whole row."
+  },
+  {
+   "caption": "Reads and writes then hit columns of the open row",
+   "text": "While the row stays open, READ and WRITE commands pick columns from the row buffer and stream them to the I/O pins. A column outside the open row cannot be reached without another ACTIVATE."
+  },
+  {
+   "caption": "The wait from ACTIVATE to the first read costs time",
+   "text": "The delay from ACTIVATE to a READ (tRCD) sets how fast a bank answers random requests, and so does the time a row must stay open. For AI workloads these gaps limit effective memory bandwidth, so controllers batch accesses to rows that are already open. Related: Micron (MU), SK hynix (000660.KS), Rambus (RMBS)."
+  }
+ ]
+}

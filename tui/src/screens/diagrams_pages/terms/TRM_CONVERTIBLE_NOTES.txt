@@ -1,0 +1,15 @@
+# 1. What it is: debt that can turn into shares
+
+ ┌───────────────┐
+ │ BOND ISSUED   │  $1.0B, low coupon
+ │ to investors  │
+ └───────┬───────┘
+         │ holder may convert if stock > conversion price
+ ┌───────┴───────┐
+ │ SHARES        │  conversion price $100
+ │ (if converted)│  = ~10M new shares
+ └───────────────┘
+
+# 2. Why it matters
+
+Cheap debt helps fund buildouts, but the conversion feature can dilute shareholders later. Check the diluted share count and the capped-call terms in the notes to the filing.

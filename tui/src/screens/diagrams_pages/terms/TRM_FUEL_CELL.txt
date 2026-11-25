@@ -1,0 +1,13 @@
+# 1. What it is: chemistry instead of burning
+
+   ┌──────────┐   ┌───────────────┐   ┌──────────┐
+   │ GAS / H2 │──▶│ FUEL CELL     │──▶│ DC POWER │
+   │ fuel in  │   │ anode|cathode │   │ to racks │
+   └──────────┘   │ no flame      │   └──────────┘
+                  └───────────────┘               
+
+  (modular blocks of roughly 100-300 kW each)
+
+# 2. Why AI cares
+
+On-site fuel cells let a campus start running before a utility hookup is ready.

@@ -1,0 +1,166 @@
+{
+ "slug": "TRM_TEST_SOCKET",
+ "beats": [
+  {
+   "caption": "Chip sits in a socket on the tester",
+   "boxes": [
+    {
+     "name": "load_board",
+     "lo": [
+      -260,
+      -200,
+      -40
+     ],
+     "hi": [
+      260,
+      -170,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "socket",
+     "lo": [
+      -200,
+      -160,
+      -40
+     ],
+     "hi": [
+      200,
+      -110,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "chip",
+     "lo": [
+      -150,
+      -100,
+      -40
+     ],
+     "hi": [
+      150,
+      -40,
+      0
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "tester load board",
+     "at": [
+      300,
+      -185,
+      20
+     ]
+    },
+    {
+     "text": "packaged chip",
+     "at": [
+      200,
+      -70,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Contact pins press the balls and wear",
+   "boxes": [
+    {
+     "name": "load_board",
+     "lo": [
+      -260,
+      -200,
+      -40
+     ],
+     "hi": [
+      260,
+      -170,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "socket",
+     "lo": [
+      -200,
+      -160,
+      -40
+     ],
+     "hi": [
+      200,
+      -110,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "chip",
+     "lo": [
+      -150,
+      -100,
+      -40
+     ],
+     "hi": [
+      150,
+      -40,
+      0
+     ],
+     "mat": "quartz"
+    },
+    {
+     "name": "pins",
+     "lo": [
+      -120,
+      -110,
+      -20
+     ],
+     "hi": [
+      120,
+      -100,
+      -10
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "press",
+     "from": [
+      0,
+      30,
+      0
+     ],
+     "to": [
+      0,
+      -40,
+      0
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "contact pins wear",
+     "at": [
+      230,
+      -110,
+      20
+     ]
+    },
+    {
+     "text": "bad socket ruins chips",
+     "at": [
+      -230,
+      40,
+      20
+     ]
+    }
+   ]
+  }
+ ]
+}

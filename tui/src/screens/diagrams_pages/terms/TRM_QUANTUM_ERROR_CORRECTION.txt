@@ -1,0 +1,19 @@
+# 1. What it is: spread one logical qubit across many physical ones
+
+   ┌───────────┐     ┌───────────────────────┐
+   │ 1 logical │────▶│ hundreds to thousands │
+   │ qubit     │     │ of physical qubits    │
+   └───────────┘     │ plus ancillas         │
+                     └───────────────────────┘
+                                 │
+                                 ▼
+                     ┌──────────────────────┐
+                     │ syndrome readout     │
+                     │ decoder fixes errors │
+                     └──────────────────────┘
+
+(physical error rate must sit below a threshold, or adding qubits makes it worse)
+
+# 2. Why it matters
+
+Fault-tolerant machines need this layer. The qubit overhead sets how large a useful quantum computer must be, so it drives the timeline for cryptanalysis and chemistry workloads.

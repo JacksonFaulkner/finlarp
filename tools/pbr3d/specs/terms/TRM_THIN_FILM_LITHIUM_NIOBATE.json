@@ -1,0 +1,22 @@
+{
+ "slug": "TRM_THIN_FILM_LITHIUM_NIOBATE",
+ "script": "terms/trm_thin_film_lithium_niobate.py",
+ "beats": [
+  {
+   "caption": "Modulators move from bulk crystal to a chip-thin film",
+   "text": "Inside a coherent module, the modulator that writes data onto light can be built from thin-film lithium niobate (TFLN). The crystal is bonded as a sub-micron layer onto a silicon wafer, so the device shrinks toward chip scale instead of the centimetres of older lithium niobate modulators."
+  },
+  {
+   "caption": "A sub-micron crystal film on oxide and silicon",
+   "text": "The stack is simple: a silicon base, a layer of oxide, then a lithium niobate film only about 0.6 microns thick, etched into a ridge that carries the light. Gold electrodes sit either side of the ridge to apply the voltage."
+  },
+  {
+   "caption": "Voltage bends the crystal's index: the Pockels effect",
+   "text": "Lithium niobate changes its refractive index in a straight line with the voltage across it. That is the Pockels effect. The field between the electrodes is strong because the gap is tiny, so a low drive voltage is enough to shift the phase of the light and keep the modulator fast."
+  },
+  {
+   "caption": "On the chip: fast, low loss, and built for 200G per lane",
+   "text": "The same ridge is laid out as a Mach-Zehnder, so the light splits, the arms phase-shift and the beams recombine. The films compete with silicon photonics and indium phosphide for 200G-per-lane and coherent parts. Coherent (COHR), Lumentum (LITE), HyperLight (private) and Fujitsu's optical unit are the names in play."
+  }
+ ]
+}

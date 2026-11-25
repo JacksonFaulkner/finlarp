@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_EDA",
+ "script": "terms/trm_eda.py",
+ "beats": [
+  {
+   "caption": "EDA software turns a chip idea into a layout a fab can print",
+   "text": "Electronic design automation (EDA) is the software chain every chip goes through: engineers describe logic in code, tools turn it into billions of transistors placed and wired on silicon, simulators and checkers prove it works, and the final layout goes to the fab. A big AI chip can't be designed any other way."
+  },
+  {
+   "caption": "Synthesis: code becomes rows of logic gates",
+   "text": "Designers write register-transfer-level (RTL) code in Verilog or VHDL. Logic synthesis maps it onto a library of standard cells (NAND, flip-flop, buffer...) supplied for a specific process node, then placement packs those cells into rows on the die, trying to keep connected cells close."
+  },
+  {
+   "caption": "Place and route: wiring billions of cells on a dozen metal layers",
+   "text": "Routing tools draw the wires: short local links on the lowest metal layers, longer ones on higher layers, joined by vias, alternating direction from layer to layer. A leading-edge chip has 15+ metal layers and tens of kilometres of wire, all of it laid out by software under strict spacing rules."
+  },
+  {
+   "caption": "Verification: simulate, check timing, fix, repeat",
+   "text": "Before tapeout, server farms run simulation and emulation for months, static timing analysis checks every path meets the clock (here one path is too slow and gets re-buffered), and physical checks confirm the layout follows the fab's rules. A mistake found after manufacturing costs a re-spin: months and tens of millions."
+  },
+  {
+   "caption": "Tapeout goes to the fab; two vendors sell most of the tools",
+   "text": "The finished layout is sent to the foundry (tapeout) and becomes masks and wafers. The market is a near duopoly of Synopsys (SNPS) and Cadence (CDNS), with Siemens EDA third, sold as multi-year licences, plus IP blocks like interfaces and Arm (ARM) CPU cores. More custom AI chips means more design seats and more IP."
+  }
+ ]
+}

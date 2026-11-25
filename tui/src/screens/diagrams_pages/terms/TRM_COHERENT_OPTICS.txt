@@ -1,0 +1,18 @@
+# 1. What it is: using the phase of light, not just on/off
+
+   Intensity (IM-DD, PAM4):      Coherent (16QAM, dual-polarization):
+   ┌──────────────────────┐      ┌──────────────────────────────┐
+   │ 4 brightness levels  │      │ 16 phase+amplitude points    │
+   │ = 2 bits per symbol  │      │ x 2 polarizations            │
+   │ reach: ~2-10 km      │      │ = 8 bits per symbol          │
+   └──────────────────────┘      │ reach: 100s-1000s of km      │
+                                 └──────────────────────────────┘
+
+   ┌──────────┐   ┌──────────┐            ┌──────────┐   ┌──────────┐
+   │ COHERENT │──▶│ IQ MOD   │═══ fiber ═▶│ COHERENT │──▶│ COHERENT │
+   │ DSP tx   │   │ + laser  │            │ RX + LO  │   │ DSP rx   │
+   └──────────┘   └──────────┘            └──────────┘   └──────────┘
+
+# 2. Why AI cares
+
+Training clusters are spreading across buildings and campuses when one site runs out of power. Coherent links tie them together over tens to hundreds of km.

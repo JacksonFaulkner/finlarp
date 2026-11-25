@@ -1,0 +1,17 @@
+# 1. What it is: only part of the model runs per token
+
+   ┌───────┐   ┌─────────────┐   ┌──────────────┐
+   │ TOKEN │──▶│ ROUTER      │──▶│ EXPERTS 1..N │
+   └───────┘   │ picks top-k │   │ only 2 of N  │
+               └─────────────┘   │ are active   │
+                                 └──────────────┘
+
+  (total parameters are large; active parameters per token are small)
+
+# 2. Why it matters
+
+MoE lets models grow total size without raising compute per token at the same rate. Many frontier models use it.
+
+# 3. Hardware
+
+All experts must sit in memory and tokens move between GPUs, which raises demand for HBM capacity and fast scale-up links.

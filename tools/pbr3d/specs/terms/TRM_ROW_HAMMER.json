@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ROW_HAMMER",
+ "script": "terms/trm_row_hammer.py",
+ "beats": [
+  {
+   "caption": "HBM and DRAM store every bit as charge in a dense grid",
+   "text": "The GPU's HBM stacks are DRAM: each die holds banks of cells, one tiny capacitor and one transistor per bit. Rows are packed tens of nanometres apart, and shrinking that gap is how DRAM gets denser each generation."
+  },
+  {
+   "caption": "Every cell leaks, so DRAM refreshes each row every 64 ms",
+   "text": "A cell's charge drains away over time, so the chip reads and rewrites every row inside a refresh window, usually 64 ms. As long as nothing drains a cell faster than that, the data survives."
+  },
+  {
+   "caption": "Hammering one row disturbs its neighbours",
+   "text": "Row hammer opens and closes the same aggressor row hundreds of thousands of times inside one refresh window. Each ACTIVATE swings the wordline, and electrical coupling plus trapped charge pull a little charge out of cells in the rows on either side."
+  },
+  {
+   "caption": "Victim cells flip before refresh comes round",
+   "text": "If enough charge leaks before the victim row is refreshed, the sense amp reads the wrong value and a bit flips. Newer, denser DRAM flips after fewer hammers. Since a program can hammer rows it owns to flip bits it does not own, this is a security hole as well as a reliability one."
+  },
+  {
+   "caption": "Defenses refresh the victims early, at a cost",
+   "text": "DRAM chips add target row refresh, which counts activations and refreshes neighbours of hot rows; DDR5 and HBM3 add refresh management, and servers add ECC to catch flips that slip through. Every extra refresh takes bank time away from real reads. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS), Rambus (RMBS)."
+  }
+ ]
+}

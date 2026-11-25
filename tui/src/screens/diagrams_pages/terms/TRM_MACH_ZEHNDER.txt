@@ -1,0 +1,15 @@
+# 1. What it is: two light paths that interfere
+
+                  ┌──────────────────────┐
+             ┌───▶│ arm A (phase shift V)│───┐
+   ┌──────┐  │    └──────────────────────┘   │   ┌──────────┐
+   │ CW   │──┤                               ├──▶│ output:  │
+   │ laser│  │    ┌──────────────────────┐   │   │ in phase │
+   └──────┘  └───▶│ arm B                │───┘   │ = bright │
+                  └──────────────────────┘       │ opposite │
+                                                 │ = dark   │
+                                                 └──────────┘
+
+# 2. Why it matters
+
+The modulator sets how fast and how cleanly bits get onto light. MZM material choice (silicon, InP, thin-film lithium niobate) drives transceiver speed, power and cost.

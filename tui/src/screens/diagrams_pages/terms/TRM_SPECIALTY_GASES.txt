@@ -1,0 +1,19 @@
+# 1. What it is: process gases in a fab
+
+   ┌──────────────────┐
+   │ gas plant or     │  NF3, WF6, silane, etch gases
+   │ on-site generator│
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ purity check     │  ppb-level impurity limits
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ deposition, etch,│  and chamber cleaning
+   │ clean steps      │
+   └──────────────────┘
+
+# 2. Why AI cares
+
+Advanced logic and memory need many gas-driven process steps. A supply problem for a single gas can stop a fab line.

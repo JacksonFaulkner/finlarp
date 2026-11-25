@@ -1,0 +1,21 @@
+# 1. What it is: the firm that designs, buys and builds
+
+  ┌──────────────────────────────┐
+  │ OWNER                        │
+  │ data center developer        │
+  └──────────────────────────────┘
+                  │
+                  ▼ EPC contract
+  ┌──────────────────────────────┐
+  │ EPC CONTRACTOR               │
+  │ design + buy + build         │
+  └──────────────────────────────┘
+                  │
+                  ▼ orders and installs
+  ┌──────────────────────────────┐
+  │ VENDORS & SUBS               │
+  │ electrical, mechanical, gear │
+  └──────────────────────────────┘
+
+# 2. Why AI cares
+Capacity additions for AI sites depend on how fast EPC firms finish. Labor, transformer lead times and site schedules often set the pace more than chip supply does.

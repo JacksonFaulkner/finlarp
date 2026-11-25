@@ -1,0 +1,12 @@
+# 1. What it is: store now, use later
+
+   ┌──────────────┐   ┌────────────┐   ┌────────────┐
+   │ GRID / SOLAR │──▶│ BATTERY    │──▶│ LOAD       │
+   │ cheap power  │   │ MWh stored │   │ peak hours │
+   └──────────────┘   └────────────┘   └────────────┘
+
+  (sized in MW of power and MWh of energy; typically 2-4 hour duration)
+
+# 2. Why AI cares
+
+Batteries help add AI load where the grid is tight, and can ride through AI training power swings.

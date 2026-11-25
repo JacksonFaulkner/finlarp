@@ -1,0 +1,10 @@
+{
+ "label": "DCI",
+ "term": "data center interconnect",
+ "aliases": [
+  "DCI",
+  "data center interconnects",
+  "datacenter interconnect"
+ ],
+ "kind": "networking"
+}

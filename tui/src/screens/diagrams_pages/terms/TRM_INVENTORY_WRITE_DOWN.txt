@@ -1,0 +1,17 @@
+# 1. What it is: stock marked down to what it can sell for
+
+ ┌───────────────┐
+ │ INVENTORY     │  $500 at cost
+ └───────┬───────┘
+         │ compare with
+ ┌───────┴───────┐
+ │ MARKET VALUE  │  $380 net sale price
+ └───────┬───────┘
+         │ cost minus value, if lower
+ ┌───────┴───────┐
+ │ WRITE-DOWN    │  $120 charge to COGS
+ └───────────────┘
+
+# 2. Why it matters
+
+The charge is non-cash in the quarter it is booked, but it lowers gross margin and reduces the carrying value of the stock. Repeated write-downs point to demand or product-timing problems, not one-off accounting.

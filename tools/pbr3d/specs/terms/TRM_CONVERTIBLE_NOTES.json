@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CONVERTIBLE_NOTES",
+ "script": "terms/trm_convertible_notes.py",
+ "beats": [
+  {
+   "caption": "A convertible note is a bond that can turn into stock",
+   "text": "Investors lend the company cash today and get a note back: a bond with a maturity date, usually five to seven years out. Unlike a plain bond, the holder may swap it for a fixed number of shares instead of being repaid. Growth companies with heavy capex use them to raise large sums quickly without selling stock up front."
+  },
+  {
+   "caption": "The coupon is low because the buyer gets an option",
+   "text": "Interest on a convertible is often 0% to 3%, well below what the same company would pay on straight debt. The difference is the price of the embedded call option on the stock. Cheap interest is why the structure appeals to cash-hungry issuers, but the bill can come later as dilution."
+  },
+  {
+   "caption": "The conversion price is set well above today's stock price",
+   "text": "At issue the conversion price is typically 25% to 40% above the stock price, called the conversion premium. Conversion rate = principal divided by conversion price, for example $1,000 / $50 = 20 shares per note. Below that price the note behaves like debt; above it, it behaves like stock."
+  },
+  {
+   "caption": "Above the conversion price, notes become new shares",
+   "text": "Once the stock trades above the conversion price, holders convert (or the company settles in shares), and new shares are added to the count. Existing shareholders own a smaller slice of the company. Analysts track diluted share counts with the if-converted method for exactly this reason."
+  },
+  {
+   "caption": "A capped call buys back the dilution up to a cap",
+   "text": "Many issuers spend part of the proceeds on a capped call: an option that pays out shares or cash between the conversion price and a higher cap price, often 75% to 100% above issue. Dilution is offset in that band, and only returns if the stock flies past the cap. Related: Super Micro Computer (SMCI), CoreWeave (CRWV), Nebius (NBIS), Lumentum (LITE)."
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+# 1. What it is: a giant next-word predictor
+
+   ┌─────────┐   ┌─────────────┐   ┌────────────┐
+   │ TEXT IN │──▶│ TRANSFORMER │──▶│ TEXT OUT   │
+   │ tokens  │   │ billions of │   │ next token │
+   └─────────┘   │ parameters  │   └────────────┘
+                 └─────────────┘                 
+
+  (output token is fed back in, one step at a time)
+
+# 2. Why it matters
+
+LLMs are the models behind chat assistants and coding tools. Their size and usage drive most current AI infrastructure spending.
+
+# 3. Business
+
+Companies build, license or rent LLMs through cloud APIs, and many filings now disclose LLM risks and costs.

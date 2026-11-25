@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SSD",
+ "script": "terms/trm_ssd.py",
+ "beats": [
+  {
+   "caption": "An SSD is NAND flash plus a controller on one board",
+   "text": "An SSD has no moving parts. A controller chip, a small DRAM cache and several NAND flash packages share one board, and gold fingers plug it into the server. A 30 TB data-center drive is mostly NAND packages."
+  },
+  {
+   "caption": "The host talks NVMe over four PCIe lanes",
+   "text": "Reads and writes arrive as NVMe commands over PCIe, typically four lanes at Gen5 for about 14 GB/s. NVMe keeps thousands of command queues open at once, so many GPUs and threads can hit one drive in parallel."
+  },
+  {
+   "caption": "The controller fans each command out over flash channels",
+   "text": "The controller splits work across 8 to 16 independent channels, each wired to several NAND dies. Spreading one large read over all of them is where the bandwidth comes from; one die alone manages only a few hundred MB/s."
+  },
+  {
+   "caption": "Inside a package: stacked dies of 3D NAND",
+   "text": "Each package stacks 8 to 16 thin dies, bonded by wires to the substrate. Each die is a 3D NAND array: 200+ word-line layers pierced by vertical channel holes, every crossing one cell holding 3 or 4 bits."
+  },
+  {
+   "caption": "Random reads in ~100 us, so SSDs feed the GPUs",
+   "text": "A random read takes about 100 microseconds, against several milliseconds for a hard disk. GPU servers carry local SSDs as scratch and checkpoint space, and flash arrays feed training data. Related: Samsung (005930.KS), SK hynix (000660.KS), MU, SNDK, PSTG."
+  }
+ ]
+}

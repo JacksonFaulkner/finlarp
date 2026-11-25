@@ -1,0 +1,13 @@
+# 1. What it is: a signal refresher in the middle of a link
+
+   ┌───────────┐         ┌───────────────┐          ┌───────────┐
+   │ CPU / GPU │──weak──▶│ RETIMER       │──clean──▶│ GPU / NIC │
+   │ PCIe root │         │ recover clock │          │ endpoint  │
+   │           │         │ re-drive data │          │           │
+   └───────────┘         └───────────────┘          └───────────┘
+
+  (a redriver just amplifies, noise included; a retimer fully re-clocks)
+
+# 2. Why AI cares
+
+PCIe Gen5/Gen6 signals reach only a short trace length. AI servers with 8 GPUs and many NICs need retimers on risers, backplanes and cables.

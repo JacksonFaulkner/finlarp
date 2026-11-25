@@ -1,0 +1,16 @@
+# 1. What it is: makes other companies' chips
+
+   ┌──────────────┐   ┌───────────────┐   ┌──────────────┐
+   │ FABLESS      │   │ FOUNDRY       │   │ OSAT / CoWoS │
+   │ designs chip │──▶│ builds wafers │──▶│ packages     │
+   │ sends GDS    │   │ in its fabs   │   │ and tests    │
+   └──────────────┘   └───────────────┘   └──────────────┘
+
+
+# 2. Why it matters
+
+The foundry decides who gets scarce leading-edge wafers. Its capex and pricing set the cost base for AI chips.
+
+# 3. Revenue drivers
+
+Wafer volume, node mix and price per wafer. Advanced nodes carry the highest margins.

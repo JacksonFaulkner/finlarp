@@ -1,0 +1,17 @@
+# 1. What it is: AMD's open GPU software stack
+
+   ┌──────────────┐   ┌────────────────┐   ┌──────────┐
+   │ AI FRAMEWORK │──▶│ ROCm           │──▶│ AMD GPU  │
+   │ PyTorch etc  │   │ HIP, libraries │   │ Instinct │
+   └──────────────┘   │ RCCL           │   └──────────┘
+                      └────────────────┘               
+
+  (HIP lets much CUDA code be ported with small changes)
+
+# 2. Why it matters
+
+ROCm is AMD's answer to CUDA and decides how easily AI software runs on AMD Instinct GPUs. Software maturity is a main factor in AMD winning data center AI share.
+
+# 3. Status
+
+AMD releases ROCm as open source and works with framework teams so popular models run out of the box.

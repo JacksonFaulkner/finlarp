@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CHARGE_TRAP",
+ "script": "terms/trm_charge_trap.py",
+ "beats": [
+  {
+   "caption": "3D NAND stacks the cells: tall towers of word-line layers",
+   "text": "Modern NAND builds its cells in a vertical stack of dozens to hundreds of layers, with a channel hole running through them. Each layer's gate is one cell's control gate on that layer."
+  },
+  {
+   "caption": "Cut through: electrons caught in traps in a nitride film",
+   "text": "A charge-trap cell replaces the conductive floating gate with a silicon nitride film full of defects. Electrons park in these traps, and the film is continuous, so charge stays local to its trap."
+  },
+  {
+   "caption": "One defect holds a few electrons; a leak drains only that spot",
+   "text": "Because the charge is local, a single defect in the film does not drain the whole cell. That makes the cell more robust than a floating gate and lets the cells sit closer together."
+  },
+  {
+   "caption": "Used in most high-layer 3D NAND",
+   "text": "Many 3D NAND products use this structure for their high layer counts, since the stacked layers are easier to make with a continuous film than with isolated poly islands."
+  },
+  {
+   "caption": "Makers: Samsung, SK Hynix, Kioxia, Lam Research (LRCX)",
+   "text": "Samsung (005930.KS), SK Hynix (000660.KS), Kioxia (285A.T) and Lam Research (LRCX) (deposition and etch tools) make and enable these stacks."
+  }
+ ]
+}

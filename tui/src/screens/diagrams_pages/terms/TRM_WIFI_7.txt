@@ -1,0 +1,12 @@
+# 1. What it is: the newest Wi-Fi standard
+
+   ┌────────────┐  2.4 GHz  ┌──────────────┐  5 GHz  ┌────────────┐
+   │ ROUTER     │──────────▶│ MULTI-LINK   │────────▶│ CLIENT     │
+   │ Wi-Fi 7 AP │◀──────────│ 320 MHz chan │◀────────│ phone/PC   │
+   └────────────┘   6 GHz   └──────────────┘         └────────────┘
+
+  (802.11be: 320 MHz channels, 4096-QAM, multi-link operation)
+
+# 2. Why it matters
+
+Wi-Fi 7 drives a router and access-point refresh cycle. Chip share goes to whoever ships radios into the new devices first.

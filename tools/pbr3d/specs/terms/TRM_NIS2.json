@@ -1,0 +1,175 @@
+{
+ "slug": "TRM_NIS2",
+ "beats": [
+  {
+   "caption": "NIS2 is the EU cybersecurity directive",
+   "boxes": [
+    {
+     "name": "nis2",
+     "lo": [
+      -380,
+      -40,
+      -20
+     ],
+     "hi": [
+      -260,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "entities",
+     "lo": [
+      -180,
+      -60,
+      -20
+     ],
+     "hi": [
+      -20,
+      60,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "fines",
+     "lo": [
+      60,
+      -60,
+      -20
+     ],
+     "hi": [
+      220,
+      60,
+      0
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "scope",
+     "from": [
+      -260,
+      0,
+      -10
+     ],
+     "to": [
+      -180,
+      0,
+      -10
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "enforce",
+     "from": [
+      -20,
+      0,
+      -10
+     ],
+     "to": [
+      60,
+      0,
+      -10
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "tags": [
+    {
+     "text": "EU cybersecurity directive",
+     "at": [
+      -320,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "essential and important entities",
+     "at": [
+      -100,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "fines up to EUR 10m",
+     "at": [
+      140,
+      90,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Data center operators and cloud providers are in scope",
+   "boxes": [
+    {
+     "name": "entities",
+     "lo": [
+      -180,
+      -60,
+      -20
+     ],
+     "hi": [
+      -20,
+      60,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "warn",
+     "lo": [
+      -180,
+      -200,
+      -20
+     ],
+     "hi": [
+      -20,
+      -120,
+      0
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "report",
+     "from": [
+      -100,
+      -120,
+      -10
+     ],
+     "to": [
+      -100,
+      -60,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "24h early warning",
+     "at": [
+      -100,
+      -230,
+      0
+     ]
+    },
+    {
+     "text": "data centers, cloud, MSPs",
+     "at": [
+      -100,
+      130,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

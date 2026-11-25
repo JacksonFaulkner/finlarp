@@ -1,0 +1,203 @@
+{
+ "slug": "TRM_MCP",
+ "beats": [
+  {
+   "caption": "An MCP server links an AI host to a data source",
+   "boxes": [
+    {
+     "name": "host",
+     "lo": [
+      -380,
+      -80,
+      -20
+     ],
+     "hi": [
+      -180,
+      80,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "server",
+     "lo": [
+      -120,
+      -80,
+      -20
+     ],
+     "hi": [
+      120,
+      80,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "data",
+     "lo": [
+      180,
+      -80,
+      -20
+     ],
+     "hi": [
+      380,
+      80,
+      0
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "mcp",
+     "from": [
+      -180,
+      0,
+      -10
+     ],
+     "to": [
+      -120,
+      0,
+      -10
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "api",
+     "from": [
+      120,
+      0,
+      -10
+     ],
+     "to": [
+      180,
+      0,
+      -10
+     ],
+     "mat": "dim"
+    }
+   ],
+   "tags": [
+    {
+     "text": "AI host: chat, IDE, agent",
+     "at": [
+      -280,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "server: tools, data, prompts",
+     "at": [
+      0,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "data source: CRM, files, DB",
+     "at": [
+      280,
+      110,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "The host decides what the model may call",
+   "boxes": [
+    {
+     "name": "host",
+     "lo": [
+      -380,
+      -80,
+      -20
+     ],
+     "hi": [
+      -180,
+      80,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "server",
+     "lo": [
+      -120,
+      -80,
+      -20
+     ],
+     "hi": [
+      120,
+      80,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "approval",
+     "lo": [
+      -120,
+      -200,
+      -20
+     ],
+     "hi": [
+      120,
+      -120,
+      0
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "request",
+     "from": [
+      -180,
+      0,
+      -10
+     ],
+     "to": [
+      -120,
+      0,
+      -10
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "gate",
+     "from": [
+      -120,
+      -80,
+      -10
+     ],
+     "to": [
+      -120,
+      -120,
+      -10
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "tags": [
+    {
+     "text": "approval flow stays on host",
+     "at": [
+      0,
+      -230,
+      0
+     ]
+    },
+    {
+     "text": "one server, any compliant host",
+     "at": [
+      0,
+      120,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

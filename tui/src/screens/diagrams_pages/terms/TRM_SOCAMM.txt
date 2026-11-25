@@ -1,0 +1,13 @@
+# 1. What it is: LPDDR on a swappable module
+
+   ┌──────────────┐   ┌───────────────┐
+   │ CPU          │──▶│ SOCAMM        │
+   │ Grace / Vera │   │ LPDDR5X chips │
+   └──────────────┘   │ screw-down    │
+                      └───────────────┘
+
+  (lower power per bit than DDR5 RDIMM; serviceable unlike soldered LPDDR)
+
+# 2. Why AI cares
+
+CPUs next to GPUs need large, low-power memory pools; SOCAMM supplies that in a field-replaceable form.

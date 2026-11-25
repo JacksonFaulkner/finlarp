@@ -1,0 +1,16 @@
+# 1. What it is: same-customer revenue, year over year
+
+┌──────────────────────────────┐
+│ START: $100 ARR cohort       │
+└──────────────────────────────┘
+              │ +30 expansion, -10 churn, -5 downsell
+              ▼
+┌──────────────────────────────┐
+│ END: $115 ARR, same logos    │
+└──────────────────────────────┘
+
+(NRR = ARR today from customers who were customers 12 months ago, divided by their ARR then: 115 / 100 = 115%)
+
+# 2. Why AI cares
+
+Above 100% means existing customers spend more even if the company adds no new logos. AI products often show expansion as usage grows, but metered usage can also fall sharply, so NRR can swing from quarter to quarter.

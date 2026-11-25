@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BOOK_TO_BILL",
+ "script": "terms/trm_book_to_bill.py",
+ "beats": [
+  {
+   "caption": "Book-to-bill compares new orders to what was shipped and billed",
+   "text": "Bookings are new orders signed in a period; billings are products shipped and invoiced in the same period. Book-to-bill is bookings divided by billings. A chip-tool maker that booked $12B and billed $10B in a quarter has a ratio of 1.2."
+  },
+  {
+   "caption": "Above 1.0, orders outrun shipments and the backlog grows",
+   "text": "When customers order faster than the factory can build and ship, unfilled orders pile up as backlog. A ratio above 1 means future revenue is already being locked in, and lead times usually stretch."
+  },
+  {
+   "caption": "Below 1.0, shipments outrun orders and the backlog drains",
+   "text": "When orders slow, the plant keeps shipping out of its backlog, so revenue can look fine for a while even as new business dries up. A ratio stuck below 1 warns that revenue will fall once the backlog runs down."
+  },
+  {
+   "caption": "It turns before revenue, which is why investors watch it",
+   "text": "Because orders come months before shipments, the ratio tends to turn ahead of reported sales. Equipment and chip makers have long published it as a read on demand; a single quarter can be lumpy when one big customer places a large order."
+  },
+  {
+   "caption": "Chip-equipment makers are where the number matters most",
+   "text": "Fabs order lithography, etch and test tools a year or more ahead, so tool makers' orders and backlog lead the whole cycle. Some now report backlog instead of a strict ratio, but the idea is the same. Related: Applied Materials (AMAT), ASML (ASML), Lam Research (LRCX), Teradyne (TER)."
+  }
+ ]
+}

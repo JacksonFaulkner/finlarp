@@ -1,0 +1,12 @@
+# 1. What it is: network and security delivered from the cloud
+
+   ┌────────┐     ┌────────────────────────────────┐     ┌──────────┐
+   │ branch │────▶│ cloud PoPs: SWG, CASB, ZTNA,   │────▶│ SaaS /   │
+   │ laptop │     │ firewall, SD-WAN in one service│     │ cloud app│
+   └────────┘     └────────────────────────────────┘     └──────────┘
+
+(replaces a separate box at each site with one policy applied everywhere)
+
+# 2. Why it matters
+
+SASE moves inspection and policy out of branch hardware into the provider's cloud. That turns security into a recurring subscription sold on traffic and seats.

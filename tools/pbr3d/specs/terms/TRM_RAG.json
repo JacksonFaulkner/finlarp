@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RAG",
+ "script": "terms/trm_rag.py",
+ "beats": [
+  {
+   "caption": "Documents are cut into chunks the search can point at",
+   "text": "Retrieval-augmented generation (RAG) starts with the company's own documents: manuals, contracts, filings, tickets. The system splits each one into chunks, passages small enough to hand back to a model whole."
+  },
+  {
+   "caption": "Each chunk is embedded as a vector and stored in an index",
+   "text": "An embedding model turns every chunk into a vector, a list of numbers that places it in meaning-space. The vectors go into a search index, so related passages end up near each other."
+  },
+  {
+   "caption": "A question is embedded, and the closest chunks light up",
+   "text": "The user's question is embedded the same way. The index returns the chunks whose vectors sit closest to it, usually a handful. Retrieval quality often limits answer quality more than the model does."
+  },
+  {
+   "caption": "The retrieved chunks are placed into the prompt",
+   "text": "The matched chunks are pasted into the model's prompt beside the question. The model now answers from current or private material it was never trained on, rather than from memory alone."
+  },
+  {
+   "caption": "The answer cites the sources it was given",
+   "text": "The model writes an answer grounded in those passages, often with citations back to the source chunks. RAG is used for enterprise search, support and research assistants. Data-platform vendors such as Snowflake (SNOW), MongoDB (MDB), Elastic (ESTC) and Palantir (PLTR) sell into that stack."
+  }
+ ]
+}

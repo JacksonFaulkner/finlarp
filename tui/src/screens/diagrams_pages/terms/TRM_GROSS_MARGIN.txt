@@ -1,0 +1,21 @@
+# 1. What it is: profit left after the cost of the product
+
+ ┌───────────────┐
+ │ REVENUE       │  $100
+ └───────┬───────┘
+         │ minus
+ ┌───────┴───────┐
+ │ COST OF REV.  │  $60
+ └───────┬───────┘
+         │ equals
+ ┌───────┴───────┐
+ │ GROSS PROFIT  │  $40
+ └───────┬───────┘
+         │ divide by revenue
+ ┌───────┴───────┐
+ │ GROSS MARGIN  │  40%
+ └───────────────┘
+
+# 2. Why AI cares
+
+Accelerator and server margins depend on mix (systems versus chips), on pricing when supply is tight, and on component costs. Gross margin shows up in every earnings release, so a drop is often the first sign of pricing pressure.

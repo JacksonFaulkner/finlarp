@@ -1,0 +1,11 @@
+# 1. What it is: a timer on every pixel gives depth
+
+   ┌──────────┐   ┌───────┐   ┌───────────────┐   ┌───────────┐
+   │ IR PULSE │──▶│ SCENE │──▶│ PHOTON RETURN │──▶│ DEPTH MAP │
+   └──────────┘   └───────┘   └───────────────┘   └───────────┘
+
+  (depth = light speed x round-trip time / 2, computed per pixel)
+
+# 2. Why it matters
+
+ToF gives robots and car cabins a cheap depth channel next to the camera. It is a smaller market than LiDAR but ships in far higher volume in phones and interiors.

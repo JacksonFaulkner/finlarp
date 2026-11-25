@@ -1,0 +1,9 @@
+{
+  "label": "NVLINK",
+  "term": "NVLink",
+  "aliases": [
+    "NVSwitch",
+    "NVLink Fusion"
+  ],
+  "kind": "networking"
+}

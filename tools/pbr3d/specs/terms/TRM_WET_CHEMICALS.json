@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_WET_CHEMICALS",
+ "script": "terms/trm_wet_chemicals.py",
+ "beats": [
+  {
+   "caption": "Wet chemicals are ultra-pure acids, bases and solvents",
+   "text": "Fabs use hydrofluoric acid to etch oxide, sulfuric acid and peroxide to strip resist, and ammonia-peroxide mixes to lift particles. They arrive by tanker or tote, sit in bulk tanks, and are pumped through a distribution system to every wet tool in the fab."
+  },
+  {
+   "caption": "Electronic grade means impurities at parts per trillion",
+   "text": "A single iron or sodium atom in the wrong place can leak current in a transistor, so metals and particles are held to parts per trillion. Suppliers distill and filter the chemicals, and the fab filters again at the point of use. Filters, liners and sensors in this loop are a business of their own."
+  },
+  {
+   "caption": "Wafer batches dip through etch, rinse and clean baths",
+   "text": "In a wet bench, a cassette of wafers is lowered into one bath after another: an acid etch, an ultra-pure water rinse, a clean, another rinse, then a dryer. Baths are heated and recirculated through filters, and used chemistry goes to waste treatment."
+  },
+  {
+   "caption": "Single-wafer tools spray chemistry on a spinning wafer",
+   "text": "Advanced nodes moved many cleans to single-wafer tools: the wafer spins and nozzles spray chemistry across it, then water, then it spins dry. This gives tighter control and fewer defects than batch baths, at the cost of more tools."
+  },
+  {
+   "caption": "Cleans run between most steps, so volume rises with complexity",
+   "text": "A modern chip sees hundreds of cleaning and etch steps, so a big fab uses thousands of tonnes of chemistry a month. More layers in 3D NAND and gate-all-around logic mean more cleans per wafer. Related: Entegris (ENTG), Merck KGaA (MRK.DE), BASF (BAS.DE)."
+  }
+ ]
+}

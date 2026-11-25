@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GALLIUM",
+ "script": "terms/trm_gallium.py",
+ "beats": [
+  {
+   "caption": "Gallium is skimmed off alumina refining as a byproduct",
+   "text": "There are no gallium mines. Bauxite ore holds about 50 parts per million of gallium, and when a refinery dissolves bauxite in hot caustic soda to make alumina, the gallium goes into the liquor with it. A recovery column pulls a little of it out of that stream, so gallium output follows alumina plants, not demand."
+  },
+  {
+   "caption": "Refined to seven nines, it is a metal that melts in your hand",
+   "text": "Crude gallium is refined to 99.99999% purity for chips. It melts at 29.8 C, so a bar turns liquid on a warm day, and it is shipped in plastic-lined bottles. World output is only several hundred tonnes a year."
+  },
+  {
+   "caption": "Bonded to nitrogen or arsenic it becomes a compound semiconductor",
+   "text": "Gallium paired with nitrogen (GaN) or arsenic (GaAs) forms crystals whose electrons move faster and stand higher voltage than silicon's. GaN has a wide bandgap of 3.4 eV versus silicon's 1.1 eV. Wafers and epitaxial layers of these crystals are what chip makers buy."
+  },
+  {
+   "caption": "GaN switches power and GaAs amplifies radio in AI and phone hardware",
+   "text": "GaN transistors switch power supplies at high frequency with low loss, shrinking server and charger power stages. GaAs chips are the power amplifiers in phones and many RF links, and GaN also makes blue lasers and LEDs. A shortage of gallium shows up as longer lead times for these parts."
+  },
+  {
+   "caption": "China refines nearly all of it and licenses exports",
+   "text": "China produces roughly 98% of primary gallium because it runs most of the world's alumina capacity. It required export licences in 2023 and later banned shipments to the US, which pushed prices outside China sharply higher. Related: AXT Inc (AXTI), Navitas Semiconductor (NVTS), Coherent (COHR)."
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+# 1. What it is: heat rejected by evaporating water
+
+  ┌──────────────────────────┐
+  │ WARM WATER IN            │
+  │ from chillers or HX      │
+  └──────────────────────────┘
+                │
+                ▼ spray over fill
+  ┌──────────────────────────┐
+  │ TOWER FILL               │
+  │ water partly evaporates  │
+  └──────────────────────────┘
+                │
+                ▼ cooled water out
+  ┌──────────────────────────┐
+  │ BASIN                    │
+  │ cooled water to the loop │
+  └──────────────────────────┘
+
+# 2. Why AI cares
+Heat from a large AI hall needs a lot of cooling water. Water rights and discharge permits can set how fast a campus is allowed to grow.

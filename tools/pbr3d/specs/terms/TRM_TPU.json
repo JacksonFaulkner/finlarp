@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TPU",
+ "script": "terms/trm_tpu.py",
+ "beats": [
+  {
+   "caption": "A TPU is a custom chip built only for AI math",
+   "text": "A Tensor Processing Unit (TPU) is Google's in-house AI accelerator. It sits on a board much like a GPU: a big package with high-bandwidth memory beside the die and a forest of power phases round it. Other hyperscalers build the same kind of chip: AWS Trainium and Inferentia, Meta MTIA, Microsoft Maia."
+  },
+  {
+   "caption": "Most of the die is a few huge systolic matrix units",
+   "text": "Open the die and the bulk of it is matrix multiply units (MXUs): systolic arrays of 128x128 or larger multiply-accumulate cells. A vector unit handles the activation functions and normalization, a scalar core issues instructions, and HBM stacks beside the die feed it weights and data. There is far less control logic than in a GPU."
+  },
+  {
+   "caption": "Data streams from HBM through the matrix units",
+   "text": "Weights and activations come in from HBM at terabytes per second, flow through the MXUs in lockstep, and results go to the vector unit. Because the hardware only does what neural nets need, more of the chip's area and power go to math, which is why hyperscalers can beat GPU cost per token on their own models."
+  },
+  {
+   "caption": "Thousands of TPUs join into a pod",
+   "text": "Each chip has inter-chip interconnect (ICI) links to its neighbours, wired as a 2D or 3D torus so the edges wrap round. Newer pods add optical circuit switches to rewire the torus. A pod holds thousands of chips that train one model together, exchanging gradients over these links instead of the general data-center network."
+  },
+  {
+   "caption": "Custom chips: owned by cloud giants, designed with partners",
+   "text": "The hyperscaler designs the architecture and uses the chips for its own models and cloud customers, so they do not show up as merchant sales. Broadcom (AVGO) co-designs Google's TPUs and others' chips; Marvell (MRVL) works on Trainium; TSMC builds them. Related: Alphabet (GOOGL), Amazon (AMZN), Meta (META), AVGO, MRVL."
+  }
+ ]
+}

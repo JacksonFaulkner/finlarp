@@ -1,0 +1,22 @@
+{
+ "slug": "TRM_WDM",
+ "script": "terms/trm_wdm.py",
+ "beats": [
+  {
+   "caption": "Two switches share one fibre, and the fibre carries many colours",
+   "text": "Wavelength division multiplexing (WDM) sends several signals down one fibre at once, each on its own colour of laser light. Here two switches are linked by a single fibre pair. Nothing new is laid: the same glass carries more data because it carries more colours."
+  },
+  {
+   "caption": "One colour is one channel",
+   "text": "Each wavelength is a separate channel with its own laser and receiver. A single colour on the fibre carries one stream of bits, and the fibre itself does not care how many colours share it."
+  },
+  {
+   "caption": "A multiplexer combines the colours into one fibre",
+   "text": "At the sending end, an arrayed-waveguide multiplexer folds the separate colours into one beam. Coarse WDM uses a few widely spaced colours for short links such as FR4 transceivers. The multiplexer is the part that makes one fibre carry four streams."
+  },
+  {
+   "caption": "A demultiplexer splits them again; dense WDM packs dozens",
+   "text": "At the far end, a demultiplexer sends each colour to its own receiver. Dense WDM (DWDM) packs dozens of closely spaced channels for long-haul and metro networks, which multiplies the capacity of the fibre already in the ground. Ciena (CIEN), Coherent (COHR), Lumentum (LITE) and Nokia (NOK) sell the gear."
+  }
+ ]
+}

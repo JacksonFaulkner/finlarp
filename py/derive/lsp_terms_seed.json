@@ -1,0 +1,5407 @@
+[
+ {
+  "term": "HBM",
+  "aliases": [
+   "high bandwidth memory",
+   "high-bandwidth memory",
+   "HBM3",
+   "HBM3E",
+   "HBM4",
+   "HBM2E"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "memory"
+ },
+ {
+  "term": "DRAM",
+  "aliases": [
+   "dynamic random access memory",
+   "DDR5",
+   "DDR4",
+   "LPDDR5",
+   "LPDDR",
+   "GDDR6",
+   "GDDR7"
+  ],
+  "node": "MEM_CELL",
+  "kind": "memory"
+ },
+ {
+  "term": "memory bank",
+  "aliases": [
+   "DRAM bank",
+   "memory banks"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "memory array",
+  "aliases": [
+   "cell array",
+   "memory arrays"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "memory bandwidth",
+  "aliases": [
+   "bandwidth per stack",
+   "memory wall"
+  ],
+  "node": "MEM_BANDWIDTH",
+  "kind": "memory"
+ },
+ {
+  "term": "3D DRAM",
+  "aliases": [
+   "vertical DRAM",
+   "stacked DRAM"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "memory"
+ },
+ {
+  "term": "high bandwidth flash",
+  "aliases": [
+   "HBF"
+  ],
+  "node": "RND_HBF",
+  "kind": "memory"
+ },
+ {
+  "term": "NAND",
+  "aliases": [
+   "NAND flash",
+   "3D NAND",
+   "flash memory",
+   "QLC",
+   "TLC NAND"
+  ],
+  "node": "TRM_NAND",
+  "kind": "memory"
+ },
+ {
+  "term": "SSD",
+  "aliases": [
+   "solid state drive",
+   "solid-state drive",
+   "enterprise SSD",
+   "eSSD"
+  ],
+  "node": "TRM_SSD",
+  "kind": "memory"
+ },
+ {
+  "term": "CXL",
+  "aliases": [
+   "Compute Express Link",
+   "CXL memory"
+  ],
+  "node": "TRM_CXL",
+  "kind": "memory"
+ },
+ {
+  "term": "FinFET",
+  "aliases": [
+   "fin field-effect transistor",
+   "FinFETs"
+  ],
+  "node": "CHIP_FINFET",
+  "kind": "transistor"
+ },
+ {
+  "term": "gate-all-around",
+  "aliases": [
+   "GAA",
+   "nanosheet",
+   "nanosheets",
+   "RibbonFET",
+   "GAAFET"
+  ],
+  "node": "CHIP_GAA",
+  "kind": "transistor"
+ },
+ {
+  "term": "high-k metal gate",
+  "aliases": [
+   "HKMG",
+   "high-k dielectric",
+   "gate stack"
+  ],
+  "node": "CHIP_GATE_STACK",
+  "kind": "transistor"
+ },
+ {
+  "term": "NMOS",
+  "aliases": [
+   "n-channel transistor",
+   "nFET"
+  ],
+  "node": "CHIP_NMOS",
+  "kind": "transistor"
+ },
+ {
+  "term": "PMOS",
+  "aliases": [
+   "p-channel transistor",
+   "pFET"
+  ],
+  "node": "CHIP_PMOS",
+  "kind": "transistor"
+ },
+ {
+  "term": "planar transistor",
+  "aliases": [
+   "planar CMOS",
+   "bulk CMOS"
+  ],
+  "node": "CHIP_PLANAR",
+  "kind": "transistor"
+ },
+ {
+  "term": "CMOS",
+  "aliases": [
+   "complementary metal-oxide-semiconductor"
+  ],
+  "node": "CHIP_PLANAR",
+  "kind": "transistor"
+ },
+ {
+  "term": "contacts",
+  "aliases": [
+   "middle-of-line",
+   "MOL",
+   "silicide"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "transistor"
+ },
+ {
+  "term": "interconnect",
+  "aliases": [
+   "back-end-of-line",
+   "BEOL",
+   "copper interconnect",
+   "damascene",
+   "dual damascene"
+  ],
+  "node": "CHIP_THIN_METAL",
+  "kind": "transistor"
+ },
+ {
+  "term": "backside power delivery",
+  "aliases": [
+   "backside power",
+   "PowerVia",
+   "BSPDN",
+   "super power rail"
+  ],
+  "node": "TRM_BACKSIDE_POWER_DELIVERY",
+  "kind": "transistor"
+ },
+ {
+  "term": "process node",
+  "aliases": [
+   "2nm",
+   "3nm",
+   "5nm",
+   "7nm",
+   "N2",
+   "N3",
+   "18A",
+   "20A",
+   "leading-edge node",
+   "advanced node",
+   "advanced process node",
+   "process technology node"
+  ],
+  "node": "TRM_PROCESS_NODE",
+  "kind": "transistor"
+ },
+ {
+  "term": "lithography",
+  "aliases": [
+   "photolithography",
+   "litho",
+   "scanner",
+   "scanners"
+  ],
+  "node": "EXPOSE",
+  "kind": "fab"
+ },
+ {
+  "term": "EUV",
+  "aliases": [
+   "extreme ultraviolet",
+   "High-NA",
+   "high NA EUV",
+   "EUV lithography"
+  ],
+  "node": "EXPOSE",
+  "kind": "fab"
+ },
+ {
+  "term": "DUV",
+  "aliases": [
+   "deep ultraviolet",
+   "immersion lithography",
+   "ArF"
+  ],
+  "node": "EXPOSE",
+  "kind": "fab"
+ },
+ {
+  "term": "photoresist",
+  "aliases": [
+   "resist",
+   "coater",
+   "track"
+  ],
+  "node": "COAT",
+  "kind": "fab"
+ },
+ {
+  "term": "develop",
+  "aliases": [
+   "developer",
+   "resist develop"
+  ],
+  "node": "DEVELOP",
+  "kind": "fab"
+ },
+ {
+  "term": "etch",
+  "aliases": [
+   "etching",
+   "plasma etch",
+   "dry etch",
+   "conductor etch",
+   "dielectric etch"
+  ],
+  "node": "ETCH",
+  "kind": "fab"
+ },
+ {
+  "term": "deposition",
+  "aliases": [
+   "CVD",
+   "ALD",
+   "PVD",
+   "atomic layer deposition",
+   "chemical vapor deposition",
+   "epitaxy",
+   "epi"
+  ],
+  "node": "DEPOSIT",
+  "kind": "fab"
+ },
+ {
+  "term": "ion implantation",
+  "aliases": [
+   "implant",
+   "implanter",
+   "implanters"
+  ],
+  "node": "IMPLANT",
+  "kind": "fab"
+ },
+ {
+  "term": "wafer cleaning",
+  "aliases": [
+   "wet clean",
+   "cleaning equipment",
+   "single-wafer clean"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "CMP",
+  "aliases": [
+   "chemical mechanical planarization",
+   "chemical mechanical polishing",
+   "polishing"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "fab"
+ },
+ {
+  "term": "inspection",
+  "aliases": [
+   "metrology",
+   "process control",
+   "defect inspection",
+   "wafer inspection",
+   "e-beam inspection"
+  ],
+  "node": "KLAC",
+  "kind": "fab"
+ },
+ {
+  "term": "wafer",
+  "aliases": [
+   "silicon wafer",
+   "300mm wafer",
+   "wafers",
+   "wafer starts"
+  ],
+  "node": "WAFER",
+  "kind": "fab"
+ },
+ {
+  "term": "polysilicon",
+  "aliases": [
+   "polycrystalline silicon",
+   "polysilicon feedstock"
+  ],
+  "node": "POLYSILICON",
+  "kind": "fab"
+ },
+ {
+  "term": "ingot",
+  "aliases": [
+   "silicon ingot",
+   "crystal growth"
+  ],
+  "node": "INGOT",
+  "kind": "fab"
+ },
+ {
+  "term": "Czochralski",
+  "aliases": [
+   "crystal pulling",
+   "CZ process"
+  ],
+  "node": "MELT_PULL",
+  "kind": "fab"
+ },
+ {
+  "term": "silica sand",
+  "aliases": [
+   "quartz",
+   "high-purity quartz"
+  ],
+  "node": "SAND",
+  "kind": "fab"
+ },
+ {
+  "term": "wafer sort",
+  "aliases": [
+   "wafer probe",
+   "probe card",
+   "probe cards"
+  ],
+  "node": "WAFER_SORT",
+  "kind": "test"
+ },
+ {
+  "term": "final test",
+  "aliases": [
+   "semiconductor test",
+   "ATE",
+   "automated test equipment",
+   "test handler",
+   "SLT",
+   "system-level test"
+  ],
+  "node": "FINAL_TEST",
+  "kind": "test"
+ },
+ {
+  "term": "dicing",
+  "aliases": [
+   "wafer dicing",
+   "singulation",
+   "saw"
+  ],
+  "node": "DICE",
+  "kind": "packaging"
+ },
+ {
+  "term": "foundry",
+  "aliases": [
+   "foundries",
+   "pure-play foundry",
+   "wafer fab",
+   "fabs",
+   "foundry services"
+  ],
+  "node": "TRM_FOUNDRY",
+  "kind": "fab"
+ },
+ {
+  "term": "WFE",
+  "aliases": [
+   "wafer fab equipment",
+   "semiconductor equipment",
+   "fab equipment",
+   "wafer fabrication equipment"
+  ],
+  "node": "TRM_WFE",
+  "kind": "fab"
+ },
+ {
+  "term": "advanced packaging",
+  "aliases": [
+   "2.5D",
+   "3D packaging",
+   "heterogeneous integration",
+   "chip packaging"
+  ],
+  "node": "PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "interposer",
+  "aliases": [
+   "silicon interposer",
+   "CoWoS",
+   "CoWoS-L",
+   "CoWoS-S",
+   "EMIB"
+  ],
+  "node": "PKG_INTERPOSER",
+  "kind": "packaging"
+ },
+ {
+  "term": "substrate",
+  "aliases": [
+   "ABF substrate",
+   "IC substrate",
+   "package substrate",
+   "glass substrate"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "packaging"
+ },
+ {
+  "term": "microbump",
+  "aliases": [
+   "micro-bump",
+   "microbumps",
+   "hybrid bonding",
+   "Cu-Cu bonding",
+   "TSV",
+   "through-silicon via"
+  ],
+  "node": "PKG_MICROBUMP",
+  "kind": "packaging"
+ },
+ {
+  "term": "chiplet",
+  "aliases": [
+   "chiplets",
+   "UCIe",
+   "multi-die"
+  ],
+  "node": "PKG_LOGIC_DIE",
+  "kind": "packaging"
+ },
+ {
+  "term": "assembly",
+  "aliases": [
+   "OSAT",
+   "assembly and test",
+   "flip chip",
+   "flip-chip",
+   "die attach"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "packaging"
+ },
+ {
+  "term": "printed circuit board",
+  "aliases": [
+   "PCB",
+   "PCBs",
+   "motherboard",
+   "baseboard"
+  ],
+  "node": "PKG_BOARD",
+  "kind": "packaging"
+ },
+ {
+  "term": "co-packaged optics",
+  "aliases": [
+   "CPO",
+   "co-packaged optical"
+  ],
+  "node": "FIB_CPO",
+  "kind": "optics"
+ },
+ {
+  "term": "DSP",
+  "aliases": [
+   "digital signal processor",
+   "PAM4 DSP",
+   "coherent DSP"
+  ],
+  "node": "FIB_DSP",
+  "kind": "optics"
+ },
+ {
+  "term": "optical fiber",
+  "aliases": [
+   "fiber optic",
+   "fibre",
+   "single-mode fiber",
+   "fiber optics"
+  ],
+  "node": "FIB_FIBER",
+  "kind": "optics"
+ },
+ {
+  "term": "laser",
+  "aliases": [
+   "EML",
+   "VCSEL",
+   "DFB laser",
+   "CW laser",
+   "lasers",
+   "indium phosphide",
+   "InP"
+  ],
+  "node": "FIB_LASER",
+  "kind": "optics"
+ },
+ {
+  "term": "photodetector",
+  "aliases": [
+   "photodiode",
+   "photodetectors",
+   "PIN diode"
+  ],
+  "node": "FIB_PD",
+  "kind": "optics"
+ },
+ {
+  "term": "optical transceiver",
+  "aliases": [
+   "transceiver",
+   "transceivers",
+   "800G",
+   "1.6T",
+   "optical module",
+   "pluggable optics",
+   "pluggables"
+  ],
+  "node": "FIB_TRX",
+  "kind": "optics"
+ },
+ {
+  "term": "silicon photonics",
+  "aliases": [
+   "SiPh",
+   "photonic integrated circuit",
+   "PIC"
+  ],
+  "node": "FIB_TRX",
+  "kind": "optics"
+ },
+ {
+  "term": "linear pluggable optics",
+  "aliases": [
+   "LPO",
+   "LRO",
+   "linear-drive optics",
+   "linear drive pluggable"
+  ],
+  "node": "TRM_LINEAR_PLUGGABLE_OPTICS",
+  "kind": "optics"
+ },
+ {
+  "term": "SerDes",
+  "aliases": [
+   "serializer/deserializer",
+   "112G SerDes",
+   "224G"
+  ],
+  "node": "TRM_SERDES",
+  "kind": "networking"
+ },
+ {
+  "term": "retimer",
+  "aliases": [
+   "retimers",
+   "PCIe retimer"
+  ],
+  "node": "TRM_RETIMER",
+  "kind": "networking"
+ },
+ {
+  "term": "PCIe",
+  "aliases": [
+   "PCI Express",
+   "PCIe Gen5",
+   "PCIe Gen6"
+  ],
+  "node": "TRM_PCIE",
+  "kind": "networking"
+ },
+ {
+  "term": "NVLink",
+  "aliases": [
+   "NVSwitch",
+   "NVLink Fusion"
+  ],
+  "node": "TRM_NVLINK",
+  "kind": "networking"
+ },
+ {
+  "term": "InfiniBand",
+  "aliases": [
+   "Quantum-X800",
+   "Quantum-2"
+  ],
+  "node": "TRM_INFINIBAND",
+  "kind": "networking"
+ },
+ {
+  "term": "Ethernet switch",
+  "aliases": [
+   "Ethernet switching",
+   "switch ASIC",
+   "Tomahawk",
+   "Spectrum-X",
+   "scale-out networking"
+  ],
+  "node": "TRM_ETHERNET_SWITCH",
+  "kind": "networking"
+ },
+ {
+  "term": "optical circuit switch",
+  "aliases": [
+   "OCS",
+   "optical circuit switching",
+   "optical circuit switches"
+  ],
+  "node": "TRM_OPTICAL_CIRCUIT_SWITCH",
+  "kind": "networking"
+ },
+ {
+  "term": "AEC",
+  "aliases": [
+   "active electrical cable",
+   "active electrical cables"
+  ],
+  "node": "TRM_AEC",
+  "kind": "networking"
+ },
+ {
+  "term": "GPU",
+  "aliases": [
+   "graphics processing unit",
+   "GPUs",
+   "accelerated computing"
+  ],
+  "node": "TRM_GPU",
+  "kind": "compute"
+ },
+ {
+  "term": "ASIC",
+  "aliases": [
+   "custom silicon",
+   "custom accelerator",
+   "XPU",
+   "application-specific integrated circuit"
+  ],
+  "node": "TRM_ASIC",
+  "kind": "compute"
+ },
+ {
+  "term": "TPU",
+  "aliases": [
+   "tensor processing unit",
+   "Trainium",
+   "Inferentia",
+   "MTIA"
+  ],
+  "node": "TRM_TPU",
+  "kind": "compute"
+ },
+ {
+  "term": "FPGA",
+  "aliases": [
+   "field-programmable gate array",
+   "FPGAs",
+   "adaptive SoC"
+  ],
+  "node": "TRM_FPGA",
+  "kind": "compute"
+ },
+ {
+  "term": "CPU",
+  "aliases": [
+   "central processing unit",
+   "server CPU",
+   "Arm-based",
+   "x86"
+  ],
+  "node": "TRM_CPU",
+  "kind": "compute"
+ },
+ {
+  "term": "matrix multiplication",
+  "aliases": [
+   "GEMM",
+   "matrix multiply",
+   "tensor core",
+   "tensor cores",
+   "MAC"
+  ],
+  "node": "MATH_MATRIX_MATRIX",
+  "kind": "compute"
+ },
+ {
+  "term": "inference",
+  "aliases": [
+   "AI inference",
+   "inferencing"
+  ],
+  "node": "TRM_INFERENCE",
+  "kind": "compute"
+ },
+ {
+  "term": "training",
+  "aliases": [
+   "AI training",
+   "model training"
+  ],
+  "node": "TRM_TRAINING",
+  "kind": "compute"
+ },
+ {
+  "term": "large language model",
+  "aliases": [
+   "LLM",
+   "LLMs",
+   "foundation model",
+   "frontier model"
+  ],
+  "node": "TRM_LARGE_LANGUAGE_MODEL",
+  "kind": "compute"
+ },
+ {
+  "term": "CUDA",
+  "aliases": [
+   "CUDA-X",
+   "CUDA platform"
+  ],
+  "node": "TRM_CUDA",
+  "kind": "compute"
+ },
+ {
+  "term": "EDA",
+  "aliases": [
+   "electronic design automation",
+   "design software"
+  ],
+  "node": "TRM_EDA",
+  "kind": "compute"
+ },
+ {
+  "term": "power grid",
+  "aliases": [
+   "transmission",
+   "electric grid",
+   "utility interconnection",
+   "interconnection queue"
+  ],
+  "node": "PWR_GRID",
+  "kind": "power"
+ },
+ {
+  "term": "substation",
+  "aliases": [
+   "transformer",
+   "transformers",
+   "power transformer"
+  ],
+  "node": "PWR_SUB",
+  "kind": "power"
+ },
+ {
+  "term": "switchgear",
+  "aliases": [
+   "medium-voltage switchgear",
+   "switchboards"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "UPS",
+  "aliases": [
+   "uninterruptible power supply",
+   "battery backup"
+  ],
+  "node": "PWR_UPS",
+  "kind": "power"
+ },
+ {
+  "term": "rack power",
+  "aliases": [
+   "power shelf",
+   "busbar",
+   "800V DC",
+   "HVDC",
+   "power distribution unit",
+   "PDU"
+  ],
+  "node": "PWR_RACK",
+  "kind": "power"
+ },
+ {
+  "term": "voltage regulator",
+  "aliases": [
+   "VRM",
+   "voltage regulator module",
+   "PMIC",
+   "power management IC",
+   "point-of-load"
+  ],
+  "node": "PWR_VRM",
+  "kind": "power"
+ },
+ {
+  "term": "liquid cooling",
+  "aliases": [
+   "direct-to-chip",
+   "cold plate",
+   "immersion cooling",
+   "CDU",
+   "coolant distribution unit",
+   "direct liquid cooling",
+   "DLC"
+  ],
+  "node": "TRM_LIQUID_COOLING",
+  "kind": "datacenter"
+ },
+ {
+  "term": "data center",
+  "aliases": [
+   "data centers",
+   "datacenter",
+   "hyperscale data center",
+   "AI factory",
+   "AI factories"
+  ],
+  "node": "TRM_DATA_CENTER",
+  "kind": "datacenter"
+ },
+ {
+  "term": "hyperscaler",
+  "aliases": [
+   "hyperscalers",
+   "cloud service provider",
+   "CSP",
+   "CSPs"
+  ],
+  "node": "TRM_HYPERSCALER",
+  "kind": "datacenter"
+ },
+ {
+  "term": "gas turbine",
+  "aliases": [
+   "turbines",
+   "combined cycle",
+   "behind-the-meter"
+  ],
+  "node": "TRM_GAS_TURBINE",
+  "kind": "power"
+ },
+ {
+  "term": "nuclear",
+  "aliases": [
+   "SMR",
+   "small modular reactor",
+   "small modular reactors"
+  ],
+  "node": "TRM_NUCLEAR",
+  "kind": "power"
+ },
+ {
+  "term": "GaN",
+  "aliases": [
+   "gallium nitride"
+  ],
+  "node": "TRM_GAN",
+  "kind": "power"
+ },
+ {
+  "term": "SiC",
+  "aliases": [
+   "silicon carbide"
+  ],
+  "node": "TRM_SIC",
+  "kind": "power"
+ },
+ {
+  "term": "RF",
+  "aliases": [
+   "radio frequency",
+   "RF front-end",
+   "RFFE"
+  ],
+  "node": "TRM_RF",
+  "kind": "analog"
+ },
+ {
+  "term": "MLCC",
+  "aliases": [
+   "multilayer ceramic capacitor",
+   "capacitors"
+  ],
+  "node": "TRM_MLCC",
+  "kind": "components"
+ },
+ {
+  "term": "analog",
+  "aliases": [
+   "mixed-signal",
+   "analog semiconductors"
+  ],
+  "node": "TRM_ANALOG",
+  "kind": "analog"
+ },
+ {
+  "term": "sovereign AI",
+  "aliases": [
+   "sovereign AI infrastructure",
+   "sovereign cloud"
+  ],
+  "node": "TRM_SOVEREIGN_AI",
+  "kind": "market"
+ },
+ {
+  "term": "export controls",
+  "aliases": [
+   "Entity List",
+   "BIS",
+   "export restrictions",
+   "export license"
+  ],
+  "node": "TRM_EXPORT_CONTROLS",
+  "kind": "market"
+ },
+ {
+  "term": "trench contact",
+  "aliases": [
+   "TS",
+   "source/drain trench contact"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "transistor"
+ },
+ {
+  "term": "contact over active gate",
+  "aliases": [
+   "COAG"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "transistor"
+ },
+ {
+  "term": "self-aligned contact cap",
+  "aliases": [
+   "SAC cap",
+   "SAC"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "transistor"
+ },
+ {
+  "term": "selective tungsten",
+  "aliases": [
+   "selective W",
+   "selective tungsten deposition"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "fab"
+ },
+ {
+  "term": "tungsten plug",
+  "aliases": [
+   "W plug",
+   "tungsten contact"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "components"
+ },
+ {
+  "term": "nickel silicide",
+  "aliases": [
+   "NiSi"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "materials"
+ },
+ {
+  "term": "interlayer dielectric",
+  "aliases": [
+   "ILD",
+   "inter-layer dielectric"
+  ],
+  "node": "CHIP_CONTACTS",
+  "kind": "materials"
+ },
+ {
+  "term": "FinFlex",
+  "aliases": [
+   "fin flex"
+  ],
+  "node": "CHIP_FINFET",
+  "kind": "transistor"
+ },
+ {
+  "term": "forksheet",
+  "aliases": [
+   "forksheet FET",
+   "forksheet transistor"
+  ],
+  "node": "CHIP_FINFET",
+  "kind": "transistor"
+ },
+ {
+  "term": "CFET",
+  "aliases": [
+   "complementary FET",
+   "complementary field-effect transistor"
+  ],
+  "node": "CHIP_FINFET",
+  "kind": "transistor"
+ },
+ {
+  "term": "self-aligned quadruple patterning",
+  "aliases": [
+   "SAQP",
+   "quadruple patterning"
+  ],
+  "node": "CHIP_FINFET",
+  "kind": "fab"
+ },
+ {
+  "term": "Si/SiGe superlattice",
+  "aliases": [
+   "silicon-germanium superlattice"
+  ],
+  "node": "CHIP_GAA",
+  "kind": "materials"
+ },
+ {
+  "term": "inner spacer",
+  "aliases": [
+   "inner spacers"
+  ],
+  "node": "CHIP_GAA",
+  "kind": "transistor"
+ },
+ {
+  "term": "hafnium oxide",
+  "aliases": [
+   "HfO2",
+   "hafnia"
+  ],
+  "node": "CHIP_GATE_STACK",
+  "kind": "materials"
+ },
+ {
+  "term": "work-function metal",
+  "aliases": [
+   "work function metal",
+   "work-function metals"
+  ],
+  "node": "CHIP_GATE_STACK",
+  "kind": "materials"
+ },
+ {
+  "term": "interfacial oxide",
+  "aliases": [
+   "interfacial layer",
+   "IL"
+  ],
+  "node": "CHIP_GATE_STACK",
+  "kind": "materials"
+ },
+ {
+  "term": "gate-last",
+  "aliases": [
+   "replacement gate",
+   "replacement metal gate",
+   "RMG"
+  ],
+  "node": "CHIP_GATE_STACK",
+  "kind": "transistor"
+ },
+ {
+  "term": "low-k dielectric",
+  "aliases": [
+   "low-k",
+   "low k",
+   "ultra-low-k",
+   "ULK"
+  ],
+  "node": "CHIP_MID_METAL",
+  "kind": "materials"
+ },
+ {
+  "term": "air gap",
+  "aliases": [
+   "air gaps",
+   "airgap"
+  ],
+  "node": "CHIP_MID_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "RC delay",
+  "aliases": [
+   "wire delay",
+   "RC"
+  ],
+  "node": "CHIP_MID_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "tantalum nitride",
+  "aliases": [
+   "TaN"
+  ],
+  "node": "CHIP_MID_METAL",
+  "kind": "materials"
+ },
+ {
+  "term": "drain-induced barrier lowering",
+  "aliases": [
+   "DIBL"
+  ],
+  "node": "CHIP_NMOS",
+  "kind": "transistor"
+ },
+ {
+  "term": "subthreshold swing",
+  "aliases": [
+   "swing",
+   "SS"
+  ],
+  "node": "CHIP_NMOS",
+  "kind": "transistor"
+ },
+ {
+  "term": "strained silicon",
+  "aliases": [
+   "strained Si",
+   "strained Si:P"
+  ],
+  "node": "CHIP_NMOS",
+  "kind": "materials"
+ },
+ {
+  "term": "source/drain epitaxy",
+  "aliases": [
+   "S/D epi",
+   "source drain epi"
+  ],
+  "node": "CHIP_NMOS",
+  "kind": "fab"
+ },
+ {
+  "term": "FD-SOI",
+  "aliases": [
+   "fully depleted silicon-on-insulator",
+   "fully-depleted SOI"
+  ],
+  "node": "CHIP_PLANAR",
+  "kind": "materials"
+ },
+ {
+  "term": "short-channel effect",
+  "aliases": [
+   "short channel effects",
+   "SCE"
+  ],
+  "node": "CHIP_PLANAR",
+  "kind": "transistor"
+ },
+ {
+  "term": "Dennard scaling",
+  "aliases": [
+   "Dennard"
+  ],
+  "node": "CHIP_PLANAR",
+  "kind": "transistor"
+ },
+ {
+  "term": "CMOS inverter",
+  "aliases": [
+   "inverter"
+  ],
+  "node": "CHIP_PMOS",
+  "kind": "transistor"
+ },
+ {
+  "term": "hole mobility",
+  "aliases": [
+   "hole"
+  ],
+  "node": "CHIP_PMOS",
+  "kind": "transistor"
+ },
+ {
+  "term": "multi-patterning",
+  "aliases": [
+   "multipatterning",
+   "multi-patterned"
+  ],
+  "node": "CHIP_THIN_METAL",
+  "kind": "fab"
+ },
+ {
+  "term": "193i lithography",
+  "aliases": [
+   "193i",
+   "ArF immersion"
+  ],
+  "node": "CHIP_THIN_METAL",
+  "kind": "fab"
+ },
+ {
+  "term": "ruthenium",
+  "aliases": [
+   "Ru"
+  ],
+  "node": "CHIP_THIN_METAL",
+  "kind": "materials"
+ },
+ {
+  "term": "molybdenum",
+  "aliases": [
+   "Mo"
+  ],
+  "node": "CHIP_THIN_METAL",
+  "kind": "materials"
+ },
+ {
+  "term": "cobalt",
+  "aliases": [
+   "Co"
+  ],
+  "node": "CHIP_THIN_METAL",
+  "kind": "materials"
+ },
+ {
+  "term": "redistribution layer",
+  "aliases": [
+   "RDL",
+   "redistribution layers"
+  ],
+  "node": "CHIP_TOP_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "electromigration",
+  "aliases": [
+   "EM"
+  ],
+  "node": "CHIP_TOP_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "IR drop",
+  "aliases": [
+   "IR-drop",
+   "voltage drop"
+  ],
+  "node": "CHIP_TOP_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "passivation",
+  "aliases": [
+   "passivation layer"
+  ],
+  "node": "CHIP_TOP_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "solder bump",
+  "aliases": [
+   "solder bumps",
+   "bump"
+  ],
+  "node": "CHIP_TOP_METAL",
+  "kind": "components"
+ },
+ {
+  "term": "SPM",
+  "aliases": [
+   "piranha",
+   "sulfuric peroxide mix"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "SC1",
+  "aliases": [
+   "standard clean 1",
+   "APM",
+   "ammonium hydroxide peroxide mixture"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "SC2",
+  "aliases": [
+   "standard clean 2",
+   "HPM",
+   "hydrochloric peroxide mixture"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "DHF",
+  "aliases": [
+   "dilute hydrofluoric acid",
+   "dilute HF"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "megasonic cleaning",
+  "aliases": [
+   "megasonic"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "Marangoni drying",
+  "aliases": [
+   "Marangoni effect",
+   "Marangoni"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "supercritical CO2 drying",
+  "aliases": [
+   "supercritical drying",
+   "supercritical CO2"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "isopropyl alcohol",
+  "aliases": [
+   "IPA"
+  ],
+  "node": "CLEAN",
+  "kind": "materials"
+ },
+ {
+  "term": "wet bench",
+  "aliases": [
+   "batch wet bench"
+  ],
+  "node": "CLEAN",
+  "kind": "fab"
+ },
+ {
+  "term": "photoacid generator",
+  "aliases": [
+   "PAG"
+  ],
+  "node": "COAT",
+  "kind": "materials"
+ },
+ {
+  "term": "bottom antireflective coating",
+  "aliases": [
+   "BARC",
+   "anti-reflective coating"
+  ],
+  "node": "COAT",
+  "kind": "materials"
+ },
+ {
+  "term": "edge bead removal",
+  "aliases": [
+   "EBR"
+  ],
+  "node": "COAT",
+  "kind": "fab"
+ },
+ {
+  "term": "post-apply bake",
+  "aliases": [
+   "PAB",
+   "soft bake"
+  ],
+  "node": "COAT",
+  "kind": "fab"
+ },
+ {
+  "term": "post-exposure bake",
+  "aliases": [
+   "PEB"
+  ],
+  "node": "COAT",
+  "kind": "fab"
+ },
+ {
+  "term": "PGMEA",
+  "aliases": [
+   "propylene glycol methyl ether acetate"
+  ],
+  "node": "COAT",
+  "kind": "materials"
+ },
+ {
+  "term": "plasma-enhanced CVD",
+  "aliases": [
+   "PECVD",
+   "plasma enhanced chemical vapor deposition"
+  ],
+  "node": "DEPOSIT",
+  "kind": "fab"
+ },
+ {
+  "term": "low-pressure CVD",
+  "aliases": [
+   "LPCVD"
+  ],
+  "node": "DEPOSIT",
+  "kind": "fab"
+ },
+ {
+  "term": "TEOS",
+  "aliases": [
+   "tetraethyl orthosilicate"
+  ],
+  "node": "DEPOSIT",
+  "kind": "materials"
+ },
+ {
+  "term": "tungsten hexafluoride",
+  "aliases": [
+   "WF6"
+  ],
+  "node": "DEPOSIT",
+  "kind": "materials"
+ },
+ {
+  "term": "TDMAH",
+  "aliases": [
+   "tetrakis(dimethylamido)hafnium"
+  ],
+  "node": "DEPOSIT",
+  "kind": "materials"
+ },
+ {
+  "term": "TMAH",
+  "aliases": [
+   "tetramethylammonium hydroxide"
+  ],
+  "node": "DEVELOP",
+  "kind": "materials"
+ },
+ {
+  "term": "chemically amplified resist",
+  "aliases": [
+   "CAR"
+  ],
+  "node": "DEVELOP",
+  "kind": "materials"
+ },
+ {
+  "term": "metal oxide resist",
+  "aliases": [
+   "MOR",
+   "metal-oxide resist"
+  ],
+  "node": "DEVELOP",
+  "kind": "materials"
+ },
+ {
+  "term": "numerical aperture",
+  "aliases": [
+   "NA"
+  ],
+  "node": "DEVELOP",
+  "kind": "fab"
+ },
+ {
+  "term": "PFAS",
+  "aliases": [
+   "per- and polyfluoroalkyl substances"
+  ],
+  "node": "DEVELOP",
+  "kind": "materials"
+ },
+ {
+  "term": "backgrinding",
+  "aliases": [
+   "wafer thinning",
+   "back grinding",
+   "backgrind"
+  ],
+  "node": "DICE",
+  "kind": "fab"
+ },
+ {
+  "term": "stealth dicing",
+  "aliases": [
+   "stealth laser dicing",
+   "stealth laser"
+  ],
+  "node": "DICE",
+  "kind": "fab"
+ },
+ {
+  "term": "kerf",
+  "aliases": [
+   "saw kerf",
+   "cut width"
+  ],
+  "node": "DICE",
+  "kind": "fab"
+ },
+ {
+  "term": "dicing tape",
+  "aliases": [
+   "blue tape",
+   "wafer tape"
+  ],
+  "node": "DICE",
+  "kind": "materials"
+ },
+ {
+  "term": "street",
+  "aliases": [
+   "scribe lane",
+   "scribe line",
+   "scribe street"
+  ],
+  "node": "DICE",
+  "kind": "fab"
+ },
+ {
+  "term": "reactive ion etching",
+  "aliases": [
+   "RIE",
+   "capacitive RIE"
+  ],
+  "node": "ETCH",
+  "kind": "fab"
+ },
+ {
+  "term": "inductively coupled plasma etch",
+  "aliases": [
+   "ICP etch",
+   "ICP-DRIE",
+   "inductive plasma etch"
+  ],
+  "node": "ETCH",
+  "kind": "fab"
+ },
+ {
+  "term": "atomic layer etching",
+  "aliases": [
+   "ALE",
+   "atomic layer etch"
+  ],
+  "node": "ETCH",
+  "kind": "fab"
+ },
+ {
+  "term": "cryogenic etch",
+  "aliases": [
+   "cryo etch",
+   "cryogenic etching"
+  ],
+  "node": "ETCH",
+  "kind": "fab"
+ },
+ {
+  "term": "hard mask",
+  "aliases": [
+   "hardmask"
+  ],
+  "node": "ETCH",
+  "kind": "materials"
+ },
+ {
+  "term": "etch selectivity",
+  "aliases": [
+   "selectivity"
+  ],
+  "node": "ETCH",
+  "kind": "fab"
+ },
+ {
+  "term": "laser-produced plasma",
+  "aliases": [
+   "LPP",
+   "LPP light source"
+  ],
+  "node": "EXPOSE",
+  "kind": "optics"
+ },
+ {
+  "term": "EUV collector mirror",
+  "aliases": [
+   "collector mirror",
+   "EUV collector"
+  ],
+  "node": "EXPOSE",
+  "kind": "optics"
+ },
+ {
+  "term": "intermediate focus",
+  "aliases": [
+   "IF"
+  ],
+  "node": "EXPOSE",
+  "kind": "optics"
+ },
+ {
+  "term": "reticle",
+  "aliases": [
+   "photomask",
+   "EUV mask"
+  ],
+  "node": "EXPOSE",
+  "kind": "equipment"
+ },
+ {
+  "term": "CO2 laser",
+  "aliases": [
+   "CO2 drive laser"
+  ],
+  "node": "EXPOSE",
+  "kind": "optics"
+ },
+ {
+  "term": "tin droplet generator",
+  "aliases": [
+   "tin droplet",
+   "droplet generator"
+  ],
+  "node": "EXPOSE",
+  "kind": "equipment"
+ },
+ {
+  "term": "optical engine",
+  "aliases": [
+   "photonic engine"
+  ],
+  "node": "FIB_CPO",
+  "kind": "optics"
+ },
+ {
+  "term": "micro-ring modulator",
+  "aliases": [
+   "microring modulator",
+   "micro-ring"
+  ],
+  "node": "FIB_CPO",
+  "kind": "optics"
+ },
+ {
+  "term": "external laser source",
+  "aliases": [
+   "ELS",
+   "external laser"
+  ],
+  "node": "FIB_CPO",
+  "kind": "optics"
+ },
+ {
+  "term": "front panel pluggable",
+  "aliases": [
+   "front panel"
+  ],
+  "node": "FIB_CPO",
+  "kind": "networking"
+ },
+ {
+  "term": "PAM4",
+  "aliases": [
+   "pulse amplitude modulation 4-level",
+   "4-level PAM"
+  ],
+  "node": "FIB_DSP",
+  "kind": "networking"
+ },
+ {
+  "term": "baud rate",
+  "aliases": [
+   "GBd",
+   "symbol rate"
+  ],
+  "node": "FIB_DSP",
+  "kind": "networking"
+ },
+ {
+  "term": "forward error correction",
+  "aliases": [
+   "FEC"
+  ],
+  "node": "FIB_DSP",
+  "kind": "networking"
+ },
+ {
+  "term": "equalization",
+  "aliases": [
+   "equalizer"
+  ],
+  "node": "FIB_DSP",
+  "kind": "networking"
+ },
+ {
+  "term": "multimode fiber",
+  "aliases": [
+   "multimode fibre",
+   "MMF"
+  ],
+  "node": "FIB_FIBER",
+  "kind": "networking"
+ },
+ {
+  "term": "total internal reflection",
+  "aliases": [
+   "TIR"
+  ],
+  "node": "FIB_FIBER",
+  "kind": "optics"
+ },
+ {
+  "term": "fiber cladding",
+  "aliases": [
+   "cladding"
+  ],
+  "node": "FIB_FIBER",
+  "kind": "materials"
+ },
+ {
+  "term": "PIN photodiode",
+  "aliases": [
+   "PIN diode photodiode",
+   "photodiode PIN"
+  ],
+  "node": "FIB_PD",
+  "kind": "optics"
+ },
+ {
+  "term": "InGaAs",
+  "aliases": [
+   "indium gallium arsenide"
+  ],
+  "node": "FIB_PD",
+  "kind": "materials"
+ },
+ {
+  "term": "responsivity",
+  "aliases": [
+   "photodiode responsivity"
+  ],
+  "node": "FIB_PD",
+  "kind": "optics"
+ },
+ {
+  "term": "transimpedance amplifier",
+  "aliases": [
+   "TIA"
+  ],
+  "node": "FIB_PD",
+  "kind": "analog"
+ },
+ {
+  "term": "germanium photodetector",
+  "aliases": [
+   "germanium",
+   "Ge photodiode"
+  ],
+  "node": "FIB_PD",
+  "kind": "materials"
+ },
+ {
+  "term": "OSFP",
+  "aliases": [
+   "octal small form-factor pluggable"
+  ],
+  "node": "FIB_TRX",
+  "kind": "networking"
+ },
+ {
+  "term": "QSFP-DD",
+  "aliases": [
+   "QSFP double density",
+   "quad small form-factor pluggable double density"
+  ],
+  "node": "FIB_TRX",
+  "kind": "networking"
+ },
+ {
+  "term": "DR8",
+  "aliases": [
+   "400G DR8"
+  ],
+  "node": "FIB_TRX",
+  "kind": "networking"
+ },
+ {
+  "term": "2xFR4",
+  "aliases": [
+   "2xFR4 optics"
+  ],
+  "node": "FIB_TRX",
+  "kind": "networking"
+ },
+ {
+  "term": "SR8",
+  "aliases": [
+   "SR8 optics"
+  ],
+  "node": "FIB_TRX",
+  "kind": "networking"
+ },
+ {
+  "term": "MPO connector",
+  "aliases": [
+   "MPO",
+   "multi-fiber push-on"
+  ],
+  "node": "FIB_TRX",
+  "kind": "networking"
+ },
+ {
+  "term": "burn-in",
+  "aliases": [
+   "burn in",
+   "burnin"
+  ],
+  "node": "FINAL_TEST",
+  "kind": "test"
+ },
+ {
+  "term": "speed binning",
+  "aliases": [
+   "speed bin",
+   "binning"
+  ],
+  "node": "FINAL_TEST",
+  "kind": "test"
+ },
+ {
+  "term": "load board",
+  "aliases": [
+   "test load board"
+  ],
+  "node": "FINAL_TEST",
+  "kind": "equipment"
+ },
+ {
+  "term": "ball grid array",
+  "aliases": [
+   "BGA"
+  ],
+  "node": "FINAL_TEST",
+  "kind": "packaging"
+ },
+ {
+  "term": "dopant",
+  "aliases": [
+   "dopants",
+   "dopant atoms"
+  ],
+  "node": "IMPLANT",
+  "kind": "materials"
+ },
+ {
+  "term": "thermal anneal",
+  "aliases": [
+   "anneal",
+   "dopant activation"
+  ],
+  "node": "IMPLANT",
+  "kind": "fab"
+ },
+ {
+  "term": "channeling",
+  "aliases": [
+   "ion channeling"
+  ],
+  "node": "IMPLANT",
+  "kind": "fab"
+ },
+ {
+  "term": "Faraday cup",
+  "aliases": [
+   "beam current cup"
+  ],
+  "node": "IMPLANT",
+  "kind": "equipment"
+ },
+ {
+  "term": "wire saw",
+  "aliases": [
+   "wafer wire saw",
+   "wire sawing"
+  ],
+  "node": "INGOT",
+  "kind": "equipment"
+ },
+ {
+  "term": "wafer notch",
+  "aliases": [
+   "notch orientation mark",
+   "orientation notch"
+  ],
+  "node": "INGOT",
+  "kind": "fab"
+ },
+ {
+  "term": "overlay",
+  "aliases": [
+   "overlay error",
+   "overlay metrology"
+  ],
+  "node": "KLAC",
+  "kind": "fab"
+ },
+ {
+  "term": "critical dimension",
+  "aliases": [
+   "CD",
+   "CD metrology"
+  ],
+  "node": "KLAC",
+  "kind": "fab"
+ },
+ {
+  "term": "full adder",
+  "aliases": [
+   "binary full adder"
+  ],
+  "node": "MATH_ADD",
+  "kind": "compute"
+ },
+ {
+  "term": "dot product",
+  "aliases": [
+   "scalar product",
+   "inner product"
+  ],
+  "node": "MATH_DOT_PRODUCT",
+  "kind": "other"
+ },
+ {
+  "term": "matrix",
+  "aliases": [
+   "matrices",
+   "m x n matrix"
+  ],
+  "node": "MATH_MATRIX",
+  "kind": "other"
+ },
+ {
+  "term": "column vector",
+  "aliases": [
+   "row vector",
+   "single-column matrix"
+  ],
+  "node": "MATH_MATRIX",
+  "kind": "other"
+ },
+ {
+  "term": "matrix-vector product",
+  "aliases": [
+   "matrix times vector",
+   "matrix-vector multiplication"
+  ],
+  "node": "MATH_MATRIX_VECTOR",
+  "kind": "other"
+ },
+ {
+  "term": "scalar multiplication",
+  "aliases": [
+   "scalar multiple",
+   "scaling a vector"
+  ],
+  "node": "MATH_SCALE",
+  "kind": "other"
+ },
+ {
+  "term": "linear combination",
+  "aliases": [
+   "weighted sum of vectors",
+   "combination of vectors"
+  ],
+  "node": "MATH_SCALE",
+  "kind": "other"
+ },
+ {
+  "term": "inner dimension",
+  "aliases": [
+   "inner dimensions",
+   "conformable matrices",
+   "matrix shape rule"
+  ],
+  "node": "MATH_SHAPE_RULE",
+  "kind": "other"
+ },
+ {
+  "term": "vector",
+  "aliases": [
+   "vectors",
+   "n-vector",
+   "ordered list of numbers"
+  ],
+  "node": "MATH_VECTOR",
+  "kind": "other"
+ },
+ {
+  "term": "vector addition",
+  "aliases": [
+   "vector sum",
+   "adding vectors"
+  ],
+  "node": "MATH_VECTOR_ADD",
+  "kind": "other"
+ },
+ {
+  "term": "crystal puller",
+  "aliases": [
+   "Czochralski puller",
+   "puller",
+   "pull chamber",
+   "crystal pulling furnace"
+  ],
+  "node": "MELT_PULL",
+  "kind": "equipment"
+ },
+ {
+  "term": "seed crystal",
+  "aliases": [
+   "seed",
+   "seed crystal neck",
+   "necking"
+  ],
+  "node": "MELT_PULL",
+  "kind": "materials"
+ },
+ {
+  "term": "quartz crucible",
+  "aliases": [
+   "crucible",
+   "crucibles"
+  ],
+  "node": "MELT_PULL",
+  "kind": "equipment"
+ },
+ {
+  "term": "polysilicon recharge",
+  "aliases": [
+   "recharge",
+   "poly recharge"
+  ],
+  "node": "MELT_PULL",
+  "kind": "materials"
+ },
+ {
+  "term": "row decoder",
+  "aliases": [
+   "row address decoder",
+   "row decode"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "word line",
+  "aliases": [
+   "wordline",
+   "WL"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "bit line",
+  "aliases": [
+   "bitline",
+   "BL",
+   "digit line"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "sense amplifier",
+  "aliases": [
+   "sense amp",
+   "sense amps",
+   "sense amplifiers"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "row buffer",
+  "aliases": [
+   "row hit",
+   "row miss",
+   "row conflict",
+   "open row",
+   "page hit"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "precharge",
+  "aliases": [
+   "bit line precharge",
+   "PRE command"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "column decoder",
+  "aliases": [
+   "column address decoder",
+   "column decode"
+  ],
+  "node": "MEM_ARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "data rate",
+  "aliases": [
+   "MT/s",
+   "megatransfers per second",
+   "transfers per second",
+   "Gb/s per pin"
+  ],
+  "node": "MEM_BANDWIDTH",
+  "kind": "memory"
+ },
+ {
+  "term": "DIMM",
+  "aliases": [
+   "dual inline memory module",
+   "memory module",
+   "DDR5 DIMM"
+  ],
+  "node": "MEM_BANDWIDTH",
+  "kind": "memory"
+ },
+ {
+  "term": "memory channel",
+  "aliases": [
+   "memory channels",
+   "DRAM channel",
+   "subchannel"
+  ],
+  "node": "MEM_BANDWIDTH",
+  "kind": "memory"
+ },
+ {
+  "term": "memory controller",
+  "aliases": [
+   "memory controllers",
+   "DRAM controller",
+   "integrated memory controller",
+   "IMC"
+  ],
+  "node": "MEM_BANDWIDTH",
+  "kind": "memory"
+ },
+ {
+  "term": "data pins",
+  "aliases": [
+   "DQ pins",
+   "DQ",
+   "bus width",
+   "I/O width"
+  ],
+  "node": "MEM_BANDWIDTH",
+  "kind": "memory"
+ },
+ {
+  "term": "bank group",
+  "aliases": [
+   "bank groups"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "command bus",
+  "aliases": [
+   "command and address bus",
+   "CA bus"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "data bus",
+  "aliases": [
+   "DQ bus",
+   "data bus turnaround"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "bank-level parallelism",
+  "aliases": [
+   "bank parallelism",
+   "bank interleaving"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "tFAW",
+  "aliases": [
+   "four activate window",
+   "four-activate window"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "tRRD",
+  "aliases": [
+   "row-to-row delay",
+   "ACTIVATE to ACTIVATE delay"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "tCCD",
+  "aliases": [
+   "column-to-column delay",
+   "CAS to CAS delay"
+  ],
+  "node": "MEM_BANK",
+  "kind": "memory"
+ },
+ {
+  "term": "1T1C cell",
+  "aliases": [
+   "1T1C",
+   "one transistor one capacitor",
+   "one-transistor one-capacitor"
+  ],
+  "node": "MEM_CELL",
+  "kind": "memory"
+ },
+ {
+  "term": "storage capacitor",
+  "aliases": [
+   "storage cell capacitor",
+   "DRAM capacitor",
+   "cell capacitor"
+  ],
+  "node": "MEM_CELL",
+  "kind": "memory"
+ },
+ {
+  "term": "access transistor",
+  "aliases": [
+   "cell access transistor",
+   "pass transistor"
+  ],
+  "node": "MEM_CELL",
+  "kind": "memory"
+ },
+ {
+  "term": "DRAM refresh",
+  "aliases": [
+   "refresh",
+   "refresh window",
+   "refresh command"
+  ],
+  "node": "MEM_CELL",
+  "kind": "memory"
+ },
+ {
+  "term": "ABF film",
+  "aliases": [
+   "Ajinomoto build-up film",
+   "ABF"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "materials"
+ },
+ {
+  "term": "build-up layers",
+  "aliases": [
+   "build-up layer",
+   "BU layers"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "packaging"
+ },
+ {
+  "term": "organic substrate",
+  "aliases": [
+   "package substrate",
+   "IC substrate",
+   "FC-BGA substrate"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "packaging"
+ },
+ {
+  "term": "flip-chip BGA",
+  "aliases": [
+   "FC-BGA",
+   "flip chip ball grid array"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "packaging"
+ },
+ {
+  "term": "C4 bump",
+  "aliases": [
+   "controlled collapse chip connection",
+   "C4 bumps",
+   "C4"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "packaging"
+ },
+ {
+  "term": "glass core substrate",
+  "aliases": [
+   "glass core",
+   "glass substrate"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "materials"
+ },
+ {
+  "term": "solder resist",
+  "aliases": [
+   "solder mask"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "materials"
+ },
+ {
+  "term": "substrate warpage",
+  "aliases": [
+   "warpage",
+   "package warpage"
+  ],
+  "node": "PKG_SUBSTRATE",
+  "kind": "packaging"
+ },
+ {
+  "term": "Siemens process",
+  "aliases": [
+   "Siemens reactor",
+   "bell jar reactor",
+   "Siemens-type reactor"
+  ],
+  "node": "POLYSILICON",
+  "kind": "equipment"
+ },
+ {
+  "term": "trichlorosilane",
+  "aliases": [
+   "TCS",
+   "SiHCl3"
+  ],
+  "node": "POLYSILICON",
+  "kind": "materials"
+ },
+ {
+  "term": "silicon tetrachloride",
+  "aliases": [
+   "STC",
+   "SiCl4"
+  ],
+  "node": "POLYSILICON",
+  "kind": "materials"
+ },
+ {
+  "term": "metallurgical-grade silicon",
+  "aliases": [
+   "MG-Si",
+   "metallurgical silicon"
+  ],
+  "node": "POLYSILICON",
+  "kind": "materials"
+ },
+ {
+  "term": "electronic-grade silicon",
+  "aliases": [
+   "EG-Si",
+   "electronic grade polysilicon"
+  ],
+  "node": "POLYSILICON",
+  "kind": "materials"
+ },
+ {
+  "term": "fluidized bed reactor",
+  "aliases": [
+   "fluidised bed reactor",
+   "FBR"
+  ],
+  "node": "POLYSILICON",
+  "kind": "equipment"
+ },
+ {
+  "term": "transmission lines",
+  "aliases": [
+   "high-voltage transmission",
+   "transmission line"
+  ],
+  "node": "PWR_GRID",
+  "kind": "power"
+ },
+ {
+  "term": "power usage effectiveness",
+  "aliases": [
+   "PUE"
+  ],
+  "node": "PWR_GRID",
+  "kind": "datacenter"
+ },
+ {
+  "term": "behind-the-meter generation",
+  "aliases": [
+   "behind the meter",
+   "BTM power"
+  ],
+  "node": "PWR_GRID",
+  "kind": "power"
+ },
+ {
+  "term": "three-phase power",
+  "aliases": [
+   "three-phase AC",
+   "3-phase power"
+  ],
+  "node": "PWR_GRID",
+  "kind": "power"
+ },
+ {
+  "term": "utility substation gantry",
+  "aliases": [
+   "substation gantry"
+  ],
+  "node": "PWR_GRID",
+  "kind": "power"
+ },
+ {
+  "term": "power supply unit",
+  "aliases": [
+   "PSU",
+   "PSU module"
+  ],
+  "node": "PWR_RACK",
+  "kind": "power"
+ },
+ {
+  "term": "800 VDC",
+  "aliases": [
+   "800 V DC",
+   "800V HVDC",
+   "800 VDC architecture"
+  ],
+  "node": "PWR_RACK",
+  "kind": "power"
+ },
+ {
+  "term": "sidecar power rack",
+  "aliases": [
+   "power sidecar"
+  ],
+  "node": "PWR_RACK",
+  "kind": "datacenter"
+ },
+ {
+  "term": "GB200 NVL72",
+  "aliases": [
+   "NVL72",
+   "NVIDIA GB200 NVL72"
+  ],
+  "node": "PWR_RACK",
+  "kind": "compute"
+ },
+ {
+  "term": "grain-oriented electrical steel",
+  "aliases": [
+   "GOES",
+   "electrical steel",
+   "silicon steel"
+  ],
+  "node": "PWR_SUB",
+  "kind": "materials"
+ },
+ {
+  "term": "transformer bushing",
+  "aliases": [
+   "bushings",
+   "bushing"
+  ],
+  "node": "PWR_SUB",
+  "kind": "power"
+ },
+ {
+  "term": "transformer lead time",
+  "aliases": [
+   "transformer lead times"
+  ],
+  "node": "PWR_SUB",
+  "kind": "market"
+ },
+ {
+  "term": "medium voltage",
+  "aliases": [
+   "MV",
+   "13.8 kV",
+   "34.5 kV"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "circuit breaker",
+  "aliases": [
+   "vacuum circuit breaker",
+   "VCB"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "automatic transfer switch",
+  "aliases": [
+   "ATS",
+   "transfer switch"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "protection relay",
+  "aliases": [
+   "protective relay"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "arc flash",
+  "aliases": [
+   "arc flash hazard"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "unit substation",
+  "aliases": [
+   "unit substations"
+  ],
+  "node": "PWR_SWG",
+  "kind": "power"
+ },
+ {
+  "term": "2N redundancy",
+  "aliases": [
+   "2N",
+   "N+1 redundancy",
+   "N+1"
+  ],
+  "node": "PWR_SWG",
+  "kind": "datacenter"
+ },
+ {
+  "term": "double conversion",
+  "aliases": [
+   "online double-conversion",
+   "double-conversion UPS"
+  ],
+  "node": "PWR_UPS",
+  "kind": "power"
+ },
+ {
+  "term": "rectifier",
+  "aliases": [
+   "AC-DC rectifier"
+  ],
+  "node": "PWR_UPS",
+  "kind": "power"
+ },
+ {
+  "term": "lithium-ion battery",
+  "aliases": [
+   "Li-ion",
+   "Li-ion battery",
+   "lithium-ion batteries"
+  ],
+  "node": "PWR_UPS",
+  "kind": "power"
+ },
+ {
+  "term": "standby generator",
+  "aliases": [
+   "diesel generator",
+   "gas generator",
+   "genset",
+   "gensets"
+  ],
+  "node": "PWR_UPS",
+  "kind": "power"
+ },
+ {
+  "term": "multiphase voltage regulator",
+  "aliases": [
+   "multiphase VRM",
+   "multiphase regulator"
+  ],
+  "node": "PWR_VRM",
+  "kind": "power"
+ },
+ {
+  "term": "power stage",
+  "aliases": [
+   "power stages",
+   "DrMOS"
+  ],
+  "node": "PWR_VRM",
+  "kind": "power"
+ },
+ {
+  "term": "vertical power delivery",
+  "aliases": [
+   "vertical power",
+   "vertical power module"
+  ],
+  "node": "PWR_VRM",
+  "kind": "power"
+ },
+ {
+  "term": "I2R loss",
+  "aliases": [
+   "I2R losses",
+   "resistive loss"
+  ],
+  "node": "PWR_VRM",
+  "kind": "power"
+ },
+ {
+  "term": "intermediate bus converter",
+  "aliases": [
+   "IBC",
+   "intermediate bus"
+  ],
+  "node": "PWR_VRM",
+  "kind": "power"
+ },
+ {
+  "term": "vertical channel transistor",
+  "aliases": [
+   "VCT",
+   "vertical transistor"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "transistor"
+ },
+ {
+  "term": "4F2 cell",
+  "aliases": [
+   "4F2",
+   "4F2 DRAM"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "memory"
+ },
+ {
+  "term": "VS-DRAM",
+  "aliases": [
+   "vertical stacked DRAM",
+   "stacked DRAM"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "memory"
+ },
+ {
+  "term": "cell on peripheral",
+  "aliases": [
+   "COP",
+   "PUC",
+   "cell-on-peripheral"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "memory"
+ },
+ {
+  "term": "hybrid copper bonding",
+  "aliases": [
+   "hybrid bonding",
+   "wafer-to-wafer bonding",
+   "W2W bonding"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "packaging"
+ },
+ {
+  "term": "floating body effect",
+  "aliases": [
+   "floating body",
+   "floating-body"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "transistor"
+ },
+ {
+  "term": "IGZO",
+  "aliases": [
+   "indium gallium zinc oxide"
+  ],
+  "node": "RND_3D_DRAM",
+  "kind": "materials"
+ },
+ {
+  "term": "KV cache",
+  "aliases": [
+   "key-value cache",
+   "KV-cache"
+  ],
+  "node": "RND_HBF",
+  "kind": "compute"
+ },
+ {
+  "term": "NAND endurance",
+  "aliases": [
+   "flash endurance",
+   "write endurance"
+  ],
+  "node": "RND_HBF",
+  "kind": "memory"
+ },
+ {
+  "term": "CMOS bonded to array",
+  "aliases": [
+   "CBA",
+   "CMOS under array"
+  ],
+  "node": "RND_HBF",
+  "kind": "fab"
+ },
+ {
+  "term": "base logic die",
+  "aliases": [
+   "base die",
+   "HBF base die"
+  ],
+  "node": "RND_HBF",
+  "kind": "packaging"
+ },
+ {
+  "term": "quartzite",
+  "aliases": [
+   "silica rock",
+   "quartz rock"
+  ],
+  "node": "SAND",
+  "kind": "materials"
+ },
+ {
+  "term": "submerged arc furnace",
+  "aliases": [
+   "SAF",
+   "electric arc furnace"
+  ],
+  "node": "SAND",
+  "kind": "equipment"
+ },
+ {
+  "term": "carbothermic reduction",
+  "aliases": [
+   "carbothermal reduction"
+  ],
+  "node": "SAND",
+  "kind": "fab"
+ },
+ {
+  "term": "silica fume",
+  "aliases": [
+   "microsilica",
+   "SiO fume"
+  ],
+  "node": "SAND",
+  "kind": "materials"
+ },
+ {
+  "term": "ferrosilicon",
+  "aliases": [
+   "FeSi"
+  ],
+  "node": "SAND",
+  "kind": "materials"
+ },
+ {
+  "term": "NVLink switch tray",
+  "aliases": [
+   "NVLink switch",
+   "NVSwitch tray"
+  ],
+  "node": "SHIP",
+  "kind": "networking"
+ },
+ {
+  "term": "compute tray",
+  "aliases": [
+   "GPU tray",
+   "compute trays"
+  ],
+  "node": "SHIP",
+  "kind": "compute"
+ },
+ {
+  "term": "original design manufacturer",
+  "aliases": [
+   "ODM"
+  ],
+  "node": "SHIP",
+  "kind": "market"
+ },
+ {
+  "term": "original equipment manufacturer",
+  "aliases": [
+   "OEM"
+  ],
+  "node": "SHIP",
+  "kind": "market"
+ },
+ {
+  "term": "Grace CPU",
+  "aliases": [
+   "NVIDIA Grace",
+   "Grace Blackwell"
+  ],
+  "node": "SHIP",
+  "kind": "compute"
+ },
+ {
+  "term": "diamond wire saw",
+  "aliases": [
+   "multi-wire saw",
+   "wire saw",
+   "diamond wire"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "equipment"
+ },
+ {
+  "term": "kerf loss",
+  "aliases": [
+   "kerf",
+   "saw kerf"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "materials"
+ },
+ {
+  "term": "double-side lapping",
+  "aliases": [
+   "lapping",
+   "double side lapping"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "equipment"
+ },
+ {
+  "term": "double-side polishing",
+  "aliases": [
+   "double side polishing"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "equipment"
+ },
+ {
+  "term": "Preston equation",
+  "aliases": [
+   "Preston law",
+   "Preston relation"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "other"
+ },
+ {
+  "term": "silicon slicing",
+  "aliases": [
+   "wafer slicing",
+   "ingot slicing"
+  ],
+  "node": "SLICE_POLISH",
+  "kind": "fab"
+ },
+ {
+  "term": "total thickness variation",
+  "aliases": [
+   "TTV"
+  ],
+  "node": "WAFER",
+  "kind": "other"
+ },
+ {
+  "term": "site flatness",
+  "aliases": [
+   "SFQR",
+   "site front least-squares range"
+  ],
+  "node": "WAFER",
+  "kind": "other"
+ },
+ {
+  "term": "epitaxial wafer",
+  "aliases": [
+   "epi wafer",
+   "epi layer"
+  ],
+  "node": "WAFER",
+  "kind": "materials"
+ },
+ {
+  "term": "silicon-on-insulator",
+  "aliases": [
+   "SOI",
+   "SOI wafer",
+   "Smart Cut"
+  ],
+  "node": "WAFER",
+  "kind": "materials"
+ },
+ {
+  "term": "buried oxide",
+  "aliases": [
+   "BOX",
+   "BOX layer"
+  ],
+  "node": "WAFER",
+  "kind": "materials"
+ },
+ {
+  "term": "FOUP",
+  "aliases": [
+   "front opening unified pod"
+  ],
+  "node": "WAFER",
+  "kind": "equipment"
+ },
+ {
+  "term": "SEMI standards",
+  "aliases": [
+   "SEMI M1",
+   "SEMI M43"
+  ],
+  "node": "WAFER",
+  "kind": "other"
+ },
+ {
+  "term": "wafer prober",
+  "aliases": [
+   "prober",
+   "wafer probe station"
+  ],
+  "node": "WAFER_SORT",
+  "kind": "test"
+ },
+ {
+  "term": "automatic test equipment",
+  "aliases": [
+   "ATE",
+   "ATE tester"
+  ],
+  "node": "WAFER_SORT",
+  "kind": "test"
+ },
+ {
+  "term": "test head",
+  "aliases": [
+   "tester head"
+  ],
+  "node": "WAFER_SORT",
+  "kind": "test"
+ },
+ {
+  "term": "wafer map",
+  "aliases": [
+   "wafer bin map",
+   "bin map"
+  ],
+  "node": "WAFER_SORT",
+  "kind": "test"
+ },
+ {
+  "term": "probe overdrive",
+  "aliases": [
+   "overdrive"
+  ],
+  "node": "WAFER_SORT",
+  "kind": "test"
+ },
+ {
+  "term": "DRAM die",
+  "aliases": [
+   "DRAM dies",
+   "thinned DRAM die"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "memory"
+ },
+ {
+  "term": "pseudo-channel",
+  "aliases": [
+   "pseudo channel",
+   "pseudo-channels"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "memory"
+ },
+ {
+  "term": "die thinning",
+  "aliases": [
+   "wafer thinning",
+   "backgrinding",
+   "thinned dies"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "fab"
+ },
+ {
+  "term": "PHY",
+  "aliases": [
+   "physical layer",
+   "PHY interface"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "memory"
+ },
+ {
+  "term": "JESD270-4",
+  "aliases": [
+   "JEDEC JESD270-4",
+   "HBM4 standard"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "other"
+ },
+ {
+  "term": "JESD238",
+  "aliases": [
+   "JEDEC JESD238",
+   "HBM3 standard"
+  ],
+  "node": "MEM_HBM_STACK",
+  "kind": "other"
+ },
+ {
+  "term": "depth of focus",
+  "aliases": [
+   "DOF",
+   "focus budget"
+  ],
+  "node": "MEM_LITHO",
+  "kind": "equipment"
+ },
+ {
+  "term": "EUV multilayer mirror",
+  "aliases": [
+   "EUV mirror",
+   "Mo/Si mirror",
+   "multilayer mirror"
+  ],
+  "node": "MEM_LITHO",
+  "kind": "optics"
+ },
+ {
+  "term": "TWINSCAN EXE:5000",
+  "aliases": [
+   "EXE:5000",
+   "High-NA EUV scanner"
+  ],
+  "node": "MEM_LITHO",
+  "kind": "equipment"
+ },
+ {
+  "term": "CXMT",
+  "aliases": [
+   "ChangXin Memory Technologies",
+   "Changxin Memory"
+  ],
+  "node": "MEM_RD_CXMT",
+  "kind": "memory"
+ },
+ {
+  "term": "16 nm process",
+  "aliases": [
+   "16nm",
+   "16 nm node"
+  ],
+  "node": "MEM_RD_CXMT",
+  "kind": "fab"
+ },
+ {
+  "term": "vHBM",
+  "aliases": [
+   "vertical HBM",
+   "vertical high bandwidth memory"
+  ],
+  "node": "MEM_RD_MICRON",
+  "kind": "memory"
+ },
+ {
+  "term": "1-beta DRAM",
+  "aliases": [
+   "1-beta",
+   "1β DRAM",
+   "1b DRAM"
+  ],
+  "node": "MEM_RD_MICRON",
+  "kind": "memory"
+ },
+ {
+  "term": "1-gamma DRAM",
+  "aliases": [
+   "1-gamma",
+   "1γ DRAM",
+   "1g DRAM"
+  ],
+  "node": "MEM_RD_MICRON",
+  "kind": "memory"
+ },
+ {
+  "term": "HBM4E",
+  "aliases": [],
+  "node": "MEM_RD_MICRON",
+  "kind": "memory"
+ },
+ {
+  "term": "custom HBM",
+  "aliases": [
+   "custom base die",
+   "custom HBM base die"
+  ],
+  "node": "MEM_RD_MICRON",
+  "kind": "memory"
+ },
+ {
+  "term": "zHBM",
+  "aliases": [
+   "Z-HBM"
+  ],
+  "node": "MEM_RD_SAMSUNG",
+  "kind": "memory"
+ },
+ {
+  "term": "HBM5",
+  "aliases": [
+   "HBM5 standard"
+  ],
+  "node": "MEM_RD_SAMSUNG",
+  "kind": "memory"
+ },
+ {
+  "term": "wafer-on-wafer bonding",
+  "aliases": [
+   "W2W bonding",
+   "wafer-to-wafer bonding"
+  ],
+  "node": "MEM_RD_SAMSUNG",
+  "kind": "packaging"
+ },
+ {
+  "term": "xPU-HBF",
+  "aliases": [
+   "xPU HBF host interface",
+   "HBF host interface"
+  ],
+  "node": "MEM_RD_SANDISK",
+  "kind": "memory"
+ },
+ {
+  "term": "Open Compute Project",
+  "aliases": [
+   "OCP",
+   "OCP spec"
+  ],
+  "node": "MEM_RD_SANDISK",
+  "kind": "other"
+ },
+ {
+  "term": "2048-bit interface",
+  "aliases": [
+   "2048-bit bus",
+   "2048-bit"
+  ],
+  "node": "MEM_RD_SK_HYNIX",
+  "kind": "memory"
+ },
+ {
+  "term": "Xtacking",
+  "aliases": [
+   "Xtacking 4.0",
+   "Xtacking architecture"
+  ],
+  "node": "MEM_RD_YMTC",
+  "kind": "memory"
+ },
+ {
+  "term": "YMTC",
+  "aliases": [
+   "Yangtze Memory Technologies",
+   "Yangtze Memory"
+  ],
+  "node": "MEM_RD_YMTC",
+  "kind": "memory"
+ },
+ {
+  "term": "three-deck bonding",
+  "aliases": [
+   "triple-deck bonding",
+   "3-deck bonding"
+  ],
+  "node": "MEM_RD_YMTC",
+  "kind": "memory"
+ },
+ {
+  "term": "wire bonding",
+  "aliases": [
+   "wire bond",
+   "wirebond"
+  ],
+  "node": "PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "transfer molding",
+  "aliases": [
+   "epoxy molding compound",
+   "EMC",
+   "molded encapsulation"
+  ],
+  "node": "PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "TC-NCF",
+  "aliases": [
+   "thermocompression non-conductive film",
+   "thermocompression bonding NCF"
+  ],
+  "node": "PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "MR-MUF",
+  "aliases": [
+   "mass reflow molded underfill",
+   "mass reflow MUF"
+  ],
+  "node": "PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "thermal interface material",
+  "aliases": [
+   "TIM",
+   "thermal interface"
+  ],
+  "node": "PACKAGE",
+  "kind": "materials"
+ },
+ {
+  "term": "known-good die",
+  "aliases": [
+   "KGD",
+   "known good die"
+  ],
+  "node": "PACKAGE",
+  "kind": "test"
+ },
+ {
+  "term": "stiffener ring",
+  "aliases": [
+   "package stiffener",
+   "stiffener"
+  ],
+  "node": "PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "redundancy repair",
+  "aliases": [
+   "row repair",
+   "fuse repair",
+   "spare row replacement"
+  ],
+  "node": "PICK",
+  "kind": "test"
+ },
+ {
+  "term": "die attach film",
+  "aliases": [
+   "DAF",
+   "die-attach film"
+  ],
+  "node": "PICK",
+  "kind": "materials"
+ },
+ {
+  "term": "collet",
+  "aliases": [
+   "vacuum collet",
+   "pick-up collet"
+  ],
+  "node": "PICK",
+  "kind": "equipment"
+ },
+ {
+  "term": "ejector needle",
+  "aliases": [
+   "ejector pin",
+   "die ejector"
+  ],
+  "node": "PICK",
+  "kind": "equipment"
+ },
+ {
+  "term": "die bonder",
+  "aliases": [
+   "TC bonder",
+   "thermocompression bonder"
+  ],
+  "node": "PICK",
+  "kind": "equipment"
+ },
+ {
+  "term": "thermocompression bonding",
+  "aliases": [
+   "TCB",
+   "TC bonding"
+  ],
+  "node": "PICK",
+  "kind": "packaging"
+ },
+ {
+  "term": "chip on wafer",
+  "aliases": [
+   "CoW",
+   "chip-on-wafer",
+   "CoW step"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "packaging"
+ },
+ {
+  "term": "on substrate",
+  "aliases": [
+   "oS",
+   "chip-on-substrate",
+   "on-substrate"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "packaging"
+ },
+ {
+  "term": "yield stackup",
+  "aliases": [
+   "cumulative yield",
+   "package yield"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "other"
+ },
+ {
+  "term": "CoWoS capacity",
+  "aliases": [
+   "CoWoS wafers per month",
+   "wafers per month"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "other"
+ },
+ {
+  "term": "underfill",
+  "aliases": [
+   "underfill epoxy",
+   "capillary underfill"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "materials"
+ },
+ {
+  "term": "reflow",
+  "aliases": [
+   "solder reflow",
+   "C4 reflow"
+  ],
+  "node": "PKG_ASSEMBLY",
+  "kind": "packaging"
+ },
+ {
+  "term": "power delivery network",
+  "aliases": [
+   "PDN",
+   "power delivery"
+  ],
+  "node": "PKG_BOARD",
+  "kind": "power"
+ },
+ {
+  "term": "BGA balls",
+  "aliases": [
+   "ball grid array",
+   "BGA"
+  ],
+  "node": "PKG_BOARD",
+  "kind": "packaging"
+ },
+ {
+  "term": "AI rack",
+  "aliases": [
+   "GPU rack",
+   "rack-scale system"
+  ],
+  "node": "PKG_BOARD",
+  "kind": "datacenter"
+ },
+ {
+  "term": "CoWoS-R",
+  "aliases": [
+   "CoWoS R",
+   "RDL interposer"
+  ],
+  "node": "PKG_INTERPOSER",
+  "kind": "packaging"
+ },
+ {
+  "term": "LSI bridge",
+  "aliases": [
+   "local silicon interconnect",
+   "silicon bridge",
+   "LSI"
+  ],
+  "node": "PKG_INTERPOSER",
+  "kind": "packaging"
+ },
+ {
+  "term": "reticle multiple",
+  "aliases": [
+   "reticle size",
+   "x reticle"
+  ],
+  "node": "PKG_INTERPOSER",
+  "kind": "packaging"
+ },
+ {
+  "term": "reticle limit",
+  "aliases": [
+   "maximum reticle size",
+   "reticle field",
+   "26 x 33 mm"
+  ],
+  "node": "PKG_LOGIC_DIE",
+  "kind": "fab"
+ },
+ {
+  "term": "die-to-die",
+  "aliases": [
+   "D2D",
+   "die-to-die interconnect",
+   "die-to-die link"
+  ],
+  "node": "PKG_LOGIC_DIE",
+  "kind": "packaging"
+ },
+ {
+  "term": "HBM shoreline",
+  "aliases": [
+   "die edge",
+   "beachfront"
+  ],
+  "node": "PKG_LOGIC_DIE",
+  "kind": "memory"
+ },
+ {
+  "term": "Blackwell",
+  "aliases": [
+   "B200",
+   "B100",
+   "Blackwell GPU"
+  ],
+  "node": "PKG_LOGIC_DIE",
+  "kind": "compute"
+ },
+ {
+  "term": "copper pillar",
+  "aliases": [
+   "Cu pillar",
+   "CU PILLAR"
+  ],
+  "node": "PKG_MICROBUMP",
+  "kind": "packaging"
+ },
+ {
+  "term": "bump pitch",
+  "aliases": [
+   "bump pitch scaling",
+   "pitch"
+  ],
+  "node": "PKG_MICROBUMP",
+  "kind": "packaging"
+ },
+ {
+  "term": "SoIC",
+  "aliases": [
+   "system on integrated chips",
+   "TSMC SoIC"
+  ],
+  "node": "PKG_MICROBUMP",
+  "kind": "packaging"
+ },
+ {
+  "term": "active optical cable",
+  "aliases": [
+   "AOC",
+   "AOCs",
+   "active optical cables"
+  ],
+  "node": "TRM_ACTIVE_OPTICAL_CABLE",
+  "kind": "optics"
+ },
+ {
+  "term": "ADC",
+  "aliases": [
+   "analog-to-digital converter",
+   "analog-to-digital converters",
+   "data converters",
+   "DAC",
+   "digital-to-analog converter"
+  ],
+  "node": "TRM_ADC",
+  "kind": "analog"
+ },
+ {
+  "term": "agentic AI",
+  "aliases": [
+   "AI agents",
+   "AI agent"
+  ],
+  "node": "TRM_AGENTIC_AI",
+  "kind": "software"
+ },
+ {
+  "term": "backlog",
+  "aliases": [
+   "remaining performance obligations",
+   "RPO",
+   "order backlog"
+  ],
+  "node": "TRM_BACKLOG",
+  "kind": "market"
+ },
+ {
+  "term": "battery energy storage",
+  "aliases": [
+   "battery energy storage system",
+   "BESS",
+   "energy storage systems",
+   "grid-scale storage"
+  ],
+  "node": "TRM_BESS",
+  "kind": "power"
+ },
+ {
+  "term": "capacity market",
+  "aliases": [
+   "capacity auction",
+   "capacity auctions",
+   "capacity payments"
+  ],
+  "node": "TRM_CAPACITY_MARKET",
+  "kind": "power"
+ },
+ {
+  "term": "capital expenditures",
+  "aliases": [
+   "capex",
+   "CapEx",
+   "purchases of property and equipment"
+  ],
+  "node": "TRM_CAPEX",
+  "kind": "market"
+ },
+ {
+  "term": "chiller",
+  "aliases": [
+   "chillers",
+   "chilled water",
+   "chiller plant"
+  ],
+  "node": "TRM_CHILLER",
+  "kind": "datacenter"
+ },
+ {
+  "term": "CHIPS Act",
+  "aliases": [
+   "CHIPS and Science Act",
+   "CHIPS Act funding"
+  ],
+  "node": "TRM_CHIPS_ACT",
+  "kind": "market"
+ },
+ {
+  "term": "coherent optics",
+  "aliases": [
+   "coherent optical",
+   "coherent transceiver",
+   "400ZR",
+   "800ZR",
+   "ZR+",
+   "coherent pluggable"
+  ],
+  "node": "TRM_COHERENT_OPTICS",
+  "kind": "optics"
+ },
+ {
+  "term": "colocation",
+  "aliases": [
+   "colo",
+   "colocation facility",
+   "colocation services",
+   "retail colocation",
+   "wholesale colocation"
+  ],
+  "node": "TRM_COLOCATION",
+  "kind": "datacenter"
+ },
+ {
+  "term": "contract price",
+  "aliases": [
+   "contract prices",
+   "contract pricing",
+   "DRAM contract price",
+   "NAND contract price"
+  ],
+  "node": "TRM_CONTRACT_PRICE",
+  "kind": "memory"
+ },
+ {
+  "term": "data center interconnect",
+  "aliases": [
+   "DCI",
+   "data center interconnects",
+   "datacenter interconnect"
+  ],
+  "node": "TRM_DCI",
+  "kind": "networking"
+ },
+ {
+  "term": "design win",
+  "aliases": [
+   "design wins",
+   "socket win"
+  ],
+  "node": "TRM_DESIGN_WIN",
+  "kind": "market"
+ },
+ {
+  "term": "DPU",
+  "aliases": [
+   "data processing unit",
+   "BlueField",
+   "IPU",
+   "infrastructure processing unit"
+  ],
+  "node": "TRM_DPU",
+  "kind": "compute"
+ },
+ {
+  "term": "erbium-doped fiber amplifier",
+  "aliases": [
+   "EDFA",
+   "optical amplifier",
+   "optical amplifiers",
+   "erbium-doped"
+  ],
+  "node": "TRM_EDFA",
+  "kind": "optics"
+ },
+ {
+  "term": "fabless",
+  "aliases": [
+   "fabless model",
+   "fabless semiconductor",
+   "fabless company"
+  ],
+  "node": "TRM_FABLESS",
+  "kind": "fab"
+ },
+ {
+  "term": "utilization rate",
+  "aliases": [
+   "fab utilization",
+   "capacity utilization",
+   "factory utilization"
+  ],
+  "node": "TRM_FAB_UTILIZATION",
+  "kind": "fab"
+ },
+ {
+  "term": "fine-tuning",
+  "aliases": [
+   "fine tuning",
+   "fine-tune",
+   "fine-tuned"
+  ],
+  "node": "TRM_FINE_TUNING",
+  "kind": "software"
+ },
+ {
+  "term": "fuel cell",
+  "aliases": [
+   "fuel cells",
+   "solid oxide fuel cell",
+   "SOFC"
+  ],
+  "node": "TRM_FUEL_CELL",
+  "kind": "power"
+ },
+ {
+  "term": "gigawatt",
+  "aliases": [
+   "gigawatts",
+   "megawatt",
+   "megawatts"
+  ],
+  "node": "TRM_GIGAWATT",
+  "kind": "power"
+ },
+ {
+  "term": "GPU-as-a-service",
+  "aliases": [
+   "GPUaaS",
+   "GPU cloud",
+   "AI cloud"
+  ],
+  "node": "TRM_GPU_AS_A_SERVICE",
+  "kind": "market"
+ },
+ {
+  "term": "GPU cluster",
+  "aliases": [
+   "GPU clusters",
+   "AI cluster",
+   "compute cluster",
+   "supercluster"
+  ],
+  "node": "TRM_GPU_CLUSTER",
+  "kind": "datacenter"
+ },
+ {
+  "term": "HAMR",
+  "aliases": [
+   "heat-assisted magnetic recording",
+   "heat assisted magnetic recording"
+  ],
+  "node": "TRM_HAMR",
+  "kind": "memory"
+ },
+ {
+  "term": "HDD",
+  "aliases": [
+   "hard disk drive",
+   "hard disk drives",
+   "nearline HDD",
+   "nearline drives"
+  ],
+  "node": "TRM_HDD",
+  "kind": "memory"
+ },
+ {
+  "term": "hot aisle containment",
+  "aliases": [
+   "hot aisle",
+   "cold aisle containment",
+   "aisle containment"
+  ],
+  "node": "TRM_HOT_AISLE",
+  "kind": "datacenter"
+ },
+ {
+  "term": "integrated device manufacturer",
+  "aliases": [
+   "IDM",
+   "IDMs",
+   "integrated device manufacturers"
+  ],
+  "node": "TRM_IDM",
+  "kind": "fab"
+ },
+ {
+  "term": "IGBT",
+  "aliases": [
+   "insulated gate bipolar transistor",
+   "IGBTs"
+  ],
+  "node": "TRM_IGBT",
+  "kind": "analog"
+ },
+ {
+  "term": "Mach-Zehnder modulator",
+  "aliases": [
+   "MZM",
+   "Mach-Zehnder",
+   "Mach-Zehnder interferometer"
+  ],
+  "node": "TRM_MACH_ZEHNDER",
+  "kind": "optics"
+ },
+ {
+  "term": "microcontroller",
+  "aliases": [
+   "microcontrollers",
+   "MCU",
+   "MCUs"
+  ],
+  "node": "TRM_MICROCONTROLLER",
+  "kind": "analog"
+ },
+ {
+  "term": "mixture of experts",
+  "aliases": [
+   "mixture-of-experts",
+   "MoE"
+  ],
+  "node": "TRM_MIXTURE_OF_EXPERTS",
+  "kind": "software"
+ },
+ {
+  "term": "MRDIMM",
+  "aliases": [
+   "multiplexed rank DIMM",
+   "MCR DIMM",
+   "multiplexer combined ranks DIMM"
+  ],
+  "node": "TRM_MRDIMM",
+  "kind": "memory"
+ },
+ {
+  "term": "neocloud",
+  "aliases": [
+   "neoclouds"
+  ],
+  "node": "TRM_NEOCLOUD",
+  "kind": "datacenter"
+ },
+ {
+  "term": "network interface card",
+  "aliases": [
+   "NIC",
+   "NICs",
+   "SuperNIC"
+  ],
+  "node": "TRM_NIC",
+  "kind": "networking"
+ },
+ {
+  "term": "NOR flash",
+  "aliases": [
+   "serial NOR"
+  ],
+  "node": "TRM_NOR_FLASH",
+  "kind": "memory"
+ },
+ {
+  "term": "NPU",
+  "aliases": [
+   "neural processing unit",
+   "neural engine",
+   "AI PC"
+  ],
+  "node": "TRM_NPU",
+  "kind": "compute"
+ },
+ {
+  "term": "OSAT",
+  "aliases": [
+   "outsourced semiconductor assembly and test",
+   "outsourced assembly and test"
+  ],
+  "node": "TRM_OSAT",
+  "kind": "fab"
+ },
+ {
+  "term": "power MOSFET",
+  "aliases": [
+   "power MOSFETs",
+   "MOSFETs",
+   "MOSFET"
+  ],
+  "node": "TRM_POWER_MOSFET",
+  "kind": "analog"
+ },
+ {
+  "term": "power purchase agreement",
+  "aliases": [
+   "PPA",
+   "PPAs",
+   "power purchase agreements"
+  ],
+  "node": "TRM_PPA",
+  "kind": "power"
+ },
+ {
+  "term": "rack density",
+  "aliases": [
+   "power density",
+   "kW per rack",
+   "kilowatts per rack",
+   "high-density racks"
+  ],
+  "node": "TRM_RACK_DENSITY",
+  "kind": "datacenter"
+ },
+ {
+  "term": "RDMA",
+  "aliases": [
+   "remote direct memory access",
+   "RoCE",
+   "RoCEv2",
+   "GPUDirect"
+  ],
+  "node": "TRM_RDMA",
+  "kind": "networking"
+ },
+ {
+  "term": "rear-door heat exchanger",
+  "aliases": [
+   "rear door heat exchanger",
+   "rear-door heat exchangers",
+   "RDHx"
+  ],
+  "node": "TRM_REAR_DOOR_HX",
+  "kind": "datacenter"
+ },
+ {
+  "term": "renewable energy certificate",
+  "aliases": [
+   "renewable energy certificates",
+   "RECs",
+   "renewable energy credits"
+  ],
+  "node": "TRM_REC",
+  "kind": "power"
+ },
+ {
+  "term": "reconfigurable optical add-drop multiplexer",
+  "aliases": [
+   "ROADM",
+   "ROADMs",
+   "wavelength selective switch",
+   "WSS"
+  ],
+  "node": "TRM_ROADM",
+  "kind": "optics"
+ },
+ {
+  "term": "ROCm",
+  "aliases": [],
+  "node": "TRM_ROCM",
+  "kind": "software"
+ },
+ {
+  "term": "scale-up",
+  "aliases": [
+   "scale up network",
+   "scale-up networking",
+   "scale-up domain"
+  ],
+  "node": "TRM_SCALE_UP",
+  "kind": "networking"
+ },
+ {
+  "term": "useful life of servers",
+  "aliases": [
+   "depreciation of servers",
+   "server depreciation",
+   "useful lives of servers"
+  ],
+  "node": "TRM_SERVER_USEFUL_LIFE",
+  "kind": "market"
+ },
+ {
+  "term": "SmartNIC",
+  "aliases": [
+   "SmartNICs",
+   "smart NIC"
+  ],
+  "node": "TRM_SMARTNIC",
+  "kind": "compute"
+ },
+ {
+  "term": "SOCAMM",
+  "aliases": [
+   "SOCAMM2",
+   "small outline compression attached memory module"
+  ],
+  "node": "TRM_SOCAMM",
+  "kind": "memory"
+ },
+ {
+  "term": "solar",
+  "aliases": [
+   "solar power",
+   "photovoltaic",
+   "utility-scale solar"
+  ],
+  "node": "TRM_SOLAR",
+  "kind": "power"
+ },
+ {
+  "term": "spine-leaf",
+  "aliases": [
+   "leaf-spine",
+   "spine and leaf",
+   "Clos network"
+  ],
+  "node": "TRM_SPINE_LEAF",
+  "kind": "networking"
+ },
+ {
+  "term": "SRAM",
+  "aliases": [
+   "static random access memory",
+   "static RAM",
+   "on-chip SRAM"
+  ],
+  "node": "TRM_SRAM",
+  "kind": "memory"
+ },
+ {
+  "term": "storage controller",
+  "aliases": [
+   "SSD controller",
+   "flash controller",
+   "NAND controller"
+  ],
+  "node": "TRM_STORAGE_CONTROLLER",
+  "kind": "memory"
+ },
+ {
+  "term": "systolic array",
+  "aliases": [
+   "systolic arrays",
+   "matrix multiply unit",
+   "MXU"
+  ],
+  "node": "TRM_SYSTOLIC_ARRAY",
+  "kind": "compute"
+ },
+ {
+  "term": "take-or-pay",
+  "aliases": [
+   "take or pay",
+   "supply agreement",
+   "long-term supply agreement",
+   "prepayment"
+  ],
+  "node": "TRM_TAKE_OR_PAY",
+  "kind": "market"
+ },
+ {
+  "term": "tape-out",
+  "aliases": [
+   "tapeout",
+   "taped out",
+   "tape out"
+  ],
+  "node": "TRM_TAPE_OUT",
+  "kind": "fab"
+ },
+ {
+  "term": "tariffs",
+  "aliases": [
+   "tariff",
+   "Section 232",
+   "Section 301",
+   "reciprocal tariffs"
+  ],
+  "node": "TRM_TARIFFS",
+  "kind": "market"
+ },
+ {
+  "term": "thin-film lithium niobate",
+  "aliases": [
+   "TFLN",
+   "lithium niobate",
+   "LiNbO3"
+  ],
+  "node": "TRM_THIN_FILM_LITHIUM_NIOBATE",
+  "kind": "optics"
+ },
+ {
+  "term": "timing device",
+  "aliases": [
+   "clock generator",
+   "clock buffer",
+   "oscillators",
+   "oscillator",
+   "jitter attenuator",
+   "timing devices",
+   "timing chip",
+   "timing solutions"
+  ],
+  "node": "TRM_TIMING",
+  "kind": "analog"
+ },
+ {
+  "term": "tokens",
+  "aliases": [
+   "tokens per second"
+  ],
+  "node": "TRM_TOKENS",
+  "kind": "software"
+ },
+ {
+  "term": "Ultra Ethernet",
+  "aliases": [
+   "Ultra Ethernet Consortium",
+   "UEC"
+  ],
+  "node": "TRM_ULTRA_ETHERNET",
+  "kind": "networking"
+ },
+ {
+  "term": "uranium enrichment",
+  "aliases": [
+   "enriched uranium",
+   "HALEU",
+   "low-enriched uranium"
+  ],
+  "node": "TRM_URANIUM_ENRICH",
+  "kind": "power"
+ },
+ {
+  "term": "wavelength division multiplexing",
+  "aliases": [
+   "WDM",
+   "DWDM",
+   "CWDM",
+   "dense wavelength division multiplexing",
+   "coarse wavelength division multiplexing"
+  ],
+  "node": "TRM_WDM",
+  "kind": "optics"
+ },
+ {
+  "term": "wafer yield",
+  "aliases": [
+   "die yield",
+   "manufacturing yield",
+   "defect density"
+  ],
+  "node": "TRM_YIELD",
+  "kind": "fab"
+ },
+ {
+  "term": "5G",
+  "aliases": [
+   "5G NR",
+   "5G standalone"
+  ],
+  "node": "TRM_5G",
+  "kind": "telecom"
+ },
+ {
+  "term": "ADAS",
+  "aliases": [
+   "advanced driver assistance systems",
+   "advanced driver-assistance systems"
+  ],
+  "node": "TRM_ADAS",
+  "kind": "automotive"
+ },
+ {
+  "term": "automated optical inspection",
+  "aliases": [
+   "AOI",
+   "optical inspection machine"
+  ],
+  "node": "TRM_AOI",
+  "kind": "test"
+ },
+ {
+  "term": "at-the-market offering",
+  "aliases": [
+   "ATM",
+   "ATM program",
+   "at-the-market",
+   "equity distribution agreement"
+  ],
+  "node": "TRM_ATM_OFFERING",
+  "kind": "finance"
+ },
+ {
+  "term": "baseband",
+  "aliases": [
+   "baseband processor",
+   "baseband modem"
+  ],
+  "node": "TRM_BASEBAND",
+  "kind": "telecom"
+ },
+ {
+  "term": "beamforming",
+  "aliases": [
+   "beamforming antenna",
+   "beam steering"
+  ],
+  "node": "TRM_BEAMFORMING",
+  "kind": "telecom"
+ },
+ {
+  "term": "bill of materials",
+  "aliases": [
+   "BOM",
+   "BOMs",
+   "bill-of-materials"
+  ],
+  "node": "TRM_BILL_OF_MATERIALS",
+  "kind": "market"
+ },
+ {
+  "term": "bitcoin halving",
+  "aliases": [
+   "block reward halving",
+   "halvening"
+  ],
+  "node": "TRM_BITCOIN_HALVING",
+  "kind": "mining"
+ },
+ {
+  "term": "bitcoin mining",
+  "aliases": [
+   "BTC mining",
+   "proof of work mining"
+  ],
+  "node": "TRM_BITCOIN_MINING",
+  "kind": "mining"
+ },
+ {
+  "term": "book-to-bill",
+  "aliases": [
+   "book-to-bill ratio",
+   "book to bill"
+  ],
+  "node": "TRM_BOOK_TO_BILL",
+  "kind": "finance"
+ },
+ {
+  "term": "building management system",
+  "aliases": [
+   "BMS",
+   "building automation system"
+  ],
+  "node": "TRM_BUILDING_MANAGEMENT_SYSTEM",
+  "kind": "industrial"
+ },
+ {
+  "term": "busway",
+  "aliases": [
+   "bus duct",
+   "busbar trunking"
+  ],
+  "node": "TRM_BUSWAY",
+  "kind": "industrial"
+ },
+ {
+  "term": "CMMC",
+  "aliases": [
+   "Cybersecurity Maturity Model Certification",
+   "CMMC 2.0"
+  ],
+  "node": "TRM_CMMC",
+  "kind": "regulation"
+ },
+ {
+  "term": "CMOS image sensor",
+  "aliases": [
+   "CIS",
+   "image sensor"
+  ],
+  "node": "TRM_CMOS_IMAGE_SENSOR",
+  "kind": "sensor"
+ },
+ {
+  "term": "confidential computing",
+  "aliases": [
+   "confidential VM",
+   "confidential AI",
+   "TDX",
+   "SEV-SNP"
+  ],
+  "node": "TRM_CONFIDENTIAL_COMPUTING",
+  "kind": "security"
+ },
+ {
+  "term": "convertible notes",
+  "aliases": [
+   "convertible senior notes",
+   "convertible debt",
+   "convertible note"
+  ],
+  "node": "TRM_CONVERTIBLE_NOTES",
+  "kind": "finance"
+ },
+ {
+  "term": "cooling tower",
+  "aliases": [
+   "cooling towers",
+   "evaporative cooler"
+  ],
+  "node": "TRM_COOLING_TOWER",
+  "kind": "industrial"
+ },
+ {
+  "term": "copper clad laminate",
+  "aliases": [
+   "CCL",
+   "copper-clad laminate"
+  ],
+  "node": "TRM_COPPER_CLAD_LAMINATE",
+  "kind": "materials"
+ },
+ {
+  "term": "CRAH",
+  "aliases": [
+   "computer room air handler",
+   "CRAH unit"
+  ],
+  "node": "TRM_CRAH",
+  "kind": "industrial"
+ },
+ {
+  "term": "CSRD",
+  "aliases": [
+   "Corporate Sustainability Reporting Directive",
+   "ESRS"
+  ],
+  "node": "TRM_CSRD",
+  "kind": "regulation"
+ },
+ {
+  "term": "curtailment",
+  "aliases": [
+   "power curtailment",
+   "load curtailment"
+  ],
+  "node": "TRM_CURTAILMENT",
+  "kind": "mining"
+ },
+ {
+  "term": "customer concentration",
+  "aliases": [
+   "customers accounting for",
+   "major customer",
+   "customer concentration risk"
+  ],
+  "node": "TRM_CUSTOMER_CONCENTRATION",
+  "kind": "finance"
+ },
+ {
+  "term": "days inventory outstanding",
+  "aliases": [
+   "days of inventory",
+   "inventory days",
+   "DIO"
+  ],
+  "node": "TRM_DAYS_OF_INVENTORY",
+  "kind": "finance"
+ },
+ {
+  "term": "demand response",
+  "aliases": [
+   "demand response program",
+   "DR program"
+  ],
+  "node": "TRM_DEMAND_RESPONSE",
+  "kind": "mining"
+ },
+ {
+  "term": "DOCSIS",
+  "aliases": [
+   "cable modem",
+   "Data Over Cable Service Interface Specification"
+  ],
+  "node": "TRM_DOCSIS",
+  "kind": "telecom"
+ },
+ {
+  "term": "DORA",
+  "aliases": [
+   "Digital Operational Resilience Act",
+   "Regulation (EU) 2022/2554"
+  ],
+  "node": "TRM_DORA",
+  "kind": "regulation"
+ },
+ {
+  "term": "edge AI",
+  "aliases": [
+   "on-device AI",
+   "edge inference"
+  ],
+  "node": "TRM_EDGE_AI",
+  "kind": "compute"
+ },
+ {
+  "term": "EMS",
+  "aliases": [
+   "electronics manufacturing services",
+   "electronics manufacturing service",
+   "contract electronics manufacturing"
+  ],
+  "node": "TRM_EMS",
+  "kind": "market"
+ },
+ {
+  "term": "energized capacity",
+  "aliases": [
+   "energized MW",
+   "energized power"
+  ],
+  "node": "TRM_ENERGIZED_CAPACITY",
+  "kind": "mining"
+ },
+ {
+  "term": "EPC contractor",
+  "aliases": [
+   "engineering, procurement and construction",
+   "EPC firm"
+  ],
+  "node": "TRM_EPC_CONTRACTOR",
+  "kind": "industrial"
+ },
+ {
+  "term": "EU AI Act",
+  "aliases": [
+   "AI Act",
+   "Regulation (EU) 2024/1689"
+  ],
+  "node": "TRM_EU_AI_ACT",
+  "kind": "regulation"
+ },
+ {
+  "term": "fan-out wafer-level packaging",
+  "aliases": [
+   "fan-out WLP",
+   "FOWLP",
+   "fan-out packaging",
+   "InFO"
+  ],
+  "node": "TRM_FAN_OUT_WLP",
+  "kind": "packaging"
+ },
+ {
+  "term": "FERC",
+  "aliases": [
+   "Federal Energy Regulatory Commission",
+   "FERC large load"
+  ],
+  "node": "TRM_FERC",
+  "kind": "regulation"
+ },
+ {
+  "term": "fire suppression",
+  "aliases": [
+   "clean agent suppression",
+   "gaseous fire suppression",
+   "fire suppression system"
+  ],
+  "node": "TRM_FIRE_SUPPRESSION",
+  "kind": "industrial"
+ },
+ {
+  "term": "Foveros",
+  "aliases": [
+   "Foveros Direct",
+   "Intel Foveros",
+   "3D Foveros"
+  ],
+  "node": "TRM_FOVEROS",
+  "kind": "packaging"
+ },
+ {
+  "term": "free cash flow",
+  "aliases": [
+   "FCF",
+   "free cash flow margin"
+  ],
+  "node": "TRM_FREE_CASH_FLOW",
+  "kind": "finance"
+ },
+ {
+  "term": "fiber to the home",
+  "aliases": [
+   "FTTH",
+   "FTTP",
+   "PON",
+   "passive optical network"
+  ],
+  "node": "TRM_FTTH",
+  "kind": "telecom"
+ },
+ {
+  "term": "gallium",
+  "aliases": [
+   "gallium arsenide",
+   "GaAs"
+  ],
+  "node": "TRM_GALLIUM",
+  "kind": "materials"
+ },
+ {
+  "term": "glass fiber cloth",
+  "aliases": [
+   "glass cloth",
+   "T-glass",
+   "low-Dk glass"
+  ],
+  "node": "TRM_GLASS_FIBER_CLOTH",
+  "kind": "materials"
+ },
+ {
+  "term": "gross margin",
+  "aliases": [
+   "gross profit margin",
+   "gross margin percentage"
+  ],
+  "node": "TRM_GROSS_MARGIN",
+  "kind": "finance"
+ },
+ {
+  "term": "hardware root of trust",
+  "aliases": [
+   "root of trust",
+   "RoT",
+   "TPM",
+   "secure element"
+  ],
+  "node": "TRM_HARDWARE_ROOT_OF_TRUST",
+  "kind": "security"
+ },
+ {
+  "term": "hashrate",
+  "aliases": [
+   "hash rate",
+   "EH/s"
+  ],
+  "node": "TRM_HASHRATE",
+  "kind": "mining"
+ },
+ {
+  "term": "helium",
+  "aliases": [
+   "helium supply",
+   "liquid helium"
+  ],
+  "node": "TRM_HELIUM",
+  "kind": "materials"
+ },
+ {
+  "term": "hosting agreement",
+  "aliases": [
+   "hosting agreements",
+   "hosting contract"
+  ],
+  "node": "TRM_HOSTING_AGREEMENT",
+  "kind": "mining"
+ },
+ {
+  "term": "HPC colocation lease",
+  "aliases": [
+   "colocation lease",
+   "HPC lease"
+  ],
+  "node": "TRM_HPC_COLOCATION_LEASE",
+  "kind": "mining"
+ },
+ {
+  "term": "humanoid robot",
+  "aliases": [
+   "humanoid robots",
+   "humanoid"
+  ],
+  "node": "TRM_HUMANOID_ROBOT",
+  "kind": "robotics"
+ },
+ {
+  "term": "HVAC",
+  "aliases": [
+   "heating, ventilation and air conditioning",
+   "HVAC system"
+  ],
+  "node": "TRM_HVAC",
+  "kind": "industrial"
+ },
+ {
+  "term": "IEEPA",
+  "aliases": [
+   "International Emergency Economic Powers Act",
+   "emergency tariffs"
+  ],
+  "node": "TRM_IEEPA",
+  "kind": "regulation"
+ },
+ {
+  "term": "inventory write-down",
+  "aliases": [
+   "inventory writedown",
+   "excess and obsolete inventory",
+   "inventory reserve"
+  ],
+  "node": "TRM_INVENTORY_WRITE_DOWN",
+  "kind": "finance"
+ },
+ {
+  "term": "low earth orbit",
+  "aliases": [
+   "LEO",
+   "LEO satellite",
+   "LEO constellation"
+  ],
+  "node": "TRM_LEO",
+  "kind": "telecom"
+ },
+ {
+  "term": "lidar",
+  "aliases": [
+   "LiDAR",
+   "light detection and ranging"
+  ],
+  "node": "TRM_LIDAR",
+  "kind": "sensor"
+ },
+ {
+  "term": "LNG",
+  "aliases": [
+   "liquefied natural gas"
+  ],
+  "node": "TRM_LNG",
+  "kind": "materials"
+ },
+ {
+  "term": "massive MIMO",
+  "aliases": [
+   "Massive MIMO",
+   "multi-user MIMO"
+  ],
+  "node": "TRM_MASSIVE_MIMO",
+  "kind": "telecom"
+ },
+ {
+  "term": "MEMS",
+  "aliases": [
+   "micro-electromechanical systems",
+   "MEMS mirror",
+   "MEMS sensor"
+  ],
+  "node": "TRM_MEMS",
+  "kind": "sensor"
+ },
+ {
+  "term": "millimeter wave",
+  "aliases": [
+   "mmWave",
+   "mmWave spectrum"
+  ],
+  "node": "TRM_MMWAVE",
+  "kind": "telecom"
+ },
+ {
+  "term": "modular data center",
+  "aliases": [
+   "prefabricated data center",
+   "prefab data center",
+   "modular data centre"
+  ],
+  "node": "TRM_MODULAR_DATA_CENTER",
+  "kind": "industrial"
+ },
+ {
+  "term": "neon",
+  "aliases": [
+   "neon gas",
+   "neon supply"
+  ],
+  "node": "TRM_NEON",
+  "kind": "materials"
+ },
+ {
+  "term": "NERC",
+  "aliases": [
+   "North American Electric Reliability Corporation",
+   "NERC CIP"
+  ],
+  "node": "TRM_NERC",
+  "kind": "regulation"
+ },
+ {
+  "term": "neuromorphic computing",
+  "aliases": [
+   "neuromorphic chip",
+   "spiking neural network",
+   "SNN",
+   "Loihi",
+   "Akida"
+  ],
+  "node": "TRM_NEUROMORPHIC_COMPUTING",
+  "kind": "neuromorphic"
+ },
+ {
+  "term": "NIS2",
+  "aliases": [
+   "NIS 2",
+   "NIS2 Directive"
+  ],
+  "node": "TRM_NIS2",
+  "kind": "regulation"
+ },
+ {
+  "term": "non-GAAP",
+  "aliases": [
+   "non-GAAP operating income",
+   "non-GAAP net income",
+   "non-GAAP EPS",
+   "adjusted EBITDA"
+  ],
+  "node": "TRM_NON_GAAP",
+  "kind": "finance"
+ },
+ {
+  "term": "NRC",
+  "aliases": [
+   "Nuclear Regulatory Commission",
+   "NRC license"
+  ],
+  "node": "TRM_NRC",
+  "kind": "regulation"
+ },
+ {
+  "term": "Open RAN",
+  "aliases": [
+   "O-RAN",
+   "open radio access network"
+  ],
+  "node": "TRM_OPEN_RAN",
+  "kind": "telecom"
+ },
+ {
+  "term": "operational technology",
+  "aliases": [
+   "OT systems",
+   "industrial control systems"
+  ],
+  "node": "TRM_OPERATIONAL_TECHNOLOGY",
+  "kind": "industrial"
+ },
+ {
+  "term": "panel-level packaging",
+  "aliases": [
+   "PLP",
+   "panel-level fan-out",
+   "fan-out panel-level packaging"
+  ],
+  "node": "TRM_PANEL_LEVEL_PACKAGING",
+  "kind": "packaging"
+ },
+ {
+  "term": "Pillar Two",
+  "aliases": [
+   "Pillar 2",
+   "GloBE",
+   "global minimum tax",
+   "BEPS 2.0"
+  ],
+  "node": "TRM_PILLAR_TWO",
+  "kind": "regulation"
+ },
+ {
+  "term": "post-quantum cryptography",
+  "aliases": [
+   "PQC",
+   "ML-KEM",
+   "ML-DSA",
+   "Kyber",
+   "Dilithium"
+  ],
+  "node": "TRM_POST_QUANTUM_CRYPTOGRAPHY",
+  "kind": "security"
+ },
+ {
+  "term": "powered land",
+  "aliases": [
+   "powered sites",
+   "powered shell"
+  ],
+  "node": "TRM_POWERED_LAND",
+  "kind": "mining"
+ },
+ {
+  "term": "power cost per kWh",
+  "aliases": [
+   "$/kWh",
+   "cents per kWh"
+  ],
+  "node": "TRM_POWER_COST_PER_KWH",
+  "kind": "mining"
+ },
+ {
+  "term": "quantum error correction",
+  "aliases": [
+   "QEC",
+   "logical qubits",
+   "surface code"
+  ],
+  "node": "TRM_QUANTUM_ERROR_CORRECTION",
+  "kind": "quantum"
+ },
+ {
+  "term": "qubit",
+  "aliases": [
+   "qubits",
+   "logical qubit",
+   "physical qubit",
+   "superconducting qubit"
+  ],
+  "node": "TRM_QUBIT",
+  "kind": "quantum"
+ },
+ {
+  "term": "rack integration",
+  "aliases": [
+   "rack-scale integration",
+   "rack-level integration",
+   "rack integration services"
+  ],
+  "node": "TRM_RACK_INTEGRATION",
+  "kind": "datacenter"
+ },
+ {
+  "term": "radar",
+  "aliases": [
+   "millimeter-wave radar",
+   "4D imaging radar"
+  ],
+  "node": "TRM_RADAR",
+  "kind": "sensor"
+ },
+ {
+  "term": "ransomware",
+  "aliases": [
+   "ransomware attack",
+   "double extortion",
+   "ransom demand"
+  ],
+  "node": "TRM_RANSOMWARE",
+  "kind": "security"
+ },
+ {
+  "term": "rare earth",
+  "aliases": [
+   "rare earth elements",
+   "REE",
+   "rare earth magnets"
+  ],
+  "node": "TRM_RARE_EARTHS",
+  "kind": "materials"
+ },
+ {
+  "term": "RF front end",
+  "aliases": [
+   "RF front-end module",
+   "FEM"
+  ],
+  "node": "TRM_RF_FRONT_END",
+  "kind": "telecom"
+ },
+ {
+  "term": "robotaxi",
+  "aliases": [
+   "robotaxis",
+   "driverless taxi",
+   "autonomous ride-hailing"
+  ],
+  "node": "TRM_ROBOTAXI",
+  "kind": "automotive"
+ },
+ {
+  "term": "SASE",
+  "aliases": [
+   "secure access service edge",
+   "Secure Access Service Edge",
+   "SSE"
+  ],
+  "node": "TRM_SASE",
+  "kind": "security"
+ },
+ {
+  "term": "small cell",
+  "aliases": [
+   "small cells",
+   "small cell site"
+  ],
+  "node": "TRM_SMALL_CELL",
+  "kind": "telecom"
+ },
+ {
+  "term": "specialty gases",
+  "aliases": [
+   "electronic specialty gases",
+   "fab gases"
+  ],
+  "node": "TRM_SPECIALTY_GASES",
+  "kind": "materials"
+ },
+ {
+  "term": "sputtering target",
+  "aliases": [
+   "sputter target",
+   "PVD target"
+  ],
+  "node": "TRM_SPUTTERING_TARGET",
+  "kind": "materials"
+ },
+ {
+  "term": "surface mount technology",
+  "aliases": [
+   "SMT",
+   "surface-mount technology",
+   "surface mount"
+  ],
+  "node": "TRM_SURFACE_MOUNT",
+  "kind": "packaging"
+ },
+ {
+  "term": "system in package",
+  "aliases": [
+   "system-in-package",
+   "system in a package"
+  ],
+  "node": "TRM_SYSTEM_IN_PACKAGE",
+  "kind": "packaging"
+ },
+ {
+  "term": "total addressable market",
+  "aliases": [
+   "TAM",
+   "addressable market",
+   "serviceable addressable market"
+  ],
+  "node": "TRM_TAM",
+  "kind": "finance"
+ },
+ {
+  "term": "trusted execution environment",
+  "aliases": [
+   "TEE",
+   "TEEs",
+   "TrustZone",
+   "secure enclave"
+  ],
+  "node": "TRM_TEE",
+  "kind": "security"
+ },
+ {
+  "term": "test socket",
+  "aliases": [
+   "test sockets",
+   "device socket",
+   "socket contactor"
+  ],
+  "node": "TRM_TEST_SOCKET",
+  "kind": "test"
+ },
+ {
+  "term": "time-of-flight",
+  "aliases": [
+   "ToF",
+   "time of flight"
+  ],
+  "node": "TRM_TIME_OF_FLIGHT",
+  "kind": "sensor"
+ },
+ {
+  "term": "vendor financing",
+  "aliases": [
+   "vendor financing arrangement",
+   "supplier financing",
+   "vendor-financed"
+  ],
+  "node": "TRM_VENDOR_FINANCING",
+  "kind": "finance"
+ },
+ {
+  "term": "wet chemicals",
+  "aliases": [
+   "electronic chemicals",
+   "ultra-high purity chemicals"
+  ],
+  "node": "TRM_WET_CHEMICALS",
+  "kind": "materials"
+ },
+ {
+  "term": "Wi-Fi 7",
+  "aliases": [
+   "802.11be",
+   "Wi-Fi 7 access point"
+  ],
+  "node": "TRM_WIFI_7",
+  "kind": "telecom"
+ },
+ {
+  "term": "wireless spectrum",
+  "aliases": [
+   "spectrum licenses",
+   "spectrum auction"
+  ],
+  "node": "TRM_WIRELESS_SPECTRUM",
+  "kind": "telecom"
+ },
+ {
+  "term": "zero trust",
+  "aliases": [
+   "zero trust architecture",
+   "ZTA",
+   "zero-trust network access",
+   "ZTNA"
+  ],
+  "node": "TRM_ZERO_TRUST",
+  "kind": "security"
+ },
+ {
+  "term": "zonal architecture",
+  "aliases": [
+   "zonal E/E architecture",
+   "zonal electrical architecture"
+  ],
+  "node": "TRM_ZONAL_ARCHITECTURE",
+  "kind": "automotive"
+ },
+ {
+  "term": "AI copilot",
+  "aliases": [
+   "copilot",
+   "copilots"
+  ],
+  "node": "TRM_AI_COPILOT",
+  "kind": "software"
+ },
+ {
+  "term": "ARR",
+  "aliases": [
+   "annual recurring revenue",
+   "annualized recurring revenue"
+  ],
+  "node": "TRM_ARR",
+  "kind": "software"
+ },
+ {
+  "term": "consumption pricing",
+  "aliases": [
+   "usage-based pricing",
+   "consumption-based pricing"
+  ],
+  "node": "TRM_CONSUMPTION_PRICING",
+  "kind": "software"
+ },
+ {
+  "term": "foundation model",
+  "aliases": [
+   "base model",
+   "frontier model"
+  ],
+  "node": "TRM_FOUNDATION_MODEL",
+  "kind": "software"
+ },
+ {
+  "term": "MCP",
+  "aliases": [
+   "Model Context Protocol"
+  ],
+  "node": "TRM_MCP",
+  "kind": "software"
+ },
+ {
+  "term": "net revenue retention",
+  "aliases": [
+   "NRR",
+   "dollar-based net retention"
+  ],
+  "node": "TRM_NET_REVENUE_RETENTION",
+  "kind": "software"
+ },
+ {
+  "term": "open-weight model",
+  "aliases": [
+   "open-weights model",
+   "open weights"
+  ],
+  "node": "TRM_OPEN_WEIGHT_MODEL",
+  "kind": "software"
+ },
+ {
+  "term": "RAG",
+  "aliases": [
+   "retrieval-augmented generation",
+   "retrieval augmented generation"
+  ],
+  "node": "TRM_RAG",
+  "kind": "software"
+ },
+ {
+  "term": "SaaS",
+  "aliases": [
+   "software-as-a-service",
+   "software as a service"
+  ],
+  "node": "TRM_SAAS",
+  "kind": "software"
+ },
+ {
+  "term": "vector database",
+  "aliases": [
+   "vector store",
+   "vector search"
+  ],
+  "node": "TRM_VECTOR_DATABASE",
+  "kind": "software"
+ },
+ {
+  "term": "activate command",
+  "aliases": [
+   "ACT command",
+   "row activate"
+  ],
+  "node": "TRM_ACTIVATE_COMMAND",
+  "kind": "memory"
+ },
+ {
+  "term": "burst length",
+  "aliases": [
+   "BL8",
+   "BL16"
+  ],
+  "node": "TRM_BURST_LENGTH",
+  "kind": "memory"
+ },
+ {
+  "term": "CAS latency",
+  "aliases": [
+   "tCL",
+   "CL"
+  ],
+  "node": "TRM_CAS_LATENCY",
+  "kind": "memory"
+ },
+ {
+  "term": "charge trap",
+  "aliases": [
+   "charge trap flash",
+   "CTF",
+   "charge-trap"
+  ],
+  "node": "TRM_CHARGE_TRAP",
+  "kind": "memory"
+ },
+ {
+  "term": "control gate",
+  "aliases": [
+   "control gate electrode"
+  ],
+  "node": "TRM_CONTROL_GATE",
+  "kind": "memory"
+ },
+ {
+  "term": "DDR SDRAM",
+  "aliases": [
+   "double data rate"
+  ],
+  "node": "TRM_DDR_SDRAM",
+  "kind": "memory"
+ },
+ {
+  "term": "ECC memory",
+  "aliases": [
+   "ECC DRAM",
+   "ECC RAM",
+   "error-correcting code memory"
+  ],
+  "node": "TRM_ECC_MEMORY",
+  "kind": "memory"
+ },
+ {
+  "term": "EEPROM",
+  "aliases": [
+   "electrically erasable programmable read-only memory"
+  ],
+  "node": "TRM_EEPROM",
+  "kind": "memory"
+ },
+ {
+  "term": "floating gate",
+  "aliases": [
+   "floating-gate transistor",
+   "floating gate transistor"
+  ],
+  "node": "TRM_FLOATING_GATE",
+  "kind": "memory"
+ },
+ {
+  "term": "GDDR",
+  "aliases": [
+   "GDDR6X"
+  ],
+  "node": "TRM_GDDR",
+  "kind": "memory"
+ },
+ {
+  "term": "memory latency",
+  "aliases": [
+   "DRAM latency",
+   "memory access latency"
+  ],
+  "node": "TRM_MEMORY_LATENCY",
+  "kind": "memory"
+ },
+ {
+  "term": "memory mat",
+  "aliases": [
+   "DRAM mat",
+   "mats"
+  ],
+  "node": "TRM_MEMORY_MAT",
+  "kind": "memory"
+ },
+ {
+  "term": "precharge command",
+  "aliases": [
+   "PRE command",
+   "bank precharge"
+  ],
+  "node": "TRM_PRECHARGE_COMMAND",
+  "kind": "memory"
+ },
+ {
+  "term": "RAS to CAS delay",
+  "aliases": [
+   "tRCD"
+  ],
+  "node": "TRM_RAS_TO_CAS_DELAY",
+  "kind": "memory"
+ },
+ {
+  "term": "retention time",
+  "aliases": [
+   "data retention",
+   "64 ms refresh window"
+  ],
+  "node": "TRM_RETENTION_TIME",
+  "kind": "memory"
+ },
+ {
+  "term": "ROM",
+  "aliases": [
+   "read-only memory",
+   "mask ROM"
+  ],
+  "node": "TRM_ROM",
+  "kind": "memory"
+ },
+ {
+  "term": "row cycle time",
+  "aliases": [
+   "tRC"
+  ],
+  "node": "TRM_ROW_CYCLE_TIME",
+  "kind": "memory"
+ },
+ {
+  "term": "row hammer",
+  "aliases": [
+   "RowHammer",
+   "rowhammer"
+  ],
+  "node": "TRM_ROW_HAMMER",
+  "kind": "memory"
+ },
+ {
+  "term": "row precharge time",
+  "aliases": [
+   "tRP"
+  ],
+  "node": "TRM_ROW_PRECHARGE_TIME",
+  "kind": "memory"
+ },
+ {
+  "term": "self-refresh",
+  "aliases": [
+   "self refresh",
+   "SREF"
+  ],
+  "node": "TRM_SELF_REFRESH",
+  "kind": "memory"
+ },
+ {
+  "term": "subarray",
+  "aliases": [
+   "sub-array",
+   "subarrays"
+  ],
+  "node": "TRM_SUBARRAY",
+  "kind": "memory"
+ },
+ {
+  "term": "target row refresh",
+  "aliases": [
+   "TRR",
+   "targeted row refresh"
+  ],
+  "node": "TRM_TARGET_ROW_REFRESH",
+  "kind": "memory"
+ },
+ {
+  "term": "tunnel oxide",
+  "aliases": [
+   "tunnel oxide layer",
+   "tunneling oxide"
+  ],
+  "node": "TRM_TUNNEL_OXIDE",
+  "kind": "memory"
+ }
+]

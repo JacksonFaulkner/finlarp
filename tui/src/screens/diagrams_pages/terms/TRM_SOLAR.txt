@@ -1,0 +1,12 @@
+# 1. What it is: sunlight to AC power
+
+   ┌───────────┐   ┌──────────┐   ┌─────────┐
+   │ PV PANELS │──▶│ INVERTER │──▶│ GRID    │
+   │ DC power  │   │ DC to AC │   │ daytime │
+   └───────────┘   └──────────┘   └─────────┘
+
+  (capacity factor ~20-30%, so 1 GW of solar averages 200-300 MW)
+
+# 2. Why AI cares
+
+Solar is quick to build and cheap per MWh, but AI loads run 24x7, so it usually needs storage or other firm power alongside.

@@ -1,0 +1,192 @@
+{
+ "slug": "TRM_BASEBAND",
+ "beats": [
+  {
+   "caption": "RF front end passes samples to the baseband",
+   "boxes": [
+    {
+     "name": "rf",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -240,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "bb",
+     "lo": [
+      -100,
+      -70,
+      -40
+     ],
+     "hi": [
+      120,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "net",
+     "lo": [
+      220,
+      -50,
+      -40
+     ],
+     "hi": [
+      380,
+      50,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "rfs",
+     "from": [
+      -230,
+      0,
+      -20
+     ],
+     "to": [
+      -110,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "RF front end",
+     "at": [
+      -310,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "baseband modem DSP",
+     "at": [
+      10,
+      100,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "rf",
+    "bb",
+    "rfs"
+   ]
+  },
+  {
+   "caption": "Baseband turns samples into packets for the network",
+   "boxes": [
+    {
+     "name": "rf",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -240,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "bb",
+     "lo": [
+      -100,
+      -70,
+      -40
+     ],
+     "hi": [
+      120,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "net",
+     "lo": [
+      220,
+      -50,
+      -40
+     ],
+     "hi": [
+      380,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "pk",
+     "lo": [
+      140,
+      -6,
+      -20
+     ],
+     "hi": [
+      200,
+      6,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "rfs",
+     "from": [
+      -230,
+      0,
+      -20
+     ],
+     "to": [
+      -110,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "pkt",
+     "from": [
+      130,
+      0,
+      -20
+     ],
+     "to": [
+      210,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "IP packets out",
+     "at": [
+      260,
+      90,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

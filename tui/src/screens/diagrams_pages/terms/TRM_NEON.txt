@@ -1,0 +1,18 @@
+# 1. What it is: a laser buffer gas from air separation
+
+   ┌──────────────────┐
+   │ air separation   │  neon is about 18 ppm of air
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ semiconductor    │  high-purity neon in cylinders
+   │ neon             │
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ excimer laser    │  feeds DUV lithography exposure
+   └──────────────────┘
+
+# 2. Why AI cares
+
+Advanced logic and memory wafers are patterned with DUV lasers that use neon. A neon shortage can slow the lithography tools behind GPU and HBM output.

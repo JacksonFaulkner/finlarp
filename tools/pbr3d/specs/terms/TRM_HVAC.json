@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HVAC",
+ "script": "terms/trm_hvac.py",
+ "beats": [
+  {
+   "caption": "HVAC is the building's whole climate system",
+   "text": "Heating, ventilation and air conditioning covers every machine that sets a building's temperature, humidity and fresh air: rooftop air handlers, ducts, chillers, pumps, cooling towers and their controls. In a data center it is the room- and building-level layer; chip-level liquid loops plug into it rather than replace it."
+  },
+  {
+   "caption": "Air side: handlers mix, filter, cool and push the air",
+   "text": "An air handler draws return air and some outdoor air through dampers, filters it, passes it over a chilled-water coil and fans it through ducts to the hall. On cool days it can use outside air directly (economiser mode) and skip mechanical cooling. Offices and support rooms get their own smaller units."
+  },
+  {
+   "caption": "Water side: chillers make the cold, towers throw it away",
+   "text": "Chillers in the plant room cool a water loop that pumps feed to every coil in the building. The heat they pull out goes into a second, condenser-water loop that runs up to cooling towers on the roof, where evaporation dumps it to the sky. Air-cooled sites swap the towers for dry coolers and use no water."
+  },
+  {
+   "caption": "Cooling is the biggest power draw after the servers",
+   "text": "Power usage effectiveness (PUE) is total site power over IT power. A modern hall runs about 1.2 to 1.4, older ones 1.6 or more, and most of that overhead is HVAC: compressors, fans and pumps. Every 0.1 of PUE on a 100 MW campus is 10 MW that could have run GPUs."
+  },
+  {
+   "caption": "Cooling capacity often sets a site's megawatts",
+   "text": "Each MW of IT becomes a MW of heat, so a site can only host as much compute as its plant can reject, on the hottest day, with a unit spare. Denser AI racks push more of the load onto liquid, but the building loop still carries it out. Suppliers: Trane Technologies (TT), Carrier (CARR), Johnson Controls (JCI), Lennox (LII)."
+  }
+ ]
+}

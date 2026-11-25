@@ -1,0 +1,14 @@
+# 1. What it is: the command that opens a row
+
+   controller                 bank
+   ┌──────────┐  ACT row 42  ┌──────────────────┐
+   │ sends    │─────────────▶│ row 42 copied to │
+   │ ACT      │              │ sense amps       │
+   └──────────┘              │ (row buffer)     │
+                             └──────────────────┘
+
+  (a row must be open before READ or WRITE can touch its columns)
+
+# 2. Why AI cares
+
+Every access that misses the open row pays for an ACT. Access patterns that jump between rows cost more time than streaming reads.

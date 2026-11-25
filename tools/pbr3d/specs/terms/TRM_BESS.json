@@ -1,0 +1,192 @@
+{
+ "slug": "TRM_BESS",
+ "beats": [
+  {
+   "caption": "Cheap power is stored in a battery",
+   "boxes": [
+    {
+     "name": "grid",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "batt",
+     "lo": [
+      -100,
+      -70,
+      -40
+     ],
+     "hi": [
+      100,
+      70,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "load",
+     "lo": [
+      220,
+      -50,
+      -40
+     ],
+     "hi": [
+      360,
+      50,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "in",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -110,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "grid / solar",
+     "at": [
+      -320,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "battery, MWh stored",
+     "at": [
+      -10,
+      100,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "grid",
+    "batt",
+    "in"
+   ]
+  },
+  {
+   "caption": "Stored energy feeds the load at peak hours",
+   "boxes": [
+    {
+     "name": "grid",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "batt",
+     "lo": [
+      -100,
+      -70,
+      -40
+     ],
+     "hi": [
+      100,
+      70,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "load",
+     "lo": [
+      220,
+      -50,
+      -40
+     ],
+     "hi": [
+      360,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "out",
+     "lo": [
+      120,
+      -6,
+      -20
+     ],
+     "hi": [
+      200,
+      6,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "in",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -110,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "out",
+     "from": [
+      110,
+      0,
+      -20
+     ],
+     "to": [
+      210,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "peak hours",
+     "at": [
+      290,
+      90,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+# 1. What it is: running a trained model
+
+   ┌──────────────┐   ┌───────────────┐   ┌────────────┐
+   │ REQUEST      │──▶│ TRAINED MODEL │──▶│ ANSWER     │
+   │ prompt/image │   │ fixed weights │   │ tokens out │
+   └──────────────┘   │ on GPU/ASIC   │   └────────────┘
+                      └───────────────┘                 
+
+  (cost scales with every user query, every day)
+
+# 2. Why it matters
+
+Inference is the recurring cost of serving AI to users. Its share of data center AI compute is rising as deployed models reach more users.
+
+# 3. Hardware
+
+Inference favors memory bandwidth, low latency and cost per token, which opens room for custom ASICs beside GPUs.

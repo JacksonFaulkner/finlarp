@@ -1,0 +1,9 @@
+{
+ "label": "CUDA",
+ "term": "CUDA",
+ "aliases": [
+  "CUDA-X",
+  "CUDA platform"
+ ],
+ "kind": "compute"
+}

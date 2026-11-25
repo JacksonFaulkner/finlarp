@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ROW_PRECHARGE_TIME",
+ "script": "terms/trm_row_precharge_time.py",
+ "beats": [
+  {
+   "caption": "HBM stacks next to the GPU: one open row per bank",
+   "text": "Each bank of an HBM die can hold only one row open in its row buffer. To reach data in a different row, the bank must first close the current one."
+  },
+  {
+   "caption": "Row 3 is open and serving reads",
+   "text": "Reads to row 3 come straight out of the row buffer. A request now arrives for row 6, which is a row conflict: row 3 has to be put away first."
+  },
+  {
+   "caption": "PRECHARGE closes the row: the tRP bar fills",
+   "text": "PRECHARGE writes the buffer's values back into the row 3 cells, drops the wordline, and pulls every bitline back to half voltage so the next row's tiny charge can be sensed. Those cycles are tRP."
+  },
+  {
+   "caption": "After tRP, ACTIVATE can open row 6",
+   "text": "Only when the bitlines are equalized may the controller issue ACTIVATE for row 6. Starting early would leave old voltage on the bitlines and the sense amps would misread the new row."
+  },
+  {
+   "caption": "A row conflict costs tRP + tRCD + CL",
+   "text": "tRP is typically 13 to 16 ns. A conflict pays tRP, then tRCD, then CL, around 40 ns before data, versus about 14 ns for an open-row hit. Controllers choose open- or closed-page policies to balance this. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS), Rambus (RMBS)."
+  }
+ ]
+}

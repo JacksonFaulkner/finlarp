@@ -1,0 +1,10 @@
+{
+  "label": "TAPE-OUT",
+  "term": "tape-out",
+  "aliases": [
+    "tapeout",
+    "taped out",
+    "tape out"
+  ],
+  "kind": "fab"
+}

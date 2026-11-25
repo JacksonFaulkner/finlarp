@@ -1,0 +1,17 @@
+# 1. What it is: a chip built for one job
+
+   ┌──────────────┐   ┌─────────────────┐   ┌───────────┐
+   │ HYPERSCALER  │   │ DESIGN PARTNER  │   │ FOUNDRY   │
+   │ model + spec │──▶│ IP, SerDes,     │──▶│ wafers +  │
+   └──────────────┘   │ physical design │   │ packaging │
+                      └─────────────────┘   └───────────┘
+
+  (design cycle ~18-24 months; payback needs large volume)
+
+# 2. Why AI cares
+
+A chip tuned to one company's workloads can beat a GPU on cost per token. Google TPU, AWS Trainium and Meta MTIA are examples.
+
+# 3. Business angle
+
+Custom silicon revenue goes to design-service firms like Broadcom and Marvell and to the foundry, not to GPU vendors.

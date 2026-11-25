@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NVLINK",
+ "script": "terms/trm_nvlink.py",
+ "beats": [
+  {
+   "caption": "NVLink wires GPUs straight to each other, not through PCIe",
+   "text": "Inside an 8-GPU server the GPUs sit on one baseboard with two NVSwitch chips between them. Every GPU has a bundle of NVLink lanes running to each switch, separate from the PCIe lanes that go to the CPU and network cards. NVLink is Nvidia's own link, built only for moving data between accelerators."
+  },
+  {
+   "caption": "GPU to GPU goes through the NVSwitch in one hop",
+   "text": "When one GPU reads another's memory, the data crosses the baseboard into an NVSwitch and straight out to the other GPU. Over PCIe the same transfer would drop to the host board, through a PCIe switch, often across both CPUs and back. Fewer hops and wider links mean lower latency and far more bandwidth."
+  },
+  {
+   "caption": "About 14x the bandwidth of a PCIe slot",
+   "text": "A Blackwell GPU has 18 NVLink 5 links, 1.8 TB/s in total. A PCIe Gen5 x16 slot moves about 128 GB/s. That gap is why large models split across GPUs (tensor and expert parallelism) run inside the NVLink domain, where GPUs swap activations every layer."
+  },
+  {
+   "caption": "NVL72: 72 GPUs in one rack act as one big accelerator",
+   "text": "In a GB200 NVL72 rack, 18 compute trays (4 GPUs each) connect to 9 NVSwitch trays through a spine of about 5,000 copper cables at the back of the rack. Every GPU reaches every other GPU at full NVLink speed, so 72 GPUs share one memory domain. Copper works because the runs are under a couple of metres."
+  },
+  {
+   "caption": "NVLink Fusion opens the fabric; UALink is the open rival",
+   "text": "NVLink Fusion licenses NVLink chiplets so other companies' CPUs and custom accelerators can join an Nvidia rack. UALink is an open standard from AMD and others for the same scale-up job. Retimers, cables and switch silicon for these links are a growing market. Related: Nvidia (NVDA), Astera Labs (ALAB), Marvell (MRVL), AMD (AMD)."
+  }
+ ]
+}

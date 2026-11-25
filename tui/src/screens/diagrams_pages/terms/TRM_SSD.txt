@@ -1,0 +1,17 @@
+# 1. What it is: flash chips plus a controller in one drive
+
+   ┌───────────┐   ┌───────────────┐   ┌─────────────┐
+   │ HOST      │──▶│ CONTROLLER    │──▶│ NAND CHIPS  │
+   │ CPU / GPU │   │ FTL, ECC      │   │ many dies   │
+   │ server    │   │ wear leveling │   │ in parallel │
+   └───────────┘   └───────────────┘   └─────────────┘
+
+  (host link: NVMe over PCIe Gen5, ~14 GB/s per drive; DRAM cache optional)
+
+# 2. Why AI cares
+
+GPUs stall if data cannot be read fast enough; NVMe SSDs feed datasets and hold checkpoints and KV cache spill.
+
+# 3. Enterprise vs client
+
+Enterprise SSDs add power-loss protection, higher endurance and capacities up to 60-120+ TB.

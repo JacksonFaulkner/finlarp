@@ -1,0 +1,13 @@
+# 1. What it is: the unit of AI capacity
+
+   ┌──────────────┐   ┌──────────┐   ┌─────────────────┐
+   │ 1 MW         │──▶│ 100 MW   │──▶│ 1 GW            │
+   │ ~1,000 homes │   │ large DC │   │ AI campus       │
+   │ ~10 racks    │   └──────────┘   │ ~1 nuclear unit │
+   └──────────────┘                  └─────────────────┘
+
+  (capacity = MW; energy over time = MWh; a GB200 NVL72 rack draws ~120-130 kW)
+
+# 2. Why AI cares
+
+Companies now report contracted and planned capacity in MW or GW, so the number tracks AI build-out directly.

@@ -1,0 +1,17 @@
+# 1. What it is: adapting a trained model
+
+   ┌────────────┐   ┌───────────────┐   ┌───────────────┐
+   │ BASE MODEL │──▶│ FINE-TUNE     │──▶│ CUSTOM MODEL  │
+   │ pretrained │   │ own data      │   │ task-specific │
+   └────────────┘   │ small compute │   └───────────────┘
+                    └───────────────┘                    
+
+  (far cheaper than training from scratch)
+
+# 2. Why it matters
+
+Fine-tuning lets businesses adapt a general model to their own data or tasks without a full training run. It is a common enterprise path to AI products.
+
+# 3. Methods
+
+Techniques include supervised fine-tuning, reinforcement learning from feedback, and low-rank adapters (LoRA).

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SERVER_USEFUL_LIFE",
+ "script": "terms/trm_server_useful_life.py",
+ "beats": [
+  {
+   "caption": "Server cost is spread over its useful life",
+   "text": "A company does not expense a $3 million GPU rack in the year it buys it. It picks an estimated useful life and books an equal slice of the cost as depreciation each year until the asset is written down."
+  },
+  {
+   "caption": "Hyperscalers stretched lives from 3 to 6 years",
+   "text": "Between 2020 and 2023 Microsoft, Alphabet, Meta and Amazon raised server lives from about 3-4 years to 5-6 years. The same rack now costs one sixth of its price a year instead of one third."
+  },
+  {
+   "caption": "A longer life lifts reported earnings",
+   "text": "Smaller yearly depreciation means higher operating income, with no change in cash spent. Each extension added billions of dollars a year to big tech profits."
+  },
+  {
+   "caption": "AI GPUs may age faster than the books say",
+   "text": "NVIDIA ships a faster GPU generation roughly every year, so older chips rent for less and less. Critics argue the real economic life of an AI GPU may be 3-4 years; Amazon cut some server lives back to 5 years in 2025."
+  },
+  {
+   "caption": "Changes are disclosed with the dollar effect",
+   "text": "A change in useful life is an accounting estimate change, applied going forward, and the 10-K or 10-Q states its effect on operating income. Watch it at MSFT, GOOGL, AMZN, META and GPU clouds like CRWV."
+  }
+ ]
+}

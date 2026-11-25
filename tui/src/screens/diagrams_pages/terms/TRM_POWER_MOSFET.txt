@@ -1,0 +1,17 @@
+# 1. What it is: a fast electronic power switch
+
+   ┌─────────────┐    ┌──────────────┐    ┌──────────┐    ┌───────────────┐
+   │ gate driver │    │ POWER MOSFET │    │ inductor │    │ low-volt load │
+   └─────────────┘───▶│ on / off     │───▶└──────────┘───▶└───────────────┘
+                      │ ~100s kHz    │                                     
+                      └──────────────┘                                     
+
+  (silicon MOSFETs dominate below ~200V; SiC and GaN take higher voltage or speed)
+
+# 2. Why AI cares
+
+Each GPU needs many power phases, each with its own MOSFETs, so content per server rises with GPU power.
+
+# 3. Package
+
+Smart power stages combine MOSFETs and driver in one package.

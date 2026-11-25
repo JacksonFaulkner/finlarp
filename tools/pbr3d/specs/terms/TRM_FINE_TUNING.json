@@ -1,0 +1,7 @@
+{"slug":"TRM_FINE_TUNING","beats":[
+{"boxes":[{"name":"base","lo":[-360,-50,-40],"hi":[-160,50,0],"mat":"steel"},{"name":"tune","lo":[-90,-50,-40],"hi":[90,50,0],"mat":"accent"},{"name":"custom","lo":[160,-50,-40],"hi":[360,50,0],"mat":"glow"}],
+"arrows":[{"name":"t1","from":[-160,0,-20],"to":[-90,0,-20],"mat":"accent"},{"name":"t2","from":[90,0,-20],"to":[160,0,-20],"mat":"accent"}],
+"tags":[{"text":"BASE MODEL: pretrained","at":[-260,80,0]},{"text":"FINE-TUNE: own data","at":[0,80,0]},{"text":"CUSTOM MODEL: task-specific","at":[260,80,0]}]},
+{"boxes":[{"name":"sft","lo":[-300,-140,-40],"hi":[-60,-100,0],"mat":"dim"},{"name":"rl","lo":[-30,-140,-40],"hi":[210,-100,0],"mat":"dim"},{"name":"lora","lo":[240,-140,-40],"hi":[360,-100,0],"mat":"accent"}],
+"tags":[{"text":"Supervised fine-tuning","at":[-180,-170,0]},{"text":"LoRA adapters: small, cheap","at":[300,-180,0]}]}
+]}

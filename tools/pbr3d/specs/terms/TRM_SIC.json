@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SIC",
+ "script": "terms/trm_sic.py",
+ "beats": [
+  {
+   "caption": "SiC switches the high-voltage side: 800 V racks, UPS, EVs",
+   "text": "Silicon carbide (SiC) power chips sit where voltages are high: in the 800 V DC power shelves coming to AI racks, in UPS and solar inverters, and above all in EV traction inverters. The GPU board's own 12 V to 0.8 V stage stays silicon (and increasingly GaN)."
+  },
+  {
+   "caption": "It starts as a hard, slow-growing crystal",
+   "text": "SiC crystals grow by sublimation at over 2,000 C, millimetres a day, far slower than silicon. Boules are short and wafers small (150 mm moving to 200 mm) and full of defects to control, which is why SiC wafers cost many times silicon ones and why Wolfspeed, Coherent and onsemi fight over substrate supply."
+  },
+  {
+   "caption": "Same voltage, a tenth of the drift: why SiC wins",
+   "text": "SiC's wide bandgap gives about ten times silicon's breakdown field. A SiC MOSFET can block 1,200 V with a drift region roughly a tenth as thick as a silicon device's, and that thin drift has far lower resistance."
+  },
+  {
+   "caption": "On: less resistance, less heat, at higher temperature",
+   "text": "Electrons cross the thin SiC drift with little loss while the thick silicon one heats up. SiC also switches fast with no hole tail and survives hotter junctions, so inverters shrink and EV range rises a few percent."
+  },
+  {
+   "caption": "A dozen SiC dies in a module drive an EV motor or an 800 V shelf",
+   "text": "Modules gang SiC dies into the six switches of a three-phase inverter. Growth tracks EV builds, plus solar, storage and data-center 800 V DC. Players: Wolfspeed (WOLF), onsemi (ON), STMicro (STM), Infineon (IFNNY), Coherent (COHR)."
+  }
+ ]
+}

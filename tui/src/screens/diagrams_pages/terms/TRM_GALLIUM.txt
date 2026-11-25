@@ -1,0 +1,23 @@
+# 1. What it is: a byproduct metal that becomes chip compounds
+
+   ┌──────────────────┐
+   │ alumina refining │  gallium comes out as a byproduct
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ crude gallium    │  refined to 99.999%+ purity
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ GaAs / GaN wafers│  RF amplifiers, power switches, LEDs
+   └──────────────────┘
+
+  (ore is bauxite; gallium is not mined on its own in most places)
+
+# 2. Why AI cares
+
+AI servers need power-conversion and high-frequency parts made from GaN and GaAs. A supply cut or license delay for refined gallium can slow those parts and the power stages that feed accelerators.
+
+# 3. Who controls it
+
+Most refined gallium comes from China, so export rules there matter more than where the ore is found.

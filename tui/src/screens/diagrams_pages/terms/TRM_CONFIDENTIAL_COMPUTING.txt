@@ -1,0 +1,15 @@
+# 1. What it is: data stays encrypted while it runs
+
+   ┌──────────────────────────────────────┐
+   │ host OS / hypervisor   (untrusted)   │
+   │  ┌────────────────────────────────┐  │
+   │  │ enclave: code + data in RAM    │  │
+   │  │ memory encrypted by CPU keys   │  │
+   │  └────────────────────────────────┘  │
+   └──────────────────────────────────────┘
+
+(the host can schedule the VM but reads only ciphertext)
+
+# 2. Why AI cares
+
+Model weights and customer prompts are among the most valuable data in an AI stack. Confidential computing lets a cloud run them on shared hardware while the provider cannot read them.

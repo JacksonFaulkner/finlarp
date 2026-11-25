@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ATM_OFFERING",
+ "script": "terms/trm_atm_offering.py",
+ "beats": [
+  {
+   "caption": "An ATM program lets a company sell new shares bit by bit into the market",
+   "text": "Instead of one big marketed deal, the company files a shelf registration with the SEC and signs a sales agreement with one or more brokers. The board sets a dollar cap, say $1-2 billion, and nothing has to be sold on any given day."
+  },
+  {
+   "caption": "The broker drips shares into normal trading at the market price",
+   "text": "On days the company chooses, the broker sells newly issued shares into ordinary trading, often a small slice of daily volume so the price is not knocked down. There is no roadshow and no fixed discount; the broker takes a commission of around 1-3%."
+  },
+  {
+   "caption": "Cash comes back over weeks or months until the cap is used",
+   "text": "Proceeds land in the company's account as trades settle. The company reports how much it sold, and at what average price, in its quarterly filings or a prospectus supplement. It can pause when the stock is weak and sell faster when it is strong."
+  },
+  {
+   "caption": "Every share sold grows the share count and dilutes existing holders",
+   "text": "New shares are new claims on the same business. If a company with 500 million shares sells 25 million, each old holder owns about 5% less of it. The trade is worth it only if the cash earns more than the ownership given up."
+  },
+  {
+   "caption": "Cash-hungry growth companies lean on it; traders watch it as steady supply",
+   "text": "AI infrastructure builders that need capital fast use ATMs alongside debt. A large open program is a steady seller in the market, which can cap rallies, so traders watch filings for new or upsized ATMs. Related: CoreWeave (CRWV), Nebius (NBIS), Super Micro Computer (SMCI), Applied Digital (APLD)."
+  }
+ ]
+}

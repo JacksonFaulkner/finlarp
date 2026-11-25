@@ -1,0 +1,12 @@
+# 1. What it is: block subsidy cut in half
+
+   ┌────────┐      ┌────────┐      ┌─────────┐
+   │ 6.25   │─────▶│ 3.125  │─────▶│ 1.5625  │
+   │ BTC    │ 2024 │ BTC    │ 2028 │ BTC     │
+   └────────┘      └────────┘      └─────────┘
+
+  (each halving: roughly every 210,000 blocks, about 4 years)
+
+# 2. Why it matters
+
+Revenue per block falls by half at each halving, so miners need cheaper power or higher hashrate to keep margins. Fees and the BTC price offset some of the drop.

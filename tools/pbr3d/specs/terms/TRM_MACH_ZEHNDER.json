@@ -1,0 +1,22 @@
+{
+ "slug": "TRM_MACH_ZEHNDER",
+ "script": "terms/trm_mach_zehnder.py",
+ "beats": [
+  {
+   "caption": "A coherent module turns electrical data into light",
+   "text": "Inside an 800G or 1.6T optical module, a DSP chip prepares the bits and a Mach-Zehnder modulator (MZM) writes them onto a laser beam. The light then leaves through fibre. MZMs are the standard modulator in coherent optics and in many of these transceivers."
+  },
+  {
+   "caption": "The chip splits the light into two arms",
+   "text": "The MZM is a small chip with a waveguide that splits the laser light into two paths, each a channel only a few microns wide. The two arms are the same length, so the light in them starts in step."
+  },
+  {
+   "caption": "Voltage on each arm shifts its phase",
+   "text": "The data signal drives gold electrodes that run along the arms. Voltage changes the refractive index in an arm, so the light there is delayed by a fraction of a wavelength. The drive needs more power than a micro-ring modulator, but the device holds its performance better across temperature."
+  },
+  {
+   "caption": "The arms recombine: in phase reads as a 1, out of phase as a 0",
+   "text": "When the two beams meet again they add or cancel, so the output swings between bright and dark. Silicon photonics, indium phosphide and lithium niobate chips all use this layout. Coherent (COHR), Lumentum (LITE), Marvell (MRVL) and Broadcom (AVGO) are the names to watch."
+  }
+ ]
+}

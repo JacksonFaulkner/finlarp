@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SPUTTERING_TARGET",
+ "script": "terms/trm_sputtering_target.py",
+ "beats": [
+  {
+   "caption": "A sputtering target is a slab of ultra-pure metal facing the wafer",
+   "text": "The target is a disc or plate of copper, tantalum, titanium, aluminum or tungsten, often 99.999% pure or better, bonded to a copper backing plate that carries away heat. It is clamped in the lid of a vacuum chamber, face down, with the wafer below it."
+  },
+  {
+   "caption": "Argon plasma ions slam into the target and knock atoms loose",
+   "text": "Argon gas is let in and a high voltage turns it into a glowing plasma. Positive argon ions accelerate into the negatively biased target and chip off metal atoms one by one. Magnets behind the target trap electrons in a ring near its face, which makes the plasma denser and the process faster."
+  },
+  {
+   "caption": "The freed atoms land on the wafer as a thin, even metal film",
+   "text": "The knocked-off atoms fly across the chamber and stick to the wafer, building a film a few nanometers to a micron thick. This is physical vapor deposition (PVD). Chips use it for barrier and seed layers, contacts and the wiring that joins transistors and memory cells."
+  },
+  {
+   "caption": "The target wears a groove and must meet tight purity and grain specs",
+   "text": "Under the magnet ring the target erodes fastest, cutting a racetrack groove, and it is swapped out before the groove breaks through. Impurities or uneven grain size make the film uneven or add defects, so targets are refined, forged and rolled to strict specs. That makes them a steady consumable tied to wafer starts."
+  },
+  {
+   "caption": "Every metal layer in a fab runs through PVD chambers using targets",
+   "text": "A cluster tool holds several PVD chambers round a robot, and a modern chip passes through them for many layers. More wafers, more metal layers and more advanced packaging all burn more targets. Related: Materion (MTRN), Entegris (ENTG), Applied Materials (AMAT)."
+  }
+ ]
+}

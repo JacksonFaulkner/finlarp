@@ -1,0 +1,13 @@
+# 1. What it is: assistant inside a product, user approves
+
+┌──────────────────────┐           ┌────────────────────────┐           ┌────────────────────┐
+│ USER                 │           │ AI COPILOT             │           │ APP DATA           │
+│ working in an app    │─context──▶│ drafts, suggests,      │─approve──▶│ docs, code, CRM    │
+└──────────────────────┘           │ asks before acting     │           └────────────────────┘
+                                   └────────────────────────┘
+
+(usually a per-seat add-on or bundled into a higher tier; each request carries inference cost)
+
+# 2. Why AI cares
+
+An AI copilot is an assistant embedded in an existing product, such as a code editor, office suite, or CRM, that drafts output and waits for the user to accept it. Vendors usually charge per seat or bundle it into a higher tier, so revenue depends on how many users adopt it. Each request carries inference cost, so margins depend on model routing and usage caps.

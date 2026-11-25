@@ -1,0 +1,12 @@
+# 1. What it is: megawatts that are live on the grid
+
+   ┌────────────┐     ┌────────────┐     ┌────────────┐
+   │ permitted  │────▶│ contracted │────▶│ energized  │
+   │ MW         │     │ MW         │     │ MW         │
+   └────────────┘     └────────────┘     └────────────┘
+
+  (revenue starts only at the energized stage)
+
+# 2. Why it matters
+
+Each stage moves a site closer to revenue. The gap between contracted and energized MW shows how much construction and grid work is still outstanding.

@@ -1,0 +1,23 @@
+# 1. What it is: the building climate system
+
+  ┌──────────────────────┐
+  │ CHILLER              │
+  │ makes chilled water  │
+  └──────────────────────┘
+              │
+              ▼ chilled water
+  ┌──────────────────────┐
+  │ AIR HANDLER          │
+  │ fans, coils, filters │
+  └──────────────────────┘
+              │
+              ▼ cool supply air
+  ┌──────────────────────┐
+  │ ROOM                 │
+  │ servers reject heat  │
+  └──────────────────────┘
+
+(in a data hall, HVAC is the room layer; liquid loops handle the chip)
+
+# 2. Why AI cares
+Cooling and fans are a large part of the power a data center draws beyond the IT load. Higher rack density pushes more heat into the same room, so HVAC capacity can limit how much compute a building can hold.

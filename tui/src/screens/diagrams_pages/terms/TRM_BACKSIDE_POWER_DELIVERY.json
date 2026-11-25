@@ -1,0 +1,11 @@
+{
+  "label": "BACKSIDE POWER",
+  "term": "backside power delivery",
+  "aliases": [
+    "backside power",
+    "PowerVia",
+    "BSPDN",
+    "super power rail"
+  ],
+  "kind": "fab"
+}

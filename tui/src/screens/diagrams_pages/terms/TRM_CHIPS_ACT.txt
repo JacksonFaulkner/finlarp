@@ -1,0 +1,13 @@
+# 1. What it is: US money for building fabs here
+
+   ┌────────────────┐    ┌───────────────┐    ┌─────────────────┐
+   │ CHIPS ACT      │───▶│ COMMERCE DEPT │───▶│ US FAB          │
+   │ grants ~$39B   │    │ award terms,  │    │ Arizona, Ohio,  │
+   │ 25% tax credit │    │ milestones    │    │ New York, Texas │
+   └────────────────┘    └───────────────┘    └─────────────────┘
+
+  (grants offset capex; credits reduce cash taxes)
+
+# 2. In filings
+
+Companies book grants as a reduction of property and equipment cost or as other income. Watch for clawback and guardrail language.

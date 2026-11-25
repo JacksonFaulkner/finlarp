@@ -1,0 +1,111 @@
+{
+ "slug": "TRM_SAAS",
+ "beats": [
+  {
+   "boxes": [
+    {
+     "name": "cust",
+     "lo": [
+      -300,
+      -60,
+      -40
+     ],
+     "hi": [
+      -100,
+      60,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "vend",
+     "lo": [
+      100,
+      -60,
+      -40
+     ],
+     "hi": [
+      300,
+      60,
+      0
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "fee",
+     "from": [
+      -100,
+      0,
+      -20
+     ],
+     "to": [
+      100,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "customer",
+     "at": [
+      -200,
+      130,
+      20
+     ]
+    },
+    {
+     "text": "vendor hosts app",
+     "at": [
+      200,
+      130,
+      20
+     ]
+    },
+    {
+     "text": "subscription fee",
+     "at": [
+      0,
+      -60,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "sub",
+     "lo": [
+      -120,
+      -200,
+      -40
+     ],
+     "hi": [
+      120,
+      -130,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "recurring revenue",
+     "at": [
+      0,
+      -240,
+      20
+     ]
+    }
+   ],
+   "show": [
+    "sub"
+   ]
+  }
+ ]
+}

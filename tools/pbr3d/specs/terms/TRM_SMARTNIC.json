@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SMARTNIC",
+ "script": "terms/trm_smartnic.py",
+ "beats": [
+  {
+   "caption": "A NIC connects the server to the network; a SmartNIC thinks too",
+   "text": "Every server talks to the network through a network interface card: a chip, a cage for the optical cable, and a PCIe link to the host. A basic NIC just turns bits on the wire into packets in memory. A SmartNIC adds its own processing (a custom ASIC, an FPGA or small cores) to do packet work itself."
+  },
+  {
+   "caption": "Inside: a line of hardware stages",
+   "text": "Follow a packet across the die. SerDes recover bits from the 112-224 Gb/s lanes, the MAC frames them, a parser reads the headers, a match-action pipeline looks them up in tables and decides what to do, and the RDMA engine and PCIe block move the payload into memory. Each stage is fixed logic, so it keeps up at line rate."
+  },
+  {
+   "caption": "Packets march through the pipeline, one stage per clock",
+   "text": "Many packets are in flight at once, each in a different stage, like an assembly line. Virtual switching, encryption, tunnel encapsulation and load balancing all happen here, instead of on host CPU cores that would need dozens of cores to keep up with 400 Gb/s."
+  },
+  {
+   "caption": "RDMA: GPU memory to the wire, no CPU copies",
+   "text": "For AI training the key job is RDMA: the NIC reads data straight out of one GPU's memory and writes it into a GPU in another server, with no CPU and no extra copies. That is how gradients move between thousands of GPUs. Back-end AI networks use about one 400-800G NIC per GPU, so NIC count grows with accelerator count."
+  },
+  {
+   "caption": "Congestion control keeps thousands of GPUs from jamming",
+   "text": "When many GPUs send to one at the same time, switch buffers fill and packets would drop. The NIC watches for congestion marks and delay and paces its sending rate in hardware within microseconds. Better congestion control means GPUs wait less. Makers: NVIDIA ConnectX (NVDA), Broadcom Thor (AVGO), AMD Pollara (AMD), Intel (INTC), Marvell (MRVL)."
+  }
+ ]
+}

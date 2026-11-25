@@ -1,0 +1,12 @@
+# 1. What it is: cellular radio plus a cloud core
+
+   ┌──────────┐   radio   ┌──────────────┐   fiber   ┌──────────────┐
+   │ PHONE    │──────────▶│ 5G RADIO     │──────────▶│ 5G CORE      │
+   │ UE       │◀──────────│ gNodeB       │◀──────────│ cloud network│
+   └──────────┘           └──────────────┘           └──────────────┘
+
+  (NR radio: sub-6 GHz for coverage, mmWave for capacity)
+
+# 2. Why it matters
+
+5G is the air interface that connects phones and devices to the network. Its capex sits in radios, backhaul and core software, and the edge sites it creates are a possible home for inference.

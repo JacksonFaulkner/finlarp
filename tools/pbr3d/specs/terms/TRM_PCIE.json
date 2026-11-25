@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_PCIE",
+ "script": "terms/trm_pcie.py",
+ "beats": [
+  {
+   "caption": "PCIe is the bus that wires a server's CPU to its GPUs, NICs and SSDs",
+   "text": "PCI Express is a point-to-point serial link, not a shared bus. Every GPU, network card and SSD in an AI server hangs off the host through a PCIe link, usually sixteen lanes wide (x16). On this board the GPU's links run out to a PCIe switch and on to two x16 slots."
+  },
+  {
+   "caption": "One lane is two differential pairs: one to send, one to receive",
+   "text": "Each lane has its own transmit pair and receive pair, so both directions run at full speed at the same time. A link bundles 1, 4, 8 or 16 lanes, and bandwidth scales with the count. The gold fingers on a card edge are just those pairs plus power and ground."
+  },
+  {
+   "caption": "Data moves as small packets, both ways at once",
+   "text": "The protocol wraps reads, writes and completions into transaction-layer packets (TLPs) with a header, payload and CRC. A bad packet is simply resent by the link layer. A GPU pulling weights from host memory and a NIC pushing data into GPU memory both look like streams of these packets."
+  },
+  {
+   "caption": "Each generation doubles the lane rate: 32, 64, 128 GT/s",
+   "text": "Gen5 runs 32 GT/s per lane, about 64 GB/s each way on x16. Gen6 doubles that to 64 GT/s using PAM4 signalling and FLIT framing, and Gen7 targets 128 GT/s. Faster lanes reach a shorter distance over board copper, which is why each step adds retimers."
+  },
+  {
+   "caption": "Switches fan the host's lanes out to many devices",
+   "text": "A CPU has a limited number of lanes, so AI servers use PCIe switches to fan them out to eight GPUs, their NICs and NVMe drives, and to let GPUs and NICs talk directly. Speed upgrades drive sales of switches and retimers. Related: Astera Labs (ALAB), Broadcom (AVGO), Marvell (MRVL), Intel (INTC), AMD (AMD)."
+  }
+ ]
+}

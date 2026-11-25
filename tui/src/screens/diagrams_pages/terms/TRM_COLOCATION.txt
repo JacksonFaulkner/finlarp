@@ -1,0 +1,17 @@
+# 1. What it is: rent the building, bring your servers
+
+   ┌───────────────────┐     ┌─────────────┐
+   │ COLO OPERATOR     │     │ TENANT      │
+   │ building, power,  │ ──▶ │ own servers │
+   │ cooling, security │     │ and network │
+   └───────────────────┘     └─────────────┘
+
+  (priced per kW per month; wholesale = whole halls, retail = cabinets + cross-connects)
+
+# 2. Why AI cares
+
+Hyperscalers and AI labs lease wholesale capacity to add compute faster than self-build allows. Power availability sets lease pricing.
+
+# 3. Metrics
+
+Filings report leased MW, backlog, renewal spreads and interconnection revenue.

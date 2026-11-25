@@ -1,0 +1,14 @@
+# 1. What it is: the smallest cell block in a subarray
+
+   BANK                SUBARRAY                MAT
+   ┌──────────┐        ┌──────────┐        ┌────────────┐
+   │ 16 sub-  │  ───▶  │ 8 mats   │  ───▶  │ 512 x 512  │
+   │ arrays   │        │ share a  │        │ cells      │
+   │          │        │ row buf  │        │            │
+   └──────────┘        └──────────┘        └────────────┘
+
+  (counts are illustrative; real layouts vary by device generation)
+
+# 2. Why AI cares
+
+A mat has its own sense amplifiers and word-line drivers. Mat layout sets how much of a row a single access touches, which feeds into energy per bit and bandwidth per stack.

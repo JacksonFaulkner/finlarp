@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ROBOTAXI",
+ "script": "terms/trm_robotaxi.py",
+ "beats": [
+  {
+   "caption": "A robotaxi is a ride-hail car with nobody in the driver's seat",
+   "text": "A robotaxi is a self-driving car run as a paid taxi service with no safety driver aboard. A rider books it in an app, it pulls up, and the steering wheel turns by itself. Commercial service runs in a small number of cities, each one gated by local permits, with Waymo the largest operator in the US."
+  },
+  {
+   "caption": "A roof pod of LiDARs, cameras and radars sees all round",
+   "text": "Driving with no human backup needs more sensing than driver assist: several spinning LiDARs that measure the distance to millions of points a second, a dozen or more cameras and multiple radars, overlapping so any one can fail. Sensors were once tens of thousands of dollars per car; LiDAR prices have fallen sharply."
+  },
+  {
+   "caption": "A data-centre-class computer fills the trunk",
+   "text": "All those feeds run to a computer in the trunk with one or more high-end AI chips doing perception, prediction and planning many times a second. It can draw on the order of a kilowatt and is liquid cooled, with redundant power and a backup path to bring the car to a safe stop if the main system fails."
+  },
+  {
+   "caption": "When stuck, the car asks a remote human for advice",
+   "text": "For odd cases (a blocked lane, police directing traffic) the car pauses and sends its view over the cellular network to a remote assistance centre. A person there suggests a path; the car still does the driving. How many cars one assistant can cover is a big lever on cost."
+  },
+  {
+   "caption": "The business is utilisation, vehicle cost and depots",
+   "text": "The operator owns the car, the software, the remote team and the depots where cars charge, get cleaned and are serviced. Profit depends on paid miles per car per day against the cost of the vehicle and its sensors. Related: Alphabet (GOOGL, Waymo), Tesla (TSLA), Uber (UBER) as a booking partner, Pony.ai (PONY)."
+  }
+ ]
+}

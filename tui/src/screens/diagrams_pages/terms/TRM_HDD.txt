@@ -1,0 +1,17 @@
+# 1. What it is: magnetic platters and a moving head
+
+   ┌───────────────┐   ┌──────────────┐   ┌─────────────────┐
+   │ HOST          │──▶│ CONTROLLER   │──▶│ PLATTERS        │
+   │ server / JBOD │   │ cache, servo │   │ ~7200 rpm       │
+   └───────────────┘   └──────────────┘   │ heads on an arm │
+                                          └─────────────────┘
+
+  (random read ~5-10 ms vs ~0.1 ms for an SSD; nearline drives now 30+ TB)
+
+# 2. Why AI cares
+
+Data lakes and object storage behind AI pipelines are mostly HDD, with flash in front as a cache.
+
+# 3. Business
+
+Only Seagate, Western Digital and Toshiba make HDDs; capacity growth comes from areal density, e.g. HAMR.

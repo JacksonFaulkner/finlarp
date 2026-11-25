@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FPGA",
+ "script": "terms/trm_fpga.py",
+ "beats": [
+  {
+   "caption": "An FPGA is a chip whose circuit is loaded after it is made",
+   "text": "A field-programmable gate array ships blank: its logic and wiring are set by a configuration file loaded at power-up. In AI data centres FPGAs turn up on network cards and SmartNICs, in storage and in test gear, and engineers use them to prototype ASICs before committing to silicon."
+  },
+  {
+   "caption": "Inside: a sea of small logic tiles joined by programmable switches",
+   "text": "The die is a grid of logic tiles, each a few look-up tables (tiny truth-table memories that can act as any small logic gate) plus flip-flops. At every crossing a switch box decides which wires connect. Columns of DSP blocks do fast multiplies, block RAM holds data, and high-speed transceivers on the edge carry 100G+ links."
+  },
+  {
+   "caption": "A bitstream sets every look-up table and every switch",
+   "text": "At power-up the FPGA reads a bitstream, tens to hundreds of megabits, from a flash chip. Each bit fills a LUT entry or opens or closes one routing switch. Once loaded, signals ripple through the configured path in parallel, with fixed, nanosecond-level latency and no instruction fetch."
+  },
+  {
+   "caption": "Load another file and the same silicon becomes a different circuit",
+   "text": "Reprogram it and the tiles and routes change: a packet filter today, a new protocol or a fixed-up bug tomorrow, in the field. The price of that flexibility is that programmable wiring is big and slow, so the same design runs maybe 5-10x slower and uses far more power and area than it would as an ASIC."
+  },
+  {
+   "caption": "Between a CPU and an ASIC: for networks, trading, prototyping, edge inference",
+   "text": "FPGAs win where volumes are too small for an ASIC or the logic must change: network and telecom gear, low-latency trading, radar and signal processing, ASIC emulation, some inference. Related: AMD (AMD, ex-Xilinx), Intel (INTC) and the now-standalone Altera, Lattice (LSCC), Microchip (MCHP)."
+  }
+ ]
+}

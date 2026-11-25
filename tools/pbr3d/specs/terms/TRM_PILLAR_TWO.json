@@ -1,0 +1,177 @@
+{
+ "slug": "TRM_PILLAR_TWO",
+ "beats": [
+  {
+   "caption": "Minimum 15% tax applies per jurisdiction",
+   "boxes": [
+    {
+     "name": "rules",
+     "lo": [
+      -380,
+      -60,
+      -60
+     ],
+     "hi": [
+      -180,
+      60,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "test",
+     "lo": [
+      -100,
+      -60,
+      -60
+     ],
+     "hi": [
+      100,
+      60,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "topup",
+     "lo": [
+      200,
+      -60,
+      -60
+     ],
+     "hi": [
+      380,
+      60,
+      -20
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "a1",
+     "from": [
+      -180,
+      0,
+      -40
+     ],
+     "to": [
+      -100,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "a2",
+     "from": [
+      100,
+      0,
+      -40
+     ],
+     "to": [
+      200,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "GloBE 15% minimum",
+     "at": [
+      -280,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "effective rate below 15%?",
+     "at": [
+      0,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "top-up tax",
+     "at": [
+      290,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "rules",
+    "test",
+    "topup",
+    "a1",
+    "a2"
+   ]
+  },
+  {
+   "caption": "Each country's rate is tested separately",
+   "boxes": [
+    {
+     "name": "jur",
+     "lo": [
+      -100,
+      -200,
+      -60
+     ],
+     "hi": [
+      100,
+      -120,
+      -20
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "j1",
+     "from": [
+      0,
+      -120,
+      -40
+     ],
+     "to": [
+      0,
+      -60,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "applies above EUR 750M revenue",
+     "at": [
+      -160,
+      -240,
+      0
+     ]
+    },
+    {
+     "text": "country by country",
+     "at": [
+      120,
+      -160,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "rules",
+    "test",
+    "topup",
+    "a1",
+    "a2",
+    "jur",
+    "j1"
+   ]
+  }
+ ]
+}

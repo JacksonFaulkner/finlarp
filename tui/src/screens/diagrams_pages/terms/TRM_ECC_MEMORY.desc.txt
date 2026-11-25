@@ -1,0 +1,1 @@
+ECC memory stores extra check bits beside each data word so the controller can correct a single flipped bit and flag double-bit errors. It is standard in servers, where a silent error could corrupt results or stored records. The extra bits cost about 12.5 percent of raw capacity and a little latency. Related: Micron (MU), Samsung (005930.KS), SK Hynix (000660.KS), Dell (DELL).

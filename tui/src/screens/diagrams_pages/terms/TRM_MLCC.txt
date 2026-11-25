@@ -1,0 +1,17 @@
+# 1. What it is: many tiny capacitors that steady the voltage
+
+   ┌────────────┐    ┌─────────────────┐    ┌─────────────┐
+   │ VRM output │    │ MLCC bank       │    │ GPU         │
+   └────────────┘───▶│ ceramic + metal │───▶│ clean power │
+                     │ layers          │    └─────────────┘
+                     └─────────────────┘                   
+
+  (hundreds of electrode layers stacked in a part as small as 0.4 x 0.2 mm)
+
+# 2. Why AI cares
+
+GPUs draw huge current swings in microseconds. MLCCs placed close to the package absorb those swings so the voltage stays in spec.
+
+# 3. Cycle
+
+Lead times stretch and prices rise when server and phone demand peak together.

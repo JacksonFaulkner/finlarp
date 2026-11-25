@@ -1,0 +1,13 @@
+# 1. What it is: thousands of GPUs acting as one
+
+   ┌─────────┐     ┌──────────────┐     ┌────────────┐
+   │ RACK    │     │ SCALE-OUT    │     │ CLUSTER    │
+   │ 72 GPUs │ ──▶ │ InfiniBand / │ ──▶ │ 100k+ GPUs │
+   │ NVLink  │     │ Ethernet     │     │ ~100+ MW   │
+   └─────────┘     └──────────────┘     └────────────┘
+
+  (scale-up inside the rack, scale-out across racks)
+
+# 2. Why AI cares
+
+Bigger clusters train bigger models. Each cluster buys GPUs, switches, optics and a data center to put them in.

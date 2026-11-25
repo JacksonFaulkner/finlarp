@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TARGET_ROW_REFRESH",
+ "script": "terms/trm_target_row_refresh.py",
+ "beats": [
+  {
+   "caption": "TRR lives inside the DRAM dies of every HBM stack",
+   "text": "Target row refresh is logic built into the DRAM itself, including the HBM stacks beside a GPU. It exists because of row hammer: opening one row over and over leaks charge out of the rows next to it."
+  },
+  {
+   "caption": "The chip counts how often each row is opened",
+   "text": "A small tracker next to each bank counts ACTIVATE commands per row, or samples them, since a full counter for every row would cost too much area. Most rows stay cold; a hammered row climbs fast."
+  },
+  {
+   "caption": "A hot row crosses the threshold",
+   "text": "When one row's count passes a set threshold inside the refresh window, the chip marks it as an aggressor. The rows on either side are the ones at risk, not the hot row itself."
+  },
+  {
+   "caption": "Its neighbours get refreshed early",
+   "text": "At the next refresh command the chip spends some of the time rewriting the victim rows next to the aggressor, restoring their full charge before any bit can flip. The counter then resets."
+  },
+  {
+   "caption": "The extra refreshes cost bandwidth, and TRR can be fooled",
+   "text": "Every early refresh ties up the bank, so less time is left for reads, which hurts when memory bandwidth limits AI work. Attacks that hammer many rows at once have beaten simple trackers, so DDR5 and HBM3 add refresh management commands from the controller. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS), Rambus (RMBS)."
+  }
+ ]
+}

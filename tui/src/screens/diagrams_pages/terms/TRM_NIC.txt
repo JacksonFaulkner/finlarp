@@ -1,0 +1,13 @@
+# 1. What it is: the server's door to the network
+
+   ┌────────────┐         ┌─────────────────┐         ┌────────┐
+   │ GPU MEMORY │──PCIe──▶│ NIC             │──800G──▶│ SWITCH │
+   │            │         │ ConnectX / Thor │         │        │
+   │            │         │ Pollara         │         │        │
+   └────────────┘         └─────────────────┘         └────────┘
+
+  (back-end: often 1 NIC per GPU; front-end: 1-2 per server)
+
+# 2. Why AI cares
+
+NICs carry RDMA traffic between GPUs; their speed sets the scale-out bandwidth per GPU.

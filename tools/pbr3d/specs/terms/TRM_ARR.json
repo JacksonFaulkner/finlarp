@@ -1,0 +1,224 @@
+{
+ "slug": "TRM_ARR",
+ "beats": [
+  {
+   "caption": "ARR is monthly recurring revenue times 12",
+   "boxes": [
+    {
+     "name": "mrr",
+     "lo": [
+      -300,
+      -60,
+      -40
+     ],
+     "hi": [
+      -60,
+      60,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "x12",
+     "lo": [
+      0,
+      -60,
+      -40
+     ],
+     "hi": [
+      120,
+      60,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "arr",
+     "lo": [
+      180,
+      -60,
+      -40
+     ],
+     "hi": [
+      360,
+      60,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "m1",
+     "from": [
+      -50,
+      0,
+      -20
+     ],
+     "to": [
+      -10,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "m2",
+     "from": [
+      130,
+      0,
+      -20
+     ],
+     "to": [
+      170,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "MRR x 12",
+     "at": [
+      -120,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "ARR, annualized",
+     "at": [
+      270,
+      90,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "mrr",
+    "x12",
+    "arr",
+    "m1",
+    "m2"
+   ]
+  },
+  {
+   "caption": "Only recurring contracts count; one-time fees are excluded",
+   "boxes": [
+    {
+     "name": "mrr",
+     "lo": [
+      -300,
+      -60,
+      -40
+     ],
+     "hi": [
+      -60,
+      60,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "x12",
+     "lo": [
+      0,
+      -60,
+      -40
+     ],
+     "hi": [
+      120,
+      60,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "arr",
+     "lo": [
+      180,
+      -60,
+      -40
+     ],
+     "hi": [
+      360,
+      60,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "onetime",
+     "lo": [
+      -300,
+      -120,
+      -30
+     ],
+     "hi": [
+      -60,
+      -90,
+      -10
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "m1",
+     "from": [
+      -50,
+      0,
+      -20
+     ],
+     "to": [
+      -10,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "m2",
+     "from": [
+      130,
+      0,
+      -20
+     ],
+     "to": [
+      170,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "one-time fees excluded",
+     "at": [
+      -180,
+      -150,
+      0
+     ]
+    },
+    {
+     "text": "run-rate",
+     "at": [
+      270,
+      -100,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "mrr",
+    "x12",
+    "arr",
+    "m1",
+    "m2",
+    "onetime"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+RAS to CAS delay, written tRCD, is the minimum time between an ACTIVATE command and the first READ or WRITE to that row. It is a basic DRAM timing parameter that adds latency whenever a new row must be opened. Controllers reduce its impact by spreading requests across banks, which matters for memory-bound AI inference. Related: Micron (MU), SK hynix (000660.KS), Rambus (RMBS).

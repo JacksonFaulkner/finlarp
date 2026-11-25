@@ -1,0 +1,11 @@
+# 1. What it is: inference runs on the device
+
+   ┌────────┐   ┌────────────┐   ┌───────────────┐   ┌────────┐
+   │ SENSOR │──▶│ PREPROCESS │──▶│ NPU INFERENCE │──▶│ ACTION │
+   └────────┘   └────────────┘   └───────────────┘   └────────┘
+
+  (no round trip to the cloud; device power budgets are often 5-30 W)
+
+# 2. Why it matters
+
+Edge AI is where inference chips for cars, PCs and robots sell, and it competes with cloud GPUs for the same models. Power and memory limits set how much model fits, so efficient silicon wins the design.

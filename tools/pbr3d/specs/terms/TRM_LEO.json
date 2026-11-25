@@ -1,0 +1,16 @@
+{"slug": "TRM_LEO", "beats": [
+ {"caption": "Satellites about 550 km up link to each other and to the ground",
+  "boxes": [
+   {"name": "sat_a", "lo": [-300, 100, -60], "hi": [-200, 160, -20], "mat": "steel"},
+   {"name": "sat_b", "lo": [-50, 100, -60], "hi": [50, 160, -20], "mat": "steel"},
+   {"name": "sat_c", "lo": [200, 100, -60], "hi": [300, 160, -20], "mat": "steel"},
+   {"name": "user_dish", "lo": [-330, -150, -40], "hi": [-230, -90, -10], "mat": "quartz"},
+   {"name": "gateway", "lo": [-50, -150, -40], "hi": [50, -90, -10], "mat": "quartz"}],
+  "arrows": [{"name": "xlink_ab", "from": [-200, 130, -40], "to": [-50, 130, -40], "mat": "glow"}, {"name": "xlink_bc", "from": [50, 130, -40], "to": [200, 130, -40], "mat": "glow"}, {"name": "down_user", "from": [-250, 100, -40], "to": [-280, -90, -40], "mat": "accent"}, {"name": "down_gw", "from": [0, 100, -40], "to": [0, -90, -40], "mat": "accent"}],
+  "tags": [{"text": "LASER crosslinks", "at": [0, 190, 0]}, {"text": "USER DISH", "at": [-280, -120, 0]}, {"text": "GATEWAY ground", "at": [0, -120, 0]}]},
+ {"caption": "Low orbit cuts latency to tens of milliseconds",
+  "boxes": [
+   {"name": "sat_b", "lo": [-50, 100, -60], "hi": [50, 160, -20], "mat": "steel"},
+   {"name": "latency", "lo": [-120, -40, -40], "hi": [120, 10, -20], "mat": "glow"}],
+  "tags": [{"text": "~550 km: tens of ms", "at": [0, -70, 0]}, {"text": "GEO ~600 ms round trip", "at": [0, 190, 0]}]}
+]}

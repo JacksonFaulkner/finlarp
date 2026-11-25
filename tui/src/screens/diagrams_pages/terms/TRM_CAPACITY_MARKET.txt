@@ -1,0 +1,12 @@
+# 1. What it is: paying for future availability
+
+   ┌────────────────┐   ┌──────────┐   ┌─────────────────┐
+   │ GRID OPERATOR  │──▶│ AUCTION  │──▶│ GENERATORS      │
+   │ forecasts peak │   │ $/MW-day │   │ commit capacity │
+   └────────────────┘   └──────────┘   └─────────────────┘
+
+  (PJM Base Residual Auction clears about three years ahead)
+
+# 2. Why AI cares
+
+Data center load growth raises forecast peaks, which lifts auction prices and generator earnings.

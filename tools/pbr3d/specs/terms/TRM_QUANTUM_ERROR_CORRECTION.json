@@ -1,0 +1,161 @@
+{
+ "slug": "TRM_QUANTUM_ERROR_CORRECTION",
+ "beats": [
+  {
+   "caption": "One logical qubit spans many physical qubits",
+   "boxes": [
+    {
+     "name": "logical",
+     "lo": [
+      -380,
+      -60,
+      -60
+     ],
+     "hi": [
+      -220,
+      60,
+      -20
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "phys",
+     "lo": [
+      -120,
+      -100,
+      -60
+     ],
+     "hi": [
+      80,
+      100,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "decoder",
+     "lo": [
+      160,
+      -100,
+      -60
+     ],
+     "hi": [
+      360,
+      -20,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "e1",
+     "from": [
+      -220,
+      0,
+      -40
+     ],
+     "to": [
+      -120,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "e2",
+     "from": [
+      80,
+      0,
+      -40
+     ],
+     "to": [
+      160,
+      -60,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "1 logical qubit",
+     "at": [
+      -330,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "hundreds+ physical qubits",
+     "at": [
+      -90,
+      130,
+      0
+     ]
+    },
+    {
+     "text": "decoder fixes errors",
+     "at": [
+      220,
+      60,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "logical",
+    "phys",
+    "decoder",
+    "e1",
+    "e2"
+   ]
+  },
+  {
+   "caption": "Physical error rate must sit below threshold",
+   "boxes": [
+    {
+     "name": "thr",
+     "lo": [
+      -120,
+      160,
+      -60
+     ],
+     "hi": [
+      80,
+      220,
+      -20
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "below threshold or worse",
+     "at": [
+      -100,
+      250,
+      0
+     ]
+    },
+    {
+     "text": "overhead is the main cost",
+     "at": [
+      -120,
+      -200,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "logical",
+    "phys",
+    "decoder",
+    "e1",
+    "e2",
+    "thr"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+# 1. What it is: how long a DRAM cell holds its charge
+
+   charge
+   ▲
+   │ ██
+   │ ██╲
+   │    ╲
+   │     ╲        ─ ─ ─ ─ ─ ─ sense threshold
+   │      ╲ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+   │       ╲
+   └──────────────────────────────────▶ time
+   write     refresh                 lost
+             ◀──── retention time ────▶
+
+  (cell charge leaks away; each row must be refreshed before it drops)
+
+# 2. Why AI cares
+
+Retention sets how often DRAM must be refreshed. Refresh takes time and power, so retention and refresh overhead show up in effective bandwidth and energy per bit.

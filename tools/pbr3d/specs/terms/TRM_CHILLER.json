@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CHILLER",
+ "script": "terms/trm_chiller.py",
+ "beats": [
+  {
+   "caption": "A chiller makes the cold water the data hall runs on",
+   "text": "A chiller is a refrigeration machine the size of a shipping container. It cools a loop of water, typically to somewhere between 7 and 18 C, and pumps it into the building, where coils in air handlers or liquid-cooling units pick up the servers' heat. The water comes back warmer and the chiller cools it again."
+  },
+  {
+   "caption": "Inside, a refrigerant loop pumps heat uphill",
+   "text": "The returning water flows through tubes in the evaporator, where low-pressure refrigerant boils and soaks up its heat. A screw or centrifugal compressor squeezes that vapour hot and dense, the condenser sheds the heat outdoors, and an expansion valve drops the pressure so the liquid can boil again. Each kW of compressor power moves about 3 to 6 kW of heat."
+  },
+  {
+   "caption": "Fans on top throw the heat into the outside air",
+   "text": "In an air-cooled chiller the condenser is a set of finned coils in a V, with large fans pulling outdoor air through them. Bigger plants use water-cooled chillers that send condenser water to cooling towers instead, trading water use for efficiency. A single large unit handles 1 to 2 MW of heat (300 to 600 tons)."
+  },
+  {
+   "caption": "Warm-water liquid cooling lets the compressor rest",
+   "text": "Direct-to-chip liquid cooling runs facility water at 30 C or more. Outdoor air is cooler than that most of the year, so water can bypass the compressor through a free-cooling coil and the fans alone do the work. Fewer compressor hours means a lower PUE, but sites still size chillers for the hottest days."
+  },
+  {
+   "caption": "AI campuses still buy chillers by the dozen",
+   "text": "A gigawatt-class campus can need hundreds of megawatts of heat rejection, and chillers, dry coolers and their controls are a big line in the cooling budget. Makers: Trane Technologies (TT), Carrier (CARR), Johnson Controls (JCI, York), Daikin, and Vertiv (VRT), which sells chillers alongside CDUs and power gear."
+  }
+ ]
+}

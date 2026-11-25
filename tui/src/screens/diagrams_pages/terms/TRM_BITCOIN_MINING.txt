@@ -1,0 +1,12 @@
+# 1. What it is: hash computations paid in BTC
+
+   ┌────────────┐          ┌────────────┐          ┌────────────┐
+   │ grid power │─────────▶│ miner rigs │─────────▶│ BTC reward │
+   │ at $/kWh   │          │ hashing    │          │ + fees     │
+   └────────────┘          └────────────┘          └────────────┘
+
+  (revenue per kWh = BTC price x blocks won x share of network hashrate)
+
+# 2. Why AI cares
+
+The same sites that power miners can deliver power and cooling to GPU servers. Miners with energized substations are now converting or adding AI hosting capacity, because hosting pays more per MW than mining at most BTC prices.

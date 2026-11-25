@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FOVEROS",
+ "script": "terms/trm_foveros.py",
+ "beats": [
+  {
+   "caption": "Foveros stacks logic tiles on top of an active base die",
+   "text": "Instead of one big flat chip, Intel builds several smaller dies (tiles) and stacks them face-down on a base die that sits on the package substrate. The base die is a real chip too: it holds I/O, cache or power delivery, and it is the wiring hub for everything above it."
+  },
+  {
+   "caption": "Microbumps join tiles to the base; TSVs carry power up",
+   "text": "Each tile lands on a field of tiny solder microbumps, about 36-50 microns apart in first-generation Foveros, thousands per square millimetre. Copper through-silicon vias (TSVs) punch through the base die so power and signals from the substrate can climb straight up into the tiles."
+  },
+  {
+   "caption": "Tiles talk through the base die, not across the substrate",
+   "text": "A signal from the compute tile to the graphics tile goes down into the base die, sideways a few millimetres, and up. That path is far shorter and denser than routing across a laminate substrate, so links cost less energy per bit and the tiles behave almost like one chip."
+  },
+  {
+   "caption": "Foveros Direct swaps solder bumps for copper-to-copper bonds",
+   "text": "Solder bumps need a gap and limit how close joints can sit. Foveros Direct polishes both dies flat and bonds copper pad to copper pad with oxide between (hybrid bonding), at about 10 microns pitch or less: roughly 10x more connections per area, lower resistance, and no gap to fill."
+  },
+  {
+   "caption": "Each tile on its own node, one package",
+   "text": "Because tiles are separate dies, compute can use the newest node while I/O stays on a cheaper one, and small tiles yield better than one giant die. Intel uses Foveros in Meteor Lake, Ponte Vecchio and Clearwater Forest; TSMC's SoIC is the rival. Related: Intel (INTC), TSMC (TSM), Amkor (AMKR)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MODULAR_DATA_CENTER",
+ "script": "terms/trm_modular_data_center.py",
+ "beats": [
+  {
+   "caption": "A modular data center is a hall built from factory-made blocks",
+   "text": "Instead of pouring and fitting out a whole building on site, the hall is split into modules: white-space pods that hold racks, power skids with switchgear and UPS, and cooling units. Each is built in a factory, shipped, and joined to the others on a prepared concrete pad."
+  },
+  {
+   "caption": "In the factory, wiring, piping and testing are done indoors",
+   "text": "Crews on an assembly line pull the cable, fit busways and coolant pipes, and load-test each module with heater banks before it leaves. Factory work is faster and more repeatable than field work, and it is not held up by weather or by finding enough skilled electricians near the site."
+  },
+  {
+   "caption": "Modules ship by road, so their size is capped",
+   "text": "Each block has to fit on a truck and under bridges, roughly 3-4 m wide and up to ~15 m long. That limit sets how much power one module can hold, so big sites use many of them. Meanwhile the pad, grid hookup and permits are prepared in parallel on site."
+  },
+  {
+   "caption": "On site the modules are set and their seams joined",
+   "text": "A crane sets each block on the pad. Electricians connect the power links between skids and pods, pipefitters couple the coolant loops, and fiber is spliced across. Because each part was tested already, commissioning takes weeks instead of months, and capacity comes online sooner."
+  },
+  {
+   "caption": "Need more capacity? Add another block",
+   "text": "Operators can grow a site block by block as demand arrives instead of building the whole hall up front, which suits fast-moving AI demand. Prefab power and cooling is a growing share of sales for the big electrical and thermal suppliers. Related: Vertiv (VRT), Eaton (ETN), Schneider Electric (SU.PA), Legrand (LR.PA)."
+  }
+ ]
+}

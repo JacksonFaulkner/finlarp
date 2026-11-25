@@ -1,0 +1,13 @@
+# 1. What it is: long contract for a plant's output
+
+   ┌───────────┐   ┌─────────────┐   ┌─────────────┐
+   │ GENERATOR │──▶│ PPA         │──▶│ BUYER       │
+   │ plant     │   │ fixed price │   │ hyperscaler │
+   └───────────┘   │ 10-20 years │   └─────────────┘
+                   └─────────────┘                  
+
+  (physical PPA delivers power; virtual PPA settles the price difference in cash)
+
+# 2. Why AI cares
+
+Big AI buyers sign PPAs to secure power years ahead and to back new nuclear, gas or renewable builds.

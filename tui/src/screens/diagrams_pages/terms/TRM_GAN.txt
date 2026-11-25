@@ -1,0 +1,16 @@
+# 1. What it is: a faster, lower-loss power switch material
+
+   ┌─────────────┐    ┌───────────────┐    ┌─────────────────┐    ┌─────────────┐
+   │ AC / 48V in │    │ GaN FETs      │    │ small magnetics │    │ server rail │
+   └─────────────┘───▶│ switch at MHz │───▶│ less heat       │───▶└─────────────┘
+                      └───────────────┘    └─────────────────┘                   
+
+  (higher switching frequency -> smaller inductors and capacitors per watt)
+
+# 2. Why AI cares
+
+AI racks push past 100 kW, and every point of conversion efficiency is heat that must be removed. GaN power supplies reach higher power density in the same rack slot.
+
+# 3. Where it sells
+
+Phone chargers were the first volume market; data center PSUs, EV onboard chargers and RF base stations follow.

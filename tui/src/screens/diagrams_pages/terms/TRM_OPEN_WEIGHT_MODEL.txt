@@ -1,0 +1,12 @@
+# 1. What it is: trained parameters published for anyone to run
+
+┌────────────────────────────┐       ┌────────────────────────────┐
+│ WEIGHTS FILE               │       │ YOUR GPUS                  │
+│ downloadable, licensed     │─run──▶│ self-hosted, fine-tuned    │
+└────────────────────────────┘       └────────────────────────────┘
+
+(license terms vary; training data and code are often withheld, so 'open source' is often inaccurate)
+
+# 2. Why AI cares
+
+Open-weight means the trained parameters are published so anyone can run, modify, or fine-tune the model, though the license may restrict commercial use. Moving a model from a vendor API onto customer-run GPUs shifts inference spend away from API revenue. A strong open-weight release raises demand for GPUs and hosting while compressing per-token prices.

@@ -1,0 +1,12 @@
+# 1. What it is: 1 MWh clean = 1 certificate
+
+   ┌──────────────┐   ┌─────────────┐   ┌─────────────┐
+   │ SOLAR / WIND │──▶│ REC         │──▶│ BUYER       │
+   │ 1 MWh        │   │ certificate │   │ clean claim │
+   └──────────────┘   └─────────────┘   └─────────────┘
+
+  (energy and certificate can be sold separately)
+
+# 2. Why AI cares
+
+Clean-energy pledges by AI buyers drive REC and PPA demand.

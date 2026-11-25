@@ -1,0 +1,1 @@
+Battery energy storage systems are large lithium-ion arrays that charge when power is cheap or plentiful and discharge later. They smooth solar and wind output, provide grid stability, and can shave data center peaks. Storage is often paired with new solar to make its output more usable. Related: Tesla (TSLA), Fluence Energy (FLNC), Eaton (ETN), NextEra Energy (NEE).

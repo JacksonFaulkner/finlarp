@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_REAR_DOOR_HX",
+ "script": "terms/trm_rear_door_hx.py",
+ "beats": [
+  {
+   "caption": "Air-cooled servers blow their heat out the back of the rack",
+   "text": "In a classic data hall, server fans pull cool air in at the front and push hot air out the back into a hot aisle, and room air handlers have to cool it all again. That works up to about 15 to 25 kW per rack. Denser AI racks would overwhelm the room's air handlers."
+  },
+  {
+   "caption": "A rear-door heat exchanger is a water coil hung on the rack's back",
+   "text": "The rack's rear door is replaced by a radiator: copper tubes carrying water, threaded through thousands of thin aluminium fins, fed by headers at top and bottom. Hoses drop to a water loop under the floor or overhead. The door is about 15 to 25 cm thick and swings open like a normal door for service."
+  },
+  {
+   "caption": "Hot exhaust goes in, room-temperature air comes out",
+   "text": "The servers' own fans push their exhaust straight through the coil, or fans in the door help (an active door). The water soaks up the heat, so air leaves the rack near room temperature and the room barely notices the rack is there. One door can remove roughly 30 to 70 kW."
+  },
+  {
+   "caption": "The water carries the heat to a CDU and out of the building",
+   "text": "The coils run on a closed loop kept above the room's dew point so they never sweat. A coolant distribution unit (CDU) at the end of the row pumps that loop and passes the heat through a plate heat exchanger to the facility's chilled or warm water, which takes it to chillers or dry coolers."
+  },
+  {
+   "caption": "A bridge that lets old halls host AI racks",
+   "text": "Rear doors need no changes to the servers, so operators use them to retrofit existing air-cooled halls for 40 to 70 kW racks, or alongside direct-to-chip racks to catch the heat the cold plates miss. Makers: Vertiv (VRT), nVent (NVT), Schneider Electric, Motivair (part of Schneider) and USystems."
+  }
+ ]
+}

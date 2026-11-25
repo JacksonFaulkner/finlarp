@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TAM",
+ "script": "terms/trm_tam.py",
+ "beats": [
+  {
+   "caption": "TAM: everything buyers spend on a category in a year",
+   "text": "Total addressable market is the yearly spending on a product category if one company won every sale. Picture the whole wafer as that market and each die as a slice of dollars. For AI accelerators, managements have quoted numbers in the hundreds of billions to a trillion dollars a year by the end of the decade."
+  },
+  {
+   "caption": "SAM: the part its products can actually serve",
+   "text": "No company sells into the whole category. The serviceable addressable market is the wedge its products, regions and customers can reach: a networking firm's SAM in AI is switches and optics, not GPUs. SAM is the honest ceiling for a single company."
+  },
+  {
+   "caption": "SOM: the share it can realistically win",
+   "text": "Within the SAM, competitors, capacity and customer habits limit what can be won. The serviceable obtainable market is that realistic share. Revenue forecasts are built from the SOM, so a huge TAM with a tiny SOM means little for the next few years."
+  },
+  {
+   "caption": "The same market is split among many vendors",
+   "text": "Every die in the wafer goes to somebody: Nvidia GPUs, custom ASICs from Broadcom and Marvell, AMD, memory from Micron and SK hynix, switches from Arista. Each vendor tends to cite the whole TAM, so adding up their claims usually gives more than the market can hold."
+  },
+  {
+   "caption": "TAMs grow and get revised; the method is rarely shown",
+   "text": "TAM figures come from earnings calls, investor days and analyst models, and they move as capex plans move. The filings seldom show how they were built, so check what spending is counted and over what years. Related: NVIDIA (NVDA), Broadcom (AVGO), Micron (MU), Arista Networks (ANET)."
+  }
+ ]
+}

@@ -1,0 +1,10 @@
+{
+ "label": "RF",
+ "term": "RF",
+ "aliases": [
+  "radio frequency",
+  "RF front-end",
+  "RFFE"
+ ],
+ "kind": "analog"
+}

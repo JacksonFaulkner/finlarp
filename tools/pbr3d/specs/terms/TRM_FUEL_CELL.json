@@ -1,0 +1,7 @@
+{"slug":"TRM_FUEL_CELL","beats":[
+{"boxes":[{"name":"fuel","lo":[-360,-50,-40],"hi":[-200,50,0],"mat":"steel"},{"name":"cell","lo":[-140,-60,-40],"hi":[140,60,0],"mat":"accent"},{"name":"dc","lo":[200,-50,-40],"hi":[360,50,0],"mat":"glow"}],
+"arrows":[{"name":"c1","from":[-200,0,-20],"to":[-140,0,-20],"mat":"accent"},{"name":"c2","from":[140,0,-20],"to":[200,0,-20],"mat":"accent"}],
+"tags":[{"text":"Gas or H2 fuel in","at":[-280,80,0]},{"text":"Fuel cell: no flame","at":[0,80,0]},{"text":"DC power to racks","at":[280,80,0]}]},
+{"boxes":[{"name":"mod1","lo":[-240,-120,-40],"hi":[-120,-70,0],"mat":"dim"},{"name":"mod2","lo":[-40,-120,-40],"hi":[80,-70,0],"mat":"dim"},{"name":"mod3","lo":[120,-120,-40],"hi":[240,-70,0],"mat":"dim"}],
+"tags":[{"text":"Modules of ~100-300 kW","at":[0,-160,0]},{"text":"On-site power before grid hookup","at":[0,-190,0]}]}
+]}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_VENDOR_FINANCING",
+ "script": "terms/trm_vendor_financing.py",
+ "beats": [
+  {
+   "caption": "A supplier lends to, or invests in, its own customer",
+   "text": "Vendor financing is when a seller funds the buyer: a loan, an equity stake, a debt guarantee or a lease. In AI infrastructure a chip maker or cloud may put money into a neocloud or AI lab that is short of capital but hungry for GPUs."
+  },
+  {
+   "caption": "The customer spends that money on the supplier's chips",
+   "text": "The cash comes straight back as orders. The neocloud buys GPU systems, the vendor books the sale as revenue, and racks fill up. The revenue is real, but part of it was paid for with the vendor's own money, so growth can look stronger than end demand."
+  },
+  {
+   "caption": "Rent from end users is what pays the loan back",
+   "text": "The neocloud rents the GPUs to AI labs and enterprises by the hour or under multi-year contracts. That rent services its debt and repays the vendor. The loop only closes if those end customers keep paying at prices high enough to cover depreciation and interest."
+  },
+  {
+   "caption": "Backstops: the vendor promises to buy unused capacity",
+   "text": "Some deals go further: the vendor guarantees a customer's lease or debt, or agrees to rent back any capacity the customer cannot sell. These sit off the balance sheet and show up in the commitments and guarantees notes of the 10-K, which is where analysts look for them."
+  },
+  {
+   "caption": "If end demand falls, the loop breaks and the vendor holds the risk",
+   "text": "When GPU rental prices drop or a customer cannot refinance, orders stop, loans may not be repaid and guarantees get called. The vendor loses future revenue and takes write-downs on the stakes. Related: NVIDIA (NVDA), CoreWeave (CRWV), Oracle (ORCL), Advanced Micro Devices (AMD)."
+  }
+ ]
+}

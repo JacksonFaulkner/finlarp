@@ -1,0 +1,12 @@
+{
+  "label": "ETHERNET SWITCH",
+  "term": "Ethernet switch",
+  "aliases": [
+    "Ethernet switching",
+    "switch ASIC",
+    "Tomahawk",
+    "Spectrum-X",
+    "scale-out networking"
+  ],
+  "kind": "networking"
+}

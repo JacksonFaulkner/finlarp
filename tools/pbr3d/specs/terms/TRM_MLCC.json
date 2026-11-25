@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MLCC",
+ "script": "terms/trm_mlcc.py",
+ "beats": [
+  {
+   "caption": "Thousands of tiny capacitors sit round the GPU and under it",
+   "text": "An AI accelerator board is carpeted in multilayer ceramic capacitors (MLCCs): rings of them round the GPU package, and a dense field on the back of the board right under the die. Each is a few millimetres long or less. A phone holds about a thousand; one AI server board holds many thousands."
+  },
+  {
+   "caption": "Inside one: ceramic layers between interleaved nickel electrodes",
+   "text": "Cut one open and it is a stack: up to hundreds of nickel electrode layers, each a few microns thick, separated by barium-titanate ceramic. Every other electrode reaches the left end, the rest reach the right. Each end is capped with copper, then nickel, then tin so it can be soldered. More, thinner layers mean more capacitance in the same size."
+  },
+  {
+   "caption": "Charge comes in at both ends and fills every gap",
+   "text": "Voltage across the two ends charges every plate: + on the left-tied plates, - on the right-tied ones. Each ceramic gap holds a little charge in its electric field, and the stack adds them all up, so a part smaller than a grain of rice can hold tens of microfarads."
+  },
+  {
+   "caption": "When the GPU's load jumps, nearby caps answer before the VRM",
+   "text": "A GPU can swing hundreds of amps in nanoseconds. The voltage regulator's control loop takes microseconds to react, so for that gap the capacitors closest to the die dump their stored charge in and hold the voltage up. That is why they crowd round and under the package: every millimetre of copper adds inductance that slows them down."
+  },
+  {
+   "caption": "Every cap smooths its own patch; the die sees a steady voltage",
+   "text": "Together the caps keep the core voltage within a few percent while current swings wildly. More watts per board means more and better MLCCs, and supply is concentrated: Murata (MRAAY), Samsung Electro-Mechanics, TDK (TTDKY), Yageo and Vishay (VSH). High-end parts can run tight in AI build-outs."
+  }
+ ]
+}

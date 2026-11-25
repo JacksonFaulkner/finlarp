@@ -1,0 +1,17 @@
+# 1. What it is: amplifying light without electronics
+
+   ┌──────────┐   ┌───────────────────────────┐   ┌──────────┐
+   │ weak     │──▶│ ERBIUM-DOPED FIBER COIL   │──▶│ strong   │
+   │ signal   │   │ (several meters)          │   │ signal   │
+   │ all λs   │   └───────────────────────────┘   │ all λs   │
+   └──────────┘               ▲                   └──────────┘
+                    ┌───────────────────┐
+                    │ PUMP LASER 980 nm │
+                    │ or 1480 nm        │
+                    └───────────────────┘
+
+  (works in the C-band, ~1530-1565 nm, where fiber loss is lowest)
+
+# 2. Why it matters
+
+Without amplifiers, each wavelength would need its own electrical regenerator every span. EDFAs make DWDM and DCI economical.

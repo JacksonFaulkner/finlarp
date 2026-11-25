@@ -1,0 +1,16 @@
+{"slug": "TRM_IEEPA", "beats": [
+ {"caption": "IEEPA is an emergency-powers law from 1977",
+  "boxes": [
+   {"name": "law", "lo": [-350, -50, -50], "hi": [-170, 50, -10], "mat": "steel"},
+   {"name": "emergency", "lo": [-100, -50, -50], "hi": [100, 50, -10], "mat": "dim"},
+   {"name": "tariff", "lo": [170, -50, -50], "hi": [350, 50, -10], "mat": "alarm"}],
+  "arrows": [{"name": "declare", "from": [-170, 0, -30], "to": [-100, 0, -30], "mat": "accent"}, {"name": "impose", "from": [100, 0, -30], "to": [170, 0, -30], "mat": "accent"}],
+  "tags": [{"text": "IEEPA (1977) emergency powers", "at": [-260, 110, 0]}, {"text": "President declares emergency", "at": [0, 110, 0]}, {"text": "tariffs by executive order", "at": [260, 110, 0]}]},
+ {"caption": "Imported servers and GPUs carry the tariff cost",
+  "boxes": [
+   {"name": "tariff", "lo": [170, -50, -50], "hi": [350, 50, -10], "mat": "alarm"},
+   {"name": "imports", "lo": [-200, -160, -40], "hi": [-40, -110, -20], "mat": "steel"},
+   {"name": "gpus", "lo": [60, -160, -40], "hi": [200, -110, -20], "mat": "steel"}],
+  "arrows": [{"name": "into_us", "from": [-40, -135, -30], "to": [60, -135, -30], "mat": "alarm"}],
+  "tags": [{"text": "servers, GPUs, components", "at": [0, -185, 0]}, {"text": "court challenges pending", "at": [0, 110, 0]}]}
+]}

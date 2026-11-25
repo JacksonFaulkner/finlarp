@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TRAINING",
+ "script": "terms/trm_training.py",
+ "beats": [
+  {
+   "caption": "Training builds a model on thousands of GPUs wired as one machine",
+   "text": "A large model is trained on a cluster: racks of GPU trays, each tray holding several accelerators, joined by switches into one fabric. Frontier runs use tens of thousands of GPUs at once, and the whole cluster works on a single model for weeks or months."
+  },
+  {
+   "caption": "Batches of training data stream to every GPU",
+   "text": "The training set (trillions of tokens of text, code, images) sits on storage and is cut into batches. Each step, every GPU gets its own slice of the batch. Feeding them fast enough takes high-throughput storage and networking, or expensive GPUs sit idle."
+  },
+  {
+   "caption": "Forward through the layers, error back down, weights nudged",
+   "text": "Each GPU runs its slice forward through the model's layers to make predictions, measures how wrong they were (the loss), then runs backward to work out how every weight should change: the gradient. That costs roughly three times the compute of the forward pass, which is why training needs so many FLOPs."
+  },
+  {
+   "caption": "Every step, all GPUs average their gradients over the network",
+   "text": "Each GPU saw different data, so before updating, the cluster sums and averages gradients across every GPU (an all-reduce), through the top-of-rack and spine switches. This happens every step, thousands of times an hour, so the network's bandwidth and latency set how well the cluster scales."
+  },
+  {
+   "caption": "Repeat for weeks until the loss stops falling",
+   "text": "Millions of steps later the loss curve flattens and the weights are frozen and shipped for inference. A frontier run can burn tens of megawatts for months. This workload drove the first wave of AI data-center spending: NVIDIA (NVDA), Microsoft (MSFT), Meta (META), Arista Networks (ANET)."
+  }
+ ]
+}

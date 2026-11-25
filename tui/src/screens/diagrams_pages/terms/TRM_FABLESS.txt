@@ -1,0 +1,13 @@
+# 1. What it is: designs only, no fabs
+
+   ┌──────────────┐   ┌─────────┐   ┌───────────────┐
+   │ FABLESS      │   │ FOUNDRY │   │ OSAT          │
+   │ chip design  │──▶│ wafers  │──▶│ package, test │
+   │ IP, software │   │         │   │               │
+   └──────────────┘   └─────────┘   └───────────────┘
+
+  (fabless firm owns the product and customer; partners own the factories)
+
+# 2. Risk
+
+Supply depends on foundry allocation, often at one supplier in Taiwan. Capacity prepayments and long-term agreements show up as commitments.

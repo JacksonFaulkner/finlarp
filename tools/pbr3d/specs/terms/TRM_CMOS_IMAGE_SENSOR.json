@@ -1,0 +1,13 @@
+{"slug":"TRM_CMOS_IMAGE_SENSOR","beats":[
+ {"caption":"light in, digital pixels out","boxes":[
+   {"name":"lens","lo":[-320,-50,-40],"hi":[-240,50,0],"mat":"quartz"},
+   {"name":"pixels","lo":[-200,-60,-40],"hi":[-40,60,0],"mat":"steel"},
+   {"name":"isp","lo":[40,-60,-40],"hi":[200,60,0],"mat":"dim"},
+   {"name":"out","lo":[240,-30,-30],"hi":[340,30,-10],"mat":"glow"}],
+  "arrows":[{"name":"l1","from":[-240,0,-20],"to":[-200,0,-20],"mat":"accent"},{"name":"l2","from":[-40,0,-20],"to":[40,0,-20],"mat":"accent"},{"name":"l3","from":[200,0,-20],"to":[240,0,-20],"mat":"accent"}],
+  "tags":[{"text":"photodiode array","at":[-120,110,-20]},{"text":"ISP: color, noise, HDR","at":[120,110,-20]}]},
+ {"caption":"value per chip moves with dynamic range","boxes":[
+   {"name":"stack","lo":[-120,-150,-60],"hi":[120,-100,0],"mat":"charge"}],
+  "tags":[{"text":"stacked pixels","at":[0,-180,-20]},{"text":"ADAS and robots drive units","at":[0,-60,-20]}],
+  "show":["lens","pixels","isp","out","l1","l2","l3","stack"]}
+]}

@@ -1,0 +1,1 @@
+A power MOSFET is a transistor built to switch large currents on and off quickly. It is the workhorse of DC-DC converters, motor drives and battery systems below a few hundred volts. In AI servers, banks of MOSFETs in power stages step 12V or 48V down to under 1V for the GPU. Related: Infineon (IFNNY), onsemi (ON), Vishay (VSH), Alpha and Omega (AOSL), Monolithic Power (MPWR).

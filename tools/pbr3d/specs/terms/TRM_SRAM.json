@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SRAM",
+ "script": "terms/trm_sram.py",
+ "beats": [
+  {
+   "caption": "SRAM is the memory built into the GPU die itself",
+   "text": "Registers, L1 and L2 caches and shared memory on a GPU are SRAM, made in the same logic process as the cores. An H100 carries about 50 MB of L2 plus tens of MB more in registers and L1."
+  },
+  {
+   "caption": "Each bit is six transistors: two inverters holding each other",
+   "text": "Two inverters are wired in a loop, so each one's output drives the other's input. The loop settles at 0 or 1 and stays there as long as power is on. Two access transistors connect it to the bitlines."
+  },
+  {
+   "caption": "No refresh: the latch holds its bit by itself",
+   "text": "Unlike a DRAM capacitor, the latch is actively driven, so it never leaks away and needs no refresh. That is why SRAM answers in about a nanosecond, many times faster than HBM."
+  },
+  {
+   "caption": "A read raises the wordline and the cell pulls one bitline down",
+   "text": "The wordline turns on both access transistors, the side holding 0 pulls its bitline slightly low, and a sense amp reads the difference between BL and BLB. Writes overpower the latch through the same two bitlines."
+  },
+  {
+   "caption": "Fast but big: six transistors per bit versus one plus a capacitor",
+   "text": "An SRAM bit takes several times the area of a DRAM bit, and SRAM cells have barely shrunk at 3 nm, so on-chip memory is costly die area. Groq and Cerebras build inference chips around huge SRAM in place of HBM. Related: Nvidia (NVDA), TSMC (TSM), Groq (private), Cerebras (CBRS)."
+  }
+ ]
+}

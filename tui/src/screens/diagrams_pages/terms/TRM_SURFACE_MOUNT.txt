@@ -1,0 +1,21 @@
+# 1. What it is: parts placed on paste, then melted in
+
+  ┌──────────────────────┐
+  │ solder paste printed │
+  └───────────┬──────────┘
+              ▼
+  ┌──────────────────────┐
+  │ pick and place       │
+  └───────────┬──────────┘
+              ▼
+  ┌──────────────────────┐
+  │ reflow oven          │
+  └───────────┬──────────┘
+              ▼
+  ┌──────────────────────┐
+  │ inspect and test     │
+  └───────────┬──────────┘
+
+# 2. Why AI cares
+
+Dense AI boards need tight placement and reflow control. Line speed and first-pass yield decide how many boards an EMS plant can ship.

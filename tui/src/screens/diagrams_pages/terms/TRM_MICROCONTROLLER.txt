@@ -1,0 +1,17 @@
+# 1. What it is: a whole small computer on one chip
+
+   ┌─────────┐    ┌─────────────┐    ┌──────────────┐
+   │ sensors │    │ MCU         │    │ motors, LEDs │
+   │ buttons │───▶│ CPU + flash │───▶│ power stages │
+   └─────────┘    │ RAM + I/O   │    └──────────────┘
+                  └─────────────┘                    
+
+  (typically Arm Cortex-M or similar, tens to hundreds of MHz)
+
+# 2. Why it matters
+
+MCUs are sticky: customers write code for one family and rarely switch. Inventory gluts in 2023-2024 hit the leaders' revenue hard.
+
+# 3. AI angle
+
+MCUs manage power supplies, fans and boards in servers; small 'edge AI' MCUs add neural accelerators.

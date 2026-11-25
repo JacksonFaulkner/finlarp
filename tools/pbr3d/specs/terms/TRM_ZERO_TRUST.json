@@ -1,0 +1,202 @@
+{
+ "slug": "TRM_ZERO_TRUST",
+ "beats": [
+  {
+   "caption": "Every request goes through a policy check",
+   "boxes": [
+    {
+     "name": "user",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "policy",
+     "lo": [
+      -180,
+      -80,
+      -40
+     ],
+     "hi": [
+      -20,
+      80,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "one_app",
+     "lo": [
+      60,
+      -50,
+      -40
+     ],
+     "hi": [
+      180,
+      50,
+      0
+     ],
+     "mat": "quartz"
+    },
+    {
+     "name": "lan",
+     "lo": [
+      240,
+      -60,
+      -40
+     ],
+     "hi": [
+      380,
+      60,
+      0
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "req",
+     "from": [
+      -260,
+      0,
+      -20
+     ],
+     "to": [
+      -180,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "grant",
+     "from": [
+      -20,
+      0,
+      -20
+     ],
+     "to": [
+      60,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "user + device",
+     "at": [
+      -320,
+      80,
+      20
+     ]
+    },
+    {
+     "text": "identity, device, risk",
+     "at": [
+      -100,
+      110,
+      20
+     ]
+    },
+    {
+     "text": "one app, not LAN",
+     "at": [
+      120,
+      80,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Least privilege per app, not the network",
+   "boxes": [
+    {
+     "name": "user",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "policy",
+     "lo": [
+      -180,
+      -80,
+      -40
+     ],
+     "hi": [
+      -20,
+      80,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "one_app",
+     "lo": [
+      60,
+      -50,
+      -40
+     ],
+     "hi": [
+      180,
+      50,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "lan",
+     "lo": [
+      240,
+      -60,
+      -40
+     ],
+     "hi": [
+      380,
+      60,
+      0
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "least privilege",
+     "at": [
+      -20,
+      -130,
+      20
+     ]
+    },
+    {
+     "text": "no flat network",
+     "at": [
+      240,
+      80,
+      20
+     ]
+    }
+   ]
+  }
+ ]
+}

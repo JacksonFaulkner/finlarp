@@ -1,0 +1,231 @@
+{
+ "slug": "TRM_VECTOR_DATABASE",
+ "beats": [
+  {
+   "caption": "A document becomes an embedding",
+   "boxes": [
+    {
+     "name": "doc",
+     "lo": [
+      -220,
+      100,
+      -40
+     ],
+     "hi": [
+      220,
+      160,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "embedding",
+     "lo": [
+      -220,
+      20,
+      -40
+     ],
+     "hi": [
+      220,
+      80,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "ann_index",
+     "lo": [
+      -220,
+      -100,
+      -40
+     ],
+     "hi": [
+      220,
+      -30,
+      0
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "store",
+     "from": [
+      0,
+      100,
+      -20
+     ],
+     "to": [
+      0,
+      80,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "lookup",
+     "from": [
+      0,
+      20,
+      -20
+     ],
+     "to": [
+      0,
+      -30,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "doc: refund policy",
+     "at": [
+      -200,
+      180,
+      20
+     ]
+    },
+    {
+     "text": "embedding: [0.12, ...]",
+     "at": [
+      -200,
+      60,
+      20
+     ]
+    },
+    {
+     "text": "ANN index (HNSW)",
+     "at": [
+      -200,
+      -115,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Query returns nearest stored vectors",
+   "boxes": [
+    {
+     "name": "doc",
+     "lo": [
+      -220,
+      100,
+      -40
+     ],
+     "hi": [
+      220,
+      160,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "embedding",
+     "lo": [
+      -220,
+      20,
+      -40
+     ],
+     "hi": [
+      220,
+      80,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "ann_index",
+     "lo": [
+      -220,
+      -100,
+      -40
+     ],
+     "hi": [
+      220,
+      -30,
+      0
+     ],
+     "mat": "quartz"
+    },
+    {
+     "name": "query",
+     "lo": [
+      -340,
+      -30,
+      -40
+     ],
+     "hi": [
+      -260,
+      30,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "top_k",
+     "lo": [
+      -160,
+      -170,
+      -40
+     ],
+     "hi": [
+      160,
+      -130,
+      0
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "ask",
+     "from": [
+      -260,
+      0,
+      -20
+     ],
+     "to": [
+      -220,
+      -30,
+      -20
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "topk",
+     "from": [
+      0,
+      -100,
+      -20
+     ],
+     "to": [
+      0,
+      -130,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "top-k IDs + distances",
+     "at": [
+      0,
+      -190,
+      20
+     ]
+    },
+    {
+     "text": "RAG retrieval layer",
+     "at": [
+      -180,
+      50,
+      20
+     ]
+    }
+   ]
+  }
+ ]
+}

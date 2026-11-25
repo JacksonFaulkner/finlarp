@@ -1,0 +1,18 @@
+# 1. What it is: ultra-pure liquids that clean and etch wafers
+
+   ┌──────────────────┐
+   │ bulk chemical    │
+   │ (HF, H2SO4, NH3) │
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ purify to ppt    │  metals and particles removed
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ wet bench        │  clean or etch, then rinse
+   └──────────────────┘
+
+# 2. Why AI cares
+
+Advanced logic and memory need many clean and etch steps. Fab output depends on steady deliveries of electronic-grade chemicals.

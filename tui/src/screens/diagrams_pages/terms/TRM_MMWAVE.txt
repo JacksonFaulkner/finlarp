@@ -1,0 +1,15 @@
+# 1. What it is: fast radio with short reach
+
+   ┌────────────┐  24-100 GHz  ┌──────────────┐
+   │ mmWave     │─────────────▶│ PHASED ARRAY │
+   │ small cell │◀─────────────│ front end    │
+   └────────────┘              └──────────────┘
+          ▲                            ▲
+          │   blocked by walls,        │
+          │   range ~hundreds of m     │
+
+  (wide channels, high peak rate, short range)
+
+# 2. Why it matters
+
+mmWave needs many small sites and phased-array modules, so it adds RF content per site even though its coverage is limited.

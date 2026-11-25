@@ -1,0 +1,13 @@
+# 1. What it is: two DRAM ranks read at once through a mux
+
+   ┌────────┐   ┌────────────┐   ┌────────────┐
+   │ RANK 0 │──▶│ MUX BUFFER │──▶│ CPU        │
+   │ DDR5   │   │ combines   │   │ 8800+ MT/s │
+   └────────┘   │ both ranks │   └────────────┘
+                └────────────┘                 
+
+  (RANK 1 also feeds the mux buffer in parallel)
+
+# 2. Why it matters
+
+More bandwidth per DIMM slot; the buffer chips are extra content for interface chip vendors.

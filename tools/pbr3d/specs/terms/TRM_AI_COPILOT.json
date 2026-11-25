@@ -1,0 +1,200 @@
+{
+ "slug": "TRM_AI_COPILOT",
+ "beats": [
+  {
+   "caption": "User works in an app; copilot reads context",
+   "boxes": [
+    {
+     "name": "user",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "copilot",
+     "lo": [
+      -130,
+      -70,
+      -40
+     ],
+     "hi": [
+      110,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "appdata",
+     "lo": [
+      160,
+      -70,
+      -40
+     ],
+     "hi": [
+      360,
+      70,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "ctx",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -140,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "user in app",
+     "at": [
+      -320,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "AI copilot",
+     "at": [
+      -10,
+      90,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "user",
+    "copilot",
+    "ctx"
+   ]
+  },
+  {
+   "caption": "Copilot suggests; user approves before data changes",
+   "boxes": [
+    {
+     "name": "user",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "copilot",
+     "lo": [
+      -130,
+      -70,
+      -40
+     ],
+     "hi": [
+      110,
+      70,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "appdata",
+     "lo": [
+      160,
+      -70,
+      -40
+     ],
+     "hi": [
+      360,
+      70,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "ok",
+     "lo": [
+      130,
+      -6,
+      -20
+     ],
+     "hi": [
+      200,
+      6,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "ctx",
+     "from": [
+      -250,
+      0,
+      -20
+     ],
+     "to": [
+      -140,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "approve",
+     "from": [
+      130,
+      0,
+      -20
+     ],
+     "to": [
+      150,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "user approves",
+     "at": [
+      60,
+      -110,
+      0
+     ]
+    },
+    {
+     "text": "docs, code, CRM",
+     "at": [
+      260,
+      90,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,21 @@
+# 1. What it is: the controls layer for building plant
+
+  ┌───────────────────────────┐
+  │ BMS SERVER                │
+  │ trends, alarms, schedules │
+  └───────────────────────────┘
+                │
+                ▼ BACnet / Modbus
+  ┌───────────────────────────┐
+  │ CONTROLLERS               │
+  │ pumps, fans, valves       │
+  └───────────────────────────┘
+                │
+                ▼ sensor signals
+  ┌───────────────────────────┐
+  │ FIELD DEVICES             │
+  │ temps, meters, pressure   │
+  └───────────────────────────┘
+
+# 2. Why AI cares
+A large AI hall runs hundreds of cooling and power points that need tight control. The BMS joins them and supplies the telemetry operators use to hold PUE and uptime targets.

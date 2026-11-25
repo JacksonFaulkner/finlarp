@@ -1,0 +1,11 @@
+{
+ "label": "TPU",
+ "term": "TPU",
+ "aliases": [
+  "tensor processing unit",
+  "Trainium",
+  "Inferentia",
+  "MTIA"
+ ],
+ "kind": "compute"
+}

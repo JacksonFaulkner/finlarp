@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CAS_LATENCY",
+ "script": "terms/trm_cas_latency.py",
+ "beats": [
+  {
+   "caption": "HBM stacks next to the GPU hold the model's data",
+   "text": "An AI accelerator reads its weights and activations from HBM, stacks of DRAM dies beside the GPU package. Every read lands in one bank of one die, and the bank answers on a fixed clock schedule set by timing numbers."
+  },
+  {
+   "caption": "Row 3 is already open: the row buffer holds it",
+   "text": "An earlier ACTIVATE raised wordline 3 and the sense amps latched the whole row into the row buffer. Any column of this row can now be read without touching the cells again."
+  },
+  {
+   "caption": "READ goes in, then the bank waits CL clock cycles",
+   "text": "The controller sends READ with a column address. The bank selects those columns in the row buffer and drives them toward the I/O pins, which takes a fixed number of clock cycles: the CAS latency, CL or tCL. Each block in the bar is one memory clock."
+  },
+  {
+   "caption": "After CL, the data burst streams out",
+   "text": "When CL cycles have passed, the first data word appears on the bus and the rest of the burst follows on consecutive clock edges. The controller can already have the next READ queued, so bursts from the open row come back to back."
+  },
+  {
+   "caption": "CL counts cycles; the real wait is cycles times clock period",
+   "text": "DDR5-6400 at CL40 and DDR4-3200 at CL22 both wait about 13 to 14 ns, because the faster clock needs more cycles. For AI, CL matters less than bandwidth: long tensor streams keep many reads in flight and hide the wait. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS)."
+  }
+ ]
+}

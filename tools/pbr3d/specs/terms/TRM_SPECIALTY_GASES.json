@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SPECIALTY_GASES",
+ "script": "terms/trm_specialty_gases.py",
+ "beats": [
+  {
+   "caption": "Specialty gases arrive in cylinders and feed the fab's tools",
+   "text": "Fabs use dozens of high-purity process gases: nitrogen trifluoride (NF3), tungsten hexafluoride (WF6), silane, and fluorocarbon etch gases. They come in steel cylinders or bulk trailers, sit in vented gas cabinets, and pass through purifiers and valve boxes before reaching a tool. Many are toxic or burn in air, so every line is double-walled and watched by sensors."
+  },
+  {
+   "caption": "In deposition, gas molecules react and land as a thin film",
+   "text": "In chemical vapor deposition, WF6 and a reducing gas meet over a hot wafer and leave a layer of tungsten a few nanometers at a time. Silane does the same for silicon and oxide films. Each layer of a chip's wiring and insulation starts as gas flowing into a chamber like this."
+  },
+  {
+   "caption": "In etch, a plasma of fluorine gases cuts the pattern",
+   "text": "Etch tools turn fluorocarbon or chlorine gases into a glowing plasma. Ions strike the wafer and carve away the film wherever the mask leaves it open, down into deep trenches and holes. 3D NAND and gate-all-around logic need many more etch steps, so they burn more gas per wafer."
+  },
+  {
+   "caption": "NF3 plasma scrubs the chamber walls between runs",
+   "text": "Film builds up on chamber walls too, and flakes would land on wafers as defects. Fabs run NF3 through a remote plasma source between batches; the fluorine eats the buildup and leaves as exhaust. NF3 is one of the largest-volume specialty gases, and exhaust is burned in abatement units because it warms the climate."
+  },
+  {
+   "caption": "Few plants, strict purity: a bad lot can scrap wafers",
+   "text": "Purity is held to parts per billion, and a contaminated cylinder can ruin every wafer it touches. Only a handful of plants make each gas, some tied to one region (neon from Ukraine was a 2022 scare). Demand grows with deposition and etch steps per wafer. Related: Linde (LIN), Air Products (APD), Entegris (ENTG)."
+  }
+ ]
+}

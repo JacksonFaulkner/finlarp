@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MRDIMM",
+ "script": "terms/trm_mrdimm.py",
+ "beats": [
+  {
+   "caption": "MRDIMMs drop into the same DDR5 slots, with more bandwidth",
+   "text": "Server CPUs like Intel Xeon 6 and AMD's next EPYC are starved for memory bandwidth as core counts climb past 128. An MRDIMM plugs into a normal DDR5 slot but delivers up to twice the data rate, so each channel feeds more cores without adding pins to the CPU."
+  },
+  {
+   "caption": "Two ranks of standard DDR5 chips behind a mux buffer",
+   "text": "The module holds two ranks: two independent sets of ordinary DDR5 chips. An MRCD chip in the middle handles address and command for both, and a row of MDB data-buffer chips sits between the DRAM and the gold fingers."
+  },
+  {
+   "caption": "Both ranks read at once; the buffers interleave them",
+   "text": "On a normal RDIMM only one rank talks at a time. On an MRDIMM both ranks run at their usual speed together, and the MDB chips merge the two streams, sending one word from rank A, then one from rank B. The CPU side of the bus runs at twice the DRAM's own rate."
+  },
+  {
+   "caption": "8800 MT/s now, 12800 MT/s next, from the same DRAM",
+   "text": "First-generation MRDIMMs run at 8800 MT/s against 6400 for a standard RDIMM, close to 40% more bandwidth per channel. The next generation targets 12800 MT/s. Memory-bound jobs like CPU-side AI inference and databases gain the most."
+  },
+  {
+   "caption": "The buffer chips are the new content",
+   "text": "The DRAM is standard, so the extra value sits in the MRCD and MDB chips, a business led by Rambus and Montage with Renesas. Memory makers sell the modules at a premium. Related: Rambus (RMBS), Montage Technology (688008.SS), Micron (MU), SK hynix (000660.KS)."
+  }
+ ]
+}

@@ -1,0 +1,16 @@
+# 1. What it is: hash attempts per second
+
+   ┌──────────────┐
+   │ hash attempts│
+   │ per second   │
+   └──────────────┘
+          ▼
+   ┌──────────────┐
+   │ EH/s fleet   │
+   └──────────────┘
+
+  (1 EH/s = 10^18 hashes per second)
+
+# 2. Why it matters
+
+Hashrate in EH/s and efficiency in J/TH together set power draw. A fleet's share of network hashrate determines its share of block rewards.

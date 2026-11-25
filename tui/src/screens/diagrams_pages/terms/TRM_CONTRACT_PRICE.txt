@@ -1,0 +1,13 @@
+# 1. What it is: the negotiated price of memory
+
+   ┌───────────────────┐   ┌───────────────────┐   ┌──────────────┐
+   │ SPOT PRICE        │──▶│ CONTRACT PRICE    │──▶│ MAKER P&L    │
+   │ daily, small lots │   │ monthly/quarterly │   │ revenue      │
+   │ moves first       │   │ big buyers        │   │ gross margin │
+   └───────────────────┘   └───────────────────┘   └──────────────┘
+
+  (trackers like TrendForce publish contract price estimates each period)
+
+# 2. Why it matters
+
+Memory is cyclical; when contract prices rise, makers' margins expand quickly, and the reverse in downturns.

@@ -1,0 +1,17 @@
+# 1. What it is: an isolated region of a processor
+
+   ┌─────────────────────┐
+   │ normal world (OS)   │
+   │   app ──▶ call      │
+   └──────────┬──────────┘
+              ▼
+   ┌─────────────────────┐
+   │ secure world (TEE)  │
+   │  keys + secrets     │
+   └─────────────────────┘
+
+(the OS can request work from the TEE but cannot read its memory)
+
+# 2. Why AI cares
+
+TEEs are smaller than full confidential VMs, so they suit narrow jobs such as key release for a model or verifying a device before it loads weights.

@@ -1,0 +1,10 @@
+{
+ "label": "FPGA",
+ "term": "FPGA",
+ "aliases": [
+  "field-programmable gate array",
+  "FPGAs",
+  "adaptive SoC"
+ ],
+ "kind": "compute"
+}

@@ -1,0 +1,199 @@
+{
+ "slug": "TRM_5G",
+ "beats": [
+  {
+   "caption": "Phone links by radio to a base station",
+   "boxes": [
+    {
+     "name": "phone",
+     "lo": [
+      -380,
+      -40,
+      -40
+     ],
+     "hi": [
+      -280,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "radio",
+     "lo": [
+      -120,
+      -40,
+      -40
+     ],
+     "hi": [
+      -20,
+      40,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "core",
+     "lo": [
+      140,
+      -40,
+      -40
+     ],
+     "hi": [
+      280,
+      40,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "radio_link",
+     "from": [
+      -270,
+      0,
+      -20
+     ],
+     "to": [
+      -130,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "phone (UE)",
+     "at": [
+      -330,
+      70,
+      0
+     ]
+    },
+    {
+     "text": "5G radio gNodeB",
+     "at": [
+      -70,
+      70,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "phone",
+    "radio"
+   ]
+  },
+  {
+   "caption": "Base station sends traffic over fiber to the core",
+   "boxes": [
+    {
+     "name": "phone",
+     "lo": [
+      -380,
+      -40,
+      -40
+     ],
+     "hi": [
+      -280,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "radio",
+     "lo": [
+      -120,
+      -40,
+      -40
+     ],
+     "hi": [
+      -20,
+      40,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "core",
+     "lo": [
+      140,
+      -40,
+      -40
+     ],
+     "hi": [
+      280,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "fiber",
+     "lo": [
+      -10,
+      -10,
+      -30
+     ],
+     "hi": [
+      130,
+      10,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "radio_link",
+     "from": [
+      -270,
+      0,
+      -20
+     ],
+     "to": [
+      -130,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "fiber_link",
+     "from": [
+      -10,
+      0,
+      -20
+     ],
+     "to": [
+      130,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "fiber backhaul",
+     "at": [
+      60,
+      40,
+      0
+     ]
+    },
+    {
+     "text": "cloud 5G core",
+     "at": [
+      210,
+      70,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

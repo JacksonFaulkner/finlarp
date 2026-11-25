@@ -1,0 +1,17 @@
+# 1. What it is: a light gas that cannot be manufactured
+
+   ┌──────────────────┐   separated from   ┌──────────────────┐
+   │ natural gas well │───────────────────▶│ crude helium     │
+   │ (trace He)       │                    │ liquefied, purity│
+   └──────────────────┘                    └────────┬─────────┘
+                                                    ▼
+                                           ┌──────────────────┐
+                                           │ fab tools, MRI,  │
+                                           │ cryogenic cooling│
+                                           └──────────────────┘
+
+  (helium is recovered from gas fields; it escapes into air and is lost)
+
+# 2. Why AI cares
+
+Chip fabs use helium for cooling and process gas. A tight helium market can slow fab output and push up the cost of building new capacity.

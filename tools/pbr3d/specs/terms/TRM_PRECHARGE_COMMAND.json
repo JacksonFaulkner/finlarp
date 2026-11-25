@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_PRECHARGE_COMMAND",
+ "script": "terms/trm_precharge_command.py",
+ "beats": [
+  {
+   "caption": "HBM stacks beside the GPU hold its working data",
+   "text": "An AI accelerator keeps weights and activations in HBM, stacks of DRAM dies next to the GPU. Each die has many banks, and each bank can have only one row open at a time."
+  },
+  {
+   "caption": "A bank with row 2 open: the row buffer holds its data",
+   "text": "An earlier ACTIVATE raised row 2's wordline. The sense amps drove every bitline to a full 0 or 1 and the row buffer now holds the whole row. Reads of that row are fast, but no other row in this bank can be reached."
+  },
+  {
+   "caption": "PRECHARGE first restores the row into its cells",
+   "text": "Reading a DRAM cell drains its charge, so the data lives only in the sense amps after ACTIVATE. Before the row closes, the sense amps drive full-strength charge back into every cell of the row. That write-back is what keeps the bits from being lost."
+  },
+  {
+   "caption": "Then the wordline drops and bitlines settle to half voltage",
+   "text": "The wordline falls, sealing each capacitor, and every bitline pair is shorted to half the supply voltage. A bitline sitting at the midpoint is what lets the next row's tiny charge tip it up or down. The time this takes is tRP, about 14 ns in modern DRAM."
+  },
+  {
+   "caption": "Only now can the bank open another row",
+   "text": "A new ACTIVATE (row 6 here) can start once tRP has passed. Random access that keeps jumping rows pays PRECHARGE plus ACTIVATE every time, so controllers reorder requests to hit already-open rows. Related: Micron (MU), SK hynix (000660.KS), Rambus (RMBS)."
+  }
+ ]
+}

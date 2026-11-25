@@ -1,0 +1,17 @@
+# 1. What it is: a server's offload processor on the NIC
+
+   ┌──────────┐   ┌─────────────────┐   ┌──────────┐
+   │ HOST CPU │   │ DPU             │   │ NETWORK  │
+   │ apps     │──▶│ Arm cores,      │──▶│ 400-800G │
+   └──────────┘   │ crypto, storage │   └──────────┘
+                  └─────────────────┘
+
+  (AWS Nitro and NVIDIA BlueField are the best-known examples)
+
+# 2. Why AI cares
+
+Frees CPU cycles and handles tenant isolation and storage traffic for GPU clusters.
+
+# 3. Business angle
+
+Often sold with networking platforms; overlaps with SmartNIC and custom cloud silicon.

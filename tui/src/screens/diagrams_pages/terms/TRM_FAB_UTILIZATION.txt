@@ -1,0 +1,13 @@
+# 1. What it is: how full the fab is
+
+   ┌──────────────┐   ┌───────────┐   ┌─────────────┐
+   │ CAPACITY     │   │ LOADING   │   │ UTILIZATION │
+   │ wafer starts │──▶│ orders in │──▶│ loading /   │
+   │ per month    │   │           │   │ capacity    │
+   └──────────────┘   └───────────┘   └─────────────┘
+
+  (below ~80% margins drop fast; costs are mostly fixed)
+
+# 2. Why it matters
+
+Gross margin guidance often cites utilization. Underutilization charges hit COGS directly.

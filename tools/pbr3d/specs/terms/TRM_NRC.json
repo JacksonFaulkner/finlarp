@@ -1,0 +1,177 @@
+{
+ "slug": "TRM_NRC",
+ "beats": [
+  {
+   "caption": "NRC licenses each reactor",
+   "boxes": [
+    {
+     "name": "nrc",
+     "lo": [
+      -320,
+      -80,
+      -60
+     ],
+     "hi": [
+      -120,
+      80,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "permit",
+     "lo": [
+      -40,
+      -80,
+      -60
+     ],
+     "hi": [
+      160,
+      80,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "plant",
+     "lo": [
+      240,
+      -80,
+      -60
+     ],
+     "hi": [
+      400,
+      80,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "a1",
+     "from": [
+      -120,
+      0,
+      -40
+     ],
+     "to": [
+      -40,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "a2",
+     "from": [
+      160,
+      0,
+      -40
+     ],
+     "to": [
+      240,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "NRC",
+     "at": [
+      -220,
+      130,
+      0
+     ]
+    },
+    {
+     "text": "permit + operating license",
+     "at": [
+      60,
+      130,
+      0
+     ]
+    },
+    {
+     "text": "inspected plant",
+     "at": [
+      320,
+      130,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "nrc",
+    "permit",
+    "plant",
+    "a1",
+    "a2"
+   ]
+  },
+  {
+   "caption": "Restarts also need NRC approval",
+   "boxes": [
+    {
+     "name": "restart",
+     "lo": [
+      -40,
+      -260,
+      -60
+     ],
+     "hi": [
+      160,
+      -160,
+      -20
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "a3",
+     "from": [
+      60,
+      -160,
+      -40
+     ],
+     "to": [
+      60,
+      -80,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "closed-plant restart",
+     "at": [
+      -40,
+      -300,
+      0
+     ]
+    },
+    {
+     "text": "new SMR designs",
+     "at": [
+      200,
+      -200,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "nrc",
+    "permit",
+    "plant",
+    "a1",
+    "a2",
+    "restart",
+    "a3"
+   ]
+  }
+ ]
+}

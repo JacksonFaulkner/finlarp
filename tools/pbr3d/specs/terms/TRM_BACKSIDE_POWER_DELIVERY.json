@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BACKSIDE_POWER_DELIVERY",
+ "script": "terms/trm_backside_power_delivery.py",
+ "beats": [
+  {
+   "caption": "Backside power moves a chip's power wiring under the transistors",
+   "text": "Every transistor on a GPU die needs two things: power and signals. Both have always come in from the front, through the same stack of a dozen-plus copper wiring layers built on top of the transistors. Backside power delivery (BSPDN) moves the power wires to the back of the silicon, leaving the front for signals only."
+  },
+  {
+   "caption": "Today power fights signals for space in one front-side stack",
+   "text": "In a conventional flip-chip die, current from the bumps has to squeeze down through every metal layer, getting thinner and more resistive near the transistors. That resistance drops voltage (IR droop) exactly where the load is highest, and the fat power rails eat a big share of the routing tracks signals also need."
+  },
+  {
+   "caption": "The wafer is flipped, bonded to a carrier and thinned to microns",
+   "text": "To reach the transistors from behind, the finished front side is bonded face-down to a carrier wafer, then the original silicon is ground and polished from hundreds of microns down to a few hundred nanometres to a few microns. Tiny nano-TSVs are etched through to the transistor level and thick power rails are built on the back."
+  },
+  {
+   "caption": "Power comes straight up from below; the front carries only signals",
+   "text": "Now current takes a short, thick path from the bumps through the backside rails into each cell, so droop falls (Intel reported ~30% less) and cells can pack tighter. The front layers freed of power rails take more signal wires. For power-hungry AI chips that means higher clocks at the same voltage, or less power at the same speed."
+  },
+  {
+   "caption": "Intel ships it first; TSMC and Samsung follow at 2 nm-class",
+   "text": "Intel's PowerVia is in production on its 18A node; TSMC's Super Power Rail arrives with A16 and Samsung has its own version on 2 nm-class processes. The extra wafer bonding, thinning, etch and deposition steps add work for tool makers like Applied Materials (AMAT) and Lam Research (LRCX). Related: Intel (INTC), TSMC (TSM)."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+# 1. What it is: small flash that stores firmware
+
+   ┌──────────┐   ┌───────────┐   ┌───────────┐
+   │ POWER ON │──▶│ NOR FLASH │──▶│ CPU / BMC │
+   └──────────┘   │ boot code │   │ runs code │
+                  │ firmware  │   └───────────┘
+                  └───────────┘                
+
+  (sizes are MB, not GB; reads are random-access, writes are slow)
+
+# 2. Why it matters
+
+A small, steady market; AI servers add NOR content per box for BMCs, NICs, retimers and accelerators.

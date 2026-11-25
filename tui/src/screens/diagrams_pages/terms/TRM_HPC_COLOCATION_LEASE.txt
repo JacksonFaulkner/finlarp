@@ -1,0 +1,14 @@
+# 1. What it is: tenant rents powered space, owns its hardware
+
+   ┌────────────┐ $ per kW/mo  ┌────────────┐
+   │ tenant     │─────────────▶│ landlord   │
+   │ runs own   │              │ power+cool │
+   │ AI servers │◀─────────────│ + space    │
+   └────────────┘ power pass-  └────────────┘
+                  through
+
+  (rent is set per kW of critical IT load)
+
+# 2. Why it matters
+
+Long leases with investment-grade tenants support project debt. The power pass-through decides how much of the power cost the landlord keeps.

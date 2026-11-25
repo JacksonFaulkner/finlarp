@@ -1,0 +1,17 @@
+# 1. What it is: repeated row opens flip bits in neighbours
+
+   ┌──────────────┐
+   │ row N-1      │  victim: bits may flip
+   ├──────────────┤
+   │ row N        │  aggressor: opened again and again
+   ├──────────────┤
+   │ row N+1      │  victim: bits may flip
+   └──────────────┘
+         ▲
+         │ ACT / PRE, very fast, many times
+
+  (each activate disturbs charge in the rows next to it)
+
+# 2. Why AI cares
+
+Rowhammer is a reliability and security problem: a workload can corrupt memory it does not own. Mitigations such as TRR and refresh management cost some bandwidth and capacity.

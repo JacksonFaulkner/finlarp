@@ -1,0 +1,12 @@
+# 1. What it is: aiming radio energy at one user
+
+   ┌──────────┐    ╲        ╱
+   │ ARRAY    │─────╲──────╱─────▶  USER
+   │ 8 antenna│      ╲    ╱
+   │ elements │       ╲  ╱   phase shift per element
+   └──────────┘
+          (narrow beam, stronger signal, less interference)
+
+# 2. Why it matters
+
+Beamforming needs phased-array chips and many antenna elements, so it adds RF content in mmWave devices and in massive MIMO radios.

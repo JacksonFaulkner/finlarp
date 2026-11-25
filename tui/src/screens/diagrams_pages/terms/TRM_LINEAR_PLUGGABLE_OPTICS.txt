@@ -1,0 +1,23 @@
+# 1. What it is: a transceiver with no DSP in the middle
+
+   Retimed (DSP) module:
+   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+   │ SWITCH   │──▶│ DSP      │──▶│ DRIVER   │──▶│ LASER    │──▶ fiber
+   │ SerDes   │   │ retimes  │   │ analog   │   │ modulator│
+   └──────────┘   └──────────┘   └──────────┘   └──────────┘
+
+   Linear (LPO) module:
+   ┌──────────┐                  ┌──────────┐   ┌──────────┐
+   │ SWITCH   │─────────────────▶│ LINEAR   │──▶│ LASER    │──▶ fiber
+   │ SerDes   │  host does EQ    │ driver   │   │ modulator│
+   └──────────┘                  └──────────┘   └──────────┘
+
+  (DSP is often the largest share of an 800G module's ~14-16 W)
+
+# 2. Why AI cares
+
+AI clusters use tens of thousands of short optical links, so watts per link add up across a data center. LPO saves power and cost per port.
+
+# 3. The catch
+
+Without a DSP to retime, link quality depends on the host SerDes and the exact module, so reach is short and vendor mixing is harder.

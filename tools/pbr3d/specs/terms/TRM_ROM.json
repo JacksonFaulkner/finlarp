@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ROM",
+ "script": "terms/trm_rom.py",
+ "beats": [
+  {
+   "caption": "ROM holds code that must be there the moment power comes on",
+   "text": "When a board powers up, the processor needs instructions before anything else works. A small read-only memory holds that first boot code or fixed microcode, and it keeps its contents with the power off."
+  },
+  {
+   "caption": "In a mask ROM, the bits are drawn into the chip itself",
+   "text": "A mask ROM is a grid of word lines and bit lines. At each crossing the factory's photomask either places a transistor or leaves it out: present means 0, absent means 1. The data is fixed when the wafer is made."
+  },
+  {
+   "caption": "Reading: raise one word line, sense every bit line",
+   "text": "To read a row, the decoder raises one word line. Where a transistor sits, it pulls its precharged bit line low; where none sits, the line stays high. Sense amplifiers turn the pattern into a byte in a few nanoseconds."
+  },
+  {
+   "caption": "PROM: blank fuses, blown once by the user",
+   "text": "A programmable ROM ships with every fuse intact. A programmer drives high current through chosen fuses to burn them open, writing the data once. After that it cannot be changed, like a mask ROM made in the field."
+  },
+  {
+   "caption": "Mostly replaced by flash; makers Macronix, Winbond, Micron",
+   "text": "Because code needs fixing after shipping, most new boards keep boot code in SPI NOR flash or EEPROM instead, and true mask ROM survives inside chips for tiny fixed boot loaders. Macronix (2337.TW), Winbond (2344.TW) and Micron (MU) make the small NOR and ROM parts."
+  }
+ ]
+}

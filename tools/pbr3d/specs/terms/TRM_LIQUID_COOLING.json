@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_LIQUID_COOLING",
+ "script": "terms/trm_liquid_cooling.py",
+ "beats": [
+  {
+   "caption": "An AI rack now makes more heat than air can carry",
+   "text": "A rack of current Nvidia GPUs draws 120 kW or more, against 10 to 20 kW for a classic server rack. Every watt ends up as heat, and blowing enough air through a rack that dense would take hurricane fans. So each compute tray now has liquid lines plugged into it, and the heat leaves in water instead of air."
+  },
+  {
+   "caption": "A cold plate sits on each chip with coolant in tiny channels",
+   "text": "Direct-to-chip cooling bolts a copper cold plate onto each GPU and CPU. Inside, coolant (water with glycol) flows through fins a fraction of a millimetre apart, right above the die, so heat crosses only a thin layer of thermal paste and copper. Roughly 80 percent or more of a tray's heat leaves this way; fans handle the rest."
+  },
+  {
+   "caption": "Trays plug into manifolds that run down the back of the rack",
+   "text": "Each tray's hoses end in dripless quick disconnects that click onto a supply and a return manifold at the rack's rear. Cool liquid goes in at maybe 25 to 40 C and comes out 10 C or so warmer. The rack loop is a closed, clean circuit with filtered, treated coolant."
+  },
+  {
+   "caption": "The CDU pumps the loop and hands the heat to facility water",
+   "text": "A coolant distribution unit (CDU) holds the pumps, a reservoir, filters and a plate heat exchanger. Warm rack coolant passes on one side of the thin steel plates, facility water on the other, so the two never mix. The facility water carries the heat to dry coolers or chillers. One large CDU can serve several megawatts."
+  },
+  {
+   "caption": "Immersion is the other route; the plumbing is a fast-growing market",
+   "text": "Immersion cooling drops whole servers into a tank of dielectric fluid that cannot short anything, and pulls the heat out of the fluid. It is used less than cold plates but avoids fans entirely. Suppliers of CDUs, manifolds and plates: Vertiv (VRT), Schneider Electric, nVent (NVT), Modine (MOD), CoolIT, Boyd, and server makers like Super Micro (SMCI) that ship racks with the loop installed."
+  }
+ ]
+}

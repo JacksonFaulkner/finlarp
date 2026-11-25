@@ -1,0 +1,11 @@
+# 1. What it is: Ethernet retuned for AI clusters
+
+   ┌──────────────┐     ┌────────────┐     ┌──────────┐
+   │ UEC NIC      │────▶│ ETHERNET   │────▶│ UEC NIC  │
+   │ packet spray │     │ fabric     │     │ reorders │
+   │ fast retry   │     │ many paths │     │ packets  │
+   └──────────────┘     └────────────┘     └──────────┘
+
+# 2. Why it matters
+
+It is the open-standard answer to InfiniBand; adoption shifts AI networking spend toward multi-vendor Ethernet.

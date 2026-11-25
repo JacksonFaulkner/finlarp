@@ -1,0 +1,12 @@
+# 1. What it is: copper cable with a chip in each end
+
+   ┌──────────┐     ┌──────────────┐                 ┌──────────────┐     ┌────────┐
+   │ SERVER   │────▶│ AEC END      │──copper 3-7 m──▶│ AEC END      │────▶│ SWITCH │
+   │ NIC port │     │ retimer chip │                 │ retimer chip │     │ port   │
+   └──────────┘     └──────────────┘                 └──────────────┘     └────────┘
+
+  (passive copper ~2 m, AEC ~7 m, optics 100 m+)
+
+# 2. Why AI cares
+
+Racks hold more GPUs and lane speeds keep rising; AECs fill the reach gap between passive copper and optics at lower cost and power.

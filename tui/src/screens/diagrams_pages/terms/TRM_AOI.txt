@@ -1,0 +1,17 @@
+# 1. What it is: cameras check the board before test
+
+  ┌─────────────────────────────┐
+  │ board after reflow          │
+  └──────────────┬──────────────┘
+                 ▼
+  ┌─────────────────────────────┐
+  │ camera scan and image check │
+  └──────────────┬──────────────┘
+                 ▼
+  ┌─────────────────────────────┐
+  │ pass, or send to rework     │
+  └──────────────┬──────────────┘
+
+# 2. Why AI cares
+
+Each defect found here is cheaper to fix than one found in a finished server. Missed defects show up later as field failures.

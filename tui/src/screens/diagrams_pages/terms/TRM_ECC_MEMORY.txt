@@ -1,0 +1,10 @@
+# 1. What it is: memory that corrects single-bit errors
+
+┌──────────────────┬───────┐
+│ 64 data bits     │ 8 ECC │
+└──────────────────┴───────┘
+(72 bits per access; SEC-DED code fixes 1-bit errors and flags 2-bit errors)
+
+# 2. Why it matters
+
+Cosmic rays and alpha particles flip bits in DRAM now and then. ECC keeps one flipped bit from corrupting a training run or database, and it is why servers ship with it while most PCs do not.

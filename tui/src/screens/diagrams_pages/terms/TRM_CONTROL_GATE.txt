@@ -1,0 +1,19 @@
+# 1. What it is: the gate that switches a cell
+
+┌────────────────────────────────────────┐
+│        CONTROL GATE (word line)        │  gate voltage switches the cell
+├────────────────────────────────────────┤
+│          interpoly dielectric          │  blocks leakage off the gate
+├────────────────────────────────────────┤
+│             FLOATING GATE              │  trapped electrons = stored bit
+├────────────────────────────────────────┤
+│          tunnel oxide (thin)           │  electrons tunnel through on write/erase
+├────────────────────────────────────────┤
+│    n+ source   p channel   n+ drain    │  silicon substrate
+└────────────────────────────────────────┘
+
+(in NAND and NOR, control gates across a row form a word line)
+
+# 2. Why it matters
+
+Its voltage, together with the drain bias, decides whether the cell reads, programs or erases. Gate spacing and stack height are central process limits in 3D flash.

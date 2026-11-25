@@ -1,0 +1,30 @@
+{
+ "slug": "TRM_CXL",
+ "script": "terms/trm_cxl.py",
+ "beats": [
+  {
+   "caption": "A processor's memory is capped by the slots wired to it",
+   "text": "A CPU or GPU can only use the DRAM wired straight to its memory channels: a fixed number of DIMM slots, or the HBM stacks inside the GPU package. AI servers often run out of memory before they run out of compute."
+  },
+  {
+   "caption": "CXL runs a memory protocol over ordinary PCIe lanes",
+   "text": "Compute Express Link reuses the PCIe physical wires and slots but adds a load/store protocol (CXL.mem). The processor reads and writes the far memory with normal instructions, at cache-line size, instead of moving blocks through a driver like a disk or NIC."
+  },
+  {
+   "caption": "An expander card: CXL controller in front of plain DDR5",
+   "text": "The card's controller chip takes CXL requests off the PCIe PHY, translates them in its CXL.mem engine, and drives DDR5 chips through its own memory controller. To the server it shows up as extra memory with no CPU of its own, often terabytes per box."
+  },
+  {
+   "caption": "It is slower than local DRAM, but far faster than flash",
+   "text": "A local DRAM load takes roughly 100 ns. Going out over CXL adds about 100-200 ns more, since the request crosses the link and a second controller. That is still around a hundred times faster than an SSD, so it suits big KV caches, embeddings and in-memory databases."
+  },
+  {
+   "caption": "Pooling: one memory box shared by many servers",
+   "text": "With CXL 2.0/3.x switches, a rack-level box of DRAM can be carved up among several hosts and reassigned as jobs change, so memory that would sit idle in one server can be used by another. This cuts stranded memory, a large cost in big fleets."
+  },
+  {
+   "caption": "Makers: Astera Labs (ALAB), Marvell (MRVL), Micron (MU), Samsung (005930.KS)",
+   "text": "Astera Labs (ALAB) Leo and Marvell (MRVL) Structera make CXL memory controllers; Micron (MU), Samsung (005930.KS) and SK Hynix (000660.KS) sell CXL memory modules. CPUs from Intel (INTC) and AMD (AMD) support CXL natively."
+  }
+ ]
+}

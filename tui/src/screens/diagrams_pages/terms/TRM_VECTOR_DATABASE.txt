@@ -1,0 +1,18 @@
+# 1. What it is: stores embeddings, returns the nearest ones
+
+┌────────────────────────────────────────┐
+│ doc: "refund policy, 30 days"          │
+│ embedding: [0.12, -0.80, 0.33, ...]    │
+└────────────────────────────────────────┘
+            │ nearest neighbors
+            ▼
+┌────────────────────────────────────────┐
+│ index: ANN graph (e.g. HNSW)           │
+│ returns top-k IDs + distances          │
+└────────────────────────────────────────┘
+
+(an embedding is a list of numbers that places text or images in a meaning space; closeness is a distance such as cosine)
+
+# 2. Why AI cares
+
+A vector database answers a query by finding the stored embeddings closest to it, usually with an approximate nearest-neighbor index that trades a little accuracy for speed. It is the retrieval layer in most RAG systems and semantic search. Many general databases now offer vector search as a feature, so it is often not a separate purchase.

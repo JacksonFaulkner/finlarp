@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TOKENS",
+ "script": "terms/trm_tokens.py",
+ "beats": [
+  {
+   "caption": "A token is a chunk of text the model reads as one unit",
+   "text": "A language model reads and writes text as tokens: whole words, or pieces of words and punctuation. A page of ordinary prose becomes a long run of these units before the model does anything else. Counting in tokens is how model capacity, speed and price are measured."
+  },
+  {
+   "caption": "Context length is counted in tokens, and the window fills up",
+   "text": "A model can only attend to a fixed number of tokens at once, its context window. Prompt, documents and the reply all share that budget, so a longer context means more memory and more compute for every new token generated."
+  },
+  {
+   "caption": "Cloud APIs bill per token, both what goes in and what comes out",
+   "text": "Providers charge per million input and output tokens, so revenue tracks token volume directly. Output tokens usually cost more, since each one needs a full pass through the model. Some companies now disclose total tokens processed as a growth measure."
+  },
+  {
+   "caption": "GPUs generate output one token at a time",
+   "text": "Each reply is produced one token per step. Every step reads the model's weights and the cached context from GPU memory, which is why inference speed depends on memory bandwidth as much as raw compute."
+  },
+  {
+   "caption": "More tokens served means more inference hardware",
+   "text": "Rising token volume turns into demand for inference capacity: GPUs, the memory they need, and the networking that connects them. Microsoft (MSFT), Alphabet (GOOGL) and NVIDIA (NVDA) are the names most exposed to that volume."
+  }
+ ]
+}

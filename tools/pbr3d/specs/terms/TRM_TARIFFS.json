@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TARIFFS",
+ "script": "terms/trm_tariffs.py",
+ "beats": [
+  {
+   "caption": "A tariff is a tax paid at the border",
+   "text": "A tariff is an import tax charged when goods cross into a country. The importer of record pays it to customs, not the foreign seller, so a US server maker importing boards from Asia writes the check."
+  },
+  {
+   "caption": "Section 301 and 232 tariffs raise hardware costs",
+   "text": "Section 301 tariffs hit many Chinese-made goods, and Section 232 national-security actions cover steel, aluminum and are being used to probe semiconductors. A 25% duty on a $10,000 part adds $2,500 to the landed cost of every unit."
+  },
+  {
+   "caption": "Companies move assembly to avoid the duty",
+   "text": "Tariffs depend on country of origin, so server and electronics makers shift final assembly to Mexico, Taiwan, Vietnam or Thailand. Moving a line takes quarters and capex, but can cut the duty to near zero under trade deals."
+  },
+  {
+   "caption": "Deadlines pull orders forward",
+   "text": "When a new tariff is announced with a start date, buyers rush to import before it hits. That inflates revenue and inventory for a quarter or two, then demand can dip after the deadline."
+  },
+  {
+   "caption": "Filings show it in gross margin and risk factors",
+   "text": "Companies either absorb the duty, which shrinks gross margin, or pass it on in prices, which can hurt volume. Look for tariff lines in risk factors and margin guidance. Related: Dell (DELL), Super Micro (SMCI), Apple (AAPL), Applied Materials (AMAT), Celestica (CLS)."
+  }
+ ]
+}

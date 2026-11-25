@@ -1,0 +1,122 @@
+{
+ "slug": "TRM_AOI",
+ "beats": [
+  {
+   "caption": "Board comes out of reflow",
+   "boxes": [
+    {
+     "name": "board",
+     "lo": [
+      -200,
+      -40,
+      -60
+     ],
+     "hi": [
+      200,
+      40,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "board after reflow",
+     "at": [
+      0,
+      90,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Camera scans and checks the image",
+   "boxes": [
+    {
+     "name": "board",
+     "lo": [
+      -200,
+      -40,
+      -60
+     ],
+     "hi": [
+      200,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "cam",
+     "lo": [
+      -80,
+      100,
+      -40
+     ],
+     "hi": [
+      80,
+      160,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "scanline",
+     "lo": [
+      -200,
+      -6,
+      -20
+     ],
+     "hi": [
+      200,
+      6,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "scan",
+     "from": [
+      0,
+      140,
+      -20
+     ],
+     "to": [
+      0,
+      50,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "camera scan",
+     "at": [
+      120,
+      140,
+      0
+     ]
+    },
+    {
+     "text": "image check",
+     "at": [
+      120,
+      -80,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "board",
+    "cam",
+    "scanline",
+    "scan"
+   ]
+  }
+ ]
+}

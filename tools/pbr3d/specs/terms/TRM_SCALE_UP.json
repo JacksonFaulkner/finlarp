@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SCALE_UP",
+ "script": "terms/trm_scale_up.py",
+ "beats": [
+  {
+   "caption": "Two networks: scale-up inside the rack, scale-out between racks",
+   "text": "An AI cluster has two separate fabrics. Scale-up ties a group of accelerators (here 72 GPUs in one rack) together with very fast, memory-like links so they behave as one machine. Scale-out connects thousands of those groups across the building with Ethernet or InfiniBand. Each GPU is wired to both."
+  },
+  {
+   "caption": "Scale-up: copper links, memory-speed, a few metres",
+   "text": "Inside the rack every GPU links through NVSwitch trays over a copper cable spine (NVLink, or UALink in open designs). GPUs load and store directly into each other's memory with sub-microsecond latency. Copper keeps it cheap and low-power, but it only reaches a couple of metres, which caps the domain at roughly a rack."
+  },
+  {
+   "caption": "Scale-out: NICs, optics and switch tiers across the hall",
+   "text": "To leave the rack, data goes through a NIC (one per GPU), an optical transceiver and fibre to a leaf switch, up to a spine and back down. It is packet networking with RDMA, so it reaches any of 100,000 GPUs, at the cost of more hops, more latency and less bandwidth per GPU."
+  },
+  {
+   "caption": "Each GPU gets about 18x more bandwidth on scale-up",
+   "text": "A Blackwell GPU has 1.8 TB/s of NVLink but one 800 Gb/s NIC, about 100 GB/s, for scale-out. So model work is split to match: tensor and expert parallelism (chatty, every layer) stays inside the scale-up domain, data and pipeline parallelism (larger, rarer transfers) cross the scale-out network."
+  },
+  {
+   "caption": "Two markets: a contested new one and a big established one",
+   "text": "Scale-up is newer and fought over: Nvidia's proprietary NVLink against open UALink and Ethernet-based scale-up, with retimers and copper cables in between. Scale-out is the existing Ethernet/InfiniBand switch, NIC and optics market, and companies report the two separately. Related: NVDA, AVGO, ALAB, ANET, MRVL."
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+# 1. What it is: metals that make strong magnets
+
+   ┌──────────────────┐   separate   ┌──────────────────┐
+   │ ore (Nd, Pr, Dy) │─────────────▶│ oxide, metal     │
+   └──────────────────┘              └────────┬─────────┘
+                                              ▼
+                                     ┌──────────────────┐
+                                     │ NdFeB magnet     │
+                                     └────────┬─────────┘
+                                              ▼
+                                     ┌──────────────────┐
+                                     │ motor, fan,      │
+                                     │ actuator         │
+                                     └──────────────────┘
+
+  (17 elements; the magnets use mainly neodymium and dysprosium)
+
+# 2. Why AI cares
+
+Cooling fans, drive heads, and actuators in AI hardware use rare-earth magnets. Export limits on separated oxides and magnets can delay those parts.

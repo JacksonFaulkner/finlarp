@@ -1,0 +1,10 @@
+{
+ "label": "SYSTOLIC ARRAY",
+ "term": "systolic array",
+ "aliases": [
+  "systolic arrays",
+  "matrix multiply unit",
+  "MXU"
+ ],
+ "kind": "compute"
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ANALOG",
+ "script": "terms/trm_analog.py",
+ "beats": [
+  {
+   "caption": "Analog chips are everywhere the board meets the real world",
+   "text": "Analog chips handle continuous quantities: voltage, current, temperature, sound, radio. On this GPU board the VRM controller, the current-sense amplifiers in each phase, the regulators for small rails and the fan drivers are all analog or mixed-signal. The bench lays one complete chain out in a row."
+  },
+  {
+   "caption": "A sensor gives a tiny, noisy signal",
+   "text": "A temperature sensor on the hot inductor puts out a few millivolts that drift with heat, buried in electrical noise from the switching around it. Nothing digital can use it yet."
+  },
+  {
+   "caption": "Amplify, then filter",
+   "text": "An operational amplifier multiplies the signal a hundredfold with precise, stable gain. A filter of resistors and capacitors then strips the high-frequency noise, leaving a clean, slow wave. Precision here is the hard part: microvolt offsets and low drift over years and temperature."
+  },
+  {
+   "caption": "Convert, decide, and drive something physical",
+   "text": "An ADC turns the clean wave into numbers, a microcontroller decides the fan must speed up, and a driver chip turns its command back into real power: pulses that spin the fan's motor. Analog sits at both ends of every such loop."
+  },
+  {
+   "caption": "Made on old fabs, sold for decades",
+   "text": "Analog parts rarely need leading-edge transistors; many are made on 200 mm and older 300 mm lines that are long paid off. Thousands of products sell to thousands of customers for 10-20 years, so margins are high and the business follows industrial and auto cycles. Makers: TI (TXN), Analog Devices (ADI), Microchip (MCHP), NXP (NXPI), onsemi (ON)."
+  }
+ ]
+}

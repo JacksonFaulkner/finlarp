@@ -1,0 +1,1 @@
+Panel-level packaging assembles chips on large rectangular panels, for example 510 by 515 mm, instead of 300 mm round wafers. A bigger panel holds more packages per pass, which can lower cost per package for large AI packages. The approach is still early in volume, and yield, warpage and tooling are the main hurdles. Related: Amkor (AMKR), ASE (ASX), TSMC (TSM).

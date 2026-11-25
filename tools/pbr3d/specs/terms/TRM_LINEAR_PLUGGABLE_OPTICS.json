@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_LINEAR_PLUGGABLE_OPTICS",
+ "script": "terms/trm_linear_pluggable_optics.py",
+ "beats": [
+  {
+   "caption": "LPO is an optical module with the DSP chip taken out",
+   "text": "A standard 800G pluggable transceiver carries a digital signal processor (DSP) that cleans up and re-times the signal before it reaches the laser. Linear pluggable optics remove that chip and drive the laser and receiver with purely analog, linear electronics. Here a conventional module (top) and an LPO module (bottom) sit in front of the same switch chip."
+  },
+  {
+   "caption": "A DSP module re-times every bit, and that costs power",
+   "text": "In the conventional module, the electrical lanes from the switch land on the DSP, which equalises, recovers the clock and re-sends clean bits to the laser driver. That chip is about half of the module's power and adds latency on every hop."
+  },
+  {
+   "caption": "In LPO the host's SerDes does the cleanup",
+   "text": "With LPO the switch or GPU SerDes drives the signal across the board, and the module only amplifies it linearly: driver to laser on the way out, photodiode to linear TIA on the way in. All the equalisation lives in the big chip's SerDes, which is already there and already powered."
+  },
+  {
+   "caption": "Dropping the DSP saves roughly 30-50% of module power",
+   "text": "An 800G DSP module draws around 14-16 W, an LPO module around 7-9 W. Across tens of thousands of links in an AI cluster that is megawatts, plus less heat in the faceplate, lower cost and tens of nanoseconds less latency per link."
+  },
+  {
+   "caption": "The catch: shorter reach and tighter matching",
+   "text": "Without a DSP to fix things, the whole channel (host SerDes, board traces, module, fibre) must be good enough end to end, so LPO targets short in-rack and in-row links and needs tested host-module pairings. Linear receive optics (LRO) keep a DSP on transmit only as a middle ground. Broadcom (AVGO), Marvell (MRVL), Arista (ANET), Coherent (COHR) and Lumentum (LITE) are involved."
+  }
+ ]
+}

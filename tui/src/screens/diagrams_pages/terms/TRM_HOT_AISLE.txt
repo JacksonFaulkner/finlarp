@@ -1,0 +1,11 @@
+# 1. What it is: keep hot and cold air apart
+
+   ┌────────────┐     ┌───────────────┐     ┌──────────────┐
+   │ COLD AISLE │     │ RACK ROW      │     │ HOT AISLE    │
+   │ supply air │ ──▶ │ servers pull  │ ──▶ │ sealed, sent │
+   │ in front   │     │ front to back │     │ to CRAH      │
+   └────────────┘     └───────────────┘     └──────────────┘
+
+# 2. Why AI cares
+
+Hybrid AI racks still reject 15-30% of heat to air. Containment keeps that air cooling efficient.

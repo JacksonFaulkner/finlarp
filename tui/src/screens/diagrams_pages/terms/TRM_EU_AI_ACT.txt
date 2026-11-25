@@ -1,0 +1,13 @@
+# 1. What it is: EU AI Act
+
+   ┌─────────────────┐       ┌────────────────────┐       ┌─────────────────────┐
+   │ EU AI Act       │       │ risk tiers:        │       │ general-purpose AI  │
+   │ Regulation (EU) │──────▶│ banned, high-risk, │──────▶│ model duties: docs, │
+   │ 2024/1689       │       │ limited, minimal   │       │ copyright policy    │
+   └─────────────────┘       └────────────────────┘       └─────────────────────┘
+
+  (bans from Feb 2025; general-purpose duties from Aug 2025)
+
+# 2. Why AI cares
+
+The AI Act sets obligations by risk tier, and high-risk system duties were scheduled to apply from August 2026, though 2025 proposals would push some dates back. Providers of general-purpose models face documentation and copyright-policy duties. Compliance cost falls on model developers and on companies that deploy AI products in the EU.

@@ -1,0 +1,11 @@
+# 1. What it is: packages built on a big rectangle
+
+   ┌─────────────────────────┐
+   │ [die] [die] [die] [die] │
+   │ [die] [die] [die] [die] │
+   │ [die] [die] [die] [die] │
+   └─────────────────────────┘
+
+# 2. Why AI cares
+
+Square panels use more of their area than round wafers, so more packages fit per run. Warpage on large panels is harder to control, which is why volume ramps are slow.

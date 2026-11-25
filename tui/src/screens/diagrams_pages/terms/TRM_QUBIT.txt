@@ -1,0 +1,15 @@
+# 1. What it is: the quantum bit
+
+   classical bit:  0 or 1
+   qubit:          a|0> + b|1>   (superposition until measured)
+
+   ┌───────────────────┐
+   │ qubit             │  measure ──▶ 0 or 1
+   │ two-level system  │  (probability |a|^2 and |b|^2)
+   └───────────────────┘
+
+(N qubits hold 2^N amplitudes, but a readout returns only N bits)
+
+# 2. Why it matters
+
+Qubit count and error rate are the two numbers that decide whether a machine can run useful algorithms. Today's systems are noisy, so most of the near-term value is in research and access, not production AI.

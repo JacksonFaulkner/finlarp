@@ -1,0 +1,17 @@
+# 1. What it is: stacked cells that keep data unpowered
+
+   ┌────────────────────┐   ┌──────────┐   ┌──────────────┐
+   │ WORD LINES         │──▶│ CELL     │──▶│ PAGE / BLOCK │
+   │ ~200-300 layers    │   │ 1-4 bits │   │ write page   │
+   │ stacked vertically │   │ SLC..QLC │   │ erase block  │
+   └────────────────────┘   └──────────┘   └──────────────┘
+
+  (read ~50 us, program ~ms; erase happens a whole block at a time)
+
+# 2. Why AI cares
+
+Training data, checkpoints and vector databases live on flash. Large QLC drives are replacing hard disks in some AI storage tiers.
+
+# 3. Business
+
+NAND is a commodity with sharp price cycles; supply is set by wafer starts and layer-count migrations at five main makers.

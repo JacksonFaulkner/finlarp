@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NPU",
+ "script": "terms/trm_npu.py",
+ "beats": [
+  {
+   "caption": "Inside a phone or laptop, one chip runs everything",
+   "text": "Open a phone and most of the logic board is one application processor (SoC) with its memory stacked on or beside it, plus modem, power and camera chips. That one SoC holds the CPU, the graphics, the image processor and, since about 2017, a neural processing unit."
+  },
+  {
+   "caption": "The SoC is a set of blocks; the NPU is one of them",
+   "text": "On the die the CPU cores, GPU, caches, memory controllers and NPU sit side by side. The NPU takes a fair slice of area but runs only one kind of work: the matrix math of neural networks. Apple calls it the Neural Engine; Qualcomm the Hexagon NPU; Intel and AMD put one in every AI PC chip."
+  },
+  {
+   "caption": "Inside the NPU: a grid of multiply-accumulate cells",
+   "text": "A neural network is mostly multiplying big matrices. The NPU lays out thousands of small multiply-accumulate (MAC) cells in a grid, feeds weights in from one side and activations from the other, and keeps both in local SRAM so they rarely travel to DRAM. Low-precision INT8 or INT4 math keeps each cell tiny and frugal."
+  },
+  {
+   "caption": "It answers on the device instead of in the cloud",
+   "text": "Because the NPU does that math at a few watts, speech recognition, photo processing, translation and small language models can run on the device: faster, offline and private, with no round trip to a data-centre GPU. The CPU or GPU could do it too, but at several times the energy."
+  },
+  {
+   "caption": "TOPS on the spec sheet sell AI PCs and phones",
+   "text": "NPUs are rated in TOPS (trillions of operations per second): about 40-50 TOPS is the bar for a Copilot+ PC, and phone NPUs are in the same range. That rating drives device upgrade cycles more than data-centre spend. Makers: Qualcomm (QCOM), Apple (AAPL), Intel (INTC), AMD (AMD), MediaTek; Arm (ARM) licenses NPU designs."
+  }
+ ]
+}

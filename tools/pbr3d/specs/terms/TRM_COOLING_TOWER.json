@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_COOLING_TOWER",
+ "script": "terms/trm_cooling_tower.py",
+ "beats": [
+  {
+   "caption": "A cooling tower dumps the plant's heat into the air by evaporating water",
+   "text": "Water-cooled chillers reject the heat they pull out of a data hall into a condenser water loop. That loop runs out to a cooling tower at roughly 35 C and comes back around 29 C. The tower is the last step in the chain: from chip, to coolant, to chiller, to outside air."
+  },
+  {
+   "caption": "Warm water is sprayed over fill while fans pull air up through it",
+   "text": "Inside, a header of nozzles sprays the warm water over fill: stacks of corrugated plastic sheets that spread it into thin films with a huge surface area. Air enters through louvers at the bottom and rises against the falling water. Drift eliminators above the spray catch droplets before the air leaves, and the cooled water collects in a basin."
+  },
+  {
+   "caption": "Evaporating about 1% of the flow cools the rest by ~6 C",
+   "text": "Each kilogram of water that evaporates carries away about 2,400 kJ, so a small fraction turning to vapour chills everything that falls past it. That is why towers can cool water below the outdoor dry-bulb temperature and run with a lower energy bill than air-cooled chillers. The white plume on a cold day is that vapour condensing."
+  },
+  {
+   "caption": "The catch: water use, refilled through a make-up meter",
+   "text": "Evaporated water has to be replaced, and some basin water is bled off (blowdown) so dissolved minerals do not build up. Rejecting 100 MW of heat this way evaporates on the order of 3 million litres a day. In dry or water-stressed regions that can decide where a campus is built, or push it toward dry coolers instead."
+  },
+  {
+   "caption": "Big AI campuses mix towers, dry coolers and chillers",
+   "text": "Warm-water liquid cooling lets many new sites skip evaporation for most of the year, but towers remain the cheapest way to reject heat where water is plentiful. Makers and suppliers: SPX Technologies (SPXC, Marley), Modine (MOD), Johnson Controls (JCI), Trane Technologies (TT), plus EVAPCO and Baltimore Aircoil (private)."
+  }
+ ]
+}

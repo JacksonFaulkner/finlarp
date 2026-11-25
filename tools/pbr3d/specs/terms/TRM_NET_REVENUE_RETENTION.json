@@ -1,0 +1,189 @@
+{
+ "slug": "TRM_NET_REVENUE_RETENTION",
+ "beats": [
+  {
+   "caption": "Same-customer revenue, year over year",
+   "boxes": [
+    {
+     "name": "start",
+     "lo": [
+      -380,
+      -30,
+      -20
+     ],
+     "hi": [
+      -200,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "end",
+     "lo": [
+      120,
+      -30,
+      -20
+     ],
+     "hi": [
+      300,
+      40,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "change",
+     "from": [
+      -200,
+      0,
+      -10
+     ],
+     "to": [
+      120,
+      0,
+      -10
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "START: $100 ARR cohort",
+     "at": [
+      -290,
+      90,
+      0
+     ]
+    },
+    {
+     "text": "END: $115 ARR, same logos",
+     "at": [
+      210,
+      90,
+      0
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "Expansion, churn and downsell net against each other",
+   "boxes": [
+    {
+     "name": "start",
+     "lo": [
+      -380,
+      -30,
+      -20
+     ],
+     "hi": [
+      -200,
+      40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "up",
+     "lo": [
+      -120,
+      80,
+      -20
+     ],
+     "hi": [
+      40,
+      140,
+      0
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "down",
+     "lo": [
+      -120,
+      -120,
+      -20
+     ],
+     "hi": [
+      40,
+      -60,
+      0
+     ],
+     "mat": "alarm"
+    },
+    {
+     "name": "end",
+     "lo": [
+      120,
+      -30,
+      -20
+     ],
+     "hi": [
+      300,
+      40,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "expand",
+     "from": [
+      -200,
+      20,
+      -10
+     ],
+     "to": [
+      -120,
+      110,
+      -10
+     ],
+     "mat": "glow"
+    },
+    {
+     "name": "churn",
+     "from": [
+      -120,
+      -90,
+      -10
+     ],
+     "to": [
+      -200,
+      -20,
+      -10
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "tags": [
+    {
+     "text": "+30 expansion",
+     "at": [
+      -40,
+      160,
+      0
+     ]
+    },
+    {
+     "text": "-10 churn, -5 downsell",
+     "at": [
+      -40,
+      -150,
+      0
+     ]
+    },
+    {
+     "text": "115 / 100 = 115%",
+     "at": [
+      220,
+      90,
+      0
+     ]
+    }
+   ]
+  }
+ ]
+}

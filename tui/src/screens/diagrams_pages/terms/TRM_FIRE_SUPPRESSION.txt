@@ -1,0 +1,21 @@
+# 1. What it is: detect, then put the fire out
+
+  ┌──────────────────────┐
+  │ SMOKE / HEAT SENSORS │
+  │ early warning        │
+  └──────────────────────┘
+              │
+              ▼ trip
+  ┌──────────────────────┐
+  │ CONTROL PANEL        │
+  │ releases the zone    │
+  └──────────────────────┘
+              │
+              ▼ release
+  ┌──────────────────────┐
+  │ AGENT / MIST         │
+  │ clean gas, no water  │
+  └──────────────────────┘
+
+# 2. Why AI cares
+A fire in a dense AI hall can destroy expensive accelerators. The suppression choice also shapes the room, since gas systems need a sealed space to work.

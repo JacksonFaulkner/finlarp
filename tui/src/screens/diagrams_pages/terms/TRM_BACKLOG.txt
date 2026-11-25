@@ -1,0 +1,12 @@
+# 1. What it is: orders signed but not yet delivered
+
+   ┌────────────┐    ┌──────────────────┐    ┌──────────────┐
+   │ NEW ORDERS │───▶│ BACKLOG / RPO    │───▶│ REVENUE      │
+   │ bookings   │    │ signed, unearned │    │ as delivered │
+   └────────────┘    └──────────────────┘    └──────────────┘
+
+  (book-to-bill above 1.0 = backlog growing)
+
+# 2. Reading it
+
+Compare backlog growth with revenue growth. Note how much converts within 12 months, which companies usually disclose next to RPO.

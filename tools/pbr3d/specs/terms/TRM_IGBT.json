@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_IGBT",
+ "script": "terms/trm_igbt.py",
+ "beats": [
+  {
+   "caption": "IGBTs live upstream of the GPU board, where volts are high",
+   "text": "The GPU board runs on 12 V and below, switched by MOSFETs. IGBTs (insulated gate bipolar transistors) work further up the chain: in UPS inverters, chiller and pump motor drives, wind and solar inverters, trains and older EV drives, switching hundreds to thousands of volts."
+  },
+  {
+   "caption": "A MOSFET on top, a bipolar transistor underneath",
+   "text": "The top looks like a power MOSFET: emitter metal, trench gates in oxide, n+ source and p-body. The difference is at the bottom: a p+ collector layer under a thick n- drift region. That extra layer turns the device into a MOSFET driving a bipolar transistor."
+  },
+  {
+   "caption": "Gate on: electrons go down, holes come up, the drift floods",
+   "text": "With the gate on, electrons flow down the channel as in a MOSFET. They reach the p+ collector, which injects holes back up into the drift region. Flooded with both carriers, the thick drift conducts far better than it could alone (conductivity modulation), so one chip carries large currents at high voltage."
+  },
+  {
+   "caption": "A module: many chips on ceramic, wired in parallel",
+   "text": "Real IGBTs ship as modules: several chips and their diodes soldered onto a ceramic DBC substrate, joined by rows of aluminium bond wires, on a copper baseplate that bolts to a heatsink, with big screw terminals on top."
+  },
+  {
+   "caption": "Turn-off is slow: holes linger, a tail current wastes energy",
+   "text": "Switch the gate off and the stored holes must drain away before current stops, leaving a tail that wastes energy each cycle. That caps IGBTs at ~tens of kHz, and is why SiC MOSFETs take the high end. IGBTs stay cheaper per amp for much industrial work. Makers: Infineon (IFNNY), Mitsubishi Electric, onsemi (ON), STMicro (STM), Fuji Electric."
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+# 1. What it is: orders compared with shipments
+
+ ┌───────────────┐
+ │ BOOKINGS      │  $1.2B new orders
+ └───────┬───────┘
+         │ divided by
+ ┌───────┴───────┐
+ │ BILLINGS      │  $1.0B shipped
+ └───────┬───────┘
+         │ above 1.0 = backlog grows
+ ┌───────┴───────┐
+ │ RATIO 1.2x    │
+ └───────────────┘
+
+# 2. Why it matters
+
+It is a rough, quarterly gauge of demand momentum. Companies define bookings differently, so compare a company with its own history rather than with peers.

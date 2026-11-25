@@ -1,0 +1,10 @@
+{
+  "label": "SERDES",
+  "term": "SerDes",
+  "aliases": [
+    "serializer/deserializer",
+    "112G SerDes",
+    "224G"
+  ],
+  "kind": "networking"
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_EDFA",
+ "script": "terms/trm_edfa.py",
+ "beats": [
+  {
+   "caption": "Long fibre routes need a boost every 60-100 km",
+   "text": "Light in glass fibre loses about 0.2 dB per km, so after an 80 km span only about a fiftieth of the power is left. A long-haul route is a chain of spans with an amplifier hut at each joint. The erbium-doped fibre amplifier (EDFA) is the box in those huts, and it amplifies without ever turning the light into electricity."
+  },
+  {
+   "caption": "Dozens of faint colours arrive together",
+   "text": "A DWDM fibre carries many wavelengths in the C-band, around 1530-1565 nm, each one a separate channel. After a span every channel is weak. Converting each one to electrical form, regenerating it and re-transmitting it would need a full transceiver per colour; the EDFA avoids all of that."
+  },
+  {
+   "caption": "A pump laser energises erbium ions in a coil of special fibre",
+   "text": "Inside the box sits 5-30 m of fibre whose core is doped with erbium. A 980 nm (or 1480 nm) pump laser is merged into that fibre by a WDM coupler. The pump light lifts the erbium ions into an excited state, storing energy along the coil."
+  },
+  {
+   "caption": "Signal photons trigger the ions to add identical photons",
+   "text": "When a signal photon passes an excited ion, the ion drops back and emits a second photon with the same wavelength, phase and direction (stimulated emission). Every colour in the C-band is copied this way at once, for 20-30 dB of gain. One amplifier serves all the channels, which is what made DWDM long-haul affordable."
+  },
+  {
+   "caption": "Filters and isolators tidy the output; amps repeat down the route",
+   "text": "Erbium gain is uneven across colours, so a gain-flattening filter evens the channels out, and optical isolators stop reflections from turning the coil into a laser. Each amp adds a little noise, which limits how many can be chained before a full regeneration. Lumentum (LITE), Coherent (COHR) and Ciena (CIEN) build them; ROADM nodes contain them too."
+  }
+ ]
+}

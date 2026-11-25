@@ -1,0 +1,16 @@
+# 1. What it is: chips for real-world, continuous signals
+
+   ┌────────────┐    ┌──────────────┐    ┌───────────┐    ┌──────────────┐
+   │ sensor     │    │ amp + ADC    │    │ digital   │    │ DAC + driver │
+   │ real world │───▶│ analog chips │───▶│ CPU / MCU │───▶│ analog chips │
+   └────────────┘    └──────────────┘    └───────────┘    └──────────────┘
+
+  (analog sits at both edges of every digital system)
+
+# 2. Why it matters
+
+Analog parts sell for years with little price pressure, so gross margins run 60%+ at leaders. Inventory cycles in industrial and auto drive the swings.
+
+# 3. AI angle
+
+Data center power management and high-speed interface chips are the main AI-linked analog lines.

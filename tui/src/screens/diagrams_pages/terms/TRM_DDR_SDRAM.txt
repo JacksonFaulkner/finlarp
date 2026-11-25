@@ -1,0 +1,19 @@
+# 1. What it is: the standard DRAM in servers and PCs
+
+┌────────────────────┐
+│ DDR SDRAM chip     │
+│ data moves on both │
+│ clock edges        │
+└────────────────────┘
+      ▲  64-bit
+      ▼  data bus
+┌────────────┐
+│ CPU memory │
+│ controller │
+└────────────┘
+
+(DDR = both clock edges; SDRAM = synchronous with the clock)
+
+# 2. Why AI cares
+
+Servers use DDR5 for large, cheap capacity. Per-channel bandwidth is far below HBM, so DDR feeds the CPU side of an AI server rather than the accelerator.

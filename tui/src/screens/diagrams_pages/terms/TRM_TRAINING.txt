@@ -1,0 +1,17 @@
+# 1. What it is: teaching a model from data
+
+   ┌───────────────┐   ┌──────────────┐   ┌────────────┐
+   │ DATA          │──▶│ GPU CLUSTER  │──▶│ WEIGHTS    │
+   │ text, images  │   │ forward pass │   │ updated    │
+   │ trillions tok │   │ backprop     │   │ checkpoint │
+   └───────────────┘   └──────────────┘   └────────────┘
+
+  (one frontier run can use tens of thousands of GPUs for months)
+
+# 2. Why it matters
+
+Training builds the model by repeatedly adjusting its weights to reduce error on data. It drives demand for the largest clusters and the fastest interconnect.
+
+# 3. Scale
+
+Frontier training runs are bounded by compute, power and networking, so they shape data center capex plans.

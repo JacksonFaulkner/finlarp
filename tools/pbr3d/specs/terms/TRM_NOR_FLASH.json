@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NOR_FLASH",
+ "script": "terms/trm_nor_flash.py",
+ "beats": [
+  {
+   "caption": "NOR flash holds the firmware every board boots from",
+   "text": "A small 8-pin NOR chip sits on every server, GPU board, SSD and switch. At power-on the processor reads its boot code and firmware from it. It keeps that code with the power off and rarely gets rewritten."
+  },
+  {
+   "caption": "Cells sit in parallel, each with its own contact",
+   "text": "Cut open, each cell is a floating-gate transistor like NAND's. The difference is wiring: every NOR cell's drain has its own contact to the bit line, so the cells sit in parallel instead of in a series string."
+  },
+  {
+   "caption": "Random reads: any byte, straight off the bit line",
+   "text": "Because each cell connects directly, the chip can read any address in tens of nanoseconds. Code can execute straight from it (execute-in-place), which is why it stores boot code rather than bulk data."
+  },
+  {
+   "caption": "Write by hot electrons, erase by tunnelling",
+   "text": "Programming drives a strong drain current so fast hot electrons jump over the oxide onto the floating gate. Erase pulls them off by tunnelling, a sector at once. Writes are slow, but reads stay fast and reliable."
+  },
+  {
+   "caption": "The trade: reliable and direct, but low density",
+   "text": "The per-cell contacts take space, so NOR is roughly 10x less dense than NAND and tops out near 2 Gb per chip. That fits firmware, not datasets. Makers: Winbond (2344.TW), Macronix (2337.TW), GigaDevice (603986.SS), Infineon (IFX.DE)."
+  }
+ ]
+}

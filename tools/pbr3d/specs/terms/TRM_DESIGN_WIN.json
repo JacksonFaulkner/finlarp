@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_DESIGN_WIN",
+ "script": "terms/trm_design_win.py",
+ "beats": [
+  {
+   "caption": "A design win is a socket picked before the product exists",
+   "text": "Chip designers choose suppliers years before a product ships. Each slot on a board is a socket, and whoever gets picked for it is the design win. Nothing is sold yet."
+  },
+  {
+   "caption": "The supplier's chip is designed into the board",
+   "text": "Once a customer picks a part for a product still in design, the supplier has a seat at the table. The part gets qualified, the board is laid out around it, and the customer is slow to change it."
+  },
+  {
+   "caption": "Revenue follows one to three years later",
+   "text": "The product reaches volume production after a long development cycle, and revenue ramps with it. Companies cite design wins to show future revenue long before it appears in results."
+  },
+  {
+   "caption": "Losing the socket at the next generation drops the stream",
+   "text": "When the next product generation comes, the socket can go to a rival. The revenue stream stops in one step, so a single lost design can outweigh a year of ordinary sales."
+  },
+  {
+   "caption": "Read design wins as a lead on future revenue",
+   "text": "A design win is a lead, not a sale. Its value depends on how many sockets a supplier holds and how sticky they are. Related: Marvell (MRVL), Broadcom (AVGO), Astera Labs (ALAB), Credo (CRDO), Lattice (LSCC)."
+  }
+ ]
+}

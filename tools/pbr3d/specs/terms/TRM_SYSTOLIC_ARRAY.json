@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SYSTOLIC_ARRAY",
+ "script": "terms/trm_systolic_array.py",
+ "beats": [
+  {
+   "caption": "The matrix engine inside an AI chip is a grid of tiny calculators",
+   "text": "Inside a TPU, and inside the tensor cores of many other accelerators, sits a systolic array: a square grid of multiply-accumulate (MAC) cells wired only to their neighbours. Google's TPUs use grids of 128x128 or 256x256 cells, tens of thousands of multipliers in one block. Here it is drawn 8x8, standing beside the board."
+  },
+  {
+   "caption": "Each cell: one multiplier, one adder, one stored weight",
+   "text": "Every cell holds one number from the weight matrix in a small register. Each clock it takes an input value from its left neighbour, multiplies it by its weight, adds the partial sum coming from the cell above, and passes both on: the input to the right, the new sum downward. No cell ever talks to main memory."
+  },
+  {
+   "caption": "Weights load once and stay put",
+   "text": "Before a matrix multiply starts, a tile of weights is shifted into the grid so every cell has its own value. That tile is then reused for every row of input that flows through, often thousands of rows, before the next tile is loaded. This weight-stationary design is what the original TPU used."
+  },
+  {
+   "caption": "Data pulses through like a heartbeat, one step per clock",
+   "text": "Inputs enter the left edge staggered by one clock per row, so a diagonal wavefront sweeps across the grid. Each clock every busy cell does one multiply-add, and finished dot products drop out of the bottom row. The name comes from systole, the heart's pumping beat: data is pumped through in lockstep."
+  },
+  {
+   "caption": "One memory fetch feeds a whole row: high throughput per watt",
+   "text": "Reading a number from SRAM or HBM costs far more energy than multiplying it. In a systolic array each fetched value is used by every cell in its row, N times for an N-wide grid, so the chip spends its power on math instead of data movement. The catch is flexibility: it only shines on big, dense matrix multiplies. Related: Alphabet (GOOGL), Broadcom (AVGO), Amazon (AMZN), NVIDIA (NVDA)."
+  }
+ ]
+}

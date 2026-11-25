@@ -1,0 +1,1 @@
+The control gate is the top electrode of a flash or EEPROM transistor, sitting above the floating gate. Voltage on it reads the cell and drives charge into the floating gate during programming. Control gates in a row connect as a word line, so one voltage selects that row. Related: Micron (MU), Samsung (005930.KS), Kioxia (285A.T), SanDisk (SNDK).

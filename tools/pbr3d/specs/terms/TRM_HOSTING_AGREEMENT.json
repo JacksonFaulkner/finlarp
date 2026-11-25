@@ -1,0 +1,14 @@
+{"slug": "TRM_HOSTING_AGREEMENT", "beats": [
+ {"caption": "The site owner supplies power and space",
+  "boxes": [
+   {"name": "customer", "lo": [-300, -60, -60], "hi": [-100, 60, -10], "mat": "steel"},
+   {"name": "site", "lo": [100, -60, -60], "hi": [300, 60, -10], "mat": "quartz"}],
+  "arrows": [{"name": "power_in", "from": [100, 0, -35], "to": [-100, 0, -35], "mat": "accent"}],
+  "tags": [{"text": "AI CUSTOMER owns GPUs", "at": [-200, 110, 0]}, {"text": "SITE OWNER power + space", "at": [200, 110, 0]}]},
+ {"caption": "Customer pays a fixed fee per MW per month",
+  "boxes": [
+   {"name": "customer", "lo": [-300, -60, -60], "hi": [-100, 60, -10], "mat": "steel"},
+   {"name": "site", "lo": [100, -60, -60], "hi": [300, 60, -10], "mat": "quartz"}],
+  "arrows": [{"name": "fee", "from": [-100, -30, -35], "to": [100, -30, -35], "mat": "glow"}],
+  "tags": [{"text": "fee per MW per month", "at": [0, 110, 0]}, {"text": "operator holds no GPU risk", "at": [0, -150, 0]}]}
+]}

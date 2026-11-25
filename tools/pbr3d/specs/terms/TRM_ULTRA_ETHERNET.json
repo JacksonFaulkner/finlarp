@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ULTRA_ETHERNET",
+ "script": "terms/trm_ultra_ethernet.py",
+ "beats": [
+  {
+   "caption": "Ultra Ethernet rebuilds Ethernet's transport for AI clusters",
+   "text": "Big AI clusters wire every server to leaf switches and every leaf to every spine, so there are many equal paths between any two GPUs. Ultra Ethernet is an open specification from the Ultra Ethernet Consortium that keeps ordinary Ethernet switches and cables but replaces the transport the NICs use on top."
+  },
+  {
+   "caption": "The old problem: one flow, one path",
+   "text": "Classic Ethernet load balancing (ECMP) hashes each flow onto a single path so its packets stay in order. AI traffic is a few huge flows, so two of them can land on the same spine link while the others sit idle. That link congests and the whole training step waits for the slowest transfer."
+  },
+  {
+   "caption": "Packet spraying: every path at once",
+   "text": "The Ultra Ethernet transport sprays the packets of one flow across all the paths. They arrive out of order, and the receiving NIC writes each one straight to its place in memory, so order no longer matters. The fabric's links fill evenly instead of one running hot."
+  },
+  {
+   "caption": "Faster congestion control and loss recovery",
+   "text": "When a switch queue overflows it can trim a packet to its header instead of silently dropping it. The receiver sees the gap at once and asks for just that packet again, and senders slow down using signals from both ends. Recovering in microseconds rather than waiting on a timeout is how it aims to match InfiniBand."
+  },
+  {
+   "caption": "An open spec with many suppliers",
+   "text": "Version 1.0 was published in 2025 and switch and NIC makers are shipping compliant parts. The pitch is InfiniBand-class performance with Ethernet's multi-vendor supply and tools. Related: Broadcom (AVGO), Arista (ANET), AMD (AMD), Cisco (CSCO), Marvell (MRVL), Nvidia (NVDA)."
+  }
+ ]
+}

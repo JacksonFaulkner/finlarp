@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NEON",
+ "script": "terms/trm_neon.py",
+ "beats": [
+  {
+   "caption": "Neon is a trace of air, drawn off big air separation plants",
+   "text": "Air is about 18 parts per million neon. Air separation units that make oxygen and nitrogen, often for steel mills, chill air until it liquefies and distil it in tall columns. Neon does not liquefy there, so it collects as a crude gas that only some plants bother to capture."
+  },
+  {
+   "caption": "Crude neon is purified and filled into cylinders",
+   "text": "The crude stream is mixed with helium and nitrogen, so a separate refinery purifies it to semiconductor grade, better than 99.999%. It ships in high-pressure cylinders and tube trailers. Making a tonne of neon means processing on the order of 100,000 tonnes of air."
+  },
+  {
+   "caption": "Excimer lasers run on a gas that is mostly neon",
+   "text": "The DUV lasers in lithography tools hold a gas mix of a little argon or krypton and fluorine in a neon buffer that is over 95% of the fill. A high-voltage discharge between electrodes makes short-lived ArF molecules that emit 193 nm light in pulses, thousands per second."
+  },
+  {
+   "caption": "Those pulses print the patterns on every DUV-exposed wafer",
+   "text": "The beam passes through the scanner's lens stack and exposes photoresist through a mask, layer after layer. Even fabs with EUV use DUV for most layers. The laser gas is refreshed regularly, so a fab burns neon continuously while its scanners run."
+  },
+  {
+   "caption": "The 2022 Ukraine shock pushed fabs to recycle and diversify",
+   "text": "Before 2022, plants in Ukraine purified a large share of chip-grade neon from Russian and Ukrainian steel mill gas, and prices jumped when the war shut them. Chip makers qualified new sources and added neon recycling to lasers, cutting use by up to half. Related: ASML (ASML), Linde (LIN), Air Liquide (AI.PA)."
+  }
+ ]
+}

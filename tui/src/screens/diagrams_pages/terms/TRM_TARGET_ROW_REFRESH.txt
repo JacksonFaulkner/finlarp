@@ -1,0 +1,22 @@
+# 1. What it is: refresh the neighbours of a hot row
+
+   ┌───────────────────┐
+   │ DRAM counts ACTs  │
+   │ per row           │
+   └────────┬──────────┘
+            ▼
+   ┌───────────────────┐
+   │ row N opened a    │
+   │ lot: hot aggressor│
+   └────────┬──────────┘
+            ▼
+   ┌───────────────────┐
+   │ extra refresh on  │
+   │ rows N-1 and N+1  │
+   └───────────────────┘
+
+  (sampling counters are imperfect; the chip refreshes the likely victims)
+
+# 2. Why AI cares
+
+TRR is a DRAM-side defense against row hammer. It spends some refresh cycles on neighbours, which trims effective bandwidth slightly.

@@ -1,0 +1,1 @@
+A renewable energy certificate represents the clean attribute of one MWh produced by a renewable generator. Companies buy RECs, alone or bundled in PPAs, to claim renewable use. Hyperscalers increasingly move toward hourly matching, which makes unbundled RECs less valuable. Related: NextEra Energy (NEE), Brookfield Renewable (BEP), Microsoft (MSFT), Alphabet (GOOGL).

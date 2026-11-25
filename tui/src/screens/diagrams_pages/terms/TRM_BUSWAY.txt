@@ -1,0 +1,21 @@
+# 1. What it is: a bolt-together bar run for power
+
+  ┌────────────────────────────┐
+  │ SWITCHGEAR                 │
+  │ main breaker               │
+  └────────────────────────────┘
+                 │
+                 ▼ feeder
+  ┌────────────────────────────┐
+  │ BUSWAY RUN                 │
+  │ plug-in taps along the run │
+  └────────────────────────────┘
+                 │
+                 ▼ tap box
+  ┌────────────────────────────┐
+  │ RACK ROW                   │
+  │ PDUs at each rack          │
+  └────────────────────────────┘
+
+# 2. Why AI cares
+Busway lets an operator move a hall's power without re-cabling. That helps when rack layouts change from one GPU generation to the next.

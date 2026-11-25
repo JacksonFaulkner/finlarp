@@ -1,0 +1,17 @@
+# 1. What it is: NVIDIA's software layer for its GPUs
+
+   ┌───────────┐   ┌────────────────┐   ┌────────────┐
+   │ PYTORCH / │   │ CUDA           │   │ NVIDIA GPU │
+   │ JAX model │──▶│ cuDNN, cuBLAS, │──▶└────────────┘
+   └───────────┘   │ NCCL, compiler │
+                   └────────────────┘
+
+  (rivals: AMD ROCm, Intel oneAPI, Triton, vendor compilers)
+
+# 2. Why AI cares
+
+Kernels, libraries and tooling built over ~20 years make NVIDIA GPUs the easiest place to run new models.
+
+# 3. Business angle
+
+Software lock-in supports NVIDIA's pricing power; porting effort is the main hurdle for alternatives.

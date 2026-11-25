@@ -1,0 +1,11 @@
+{"slug":"TRM_CSRD","beats":[
+ {"caption":"CSRD requires audited sustainability data","boxes":[
+   {"name":"co","lo":[-300,-40,-40],"hi":[-120,40,0],"mat":"steel"},
+   {"name":"report","lo":[120,-60,-40],"hi":[300,60,0],"mat":"quartz"}],
+  "arrows":[{"name":"disc","from":[-120,0,-20],"to":[120,0,-20],"mat":"accent"}],
+  "tags":[{"text":"covered company","at":[-200,100,-20]},{"text":"audited disclosures","at":[210,100,-20]}]},
+ {"caption":"energy and water are reported per site","boxes":[
+   {"name":"site","lo":[-100,-150,-60],"hi":[100,-100,0],"mat":"charge"}],
+  "tags":[{"text":"site energy and water","at":[0,-180,-20]},{"text":"scope narrowed, delayed 2025","at":[0,-70,-20]}],
+  "show":["co","report","disc","site"]}
+]}

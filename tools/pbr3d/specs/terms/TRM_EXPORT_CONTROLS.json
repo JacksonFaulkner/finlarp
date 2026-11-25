@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_EXPORT_CONTROLS",
+ "script": "terms/trm_export_controls.py",
+ "beats": [
+  {
+   "caption": "Export controls decide which chips ship where",
+   "text": "The US Commerce Department's Bureau of Industry and Security (BIS) writes rules that say which chips, chipmaking tools and design software need a license to ship, and to which countries. Without a license, the sale cannot happen even if a customer is ready to pay."
+  },
+  {
+   "caption": "Since 2022, top AI GPUs and fab tools are barred from China",
+   "text": "Rules from October 2022, 2023 and later cap the compute and memory bandwidth of AI chips sold into China, and restrict advanced lithography, etch and deposition tools. Shipments to allied countries keep flowing; the China lane needs a license that is usually denied."
+  },
+  {
+   "caption": "The Entity List names specific companies",
+   "text": "Beyond country rules, BIS puts named firms on the Entity List. Selling them almost anything made with US technology needs a license. Huawei, SMIC and many Chinese AI labs and server makers are on it."
+  },
+  {
+   "caption": "A sudden ban can strand inventory",
+   "text": "When a rule changes fast, chips already built for China cannot be sold. Companies then write the inventory down: NVIDIA took about a $4.5B charge in 2025 when its H20 needed a license, and AMD took about $800M on its MI308."
+  },
+  {
+   "caption": "Chipmakers redesign SKUs and revenue shifts",
+   "text": "Vendors build cut-down versions that fall under the thresholds, and tool makers watch China's share of sales. Filings list export controls as a key risk. Related: NVIDIA (NVDA), AMD (AMD), Applied Materials (AMAT), Lam Research (LRCX), KLA (KLAC)."
+  }
+ ]
+}

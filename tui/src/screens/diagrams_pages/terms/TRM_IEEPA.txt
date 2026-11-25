@@ -1,0 +1,13 @@
+# 1. What it is: IEEPA
+
+   ┌──────────────────┐       ┌────────────────────┐       ┌──────────────────────┐
+   │ IEEPA (1977)     │       │ President declares │       │ tariffs or sanctions │
+   │ emergency powers │──────▶│ national emergency │──────▶│ by executive order   │
+   │ law              │       └────────────────────┘       └──────────────────────┘
+   └──────────────────┘
+
+  (tariffs apply to servers, GPUs, and components imported into the US)
+
+# 2. Why AI cares
+
+IEEPA was the legal basis for the broad 2025 tariffs on many trading partners, and those tariffs raised the cost of imported hardware. Companies have challenged that use of the statute in court, so the outcome affects import costs for chip and server makers. Sanctions and export-related actions also rely on the same law.

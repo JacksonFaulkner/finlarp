@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GPU_CLUSTER",
+ "script": "terms/trm_gpu_cluster.py",
+ "beats": [
+  {
+   "caption": "The building block: a rack of GPUs wired as one",
+   "text": "A GPU cluster is many GPU servers networked so they can train or serve one model together. It starts with the rack: in an Nvidia NVL72, 72 GPUs share copper NVLink through nine switch trays, so any GPU can read any other's memory at about 1.8 TB/s. Inside that domain the rack behaves like one giant GPU."
+  },
+  {
+   "caption": "Racks join through a second network: InfiniBand or Ethernet",
+   "text": "Each compute tray also has network cards (NICs), one per GPU, wired by fibre to leaf switches and from there to spine switches. This scale-out fabric is slower per GPU than NVLink but reaches every rack in the building. Big clusters use hundreds of thousands of optical links, which is why switch and optics makers ride AI build-outs."
+  },
+  {
+   "caption": "Training steps sync the whole hall at once",
+   "text": "In training, each GPU works on its slice of the batch, then all of them swap gradients (an all-reduce) before the next step. The slowest link sets the pace, so the network is designed for every GPU to talk at full speed at the same moment. The largest training clusters now link 100,000 or more GPUs across several buildings."
+  },
+  {
+   "caption": "Size is measured in megawatts as much as GPUs",
+   "text": "This hall's 32 racks would draw about 4 MW for the IT gear alone, plus cooling. A 100,000-GPU cluster needs well over 100 MW, as much as a small city, so builders quote clusters in megawatts and gigawatts and pick sites by how fast the grid can deliver power."
+  },
+  {
+   "caption": "At this scale something is always failing",
+   "text": "With tens of thousands of GPUs, optics and cables, a part fails every few hours. A training job saves checkpoints to storage and, when a rack drops out, swaps in a spare and restarts from the last one, so reliability tooling matters as much as raw speed. Related: Nvidia (NVDA), Arista (ANET), Broadcom (AVGO), CoreWeave (CRWV), Meta (META)."
+  }
+ ]
+}

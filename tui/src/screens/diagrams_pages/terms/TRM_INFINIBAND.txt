@@ -1,0 +1,12 @@
+# 1. What it is: the low-latency cluster network
+
+   ┌──────────────┐            ┌───────────┐            ┌──────────────┐
+   │ GPU SERVER   │──IB link──▶│ IB SWITCH │──IB link──▶│ GPU SERVER   │
+   │ ConnectX NIC │            │ Quantum   │            │ ConnectX NIC │
+   └──────────────┘            └───────────┘            └──────────────┘
+
+  (lossless, credit-based flow control; RDMA is native)
+
+# 2. Why AI cares
+
+Scale-out training syncs gradients across thousands of GPUs; tail latency and congestion directly cut GPU utilization.

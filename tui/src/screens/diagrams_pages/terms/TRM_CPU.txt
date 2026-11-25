@@ -1,0 +1,17 @@
+# 1. What it is: the general-purpose brain of a server
+
+   ┌────────┐   ┌────────────────┐   ┌────────────────┐
+   │ DDR5   │   │ CPU            │   │ PCIe / NVLink  │
+   │ memory │──▶│ 16-192 cores   │──▶│ to GPUs, NICs, │
+   └────────┘   │ OS, scheduling │   │ storage        │
+                └────────────────┘   └────────────────┘
+
+  (x86 ISA: Intel, AMD; Arm ISA: Grace, Graviton, Axion, Cobalt)
+
+# 2. Why AI cares
+
+Accelerators need a host to load data and run the control code. Agent and inference workloads also lean on CPUs for tool calls and data prep.
+
+# 3. Business angle
+
+Share shifts between Intel, AMD and Arm-based chips move server CPU revenue and Arm royalties.

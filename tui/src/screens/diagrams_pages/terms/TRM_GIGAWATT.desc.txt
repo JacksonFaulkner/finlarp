@@ -1,0 +1,1 @@
+Megawatts (MW) and gigawatts (GW, 1,000 MW) measure power capacity, the rate at which electricity can be delivered. Data center size is now quoted in MW of IT load, and new AI campuses target 1 GW or more. Capacity in MW, not floor space, has become the main unit of data center supply. Related: Equinix (EQIX), Digital Realty (DLR), CoreWeave (CRWV), Vistra (VST).

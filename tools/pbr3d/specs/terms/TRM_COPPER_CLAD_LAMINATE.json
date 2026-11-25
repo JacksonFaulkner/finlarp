@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_COPPER_CLAD_LAMINATE",
+ "script": "terms/trm_copper_clad_laminate.py",
+ "beats": [
+  {
+   "caption": "A copper clad laminate is copper foil bonded to a glass-and-resin core",
+   "text": "CCL is the raw sheet every printed circuit board starts from. Its core is woven glass cloth soaked in resin, which gives it stiffness and insulation, and thin copper foil (often 12 to 35 microns) is bonded to one or both faces. The board maker later etches that copper into wiring."
+  },
+  {
+   "caption": "Stacks of foil and prepreg are cured in a hot vacuum press",
+   "text": "Glass cloth is dipped in resin and part-cured into sheets called prepreg. Prepreg is stacked with foil between polished steel plates, and a press heats the stack near 200 C under pressure for an hour or more. The resin melts, flows round the glass and hardens, locking the foil on."
+  },
+  {
+   "caption": "The board maker etches the foil into the wires of a server board",
+   "text": "A PCB maker coats the copper with a photo mask, exposes the circuit pattern and etches away the copper that is not wanted. What is left are traces that carry power and signals between chips. Many etched laminates are then pressed together into one multilayer board."
+  },
+  {
+   "caption": "Low-loss resin keeps fast signals from fading in the board",
+   "text": "At 56 to 112 Gb/s per lane, ordinary FR-4 epoxy soaks up signal energy as heat, so pulses fade within a short run. Low-loss CCL uses resins with a low dielectric constant (Dk) and loss factor (Df), plus special glass, so signals reach the far chip. These grades are harder to make and few are qualified."
+  },
+  {
+   "caption": "Every AI accelerator, switch and backplane adds layers of CCL",
+   "text": "An AI server board can stack 20 to 30 laminate layers, versus 4 to 8 in a PC board, and each accelerator, switch tray and backplane adds more. CCL demand therefore rises with AI rack builds, and the low-loss pool is tight. Related: Rogers (ROG), Taiwan Union Technology (6274.TW), Shengyi Technology (600183.SS)."
+  }
+ ]
+}

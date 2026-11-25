@@ -1,0 +1,15 @@
+# 1. What it is: how much revenue comes from a few buyers
+
+ ┌───────────────┐
+ │ TOTAL REVENUE │  $10.0B
+ └───────┬───────┘
+         │ split by customer
+ ┌───────┴───────┐
+ │ CUSTOMER A    │  $4.0B = 40%
+ │ CUSTOMER B    │  $2.5B = 25%
+ │ all others    │  $3.5B = 35%
+ └───────────────┘
+
+# 2. Why it matters
+
+Under ASC 280, any customer at 10% or more of revenue must be named or flagged in the filing. Losing or cutting one of those buyers can hit revenue faster than most other risks.

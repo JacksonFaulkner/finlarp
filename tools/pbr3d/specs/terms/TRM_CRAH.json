@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CRAH",
+ "script": "terms/trm_crah.py",
+ "beats": [
+  {
+   "caption": "A CRAH cools the room air, not the chips",
+   "text": "A computer room air handler is a fridge-sized cabinet on the data hall floor. It pulls in the warm air the servers exhaust, cools it across a water coil and blows it back out, usually down into a raised floor so it rises through perforated tiles in front of the racks. A hall has a row of them along the walls."
+  },
+  {
+   "caption": "Chilled water does the cooling; the coil is the heart",
+   "text": "Inside is a big finned coil, often folded into an A shape for more area. Chilled water from the building plant runs through its tubes at roughly 10 to 18 C, and a motorised valve opens or closes to match the heat load. No compressor sits inside: that is the difference from a CRAC, which carries its own refrigerant circuit."
+  },
+  {
+   "caption": "EC fans push the cold air under the floor",
+   "text": "Variable-speed EC fans at the bottom blow the cooled air into the floor plenum, holding a small positive pressure (a few hundredths of an inch of water) so air comes up wherever a tile is perforated. Fan power goes with the cube of speed, so running more units at half speed beats a few at full speed."
+  },
+  {
+   "caption": "Sensors steer it, and a spare stands by",
+   "text": "A controller reads supply and return air temperature and humidity, then trims the valve and fan speed. Water that condenses on the coil drips into a pan and is pumped away. Halls carry at least one extra unit (N+1) so a failure or service does not warm the room. A large unit moves 100-250 kW of heat."
+  },
+  {
+   "caption": "Air runs out of road above ~20 kW a rack",
+   "text": "Room air handles about 15 to 20 kW per rack before the airflow gets impractical. AI racks run 40 to 130 kW, so GPUs move to direct liquid cooling and CRAHs shrink to the leftover heat from networking, storage and power gear. Makers: Vertiv (VRT, Liebert), Schneider, Stulz, Trane (TT), Johnson Controls (JCI), Munters."
+  }
+ ]
+}

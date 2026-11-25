@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NON_GAAP",
+ "script": "terms/trm_non_gaap.py",
+ "beats": [
+  {
+   "caption": "GAAP profit is revenue minus every cost, by the rulebook",
+   "text": "US companies report results under GAAP, the standard accounting rules. Start from revenue, take away the cost of the products sold, research and development, sales and admin, stock paid to staff, amortization of bought companies and one-off charges, and what is left is GAAP operating profit. Every company follows the same rules, so GAAP numbers compare cleanly across firms."
+  },
+  {
+   "caption": "Management flags some costs as non-cash or one-off",
+   "text": "Companies argue a few lines do not reflect how the business runs day to day. The usual three: stock-based compensation (staff paid in shares, no cash leaves), amortization of intangibles bought in acquisitions (an accounting write-down of a past deal), and restructuring such as layoffs or plant closures. Each company picks its own list."
+  },
+  {
+   "caption": "Add them back and you get the bigger non-GAAP number",
+   "text": "Non-GAAP profit is GAAP profit with those items added back. For a chip firm that bought big companies the gap is large: Broadcom's non-GAAP operating margin runs far above its GAAP margin because of VMware and earlier deal amortization plus billions in stock pay. Analyst estimates and 'beats' are usually quoted on the non-GAAP figure."
+  },
+  {
+   "caption": "Stock pay is still a real cost to shareholders",
+   "text": "Paying staff in shares spends no cash, but every grant adds shares and dilutes existing owners. Many firms then spend cash on buybacks just to hold the share count flat, so the cost shows up anyway. For AI hardware and neocloud names stock comp is often the single largest add-back, which is why some investors stick to GAAP or subtract it themselves."
+  },
+  {
+   "caption": "The SEC requires a reconciliation beside every non-GAAP figure",
+   "text": "Under Regulation G and Item 10(e), a company that publishes a non-GAAP measure must show the closest GAAP measure with equal prominence and a line-by-line table bridging the two. Read the table: if the add-backs grow every year, they are not one-off. Related: NVIDIA (NVDA), Broadcom (AVGO), Marvell (MRVL), CoreWeave (CRWV)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_DCI",
+ "script": "terms/trm_dci.py",
+ "beats": [
+  {
+   "caption": "Data center interconnect links separate data centers with fibre",
+   "text": "DCI is the network between data centers: from buildings on one campus to sites hundreds of kilometres apart. It runs over fibre that cloud providers lease or own, buried in ducts along roads and rail lines. Each site's routers hand traffic to the DCI link, which carries far more capacity per fibre than anything inside the building."
+  },
+  {
+   "caption": "DWDM: dozens of colors share one fibre",
+   "text": "Dense wavelength-division multiplexing puts many lasers of slightly different colors on one fibre, each an independent channel. Sixty-four channels of 800G on one fibre pair is over 50 Tb/s. Fibre is expensive to lay, so filling each strand with more colors is how DCI capacity grows."
+  },
+  {
+   "caption": "A coherent ZR optic turns a router port into a DWDM channel",
+   "text": "Coherent optics encode data in the phase and amplitude of the light and use a DSP to undo distortion, which reaches far further than the simple optics inside a building. ZR pluggables (400ZR, 800ZR) put this into the same port size as a normal optic, so a router can drive the long link directly instead of through a separate optical shelf."
+  },
+  {
+   "caption": "Every ~80 km an amplifier boosts all the colors at once",
+   "text": "Light fades as it travels through glass. An optical amplifier (an erbium-doped fibre amplifier) boosts every wavelength together without converting it to electricity, so long routes are chains of amplifier huts. Dedicated line systems handle these spans; ZR pluggables suit shorter, simpler links."
+  },
+  {
+   "caption": "AI spreads training over sites, so DCI keeps growing",
+   "text": "A single site often lacks the power for the largest clusters, so training and inference fleets are split across several data centers joined by very high-capacity DCI. Cloud providers are the biggest buyers. Sales show up in the optical segments of networking firms. Related: Ciena (CIEN), Cisco (CSCO), Arista (ANET), Nokia (NOK), Marvell (MRVL)."
+  }
+ ]
+}

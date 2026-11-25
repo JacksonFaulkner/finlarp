@@ -1,0 +1,16 @@
+# 1. What it is: a country buys its own AI cloud
+
+   ┌────────────────┐    ┌───────────────────┐    ┌───────────────────┐    ┌────────────────────┐
+   │ GOVERNMENT     │───▶│ NATIONAL OPERATOR │───▶│ LOCAL DATA CENTER │───▶│ LOCAL MODELS       │
+   │ budget, policy │    │ telco / champion  │    │ GPUs in-country   │    │ own language, data │
+   └────────────────┘    └───────────────────┘    └───────────────────┘    └────────────────────┘
+
+  (examples cited in filings: Saudi Arabia, UAE, Japan, France, India)
+
+# 2. Why it matters
+
+Sovereign buyers add demand that is not tied to the big US cloud capex budgets. NVIDIA has called out sovereign AI as a revenue driver in earnings calls.
+
+# 3. Risks
+
+Shipments to many of these countries need US export licenses, so timing depends on policy as much as on the customer.

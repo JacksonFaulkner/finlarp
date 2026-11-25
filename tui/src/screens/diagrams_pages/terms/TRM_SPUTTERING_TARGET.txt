@@ -1,0 +1,22 @@
+# 1. What it is: a metal plate that becomes a thin film
+
+   ┌──────────────────┐
+   │ target (Cu, Ta,  │
+   │ Ti, Al, W)       │
+   └────────┬─────────┘
+            │ ions knock atoms off
+            ▼
+   ┌──────────────────┐
+   │ vacuum chamber   │
+   └────────┬─────────┘
+            │ atoms land on wafer
+            ▼
+   ┌──────────────────┐
+   │ thin metal film  │
+   └──────────────────┘
+
+  (purity and grain size of the target control film uniformity)
+
+# 2. Why AI cares
+
+Fabs use sputtered metal layers to wire GPUs, HBM stacks, and substrates. Target supply limits how fast those tools can run.

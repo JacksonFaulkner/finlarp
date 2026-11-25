@@ -1,0 +1,17 @@
+# 1. What it is: GPU rental clouds
+
+   ┌───────────────┐     ┌──────────────┐     ┌──────────────┐
+   │ NVIDIA GPUs   │     │ NEOCLOUD     │     │ CUSTOMERS    │
+   │ bought with   │ ──▶ │ CoreWeave,   │ ──▶ │ AI labs,     │
+   │ debt + equity │     │ Nebius, IREN │     │ hyperscalers │
+   └───────────────┘     └──────────────┘     └──────────────┘
+
+  (multi-year take-or-pay contracts back the debt)
+
+# 2. Why AI cares
+
+Neoclouds add GPU capacity quickly and are large Nvidia buyers. Their contract backlog and financing costs are key filing metrics.
+
+# 3. Risks
+
+High leverage, few big customers and GPU depreciation schedules are the usual risk factors.

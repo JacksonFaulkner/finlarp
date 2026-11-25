@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SELF_REFRESH",
+ "script": "terms/trm_self_refresh.py",
+ "beats": [
+  {
+   "caption": "Normally the GPU's controller drives every DRAM command",
+   "text": "While the accelerator is busy, its memory controller sends a constant stream of ACTIVATE, READ, WRITE and REFRESH commands to the HBM stacks. Refresh is the controller's job: it must hit every row about every 64 ms."
+  },
+  {
+   "caption": "Self-refresh entry: the controller goes quiet",
+   "text": "When memory will sit idle, the controller issues a self-refresh entry command and stops talking. The DRAM takes over its own refresh, so the link and the controller's PHY can power down."
+  },
+  {
+   "caption": "The DRAM's own timer refreshes each row in turn",
+   "text": "An internal oscillator and row counter inside the die open and rewrite rows one after another, keeping every cell inside its retention window. The data stays valid with no outside commands."
+  },
+  {
+   "caption": "Only refresh draws power; the interface sleeps",
+   "text": "Clocks, I/O drivers and receivers are off, so the device draws a few milliwatts instead of watts. Many parts also adjust the refresh rate to temperature, refreshing less often when cool."
+  },
+  {
+   "caption": "Exit takes time, so it suits idle memory, not training",
+   "text": "Leaving self-refresh needs a wake-up delay of hundreds of nanoseconds before commands resume, so busy training jobs never use it. It matters for idle nodes, system suspend and memory power budgets. Related: Micron (MU), SK hynix (000660.KS), Rambus (RMBS)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ADC",
+ "script": "terms/trm_adc.py",
+ "beats": [
+  {
+   "caption": "The VRM controller measures the rail with ADCs",
+   "text": "Every system that touches the real world needs data converters. On this GPU board, the multiphase controller uses analog-to-digital converters (ADCs) to read the core voltage and each phase's current thousands of times a second, so it can steer the power stages."
+  },
+  {
+   "caption": "A real signal is a continuous wave",
+   "text": "The voltage on a wire can take any value at any instant: a smooth, continuous wave. Digital logic can only store numbers, so the wave has to be measured at moments in time."
+  },
+  {
+   "caption": "Sampling: freeze the wave at regular ticks",
+   "text": "A sample-and-hold circuit grabs the voltage at every clock tick. The tick rate must be more than twice the fastest frequency in the signal (Nyquist), or fast wiggles fold back as false slow ones."
+  },
+  {
+   "caption": "Quantizing: round each sample to a code",
+   "text": "Each held sample is compared against fixed levels and rounded to the nearest one, giving a binary code. Here 3 bits give 8 levels; real parts use 12 to 24 bits for precision, or fewer bits at GHz rates in optical DSPs and radios."
+  },
+  {
+   "caption": "A DAC turns codes back into a voltage",
+   "text": "A digital-to-analog converter does the reverse: each code sets an output level, and a filter smooths the steps into a wave again. Converters sit in radios, radar, test gear and every 800G optical link. Makers: Analog Devices (ADI), Texas Instruments (TXN), Microchip (MCHP); in-house in Marvell (MRVL) and Broadcom (AVGO) DSPs."
+  }
+ ]
+}

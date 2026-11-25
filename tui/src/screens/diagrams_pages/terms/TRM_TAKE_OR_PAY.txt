@@ -1,0 +1,13 @@
+# 1. What it is: buyer commits to buy, or pays anyway
+
+   ┌────────────────┐    ┌───────────────────┐    ┌────────────────┐
+   │ BUYER          │───▶│ SELLER            │───▶│ SHORTFALL      │
+   │ minimum volume │    │ reserved capacity │    │ buyer pays     │
+   │ commitment     │    │ prepayment        │    │ the difference │
+   └────────────────┘    └───────────────────┘    └────────────────┘
+
+  (look for 'purchase obligations' and 'prepayments' in the notes)
+
+# 2. Why it matters
+
+These contracts move supply risk from seller to buyer. In a downturn the buyer may owe for chips it no longer needs, as NVIDIA's inventory and commitment charges have shown.

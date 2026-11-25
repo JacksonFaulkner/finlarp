@@ -1,0 +1,16 @@
+# 1. What it is: fission heat to steam to power
+
+   ┌───────────┐   ┌──────────────┐   ┌─────────┐   ┌────────────┐
+   │ URANIUM   │──▶│ REACTOR      │──▶│ STEAM   │──▶│ GRID / DC  │
+   │ fuel rods │   │ fission heat │   │ turbine │   │ 24x7 power │
+   └───────────┘   └──────────────┘   └─────────┘   └────────────┘
+
+  (large plant ~1 GW; SMR ~50-300 MW per module)
+
+# 2. Why AI cares
+
+Data centers need power every hour of the year, and nuclear is the main carbon-free source that delivers that.
+
+# 3. Timing
+
+Restarts and uprates of existing plants come first; most SMRs are not expected online until the 2030s.

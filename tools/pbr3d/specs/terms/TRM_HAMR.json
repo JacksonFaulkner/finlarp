@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HAMR",
+ "script": "terms/trm_hamr.py",
+ "beats": [
+  {
+   "caption": "A hard drive writes bits as tiny magnetized patches on a spinning platter",
+   "text": "Inside a drive, glass or aluminium platters spin at 7,200 rpm while an arm swings a head a few nanometres above the surface. Each bit is a patch of magnetic grains pointing up or down. More bits per platter means more terabytes per drive without adding platters."
+  },
+  {
+   "caption": "Smaller bits need tougher grains, which a normal head cannot flip",
+   "text": "To shrink a bit you shrink the grains, but small grains lose their magnetism to room-temperature jiggling unless the material is very stubborn (high coercivity, like iron-platinum). The write pole's field is too weak to flip such stubborn grains cold."
+  },
+  {
+   "caption": "HAMR: a laser heats a nanometre spot for about a nanosecond, then the pole writes it",
+   "text": "A laser diode on the slider sends light down a waveguide to a gold near-field transducer, which focuses it to a spot tens of nanometres wide. The spot heats past about 400 C, the grains soften, the pole flips them, and they cool locked in place within a nanosecond as the platter moves on."
+  },
+  {
+   "caption": "Result: smaller grains and denser tracks than conventional recording",
+   "text": "With grains that stay stable at small sizes, HAMR raises areal density well past conventional perpendicular recording (PMR). Drives of 30-36 TB ship today with roadmaps toward 50 TB and beyond, at the same 3.5-inch size."
+  },
+  {
+   "caption": "Bulk storage for AI data lakes: Seagate (STX), Western Digital (WDC), Toshiba (6502.T)",
+   "text": "Training sets, checkpoints and logs mostly live on hard drives because they are still several times cheaper per terabyte than flash. Seagate (STX) ships HAMR first as Mozaic; Western Digital (WDC) and Toshiba (6502.T) are bringing their own HAMR drives."
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+# 1. What it is: a contract builder for other brands' hardware
+
+  ┌─────────────────────────────┐
+  │ BRAND                       │
+  │ designs the product         │
+  └──────────────┬──────────────┘
+                 ▼
+  ┌─────────────────────────────┐
+  │ EMS                         │
+  │ buys parts, builds, tests   │
+  └──────────────┬──────────────┘
+                 ▼
+  ┌─────────────────────────────┐
+  │ SHIPPED                     │
+  │ server or board to customer │
+  └──────────────┬──────────────┘
+
+# 2. Why AI cares
+
+GPU servers and racks are built largely by EMS and ODM partners, so their capacity and yield gate how fast AI systems reach customers. Margins here are thin, and one large customer can move an EMS company's revenue by a lot.

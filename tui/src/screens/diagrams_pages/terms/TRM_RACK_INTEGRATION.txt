@@ -1,0 +1,21 @@
+# 1. What it is: a full rack built and tested before shipping
+
+  ┌─────────────────────┐
+  │ servers + switches  │
+  └──────────┬──────────┘
+             ▼
+  ┌─────────────────────┐
+  │ power + cooling     │
+  └──────────┬──────────┘
+             ▼
+  ┌─────────────────────┐
+  │ burn-in and test    │
+  └──────────┬──────────┘
+             ▼
+  ┌─────────────────────┐
+  │ ship to data center │
+  └──────────┬──────────┘
+
+# 2. Why AI cares
+
+Rack-scale GPU systems arrive as one unit, so integration time and yield set how fast capacity comes online at a site.

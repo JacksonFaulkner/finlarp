@@ -1,0 +1,18 @@
+# 1. What it is: software that designs chips
+
+   ┌──────────┐   ┌─────────────┐   ┌────────────┐
+   │ SPEC     │──▶│ EDA TOOLS   │──▶│ TAPE-OUT   │
+   │ RTL code │   │ synthesis   │   │ to foundry │
+   └──────────┘   │ place/route │   └────────────┘
+                  │ verify      │                 
+                  └─────────────┘                 
+
+  (every advanced chip passes through EDA tools before manufacturing)
+
+# 2. Why it matters
+
+Chips with billions of transistors cannot be laid out by hand. EDA tools handle design, simulation and verification, and the market is dominated by two vendors.
+
+# 3. AI link
+
+More custom AI chips and harder process nodes increase EDA spending, and vendors now add AI to the tools themselves.

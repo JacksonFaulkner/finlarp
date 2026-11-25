@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ZONAL_ARCHITECTURE",
+ "script": "terms/trm_zonal_architecture.py",
+ "beats": [
+  {
+   "caption": "The old way: one box per feature, wired point to point",
+   "text": "A conventional car has 70 to 150 electronic control units (ECUs), one for the windows, one for the seats, one for the brakes and so on, each wired to its own sensors and to the others. The harness that ties them together can run to several kilometres of copper and weigh 50 kg or more, and it is one of the costliest parts to build."
+  },
+  {
+   "caption": "Zonal: a few zone controllers by location, one central brain",
+   "text": "A zonal architecture groups everything by where it sits in the car. A zone controller in each corner powers and talks to the sensors, lights and motors near it, and a central high-performance computer runs the actual features as software. Dozens of ECUs collapse into a handful of boxes."
+  },
+  {
+   "caption": "Sensors talk to the nearest zone; Ethernet carries it to the centre",
+   "text": "Each sensor or actuator now needs only a short wire to its zone. The zones join the central computer over a few automotive Ethernet links (1 to 10 Gbit/s) instead of hundreds of dedicated wires, and the same backbone can carry camera data for driver assistance."
+  },
+  {
+   "caption": "Software updates reach the whole car over the air",
+   "text": "With the logic in one central computer, a carmaker can ship a new feature or a fix over the cellular link and push it to every zone, the way phones update. That is the core of the 'software-defined vehicle' carmakers are moving to."
+  },
+  {
+   "caption": "Less copper, more central chips",
+   "text": "Fewer, shorter wires cut harness weight and assembly cost substantially. The shift moves silicon spend from many cheap microcontrollers to a few high-performance SoCs, zone MCUs and Ethernet switches. Related: NXP (NXPI), Infineon (IFNNY), Renesas (6723.T), Marvell (MRVL) for automotive Ethernet."
+  }
+ ]
+}

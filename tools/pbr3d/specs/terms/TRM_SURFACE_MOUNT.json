@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SURFACE_MOUNT",
+ "script": "terms/trm_surface_mount.py",
+ "beats": [
+  {
+   "caption": "Surface mount puts parts straight onto pads on the board's surface",
+   "text": "Older boards pushed component leads through drilled holes. Surface mount technology (SMT) instead sets each part on flat copper pads and solders it there, so parts can be tiny and sit on both sides of the board. A line is a row of machines: board loader, paste printer, pick-and-place, reflow oven, inspection."
+  },
+  {
+   "caption": "A stencil and squeegee print solder paste onto every pad",
+   "text": "A laser-cut steel stencil, about 0.1 mm thick, is clamped on the board with an opening over each pad. A squeegee drags solder paste (tiny tin-silver-copper balls in flux) across it, leaving a measured deposit on every pad at once. Most assembly defects trace back to this step, so 3D paste inspection usually follows."
+  },
+  {
+   "caption": "Pick-and-place nozzles set every part onto the wet paste",
+   "text": "Vacuum nozzles lift parts off reels and trays, a camera checks each one's position, and the head sets it down on its paste. Fast machines place tens of thousands of parts per hour; a GPU server board carries thousands of them, mostly tiny capacitors, plus big BGA chips that need extra accuracy."
+  },
+  {
+   "caption": "A reflow oven melts the paste into solder joints",
+   "text": "The board rides through zones that preheat, soak to activate the flux, peak around 240-250 C for lead-free solder, then cool. The paste melts, wets the pads and leads, and surface tension pulls parts into line. Under a BGA, hundreds of hidden balls melt at once."
+  },
+  {
+   "caption": "Inspection checks every joint; contract makers run the lines",
+   "text": "Optical cameras check placement and fillets, X-ray looks under BGAs, then electrical test. Heavy AI boards with big packages are hard to reflow without warping, which favours experienced builders. Related: Jabil (JBL), Flex (FLEX), Celestica (CLS); machines from ASMPT and Fuji."
+  }
+ ]
+}

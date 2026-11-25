@@ -1,0 +1,23 @@
+# 1. What it is: one large model adapted to many tasks
+
+┌────────────────────────────────────────┐
+│ web text, code, images,                │
+│ audio (trillions of tokens)            │
+└────────────────────────────────────────┘
+            │ pretraining (GPU-months)
+            ▼
+┌────────────────────────────────────────┐
+│ FOUNDATION MODEL                       │
+│ general-purpose weights                │
+└────────────────────────────────────────┘
+            │ adapt: prompt, RAG, tune
+            ▼
+┌────────────────────────────────────────┐
+│ apps: search, support, code            │
+└────────────────────────────────────────┘
+
+(training is paid once; every downstream product then pays inference for each request)
+
+# 2. Why AI cares
+
+A foundation model is trained once on broad data, then reused across many products through prompting, retrieval, or fine-tuning. Frontier training runs cost tens to hundreds of millions of dollars, which concentrates development among a few well-funded labs. After training, the recurring cost shifts to inference, which is where ongoing GPU demand comes from.

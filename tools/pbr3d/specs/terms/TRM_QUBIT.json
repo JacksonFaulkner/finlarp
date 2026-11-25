@@ -1,0 +1,145 @@
+{
+ "slug": "TRM_QUBIT",
+ "beats": [
+  {
+   "caption": "A qubit holds a superposition until measured",
+   "boxes": [
+    {
+     "name": "qubit",
+     "lo": [
+      -100,
+      -80,
+      -60
+     ],
+     "hi": [
+      100,
+      80,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "bit",
+     "lo": [
+      -340,
+      60,
+      -60
+     ],
+     "hi": [
+      -180,
+      120,
+      -20
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "result",
+     "lo": [
+      240,
+      -40,
+      -60
+     ],
+     "hi": [
+      380,
+      40,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "meas",
+     "from": [
+      100,
+      0,
+      -40
+     ],
+     "to": [
+      240,
+      0,
+      -40
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "classical bit: 0 or 1",
+     "at": [
+      -340,
+      150,
+      0
+     ]
+    },
+    {
+     "text": "qubit: a|0> + b|1>",
+     "at": [
+      -80,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "measure gives 0 or 1",
+     "at": [
+      200,
+      90,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "qubit",
+    "bit",
+    "result",
+    "meas"
+   ]
+  },
+  {
+   "caption": "Qubit count and error rate decide usefulness",
+   "boxes": [
+    {
+     "name": "err",
+     "lo": [
+      -120,
+      -200,
+      -60
+     ],
+     "hi": [
+      120,
+      -120,
+      -20
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "qubit count and error rate",
+     "at": [
+      -130,
+      -240,
+      0
+     ]
+    },
+    {
+     "text": "near term: research access",
+     "at": [
+      -160,
+      -300,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "qubit",
+    "bit",
+    "result",
+    "meas",
+    "err"
+   ]
+  }
+ ]
+}

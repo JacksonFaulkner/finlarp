@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RAS_TO_CAS_DELAY",
+ "script": "terms/trm_ras_to_cas_delay.py",
+ "beats": [
+  {
+   "caption": "HBM stacks next to the GPU serve every memory request",
+   "text": "The GPU's data sits in HBM stacks beside the package. A request for a row that is not open has to start with ACTIVATE, and the bank cannot answer a READ until that row is ready."
+  },
+  {
+   "caption": "The bank starts closed: no row in the buffer",
+   "text": "Bitlines are held at half voltage and the sense amps are idle. Nothing can be read until a wordline opens a row."
+  },
+  {
+   "caption": "ACTIVATE starts the tRCD clock",
+   "text": "ACTIVATE (the old RAS, row address strobe) raises wordline 3. Each cell's tiny charge leaks onto its bitline, and the sense amps need time to push that small swing to a full 0 or 1. The bar fills for those cycles: tRCD."
+  },
+  {
+   "caption": "Only after tRCD may READ pick columns",
+   "text": "Once the row buffer holds the settled row, the controller may issue READ (the old CAS, column address strobe). Issue it earlier and the sense amps would hand back garbage, so the controller counts the cycles."
+  },
+  {
+   "caption": "A row miss pays tRCD plus CL before any data",
+   "text": "Typical tRCD is around 13 to 16 ns on DDR5 and HBM. A request to a closed row waits tRCD then CL, roughly double a hit to an open row, which is why controllers reorder requests to reuse open rows. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS), Rambus (RMBS)."
+  }
+ ]
+}

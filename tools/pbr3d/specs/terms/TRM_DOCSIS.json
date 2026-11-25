@@ -1,0 +1,135 @@
+{
+ "slug": "TRM_DOCSIS",
+ "beats": [
+  {
+   "boxes": [
+    {
+     "name": "head",
+     "lo": [
+      -380,
+      -50,
+      -40
+     ],
+     "hi": [
+      -260,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "node",
+     "lo": [
+      -80,
+      -50,
+      -40
+     ],
+     "hi": [
+      40,
+      50,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "fib",
+     "from": [
+      -255,
+      0,
+      -20
+     ],
+     "to": [
+      -85,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "CMTS at headend",
+     "at": [
+      -320,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "HFC node",
+     "at": [
+      -20,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "head",
+    "node",
+    "fib"
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "modem",
+     "lo": [
+      200,
+      -50,
+      -40
+     ],
+     "hi": [
+      340,
+      50,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "coax",
+     "from": [
+      45,
+      0,
+      -20
+     ],
+     "to": [
+      195,
+      0,
+      -20
+     ],
+     "mat": "quartz"
+    }
+   ],
+   "tags": [
+    {
+     "text": "coax to the home",
+     "at": [
+      120,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "cable modem",
+     "at": [
+      270,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "head",
+    "node",
+    "fib",
+    "modem",
+    "coax"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RETENTION_TIME",
+ "script": "terms/trm_retention_time.py",
+ "beats": [
+  {
+   "caption": "HBM stacks feed the GPU, and every bit is charge on a capacitor",
+   "text": "The HBM stacks beside an AI accelerator are DRAM: each bit is a small charge on a capacitor of a few femtofarads, gated by one transistor. That charge does not stay put forever."
+  },
+  {
+   "caption": "Right after a write, each cell holds full charge",
+   "text": "A write or refresh pushes the capacitor to a full 1 or empties it to 0. The sense amp can tell them apart as long as the stored charge stays well above the halfway point."
+  },
+  {
+   "caption": "Charge leaks away; retention time is how long a bit survives",
+   "text": "Leakage through the access transistor and the junction drains the capacitor. Retention time is how long a cell keeps a readable charge. Most cells last seconds, but the weakest few set the rule: every row must be refreshed within about 64 ms."
+  },
+  {
+   "caption": "Refresh reads each row and writes it back before the deadline",
+   "text": "The controller issues REFRESH commands that open rows in turn, let the sense amps restore full charge, and close them again. While a bank refreshes it cannot serve reads, so refresh costs bandwidth and power."
+  },
+  {
+   "caption": "Heat shortens retention, so hot memory refreshes twice as often",
+   "text": "Leakage roughly doubles every 10 C or so. Above 85 C the DDR rules halve the window to 32 ms, doubling refresh overhead. Dense AI servers run memory hot, so retention drives both lost bandwidth and DRAM design. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS)."
+  }
+ ]
+}

@@ -1,0 +1,13 @@
+# 1. What it is: a radiator on the back of the rack
+
+   ┌───────────┐     ┌──────────────┐     ┌──────────────┐
+   │ SERVERS   │     │ REAR DOOR    │     │ ROOM         │
+   │ fans push │ ──▶ │ water coil   │ ──▶ │ near-neutral │
+   │ hot air   │     │ absorbs heat │     │ air returns  │
+   └───────────┘     └──────────────┘     └──────────────┘
+
+  (water loop fed by a CDU or facility chilled water)
+
+# 2. Why AI cares
+
+RDHx raises density in air-cooled buildings, extending older facilities into the AI era at lower cost than full liquid cooling.

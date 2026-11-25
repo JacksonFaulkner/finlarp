@@ -1,0 +1,17 @@
+# 1. What it is: models that plan and take actions
+
+   ┌───────────┐   ┌─────────────┐   ┌────────────┐
+   │ GOAL      │──▶│ LLM AGENT   │──▶│ ACTIONS    │
+   │ user task │   │ plan, call  │   │ apps, code │
+   └───────────┘   │ tools, loop │   │ APIs       │
+                   └─────────────┘   └────────────┘
+
+  (each task can run many model calls, multiplying tokens)
+
+# 2. Why it matters
+
+Agents chain many model calls and tool uses to complete multi-step tasks. That multiplies inference tokens per task compared with simple chat.
+
+# 3. Business
+
+Software firms are pricing agents into their products, and filings note both revenue opportunity and reliability risk.

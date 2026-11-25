@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GLASS_FIBER_CLOTH",
+ "script": "terms/trm_glass_fiber_cloth.py",
+ "beats": [
+  {
+   "caption": "Molten glass is drawn through a platinum bushing into fine filaments",
+   "text": "Glass batch is melted near 1,500 C and flows into a platinum-rhodium bushing with thousands of tiny nozzles. Filaments 5 to 9 microns thick are pulled out and cooled in a fraction of a second, then gathered and wound onto a spinning drum. The draw speed sets how thin each filament is."
+  },
+  {
+   "caption": "A loom weaves the yarn into a thin, even cloth",
+   "text": "Bundles of filaments are twisted into yarn and set up as warp threads along the loom. The weft is shot across between them, over one and under the next, row after row. PCB cloth is very thin, some styles under 20 microns, and must be flat and even with no gaps."
+  },
+  {
+   "caption": "Each yarn in the weave is a bundle of hundreds of glass filaments",
+   "text": "Up close the cloth is an over-under grid of flattened yarns, and each yarn holds a few hundred filaments. Glass gives the laminate its strength and keeps it from swelling with heat. Where glass and resin alternate, a fast signal sees a bumpy dielectric, so cloth for AI boards is spread flat to even it out."
+  },
+  {
+   "caption": "Soaked in resin, the cloth becomes prepreg, the core of every laminate",
+   "text": "The cloth runs through a resin bath and a drying oven to become prepreg, which is pressed with copper into copper clad laminate and package substrates. Ordinary E-glass works for common boards. AI boards and substrates need low-Dk glass so signals lose less, and low-expansion T-glass so big chips stay flat."
+  },
+  {
+   "caption": "Only a few mills make the special grades, and they ran short",
+   "text": "Low-Dk, T-glass and quartz yarns come mostly from a handful of makers in Japan and Taiwan. In 2024 and 2025 shortages of these grades held back laminate and substrate output as AI demand grew. Related: Owens Corning (OC), Nittobo (3110.T), AGC (5201.T)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_OSAT",
+ "script": "terms/trm_osat.py",
+ "beats": [
+  {
+   "caption": "OSATs turn finished wafers into packaged, tested chips",
+   "text": "A wafer leaving the fab is just a disc of bare dies. Outsourced semiconductor assembly and test (OSAT) firms cut it up, mount each die in a package that can be soldered to a board, and test every part. ASE and Amkor are the biggest; JCET and others are large in China. Most chip companies, even IDMs, use them for some volume."
+  },
+  {
+   "caption": "Dicing: a saw cuts the wafer into individual dies",
+   "text": "The wafer is taped to a frame and a diamond saw (or a laser) cuts along the thin streets between dies. Good dies, already marked by wafer probe testing, are picked off the tape. One 300 mm wafer gives a few dozen huge AI dies or thousands of small ones."
+  },
+  {
+   "caption": "Advanced packaging: GPU and HBM side by side on silicon",
+   "text": "An AI accelerator is not one die but several: a GPU (or two) plus HBM memory stacks placed on a silicon interposer through tens of thousands of micro-bumps, then mounted on an organic substrate with solder balls underneath. This 2.5D build (TSMC calls it CoWoS) gives the terabytes per second the GPU needs."
+  },
+  {
+   "caption": "Lid on, then every part is tested before it ships",
+   "text": "A metal lid goes on to spread heat and protect the dies. Then automatic handlers press each part into a socket and run it hot and cold through electrical tests; failures are binned out. Big AI packages take longer to test and one bad HBM stack can scrap thousands of dollars of silicon, so test time and yield matter."
+  },
+  {
+   "caption": "ASE, Amkor and TSMC share the advanced packaging boom",
+   "text": "TSMC builds most CoWoS for Nvidia itself, but packaging capacity has been the bottleneck for AI chips, so it hands overflow and final test to OSATs, which are adding 2.5D lines. Related: Amkor (AMKR), ASE Technology (ASX), TSMC (TSM). Cost and value per chip rise with die size and the number of HBM stacks."
+  }
+ ]
+}

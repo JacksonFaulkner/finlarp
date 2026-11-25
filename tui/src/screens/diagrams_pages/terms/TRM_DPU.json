@@ -1,0 +1,11 @@
+{
+ "label": "DPU",
+ "term": "DPU",
+ "aliases": [
+  "data processing unit",
+  "BlueField",
+  "IPU",
+  "infrastructure processing unit"
+ ],
+ "kind": "compute"
+}

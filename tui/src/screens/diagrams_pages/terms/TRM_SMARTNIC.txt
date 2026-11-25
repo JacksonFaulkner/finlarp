@@ -1,0 +1,17 @@
+# 1. What it is: a network card that does its own processing
+
+   ┌───────────┐   ┌────────────────┐   ┌────────┐
+   │ GPU / CPU │──▶│ SMARTNIC       │──▶│ SWITCH │
+   └───────────┘   │ RDMA, crypto,  │   └────────┘
+                   │ offload engine │
+                   └────────────────┘
+
+  (AI servers: ~1 NIC per GPU at 400G-800G)
+
+# 2. Why AI cares
+
+GPU-to-GPU traffic across servers runs through NICs; their speed and congestion handling affect training time.
+
+# 3. Business angle
+
+NIC units grow with GPU count, adding networking revenue per accelerator sold.

@@ -1,0 +1,19 @@
+# 1. What it is: a transistor whose gate holds charge
+
+┌────────────────────────────────────────┐
+│        CONTROL GATE (word line)        │  gate voltage reads and programs
+├────────────────────────────────────────┤
+│          interpoly dielectric          │  blocks leakage off the gate
+├────────────────────────────────────────┤
+│             FLOATING GATE              │  trapped electrons = stored bit
+├────────────────────────────────────────┤
+│          tunnel oxide (thin)           │  electrons tunnel through on write/erase
+├────────────────────────────────────────┤
+│    n+ source   p channel   n+ drain    │  silicon substrate
+└────────────────────────────────────────┘
+
+(stored charge shifts the threshold voltage; a read senses which state the cell is in)
+
+# 2. Why it matters
+
+Trapped electrons stay put for years because the floating gate is fully enclosed by oxide. This is the cell behind NOR and NAND flash, and scaling it to more bits per cell needs finer charge control.

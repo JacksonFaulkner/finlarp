@@ -1,0 +1,13 @@
+# 1. What it is: makes the cold water
+
+   ┌──────────────┐     ┌───────────────┐     ┌──────────────┐
+   │ CHILLER      │     │ CHILLED WATER │     │ IT LOAD      │
+   │ compressor + │ ──▶ │ to CRAHs or   │ ──▶ │ heat back to │
+   │ refrigerant  │     │ CDUs          │     │ chiller      │
+   └──────────────┘     └───────────────┘     └──────────────┘
+
+  (heat leaves via cooling towers or dry coolers; free cooling skips the compressor)
+
+# 2. Why AI cares
+
+Cooling is the largest non-IT power draw in a data center. Chiller orders are a direct read on data center construction for HVAC suppliers.

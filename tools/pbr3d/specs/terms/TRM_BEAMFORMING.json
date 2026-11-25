@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BEAMFORMING",
+ "script": "terms/trm_beamforming.py",
+ "beats": [
+  {
+   "caption": "A panel of elements, one phone down the street",
+   "text": "A phased-array panel is a grid of small antennas that all transmit the same signal. The base station's beamformer decides what each element sends, so one panel can point its energy at a chosen phone."
+  },
+  {
+   "caption": "Inside the beamformer: a phase shifter and amplitude control per element",
+   "text": "The beamformer chip splits the signal across channels. Each channel has a phase shifter and a gain stage, so each element's copy of the signal can be delayed and scaled independently. Phone handsets use a small version of the same idea."
+  },
+  {
+   "caption": "Shift each element's phase and the waves tilt toward the phone",
+   "text": "Waves from neighbouring elements are offset by a small phase step. The steps tilt the wavefront, and the energy piles up in the direction the phase steps point, like a flashlight beam made of many small sources."
+  },
+  {
+   "caption": "The waves add up on the phone and cancel in other directions",
+   "text": "In the chosen direction the copies arrive in step and add up, which gives more signal strength and less interference for everyone else. Mmwave phones and small cells rely on this to reach a handset without wasting power on empty space."
+  },
+  {
+   "caption": "The phone moves and the beam follows it",
+   "text": "When the phone moves the beamformer recomputes the phase steps and re-aims the beam, dropping the old direction. Beamforming chips from Qualcomm (QCOM), Skyworks (SWKS), Qorvo (QRVO) and Ericsson (ERIC) sit in this path."
+  }
+ ]
+}

@@ -1,0 +1,19 @@
+# 1. What it is: DRAM refreshes itself while idle
+
+   NORMAL                         SELF-REFRESH
+   ┌────────────┐                 ┌────────────┐
+   │ controller │ sends REF       │ controller │ idle
+   │ every 3.9us│                 │ CKE low    │
+   └─────┬──────┘                 └─────┬──────┘
+         ▼                              ▼
+   ┌────────────┐                 ┌────────────┐
+   │ DRAM       │                 │ DRAM       │ refreshes
+   │ waits for  │                 │ own timer  │ rows itself
+   │ commands   │                 │            │
+   └────────────┘                 └────────────┘
+
+  (entered with SRE, left with SRX; used in sleep and suspend)
+
+# 2. Why AI cares
+
+Self-refresh keeps data alive while the memory controller is powered down. It lets idle memory save power without losing its contents.

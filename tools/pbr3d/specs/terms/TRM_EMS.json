@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_EMS",
+ "script": "terms/trm_ems.py",
+ "beats": [
+  {
+   "caption": "EMS firms build hardware that other companies design",
+   "text": "Brand owners like cloud providers and GPU vendors design boards and servers but do not run their own factories. An electronics manufacturing services firm takes the design files and builds the product under contract."
+  },
+  {
+   "caption": "Parts come in, boards go through the surface-mount line",
+   "text": "The EMS firm buys the components on the bill of materials. A printer lays solder paste, pick-and-place machines set thousands of parts a minute, and a reflow oven melts the solder to fix them to the board."
+  },
+  {
+   "caption": "Every board is tested, then built into servers and racks",
+   "text": "Boards go through electrical and functional test, then get built into servers. For AI, whole racks are cabled, filled with liquid-cooling plumbing and burned in at the plant before they ship."
+  },
+  {
+   "caption": "Plants in several countries ship finished racks",
+   "text": "Large EMS firms run plants in Mexico, Taiwan, China, Southeast Asia and elsewhere, so they can move builds closer to customers or around tariffs. How fast they build racks sets how fast GPU capacity comes online."
+  },
+  {
+   "caption": "Huge revenue, thin margin: watch the slice the assembly step keeps",
+   "text": "Pass-through parts like GPUs inflate EMS revenue, but the build step keeps only a few percent as operating margin. Rack-scale integration earns more than plain board assembly. Related: Foxconn (2317.TW), Jabil (JBL), Flex (FLEX), Celestica (CLS), Sanmina (SANM)."
+  }
+ ]
+}

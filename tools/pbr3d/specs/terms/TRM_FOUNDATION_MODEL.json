@@ -1,0 +1,7 @@
+{"slug":"TRM_FOUNDATION_MODEL","beats":[
+{"boxes":[{"name":"data","lo":[-300,120,-40],"hi":[300,170,0],"mat":"dim"},{"name":"fm","lo":[-200,-20,-40],"hi":[200,60,0],"mat":"accent"},{"name":"apps","lo":[-200,-150,-40],"hi":[200,-90,0],"mat":"glow"}],
+"arrows":[{"name":"p1","from":[0,120,-20],"to":[0,60,-20],"mat":"accent"},{"name":"p2","from":[0,-20,-20],"to":[0,-90,-20],"mat":"accent"}],
+"tags":[{"text":"Pretraining: web, code, images","at":[260,145,0]},{"text":"Foundation model: general weights","at":[260,20,0]},{"text":"Apps: search, support, code","at":[260,-120,0]}]},
+{"boxes":[{"name":"train","lo":[-300,-60,-40],"hi":[-60,-20,0],"mat":"dim"},{"name":"infer","lo":[60,-60,-40],"hi":[300,-20,0],"mat":"glow"}],
+"tags":[{"text":"Training: paid once","at":[-180,-100,0]},{"text":"Inference: recurring cost","at":[180,-100,0]}]}
+]}

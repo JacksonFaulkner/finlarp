@@ -1,0 +1,19 @@
+# 1. What it is: flash that stores charge in a nitride film
+
+┌────────────────────────────────────────┐
+│        CONTROL GATE (word line)        │  gate voltage reads and programs the cell
+├────────────────────────────────────────┤
+│             blocking oxide             │  keeps charge from leaking to the gate
+├────────────────────────────────────────┤
+│       silicon nitride trap layer       │  charge sits in traps, not a metal island
+├────────────────────────────────────────┤
+│          tunnel oxide (thin)           │  electrons tunnel through on write/erase
+├────────────────────────────────────────┤
+│    n+ source   p channel   n+ drain    │  silicon substrate
+└────────────────────────────────────────┘
+
+(charge sits in traps inside silicon nitride, not in a conductive island)
+
+# 2. Why it matters
+
+Local charge storage lets cells sit closer together and tolerates single defects, which is why many 3D NAND stacks use it.

@@ -1,0 +1,17 @@
+# 1. What it is: the bridge between voltages and numbers
+
+   ┌───────────┐    ┌──────────┐    ┌────────────┐    ┌─────┐    ┌────────────┐
+   │ analog in │    │ ADC      │    │ digital    │    │ DAC │    │ analog out │
+   └───────────┘───▶│ sample + │───▶│ processing │───▶└─────┘───▶└────────────┘
+                    │ quantize │    └────────────┘                             
+                    └──────────┘                                               
+
+  (key specs: sample rate and bits of resolution)
+
+# 2. Why AI cares
+
+PAM4 optical and electrical links run on very fast ADCs and DACs inside the DSP, so converter design drives network speed.
+
+# 3. Market
+
+Precision converters are a high-margin core of the analog business.

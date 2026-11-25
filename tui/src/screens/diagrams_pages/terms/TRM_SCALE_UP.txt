@@ -1,0 +1,14 @@
+# 1. What it is: fast inside the pod, wide across the hall
+
+   ┌───────────────┐              ┌───────────────┐     ┌────────────┐
+   │ SCALE-UP POD  │──800G NICs──▶│ SCALE-OUT     │────▶│ OTHER PODS │
+   │ 72 GPUs       │              │ Ethernet / IB │     │ thousands  │
+   │ NVLink/UALink │              │ switches      │     │ of GPUs    │
+   │ TB/s per GPU  │              │               │     │            │
+   └───────────────┘              └───────────────┘     └────────────┘
+
+  (scale-up: ~10x the bandwidth per GPU, meters of reach; scale-out: km)
+
+# 2. Why it matters
+
+Different chips win each layer: NVSwitch or UALink switches inside, Ethernet switch ASICs and optics outside.

@@ -1,0 +1,13 @@
+# 1. What it is: the wait between ACT and READ or WRITE
+
+   ACT row 42           READ col 7          data
+   ───────┬─────────────────┬────────────────────▶
+          │◀── tRCD ───────▶│
+          │  row sensed     │  column can be read
+          │  into row buf   │
+
+  (tRCD is the ACT-to-READ or ACT-to-WRITE gap in the same bank)
+
+# 2. Why AI cares
+
+tRCD adds to the time before the first byte of a new row can move. Controllers hide it by keeping rows open and pipelining requests across banks.

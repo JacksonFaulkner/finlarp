@@ -1,0 +1,14 @@
+{"slug": "TRM_HASHRATE", "beats": [
+ {"caption": "Hashrate counts hash attempts per second",
+  "boxes": [
+   {"name": "attempts", "lo": [-200, 60, -40], "hi": [200, 140, -10], "mat": "steel"},
+   {"name": "fleet", "lo": [-200, -120, -40], "hi": [200, -40, -10], "mat": "accent"}],
+  "arrows": [{"name": "to_fleet", "from": [0, 50, -25], "to": [0, -30, -25], "mat": "accent"}],
+  "tags": [{"text": "hash attempts per second", "at": [0, 170, 0]}, {"text": "EH/s = 10^18 hashes/s", "at": [0, -170, 0]}]},
+ {"caption": "Fleet hashrate times efficiency sets power draw",
+  "boxes": [
+   {"name": "fleet", "lo": [-200, -120, -40], "hi": [200, -40, -10], "mat": "accent"},
+   {"name": "power", "lo": [-120, -10, -40], "hi": [120, 60, -10], "mat": "alarm"}],
+  "arrows": [{"name": "draw", "from": [0, -50, -25], "to": [0, 0, -25], "mat": "alarm"}],
+  "tags": [{"text": "hashrate x J/TH = power", "at": [0, 110, 0]}, {"text": "share of network reward", "at": [0, -170, 0]}]}
+]}

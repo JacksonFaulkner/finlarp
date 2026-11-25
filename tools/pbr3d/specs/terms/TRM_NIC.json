@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NIC",
+ "script": "terms/trm_nic.py",
+ "beats": [
+  {
+   "caption": "Every GPU in an AI server gets its own network card",
+   "text": "A network interface card connects a server to the network. An 8-GPU AI server has eight high-speed NICs along its front edge, one per GPU, for the back-end (GPU-to-GPU) network, plus one or two DPUs for the front-end and storage network. Each NIC has an optical transceiver and a fibre running to a leaf switch."
+  },
+  {
+   "caption": "Inside: a PCIe connector, a packet chip and an optical cage",
+   "text": "The card plugs into PCIe on one edge. The controller chip in the middle holds the SerDes, a PCIe interface and hardware engines for RDMA, congestion control and encryption, under a heatsink because it burns 20-30 W. The other edge is an OSFP cage that holds the transceiver: 400G or 800G per port today, 1.6T next."
+  },
+  {
+   "caption": "RDMA: data goes from GPU memory straight onto the wire",
+   "text": "With GPUDirect RDMA the NIC reads directly from the GPU's memory through the PCIe switch next to it. The CPU and its memory are never in the path, which cuts latency and frees the CPU. The far NIC writes the data straight into the remote GPU's memory the same way."
+  },
+  {
+   "caption": "It turns bytes in memory into packets on the wire",
+   "text": "The NIC slices a buffer into packets, adds headers (addresses, sequence numbers), checksums and sends them through the SerDes and laser. Incoming packets go the other way: checked, reordered and placed in memory. Doing this in hardware at 800 Gb/s is what separates AI NICs from ordinary ones."
+  },
+  {
+   "caption": "Attach rate scales with GPUs, so NICs are a real product line",
+   "text": "One back-end NIC per GPU means every GPU shipped pulls a NIC with it, plus transceivers and switch ports. SmartNICs and DPUs add offload for storage and security. Related: Nvidia ConnectX/BlueField (NVDA), Broadcom Thor (AVGO), AMD Pensando (AMD), Marvell (MRVL), Intel (INTC)."
+  }
+ ]
+}

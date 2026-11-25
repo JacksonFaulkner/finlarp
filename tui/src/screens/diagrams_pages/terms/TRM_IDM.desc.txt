@@ -1,0 +1,1 @@
+An integrated device manufacturer designs chips and also makes them in its own fabs. Intel, Samsung, Texas Instruments, Micron and SK hynix are examples. Owning fabs gives control over supply and process but brings heavy fixed costs and capex. Some IDMs, like Intel, now also sell foundry services. Related: Intel (INTC), Texas Instruments (TXN), Micron (MU), Analog Devices (ADI).

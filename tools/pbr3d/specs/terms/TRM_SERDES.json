@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SERDES",
+ "script": "terms/trm_serdes.py",
+ "beats": [
+  {
+   "caption": "A SerDes row runs along the edge of every AI chip",
+   "text": "A SerDes (serializer/deserializer) is the circuit at the edge of a chip that turns wide, slow parallel data into one very fast serial lane, and back again. A GPU, switch ASIC or NIC is ringed with dozens of them. Each lane carries a pair of wires, so a chip's total bandwidth is simply lane count times lane speed."
+  },
+  {
+   "caption": "Inside one macro: receive columns, clock recovery, a serializer and a driver",
+   "text": "Each receive column samples its incoming bit with a clock recovered from the data itself (CDR). The equalizer rebuilds the edges that the channel blurred. A serializer tree multiplexes many slow bits into one stream, and the TX driver pushes that stream onto the copper. Getting this right at tens of gigabits is the hard part."
+  },
+  {
+   "caption": "Parallel bits in, one serial stream out",
+   "text": "The chip hands over a wide bus of slow bits. The serializer folds them into one lane running many times faster, one bit after another. The receiver on the far end does the reverse, so the bus on each side never has to run at the lane rate."
+  },
+  {
+   "caption": "The board trace blurs the edges; the equalizer sharpens them",
+   "text": "Copper loses signal with length and frequency, so a fast edge arrives rounded and smeared. The equalizer boosts the high frequencies in the receiver to undo that, which is why each generation needs more of it and more power per bit."
+  },
+  {
+   "caption": "Lane speed sets the bandwidth: 56G, 112G, now 224G",
+   "text": "Per-lane rates have doubled from 56G to 112G and now 224G. Designing low-power SerDes at those speeds is hard, so it is a key differentiator and licensable IP. Related: Broadcom (AVGO), Marvell (MRVL), Credo (CRDO), Alphawave (AWE), Synopsys (SNPS), Cadence (CDNS)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_EDGE_AI",
+ "script": "terms/trm_edge_ai.py",
+ "beats": [
+  {
+   "caption": "Edge AI runs the model on the device itself",
+   "text": "A car's camera sees a pedestrian and the car must brake within a fraction of a second. Edge AI means the neural network runs on a chip inside the car (or phone, camera, PC, robot) rather than in a data center. The camera frames go a few centimetres to the computer, not hundreds of kilometres."
+  },
+  {
+   "caption": "Inside the chip: an NPU next to the CPU and GPU",
+   "text": "An edge system-on-chip packs CPU cores for control, a GPU for graphics and some AI, an image signal processor for the camera, and a neural processing unit (NPU): a big array of multiply-accumulate units built for inference at low power. LPDDR memory sits right beside it on the package."
+  },
+  {
+   "caption": "Local answers in milliseconds; the cloud adds a round trip",
+   "text": "On the device, a frame goes camera -> NPU -> brake decision in tens of milliseconds, with no network needed. Sending it to a data center adds radio and network hops both ways and can stall when coverage drops. Edge inference also saves bandwidth and keeps data private."
+  },
+  {
+   "caption": "The limit is power and heat: TOPS per watt",
+   "text": "A phone chip has a few watts to spend and a car computer tens of watts, against hundreds to over a thousand for one data-center GPU. So edge chips are rated in TOPS (trillion operations per second) per watt, run smaller or quantized models (8-bit or 4-bit), and are limited by memory capacity and bandwidth."
+  },
+  {
+   "caption": "Edge chips ship in phones, PCs, cars, cameras and robots",
+   "text": "Every new phone and 'AI PC' has an NPU, cars carry driver-assist SoCs, and cameras and robots run vision models locally. Related: Qualcomm (QCOM) in phones, PCs and cars, Ambarella (AMBA) in vision SoCs, NXP (NXPI) in cars and industry, Intel (INTC) in AI PCs; also Apple, MediaTek and NVIDIA's Jetson/DRIVE."
+  }
+ ]
+}

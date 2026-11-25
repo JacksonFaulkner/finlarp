@@ -1,0 +1,14 @@
+# 1. What it is: time for one memory request to return
+
+┌─────┐   ┌────────────┐   ┌──────┐
+│ CPU │   │ memory     │   │ DRAM │
+│     │──▶│ controller │──▶│ bank │
+└─────┘   └────────────┘   └──────┘
+   ▲                           │
+   └── data back ◀─────────────┘
+
+(a server DRAM access is on the order of 100 ns end to end)
+
+# 2. Why AI cares
+
+Bandwidth sets how fast weights stream, and latency sets how long a core stalls on a miss. GPUs hide latency with many threads in flight, which is why wide bandwidth matters more to them than latency.

@@ -1,0 +1,13 @@
+# 1. What it is: verify every request, trust nothing by location
+
+   ┌────────┐            ┌────────────────┐            ┌──────────┐
+   │ user   │───────────▶│ policy engine  │───────────▶│ one app  │
+   │ + dev  │            │ identity,      │            │ not LAN  │
+   └────────┘            │ device, risk   │            └──────────┘
+                         └────────────────┘
+
+(each session gets least-privilege access to one app, not the whole network)
+
+# 2. Why it matters
+
+Access decisions move from the corporate network to identity and device posture. This shifts spending toward identity, endpoint and access-control products.

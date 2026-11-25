@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SOCAMM",
+ "script": "terms/trm_socamm.py",
+ "beats": [
+  {
+   "caption": "SOCAMM puts low-power LPDDR on a module beside the CPU",
+   "text": "NVIDIA's Grace and Vera CPUs use LPDDR, the phone-style DRAM, because it uses far less power than server DDR5. Until now LPDDR had to be soldered to the board. SOCAMM mounts it on small flat modules that sit right next to the CPU package."
+  },
+  {
+   "caption": "Four LPDDR5X packages on a thin board",
+   "text": "Each module carries four stacked LPDDR5X packages on a board about 14 x 90 mm. There is no buffer chip: the short traces let LPDDR run at 8533 MT/s or more. A compression connector underneath replaces the gold-finger slot of a DIMM."
+  },
+  {
+   "caption": "Two screws and it lifts off: memory becomes replaceable",
+   "text": "With soldered LPDDR, one bad chip scraps the whole CPU board and capacity is fixed at build time. A SOCAMM is held by screws, so a data centre can swap a failed module or fit a bigger one. That makes LPDDR practical for servers."
+  },
+  {
+   "caption": "About a third of the power of DDR5 RDIMMs",
+   "text": "Memory makers quote SOCAMM at roughly one third the power of an RDIMM of the same capacity, with more bandwidth per module. Across a rack of Grace or Vera CPUs, that frees power for GPUs."
+  },
+  {
+   "caption": "A new product line for memory makers",
+   "text": "Micron shipped SOCAMM first, with Samsung and SK hynix following; SOCAMM2 is being standardised at JEDEC. It adds an AI server memory line alongside HBM. Related: Micron (MU), Samsung (005930.KS), SK hynix (000660.KS), Nvidia (NVDA)."
+  }
+ ]
+}

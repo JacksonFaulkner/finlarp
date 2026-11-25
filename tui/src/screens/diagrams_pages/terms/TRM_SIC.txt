@@ -1,0 +1,16 @@
+# 1. What it is: a high-voltage power switch material
+
+   ┌────────────────┐    ┌─────────────┐    ┌───────────────┐
+   │ battery / grid │    │ SiC MOSFETs │    │ inverter      │
+   │ 400-1500V      │───▶│ low loss    │───▶│ to motor/load │
+   └────────────────┘    └─────────────┘    └───────────────┘
+
+  (substrates are hard to grow; 150mm moving to 200mm wafers)
+
+# 2. Why it matters
+
+SiC raises EV range and inverter efficiency. For data centers it appears in solid-state transformers and 800V DC rack power.
+
+# 3. Supply
+
+Substrate crystal growth is the bottleneck and the cost driver; a few firms make most boules.

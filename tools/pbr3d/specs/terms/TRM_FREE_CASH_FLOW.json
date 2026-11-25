@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FREE_CASH_FLOW",
+ "script": "terms/trm_free_cash_flow.py",
+ "beats": [
+  {
+   "caption": "Operating cash flow is the cash the business brings in",
+   "text": "Operating cash flow is cash collected from customers minus cash paid for staff, suppliers, power and taxes, adjusted for timing of payments. It is closer to real money than net income because it skips non-cash items like depreciation and stock pay. For a big cloud company it runs at tens of billions a year."
+  },
+  {
+   "caption": "Capital expenditure drains it to buildings, servers and chips",
+   "text": "Capex is cash spent on long-lived assets: land, data-center shells, power and cooling gear, servers and GPUs. It does not show up as an expense right away; it is depreciated over years. But the cash leaves now."
+  },
+  {
+   "caption": "Free cash flow is what is left: operating cash flow minus capex",
+   "text": "Free cash flow (FCF) = operating cash flow - capital expenditure. It is the cash the company could hand back to shareholders, use to pay debt, or keep. Definitions vary a little: some also subtract finance leases, which matter for data-center deals."
+  },
+  {
+   "caption": "An AI build-out can push FCF toward zero or below",
+   "text": "When capex surges for AI data centers, it can eat most of operating cash flow even while profits rise. If capex exceeds operating cash, FCF turns negative and the gap is filled with cash reserves, bonds or leases. Investors watch the gap closely: it is a bet that the new capacity earns back its cost."
+  },
+  {
+   "caption": "FCF pays for buybacks, dividends and debt; tickers",
+   "text": "Healthy FCF funds share buybacks, dividends and debt paydown without borrowing. A falling FCF margin with rising capex is the trade-off hyperscalers are making now. Related: Microsoft (MSFT), Alphabet (GOOGL), Meta (META), Oracle (ORCL)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TEE",
+ "script": "terms/trm_tee.py",
+ "beats": [
+  {
+   "caption": "A host CPU holds a sealed enclave beside the OS",
+   "text": "Modern processors carve out a small trusted execution environment (TEE): an isolated region of the chip that runs secure code and holds secrets the main operating system cannot read. It sits inside the same CPU package that runs the rest of the server, so no extra chip is needed."
+  },
+  {
+   "caption": "Cut open: barrier walls in silicon separate the enclave from the OS",
+   "text": "On the die, the enclave is a walled-off block with its own memory and key store. Hardware enforces the wall: the OS cores and caches sit on the other side and have no path into it. Keys and secrets stay in the enclave, even when the operating system is fully compromised."
+  },
+  {
+   "caption": "The OS can ask, but the gate decides who gets in",
+   "text": "Requests reach the enclave only through a gate the hardware checks. A direct poke at the wall is refused. The enclave answers with a result, never with its keys, so an attacker on the OS side learns nothing about what it holds."
+  },
+  {
+   "caption": "The enclave proves what it runs before it gets a key",
+   "text": "The enclave measures its own code and signs that measurement, a remote attestation report. A verifier checks the signature and the measurement, and only then releases the key the model or payment needs. Code that has been altered fails the check and gets nothing."
+  },
+  {
+   "caption": "Phones, laptops and servers all carry one",
+   "text": "Arm TrustZone and Apple's Secure Enclave guard payments and biometrics in phones and laptops. Server chips use the same idea for keys and attestation. Vendors: Arm (ARM), Qualcomm (QCOM), Apple (AAPL), Intel (INTC). A TEE is a small sealed region; confidential computing, next, protects a whole virtual machine."
+  }
+ ]
+}

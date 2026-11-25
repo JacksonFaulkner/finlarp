@@ -1,0 +1,10 @@
+{
+ "label": "NPU",
+ "term": "NPU",
+ "aliases": [
+  "neural processing unit",
+  "neural engine",
+  "AI PC"
+ ],
+ "kind": "compute"
+}

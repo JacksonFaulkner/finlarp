@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RETIMER",
+ "script": "terms/trm_retimer.py",
+ "beats": [
+  {
+   "caption": "At 32-64 GT/s, a signal only survives a few inches of board copper",
+   "text": "Copper traces lose more signal the longer they are and the higher the frequency. A PCIe Gen5 lane loses about 36 dB end to end before the receiver gives up, and Gen6 has even less margin. In a big AI server the GPU, CPU, NIC and SSD sit too far apart, so the bits reach the end as mush."
+  },
+  {
+   "caption": "A retimer sits halfway and sends a fresh copy",
+   "text": "A retimer is a small chip placed in the middle of the link. It fully receives the weak signal, decides each bit, and retransmits it at full strength with a clean clock. Each side now only has to cover half the distance, so the loss budget resets."
+  },
+  {
+   "caption": "Inside: equalize, recover the clock, decide, retransmit",
+   "text": "Every lane has its own receiver with an equalizer that undoes the channel's blur, a clock-data recovery (CDR) loop that locks onto the incoming bits, and a transmitter. Because it takes part in link training like a real endpoint, it also resets jitter. A simple redriver only amplifies, noise and all."
+  },
+  {
+   "caption": "A nearly closed eye in, a wide-open eye out",
+   "text": "Engineers judge a link by its eye diagram: many bits overlaid. A tall, wide opening means the receiver can tell ones from zeros easily. At the far end of a long trace the eye has almost collapsed; after the retimer it is wide open again."
+  },
+  {
+   "caption": "More lanes and faster speeds mean more retimers per server",
+   "text": "AI servers use retimers between CPUs, GPUs, NICs and SSDs and on riser cards, often several per accelerator, and each speed step shortens reach further. That makes it a fast-growing attach product. Related: Astera Labs (ALAB), Broadcom (AVGO), Marvell (MRVL), Credo (CRDO)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CHIPS_ACT",
+ "script": "terms/trm_chips_act.py",
+ "beats": [
+  {
+   "caption": "The CHIPS Act pays to build chip fabs in the US",
+   "text": "The CHIPS and Science Act of 2022 set aside about $39 billion in direct manufacturing grants, plus a 25% investment tax credit on fab equipment and buildings. The goal is to bring leading-edge and mature chip production back onshore after decades of it moving to Taiwan, Korea and China."
+  },
+  {
+   "caption": "Grants are paid out in milestones, not up front",
+   "text": "A company signs a preliminary award, then receives the money in tranches as it hits construction and production milestones. A fab takes three to five years to build, so a delayed fab also delays its grant cash."
+  },
+  {
+   "caption": "The subsidy narrows the US cost gap",
+   "text": "Building and running a fab in the US costs roughly 30-50% more than in Taiwan, mostly from labor, permits and construction. The grant plus the tax credit cuts the net cost of a US fab enough to make the project pencil out."
+  },
+  {
+   "caption": "The money comes with strings",
+   "text": "Recipients agree to guardrails: for ten years they cannot materially expand advanced chip capacity in China or other countries of concern. Some awards also carry conditions on stock buybacks, childcare and profit sharing above plan."
+  },
+  {
+   "caption": "The big awards went to a handful of chipmakers",
+   "text": "Intel, TSMC Arizona, Samsung Texas, Micron Idaho/New York and GlobalFoundries got the largest grants. For investors it lowers capex net of subsidy and shows up as reduced property cost or grant income. Related: Intel (INTC), Micron (MU), TSMC (TSM), GlobalFoundries (GFS), Texas Instruments (TXN)."
+  }
+ ]
+}

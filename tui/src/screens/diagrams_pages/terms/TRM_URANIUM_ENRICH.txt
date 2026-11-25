@@ -1,0 +1,12 @@
+# 1. What it is: making reactor fuel
+
+   ┌────────────┐   ┌────────────┐   ┌─────────────┐   ┌────────────┐
+   │ MINED U3O8 │──▶│ CONVERSION │──▶│ CENTRIFUGES │──▶│ FUEL       │
+   │ 0.7% U-235 │   │ UF6 gas    │   │ 3-20% U-235 │   │ assemblies │
+   └────────────┘   └────────────┘   └─────────────┘   └────────────┘
+
+  (HALEU = high-assay low-enriched uranium, 5-20%)
+
+# 2. Why AI cares
+
+SMRs and restarts for data centers need fuel, and enrichment is the tightest step in the chain.

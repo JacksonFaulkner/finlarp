@@ -1,0 +1,17 @@
+# 1. What it is: the chips between the antenna and the modem
+
+   ┌─────────┐    ┌────────────────┐    ┌─────────────┐    ┌───────┐
+   │ antenna │    │ RF FRONT-END   │    │ transceiver │    │ modem │
+   └─────────┘◀──▶│ switch, filter │◀──▶└─────────────┘◀──▶└───────┘
+                  │ PA, LNA        │                                
+                  └────────────────┘                                
+
+  (PA = power amplifier on transmit; LNA = low-noise amplifier on receive)
+
+# 2. Why it matters
+
+Each new cellular band adds filters and switches, so content per phone rises with 5G. Customer concentration (Apple, Samsung) is high.
+
+# 3. Materials
+
+PAs often use GaAs or GaN; filters use BAW/SAW acoustic resonators.

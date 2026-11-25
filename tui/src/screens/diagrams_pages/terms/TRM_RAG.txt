@@ -1,0 +1,13 @@
+# 1. What it is: answer from documents fetched at question time
+
+┌──────────────────┐         ┌────────────────────────┐          ┌──────────────────────┐
+│ 1. QUESTION      │         │ 2. RETRIEVE            │          │ 3. GENERATE          │
+│ user query       │─embed──▶│ embed query, search    │─prompt──▶│ LLM answers from     │
+└──────────────────┘         │ index, top-k chunks    │          │ retrieved text       │
+                             └────────────────────────┘          └──────────────────────┘
+
+(the model's weights stay fixed; new documents change answers without retraining)
+
+# 2. Why AI cares
+
+RAG lets a model answer from documents it was never trained on, such as filings, tickets, or an internal wiki, without retraining. Answer quality depends on how documents are split into chunks, the retrieval step, and whether the index is current. Stale or poorly chunked data produces confident wrong answers, so retrieval quality is usually the bottleneck.

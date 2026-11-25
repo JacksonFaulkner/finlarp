@@ -1,0 +1,11 @@
+{"slug":"TRM_CAPACITY_MARKET","beats":[
+ {"caption":"auction buys power availability three years out","boxes":[
+   {"name":"auction","lo":[-300,-40,-40],"hi":[-60,40,0],"mat":"steel"},
+   {"name":"gen","lo":[100,-40,-40],"hi":[300,40,0],"mat":"dim"}],
+  "arrows":[{"name":"bid","from":[-50,0,-20],"to":[90,0,-20],"mat":"accent"}],
+  "tags":[{"text":"PJM base residual auction","at":[-180,110,-20]},{"text":"clears ~3 years ahead","at":[-180,-100,-20]},{"text":"generator earnings","at":[200,110,-20]}]},
+ {"caption":"data center load raises forecast peaks and prices","boxes":[
+   {"name":"peak","lo":[-300,-150,-60],"hi":[300,-100,0],"mat":"alarm"}],
+  "tags":[{"text":"data center load growth","at":[0,-180,-20]},{"text":"higher price per MW-day","at":[0,140,-20]}],
+  "show":["auction","gen","peak"]}
+]}

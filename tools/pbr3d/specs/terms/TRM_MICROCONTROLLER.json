@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MICROCONTROLLER",
+ "script": "terms/trm_microcontroller.py",
+ "beats": [
+  {
+   "caption": "A small MCU keeps the big board in order",
+   "text": "Next to the GPU sits a tiny computer: a microcontroller (MCU) that sequences the power rails on and off, watches temperatures and fans, and talks to the voltage controller. Cars carry dozens of MCUs, a washing machine a few, and factories millions."
+  },
+  {
+   "caption": "Open the package: a whole computer on one die",
+   "text": "Inside the plastic package a lead frame fans out to dozens of pins, each tied to the die by a gold bond wire. The die holds a CPU core, flash memory for the program, SRAM for working data, and peripherals: ADCs, timers, serial ports and PWM outputs. Cheap MCUs run on older, depreciated nodes (40-180 nm)."
+  },
+  {
+   "caption": "Fetch, execute, store, millions of times a second",
+   "text": "The CPU fetches each instruction from flash, works on data held in SRAM and writes results back, typically at tens to hundreds of MHz. Because the program lives on the chip, an MCU boots instantly and runs for years."
+  },
+  {
+   "caption": "Pins talk to the world: sensors in, commands out",
+   "text": "The peripherals turn pins into inputs and outputs: here the MCU reads temperatures, toggles enable pins in the right order and sends commands to the VRM controller over a serial bus."
+  },
+  {
+   "caption": "New MCUs add a tiny neural accelerator",
+   "text": "Edge AI parts add a small NPU block of multiply-accumulate units so the MCU can run keyword spotting, vibration or vision models locally at milliwatts. Pricing follows auto and industrial inventory cycles. Makers: Microchip (MCHP), NXP (NXPI), STMicro (STM), Renesas (RNECY), TI (TXN), Infineon (IFNNY)."
+  }
+ ]
+}

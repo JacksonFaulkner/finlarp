@@ -1,0 +1,9 @@
+{
+ "label": "ANALOG",
+ "term": "analog",
+ "aliases": [
+  "mixed-signal",
+  "analog semiconductors"
+ ],
+ "kind": "analog"
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CUSTOMER_CONCENTRATION",
+ "script": "terms/trm_customer_concentration.py",
+ "beats": [
+  {
+   "caption": "Customer concentration: how much revenue a few buyers make up",
+   "text": "A supplier's revenue is the sum of what every customer buys. If thousands of customers each buy a little, losing one hardly matters. If a handful buy most of the output, the company's results depend on those few purchase decisions."
+  },
+  {
+   "caption": "In AI hardware a few hyperscalers buy most of the output",
+   "text": "Microsoft, Amazon, Google, Meta and Oracle build most of the world's AI data centers, so chip, network and server suppliers sell a large share of their output to them. A supplier can have two or three customers making up half its revenue. Big orders arrive as large, lumpy purchase commitments."
+  },
+  {
+   "caption": "Filers must disclose any customer at 10% or more",
+   "text": "US rules require a company to say when a single customer accounts for 10% or more of revenue, usually as 'Customer A, B, C' in the 10-K notes with the percentage. Risk factors often describe the largest buyers and what would happen if they cut back. Adding up these disclosures shows how concentrated a supplier is."
+  },
+  {
+   "caption": "One buyer pulling back can move the whole company",
+   "text": "When a large customer pauses, switches to a rival, or designs its own chip in house, the supplier's revenue can fall by a double-digit percentage in a quarter. Fixed costs stay, so margins fall faster than revenue. Big buyers also use their weight to push prices down."
+  },
+  {
+   "caption": "Concentration cuts both ways",
+   "text": "Selling to the biggest spenders means fast growth while their capex rises, and long design-in relationships are hard to displace. But the same few budgets drive the stock up and down, and in-house silicon programs are a standing threat. Related: NVIDIA (NVDA), Broadcom (AVGO), Marvell (MRVL), Super Micro Computer (SMCI)."
+  }
+ ]
+}

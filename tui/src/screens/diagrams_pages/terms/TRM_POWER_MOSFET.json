@@ -1,0 +1,10 @@
+{
+ "label": "POWER MOSFET",
+ "term": "power MOSFET",
+ "aliases": [
+  "power MOSFETs",
+  "MOSFETs",
+  "MOSFET"
+ ],
+ "kind": "analog"
+}

@@ -1,0 +1,14 @@
+# 1. What it is: the processor that runs an SSD
+
+   ┌───────────┐   ┌────────────┐   ┌──────────┐
+   │ NVMe HOST │──▶│ CONTROLLER │──▶│ NAND     │
+   │ PCIe      │   │ FTL map    │   │ 8-16     │
+   └───────────┘   │ LDPC ECC   │   │ channels │
+                   │ wear level │   └──────────┘
+                   └────────────┘               
+
+  (a DRAM buffer often holds the logical-to-physical address table)
+
+# 2. Why it matters
+
+Flash wears out and has bit errors; the controller hides this so the drive looks like simple fast blocks.

@@ -1,0 +1,1 @@
+A microcontroller is a small computer on one chip: CPU core, flash, RAM and I/O peripherals. MCUs run embedded control in cars, appliances, factories and power supplies. They sell in billions of units, and pricing follows auto and industrial inventory cycles. Related: Microchip (MCHP), NXP (NXPI), STMicroelectronics (STM), Renesas (RNECY), Texas Instruments (TXN).

@@ -1,0 +1,11 @@
+# 1. What it is: light in, digital pixels out
+
+   ┌───────┐   ┌─────────────┐   ┌─────┐   ┌─────┐   ┌─────────────┐
+   │ LIGHT │──▶│ PIXEL ARRAY │──▶│ ADC │──▶│ ISP │──▶│ DIGITAL OUT │
+   └───────┘   └─────────────┘   └─────┘   └─────┘   └─────────────┘
+
+  (ISP = image signal processor, which does color, noise and HDR)
+
+# 2. Why it matters
+
+Each ADAS camera and robot eye is one of these chips, so unit counts rise with cars and robots. Dynamic range and stacked pixels are where value per chip moves.

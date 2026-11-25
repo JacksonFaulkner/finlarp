@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_IDM",
+ "script": "terms/trm_idm.py",
+ "beats": [
+  {
+   "caption": "An IDM designs its chips and makes them in its own fabs",
+   "text": "An integrated device manufacturer (IDM) does the whole job in-house: its engineers design the chip, its own fabs make the wafers, and its own lines test and package them. Intel, Texas Instruments, Micron, Analog Devices, Samsung and SK hynix work this way. The opposite is fabless (Nvidia, AMD), which rents a foundry."
+  },
+  {
+   "caption": "Design and process are tuned together",
+   "text": "Because the designers and the fab sit in one company, the process can be shaped around the product and the product around the process. That matters most where the transistor is the product: memory cells (Micron, SK hynix), analog and power parts (TI, ADI) whose specs come straight from the fab recipe."
+  },
+  {
+   "caption": "Fabs cost billions up front and only pay off when full",
+   "text": "A leading-edge fab costs $20B or more, and almost all of that is fixed: tools depreciate whether wafers flow or not. An IDM must fill its fabs with its own products; when demand dips, utilization falls and margins collapse fast. That operating leverage is why memory and IDM earnings swing so hard through the cycle."
+  },
+  {
+   "caption": "Some IDMs now sell spare capacity as a foundry",
+   "text": "To keep fabs full and share the cost of new nodes, some IDMs open the gate to outside designs. Intel Foundry takes customer chips; Samsung has long run a foundry next to its memory business. Winning outside customers means proving yields and keeping their designs walled off from the in-house chip teams."
+  },
+  {
+   "caption": "Mostly memory, analog and Intel",
+   "text": "Memory (Micron MU, SK hynix, Samsung) and analog/mixed-signal (TI TXN, ADI, Infineon) stay IDM because the process is the edge and older 300 mm fabs keep earning for decades. Intel (INTC) is the big logic IDM, now split into product and foundry arms. AI demand pulls hardest on memory IDMs through HBM."
+  }
+ ]
+}

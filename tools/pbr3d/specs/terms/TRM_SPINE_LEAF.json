@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SPINE_LEAF",
+ "script": "terms/trm_spine_leaf.py",
+ "beats": [
+  {
+   "caption": "Spine-leaf: every rack gets a leaf, every leaf wires to every spine",
+   "text": "Spine-leaf is the standard layout of a data-center network. Each rack has a leaf (top-of-rack) switch, and each leaf has one uplink to every spine switch. There are no leaf-to-leaf or spine-to-spine links. The full mesh between the two tiers is what makes the network predictable."
+  },
+  {
+   "caption": "The leaf collects the servers in its rack",
+   "text": "Every GPU server cables up to the leaf above it, short runs that can use cheap copper. Half the leaf's ports face down to servers and half face up to spines, so the leaf can carry all its servers' traffic upward without a bottleneck."
+  },
+  {
+   "caption": "Any server to any other: leaf, spine, leaf",
+   "text": "A packet from a server in the first rack to one in the last climbs to its leaf, crosses one spine, and drops to the far leaf. Every pair of servers is the same three switch hops apart, so latency and bandwidth are the same wherever a job's GPUs land."
+  },
+  {
+   "caption": "Traffic spreads across every spine at once",
+   "text": "Because each leaf has a path through every spine, flows are hashed across all of them (ECMP). Adding spines adds bandwidth, and losing one spine only removes a quarter of the capacity here instead of cutting racks off."
+  },
+  {
+   "caption": "Bigger clusters add a tier, and every tier adds switches and optics",
+   "text": "One leaf-spine pair of tiers tops out at a few thousand GPUs; bigger AI clusters add a super-spine tier on top. Each tier multiplies the switches and the optical links between them, which is why GPU counts drive optics and switch demand. Related: Arista (ANET), Cisco (CSCO), Broadcom (AVGO), Nvidia (NVDA), Coherent (COHR)."
+  }
+ ]
+}

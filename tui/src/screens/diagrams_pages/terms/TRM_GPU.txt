@@ -1,0 +1,17 @@
+# 1. What it is: many small cores doing math in parallel
+
+   ┌────────────┐   ┌──────────────┐   ┌──────────────┐
+   │ HOST CPU   │   │ GPU          │   │ HBM          │
+   │ sends work │──▶│ ~100+ SMs    │──▶│ stacked DRAM │
+   └────────────┘   │ tensor cores │   │ TB/s         │
+                    └──────────────┘   └──────────────┘
+
+  (one CPU feeds 4-8 GPUs in a typical AI server)
+
+# 2. Why AI cares
+
+Training and inference are dominated by matrix math that parallelizes well. GPUs plus their software stack (CUDA, ROCm) are the default platform for that work.
+
+# 3. Business angle
+
+Data center GPU revenue is the largest single line in AI hardware spend. Lead times, HBM supply and CoWoS packaging capacity limit how many ship.

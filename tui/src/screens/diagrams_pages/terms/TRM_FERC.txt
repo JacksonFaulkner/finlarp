@@ -1,0 +1,13 @@
+# 1. What it is: FERC
+
+   ┌───────────────────┐       ┌────────────────────────┐
+   │ FERC              │       │ RTO / ISO              │
+   │ federal regulator │──────▶│ PJM, MISO, SPP         │
+   │ approves tariffs  │       │ runs wholesale markets │
+   └───────────────────┘       └────────────────────────┘
+
+  (FERC covers interstate power and gas transmission; states regulate retail rates and siting)
+
+# 2. Why AI cares
+
+Large data center campuses connect to transmission systems that FERC regulates, so interconnection and co-location rules help decide how quickly a site gets power. In 2025 the Department of Energy pushed FERC toward a rulemaking on large-load interconnection. Those rules feed directly into power prices and build timelines for AI capacity.

@@ -1,0 +1,9 @@
+{
+  "label": "INFINIBAND",
+  "term": "InfiniBand",
+  "aliases": [
+    "Quantum-X800",
+    "Quantum-2"
+  ],
+  "kind": "networking"
+}

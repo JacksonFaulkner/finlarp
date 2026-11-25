@@ -1,0 +1,12 @@
+# 1. What it is: a chip that vouches for the boot chain
+
+   ┌──────────────┐  measures  ┌──────────────┐  measures  ┌──────────────┐
+   │ root of trust│───────────▶│ firmware     │───────────▶│ OS / kernel  │
+   │ (secure chip)│            │ boot code    │            │ then apps    │
+   └──────────────┘            └──────────────┘            └──────────────┘
+
+(each stage hashes the next before running it; a mismatch halts the boot)
+
+# 2. Why AI cares
+
+Accelerators and servers need proof they run the firmware that was shipped. A TPM or secure element stores the keys and measurements, and remote attestation lets a buyer check them.

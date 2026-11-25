@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SOVEREIGN_AI",
+ "script": "terms/trm_sovereign_ai.py",
+ "beats": [
+  {
+   "caption": "A nation builds AI compute on its own soil",
+   "text": "Sovereign AI is a government, or a national champion it backs, building GPU data centers and AI models inside its own borders under local control. Examples include national clouds in Saudi Arabia, the UAE, France, Japan and India."
+  },
+  {
+   "caption": "Data and models stay inside the border",
+   "text": "Countries want citizens' and government data processed at home, under their own laws. They also want models trained on their own languages and culture rather than relying on a few US companies for a strategic technology."
+  },
+  {
+   "caption": "The state budget is the customer",
+   "text": "The money often comes from state budgets, sovereign wealth funds or national telecoms. For suppliers this is a new customer class beyond the US hyperscalers, sometimes worth billions per country."
+  },
+  {
+   "caption": "Deals are lumpy and wait on export licenses",
+   "text": "Orders arrive as a few very large projects, so supplier revenue jumps around by quarter. Advanced US GPUs need export licenses for many countries, and a deal can sit at the border until approval comes."
+  },
+  {
+   "caption": "Chip, cloud and network suppliers benefit",
+   "text": "NVIDIA sells the GPUs and full systems, Oracle and others run sovereign cloud regions, and Dell, HPE, Cisco build and network the halls. Related: NVDA, ORCL, CSCO, DELL."
+  }
+ ]
+}

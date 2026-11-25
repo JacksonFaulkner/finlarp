@@ -1,0 +1,161 @@
+{
+ "slug": "TRM_POWERED_LAND",
+ "beats": [
+  {
+   "caption": "Grid connection already in place",
+   "boxes": [
+    {
+     "name": "line",
+     "lo": [
+      -380,
+      -40,
+      -60
+     ],
+     "hi": [
+      -240,
+      40,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "sub",
+     "lo": [
+      -180,
+      -40,
+      -60
+     ],
+     "hi": [
+      -40,
+      40,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "land",
+     "lo": [
+      80,
+      -80,
+      -60
+     ],
+     "hi": [
+      340,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "p1",
+     "from": [
+      -240,
+      0,
+      -40
+     ],
+     "to": [
+      -180,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "p2",
+     "from": [
+      -40,
+      0,
+      -40
+     ],
+     "to": [
+      80,
+      -40,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "transmission line",
+     "at": [
+      -340,
+      100,
+      0
+     ]
+    },
+    {
+     "text": "substation MW rights",
+     "at": [
+      -120,
+      100,
+      0
+     ]
+    },
+    {
+     "text": "site land + shell",
+     "at": [
+      210,
+      60,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "line",
+    "sub",
+    "land",
+    "p1",
+    "p2"
+   ]
+  },
+  {
+   "caption": "Grid queue is the slow step",
+   "boxes": [
+    {
+     "name": "queue",
+     "lo": [
+      -380,
+      160,
+      -60
+     ],
+     "hi": [
+      -240,
+      220,
+      -20
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "interconnection queue: years",
+     "at": [
+      -300,
+      260,
+      0
+     ]
+    },
+    {
+     "text": "powered sites command premium",
+     "at": [
+      -60,
+      -180,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "line",
+    "sub",
+    "land",
+    "p1",
+    "p2",
+    "queue"
+   ]
+  }
+ ]
+}

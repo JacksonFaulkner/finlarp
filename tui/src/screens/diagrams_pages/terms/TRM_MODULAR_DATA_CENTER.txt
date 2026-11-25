@@ -1,0 +1,21 @@
+# 1. What it is: a data hall built in factory modules
+
+  ┌──────────────────────────┐
+  │ POWER SKID               │
+  │ switchgear, UPS, gensets │
+  └──────────────────────────┘
+                │
+                ▼ shipped and joined
+  ┌──────────────────────────┐
+  │ IT POD                   │
+  │ racks in a sealed hall   │
+  └──────────────────────────┘
+                │
+                ▼ piped to the pod
+  ┌──────────────────────────┐
+  │ COOLING SKID             │
+  │ CDUs, chillers, pumps    │
+  └──────────────────────────┘
+
+# 2. Why AI cares
+A modular build can start producing power and compute sooner than a site-built hall. Its size per module and its factory queue limit how fast the capacity can grow.

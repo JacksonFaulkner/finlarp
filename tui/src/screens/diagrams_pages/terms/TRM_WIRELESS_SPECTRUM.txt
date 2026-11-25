@@ -1,0 +1,13 @@
+# 1. What it is: licensed radio frequency bands
+
+   ┌──────────────┬──────────────┬──────────────┐
+   │ LOW BAND     │ MID BAND     │ mmWAVE       │
+   │ < 1 GHz      │ 1-7 GHz      │ 24-100 GHz   │
+   │ coverage     │ capacity mix │ peak speed   │
+   └──────────────┴──────────────┴──────────────┘
+
+  (licensed via FCC auctions; the cash paid is a balance-sheet asset)
+
+# 2. Why it matters
+
+Spectrum is the input that caps what a carrier can sell. Auction spend and license holdings show up in the carrier's capex and assets.

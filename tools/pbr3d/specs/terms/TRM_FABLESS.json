@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FABLESS",
+ "script": "terms/trm_fabless.py",
+ "beats": [
+  {
+   "caption": "A fabless company designs chips and pays others to make them",
+   "text": "A fabless chip company owns the design, the software and the customer, but no factory. Its layouts go to a foundry that prints the wafers and to packaging and test houses (OSATs) that turn dies into finished chips. NVIDIA, AMD, Broadcom, Qualcomm and Marvell all work this way."
+  },
+  {
+   "caption": "The designer's product is a layout file, not silicon",
+   "text": "Thousands of engineers write the chip in code, verify it on compute farms and lay it out with EDA software. The finished design is sent to the foundry as a tapeout. The designer's spending is mostly people, software licences and mask sets, not buildings."
+  },
+  {
+   "caption": "The foundry and packaging houses carry the factories",
+   "text": "The foundry (mostly TSMC at the leading edge) spends tens of billions a year on fabs and tools and prints the wafers; packagers like ASE and Amkor, or TSMC's own CoWoS lines, mount the dies with memory into the finished part. The designer ships those chips to server makers and clouds."
+  },
+  {
+   "caption": "Low capex, high margins: the designer keeps the value of the design",
+   "text": "The customer pays the designer; the designer pays the foundry a wafer price and the packager a fee. Because the design and software carry the value, a leader like NVIDIA keeps ~70%+ gross margin while spending little on capex. The foundry earns its own margin on wafers but carries all the plant risk."
+  },
+  {
+   "caption": "The catch: you queue for someone else's capacity",
+   "text": "Fabless companies depend on foundry capacity and pricing: in tight markets everyone lines up for the same leading-edge and CoWoS slots, and filings name TSMC as a sole or key supplier risk (Taiwan included). Related: NVIDIA (NVDA), AMD (AMD), Broadcom (AVGO), Marvell (MRVL), Qualcomm (QCOM)."
+  }
+ ]
+}

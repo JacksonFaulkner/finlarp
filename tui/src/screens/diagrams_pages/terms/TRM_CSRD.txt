@@ -1,0 +1,13 @@
+# 1. What it is: CSRD
+
+   ┌───────────────────┐       ┌────────────────────┐       ┌────────────────────┐
+   │ CSRD              │       │ ESRS standards:    │       │ assured disclosure │
+   │ EU sustainability │──────▶│ emissions, energy, │──────▶│ Scope 1, 2, and 3  │
+   │ reporting rule    │       │ water, workforce   │       │ emissions          │
+   └───────────────────┘       └────────────────────┘       └────────────────────┘
+
+  (the 2025 omnibus package narrowed its scope and delayed some waves)
+
+# 2. Why AI cares
+
+CSRD requires covered companies to publish audited sustainability data, which for AI builders includes energy use and data center emissions. Site-level electricity and water figures are reported in more detail than before. The scope was narrowed and delayed in 2025, so the timing differs by company.

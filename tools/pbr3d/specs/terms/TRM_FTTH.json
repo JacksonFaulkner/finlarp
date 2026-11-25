@@ -1,0 +1,7 @@
+{"slug":"TRM_FTTH","beats":[
+{"boxes":[{"name":"olt","lo":[-360,-40,-40],"hi":[-220,40,0],"mat":"steel"},{"name":"feeder","lo":[-200,-20,-40],"hi":[-120,20,0],"mat":"dim"},{"name":"split","lo":[-100,-60,-40],"hi":[-40,60,0],"mat":"accent"},{"name":"homes","lo":[60,-120,-40],"hi":[360,120,0],"mat":"glow"}],
+"arrows":[{"name":"h1","from":[-120,0,-20],"to":[-100,0,-20],"mat":"accent"},{"name":"h2","from":[-40,0,-20],"to":[60,0,-20],"mat":"accent"}],
+"tags":[{"text":"Central office OLT","at":[-290,90,0]},{"text":"Splitter 1:32 (passive)","at":[-70,100,0]},{"text":"Homes served by one fiber","at":[210,150,0]}]},
+{"boxes":[{"name":"cable","lo":[-300,-150,-40],"hi":[-60,-120,0],"mat":"dim"},{"name":"fiber","lo":[-40,-150,-40],"hi":[240,-120,0],"mat":"glow"}],
+"tags":[{"text":"Symmetric multi-gig speeds","at":[100,-180,0]},{"text":"Capex-heavy build-out","at":[-160,-180,0]}]}
+]}

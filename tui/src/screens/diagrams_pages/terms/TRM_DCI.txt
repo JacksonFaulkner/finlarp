@@ -1,0 +1,14 @@
+# 1. What it is: the links between data centers
+
+   ┌──────────────┐                                  ┌──────────────┐
+   │ DATA CENTER A│   ┌──────────┐      ┌──────────┐  │ DATA CENTER B│
+   │ routers,     │──▶│ DWDM     │══════│ DWDM     │◀─│ routers,     │
+   │ ZR optics    │   │ terminal │ fiber│ terminal │  │ ZR optics    │
+   └──────────────┘   └──────────┘ 2-   └──────────┘  └──────────────┘
+                                  -1000 km
+
+  (inside a building = data center network; between buildings/sites = DCI)
+
+# 2. Why AI cares
+
+Power limits cap how big one site can grow. Spreading a cluster across sites shifts traffic onto DCI, which drives coherent optics and line-system orders.

@@ -1,0 +1,11 @@
+# 1. What it is: chirps out, echoes back, speed measured
+
+   ┌──────────┐   ┌──────┐   ┌──────────┐   ┌───────────────┐
+   │ TX CHIRP │──▶│ ECHO │──▶│ RX ARRAY │──▶│ RANGE + SPEED │
+   └──────────┘   └──────┘   └──────────┘   └───────────────┘
+
+  (a typical car carries several units: front, corners and rear)
+
+# 2. Why it matters
+
+Radar is cheap and robust, so almost every ADAS car carries several units. Imaging radar is the upgrade path that lets it map a scene rather than only flag objects.

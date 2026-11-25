@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ETHERNET_SWITCH",
+ "script": "terms/trm_ethernet_switch.py",
+ "beats": [
+  {
+   "caption": "An Ethernet switch ties every server in a rack to the network",
+   "text": "A switch is a box of ports with one job: take each packet that arrives and send it out the right port. In an AI cluster the top-of-rack switch takes a cable from every GPU server's network card, and its uplinks reach the next tier. The back-end network that links thousands of GPUs is built from boxes like this one."
+  },
+  {
+   "caption": "Inside: one big switch ASIC, ringed by ports",
+   "text": "Lift the lid and most of the box is a single switch chip under a heatsink. Copper traces fan out from the chip's SerDes lanes to the cages on the front panel, where optics or copper cables plug in. Fans and two power supplies at the back keep the 500 W-class ASIC cool. The chip (Broadcom Tomahawk, Nvidia Spectrum, Cisco Silicon One) is the product."
+  },
+  {
+   "caption": "A packet in one port, out another, in under a microsecond",
+   "text": "The ASIC reads each packet's header, looks the destination up in its tables and queues the packet for the right output port. It does this for billions of packets a second, all in hardware. AI traffic is bursty, so deep buffers, congestion signals and load balancing (as in Spectrum-X or Ultra Ethernet) decide how fast a training job runs."
+  },
+  {
+   "caption": "64 ports x 800G = 51.2 terabits a second",
+   "text": "Bandwidth is port count times port speed. A 51.2T chip drives 512 SerDes lanes at 100G, grouped into 64 ports of 800G. Each port takes a pluggable optic: inside, a DSP retimes the signal and eight lasers send it down fibre. Optics often cost more than the switch itself."
+  },
+  {
+   "caption": "Switch chips double about every two years: 25.6T, 51.2T, 102.4T",
+   "text": "Each generation doubles the bandwidth of one chip, so fewer boxes and hops are needed for the same cluster. 102.4T chips with 200G lanes are shipping now. AI back-end Ethernet is one of the fastest-growing parts of networking. Related: Arista (ANET), Broadcom (AVGO), Nvidia (NVDA), Cisco (CSCO), Celestica (CLS), Marvell (MRVL)."
+  }
+ ]
+}

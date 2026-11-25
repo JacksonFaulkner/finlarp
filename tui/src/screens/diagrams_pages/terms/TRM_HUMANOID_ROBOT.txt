@@ -1,0 +1,11 @@
+# 1. What it is: a body built for human spaces
+
+   ┌─────────┐   ┌──────────┐   ┌──────────────┐   ┌─────────────┐
+   │ CAMERAS │──▶│ AI MODEL │──▶│ JOINT MOTORS │──▶│ ARMS + LEGS │
+   └─────────┘   └──────────┘   └──────────────┘   └─────────────┘
+
+  (each joint is a motor, a reducer and a torque sensor)
+
+# 2. Why it matters
+
+Humanoids need many actuators, so reducer, motor and sensor content per robot is high. Volumes are still small, so robot AI chip demand is mostly training and simulation for now.

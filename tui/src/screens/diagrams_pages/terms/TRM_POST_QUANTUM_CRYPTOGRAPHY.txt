@@ -1,0 +1,16 @@
+# 1. What it is: public-key math that quantum computers should not break
+
+   ┌────────────────┐         ┌──────────────────────┐
+   │ RSA / ECC      │ ──────▶ │ broken by Shor's     │
+   │ today's keys   │         │ algorithm at scale   │
+   └────────────────┘         └──────────────────────┘
+   ┌────────────────┐         ┌──────────────────────┐
+   │ ML-KEM, ML-DSA │ ──────▶ │ lattice math, NIST   │
+   │ (FIPS 203/204) │         │ standard since 2024  │
+   └────────────────┘         └──────────────────────┘
+
+(migration swaps key exchange and signatures; stored data is re-encrypted)
+
+# 2. Why it matters
+
+Data encrypted today can be recorded now and decrypted later. Upgrading key exchange and certificates is a multi-year program across banks, chips and cloud.

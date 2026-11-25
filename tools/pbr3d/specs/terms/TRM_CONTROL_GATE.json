@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CONTROL_GATE",
+ "script": "terms/trm_control_gate.py",
+ "beats": [
+  {
+   "caption": "The control gate is the top electrode of each cell",
+   "text": "On a NAND die, every cell has a control gate on top of its floating gate (or trap layer). The control gate sets the voltage that programs, reads or erases that cell."
+  },
+  {
+   "caption": "Cut through: the control gate sits above the stored charge",
+   "text": "The control gate is a metal-filled poly plate. Between it and the floating gate lies the inter-poly dielectric, which lets the field from the gate reach the charge without leaking it away."
+  },
+  {
+   "caption": "Word line: one row's control gates share one wire",
+   "text": "Control gates in a row connect along one word line. One voltage on that wire selects every cell in the row, so the controller programs or reads a whole page at once."
+  },
+  {
+   "caption": "Read or program: the voltage on the gate sets the outcome",
+   "text": "A read puts a voltage on the word line and senses which cells conduct. A program pulse drives a higher voltage that pushes electrons in. The gate voltage, not the cell alone, decides what happens."
+  },
+  {
+   "caption": "Makers: Micron (MU), Samsung (005930.KS), Kioxia (285A.T), SanDisk (SNDK)",
+   "text": "These four makers build NAND dies with control gates in this layout. Their word line wiring is what sets how many pages a die can address."
+  }
+ ]
+}

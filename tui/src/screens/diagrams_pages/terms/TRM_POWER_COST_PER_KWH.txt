@@ -1,0 +1,12 @@
+# 1. What it is: all-in cost of one kilowatt-hour
+
+   ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
+   │ energy     │───▶│ transmis.  │───▶│ capacity / │───▶│ all-in     │
+   │ $/kWh      │    │ $/kWh      │    │ demand fees│    │ $/kWh      │
+   └────────────┘    └────────────┘    └────────────┘    └────────────┘
+
+  (a site's margin = BTC revenue per kWh minus this number)
+
+# 2. Why it matters
+
+Miners compare their all-in $/kWh against the revenue per kWh they earn from mining or hosting. Lower power cost is what makes a site competitive after a halving.

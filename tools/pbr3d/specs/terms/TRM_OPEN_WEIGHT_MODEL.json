@@ -1,0 +1,137 @@
+{
+ "slug": "TRM_OPEN_WEIGHT_MODEL",
+ "beats": [
+  {
+   "caption": "Weights are downloaded and run locally",
+   "boxes": [
+    {
+     "name": "weights",
+     "lo": [
+      -340,
+      -60,
+      -60
+     ],
+     "hi": [
+      -60,
+      60,
+      -20
+     ],
+     "mat": "quartz"
+    },
+    {
+     "name": "gpus",
+     "lo": [
+      120,
+      -60,
+      -60
+     ],
+     "hi": [
+      340,
+      60,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "run",
+     "from": [
+      -60,
+      0,
+      -40
+     ],
+     "to": [
+      120,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "trained parameters file",
+     "at": [
+      -300,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "your GPUs, self-hosted",
+     "at": [
+      160,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "weights",
+    "gpus",
+    "run"
+   ]
+  },
+  {
+   "caption": "Inference moves off vendor APIs",
+   "boxes": [
+    {
+     "name": "api",
+     "lo": [
+      120,
+      -220,
+      -60
+     ],
+     "hi": [
+      340,
+      -140,
+      -20
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "shift",
+     "from": [
+      200,
+      -140,
+      -40
+     ],
+     "to": [
+      200,
+      -60,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "API vendor per token",
+     "at": [
+      -40,
+      -200,
+      0
+     ]
+    },
+    {
+     "text": "license may restrict use",
+     "at": [
+      -240,
+      -120,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "weights",
+    "gpus",
+    "run",
+    "api",
+    "shift"
+   ]
+  }
+ ]
+}

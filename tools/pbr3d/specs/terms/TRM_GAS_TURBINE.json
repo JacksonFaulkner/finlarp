@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GAS_TURBINE",
+ "script": "terms/trm_gas_turbine.py",
+ "beats": [
+  {
+   "caption": "A gas turbine burns gas to spin a generator",
+   "text": "A gas turbine burns natural gas to spin a generator. Add a steam turbine fed by its exhaust heat and the plant becomes a combined cycle, which gets more power out of the same fuel. It is the fastest firm power a data center can add, whether from the grid or built on site behind the meter."
+  },
+  {
+   "caption": "Cut open: compressor, combustor and turbine on one shaft",
+   "text": "Air is squeezed through the compressor's blade rings and then goes into the combustor. The turbine's blades sit on the same shaft downstream, so part of the turbine's work drives the compressor and the rest turns the generator."
+  },
+  {
+   "caption": "Air in, fuel lit, hot gas spins the blades",
+   "text": "Fuel is injected into the compressed air in the combustor cans and lit. The hot gas expands fast through the turbine blades, which are nickel superalloys and are cooled with air bled off the compressor, since the flame is far hotter than the metal can take."
+  },
+  {
+   "caption": "The generator turns the shaft into grid power",
+   "text": "The generator sits on the same shaft. Its spinning rotor induces current in the stator windings, which runs out through a transformer to the grid or straight to a data center on site."
+  },
+  {
+   "caption": "Exhaust heat makes steam for a second turbine",
+   "text": "The exhaust still carries a lot of heat. A heat recovery steam generator (HRSG) turns it into steam for a steam turbine, adding a second generator and lifting the plant's efficiency. Turbine order books now run years out on AI load. Related: GE Vernova (GEV), Siemens Energy (ENR), Mitsubishi Heavy (MHVYF), Caterpillar (CAT)."
+  }
+ ]
+}

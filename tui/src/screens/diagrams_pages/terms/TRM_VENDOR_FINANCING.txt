@@ -1,0 +1,17 @@
+# 1. What it is: the supplier funds the customer
+
+ ┌───────────────┐
+ │ CHIP VENDOR   │  lends or invests $1B
+ └───────┬───────┘
+         │ cash or guarantee to
+ ┌───────┴───────┐
+ │ CUSTOMER      │  often a neocloud
+ └───────┬───────┘
+         │ customer buys chips with the money
+ ┌───────┴───────┐
+ │ VENDOR REVENUE│  $1B back to the vendor
+ └───────────────┘
+
+# 2. Why it matters
+
+The vendor books sales, but part of the cash comes from its own balance sheet. Look for these terms in the commitments, guarantees and related-party notes.

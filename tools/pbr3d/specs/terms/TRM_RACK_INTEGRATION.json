@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RACK_INTEGRATION",
+ "script": "terms/trm_rack_integration.py",
+ "beats": [
+  {
+   "caption": "Rack-scale AI systems are built in a factory, not in the data center",
+   "text": "Rack integration is assembling, cabling, testing and validating a whole rack of servers, switches, power and cooling before it ships. Parts arrive at an integration site run by an ODM or system maker: compute trays, NVLink switch trays, power shelves and an empty rack frame with its busbar and manifolds already fitted."
+  },
+  {
+   "caption": "Trays, switches and power shelves slide into the frame",
+   "text": "Workers lift each tray into its slot: power shelves top and bottom, 18 compute trays and 9 NVLink switch trays for an NVL72. Each tray blind-mates to the rear busbar, the coolant manifold and the NVLink spine as it slides home, so the order and fit have to be exact."
+  },
+  {
+   "caption": "Then it is cabled and plumbed",
+   "text": "Network fibre runs from every tray's NICs to the top-of-rack, power whips connect to the shelves, and coolant hoses are filled and pressure-tested for leaks. An NVL72's copper spine alone has about 5,000 cables, which is why this is done once, under factory conditions, rather than on site."
+  },
+  {
+   "caption": "Burn-in: run it flat out until weak parts fail",
+   "text": "The rack is hooked to factory power and a coolant test loop and run at full load for days. Bad GPUs, optics, cables and pumps tend to fail early, so they are caught and swapped here instead of in a customer's cluster. Burn-in floor space, power and chilled water limit how many racks a site can turn out a week."
+  },
+  {
+   "caption": "Shipped as one finished unit, ready to plug in",
+   "text": "The tested rack is crated and trucked to the data center at around 1.4 tonnes. On site it only needs power, water and network to come up, cutting deployment from weeks to days, which is why integration capacity can be a bottleneck in AI build-outs. Related: Super Micro (SMCI), Dell (DELL), Foxconn (2317.TW)."
+  }
+ ]
+}

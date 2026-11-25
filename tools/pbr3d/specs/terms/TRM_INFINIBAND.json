@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_INFINIBAND",
+ "script": "terms/trm_infiniband.py",
+ "beats": [
+  {
+   "caption": "InfiniBand is a separate network built just for clusters",
+   "text": "Each GPU server gets InfiniBand host channel adapters (HCAs), one per GPU in big systems, cabled to InfiniBand switches. It is its own protocol stack, not Ethernet: links, switches, routing and transport were all designed together for supercomputers, so latency is low and behaviour is predictable."
+  },
+  {
+   "caption": "Credit flow control: a packet only leaves when there is room for it",
+   "text": "The receiving port tells the sender how many buffer slots it has free, as credits. The sender spends one credit per packet and stops when it runs out, so a switch never has to drop a packet for lack of space. Lossless links are what let RDMA work without slow retransmissions."
+  },
+  {
+   "caption": "RDMA is built in: GPU memory to GPU memory, no CPU in the path",
+   "text": "The HCA reads data straight out of one GPU's memory, the switch forwards it in well under a microsecond, and the far HCA writes it straight into the other GPU's memory. Neither CPU nor operating system touches the data, which keeps GPUs fed during training when they swap gradients thousands of times a second."
+  },
+  {
+   "caption": "The switch can do the maths itself (SHARP)",
+   "text": "In an all-reduce every GPU needs the sum of everyone's gradients. With SHARP the switch ASIC adds the incoming numbers as they pass and sends a single result back, instead of the data bouncing between servers. That roughly halves the traffic for the most common collective in training."
+  },
+  {
+   "caption": "Nvidia owns it, and Ethernet is fighting back",
+   "text": "Speeds have doubled every few years: EDR 100G, HDR 200G, NDR 400G, now XDR 800G per port. Nvidia bought Mellanox, the main supplier, in 2020, and InfiniBand was the default for early large training clusters. Ethernet with RoCE and Ultra Ethernet now competes for the same job. Related: Nvidia (NVDA), Arista (ANET), Broadcom (AVGO)."
+  }
+ ]
+}

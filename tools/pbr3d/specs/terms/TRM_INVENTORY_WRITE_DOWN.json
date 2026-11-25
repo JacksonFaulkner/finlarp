@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_INVENTORY_WRITE_DOWN",
+ "script": "terms/trm_inventory_write_down.py",
+ "beats": [
+  {
+   "caption": "Unsold boards sit on the balance sheet at what they cost",
+   "text": "Inventory is product a company has paid to build but not yet sold: raw parts, work in progress and finished boards. It is carried on the balance sheet at cost. For an AI hardware maker that can be billions of dollars of GPUs, memory and servers sitting in warehouses and contract factories."
+  },
+  {
+   "caption": "A new platform ships and buyers move to it",
+   "text": "AI hardware turns over fast: a new GPU generation every year or so, faster memory, new rack designs. Once the next platform is available, customers stop ordering the old one, and parts bought for it can be left over."
+  },
+  {
+   "caption": "When the stock can only sell below cost, its value is cut",
+   "text": "Accounting rules say inventory must be carried at the lower of cost and what it can be sold for. If old boards can now only fetch less than they cost, or nothing at all, the company must write their value down to that lower number. The gap between the two bars is the write-down."
+  },
+  {
+   "caption": "The write-down is charged to cost of revenue and hits gross margin",
+   "text": "The charge goes through cost of revenue in the quarter it is booked, so reported gross margin drops even though no extra product was made. Companies often call out the one-time amount so investors can see the underlying margin. A large charge is a sign demand shifted faster than the supply plan."
+  },
+  {
+   "caption": "Afterwards the stock is carried at the lower value",
+   "text": "If written-down parts later sell, there is little cost left against them, which can flatter margins for a quarter. Watch inventory growth against sales: stock rising much faster than revenue is an early warning. Related: NVIDIA (NVDA), Super Micro (SMCI), Micron (MU), Intel (INTC)."
+  }
+ ]
+}

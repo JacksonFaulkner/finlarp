@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HYPERSCALER",
+ "script": "terms/trm_hyperscaler.py",
+ "beats": [
+  {
+   "caption": "A hyperscaler runs computing across dozens of its own giant campuses",
+   "text": "Amazon (AWS), Microsoft (Azure), Google (GCP) and Meta each own and operate fleets of data centers around the world, grouped into regions. They design their own servers, racks and often chips, and buy at a scale no one else does. Oracle and a few newer GPU clouds are trying to join that tier."
+  },
+  {
+   "caption": "Regions are tied together by private fiber backbones",
+   "text": "Each hyperscaler lays or leases its own long-haul and subsea fiber, so traffic between its regions never touches the public internet. That backbone lets them spread a service, or a training job's data, across many sites and fail over when one goes down."
+  },
+  {
+   "caption": "Each campus is a cluster of halls full of AI racks",
+   "text": "Zoom into one site and it is a data center like any other, only larger and more uniform: hundreds of MW, identical rows of racks, and increasingly liquid-cooled GPU or custom-chip (TPU, Trainium, Maia, MTIA) systems. They buy for themselves and rent the capacity to cloud customers."
+  },
+  {
+   "caption": "Their capex, hundreds of billions a year, is the AI build-out",
+   "text": "Combined capital spending by the big four runs at several hundred billion dollars a year and is still rising. Roughly half goes to servers and chips, the rest to buildings, power, cooling and network. That spending is the main source of demand for nearly every AI hardware supplier."
+  },
+  {
+   "caption": "Suppliers name them as top customers, so their guidance moves the chain",
+   "text": "Nvidia, Broadcom, Arista, Vertiv and others list hyperscalers among their largest customers. When one raises or trims its capex guidance on an earnings call, the whole AI supply chain reprices. Related: Amazon (AMZN), Microsoft (MSFT), Alphabet (GOOGL), Meta (META), Oracle (ORCL)."
+  }
+ ]
+}

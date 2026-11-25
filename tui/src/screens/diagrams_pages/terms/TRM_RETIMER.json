@@ -1,0 +1,9 @@
+{
+  "label": "RETIMER",
+  "term": "retimer",
+  "aliases": [
+    "retimers",
+    "PCIe retimer"
+  ],
+  "kind": "networking"
+}

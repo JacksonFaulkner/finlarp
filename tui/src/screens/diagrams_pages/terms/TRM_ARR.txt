@@ -1,0 +1,13 @@
+# 1. What it is: annualized value of recurring contracts
+
+┌────────────────────────────────────┐
+│ ARR = MRR x 12                     │
+│ MRR = monthly recurring revenue    │
+│ contracted, excludes one-time fees │
+└────────────────────────────────────┘
+
+(run-rate: the current billing period, annualized, not revenue booked over the year)
+
+# 2. Why AI cares
+
+ARR annualizes the recurring fees a company bills today, so it works as a forward signal of the revenue base. Companies define it differently: some include usage fees, pilots, or contracts that have not started billing. Check the filing's definition before comparing ARR across companies.

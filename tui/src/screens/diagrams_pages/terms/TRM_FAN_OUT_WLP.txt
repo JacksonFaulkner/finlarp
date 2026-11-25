@@ -1,0 +1,21 @@
+# 1. What it is: a die is molded, then wired out past its edges
+
+  ┌────────────────────────────┐
+  │ known-good die             │
+  └──────────────┬─────────────┘
+                 ▼
+  ┌────────────────────────────┐
+  │ epoxy mold compound        │
+  └──────────────┬─────────────┘
+                 ▼
+  ┌────────────────────────────┐
+  │ redistribution layer (RDL) │
+  └──────────────┬─────────────┘
+                 ▼
+  ┌────────────────────────────┐
+  │ solder balls               │
+  └──────────────┬─────────────┘
+
+# 2. Why AI cares
+
+Fan-out gives more I/O per package at lower cost than a full silicon interposer. It is widely used in phone processors and is also used for some AI and networking parts.

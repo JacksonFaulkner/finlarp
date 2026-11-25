@@ -1,0 +1,10 @@
+{
+  "label": "SPINE-LEAF",
+  "term": "spine-leaf",
+  "aliases": [
+    "leaf-spine",
+    "spine and leaf",
+    "Clos network"
+  ],
+  "kind": "networking"
+}

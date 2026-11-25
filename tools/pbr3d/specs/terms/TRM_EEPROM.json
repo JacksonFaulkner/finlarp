@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_EEPROM",
+ "script": "terms/trm_eeprom.py",
+ "beats": [
+  {
+   "caption": "EEPROM: a tiny chip that remembers settings",
+   "text": "Small serial EEPROMs, often a few kilobits, sit on boards, DIMMs, sensors and cars. They hold configuration, serial numbers and calibration that must survive power-off and change now and then."
+  },
+  {
+   "caption": "Each bit is a select transistor plus a floating gate",
+   "text": "Cut open, an EEPROM bit is two transistors. The floating-gate cell stores charge like flash; the select transistor beside it isolates that cell, so one byte can be changed without touching its neighbours."
+  },
+  {
+   "caption": "Write: electrons tunnel onto one byte's gates",
+   "text": "The select transistor opens a single byte, and a high voltage pulls electrons through a thin tunnel oxide onto the floating gate. Only that byte changes; there is no block erase as in flash."
+  },
+  {
+   "caption": "Erase electrically, byte by byte, no UV lamp",
+   "text": "Reversing the field tunnels the charge back off. Older EPROMs needed a UV lamp through a quartz window to erase; EEPROM does it with voltage in milliseconds, for about a million cycles."
+  },
+  {
+   "caption": "Flexible but big: the extra transistor costs density",
+   "text": "Two transistors per bit makes EEPROM far less dense than flash, so it stays at kilobits to a few megabits for config data. Makers: Microchip (MCHP), STMicroelectronics (STM), Infineon (IFX.DE)."
+  }
+ ]
+}

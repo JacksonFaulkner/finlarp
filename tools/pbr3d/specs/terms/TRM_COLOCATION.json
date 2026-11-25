@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_COLOCATION",
+ "script": "terms/trm_colocation.py",
+ "beats": [
+  {
+   "caption": "Colocation: rent the building, bring your own servers",
+   "text": "A colocation (colo) provider owns the data center building and everything that keeps it running: the grid connection, backup power, cooling, security and fiber. Customers rent space inside it and install servers they own and operate themselves. The provider never touches the customer's computers; it sells a safe, powered, cooled, connected place to put them."
+  },
+  {
+   "caption": "Retail colo: a locked cage of the customer's own cabinets",
+   "text": "Retail customers rent a few cabinets or a fenced cage on a shared floor. Inside, the racks, servers, switches and storage belong to the tenant, and only its staff hold the badge to the cage door. Contracts typically run three to five years and renew, which makes the revenue recurring and sticky: moving racks out is costly and risky."
+  },
+  {
+   "caption": "The provider supplies power and cooling, billed mostly per kW",
+   "text": "Utility power comes in through switchgear and UPS batteries with generators behind them, then runs along overhead busway and drops into each rack. CRAH units push cold air into the rack fronts and pull the hot exhaust back. Because power and cooling are the scarce, expensive parts, pricing is quoted largely per kilowatt of committed power rather than per square foot."
+  },
+  {
+   "caption": "Interconnection: cross-connects through the meet-me room",
+   "text": "Every cage runs fiber to the meet-me room, where a cross-connect patches it to any other tenant: carriers, cloud on-ramps, exchanges, partners. Each cross-connect is a small monthly fee with almost no cost to provide. The more networks in one building, the more valuable it is to the next tenant, which is the moat of interconnection-heavy retail sites."
+  },
+  {
+   "caption": "Wholesale colo: whole halls leased to one tenant, now for AI",
+   "text": "Wholesale colo leases an entire hall or building, often to a hyperscaler, on 10-15 year terms at lower margins per kW. AI shows up here as bigger, denser leases: racks that drew 8-15 kW now draw 40-130 kW and need liquid cooling. Related: Equinix (EQIX) leans retail and interconnection, Digital Realty (DLR) wholesale plus retail, Iron Mountain (IRM) and Applied Digital (APLD) build for AI tenants."
+  }
+ ]
+}

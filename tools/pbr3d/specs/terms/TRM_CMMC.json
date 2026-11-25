@@ -1,0 +1,12 @@
+{"slug":"TRM_CMMC","beats":[
+ {"caption":"a vendor handling CUI must certify","boxes":[
+   {"name":"cui","lo":[-300,-40,-40],"hi":[-120,40,0],"mat":"charge"},
+   {"name":"gate","lo":[-40,-100,-60],"hi":[40,100,0],"mat":"accent"},
+   {"name":"contract","lo":[120,-40,-40],"hi":[300,40,0],"mat":"steel"}],
+  "arrows":[{"name":"assess","from":[-120,0,-20],"to":[-40,0,-20],"mat":"accent"},{"name":"award","from":[40,0,-20],"to":[120,0,-20],"mat":"glow"}],
+  "tags":[{"text":"CUI = controlled data","at":[-210,100,-20]},{"text":"CMMC assessment","at":[0,130,-20]},{"text":"defense contract eligibility","at":[210,100,-20]}]},
+ {"caption":"a failed assessment removes eligibility","boxes":[
+   {"name":"fail","lo":[80,-150,-60],"hi":[260,-100,0],"mat":"alarm"}],
+  "tags":[{"text":"phase-in began late 2025","at":[0,-190,-20]},{"text":"failed: vendor drops out","at":[170,-70,-20]}],
+  "show":["cui","gate","contract","assess","award","fail"]}
+]}

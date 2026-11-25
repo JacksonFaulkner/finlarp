@@ -1,0 +1,17 @@
+# 1. What it is: the contact point between chip and tester
+
+  ┌───────────────────────────┐
+  │ tester load board         │
+  └─────────────┬─────────────┘
+                ▼
+  ┌───────────────────────────┐
+  │ test socket: contact pins │
+  └─────────────┬─────────────┘
+                ▼
+  ┌───────────────────────────┐
+  │ packaged chip             │
+  └─────────────┬─────────────┘
+
+# 2. Why AI cares
+
+Large AI packages have many balls and high speeds, so sockets are costly and wear fast. A socket that fails can ruin good chips or slow the whole test floor.

@@ -1,0 +1,14 @@
+# 1. What it is: clocks from READ to first data
+
+   controller                              DRAM
+   ┌──────────┐   READ (column)   ┌──────────────────┐
+   │          │──────────────────▶│ column selected  │
+   │          │                   │ data driven out  │
+   │          │◀ ─ ─ ─ ─ ─ ─ ─ ─ ─│                  │
+   └──────────┘   CL clocks later └──────────────────┘
+
+  (CL is counted in memory clock cycles; a row must already be open)
+
+# 2. Why AI cares
+
+CL is one of the numbers on a DRAM datasheet and sets how long a read waits before data appears. For AI servers, bandwidth matters more than CL, because streaming large tensors hides most of the wait.

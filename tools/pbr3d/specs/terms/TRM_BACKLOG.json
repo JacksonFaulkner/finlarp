@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BACKLOG",
+ "script": "terms/trm_backlog.py",
+ "beats": [
+  {
+   "caption": "Backlog is signed orders not yet delivered",
+   "text": "Backlog is what customers have contracted to buy and the company has not yet delivered or recognised. Under US GAAP the same idea is reported as remaining performance obligations (RPO). It is a measure of locked-in demand."
+  },
+  {
+   "caption": "Signed multi-year AI compute deals swell the backlog",
+   "text": "Cloud and AI infrastructure contracts often run for several years. Oracle and CoreWeave reported RPO jumps when large multi-year AI compute contracts were signed. The number rises the day the contract is signed, not when the revenue comes in."
+  },
+  {
+   "caption": "Delivery turns backlog into recognised revenue",
+   "text": "As the work is done or the product ships, the order moves out of backlog and into revenue. A company with a large backlog can show steady revenue growth for years, provided deliveries keep up."
+  },
+  {
+   "caption": "Cancelled or delayed orders shrink backlog",
+   "text": "Backlog can be cancelled, delayed or re-scoped. Size alone is not enough: the quality of backlog depends on contract terms, how long it runs, and how creditworthy the customer is."
+  },
+  {
+   "caption": "Watch duration, cancellation terms and customer quality",
+   "text": "A year of backlog from a strong buyer is worth more than a longer book from a weak one. Related: Oracle (ORCL), CoreWeave (CRWV), Microsoft (MSFT), Vertiv (VRT), GE Vernova (GEV)."
+  }
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MIXTURE_OF_EXPERTS",
+ "script": "terms/trm_mixture_of_experts.py",
+ "beats": [
+  {
+   "caption": "A router sends each token to a few experts, not all of them",
+   "text": "A mixture-of-experts (MoE) model replaces one big feed-forward block with many smaller expert networks and a router. For every token the router reads its state and picks a handful of experts to run. Only those do any work, so compute per token stays low even when the model holds far more weights than a dense model of the same speed."
+  },
+  {
+   "caption": "The router scores every expert and picks the top few",
+   "text": "The router is a small learned layer that outputs one score per expert. The highest-scoring experts (typically two in a larger group) receive the token, and their outputs are mixed back together using the router's weights. The same router runs on every layer, so different tokens take different routes."
+  },
+  {
+   "caption": "Only the chosen experts compute; their outputs return to the router",
+   "text": "The chosen experts light up and process the token, while the rest sit idle. Each chosen expert sends its result back to the router, which combines them into one vector for the next layer. Per token, the work done is a small slice of what the full parameter count would need."
+  },
+  {
+   "caption": "Each expert lives on its own GPU, so tokens cross the network",
+   "text": "Experts are split across GPUs, and a token routed to a remote expert has to travel over the GPU-to-GPU link (NVLink in NVIDIA systems). That all-to-all traffic is the trade-off: more bandwidth between accelerators is what keeps the experts busy. Networking silicon from Broadcom (AVGO) sits on that path."
+  },
+  {
+   "caption": "More experts means more memory held, even though compute stays small",
+   "text": "All experts' weights must sit in GPU memory for the router to reach them, so MoE models need large HBM pools even though each token uses only a few experts. That favours memory-rich GPUs, such as NVIDIA (NVDA) accelerators with high-bandwidth memory from Micron (MU)."
+  }
+ ]
+}

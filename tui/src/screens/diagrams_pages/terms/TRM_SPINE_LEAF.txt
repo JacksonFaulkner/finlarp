@@ -1,0 +1,13 @@
+# 1. What it is: every leaf links to every spine
+
+   ┌───────────┐     ┌─────────────┐               ┌──────────┐
+   │ SERVERS   │────▶│ LEAF        │──all-to-all──▶│ SPINE    │
+   │ GPU racks │     │ switches    │               │ switches │
+   │           │     │ top of rack │               │ core     │
+   └───────────┘     └─────────────┘               └──────────┘
+
+  (server -> leaf -> spine -> leaf -> server: max 4 hops in 2 tiers)
+
+# 2. Why AI cares
+
+Bigger clusters add tiers; each tier adds switches and optics per GPU.

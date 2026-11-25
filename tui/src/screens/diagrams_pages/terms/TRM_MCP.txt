@@ -1,0 +1,13 @@
+# 1. What it is: open protocol linking AI apps to tools and data
+
+┌────────────────────────┐       ┌────────────────────────┐       ┌────────────────────────┐
+│ AI HOST                │       │ MCP SERVER             │       │ DATA SOURCE            │
+│ chat app, IDE, agent   │─MCP──▶│ exposes tools,         │─API──▶│ CRM, files, DB, API    │
+└────────────────────────┘       │ data, prompts          │       └────────────────────────┘
+                                 └────────────────────────┘
+
+(the client inside the host talks JSON-RPC to the server; one server works with any compliant host)
+
+# 2. Why AI cares
+
+Anthropic published MCP in late 2024 as an open standard, so a connector written once can serve any compliant AI host. Before that, each model vendor and app needed its own integration for each data source. Servers can expose tools the model may call, read-only resources, and prompt templates, and the host decides what to allow.

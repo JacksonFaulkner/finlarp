@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_COHERENT_OPTICS",
+ "script": "terms/trm_coherent_optics.py",
+ "beats": [
+  {
+   "caption": "Coherent optics link data centres tens to hundreds of km apart",
+   "text": "An AI campus often spans several buildings or sites, and they must trade data as if they were one cluster. Coherent optics send 400G to 1.6T per wavelength over a single fibre pair for 80 to 1,000+ km, with optical amplifiers every 80 km or so. Ordinary short-reach optics run out of reach after a few kilometres."
+  },
+  {
+   "caption": "Bits ride on phase and amplitude, not just on/off",
+   "text": "A plain optic turns the light on and off: one bit per symbol. A coherent optic sets the light's phase and amplitude, so each symbol lands on one point of a grid called a constellation. 16QAM has 16 points, so 4 bits per symbol, and two polarisations double it to 8. At ~120 Gbaud that is about 1 Tb/s of raw capacity on one colour."
+  },
+  {
+   "caption": "The transmitter: a laser and nested IQ modulators",
+   "text": "Inside the module a tunable laser feeds two nested Mach-Zehnder modulators per polarisation: one sets the in-phase part (I), the other the quadrature part (Q), 90 degrees apart. A polarisation rotator and combiner merge the X and Y streams into one fibre. The DSP's DACs drive the modulator electrodes."
+  },
+  {
+   "caption": "The receiver: a local laser and a DSP that undoes the fibre",
+   "text": "At the far end a second laser, the local oscillator, mixes with the incoming light in a 90-degree hybrid, and balanced photodiodes read out I and Q for each polarisation. A DSP with fast ADCs then reverses chromatic dispersion and polarisation drift and applies error correction, so smeared pulses become clean symbols. That DSP is the hardest and most power-hungry chip in the module."
+  },
+  {
+   "caption": "400ZR and 800ZR put coherent into a switch port",
+   "text": "Coherent used to need large line-card systems. 400ZR and 800ZR pluggables shrink it to a QSFP-DD or OSFP module that plugs straight into a switch, at about 15-30 W each. Ciena (CIEN) leads line systems, Marvell (MRVL) and Cisco (CSCO, via Acacia) make coherent DSPs and modules, and Coherent (COHR) and Lumentum (LITE) supply lasers and modulators."
+  }
+ ]
+}

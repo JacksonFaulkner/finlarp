@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RARE_EARTHS",
+ "script": "terms/trm_rare_earths.py",
+ "beats": [
+  {
+   "caption": "Rare earth magnets turn the fans and motors in AI racks",
+   "text": "Rare earths are 17 metallic elements, neodymium and dysprosium among them. Their permanent magnets spin the cooling fans in servers, the drives in storage, and the motors in robots and vehicles. Neodymium-iron-boron (NdFeB) is the strongest common type, so a small magnet gives a lot of turning force."
+  },
+  {
+   "caption": "Inside a magnet: grains, each one a tiny magnetic domain",
+   "text": "A sintered NdFeB magnet is packed with fine grains, and each grain acts as a small magnet with its own north and south pole. Left alone, the grains point every which way and their fields cancel out. The alloy keeps the order it is given, which is why these magnets stay strong at room temperature."
+  },
+  {
+   "caption": "Pressed in a field, the grains line up and lock in",
+   "text": "During manufacturing the powder is pressed in a strong magnetic field, so the grains turn to point the same way. Sintering then locks that order in place. A grain pointing the wrong way adds nothing to the field, so alignment decides how strong the finished magnet is."
+  },
+  {
+   "caption": "Mined, separated and pressed into magnets in a chain of steps",
+   "text": "Ore is mined, then the rare earths are separated from one another and refined into metal and alloy. The alloy is milled to powder, pressed in a field and sintered into a magnet. Each separation step is hard chemistry, which is why so few plants can do it."
+  },
+  {
+   "caption": "China handles most of the chain, so export limits reach the motors",
+   "text": "China does most of the mining, nearly all separation and most magnet making, and it has put export controls on rare earths. Magnet supply sets the cost and lead time of motors and actuators in data center and factory equipment. Related: MP Materials (MP), Lynas Rare Earths (LYC.AX), Neo Performance Materials (NEO.TO)."
+  }
+ ]
+}

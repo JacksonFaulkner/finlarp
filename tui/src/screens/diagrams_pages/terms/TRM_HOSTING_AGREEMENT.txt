@@ -1,0 +1,12 @@
+# 1. What it is: site owner powers, customer owns the servers
+
+   ┌────────────┐   power + space   ┌────────────┐
+   │ AI customer│──────────────────▶│ site owner │
+   │ owns GPUs  │◀──────────────────│ (miner)    │
+   └────────────┘   fee per MW/mo   └────────────┘
+
+  (the operator carries no GPU hardware risk)
+
+# 2. Why it matters
+
+Fees are contracted over several years, which can support debt financing for the site. The customer usually pays for power separately or through the fee, so the operator's margin depends on how the fee is set against its power cost.

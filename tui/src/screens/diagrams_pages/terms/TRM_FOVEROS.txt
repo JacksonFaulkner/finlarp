@@ -1,0 +1,25 @@
+# 1. What it is: stacking chiplets on a base die
+
+  ┌──────────────────────────────┐
+  │ chiplets (compute, cache)    │
+  └───────────────┬──────────────┘
+                  ▼
+  ┌──────────────────────────────┐
+  │ microbumps or Cu-Cu bonds    │
+  └───────────────┬──────────────┘
+                  ▼
+  ┌──────────────────────────────┐
+  │ base die (I/O, power, cache) │
+  └───────────────┬──────────────┘
+                  ▼
+  ┌──────────────────────────────┐
+  │ package substrate            │
+  └───────────────┬──────────────┘
+
+# 2. Why AI cares
+
+Stacking puts logic next to memory and links over very short wires, which cuts power per bit moved. Yield and thermal limits on stacked dies are the main hurdles.
+
+# 3. Versus EMIB
+
+EMIB embeds a small silicon bridge in the substrate to join dies side by side. Foveros stacks dies vertically on a base die.

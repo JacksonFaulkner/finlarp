@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MMWAVE",
+ "script": "terms/trm_mmwave.py",
+ "beats": [
+  {
+   "caption": "Small cells on the lamp posts, many per block",
+   "text": "Millimetre-wave networks put small radios on street furniture: lamp posts, poles and building faces. Each is a box about the size of a shoebox, and a dense city needs many of them close together."
+  },
+  {
+   "caption": "Inside the module: a patch array printed on a laminate",
+   "text": "The radio is an antenna-in-package: a grid of tiny patch antennas printed on a laminate, sitting right on top of the beamformer chip. Short traces keep the loss low at these frequencies."
+  },
+  {
+   "caption": "24 to 100 GHz: a wide channel, but a short reach",
+   "text": "At these frequencies the wavelength is a few millimetres. Channels are wide, so peak throughput is high, but the waves die out over short distances. A single cell covers a short stretch of street."
+  },
+  {
+   "caption": "A wall or a building blocks the path; a nearer cell takes over",
+   "text": "Walls, glass, foliage and even people block or absorb these waves. When the path is cut, the network hands the phone to a cell with a clear line, which is why the sites sit so close together."
+  },
+  {
+   "caption": "Dense sites on every block: many small cells, not a few towers",
+   "text": "The model is many small sites, not a few tall towers. Each cell carries a few hundred metres of street (est.), so carriers need far more sites per square kilometre. Qualcomm (QCOM), Skyworks (SWKS), Qorvo (QRVO) and Verizon (VZ) are named in this build-out."
+  }
+ ]
+}

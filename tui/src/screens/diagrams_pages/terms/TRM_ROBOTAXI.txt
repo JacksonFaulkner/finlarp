@@ -1,0 +1,11 @@
+# 1. What it is: a car with no driver, sold by the ride
+
+   ┌─────────┐   ┌────────────┐   ┌─────────┐   ┌─────────────────┐
+   │ SENSORS │──▶│ AV COMPUTE │──▶│ PLANNER │──▶│ DRIVERLESS RIDE │
+   └─────────┘   └────────────┘   └─────────┘   └─────────────────┘
+
+  (remote assist staff help with edge cases; no one sits in the driver seat)
+
+# 2. Why it matters
+
+Robotaxi cost per mile is the whole business. Sensor count, compute power and vehicle price each cut into margin, so each cost line draws AI chip, LiDAR and EV demand.

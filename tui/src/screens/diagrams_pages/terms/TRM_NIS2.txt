@@ -1,0 +1,13 @@
+# 1. What it is: NIS2
+
+   ┌──────────────────┐       ┌──────────────────────────┐       ┌─────────────────────┐
+   │ NIS2             │       │ essential and important  │       │ 24h early warning   │
+   │ EU cybersecurity │──────▶│ entities: energy, cloud, │──────▶│ fines up to EUR 10m │
+   │ directive        │       │ data centers, MSPs       │       │ or 2% of turnover   │
+   └──────────────────┘       └──────────────────────────┘       └─────────────────────┘
+
+  (essential entities face the higher fine cap)
+
+# 2. Why AI cares
+
+NIS2 brings data center operators, cloud providers, and managed service providers into scope across EU member states. Covered companies must report significant incidents quickly and manage supplier security. Member states were due to transpose it by October 2024, and national laws differ in timing and detail.

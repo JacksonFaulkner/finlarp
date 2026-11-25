@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GROSS_MARGIN",
+ "script": "terms/trm_gross_margin.py",
+ "beats": [
+  {
+   "caption": "Every board sold brings in revenue",
+   "text": "Gross margin starts with revenue: the price customers pay for each GPU board, server or chip that ships. Here boards roll off the line and each sale pours into the revenue bar. On its own, revenue says nothing about how much of that money the company keeps."
+  },
+  {
+   "caption": "Cost of revenue fills the bottom; gross profit is what is left",
+   "text": "Cost of revenue is what it took to make what was sold: purchased memory (HBM), advanced packaging (CoWoS), the board, components, assembly, test and yield losses. Subtract it from revenue and the remainder is gross profit. Gross margin is gross profit divided by revenue, so a $100 sale with $25 of cost is a 75% gross margin."
+  },
+  {
+   "caption": "Pricing power shows up as a fat margin; assemblers run thin",
+   "text": "A chip designer that owns the product sells a board for several times its input cost and runs gross margins in the 70s. A server assembler buys those same GPUs and resells them inside a box, so most of its revenue passes straight through to cost and margins sit near 10%. Same hardware, very different share of each dollar kept."
+  },
+  {
+   "caption": "Input costs and product mix move the margin",
+   "text": "When HBM prices rise, a new product ramps with low early yields, or sales shift toward cheaper parts, cost per dollar of revenue goes up and the green shrinks. A few points of gross margin on a large revenue base can swing operating profit by billions, which is why guidance on margin moves stocks."
+  },
+  {
+   "caption": "Gross profit pays for R&D and SG&A; the rest is operating profit",
+   "text": "Operating expenses come out of gross profit, not revenue: engineering (R&D), sales and admin (SG&A). A high, stable gross margin leaves room to outspend rivals on R&D and still earn a lot. Related: NVIDIA (NVDA), Broadcom (AVGO), Super Micro (SMCI), Dell (DELL)."
+  }
+ ]
+}

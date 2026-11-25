@@ -1,0 +1,17 @@
+# 1. What it is: a fast modulator crystal, thinned onto a wafer
+
+   ┌──────────────────────────────────────┐
+   │ electrodes (RF data signal)          │
+   ├──────────────────────────────────────┤
+   │ LiNbO3 film, < 1 um  ◀ light guide   │
+   ├──────────────────────────────────────┤
+   │ oxide (buried insulator)             │
+   ├──────────────────────────────────────┤
+   │ silicon handle wafer                 │
+   └──────────────────────────────────────┘
+
+  (Pockels effect: index changes linearly with voltage, very fast)
+
+# 2. Why it matters
+
+Moving to 200G and 400G per lane strains silicon modulators. TFLN offers more bandwidth at lower voltage, so it is a candidate for next-gen transceivers.

@@ -1,0 +1,12 @@
+# 1. What it is: the digital half of the radio
+
+   ┌──────────┐  RF samples  ┌──────────────┐  IP / packets
+   │ RF FRONT │─────────────▶│ BASEBAND     │───────────────▶ network
+   │ END      │◀─────────────│ modem DSP    │◀───────────────
+   └──────────┘              └──────────────┘
+
+  (modulation, coding, protocol stack; runs on the modem chip)
+
+# 2. Why it matters
+
+Baseband compute sets how fast a radio can go and how much power it uses, so modem silicon is a main place where share is won.

@@ -1,0 +1,17 @@
+# 1. What it is: good dies / total dies
+
+   ┌──────────────┐   ┌──────────────────┐   ┌───────────────┐
+   │ WAFER        │   │ DEFECTS          │   │ GOOD DIES     │
+   │ ~60 big dies │──▶│ random particles │──▶│ e.g. 40 of 60 │
+   │ per 300mm    │   │ and pattern      │   │ = 67% yield   │
+   └──────────────┘   └──────────────────┘   └───────────────┘
+
+  (bigger die = more chance one defect kills it)
+
+# 2. Why it matters
+
+Cost per good die = wafer cost / good dies. A yield jump lowers unit cost without any price change.
+
+# 3. Where it shows up
+
+Earnings calls mention yield on new-node ramps, HBM stacks and advanced packaging.

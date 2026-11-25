@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HELIUM",
+ "script": "terms/trm_helium.py",
+ "beats": [
+  {
+   "caption": "Helium comes out of the ground mixed into natural gas",
+   "text": "Helium forms over hundreds of millions of years from radioactive decay in rock and collects in some natural gas fields, at a fraction of a percent up to a few percent. It is pulled out only where a gas plant bothers to separate it. Once vented into the air, it escapes to space, so nobody can manufacture it."
+  },
+  {
+   "caption": "Chilled to 4.2 K, it ships as a liquid in vacuum dewars",
+   "text": "The plant cools the gas until everything else condenses, then liquefies the helium at 4.2 kelvin, the coldest boiling point of any element. It travels in insulated ISO containers that slowly boil off, so a shipment has a clock on it of about a month."
+  },
+  {
+   "caption": "Liquid helium keeps superconducting magnets cold",
+   "text": "MRI scanners and research magnets wind niobium-titanium wire that only superconducts near 4 K. The coil sits in a bath of liquid helium, and the bath slowly boils away and must be topped up. Magnets are the largest single use of helium."
+  },
+  {
+   "caption": "Fabs use it to cool wafers and check for leaks",
+   "text": "In etch and deposition tools, helium flows behind the wafer to carry heat to the chuck, because it conducts heat well and reacts with nothing. It is also a carrier gas and the tracer for leak checks. A large fab needs a steady high-purity supply, so a shortage slows tools and raises running costs."
+  },
+  {
+   "caption": "A handful of countries supply it, and supply can't be ramped",
+   "text": "The US, Qatar, Algeria and Russia produce most of the world's helium, and an outage at one plant can tighten the market for months. For AI data centers it is a tiny cost, but for new fabs it is a real input constraint. Related: Linde (LIN), Air Products (APD), Air Liquide (AI.PA)."
+  }
+ ]
+}

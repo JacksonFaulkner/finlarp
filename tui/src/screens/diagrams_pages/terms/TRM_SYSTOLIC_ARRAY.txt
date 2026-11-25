@@ -1,0 +1,20 @@
+# 1. What it is: a grid where data pulses cell to cell
+
+   weights ▼        ▼        ▼
+        ┌─────┐  ┌─────┐  ┌─────┐
+ data ─▶│ MAC │─▶│ MAC │─▶│ MAC │
+        └──┬──┘  └──┬──┘  └──┬──┘
+        ┌──▼──┐  ┌──▼──┐  ┌──▼──┐
+ data ─▶│ MAC │─▶│ MAC │─▶│ MAC │
+        └──┬──┘  └──┬──┘  └──┬──┘
+           ▼        ▼        ▼  partial sums out
+
+  (each cell multiplies, adds, and passes data right and down)
+
+# 2. Why AI cares
+
+Reusing operands inside the grid cuts memory traffic, which is the main cost in matrix math.
+
+# 3. Business angle
+
+Explains why custom ASICs can match GPUs on narrow workloads at lower power.

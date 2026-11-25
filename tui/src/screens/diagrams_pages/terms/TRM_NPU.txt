@@ -1,0 +1,18 @@
+# 1. What it is: an AI block inside a device chip
+
+   ┌───────────┐   ┌─────────────────┐
+   │ SoC       │   │ ON-DEVICE       │
+   │ CPU cores │   │ speech, vision, │
+   │ GPU       │──▶│ small LLMs      │
+   │ NPU  ◀ AI │   └─────────────────┘
+   └───────────┘
+
+  (rated in TOPS at a few watts)
+
+# 2. Why AI cares
+
+Running models on the device cuts cloud cost and latency and keeps data local.
+
+# 3. Business angle
+
+NPU performance is used to market AI PCs and phones and can drive upgrade cycles.

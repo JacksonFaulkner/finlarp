@@ -1,0 +1,17 @@
+# 1. What it is: power wires on the back, signals on the front
+
+   ┌───────────────┐   ┌──────────────┐   ┌─────────────┐
+   │ FRONT METAL   │   │ TRANSISTORS  │   │ BACK METAL  │
+   │ signal wiring │──▶│ thin silicon │──▶│ power rails │
+   │ only          │   │ layer        │   │ to bumps    │
+   └───────────────┘   └──────────────┘   └─────────────┘
+
+  (old way: power and signal share the front stack and fight for space)
+
+# 2. Why it matters
+
+Shorter, thicker power paths mean less IR drop, so chips hold voltage under heavy AI load. Freed front-side tracks let designers pack cells tighter.
+
+# 3. Cost
+
+The wafer is bonded to a carrier and thinned to a few microns, adding bonding, thinning and alignment steps.

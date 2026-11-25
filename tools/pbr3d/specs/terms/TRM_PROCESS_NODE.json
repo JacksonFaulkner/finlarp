@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_PROCESS_NODE",
+ "script": "terms/trm_process_node.py",
+ "beats": [
+  {
+   "caption": "A process node is a generation of chip-making technology",
+   "text": "Names like 28nm, TSMC N5, N3, N2 or Intel 18A label generations of manufacturing. They stopped matching any real dimension around 2010; now they mark steps in how densely transistors pack and how fast and efficiently they switch. The biggest changes came from the transistor's shape: planar, then FinFET, now gate-all-around."
+  },
+  {
+   "caption": "Planar: the gate sits on top of a flat channel",
+   "text": "In a planar transistor the gate presses down on a flat strip of silicon between source and drain. Voltage on the gate opens a thin channel at the surface and electrons flow. Shrink it below ~20nm and the gate loses grip: current leaks underneath even when the switch is off, wasting power as heat."
+  },
+  {
+   "caption": "FinFET: the channel stands up as a fin, gate on three sides",
+   "text": "From 22/16nm (2012-2015) the channel became a thin vertical fin and the gate drapes over it, controlling it from three sides. Leakage dropped and the fins could be packed tightly, which carried the industry from 16nm through TSMC N3. Two or three fins side by side make one stronger transistor."
+  },
+  {
+   "caption": "Gate-all-around: stacked nanosheets, gate on every side",
+   "text": "At TSMC N2, Samsung 3nm and Intel 18A the fin is replaced by a stack of thin horizontal silicon sheets, with gate material filling the gaps so it surrounds each sheet completely. Better control means lower voltage and less leakage at the same speed; sheet width can be tuned per transistor."
+  },
+  {
+   "caption": "Each node packs more transistors per mm2 for 10-30% better power or speed",
+   "text": "A new node typically gives 10-30% more speed or lower power and a density gain, at a much higher wafer price (a leading-edge wafer is $20k-30k). AI accelerators, CPUs and phone chips move first. Only TSMC (TSM), Samsung and Intel (INTC) build at the leading edge; NVIDIA (NVDA) and Apple (AAPL) are TSMC's biggest leading-node buyers."
+  }
+ ]
+}

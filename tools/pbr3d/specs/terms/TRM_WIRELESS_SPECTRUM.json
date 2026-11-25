@@ -1,0 +1,174 @@
+{
+ "slug": "TRM_WIRELESS_SPECTRUM",
+ "beats": [
+  {
+   "caption": "Three licensed bands, three jobs",
+   "boxes": [
+    {
+     "name": "low_band",
+     "lo": [
+      -300,
+      -120,
+      -40
+     ],
+     "hi": [
+      -120,
+      -40,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "mid_band",
+     "lo": [
+      -90,
+      -120,
+      -40
+     ],
+     "hi": [
+      90,
+      40,
+      0
+     ],
+     "mat": "charge"
+    },
+    {
+     "name": "mmwave",
+     "lo": [
+      120,
+      -120,
+      -40
+     ],
+     "hi": [
+      300,
+      120,
+      0
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "LOW <1 GHz: coverage",
+     "at": [
+      -210,
+      -70,
+      20
+     ]
+    },
+    {
+     "text": "MID 1-7 GHz: capacity",
+     "at": [
+      0,
+      70,
+      20
+     ]
+    },
+    {
+     "text": "mmWave: peak speed",
+     "at": [
+      210,
+      150,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "caption": "FCC auction buys the license",
+   "boxes": [
+    {
+     "name": "low_band",
+     "lo": [
+      -300,
+      -120,
+      -40
+     ],
+     "hi": [
+      -120,
+      -40,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "mid_band",
+     "lo": [
+      -90,
+      -120,
+      -40
+     ],
+     "hi": [
+      90,
+      40,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "mmwave",
+     "lo": [
+      120,
+      -120,
+      -40
+     ],
+     "hi": [
+      300,
+      120,
+      0
+     ],
+     "mat": "dim"
+    },
+    {
+     "name": "fcc_auction",
+     "lo": [
+      -200,
+      140,
+      -40
+     ],
+     "hi": [
+      200,
+      200,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "pay",
+     "from": [
+      0,
+      140,
+      -20
+     ],
+     "to": [
+      0,
+      40,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "FCC auction",
+     "at": [
+      0,
+      215,
+      20
+     ]
+    },
+    {
+     "text": "asset on balance sheet",
+     "at": [
+      -140,
+      -170,
+      20
+     ]
+    }
+   ]
+  }
+ ]
+}

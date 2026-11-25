@@ -1,0 +1,12 @@
+{
+ "label": "WDM",
+ "term": "wavelength division multiplexing",
+ "aliases": [
+  "WDM",
+  "DWDM",
+  "CWDM",
+  "dense wavelength division multiplexing",
+  "coarse wavelength division multiplexing"
+ ],
+ "kind": "optics"
+}

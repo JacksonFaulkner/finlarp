@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FIRE_SUPPRESSION",
+ "script": "terms/trm_fire_suppression.py",
+ "beats": [
+  {
+   "caption": "Pipes sniff the air for smoke before anyone sees it",
+   "text": "Data halls use aspirating smoke detection: a thin pipe along the ceiling with small holes, and a fan that pulls room air through a laser detector. It can catch the faint smoke of an overheating power supply or cable long before a spot detector would. Ordinary ceiling detectors back it up and confirm."
+  },
+  {
+   "caption": "Two detectors agree, then the panel counts down",
+   "text": "Release usually needs two independent detectors in the same zone to agree, so one dusty sensor cannot dump the system. The release panel sounds horns and strobes, shuts HVAC dampers so the agent stays in the room, and runs a 30 to 60 second countdown that staff can hold with an abort button."
+  },
+  {
+   "caption": "Cylinders dump a gas that fills the room in seconds",
+   "text": "A bank of pressurised cylinders opens into a manifold and pipe network, and nozzles at the ceiling discharge the agent in about 10 seconds (60 to 120 s for inert gases). Clean chemical agents such as FK-5-1-12 or HFC-227ea pull heat out of the flame; inert gases like IG-541 drop oxygen to around 12-14%, too low to burn."
+  },
+  {
+   "caption": "The servers keep running, and nothing gets wet",
+   "text": "The agents are electrically non-conductive and leave no residue, so equipment that was not burning comes through untouched and the hall can recover fast. Water would short live gear, so many sites keep a pre-action sprinkler pipe dry until both a detector and heat at a sprinkler head call for it."
+  },
+  {
+   "caption": "Every hall needs one, and AI halls are bigger",
+   "text": "Fire protection is a small slice of build cost but goes in every data hall, battery room and switchgear room, and lithium-ion UPS batteries are raising the bar. Makers: Carrier (CARR, Kidde and Marioff), Johnson Controls (JCI, Tyco, Ansul), Honeywell (HON), Halma (HLMA.L, smoke detection), Siemens and Xtralis (VESDA)."
+  }
+ ]
+}

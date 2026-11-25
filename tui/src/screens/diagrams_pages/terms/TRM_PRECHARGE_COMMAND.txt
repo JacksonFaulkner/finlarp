@@ -1,0 +1,14 @@
+# 1. What it is: the command that closes an open row
+
+   controller                 bank
+   ┌──────────┐  PRE         ┌──────────────────┐
+   │ sends    │─────────────▶│ row buffer       │
+   │ PRE      │              │ written back,    │
+   └──────────┘              │ bitlines reset   │
+                             └──────────────────┘
+
+  (after PRE, the bank can take a new ACT to a different row)
+
+# 2. Why AI cares
+
+Switching rows in the same bank needs a PRE followed by an ACT. That round trip is a main source of latency for random memory access.

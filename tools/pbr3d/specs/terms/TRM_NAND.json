@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NAND",
+ "script": "terms/trm_nand.py",
+ "beats": [
+  {
+   "caption": "NAND flash keeps data with the power off",
+   "text": "A NAND package sits on every SSD board next to its controller. It holds bits as charge trapped in its cells, so nothing is lost when power drops. AI clusters fill racks of SSDs with it for datasets and checkpoints."
+  },
+  {
+   "caption": "Inside: cells stacked hundreds of layers high",
+   "text": "Modern NAND is 3D: word-line plates are stacked in oxide, 200 to 300+ layers, and a vertical channel hole is etched through all of them. Each place a plate wraps the hole is one cell."
+  },
+  {
+   "caption": "A string: the cells share one channel in series",
+   "text": "The cells down one hole are wired in series like a string of lights, with a bit line on top and a source at the bottom. To read one cell, the others are switched fully on and current only flows if the chosen cell conducts."
+  },
+  {
+   "caption": "Write: electrons tunnel into a layer's charge store",
+   "text": "A high voltage on one word line pulls electrons from the channel into that layer's charge-trap film. More stored charge raises the cell's threshold. Storing 1 to 4 bits per cell (SLC to QLC) means sorting it into 2 to 16 levels."
+  },
+  {
+   "caption": "Erase is per block, and cycling wears it out",
+   "text": "Erase pulls charge out of a whole block at once, so the controller remaps writes and wears cells evenly. TLC endures about 3,000 cycles, QLC about 1,000. Makers: Samsung (005930.KS), SK hynix (000660.KS), Micron (MU), Kioxia (285A.T), Sandisk (SNDK)."
+  }
+ ]
+}

@@ -1,0 +1,12 @@
+# 1. What it is: the full time to reopen a row in one bank
+
+   ACT ──────────────────── PRE ─────────────── ACT
+   │◀──────────── tRC ─────────────────────────▶│
+   │◀──── tRAS (row open) ───▶│◀── tRP ───▶│
+                              PRE done
+
+  (tRC is roughly tRAS plus tRP: the minimum gap between two ACTs to one bank)
+
+# 2. Why AI cares
+
+tRC caps how often one bank can serve a new row. Parallel banks and subarrays are how memory hides this limit at system level.

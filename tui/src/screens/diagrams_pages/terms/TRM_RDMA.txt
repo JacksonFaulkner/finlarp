@@ -1,0 +1,12 @@
+# 1. What it is: memory-to-memory copies, CPU skipped
+
+   ┌────────┐     ┌───────┐              ┌───────┐     ┌────────┐
+   │ GPU A  │────▶│ NIC A │──RoCE / IB──▶│ NIC B │────▶│ GPU B  │
+   │ memory │     │       │              │       │     │ memory │
+   └────────┘     └───────┘              └───────┘     └────────┘
+
+  (no CPU copies, no kernel calls on the data path)
+
+# 2. Why AI cares
+
+Collective operations like all-reduce depend on RDMA; RoCE needs lossless or well-managed Ethernet, which is what Ultra Ethernet improves.

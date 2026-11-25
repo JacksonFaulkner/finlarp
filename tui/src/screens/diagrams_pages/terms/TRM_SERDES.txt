@@ -1,0 +1,17 @@
+# 1. What it is: many slow wires in, one fast lane out
+
+   ┌─────────────┐     ┌────────────┐                        ┌──────────────┐     ┌────────────┐
+   │ CHIP CORE   │────▶│ SERIALIZER │──1 lane 112-224 Gb/s──▶│ DESERIALIZER │────▶│ OTHER CHIP │
+   │ 64 parallel │     │ TX SerDes  │                        │ RX SerDes    │     │ parallel   │
+   │ bits, slow  │     │            │                        │              │     │ again      │
+   └─────────────┘     └────────────┘                        └──────────────┘     └────────────┘
+
+  (PAM4 signaling: 2 bits per symbol; 112G and 224G lanes are PAM4)
+
+# 2. Why AI cares
+
+AI clusters are bandwidth-bound: GPU-to-GPU and switch ports are built from bundles of SerDes lanes. Doubling lane speed roughly doubles port bandwidth (8 x 112G = 800G, 8 x 224G = 1.6T).
+
+# 3. The catch
+
+Faster lanes lose signal faster over copper, which drives demand for retimers, AECs and optics.

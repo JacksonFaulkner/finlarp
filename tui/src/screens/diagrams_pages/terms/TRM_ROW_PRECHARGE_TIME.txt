@@ -1,0 +1,13 @@
+# 1. What it is: the wait between PRE and the next ACT
+
+   PRE                    ACT (new row)
+   ───┬──────────────────────┬──────────────▶
+      │◀──── tRP ───────────▶│
+      │ bitlines settle      │ row can open
+      │ back to idle         │
+
+  (tRP applies within one bank; other banks can keep working meanwhile)
+
+# 2. Why AI cares
+
+tRP is the idle gap after closing a row. It is one part of the row-cycle cost that limits random access rates on memory-bound workloads.

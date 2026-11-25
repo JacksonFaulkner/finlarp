@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BUILDING_MANAGEMENT_SYSTEM",
+ "script": "terms/trm_building_management_system.py",
+ "beats": [
+  {
+   "caption": "A BMS watches and runs a building's mechanical and electrical plant",
+   "text": "A building management system is the network of sensors, controllers and software that runs chillers, pumps, air handlers and meters. In a data center it is the nervous system for everything that is not IT: the plant that keeps the racks cool and powered."
+  },
+  {
+   "caption": "Thousands of sensors report temperature, flow, pressure and power",
+   "text": "Every chiller, pump, valve and air handler carries sensors wired to field controllers (DDC panels) over protocols like BACnet and Modbus. A large site has tens of thousands of points, each sampled every few seconds and logged for trends and audits."
+  },
+  {
+   "caption": "Controllers run the control loops; the screen shows one view of the site",
+   "text": "Field controllers run local loops on their own: hold supply water at a setpoint, stage chillers, vary pump speed. The supervisory layer collects all of it into one plant graphic with trends, schedules and energy reports, often beside the power monitoring and DCIM tools."
+  },
+  {
+   "caption": "When a reading drifts, it raises an alarm and can reset setpoints",
+   "text": "If chilled-water supply creeps above its band or a pump trips, the BMS alarms, can bring a standby unit online and pushes new setpoints out to the controllers. Good tuning also saves energy: raising water temperatures and trimming fan speeds lowers PUE."
+  },
+  {
+   "caption": "AI sites need more controls, and the same vendors supply them",
+   "text": "Liquid cooling adds CDUs, more pumps and tighter loops, so control points per MW rise. BMS vendors: Johnson Controls (JCI, Metasys), Schneider Electric (SU.PA, EcoStruxure), Siemens (SIE.DE, Desigo), Honeywell (HON). Software is sticky: once a site is wired to one system it rarely switches."
+  }
+ ]
+}

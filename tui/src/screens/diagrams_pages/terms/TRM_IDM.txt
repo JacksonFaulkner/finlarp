@@ -1,0 +1,11 @@
+# 1. What it is: designs and builds its own chips
+
+   ┌──────────┐   ┌──────────┐   ┌─────────────────┐
+   │ DESIGN   │   │ OWN FABS │   │ SELLS CHIPS     │
+   │ in-house │──▶│ in-house │──▶│ under own brand │
+   └──────────┘   └──────────┘   └─────────────────┘
+
+
+# 2. Why it matters
+
+IDMs carry fab depreciation, so utilization swings hit margins hard. They also capture the full margin when fabs run full.

@@ -1,0 +1,139 @@
+{
+ "slug": "TRM_SASE",
+ "beats": [
+  {
+   "boxes": [
+    {
+     "name": "br",
+     "lo": [
+      -380,
+      -60,
+      -40
+     ],
+     "hi": [
+      -260,
+      60,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "pop",
+     "lo": [
+      -180,
+      -80,
+      -40
+     ],
+     "hi": [
+      180,
+      80,
+      0
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "app",
+     "lo": [
+      260,
+      -60,
+      -40
+     ],
+     "hi": [
+      380,
+      60,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "b1",
+     "from": [
+      -260,
+      0,
+      -20
+     ],
+     "to": [
+      -180,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "b2",
+     "from": [
+      180,
+      0,
+      -20
+     ],
+     "to": [
+      260,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "branch / laptop",
+     "at": [
+      -320,
+      130,
+      20
+     ]
+    },
+    {
+     "text": "cloud PoP: SWG, ZTNA, SD-WAN",
+     "at": [
+      0,
+      130,
+      20
+     ]
+    },
+    {
+     "text": "SaaS / cloud app",
+     "at": [
+      320,
+      130,
+      20
+     ]
+    }
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "pol",
+     "lo": [
+      -160,
+      -200,
+      -40
+     ],
+     "hi": [
+      160,
+      -130,
+      0
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "one policy everywhere",
+     "at": [
+      0,
+      -250,
+      20
+     ]
+    }
+   ],
+   "show": [
+    "pol"
+   ]
+  }
+ ]
+}

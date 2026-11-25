@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_OPTICAL_CIRCUIT_SWITCH",
+ "script": "terms/trm_optical_circuit_switch.py",
+ "beats": [
+  {
+   "caption": "An optical circuit switch patches fibre to fibre with mirrors",
+   "text": "An optical circuit switch (OCS) connects any input fibre to any output fibre by steering the light itself. Google puts OCS between the racks of its TPU pods and in its data-center spine, so the wiring between racks can be changed by software instead of by people re-plugging cables."
+  },
+  {
+   "caption": "Inside: collimators and two arrays of tiny tilting mirrors",
+   "text": "Each input fibre ends in a collimator lens that launches a narrow beam into free space. The beam hits a MEMS mirror (a silicon mirror under a millimetre across, tilted by electrostatic force), then a second mirror array, which aims it into the chosen output collimator. Arrays of over a hundred ports per side are common."
+  },
+  {
+   "caption": "Light in, light out, never turned into electricity",
+   "text": "The switch never reads a packet. Light passes straight through, so it does not care about protocol or line rate: the same OCS carries 400G today and 1.6T later. There are no SerDes, no DSP and no buffers in the path."
+  },
+  {
+   "caption": "Tilt a mirror and the beam lands on a different fibre",
+   "text": "Re-pointing a mirror makes a new connection in milliseconds. That is far too slow to switch individual packets, so OCS is used for topologies that change rarely: carving a TPU pod into slices, routing around a failed rack, or rebalancing spine capacity."
+  },
+  {
+   "caption": "Far less power than an electrical switch, at any speed",
+   "text": "A packet switch converts every bit to electricity, processes it and converts it back, burning watts per port and needing new silicon each speed generation. An OCS port costs a few hundred milliwatts and survives upgrades. Related: Alphabet (GOOGL), Lumentum (LITE), Coherent (COHR), Ciena (CIEN)."
+  }
+ ]
+}

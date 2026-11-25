@@ -1,0 +1,177 @@
+{
+ "slug": "TRM_PPA",
+ "beats": [
+  {
+   "caption": "Long contract links generator to buyer",
+   "boxes": [
+    {
+     "name": "gen",
+     "lo": [
+      -360,
+      -60,
+      -60
+     ],
+     "hi": [
+      -200,
+      60,
+      -20
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "ppa",
+     "lo": [
+      -100,
+      -40,
+      -60
+     ],
+     "hi": [
+      60,
+      40,
+      -20
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "buyer",
+     "lo": [
+      200,
+      -60,
+      -60
+     ],
+     "hi": [
+      360,
+      60,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "c1",
+     "from": [
+      -200,
+      0,
+      -40
+     ],
+     "to": [
+      -100,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    },
+    {
+     "name": "c2",
+     "from": [
+      60,
+      0,
+      -40
+     ],
+     "to": [
+      200,
+      0,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "GENERATOR plant",
+     "at": [
+      -320,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "PPA fixed, 10-20 years",
+     "at": [
+      -60,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "BUYER hyperscaler",
+     "at": [
+      240,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "gen",
+    "ppa",
+    "buyer",
+    "c1",
+    "c2"
+   ]
+  },
+  {
+   "caption": "Virtual PPA settles price in cash",
+   "boxes": [
+    {
+     "name": "vppa",
+     "lo": [
+      -100,
+      -200,
+      -60
+     ],
+     "hi": [
+      60,
+      -120,
+      -20
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "v1",
+     "from": [
+      -20,
+      -120,
+      -40
+     ],
+     "to": [
+      -20,
+      -40,
+      -40
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "physical PPA delivers power",
+     "at": [
+      -200,
+      -240,
+      0
+     ]
+    },
+    {
+     "text": "virtual PPA: cash difference",
+     "at": [
+      -140,
+      -300,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "gen",
+    "ppa",
+    "buyer",
+    "c1",
+    "c2",
+    "vppa",
+    "v1"
+   ]
+  }
+ ]
+}

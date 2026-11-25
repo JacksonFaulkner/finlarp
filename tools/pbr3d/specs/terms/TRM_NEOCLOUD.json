@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NEOCLOUD",
+ "script": "terms/trm_neocloud.py",
+ "beats": [
+  {
+   "caption": "A neocloud is a cloud built only to rent out GPUs",
+   "text": "Neoclouds are newer cloud providers that sell one thing: time on large clusters of Nvidia GPUs for AI training and inference. Unlike AWS, Azure or Google Cloud they skip the long menu of databases, storage and software services. Their halls are rows of rack-scale GPU systems, each rack drawing well over 100 kW."
+  },
+  {
+   "caption": "What they rent: trays of GPUs, HBM and fast NICs",
+   "text": "Each rack holds compute trays like this one: GPU packages with stacked HBM memory beside the die, cold plates carrying liquid over them, and high-speed network cards. A single rack-scale system costs a few million dollars, and a cluster has thousands of GPUs, so the hardware bill runs into the billions."
+  },
+  {
+   "caption": "Training jobs need every GPU wired to every other",
+   "text": "A big model trains across thousands of GPUs at once, swapping gradients every step. So neoclouds build non-blocking InfiniBand or Ethernet fabrics with spine switches at the end of the rows, and sell whole clusters that behave like one machine. Getting this right at scale is a large part of their pitch."
+  },
+  {
+   "caption": "Power is leased from data center developers",
+   "text": "Most neoclouds do not build their own power plants or grid connections. They lease powered shells from developers and ex-bitcoin miners who already hold substations and utility contracts. Power availability, measured in megawatts that can be energised by a given date, is often the real limit on growth."
+  },
+  {
+   "caption": "Debt buys the GPUs; a few big customers pay it back",
+   "text": "GPUs are bought in bulk with debt, often secured by the GPUs and backed by multi-year take-or-pay contracts from AI labs and hyperscalers that need overflow capacity. That makes revenue lumpy and concentrated in a handful of customers, and GPUs depreciate within a few years. Related: CoreWeave (CRWV), Nebius (NBIS), IREN (IREN), Applied Digital (APLD), and supplier Nvidia (NVDA)."
+  }
+ ]
+}

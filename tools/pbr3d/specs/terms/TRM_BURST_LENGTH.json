@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_BURST_LENGTH",
+ "script": "terms/trm_burst_length.py",
+ "beats": [
+  {
+   "caption": "HBM and DDR deliver data in bursts, not single words",
+   "text": "The GPU or CPU never asks DRAM for one byte. Each READ or WRITE command moves a fixed run of back-to-back transfers on the data pins, called a burst."
+  },
+  {
+   "caption": "One READ on an open row starts the burst",
+   "text": "After ACTIVATE the row buffer holds the whole row. A READ picks a starting column, and the chip then streams consecutive data out of the row buffer without needing another command."
+  },
+  {
+   "caption": "Burst length 8: eight transfers fill a 64-byte line",
+   "text": "DDR4 uses a burst of 8 on a 64-bit channel: 8 transfers x 8 bytes = 64 bytes, exactly one CPU cache line. Data moves on both clock edges, so the burst takes four clock cycles."
+  },
+  {
+   "caption": "DDR5 doubles it to 16 on a narrower subchannel",
+   "text": "DDR5 splits each module into two 32-bit subchannels and uses a burst of 16: 16 x 4 bytes is still 64 bytes. Two independent subchannels keep more requests in flight, which raises usable bandwidth."
+  },
+  {
+   "caption": "Long bursts suit streaming, short ones suit random reads",
+   "text": "Model weights stream in long sequential runs, so long bursts keep the pins busy and the command bus quiet. Small random reads waste part of each burst. Burst length is set by the memory standard and controller, not by the buyer. Related: Micron (MU), Samsung (005930.KS), SK hynix (000660.KS)."
+  }
+ ]
+}

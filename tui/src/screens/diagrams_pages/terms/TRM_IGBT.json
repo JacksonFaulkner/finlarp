@@ -1,0 +1,9 @@
+{
+ "label": "IGBT",
+ "term": "IGBT",
+ "aliases": [
+  "insulated gate bipolar transistor",
+  "IGBTs"
+ ],
+ "kind": "analog"
+}

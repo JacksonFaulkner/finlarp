@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_SUBARRAY",
+ "script": "terms/trm_subarray.py",
+ "beats": [
+  {
+   "caption": "HBM stacks feed the GPU; every bank is built from subarrays",
+   "text": "AI accelerators stream weights and activations from HBM stacks next to the GPU. Each DRAM die holds many banks, and each bank is not one big grid: it is a stack of subarrays, typically 512 to 1024 rows each."
+  },
+  {
+   "caption": "A subarray is a block of rows with its own sense amps",
+   "text": "Every subarray has a local row of sense amplifiers at its edge. Its bitlines only run the height of the subarray, which keeps them short enough for a cell's tiny charge to be read reliably."
+  },
+  {
+   "caption": "ACTIVATE opens one row in one subarray",
+   "text": "The row address picks a subarray and a row in it. That subarray's wordline rises and its sense amps latch the row; the other subarrays in the bank stay idle with their sense amps precharged."
+  },
+  {
+   "caption": "Separate sense amps let several subarrays work at once",
+   "text": "Because each subarray latches its own row, a bank can in principle keep rows open in two subarrays and overlap their activate and precharge. Designs that exploit this (subarray-level parallelism) cut the penalty when requests hit different rows of the same bank."
+  },
+  {
+   "caption": "Subarray wiring sets how well a bank handles mixed requests",
+   "text": "When two requests hit different rows in one bank, a plain bank must close one row before opening the next, which costs tens of nanoseconds. Accelerators issue huge numbers of such requests, so bank and subarray parallelism drives the bandwidth actually delivered. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS)."
+  }
+ ]
+}

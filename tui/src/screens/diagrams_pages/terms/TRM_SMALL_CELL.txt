@@ -1,0 +1,17 @@
+# 1. What it is: low-power radio on a streetlight
+
+   ┌──────────────┐   fiber   ┌──────────────┐
+   │ SMALL CELL   │──────────▶│ AGGREGATION  │
+   │ pole mounted │◀──────────│ point        │
+   └──────┬───────┘           └──────────────┘
+          │ ~100 m to a few hundred m
+          ▼
+     ┌─────────┐
+     │ USERS   │
+     └─────────┘
+
+  (low power, dense sites; the fiber backhaul is often the cost)
+
+# 2. Why it matters
+
+Small cells need a site, power and fiber at each location, so each deployment is a unit of capex that adds fiber and radio demand.

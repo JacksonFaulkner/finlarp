@@ -1,0 +1,11 @@
+{
+  "label": "RDMA / ROCE",
+  "term": "RDMA",
+  "aliases": [
+    "remote direct memory access",
+    "RoCE",
+    "RoCEv2",
+    "GPUDirect"
+  ],
+  "kind": "networking"
+}

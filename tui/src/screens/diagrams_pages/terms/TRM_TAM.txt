@@ -1,0 +1,17 @@
+# 1. What it is: the ceiling on a market
+
+ ┌───────────────┐
+ │ TAM           │  all spend on the category
+ └───────┬───────┘
+         │ cut to products the company sells
+ ┌───────┴───────┐
+ │ SAM           │  serviceable market
+ └───────┬───────┘
+         │ cut to a realistic share
+ ┌───────┴───────┐
+ │ SOM           │  obtainable share
+ └───────────────┘
+
+# 2. Why it matters
+
+TAM is an estimate, so the source and year matter. A large TAM does not mean revenue follows; compare it with the revenue the company actually reports.

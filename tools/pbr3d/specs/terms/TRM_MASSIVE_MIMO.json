@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MASSIVE_MIMO",
+ "script": "terms/trm_massive_mimo.py",
+ "beats": [
+  {
+   "caption": "One tower, one antenna unit, many users below",
+   "text": "A 5G mid-band macro site hangs an active antenna unit at the top of its mast. The unit's face is a grid of dozens to hundreds of antenna elements, and the same panel serves every phone in the sector at once."
+  },
+  {
+   "caption": "Inside: one transceiver chain per array element",
+   "text": "Behind each element sits its own radio chain: a transceiver chip, filters and amplifiers. Because every element has its own chain, the base station can control the phase and amplitude of each one separately, and that is what makes the beams possible."
+  },
+  {
+   "caption": "Beams to several phones in the same slot",
+   "text": "The unit sends a separate beam to each phone on the same frequency and time. Each beam is aimed by weighting the elements, so each user receives mostly its own signal and the others see little of it."
+  },
+  {
+   "caption": "More streams: more users served in the same spectrum",
+   "text": "Every extra antenna adds degrees of freedom, so the site can carry more spatial streams. Capacity grows with the number of elements and the number of users served, without buying more spectrum."
+  },
+  {
+   "caption": "Scale: more elements, more streams, same spectrum",
+   "text": "The gain is in the array, so it lands in the radio content: more antenna elements, transceiver chains and baseband processing per site. Suppliers include Ericsson (ERIC), Nokia (NOK), Qualcomm (QCOM) and Skyworks (SWKS)."
+  }
+ ]
+}

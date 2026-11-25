@@ -1,0 +1,17 @@
+# 1. What it is: giant clouds that buy most AI gear
+
+   ┌─────────────┐     ┌────────────────┐     ┌─────────────┐
+   │ HYPERSCALER │     │ CAPEX          │     │ SUPPLIERS   │
+   │ AWS, Azure, │ ──▶ │ GPUs, servers, │ ──▶ │ NVDA, AVGO, │
+   │ GCP, Meta   │     │ buildings      │     │ VRT, ANET   │
+   └─────────────┘     └────────────────┘     └─────────────┘
+
+  (watch quarterly capex guidance; it sets demand for the chain)
+
+# 2. Why AI cares
+
+Hyperscalers buy the majority of data center GPUs and design custom chips (TPU, Trainium, Maia). Their spending plans drive supplier revenue.
+
+# 3. Concentration
+
+Many suppliers report one or two hyperscalers above 10% of revenue, a customer concentration risk noted in 10-Ks.

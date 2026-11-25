@@ -1,0 +1,11 @@
+{
+ "label": "CPU",
+ "term": "CPU",
+ "aliases": [
+  "central processing unit",
+  "server CPU",
+  "Arm-based",
+  "x86"
+ ],
+ "kind": "compute"
+}

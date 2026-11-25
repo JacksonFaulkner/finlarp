@@ -1,0 +1,1 @@
+GDDR is a graphics-oriented DRAM family built for high per-pin data rates on a board-level bus. Each chip attaches to the GPU through its own narrow interface, and a card uses several chips around the die. It gives consumer and workstation GPUs far more bandwidth than DDR, at lower cost than HBM stacks. Related: NVIDIA (NVDA), Micron (MU), Samsung (005930.KS), AMD (AMD).

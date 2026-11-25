@@ -1,0 +1,18 @@
+# 1. What it is: woven glass that stiffens the board
+
+   ┌──────────────────┐
+   │ glass yarn       │  E-glass or low-Dk T-glass
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ woven cloth      │  sets stiffness and thermal size
+   └────────┬─────────┘
+            ▼
+   ┌──────────────────┐
+   │ resin-impregnated│  becomes CCL or substrate core
+   │ prepreg          │
+   └──────────────────┘
+
+# 2. Why AI cares
+
+The specialty glass grades that AI boards need are made by few suppliers. A shortage there can cap substrate and laminate output for accelerators.

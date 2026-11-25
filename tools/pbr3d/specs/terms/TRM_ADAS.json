@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ADAS",
+ "script": "terms/trm_adas.py",
+ "beats": [
+  {
+   "caption": "A modern car carries a ring of cameras, radars and sensors",
+   "text": "ADAS (advanced driver-assistance systems) is the hardware and software that warns a driver or steps in to brake, steer or hold a lane. A new car typically has a forward camera behind the windscreen, a front radar in the grille, corner radars and a dozen ultrasonic sensors in the bumpers. Some add LiDAR. It is now standard equipment: automatic emergency braking is mandatory on new cars in the EU and coming in the US."
+  },
+  {
+   "caption": "Each sensor sees the road a different way",
+   "text": "The camera reads lanes, signs and what an object is, but struggles in glare and fog. Radar bounces 77 GHz radio off objects and measures distance and speed directly, in any weather, with coarse shape. Ultrasonic sensors ping a few metres for parking. Combining them (sensor fusion) covers each one's blind spots."
+  },
+  {
+   "caption": "All of it is wired back to one AI chip",
+   "text": "Older cars ran each feature on its own small module. Today the camera and radar feeds run back over the harness to a central ADAS computer, an SoC with a neural-network accelerator that detects cars, people and lanes many times a second and plans what to do. An L2 system needs tens of TOPS; that chip is the main AI silicon in a car."
+  },
+  {
+   "caption": "The car ahead brakes; the computer brakes first",
+   "text": "When the lead car stops or someone steps out, the SoC sees the gap closing, warns the driver, and if nobody reacts commands the brakes itself. A person needs about 1.5 seconds to react; the system can start braking in a few hundred milliseconds. Lane-keep and adaptive cruise use the same loop to steer and hold distance."
+  },
+  {
+   "caption": "More autonomy means far more compute per car",
+   "text": "L1-L2 assist (cruise, lane-keep) runs on a few to tens of TOPS. Hands-off L2+ and eyes-off L3 need hundreds, and driverless L4 needs a thousand or more, plus LiDAR and redundancy. That climb is why ADAS is the biggest volume market for automotive AI chips: Mobileye (MBLY), NVIDIA (NVDA), Qualcomm (QCOM), Ambarella (AMBA)."
+  }
+ ]
+}

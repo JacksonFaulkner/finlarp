@@ -1,0 +1,15 @@
+# 1. What it is: one grid of cells inside a bank
+
+   BANK
+   ┌──────────────────────────────────┐
+   │ ┌──────────┐      ┌──────────┐   │
+   │ │ SUBARRAY │ ...  │ SUBARRAY │   │
+   │ │ 512 rows │      │ 512 rows │   │
+   │ └──────────┘      └──────────┘   │
+   └──────────────────────────────────┘
+
+  (a DRAM bank holds many subarrays; each one has its own row buffer)
+
+# 2. Why AI cares
+
+Subarray count sets how many rows can stay open at once inside a bank. More subarrays give more parallelism, which helps HBM and DDR5 keep up with GPU memory requests.

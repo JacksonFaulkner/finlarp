@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_OPERATIONAL_TECHNOLOGY",
+ "script": "terms/trm_operational_technology.py",
+ "beats": [
+  {
+   "caption": "OT is the gear that runs physical machines; IT runs the business",
+   "text": "Operational technology means the controllers, sensors, drives and screens that switch breakers, run pumps, open valves and move robot arms. IT means the email, databases and standard servers. Data centers, fabs, factories and grids all have both, traditionally on separate networks run by separate teams."
+  },
+  {
+   "caption": "A PLC reads sensors and drives actuators in a tight loop",
+   "text": "A programmable logic controller (PLC) reads a pressure or temperature sensor, runs its logic and sets a pump speed or valve position, over and over every few milliseconds. It must never pause: a missed cycle can mean a tripped chiller or a burst pipe, so OT values uptime and timing above everything else."
+  },
+  {
+   "caption": "SCADA screens watch many PLCs over decades-old protocols",
+   "text": "Operators watch the plant on HMI and SCADA screens that poll many controllers. Much of it speaks protocols like Modbus or older fieldbuses that were designed with no passwords or encryption, and the equipment stays in service for 15-30 years, so patching is rare."
+  },
+  {
+   "caption": "Plants now link OT to IT for data and remote control",
+   "text": "To optimise energy, predict failures and run sites remotely, operators pipe OT data up to IT systems and the cloud. A data center's power and cooling controls are OT too, and AI halls lean on them heavily. Every new link is a path that did not exist when the gear was designed."
+  },
+  {
+   "caption": "Each link widens the attack surface, so the boundary is guarded",
+   "text": "An attacker who gets into the office network can try to reach the controllers and stop pumps or open breakers. Plants answer with segmented zones, firewalls and OT-specific monitoring. Related: Rockwell Automation (ROK), Emerson (EMR), Honeywell (HON) and Siemens (SIE.DE) sell the controllers and the security around them."
+  }
+ ]
+}

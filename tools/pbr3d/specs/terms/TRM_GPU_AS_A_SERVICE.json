@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GPU_AS_A_SERVICE",
+ "script": "terms/trm_gpu_as_a_service.py",
+ "beats": [
+  {
+   "caption": "Rent GPU time instead of buying servers",
+   "text": "GPU-as-a-service means a provider buys the GPUs, installs them in its own data center and rents the compute out. A lab or enterprise gets thousands of GPUs in weeks without spending billions up front or running a hall."
+  },
+  {
+   "caption": "Hourly on demand, or multi-year contracts",
+   "text": "Small users pay by the GPU-hour, often a few dollars per H100-hour, and can leave any time. Big AI labs sign take-or-pay contracts for 2-5 years that fix the price and volume, which makes the provider's revenue bankable."
+  },
+  {
+   "caption": "The hall is bought with borrowed money",
+   "text": "A 100 MW GPU campus can cost several billion dollars in GPUs, networking and power gear. Neoclouds fund much of it with debt secured on the GPUs and the customer contracts, so interest is a big fixed cost from day one."
+  },
+  {
+   "caption": "Returns hinge on utilization and GPU life",
+   "text": "Idle GPUs earn nothing while their debt and depreciation keep running. Profit depends on keeping the racks busy and on the GPUs still renting at a good price before newer chips make them cheap."
+  },
+  {
+   "caption": "Neoclouds and hyperscalers sell it",
+   "text": "CoreWeave and Nebius are pure-play GPU clouds; Oracle, Amazon, Microsoft and Google rent GPUs alongside their other cloud services. NVIDIA supplies the chips and sometimes backs the neoclouds. Related: CRWV, NBIS, ORCL, AMZN, NVDA."
+  }
+ ]
+}

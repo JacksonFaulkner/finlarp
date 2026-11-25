@@ -1,0 +1,12 @@
+# 1. What it is: radio parts from different vendors
+
+   ┌──────────┐  open fronthaul  ┌──────────┐  open interface  ┌──────────┐
+   │ RADIO    │─────────────────▶│ DU       │─────────────────▶│ CU / RIC │
+   │ RU       │◀─────────────────│ baseband │◀─────────────────│ software │
+   └──────────┘                  └──────────┘                  └──────────┘
+
+  (RU = radio unit, DU = distributed unit, CU = central unit, RIC = RAN intelligent controller)
+
+# 2. Why it matters
+
+Open RAN aims to lower cost and lock-in for operators. Its main effect so far is on how vendor share and integration work are split.

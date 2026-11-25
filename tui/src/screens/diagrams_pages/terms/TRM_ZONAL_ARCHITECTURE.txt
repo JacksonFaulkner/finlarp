@@ -1,0 +1,11 @@
+# 1. What it is: zones report to a few central computers
+
+   ┌─────────────────────┐   ┌─────────────────┐   ┌──────────┐   ┌─────────────────┐
+   │ SENSORS + ACTUATORS │──▶│ ZONE CONTROLLER │──▶│ ETHERNET │──▶│ CENTRAL COMPUTE │
+   └─────────────────────┘   └─────────────────┘   └──────────┘   └─────────────────┘
+
+  (fewer, smarter boxes replace dozens of single-purpose ECUs)
+
+# 2. Why it matters
+
+Fewer, smarter boxes mean less wire and simpler software. The central computer becomes a high-value automotive chip, and zone controllers become a new silicon category.

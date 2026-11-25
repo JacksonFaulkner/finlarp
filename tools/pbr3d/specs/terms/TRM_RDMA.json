@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_RDMA",
+ "script": "terms/trm_rdma.py",
+ "beats": [
+  {
+   "caption": "Normally every byte from the network goes through the CPU",
+   "text": "With ordinary TCP the NIC hands each packet to the operating system. The CPU runs the network stack, then copies the data into the application's memory, often more than once. At 400 Gb/s that burns many CPU cores and adds tens of microseconds of delay."
+  },
+  {
+   "caption": "RDMA: the NIC writes straight into the other server's memory",
+   "text": "Remote direct memory access lets one server's NIC read or write a registered region of another server's memory directly. The application posts the request to a queue on the NIC, and the far NIC places the data in memory itself. No CPU cycles, no kernel, no copies on either side."
+  },
+  {
+   "caption": "GPUDirect RDMA: GPU memory to GPU memory",
+   "text": "With GPUDirect the NIC reads from and writes to GPU memory over PCIe, skipping system memory too. Gradients leave one GPU's HBM and land in another's, which is what makes training across thousands of GPUs practical."
+  },
+  {
+   "caption": "RoCE runs RDMA over Ethernet, with pause frames to stay lossless",
+   "text": "InfiniBand has RDMA built in. RoCE (RDMA over Converged Ethernet) wraps the same transport in Ethernet and IP packets. RDMA hates dropped packets, so when a switch buffer fills it sends a pause frame (PFC) or marks packets (ECN) and the sender slows down. Tuning this is the hard part of running RoCE at scale."
+  },
+  {
+   "caption": "A few microseconds instead of tens",
+   "text": "Cutting out the CPU and the copies takes end-to-end latency from tens of microseconds to about one or two, and frees those cores. Most Ethernet AI clusters run RoCE today. Related: Nvidia (NVDA), Broadcom (AVGO), Arista (ANET), AMD (AMD)."
+  }
+ ]
+}

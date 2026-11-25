@@ -1,0 +1,12 @@
+# 1. What it is: land with a grid connection already in place
+
+   ┌────────────┐     ┌────────────┐     ┌────────────┐
+   │ transmiss. │────▶│ substation │────▶│ site land  │
+   │ line       │     │ MW rights  │     │ + shell    │
+   └────────────┘     └────────────┘     └────────────┘
+
+  (the grid queue is often the slowest step, so powered sites command a premium)
+
+# 2. Why it matters
+
+Developers can build a data center on a powered site in months rather than the years a grid interconnection queue can take. The value comes from the megawatts already allocated to the site.

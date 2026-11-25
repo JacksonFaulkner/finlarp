@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_MEMORY_MAT",
+ "script": "terms/trm_memory_mat.py",
+ "beats": [
+  {
+   "caption": "HBM stacks feed the GPU; each die is tiled into mats",
+   "text": "AI accelerators read weights and activations from HBM stacks beside the GPU. Inside each DRAM die, a bank is split into subarrays, and each subarray is tiled again into mats: small cell arrays of roughly 512 x 512 bits."
+  },
+  {
+   "caption": "A mat is a small cell array with its own drivers and sense amps",
+   "text": "Each mat has local row drivers along one edge and a strip of local sense amps along another. The mat is the unit that physically switches on: its wordlines and bitlines stop at the mat's border."
+  },
+  {
+   "caption": "A global wordline selects; only one mat fires its local wordline",
+   "text": "The row address travels on a global wordline in a high metal layer over all the mats. Only the selected mat's driver raises its short local wordline, so the other mats stay idle and burn no switching energy."
+  },
+  {
+   "caption": "Short bitlines give a bigger signal and a faster read",
+   "text": "A cell's charge is tiny, and the bitline's own capacitance dilutes it. A mat keeps bitlines short, so the voltage swing the sense amp sees is larger and it settles sooner. That cuts both latency and energy per access."
+  },
+  {
+   "caption": "Mat size trades area against speed and energy per bit",
+   "text": "Smaller mats mean more sense amps and drivers, which take die area that could hold cells and raise cost per bit. HBM uses finer mats and shorter wires than DDR5 to lower picojoules per bit, which matters when AI servers are power limited. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS)."
+  }
+ ]
+}

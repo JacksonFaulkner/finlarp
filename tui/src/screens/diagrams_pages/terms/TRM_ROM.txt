@@ -1,0 +1,13 @@
+# 1. What it is: memory whose bits are fixed at making
+
+┌─────────────────────────┐
+│ ROM                     │
+│ contents set by a mask  │
+│ or fuses at manufacture │
+└─────────────────────────┘
+
+(mask ROM: pattern set by a photomask; PROM: fused once after it ships)
+
+# 2. Why it matters
+
+Boot code and fixed microcode often live in ROM. Because it cannot be changed in the field, it is a cheap and tamper-resistant choice for code that must not move.

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_DAYS_OF_INVENTORY",
+ "script": "terms/trm_days_of_inventory.py",
+ "beats": [
+  {
+   "caption": "Days of inventory: how long stock sits before it sells",
+   "text": "Days inventory outstanding (DIO) = ending inventory / (cost of revenue / 365). If a company holds $3B of inventory and its yearly cost of revenue is $18B, that is about $49M a day, so roughly 61 days of inventory. It turns a balance-sheet number into time."
+  },
+  {
+   "caption": "In balance: parts come in as fast as servers go out",
+   "text": "When purchases, production and shipments move together, inventory stays roughly flat and DIO stays steady. Every business has a normal level: a server builder with long build cycles holds more days than a retailer. The change over time matters more than the level."
+  },
+  {
+   "caption": "A platform ramp builds stock on purpose",
+   "text": "Before a new GPU generation ships in volume, server makers buy chips, memory and chassis early and build systems ahead of customer acceptance. Inventory and DIO jump. That is healthy if those systems ship and get paid for in the next quarter or two."
+  },
+  {
+   "caption": "If sales stall, the stacks keep growing",
+   "text": "When orders slip, a customer delays a data center, or a part shortage holds up final assembly, product keeps arriving but stops leaving. DIO climbs past its normal range. Rising DIO with flat or falling revenue is the warning sign analysts look for."
+  },
+  {
+   "caption": "Old stock ties up cash and risks write-downs",
+   "text": "Inventory is cash already spent. If it sits too long, the next GPU generation makes it worth less and the company takes an inventory write-down that hits gross margin. Hardware makers with long build cycles watch DIO closely around ramps. Related: Super Micro Computer (SMCI), Dell (DELL), Micron (MU), NVIDIA (NVDA)."
+  }
+ ]
+}

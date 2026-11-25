@@ -1,0 +1,16 @@
+# 1. What it is: an on-ramp/off-ramp for wavelengths
+
+   ┌──────────┐   ┌─────────────────────────┐   ┌──────────┐
+   │ fiber in │──▶│ ROADM NODE (WSS)        │──▶│ fiber out│
+   │ λ1..λ40  │   │ λ1,λ3..λ40 pass through │   │ λ1..λ40  │
+   └──────────┘   └─────────────────────────┘   └──────────┘
+                       │                ▲
+                       ▼                │
+                 ┌──────────┐     ┌──────────┐
+                 │ DROP λ2  │     │ ADD λ2   │
+                 │ local    │     │ new data │
+                 └──────────┘     └──────────┘
+
+# 2. Why it matters
+
+Software can reroute traffic per wavelength across a mesh network, so capacity follows demand without new hardware at each site.

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TAPE_OUT",
+ "script": "terms/trm_tape_out.py",
+ "beats": [
+  {
+   "caption": "Tape-out: the finished chip design leaves for the factory",
+   "text": "Tape-out is the moment a chip's design is frozen and handed to the foundry. Everything before it is software and simulation; everything after is physical: masks, wafers, packaging, test. The name dates from when layouts were shipped on magnetic tape."
+  },
+  {
+   "caption": "The final layout is sent as one huge file",
+   "text": "The design team signs off on timing, power and the foundry's rule checks, then exports the layout (a GDSII or OASIS file, often hundreds of gigabytes) describing every polygon on every layer. After this, a bug means a re-spin: new masks and months of delay."
+  },
+  {
+   "caption": "The mask shop turns each layer into a photomask",
+   "text": "Each layer becomes a photomask: a quartz plate patterned in chrome by an electron-beam writer. A leading-edge chip needs roughly 60-90 masks, several of them EUV. A full set at 3nm-class nodes costs tens of millions of dollars, which is why only high-volume chips go to the newest nodes."
+  },
+  {
+   "caption": "The fab builds the wafer layer by layer for months",
+   "text": "Wafers go through more than a thousand process steps: print a layer with its mask, etch, deposit, polish, repeat. Transistors at the bottom, a dozen-plus copper wiring layers on top. Start to finish takes about 3-4 months at a leading node, before packaging adds more weeks."
+  },
+  {
+   "caption": "First silicon comes back and is brought up on a test board",
+   "text": "The first parts are mounted on test boards and powered up ('bring-up') to check they work at speed. Companies announce tape-outs as proof a product is on schedule; revenue typically follows 9-12 months later. NVIDIA (NVDA), Broadcom (AVGO) and Marvell (MRVL) tape out custom chips; Synopsys (SNPS) and Cadence (CDNS) sell the tools."
+  }
+ ]
+}

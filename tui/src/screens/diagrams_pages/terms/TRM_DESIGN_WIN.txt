@@ -1,0 +1,12 @@
+# 1. What it is: customer picks your chip for its product
+
+   ┌───────────────┐    ┌────────────────┐    ┌────────────────────┐
+   │ DESIGN WIN    │───▶│ QUALIFICATION  │───▶│ VOLUME             │
+   │ chip selected │    │ samples, tests │    │ production revenue │
+   └───────────────┘    └────────────────┘    └────────────────────┘
+
+  (lag from win to revenue is often 12-36 months)
+
+# 2. Caveat
+
+Design wins are not orders. Their value depends on how many units the end product actually ships.

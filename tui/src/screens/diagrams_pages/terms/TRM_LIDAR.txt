@@ -1,0 +1,11 @@
+# 1. What it is: laser pulses that return a 3D map
+
+   ┌───────┐   ┌─────────────┐   ┌─────────────┐   ┌─────────┐
+   │ LASER │──▶│ POINT CLOUD │──▶│ OBJECT LIST │──▶│ PLANNER │
+   └───────┘   └─────────────┘   └─────────────┘   └─────────┘
+
+  (distance = light speed x round-trip time / 2)
+
+# 2. Why it matters
+
+Cameras give color and texture, while LiDAR gives direct range. Robotaxi stacks often fuse both, so LiDAR volume tracks robotaxi and premium ADAS programs.

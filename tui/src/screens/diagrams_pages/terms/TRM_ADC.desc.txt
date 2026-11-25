@@ -1,0 +1,1 @@
+An analog-to-digital converter turns a voltage into numbers; a DAC turns numbers back into a voltage. Data converters sit at the edge of every system that measures or produces real-world signals. High-speed versions are inside optical DSPs, radios, test equipment and radar. Related: Analog Devices (ADI), Texas Instruments (TXN), Microchip (MCHP), Marvell (MRVL), Broadcom (AVGO).

@@ -1,0 +1,14 @@
+# 1. What it is: amplifiers and filters before the antenna
+
+   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐
+   │ PA       │──▶│ FILTER   │──▶│ SWITCH   │──▶│ ANTENNA  │
+   │ power amp│   │ band     │   │ band sel.│   │          │
+   └──────────┘   └──────────┘   └──────────┘   └──────────┘
+        ▲                                             │
+        └──────────── LNA receive path ◀──────────────┘
+
+  (PA sends, LNA receives; filters pick each band)
+
+# 2. Why it matters
+
+Every added 5G band adds filters and switches, so RF content per phone and per radio keeps rising with band count.

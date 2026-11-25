@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_HDD",
+ "script": "terms/trm_hdd.py",
+ "beats": [
+  {
+   "caption": "An HDD stores bits magnetically on spinning platters",
+   "text": "Open the sealed case and there are 8 to 10 glass or aluminium platters on one spindle, an arm with a head for every surface, and a controller board underneath. Data-center drives are filled with helium to cut drag."
+  },
+  {
+   "caption": "Platters spin at 7,200 rpm under flying heads",
+   "text": "The stack turns 120 times a second. Each head rides on an air (helium) cushion a few nanometres above the surface, reading concentric tracks of bits as they pass beneath."
+  },
+  {
+   "caption": "The actuator arm seeks: milliseconds, not microseconds",
+   "text": "A voice-coil motor swings all heads together to the right track, then the drive waits for the sector to come round. Seek plus rotation costs 5 to 10 ms, about 50 times slower than an SSD read."
+  },
+  {
+   "caption": "Close up: the head flips tiny magnetic grains",
+   "text": "The write pole's field sets the magnetization of each bit, up or down, and a magnetoresistive sensor reads it back. HAMR and similar tricks heat the spot with a laser to pack bits tighter: 30+ TB per drive."
+  },
+  {
+   "caption": "Cheapest storage per TB, so it holds the bulk",
+   "text": "An HDD costs several times less per terabyte than an SSD, so most cloud data still lives on disks. AI piles up training sets, logs and generated media in these capacity tiers. Related: Seagate (STX), Western Digital (WDC), Toshiba (6502.T)."
+  }
+ ]
+}

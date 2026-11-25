@@ -1,0 +1,14 @@
+# 1. What it is: chips that compute with spikes, like neurons
+
+   conventional:  memory ──bus──▶ ALU ──bus──▶ memory   (every op moves data)
+
+   ┌────────┐  spike  ┌────────┐  spike  ┌────────┐
+   │ neuron │────────▶│ neuron │────────▶│ neuron │
+   │ state  │         │ state  │         │ state  │
+   └────────┘         └────────┘         └────────┘
+
+(memory and compute sit together; events fire only when inputs change)
+
+# 2. Why it matters
+
+Event-driven chips aim at low-power inference on sparse inputs such as sensor streams. Commercial use is still small next to GPUs and accelerators.

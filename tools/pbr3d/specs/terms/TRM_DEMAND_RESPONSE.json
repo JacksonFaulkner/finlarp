@@ -1,0 +1,135 @@
+{
+ "slug": "TRM_DEMAND_RESPONSE",
+ "beats": [
+  {
+   "boxes": [
+    {
+     "name": "util",
+     "lo": [
+      -360,
+      -50,
+      -40
+     ],
+     "hi": [
+      -240,
+      50,
+      0
+     ],
+     "mat": "steel"
+    },
+    {
+     "name": "site",
+     "lo": [
+      -80,
+      -50,
+      -40
+     ],
+     "hi": [
+      40,
+      50,
+      0
+     ],
+     "mat": "charge"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "call",
+     "from": [
+      -235,
+      0,
+      -20
+     ],
+     "to": [
+      -85,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "utility event call",
+     "at": [
+      -300,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "site cuts load",
+     "at": [
+      -20,
+      110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "util",
+    "site",
+    "call"
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "pay",
+     "lo": [
+      200,
+      -50,
+      -40
+     ],
+     "hi": [
+      340,
+      50,
+      0
+     ],
+     "mat": "glow"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "money",
+     "from": [
+      45,
+      0,
+      -20
+     ],
+     "to": [
+      195,
+      0,
+      -20
+     ],
+     "mat": "glow"
+    }
+   ],
+   "tags": [
+    {
+     "text": "$ per MW credit",
+     "at": [
+      270,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "notice window, hour cap",
+     "at": [
+      270,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "util",
+    "site",
+    "call",
+    "pay",
+    "money"
+   ]
+  }
+ ]
+}

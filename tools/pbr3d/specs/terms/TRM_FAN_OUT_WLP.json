@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_FAN_OUT_WLP",
+ "script": "terms/trm_fan_out_wlp.py",
+ "beats": [
+  {
+   "caption": "Known-good dies are placed face-down on a round carrier",
+   "text": "Fan-out starts after the wafer is diced. Each die is tested first, and only the known-good ones are picked up and placed face-down on a temporary carrier, spaced wider apart than they sat on the original wafer. That extra room around each die is what the package will use for wiring."
+  },
+  {
+   "caption": "Epoxy mold fills around them: a reconstituted wafer",
+   "text": "The carrier is flooded with epoxy mold compound and cured, locking every die in a disc of plastic the same size as a silicon wafer. The carrier is then released. The result looks like a wafer and runs on wafer tools, but it is mostly mold with dies embedded in it."
+  },
+  {
+   "caption": "Copper redistribution layers spread the pads outward",
+   "text": "On the die side, thin layers of polyimide and plated copper are built up like a tiny circuit board: the redistribution layer (RDL). Lines a few microns wide leave each die pad and route outward, past the die edge, onto the mold around it. No silicon interposer and no laminate substrate are needed."
+  },
+  {
+   "caption": "Signals fan out to solder balls beyond the die edge",
+   "text": "A die's pads are packed at tens of microns; a phone board needs balls about 0.35-0.5 mm apart. Fan-in packaging can only put balls under the die itself, which caps the I/O count. Fan-out uses the mold area too, so a small die can still have hundreds of balls, with short, thin wiring that keeps the package low and fast."
+  },
+  {
+   "caption": "Through-mold vias stack memory on top: TSMC's InFO",
+   "text": "Copper pillars through the mold carry signals up to a DRAM package stacked on top. That is InFO-PoP, used for Apple's phone processors since 2016; bigger variants (InFO-oS, CoWoS-R) use fan-out RDL to join chiplets for AI and networking. Main players: TSMC (TSM), ASE (ASX), Amkor (AMKR), and JCET in China."
+  }
+ ]
+}

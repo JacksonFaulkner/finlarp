@@ -1,0 +1,10 @@
+{
+ "label": "MACH-ZEHNDER MODULATOR",
+ "term": "Mach-Zehnder modulator",
+ "aliases": [
+  "MZM",
+  "Mach-Zehnder",
+  "Mach-Zehnder interferometer"
+ ],
+ "kind": "optics"
+}

@@ -1,0 +1,17 @@
+# 1. What it is: the control network for physical plant
+
+  ┌─────────────────────────┐
+  │ OT NETWORK              │
+  │ PLCs, HMIs, SCADA       │
+  └─────────────────────────┘
+               │
+               ▼ fieldbus / Modbus
+  ┌─────────────────────────┐
+  │ PHYSICAL PLANT          │
+  │ breakers, pumps, valves │
+  └─────────────────────────┘
+
+(the IT network sits above this, behind a firewall)
+
+# 2. Why AI cares
+AI sites need reliable power and cooling plant, and that plant is run by OT. An OT outage or intrusion can stop a hall even when the servers are healthy.

@@ -1,0 +1,13 @@
+# 1. What it is: a box that forwards packets between servers
+
+   ┌─────────────┐           ┌─────────────────┐           ┌───────────────┐
+   │ SERVER NICs │──optics──▶│ SWITCH ASIC     │──optics──▶│ OTHER SERVERS │
+   │ 400G / 800G │           │ 51.2T or 102.4T │           │ or spine      │
+   │             │           │ 64-128 ports    │           │               │
+   └─────────────┘           └─────────────────┘           └───────────────┘
+
+  (51.2T chip = 64 x 800G ports)
+
+# 2. Why AI cares
+
+Back-end AI networks need several switch ports per GPU, so switch spend scales with accelerator count.

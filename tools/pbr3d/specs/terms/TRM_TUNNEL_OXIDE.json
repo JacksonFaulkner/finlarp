@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TUNNEL_OXIDE",
+ "script": "terms/trm_tunnel_oxide.py",
+ "beats": [
+  {
+   "caption": "Every flash cell has a glass film a few nm thick",
+   "text": "Inside each NAND or NOR cell, a sheet of silicon dioxide separates the channel from the charge store. It is about 7 to 10 nm thick, a few dozen atoms. All data in flash depends on this layer."
+  },
+  {
+   "caption": "It sits between the channel and the floating gate",
+   "text": "Below it is the silicon channel between source and drain; above it is the floating gate that holds the bit. At normal voltages it is a near-perfect insulator, so stored electrons stay for ten years or more."
+  },
+  {
+   "caption": "High voltage: electrons tunnel straight through",
+   "text": "Put about 20 V across the film and the barrier bends thin enough for electrons to tunnel through quantum mechanically (Fowler-Nordheim tunnelling). Program sends them up; erase reverses the field to pull them back."
+  },
+  {
+   "caption": "Each cycle leaves damage: traps build up",
+   "text": "Electrons forced through the oxide break bonds and leave charge traps behind. Traps shift thresholds and open leak paths, so retention drops. This is the main reason a cell survives only thousands of cycles."
+  },
+  {
+   "caption": "Thinner is faster but leakier",
+   "text": "Thinning the oxide lowers write voltage but lets charge leak; that limit helped push NAND from shrinking cells to stacking them in 3D. Oxide deposition and etch: Applied Materials (AMAT), Lam Research (LRCX); users: Micron (MU), Samsung (005930.KS)."
+  }
+ ]
+}

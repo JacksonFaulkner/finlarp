@@ -1,0 +1,12 @@
+# 1. What it is: packages and tests chips for others
+
+   ┌──────────────┐   ┌────────────┐   ┌───────────────┐
+   │ WAFER        │   │ OSAT       │   │ FINISHED CHIP │
+   │ from foundry │──▶│ dice, bond │──▶│ to customer   │
+   │              │   │ mold, test │   │               │
+   └──────────────┘   └────────────┘   └───────────────┘
+
+
+# 2. Why AI cares
+
+Advanced packaging capacity limits AI accelerator output. OSATs take overflow and lower-end packaging work.

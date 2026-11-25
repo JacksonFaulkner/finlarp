@@ -1,0 +1,18 @@
+# 1. What it is: software rented as a subscription
+
+┌────────────────────────────┐
+│ CUSTOMER                   │
+│ browsers, apps, APIs       │
+└─────────────┬──────────────┘
+              │ subscription fee
+              ▼
+┌────────────────────────────┐
+│ VENDOR (SaaS)              │
+│ hosts app, data, updates   │
+└────────────────────────────┘
+
+(customer pays per seat or per month; vendor carries hosting, upkeep and security)
+
+# 2. Why AI cares
+
+Revenue recurs each billing period for as long as customers stay subscribed, which is why investors value SaaS on recurring revenue. Vendors own the cost to serve, so gross margin depends on hosting and support spend. AI features add inference cost on top of that, which pressures margins unless the vendor passes it through in price.

@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GDDR",
+ "script": "terms/trm_gddr.py",
+ "beats": [
+  {
+   "caption": "GDDR chips ring the GPU on a graphics card",
+   "text": "Gaming and workstation GPUs, and some AI inference cards, use GDDR: DRAM chips soldered to the card in a ring around the GPU package. A typical card has 8 to 16 of them, each 2 to 3 GB, kept within a few centimetres of the die so the traces stay short."
+  },
+  {
+   "caption": "Every chip gets its own narrow 32-bit channel",
+   "text": "Unlike a DIMM, where many chips share one bus, each GDDR chip talks to the GPU over its own 32-bit link. Twelve chips give a 384-bit bus. More chips means more bandwidth, which is why bus width is quoted on every card's spec sheet."
+  },
+  {
+   "caption": "It wins on speed per pin, not on width",
+   "text": "GDDR7 signals at about 28-32 Gb/s per pin, four to five times DDR5. It gets there with PAM3 signalling: three voltage levels carry 1.5 bits per symbol instead of one. Each pin is pushed hard, which costs power and needs careful board design."
+  },
+  {
+   "caption": "Bandwidth sits between DDR and HBM, at a much lower cost",
+   "text": "A DDR5 channel moves about 50 GB/s. A 384-bit GDDR7 card moves around 1.5 TB/s. An HBM3E GPU moves 8 TB/s using thousands of slow pins on stacked dies, but HBM needs costly 3D stacking and an interposer. GDDR uses plain packages on a normal board."
+  },
+  {
+   "caption": "Three memory makers supply it, GPU vendors buy it",
+   "text": "Samsung, SK hynix and Micron make GDDR, and NVIDIA and AMD design their consumer GPUs around it. Cheaper inference cards such as NVIDIA's RTX Pro line keep GDDR to save HBM supply for training GPUs. Related: NVIDIA (NVDA), Micron (MU), Samsung (005930.KS), AMD (AMD)."
+  }
+ ]
+}

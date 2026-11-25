@@ -1,0 +1,12 @@
+{
+ "label": "ADC",
+ "term": "ADC",
+ "aliases": [
+  "analog-to-digital converter",
+  "analog-to-digital converters",
+  "data converters",
+  "DAC",
+  "digital-to-analog converter"
+ ],
+ "kind": "analog"
+}

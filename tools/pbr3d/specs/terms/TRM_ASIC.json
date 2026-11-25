@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ASIC",
+ "script": "terms/trm_asic.py",
+ "beats": [
+  {
+   "caption": "An ASIC is a chip built for one job, here a custom AI accelerator",
+   "text": "An application-specific integrated circuit has its logic fixed at design time for one task. In AI the big cloud companies co-design their own accelerators (Google TPU, Amazon Trainium, Meta MTIA), often called XPUs, and put them on boards just like this one in place of a merchant GPU."
+  },
+  {
+   "caption": "Open the die: a giant multiply array, SRAM and memory links, no general cores",
+   "text": "Most of the silicon is one big grid of multiply-accumulate units sized for the matrix maths of neural networks. Banks of on-chip SRAM hold weights and activations next to it, PHYs along the edge talk to stacked HBM, and SerDes lanes link chip to chip. Anything the target models do not need is simply left out."
+  },
+  {
+   "caption": "Weights stream down, activations stream across, every cell multiplies and passes on",
+   "text": "In a systolic array each cell multiplies the weight it holds by the value arriving from its neighbour, adds it to a running sum and hands both on, so data flows through the grid like a wave without trips back to memory. A 128x128 array does 16,384 multiply-adds every clock cycle."
+  },
+  {
+   "caption": "Same model, fewer watts: no silicon spent on what the job never uses",
+   "text": "Because the chip skips general-purpose scheduling, graphics leftovers and wide number formats it does not need, a well-targeted ASIC can deliver more inferences per watt and per dollar than a GPU on its home workload. The catch is flexibility: if models change shape, a fixed design can age fast."
+  },
+  {
+   "caption": "Huge up-front cost, paid back only at hyperscaler volume",
+   "text": "A leading-edge design costs hundreds of millions of dollars and 2-3 years before the first chip, so ASICs make sense only when one buyer will deploy hundreds of thousands. Design partners Broadcom (AVGO), Marvell (MRVL) and Alchip build them for Alphabet (GOOGL), Amazon (AMZN) and others, and TSMC (TSM) makes them."
+  }
+ ]
+}

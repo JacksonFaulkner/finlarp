@@ -1,0 +1,16 @@
+# 1. What it is: the unit AI models read and write
+
+   ┌────────────────┐   ┌─────────────┐   ┌────────────────┐
+   │ TEXT           │──▶│ TOKENIZER   │──▶│ TOKENS         │
+   │ "unbelievable" │   │ splits text │   │ un|believ|able │
+   └────────────────┘   └─────────────┘   └────────────────┘
+
+  (about 3/4 of an English word per token on average)
+
+# 2. Why it matters
+
+Models process and price work in tokens. Cloud APIs bill per million tokens, and hardware is compared by tokens per second and cost per token.
+
+# 3. Demand signal
+
+Companies report tokens processed as a usage metric, a proxy for inference demand.

@@ -1,0 +1,21 @@
+# 1. What it is: room-level air cooler
+
+  ┌─────────────────────────┐
+  │ HOT AISLE               │
+  │ warm air from racks     │
+  └─────────────────────────┘
+               │
+               ▼ return air
+  ┌─────────────────────────┐
+  │ CRAH COIL               │
+  │ chilled water cools air │
+  └─────────────────────────┘
+               │
+               ▼ supply air
+  ┌─────────────────────────┐
+  │ COLD AISLE              │
+  │ fans push air to racks  │
+  └─────────────────────────┘
+
+# 2. Why AI cares
+Air cooling tops out at a certain rack density. Above that, halls move to liquid loops, so CRAH capacity becomes a ceiling on how many racks a floor can carry.

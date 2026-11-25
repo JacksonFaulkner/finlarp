@@ -1,0 +1,161 @@
+{
+ "slug": "TRM_CURTAILMENT",
+ "beats": [
+  {
+   "boxes": [
+    {
+     "name": "grid",
+     "lo": [
+      -360,
+      -60,
+      -40
+     ],
+     "hi": [
+      -220,
+      60,
+      0
+     ],
+     "mat": "steel"
+    }
+   ],
+   "arrows": [],
+   "tags": [
+    {
+     "text": "grid peak demand",
+     "at": [
+      -290,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "large load: bitcoin miner",
+     "at": [
+      -290,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "grid"
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "iso",
+     "lo": [
+      -60,
+      -60,
+      -40
+     ],
+     "hi": [
+      80,
+      60,
+      0
+     ],
+     "mat": "accent"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "sig",
+     "from": [
+      -210,
+      0,
+      -20
+     ],
+     "to": [
+      -70,
+      0,
+      -20
+     ],
+     "mat": "accent"
+    }
+   ],
+   "tags": [
+    {
+     "text": "ISO curtail signal",
+     "at": [
+      10,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "sent to the load",
+     "at": [
+      10,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "grid",
+    "iso",
+    "sig"
+   ]
+  },
+  {
+   "boxes": [
+    {
+     "name": "miner",
+     "lo": [
+      220,
+      -60,
+      -40
+     ],
+     "hi": [
+      360,
+      60,
+      0
+     ],
+     "mat": "dim"
+    }
+   ],
+   "arrows": [
+    {
+     "name": "stop",
+     "from": [
+      90,
+      0,
+      -20
+     ],
+     "to": [
+      210,
+      0,
+      -20
+     ],
+     "mat": "alarm"
+    }
+   ],
+   "tags": [
+    {
+     "text": "miner goes idle",
+     "at": [
+      290,
+      110,
+      0
+     ]
+    },
+    {
+     "text": "paid for unused power",
+     "at": [
+      290,
+      -110,
+      0
+     ]
+    }
+   ],
+   "show": [
+    "grid",
+    "iso",
+    "sig",
+    "miner",
+    "stop"
+   ]
+  }
+ ]
+}

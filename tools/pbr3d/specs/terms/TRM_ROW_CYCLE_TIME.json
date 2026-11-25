@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_ROW_CYCLE_TIME",
+ "script": "terms/trm_row_cycle_time.py",
+ "beats": [
+  {
+   "caption": "HBM stacks next to the GPU: each bank cycles rows one at a time",
+   "text": "Random access across many rows means a bank keeps opening and closing rows. The minimum time for one full open-and-close cycle in one bank is the row cycle time, tRC."
+  },
+  {
+   "caption": "ACTIVATE opens row 2 and starts tRAS",
+   "text": "ACTIVATE raises wordline 2 and the sense amps latch the row. The row must then stay open at least tRAS, long enough for the sense amps to restore full charge into the cells they just drained."
+  },
+  {
+   "caption": "Reads run while the cells are restored",
+   "text": "READs pick columns out of the row buffer during tRAS. Meanwhile the amplified bitlines refill each cell's capacitor, because sensing a DRAM cell destroys its stored charge."
+  },
+  {
+   "caption": "PRECHARGE adds tRP: together they make tRC",
+   "text": "After tRAS, PRECHARGE closes the row and equalizes the bitlines for tRP. tRC = tRAS + tRP, about 45 to 50 ns on DDR5 and HBM. No new ACTIVATE can hit this bank before tRC is up."
+  },
+  {
+   "caption": "Next ACTIVATE: tRC caps random row rate per bank",
+   "text": "At ~48 ns, one bank opens at most about 20 million rows per second. Memory gets random throughput by spreading requests across many banks and bank groups so their tRC windows overlap. Related: Micron (MU), SK hynix (000660.KS), Samsung (005930.KS), Rambus (RMBS)."
+  }
+ ]
+}

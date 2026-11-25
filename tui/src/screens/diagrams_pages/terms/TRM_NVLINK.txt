@@ -1,0 +1,12 @@
+# 1. What it is: GPU-to-GPU wiring inside a rack
+
+   ┌───────┐           ┌──────────┐           ┌─────────────┐
+   │ GPU 1 │──NVLink──▶│ NVSWITCH │──NVLink──▶│ GPU 2 .. 72 │
+   │       │           │ tray     │           │             │
+   └───────┘           └──────────┘           └─────────────┘
+
+  (NVLink 5: ~1.8 TB/s per GPU, roughly 14x PCIe Gen5 x16)
+
+# 2. Why AI cares
+
+Training and serving big models splits them across GPUs that must swap data constantly. A larger NVLink domain means less time waiting on the network.

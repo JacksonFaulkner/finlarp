@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_GAN",
+ "script": "terms/trm_gan.py",
+ "beats": [
+  {
+   "caption": "GaN switches in the power path feeding the GPU",
+   "text": "Gallium nitride (GaN) transistors show up in the high-density power supplies and 48 V-to-12 V converters that feed AI boards, and increasingly in the phases round the GPU. They switch faster and lose less than silicon, so the same power fits in a smaller box."
+  },
+  {
+   "caption": "A thin GaN film on a silicon wafer",
+   "text": "A GaN power transistor is built on an ordinary silicon wafer: buffer layers grade the crystal from silicon to GaN, then a GaN channel layer and a very thin AlGaN barrier on top. Source and drain contacts sit at the ends and the gate in between, with field plates to spread the high-voltage field."
+  },
+  {
+   "caption": "Electrons race along a sheet only nanometres thick",
+   "text": "Where AlGaN meets GaN, the crystals' built-in polarization pulls a sheet of electrons into the interface: a two-dimensional electron gas (2DEG). Electrons there move very fast with no doping needed, so the device is a High Electron Mobility Transistor (HEMT). The gate pinches the sheet off to switch."
+  },
+  {
+   "caption": "Faster switching: smaller inductors and capacitors",
+   "text": "Because GaN has tiny capacitance and no stored charge to clear, it switches several times faster than silicon with less loss per edge. Higher frequency lets designers shrink the magnetics and capacitors round it, and a power shelf packs more watts per rack unit."
+  },
+  {
+   "caption": "Less heat per watt delivered",
+   "text": "Each switching edge costs less energy, so for the same load the GaN stage runs cooler. Players: Navitas (NVTS), Infineon (IFNNY, after buying GaN Systems), Texas Instruments (TXN), EPC, and for RF GaN Qorvo (QRVO) and Wolfspeed (WOLF)."
+  }
+ ]
+}

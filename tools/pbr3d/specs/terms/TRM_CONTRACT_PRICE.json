@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CONTRACT_PRICE",
+ "script": "terms/trm_contract_price.py",
+ "beats": [
+  {
+   "caption": "Memory makers sell chips by the pallet and by the lot",
+   "text": "DRAM and NAND come off the fab as trays of packaged chips. A few makers supply nearly all of it, and they sell through two channels with two different prices."
+  },
+  {
+   "caption": "Contract price: what big buyers negotiate",
+   "text": "Hyperscalers, PC and phone makers buy huge volumes on agreements that reset monthly or quarterly. That negotiated per-chip price is the contract price, and it covers most of the industry's revenue."
+  },
+  {
+   "caption": "Spot price: small lots that trade every day",
+   "text": "Brokers and smaller buyers trade leftover chips daily. The spot price reacts quickly to shortages or gluts, so it is noisy."
+  },
+  {
+   "caption": "Spot moves first; contract follows in steps",
+   "text": "When spot runs above contract, buyers expect the next negotiation to rise, and vice versa. Contract prices move in quarterly steps that trail the spot trend, which makes spot a leading indicator."
+  },
+  {
+   "caption": "Contract trends drive memory makers' earnings",
+   "text": "A 10-20% quarterly move in contract price flows almost straight into gross margin, since fab costs are mostly fixed. That is why analysts track it on every earnings call. Related: Micron (MU), Samsung (005930.KS), SK hynix (000660.KS), Sandisk (SNDK)."
+  }
+ ]
+}

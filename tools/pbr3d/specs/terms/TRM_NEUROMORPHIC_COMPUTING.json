@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_NEUROMORPHIC_COMPUTING",
+ "script": "terms/trm_neuromorphic_computing.py",
+ "beats": [
+  {
+   "caption": "Ordinary chips spend most energy moving data",
+   "text": "In a CPU or GPU, the weights of a neural network sit in memory chips separate from the compute units, and every step hauls them across the bus. Moving a number from DRAM can cost 100x more energy than the arithmetic done on it. This split, the von Neumann bottleneck, is what neuromorphic chips try to remove."
+  },
+  {
+   "caption": "A neuromorphic chip is a mesh of tiny cores, each with its own memory",
+   "text": "The die is tiled with many small cores. Each core holds its own synapse memory (the weights) right next to a group of digital neurons, so data barely moves. Intel's Loihi 2 has 128 such cores and about a million neurons; the cores talk over an on-chip mesh network."
+  },
+  {
+   "caption": "Neurons fire spikes, and only busy cores wake up",
+   "text": "Each neuron adds up incoming spikes and fires its own spike when a threshold is crossed. A spike is a small packet routed across the mesh to the neurons it connects to. Cores with no incoming spikes stay idle, so power tracks activity instead of clock speed."
+  },
+  {
+   "caption": "Best fit: sparse sensor data at the edge",
+   "text": "Event cameras and other sensors send a signal only when something changes, which suits spiking chips well. Gesture, keyword or anomaly detection can run in milliwatts on a battery device, where a GPU would need watts. BrainChip's Akida is sold as licensable IP and small chips for this."
+  },
+  {
+   "caption": "Promising, but GPUs still carry almost all AI",
+   "text": "Spiking networks are hard to train and lack the software stack that CUDA gives GPUs, so neuromorphic chips remain mostly research and niche edge parts. Data-centre AI still runs on GPUs and accelerators. Related: Intel (INTC, Loihi), BrainChip (BRCHF), NVIDIA (NVDA), Qualcomm (QCOM)."
+  }
+ ]
+}

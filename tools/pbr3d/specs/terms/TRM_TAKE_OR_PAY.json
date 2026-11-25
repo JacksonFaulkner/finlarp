@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_TAKE_OR_PAY",
+ "script": "terms/trm_take_or_pay.py",
+ "beats": [
+  {
+   "caption": "Take-or-pay: buy the minimum volume or pay for it anyway",
+   "text": "A take-or-pay or long-term supply agreement commits a buyer to purchase a set minimum over several years. If the buyer takes less, it still owes the money. In AI, buyers sign these to lock in scarce memory, GPUs or compute."
+  },
+  {
+   "caption": "Prepayments give the seller cash to build capacity",
+   "text": "Some deals come with money up front. Memory makers have taken customer prepayments to help fund new fabs, and the commitment lets them add capacity knowing it is already sold."
+  },
+  {
+   "caption": "Supply flows to the buyer at the committed rate",
+   "text": "While demand is strong, the buyer gets guaranteed supply when others are rationed. Cloud providers sign multi-year compute commitments with neoclouds on the same logic: capacity reserved, price fixed."
+  },
+  {
+   "caption": "When demand falls, the buyer still pays",
+   "text": "If the buyer needs less, the product piles up or the reserved capacity sits idle, but the minimum payment keeps flowing. The seller is protected; the risk sits with the buyer."
+  },
+  {
+   "caption": "Find them under purchase obligations in filings",
+   "text": "Filings list these as purchase commitments or contractual obligations, often billions over several years. Rising obligations show confidence or a scramble for supply. Related: Micron (MU), NVIDIA (NVDA), CoreWeave (CRWV), Microsoft (MSFT), Western Digital (WDC)."
+  }
+ ]
+}

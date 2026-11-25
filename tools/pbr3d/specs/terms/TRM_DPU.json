@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_DPU",
+ "script": "terms/trm_dpu.py",
+ "beats": [
+  {
+   "caption": "A DPU is a whole computer on the network card",
+   "text": "A data processing unit sits on a network card beside the GPUs. It has its own fast Ethernet ports, its own DDR memory and its own processor, and plugs into the server over PCIe. The host CPU sees it as a NIC, but the DPU runs its own operating system."
+  },
+  {
+   "caption": "Inside: Arm cores plus hardware engines",
+   "text": "Open the chip and most of the die is not general cores. A cluster of Arm cores runs control software, while fixed engines do the heavy lifting: packet parsing and switching, encryption, compression and NVMe storage. SerDes on the edge drive 200-800 Gb/s of Ethernet; a PCIe block talks to the host and GPUs."
+  },
+  {
+   "caption": "Packets are parsed, decrypted and steered in hardware",
+   "text": "A packet arrives from the wire, the packet engine reads its headers and matches it against flow tables, the crypto engine decrypts it at line rate, and it is steered to the right destination. Doing this in silicon takes nanoseconds per packet, where software on CPU cores would burn dozens of cores at these speeds."
+  },
+  {
+   "caption": "Data goes straight to GPU memory; the CPU stays free",
+   "text": "With GPUDirect-style transfers the DPU writes incoming data straight into GPU memory over PCIe. The host CPU is not in the path, so its cores stay free for the job, and storage reads (NVMe over fabrics) land in the GPU the same way."
+  },
+  {
+   "caption": "It also walls tenants off from each other",
+   "text": "Because networking, storage and security policy run on the DPU, a cloud can rent the server's CPU and GPUs to a customer while keeping its own control plane out of their reach. Firewall rules drop bad traffic before it reaches the host. Makers: NVIDIA BlueField (NVDA), AMD Pensando (AMD), Intel IPU (INTC), Marvell OCTEON (MRVL), Broadcom (AVGO)."
+  }
+ ]
+}

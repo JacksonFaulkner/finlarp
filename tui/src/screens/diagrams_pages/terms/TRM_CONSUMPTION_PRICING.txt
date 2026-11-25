@@ -1,0 +1,18 @@
+# 1. What it is: billed on metered usage
+
+┌──────────────────────────────────┐
+│ customer usage                   │
+│ API calls, tokens, GPU-hours     │
+└──────────────────────────────────┘
+          │ x unit price
+          ▼
+┌──────────────────────────────────┐
+│ monthly invoice                  │
+│ usage x rate, plus minimums      │
+└──────────────────────────────────┘
+
+(often paired with a committed minimum spend the customer pays regardless of usage)
+
+# 2. Why AI cares
+
+Fees track what a customer actually consumes, such as tokens, GPU-hours, or stored gigabytes, instead of a fixed seat count. Revenue rises when usage rises, which can make growth fast in a boom and reverse quickly when customers cut back. For AI vendors, revenue follows inference volume, so forecasting is harder than with subscriptions.

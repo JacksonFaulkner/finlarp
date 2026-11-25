@@ -1,0 +1,16 @@
+{"slug": "TRM_HUMANOID_ROBOT", "beats": [
+ {"caption": "Cameras feed an AI model that drives the joints",
+  "boxes": [
+   {"name": "cameras", "lo": [-380, 120, -60], "hi": [-280, 180, -20], "mat": "glow"},
+   {"name": "ai_model", "lo": [-220, 100, -60], "hi": [-100, 170, -20], "mat": "steel"},
+   {"name": "joint_motors", "lo": [-40, 100, -60], "hi": [80, 170, -20], "mat": "accent"},
+   {"name": "body", "lo": [120, -150, -60], "hi": [260, 170, -20], "mat": "steel"}],
+  "arrows": [{"name": "see", "from": [-280, 150, -40], "to": [-220, 140, -40], "mat": "glow"}, {"name": "drive", "from": [-100, 140, -40], "to": [-40, 140, -40], "mat": "accent"}],
+  "tags": [{"text": "CAMERAS", "at": [-330, 210, 0]}, {"text": "AI MODEL", "at": [-160, 210, 0]}, {"text": "JOINT MOTORS", "at": [0, 210, 0]}]},
+ {"caption": "Each joint is a motor, reducer and torque sensor",
+  "boxes": [
+   {"name": "joint_motors", "lo": [-40, 100, -60], "hi": [80, 170, -20], "mat": "accent"},
+   {"name": "reducer", "lo": [-20, 20, -60], "hi": [60, 60, -20], "mat": "dim"},
+   {"name": "torque_sensor", "lo": [-10, -40, -60], "hi": [50, 0, -20], "mat": "glow"}],
+  "tags": [{"text": "motor + reducer", "at": [0, 90, 0]}, {"text": "torque sensor", "at": [0, -70, 0]}]}
+]}

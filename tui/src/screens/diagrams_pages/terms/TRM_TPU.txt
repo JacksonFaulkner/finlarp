@@ -1,0 +1,17 @@
+# 1. What it is: a hyperscaler's in-house AI chip
+
+   ┌──────────────┐   ┌──────────────────┐   ┌─────────────────┐
+   │ TPU CHIP     │   │ POD              │   │ CLOUD           │
+   │ matrix units │──▶│ thousands of     │──▶│ internal models │
+   │ + HBM        │   │ chips, ICI links │   │ + rentals       │
+   └──────────────┘   └──────────────────┘   └─────────────────┘
+
+  (ICI = inter-chip interconnect; optical circuit switches link pod slices)
+
+# 2. Why AI cares
+
+Owning the chip lets a cloud set its own cost per unit of compute and avoid paying a GPU vendor margin.
+
+# 3. Business angle
+
+Volume of TPU/Trainium orders shows up in Broadcom, Marvell, HBM and foundry revenue.

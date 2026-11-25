@@ -1,0 +1,12 @@
+# 1. What it is: the heartbeat for every digital chip
+
+   ┌────────────────┐    ┌─────────────────┐    ┌─────────┐    ┌───────────────┐
+   │ crystal / MEMS │    │ clock generator │    │ buffer  │    │ CPU, GPU, NIC │
+   │ resonator      │───▶│ PLL, low jitter │───▶│ fan-out │───▶│ switch        │
+   └────────────────┘    └─────────────────┘    └─────────┘    └───────────────┘
+
+  (jitter is measured in femtoseconds for 112G/224G SerDes)
+
+# 2. Why AI cares
+
+Faster links tolerate less clock noise. Each AI server and switch needs several precision clocks.

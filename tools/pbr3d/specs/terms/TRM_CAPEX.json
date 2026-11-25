@@ -1,0 +1,26 @@
+{
+ "slug": "TRM_CAPEX",
+ "script": "terms/trm_capex.py",
+ "beats": [
+  {
+   "caption": "Capex is cash spent on long-lived assets",
+   "text": "Capital expenditure is money spent on things that last years: data centers, servers, power gear and fabs. It leaves the bank now, but it is not an expense in the year it is paid. It goes on the balance sheet as an asset."
+  },
+  {
+   "caption": "Cash becomes racks, halls and power",
+   "text": "An AI buildout turns operating cash into GPU racks, halls, cooling and grid connections. Each dollar here is a dollar a company can no longer return to shareholders or spend on other things."
+  },
+  {
+   "caption": "Depreciation spreads the cost over years",
+   "text": "The asset loses value on the books each year, and that depreciation runs through the income statement. So heavy capex shows up as cash out today and as lower profit for years after."
+  },
+  {
+   "caption": "Hyperscaler capex surges in the AI build",
+   "text": "Microsoft, Alphabet, Amazon and Meta are each spending tens of billions a year on AI capacity. Guidance for next year is watched closely because it sets the demand for chips, memory and power gear."
+  },
+  {
+   "caption": "One company's capex is another's revenue",
+   "text": "The spend flows out to chip, memory, networking and power suppliers. Their backlog and revenue are this cash in another company's books. Related: NVIDIA (NVDA), Vertiv (VRT), GE Vernova (GEV), Broadcom (AVGO)."
+  }
+ ]
+}

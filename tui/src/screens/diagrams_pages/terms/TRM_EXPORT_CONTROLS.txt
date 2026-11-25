@@ -1,0 +1,17 @@
+# 1. What it is: a license gate on chip shipments
+
+   ┌─────────────┐    ┌───────────────────┐    ┌───────────────────┐
+   │ US SUPPLIER │───▶│ BIS CHECK         │───▶│ SHIP / DENY       │
+   │ GPU / tool  │    │ country, buyer,   │    │ license or        │
+   │             │    │ performance limit │    │ Entity List block │
+   └─────────────┘    └───────────────────┘    └───────────────────┘
+
+  (rules key on chip performance density and end-user, not just country)
+
+# 2. Business effect
+
+A new rule can turn a product line into unsellable inventory overnight, as with NVIDIA's H20 charge in 2025. Vendors respond with cut-down China SKUs.
+
+# 3. In filings
+
+Look for 'export license', 'Entity List' and China revenue share in the risk factors and geographic revenue notes.

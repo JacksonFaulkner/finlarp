@@ -1,0 +1,16 @@
+# 1. What it is: the board stock for printed circuits
+
+   ┌──────────────────┐
+   │ copper foil      │
+   ├──────────────────┤
+   │ resin + glass    │  low-loss grade for AI
+   │ cloth            │
+   ├──────────────────┤
+   │ copper foil      │
+   └──────────────────┘
+
+  (copper is etched off to leave the traces; FR-4 is the common grade)
+
+# 2. Why AI cares
+
+High-speed links in AI racks need low-loss laminate. Qualified low-loss grades are scarce, so they can limit PCB and switch board output.

@@ -1,0 +1,17 @@
+# 1. What it is: a generation of manufacturing tech
+
+   ┌───────────┐   ┌──────────┐   ┌──────────────┐
+   │ N7 / N5   │   │ N3       │   │ N2 / 18A     │
+   │ FinFET    │──▶│ FinFET   │──▶│ nanosheet    │
+   │ DUV + EUV │   │ more EUV │   │ backside pwr │
+   └───────────┘   └──────────┘   └──────────────┘
+
+  (each step: more transistors per mm2, lower power at same speed, higher wafer price)
+
+# 2. Why AI cares
+
+Datacenter GPUs and custom accelerators move to the newest node to fit more compute per watt. Node access is a constraint on supply.
+
+# 3. Economics
+
+Leading-edge wafers cost far more per unit than mature ones, and fab construction runs tens of billions of dollars.

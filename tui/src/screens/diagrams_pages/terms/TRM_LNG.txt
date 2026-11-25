@@ -1,0 +1,21 @@
+# 1. What it is: gas chilled to liquid for shipping
+
+   ┌──────────────────┐   liquefy   ┌──────────────────┐
+   │ pipeline gas     │────────────▶│ LNG at -162 C    │
+   └──────────────────┘             └────────┬─────────┘
+                                             │ ship
+                                             ▼
+                                    ┌──────────────────┐
+                                    │ regasify at      │
+                                    │ import terminal  │
+                                    └────────┬─────────┘
+                                             ▼
+                                    ┌──────────────────┐
+                                    │ gas power plant  │
+                                    └──────────────────┘
+
+  (liquid takes about 1/600 the volume of gas at room conditions)
+
+# 2. Why AI cares
+
+Gas-fired plants are a common source of firm power for new data centers. LNG price and shipping swings feed into what that power costs.

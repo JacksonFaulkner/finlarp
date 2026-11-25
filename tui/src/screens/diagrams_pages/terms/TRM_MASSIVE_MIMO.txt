@@ -1,0 +1,17 @@
+# 1. What it is: many antennas, many users at once
+
+   ┌──────────────┐
+   │ BASE STATION │  64 to 192 antenna elements
+   │ AAU          │
+   └──────┬───────┘
+          │  beams to separate users
+     ╱────┼────╲
+   ┌─┴─┐ ┌─┴─┐ ┌─┴─┐
+   │ U1│ │ U2│ │ U3│
+   └───┘ └───┘ └───┘
+
+  (more antennas = more spatial streams, same spectrum)
+
+# 2. Why it matters
+
+Massive MIMO raises cell capacity with antennas and RF hardware instead of extra spectrum. Those antennas are a large share of the radio unit bill of materials.
