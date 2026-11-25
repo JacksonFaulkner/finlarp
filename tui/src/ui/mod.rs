@@ -37,6 +37,7 @@ pub mod hcandles;
 pub mod help;
 pub mod layout;
 pub mod pie;
+pub mod pic_chart;
 pub mod pixels;
 pub mod section_list;
 pub mod section_tabs;

@@ -51,6 +51,8 @@ pub enum Route {
     /// `<space>ac` / `<space>as`: show the Claude popup, or with `text`
     /// type it into Claude's prompt first.
     Claude { text: Option<String> },
+    /// Resume Claude session `session` (run in `cwd`) in a popup of its own (the `L` screen).
+    ClaudeResume { session: String, cwd: String },
     /// `<space>wq`: rebuild fl from the checkout (screens::rebuild).
     Rebuild,
     /// The rebuild finished: main execs the new binary into the screen
@@ -119,6 +121,11 @@ pub trait Screen {
     /// plain character there.
     fn leader_ok(&self) -> bool {
         true
+    }
+    /// `<space>w` then `key` (other than `q`, which rebuilds): window keys for screens
+    /// with panes (intraday's grid). True when the screen used it.
+    fn leader_window(&mut self, _key: KeyEvent) -> bool {
+        false
     }
     /// Whether the ticker tape shows on the bottom row. Screens that use the
     /// whole screen turn it off.
@@ -254,6 +261,7 @@ fn route_key(screen: &mut dyn Screen, chord: &mut Chord, key: KeyEvent) -> Actio
             if is_plain(&key, 'q') {
                 Action::Route(Route::Rebuild)
             } else {
+                screen.leader_window(key);
                 Action::None
             }
         }
@@ -333,6 +341,89 @@ fn draw_flash(frame: &mut Frame, msg: &str, theme: Theme) {
 pub(crate) trait Events {
     /// Next event, or None if `timeout` passed without one.
     fn next(&mut self, timeout: Duration) -> io::Result<Option<Event>>;
+}
+
+/// Frames without a key are logged only when they send at least this much (a picture).
+const PROFILE_TICK_BYTES: usize = 64 * 1024;
+
+/// `FL_PROFILE=<file>` (or `1`: $TMPDIR/fl_profile.jsonl): one JSON line per frame that
+/// answers a key, and per live frame that sends a picture.
+///
+///   key       the key the frame answers ("tick" for live frames)
+///   handle    key arrival -> draw start (the screen's on_key, chords, queued keys)
+///   render    building the frame: the screen's draw, image encoding included
+///   draw      render + ratatui's diff + writing the bytes to the terminal
+///   term      cursor-position round trip right after: the terminal processing the frame
+///   total     key arrival -> terminal done (null term: it never answered)
+///   bytes     what the frame's image cells carried (escape sequences)
+///
+/// Summarise with `py/tools/fl_profile.py <file>`.
+struct Profile {
+    out: std::fs::File,
+}
+
+impl Profile {
+    fn from_env() -> Option<Self> {
+        let v = std::env::var("FL_PROFILE").ok().filter(|v| !v.is_empty())?;
+        let path = if v == "1" {
+            std::env::temp_dir().join("fl_profile.jsonl")
+        } else {
+            std::path::PathBuf::from(v)
+        };
+        let out = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .ok()?;
+        Some(Self { out })
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn frame(
+        &mut self,
+        key: &str,
+        handle: Duration,
+        render: Duration,
+        draw: Duration,
+        term: Option<Duration>,
+        total: Duration,
+        bytes: usize,
+    ) {
+        use std::io::Write as _;
+        let ms = |d: Duration| d.as_secs_f64() * 1000.0;
+        let term = term.map_or("null".to_string(), |d| format!("{:.2}", ms(d)));
+        let total = ms(total);
+        let key = key.replace('\\', "\\\\").replace('"', "\\\"");
+        let _ = writeln!(
+            self.out,
+            "{{\"key\":\"{key}\",\"handle\":{:.2},\"render\":{:.2},\"draw\":{:.2},\"term\":{term},\"total\":{total:.2},\"bytes\":{bytes}}}",
+            ms(handle),
+            ms(render),
+            ms(draw),
+        );
+    }
+}
+
+/// Bytes the frame's image cells carry: a picture's escape sequence rides on its first cell
+/// in the frame that sends it, so long symbols are the payload.
+fn payload_bytes(buf: &ratatui::buffer::Buffer) -> usize {
+    buf.content
+        .iter()
+        .map(|c| c.symbol().len())
+        .filter(|&n| n > 64)
+        .sum()
+}
+
+fn key_name(key: &KeyEvent) -> String {
+    let base = match key.code {
+        KeyCode::Char(c) => c.to_string(),
+        other => format!("{other:?}"),
+    };
+    if key.modifiers.contains(KeyModifiers::CONTROL) {
+        format!("ctrl-{base}")
+    } else {
+        base
+    }
 }
 
 struct CrosstermEvents;
@@ -432,6 +523,9 @@ pub(crate) fn event_loop<B: Backend>(
     let mut dirty = true;
     let mut chord = Chord::Idle;
     let mut help_open = false;
+    let mut profile = Profile::from_env();
+    // The key the next frame answers, when profiling: (when it arrived, its name).
+    let mut answering: Option<(Instant, String)> = None;
     // The offscreen buffer a screen draws into while the tape holds the bottom row.
     let mut body =
         Terminal::new(TestBackend::new(1, 1)).map_err(|e| io::Error::other(e.to_string()))?;
@@ -440,8 +534,11 @@ pub(crate) fn event_loop<B: Backend>(
         // The tape scrolls, so it redraws every poll while it is on.
         let show = screen.shows_tape();
         if dirty || screen.needs_redraw() || (show && tape.enabled()) {
-            terminal
+            let started = Instant::now();
+            let mut render = Duration::ZERO;
+            let frame = terminal
                 .draw(|f| {
+                    let t = Instant::now();
                     draw_with_tape(f, screen, &mut body, tape, show, theme);
                     if help_open {
                         draw_help(f, screen.help(), theme);
@@ -449,9 +546,31 @@ pub(crate) fn event_loop<B: Backend>(
                     if let Some(msg) = screen.flash_text() {
                         draw_flash(f, msg, theme);
                     }
+                    render = t.elapsed();
                 })
                 .map_err(|e| io::Error::other(e.to_string()))?;
             dirty = false;
+            if let Some(p) = profile.as_mut() {
+                let bytes = payload_bytes(frame.buffer);
+                let drawn = started.elapsed();
+                match answering.take() {
+                    Some((at, key)) => {
+                        // The terminal answers a cursor-position query only after it has
+                        // processed every byte before it: the round trip is how long the
+                        // terminal took to take in this frame (images decoded and stored).
+                        let asked = Instant::now();
+                        let term = ratatui::crossterm::cursor::position()
+                            .ok()
+                            .map(|_| asked.elapsed());
+                        p.frame(&key, started - at, render, drawn, term, at.elapsed(), bytes);
+                    }
+                    // frames nobody pressed a key for (live ticks) only when they carry pictures
+                    None if bytes >= PROFILE_TICK_BYTES => {
+                        p.frame("tick", Duration::ZERO, render, drawn, None, drawn, bytes)
+                    }
+                    None => {}
+                }
+            }
         }
         // A request from outside (remote.rs): a route pushes a screen like a key would;
         // a tool call goes to the open screen, which answers it in place.
@@ -468,6 +587,9 @@ pub(crate) fn event_loop<B: Backend>(
             match events.next(screen.poll_interval())? {
                 Some(Event::Key(key)) if key.kind == KeyEventKind::Press => {
                     dirty = true;
+                    if profile.is_some() {
+                        answering = Some((Instant::now(), key_name(&key)));
+                    }
                     action = handle_key(screen, &mut chord, &mut help_open, key);
                     // Keys that queued up while the last frame drew (held J/K
                     // repeating) are handled now, before one draw, so a slow
@@ -534,6 +656,17 @@ pub(crate) fn event_loop<B: Backend>(
                     code: 0,
                     handoff: Some(r),
                 });
+            }
+            Action::Route(Route::ClaudeResume { session, cwd }) => {
+                let res = crate::claude_popup::resume(&session, &cwd);
+                if std::env::var_os("TMUX").is_none() {
+                    terminal
+                        .clear()
+                        .map_err(|e| io::Error::other(e.to_string()))?;
+                }
+                if let Err(e) = res {
+                    screen.set_flash(format!("claude: {e}"));
+                }
             }
             Action::Route(Route::Claude { text }) => {
                 let res = crate::claude_popup::open(text.as_deref());

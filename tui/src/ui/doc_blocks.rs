@@ -133,6 +133,12 @@ struct File {
     blocks: Vec<Block>,
 }
 
+/// The blocks of a parsed document value (crate::filing_blocks::document).
+pub fn from_value(doc: serde_json::Value) -> Result<Vec<Block>, String> {
+    let f: File = serde_json::from_value(doc).map_err(|e| e.to_string())?;
+    Ok(f.blocks)
+}
+
 /// Reads a blocks.json written by docview.py --blocks / filing_blocks.py.
 pub fn load(path: &str) -> Result<Vec<Block>, String> {
     let bytes = std::fs::read(path).map_err(|e| format!("{path}: {e}"))?;

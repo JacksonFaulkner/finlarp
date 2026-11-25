@@ -42,6 +42,13 @@ enum Source {
 /// Custom memory-page scenes (tools/pbr3d/blender/mem_*.py) are 3 beats of 8 s.
 pub const GLB_LOOP_SECS: f32 = 24.0;
 
+/// A custom scene's loop: its keyframed length in whole 8 s beats (template scenes run 3 to 6
+/// beats; the hand-built memory pages are 3), at least one beat.
+pub fn glb_loop_secs(scene: &pbr3d::scene_gltf::Scene) -> f32 {
+    let beats = (scene.duration / 8.0).round().max(1.0);
+    if scene.duration > 0.0 { beats * 8.0 } else { GLB_LOOP_SECS }
+}
+
 /// How long a flight to a map site (or back to the overview) takes.
 pub const FLIGHT: Duration = Duration::from_millis(1600);
 /// The camera over a site: this far above the land (degrees of the view's elevation).
@@ -289,8 +296,9 @@ impl MemoryScene {
         }
         self.slot = page.and_then(|p| {
             let start = Instant::now();
-            // "mem/<company>_<tab>" = a custom scene; anything else is a diagrams node
-            let (source, map) = if p.starts_with("mem/") {
+            // "mem/<company>_<tab>" = a custom scene, "tpl/<TICKER>_<tab>" = a template scene
+            // (py/derive/dossier_diagrams.py); anything else is a diagrams node
+            let (source, map) = if p.starts_with("mem/") || p.starts_with("tpl/") {
                 let scene = load_glb(p)?;
                 let map = Map::load(p, &scene);
                 (Source::Glb(scene), map)
@@ -398,7 +406,7 @@ impl MemoryScene {
                     scene_frame(player, &t, px)
                 }
                 Source::Glb(scene) => {
-                    let secs = slot.start.elapsed().as_secs_f32() % GLB_LOOP_SECS;
+                    let secs = slot.start.elapsed().as_secs_f32() % glb_loop_secs(scene);
                     let (w, h) = (px.0.max(1), px.1.max(1));
                     match slot.map.as_mut() {
                         Some(map) => {
@@ -508,16 +516,17 @@ mod tests {
         let scene =
             load_glb(&name).unwrap_or_else(|| panic!("{name}: no GLB at {:?}", glb_path(&name)));
         let (w, h) = (1140, 380);
-        let mut sheet = RgbaImage::new(w * 3, h * 3);
-        let stem = name.trim_start_matches("mem/");
-        for beat in 0..3u32 {
+        let beats = (glb_loop_secs(&scene) / 8.0) as u32;
+        let mut sheet = RgbaImage::new(w * 3, h * beats);
+        let stem = name.rsplit('/').next().unwrap_or(&name);
+        for beat in 0..beats {
             for (j, u) in [0.2f32, 0.5, 0.85].iter().enumerate() {
                 let img = glb_frame(&scene, (beat as f32 + u) * 8.0, w, h);
                 img.save(format!("{dir}/{stem}_b{beat}_{j}.png")).unwrap();
                 imageops::overlay(&mut sheet, &img, (j as u32 * w) as i64, (beat * h) as i64);
             }
         }
-        let small = imageops::resize(&sheet, w * 3 / 2, h * 3 / 2, imageops::FilterType::Triangle);
+        let small = imageops::resize(&sheet, w * 3 / 2, h * beats / 2, imageops::FilterType::Triangle);
         small.save(format!("{dir}/{stem}_sheet.png")).unwrap();
     }
 

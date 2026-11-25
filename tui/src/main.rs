@@ -16,8 +16,10 @@
 // Env: FINLARP_DB overrides the DuckDB path.
 
 mod app;
+mod chats;
 mod claude_popup;
 mod db;
+mod filing_blocks;
 #[cfg(test)]
 mod mock;
 mod model;
@@ -67,6 +69,7 @@ const SCREENS: &[&str] = &[
     "transactions",
     "onboard",
     "claude_history",
+    "chats",
     "claude_log",
     "keys",
     "video",
@@ -156,7 +159,7 @@ fn build_screen(
     arg: Option<String>,
 ) -> std::io::Result<Box<dyn app::Screen>> {
     use screens::{
-        candles, canslim, chart, chat, claude_history, claude_log, diagrams, docview, dossier,
+        candles, canslim, chart, chat, chats, claude_history, claude_log, diagrams, docview, dossier,
         events, figgie, filings, home, intraday, keys, menu, note, notes,
         onboard, pick, portfolio, rebuild, rows, scratch, search, sources, transactions, universe,
         video,
@@ -190,6 +193,7 @@ fn build_screen(
         ("transactions", _) => Box::new(transactions::open(ctx, arg)?),
         ("onboard", _) => Box::new(onboard::open(ctx, arg)?),
         ("claude_history", _) => Box::new(claude_history::open(ctx, arg)?),
+        ("chats", _) => Box::new(chats::open(ctx, arg)?),
         ("claude_log", _) => Box::new(claude_log::open(ctx, arg)?),
         ("keys", _) => Box::new(keys::open(ctx, arg)?),
         ("scratch", _) => Box::new(scratch::open(ctx, arg)?),
@@ -364,6 +368,11 @@ fn main() {
         && args.get(1).map(String::as_str) == Some("render")
     {
         std::process::exit(screens::z_spec::run_render(&args[2..]));
+    }
+    // `fl filing-blocks FILE URL`: the reader's block JSON for a cached filing (filing_blocks),
+    // printed for the parity check against py/sources/filing_blocks.py.
+    if args.first().map(String::as_str) == Some("filing-blocks") {
+        std::process::exit(filing_blocks::run_cli(&args[1..]));
     }
     if args.first().map(String::as_str) == Some("render-video") {
         std::process::exit(screens::diagrams_video::run_cli(&args[1..]));

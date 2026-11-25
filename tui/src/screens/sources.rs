@@ -27,6 +27,8 @@ const KEYS: &[Key] = &[
     key("enter", "open provider / search dataset"),
     key("i", "dataset details"),
     key("/", "search SEC EDGAR text"),
+    key("R", "refresh now: watchlist 8-Ks, tweets, sentiment"),
+    key("U U", "turn auto-update (launchd) on / off"),
     key("esc", "back"),
     key("q", "close"),
 ];
@@ -440,8 +442,87 @@ struct Tile {
     line3: String,
 }
 
+/// The scheduled refresh (py/jobs/refresh.py): whether its launchd agents are installed and
+/// how its last run went. Read when the screen opens and after a run started here ends.
+#[derive(Clone, Debug, Default, PartialEq)]
+struct Refresh {
+    /// Which agents are in ~/Library/LaunchAgents ("daily", "intraday").
+    installed: Vec<&'static str>,
+    /// The newest run report: mode, when (YYYYMMDD_HHMMSS), steps ok, steps failed.
+    last: Option<(String, String, usize, usize)>,
+}
+
+impl Refresh {
+    fn read() -> Self {
+        let home = std::env::var_os("HOME").map(std::path::PathBuf::from).unwrap_or_default();
+        let agents = home.join("Library/LaunchAgents");
+        let installed = ["daily", "intraday"]
+            .into_iter()
+            .filter(|m| agents.join(format!("com.finlarp.refresh.{m}.plist")).is_file())
+            .collect();
+        let dirs = [
+            crate::data_dir().join("debug"),
+            crate::pyrun::plugin_dir().join("data/debug"),
+        ];
+        let newest = dirs
+            .iter()
+            .filter_map(|d| std::fs::read_dir(d).ok())
+            .flatten()
+            .flatten()
+            .map(|e| e.path())
+            .filter(|p| {
+                p.file_name()
+                    .and_then(|n| n.to_str())
+                    .is_some_and(|n| n.starts_with("refresh_") && n.ends_with(".json"))
+            })
+            .max_by_key(|p| p.file_name().map(|n| n.to_os_string()));
+        let last = newest.and_then(|p| {
+            let v: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(p).ok()?).ok()?;
+            let steps = v["steps"].as_array()?;
+            let ok = steps.iter().filter(|s| s["status"] == "ok").count();
+            let fail = steps
+                .iter()
+                .filter(|s| s["status"] == "failed" || s["status"] == "error" || s["status"] == "timeout")
+                .count();
+            Some((
+                v["mode"].as_str().unwrap_or("?").to_string(),
+                v["started"].as_str().unwrap_or("").to_string(),
+                ok,
+                fail,
+            ))
+        });
+        Self { installed, last }
+    }
+
+    /// `auto: daily+intraday · last intraday 10-28 10:54 · 12 ok 0 failed`
+    fn line(&self) -> String {
+        let auto = if self.installed.is_empty() {
+            "auto-update off (U turns it on)".to_string()
+        } else {
+            format!("auto-update {}", self.installed.join("+"))
+        };
+        match &self.last {
+            Some((mode, at, ok, fail)) => {
+                let when = if at.len() >= 13 {
+                    format!("{}-{} {}:{}", &at[4..6], &at[6..8], &at[9..11], &at[11..13])
+                } else {
+                    at.clone()
+                };
+                format!("{auto} · last {mode} {when} · {ok} ok {fail} failed")
+            }
+            None => format!("{auto} · never run"),
+        }
+    }
+}
+
 pub struct Sources {
     theme: Theme,
+    refresh: Refresh,
+    /// A refresh or an agent install running in the background, and what it is.
+    job: Option<(&'static str, std::sync::mpsc::Receiver<Result<String, String>>)>,
+    /// `U` pressed once: the second press installs (or removes) the agents.
+    arm: bool,
+    flash: Option<String>,
     providers: Vec<Provider>,
     view: View,
     /// Selected tile in the current view.
@@ -453,6 +534,10 @@ pub struct Sources {
 pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Sources> {
     Ok(Sources {
         theme: ctx.theme,
+        refresh: if cfg!(test) { Refresh::default() } else { Refresh::read() },
+        job: None,
+        arm: false,
+        flash: None,
         providers: providers(),
         view: View::Providers,
         sel: 0,
@@ -460,7 +545,64 @@ pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Sources> {
     })
 }
 
+/// Runs `program args` from the repo root on a thread; the output arrives on the receiver.
+fn spawn_in_repo(program: &str, args: &[&str]) -> std::sync::mpsc::Receiver<Result<String, String>> {
+    let (tx, rx) = std::sync::mpsc::channel();
+    let program = program.to_string();
+    let args: Vec<String> = args.iter().map(|a| a.to_string()).collect();
+    std::thread::spawn(move || {
+        let out = std::process::Command::new(&program)
+            .args(&args)
+            .current_dir(crate::pyrun::plugin_dir())
+            .output();
+        let _ = tx.send(match out {
+            Ok(o) if o.status.success() => Ok(String::from_utf8_lossy(&o.stdout).into_owned()),
+            Ok(o) => Err(String::from_utf8_lossy(&o.stderr)
+                .lines()
+                .last()
+                .unwrap_or("failed")
+                .to_string()),
+            Err(e) => Err(format!("{program}: {e}")),
+        });
+    });
+    rx
+}
+
 impl Sources {
+    /// R: an intraday refresh now (filings for the watchlist, tweets, sentiment).
+    fn refresh_now(&mut self) {
+        if self.job.is_some() {
+            return;
+        }
+        self.flash = Some("refreshing: 8-Ks, tweets, sentiment…".into());
+        self.job = Some((
+            "refresh",
+            spawn_in_repo(
+                "uv",
+                &["run", "--env-file", ".env", "python", "-m", "jobs.refresh", "intraday", "--force"],
+            ),
+        ));
+    }
+
+    /// U U: installs the launchd agents (nightly batch + 30-minute market-hours loop), or
+    /// removes them when they are in.
+    fn toggle_auto(&mut self) {
+        if !std::mem::take(&mut self.arm) {
+            self.arm = true;
+            self.flash = Some(if self.refresh.installed.is_empty() {
+                "U again: install auto-update (nightly 18:30 + every 30 min in market hours)".into()
+            } else {
+                "U again: remove auto-update".into()
+            });
+            return;
+        }
+        let mut args = vec!["py/jobs/launchd/install.sh"];
+        if !self.refresh.installed.is_empty() {
+            args.push("uninstall");
+        }
+        self.job = Some(("install", spawn_in_repo("sh", &args)));
+    }
+
     fn tiles(&self) -> Vec<Tile> {
         match self.view {
             View::Providers => self
@@ -610,9 +752,22 @@ impl Screen for Sources {
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
-        let [head, body] =
-            Layout::vertical([Constraint::Length(1), Constraint::Min(1)]).areas(area);
+        let [head, body, foot] = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Min(1),
+            Constraint::Length(1),
+        ])
+        .areas(area);
         frame.render_widget(Paragraph::new(self.crumb()), head);
+        let status = match (&self.flash, &self.job) {
+            (Some(f), _) => f.clone(),
+            (None, Some((what, _))) => format!("{what} running…"),
+            (None, None) => self.refresh.line(),
+        };
+        frame.render_widget(
+            Paragraph::new(text::truncate(&status, foot.width as usize)).style(t.dim()),
+            foot,
+        );
         match self.view {
             View::Detail(i) => self.draw_detail(frame, body, &SOURCES[i]),
             _ => self.draw_tiles(frame, body),
@@ -623,10 +778,39 @@ impl Screen for Sources {
         Help::new("data sources", KEYS)
     }
 
+    fn tick(&mut self) -> Action {
+        let Some((what, rx)) = &self.job else {
+            return Action::None;
+        };
+        let what = *what;
+        if let Ok(out) = rx.try_recv() {
+            self.job = None;
+            self.refresh = Refresh::read();
+            self.flash = Some(match (what, out) {
+                ("install", Ok(_)) if self.refresh.installed.is_empty() => "auto-update removed".into(),
+                ("install", Ok(_)) => "auto-update on".into(),
+                ("refresh", Ok(_)) => format!("refreshed · {}", self.refresh.line()),
+                (_, Err(e)) => format!("{what} failed: {e}"),
+                _ => String::new(),
+            });
+        }
+        Action::None
+    }
+
+    fn needs_redraw(&self) -> bool {
+        self.job.is_some() || self.flash.is_some()
+    }
+
     fn on_key(&mut self, key: KeyEvent) -> Action {
         let last = self.tiles().len().saturating_sub(1);
+        self.flash = None;
+        if key.code != KeyCode::Char('U') {
+            self.arm = false;
+        }
         match key.code {
             KeyCode::Char('q') => return Action::Quit,
+            KeyCode::Char('R') => self.refresh_now(),
+            KeyCode::Char('U') => self.toggle_auto(),
             KeyCode::Char('/') => {
                 if let View::Detail(i) = self.view {
                     return search_action(&SOURCES[i]);
@@ -697,6 +881,10 @@ mod tests {
     fn screen() -> Sources {
         Sources {
             theme: Theme::default(),
+            refresh: Refresh::default(),
+            job: None,
+            arm: false,
+            flash: None,
             providers: providers(),
             view: View::Providers,
             sel: 0,
@@ -850,5 +1038,19 @@ mod tests {
         assert_eq!(s.cols, 3);
         press(&mut s, KeyCode::Char('j'));
         assert_eq!(s.sel, 3);
+    }
+
+    #[test]
+    fn refresh_line_says_whether_auto_update_is_on() {
+        let mut r = Refresh::default();
+        assert!(r.line().contains("off"));
+        r.installed = vec!["daily", "intraday"];
+        r.last = Some(("intraday".into(), "20261028_105442".into(), 5, 1));
+        assert_eq!(r.line(), "auto-update daily+intraday · last intraday 10-28 10:54 · 5 ok 1 failed");
+        let mut s = screen();
+        press(&mut s, KeyCode::Char('U'));
+        assert!(s.arm && s.job.is_none());
+        press(&mut s, KeyCode::Char('j'));
+        assert!(!s.arm);
     }
 }

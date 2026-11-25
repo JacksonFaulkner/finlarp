@@ -120,6 +120,7 @@ const KEYS: &[Key] = &[
     key("tab", "query / results"),
     key("j/k", "move"),
     key("↵", "open filing"),
+    key("d", "the row's ticker dossier"),
     key("/", "back to the query"),
     key("esc", "back / close"),
     key("q", "close"),
@@ -256,6 +257,14 @@ impl Screen for Filings {
                 KeyCode::Enter => {
                     if let Some(f) = self.selected() {
                         return Action::OpenBrowser(f.url.clone());
+                    }
+                }
+                KeyCode::Char('d') => {
+                    if let Some(f) = self.selected().filter(|f| !f.ticker.is_empty()) {
+                        return Action::Route(crate::app::Route::Screen {
+                            screen: "dossier".into(),
+                            arg: Some(f.ticker.clone()),
+                        });
                     }
                 }
                 _ => {}

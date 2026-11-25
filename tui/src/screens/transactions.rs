@@ -12,7 +12,8 @@
 
 use std::collections::HashSet;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::sync::mpsc::Receiver;
 
 use chrono::{DateTime, Local, Utc};
 use ratatui::Frame;
@@ -68,6 +69,62 @@ pub struct Transactions {
     page: usize,
     flash: Option<String>,
     theme: Theme,
+    /// The DuckDB the cache lives in (reread after a refresh).
+    db_path: PathBuf,
+    /// A pull from E*TRADE (or a login step) running in the background.
+    job: Option<(Job, Receiver<Result<String, String>>)>,
+    /// E*TRADE wants a fresh login: the request token pair, and the code typed so far.
+    login: Option<Login>,
+    dirty: bool,
+}
+
+/// What the background job is.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum Job {
+    Pull,
+    Finish,
+}
+
+/// A login in progress: E*TRADE's page is open in the browser, the user types the code.
+#[derive(Clone, Debug, PartialEq)]
+struct Login {
+    url: String,
+    token: String,
+    secret: String,
+    code: String,
+}
+
+/// The cache is pulled again on open when it is older than this.
+const STALE_MINS: i64 = 60;
+const ETRADE: &str = "py/sources/etrade.py";
+
+/// What a pull printed: a login E*TRADE wants, an error, or fine.
+#[derive(Debug, PartialEq)]
+enum Pulled {
+    Ok,
+    Login { url: String, token: String, secret: String },
+    Err(String),
+}
+
+fn parse_pull(out: Result<String, String>) -> Pulled {
+    let out = match out {
+        Ok(o) => o,
+        Err(e) => return Pulled::Err(e.lines().last().unwrap_or("failed").to_string()),
+    };
+    let v: serde_json::Value = out
+        .lines()
+        .rev()
+        .find_map(|l| serde_json::from_str(l).ok())
+        .unwrap_or_default();
+    if v["auth_required"] == true {
+        let g = |k: &str| v[k].as_str().unwrap_or("").to_string();
+        return Pulled::Login {
+            url: g("authorize_url"),
+            token: g("request_token"),
+            secret: g("request_token_secret"),
+        };
+    }
+    Pulled::Ok
 }
 
 pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Transactions> {
@@ -76,7 +133,15 @@ pub fn open(ctx: &Ctx, _arg: Option<String>) -> io::Result<Transactions> {
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
         .unwrap_or_else(|| "finlarp.duckdb".into());
-    Ok(Transactions::new(load(&ctx.db_path), source, ctx.theme))
+    let mut s = Transactions::new(load(&ctx.db_path), source, ctx.theme);
+    s.db_path = ctx.db_path.clone();
+    let stale = s
+        .fetched_at
+        .is_none_or(|t| (Local::now() - t).num_minutes() > STALE_MINS);
+    if stale && !cfg!(test) {
+        s.pull();
+    }
+    Ok(s)
 }
 
 impl Transactions {
@@ -93,9 +158,94 @@ impl Transactions {
             page: 10,
             flash: None,
             theme,
+            db_path: PathBuf::new(),
+            job: None,
+            login: None,
+            dirty: true,
         };
         s.refilter();
         s
+    }
+
+    /// R: pulls the history from E*TRADE now (past the cache), in the background.
+    fn pull(&mut self) {
+        if self.job.is_some() {
+            return;
+        }
+        self.flash = Some("pulling from E*TRADE…".into());
+        self.job = Some((Job::Pull, crate::pyrun::spawn_script(ETRADE, &["transactions_fresh"])));
+    }
+
+    /// Enter in the login box: hands E*TRADE the code, then pulls again.
+    fn finish_login(&mut self) {
+        let Some(l) = self.login.take() else { return };
+        let code = l.code.trim().to_string();
+        if code.is_empty() {
+            self.login = Some(l);
+            return;
+        }
+        self.flash = Some("logging in…".into());
+        self.job = Some((
+            Job::Finish,
+            crate::pyrun::spawn_script(ETRADE, &["auth_finish", &l.token, &l.secret, &code]),
+        ));
+    }
+
+    /// A finished job: reload the cache, start the login, or say what went wrong.
+    fn job_done(&mut self, job: Job, out: Result<String, String>) -> Action {
+        self.dirty = true;
+        match (job, parse_pull(out)) {
+            (Job::Pull, Pulled::Ok) => {
+                let keep = self.query.clone();
+                let l = load(&self.db_path);
+                self.rows = l.rows;
+                self.error = l.error;
+                self.fetched_at = l.fetched_at;
+                self.query = keep;
+                self.refilter();
+                self.flash = Some(format!("{} rows from E*TRADE", self.rows.len()));
+            }
+            (Job::Pull, Pulled::Login { url, token, secret }) => {
+                self.flash = Some("E*TRADE login: approve in the browser, type the code".into());
+                self.login = Some(Login {
+                    url: url.clone(),
+                    token,
+                    secret,
+                    code: String::new(),
+                });
+                return Action::OpenBrowser(url);
+            }
+            (Job::Finish, Pulled::Ok) => {
+                self.job = None;
+                self.pull();
+            }
+            (_, Pulled::Login { .. }) => self.flash = Some("login failed; R to try again".into()),
+            (_, Pulled::Err(e)) => self.flash = Some(format!("E*TRADE: {e}")),
+        }
+        Action::None
+    }
+
+    /// Keys while the login code box is open.
+    fn on_login_key(&mut self, key: KeyEvent) -> Action {
+        let Some(l) = self.login.as_mut() else {
+            return Action::None;
+        };
+        match key.code {
+            KeyCode::Esc => {
+                self.login = None;
+                self.flash = Some("login cancelled".into());
+            }
+            KeyCode::Enter => self.finish_login(),
+            KeyCode::Backspace => {
+                l.code.pop();
+            }
+            KeyCode::Char('o') if key.modifiers.contains(KeyModifiers::CONTROL) => {
+                return Action::OpenBrowser(l.url.clone());
+            }
+            KeyCode::Char(c) if !c.is_whitespace() => l.code.push(c),
+            _ => {}
+        }
+        Action::None
     }
 
     /// Rows matching every whitespace-separated term of the query
@@ -247,6 +397,8 @@ const KEYS: &[Key] = &[
     key("g/G", "first / last row"),
     key("^d/^u", "page down / up"),
     key("↵", "dossier"),
+    key("R", "pull from E*TRADE now (logs in when the token is stale)"),
+    key("^o", "login box: reopen E*TRADE's page"),
     key("esc", "back"),
     key("q", "close"),
     key("^n/^p", "move down / up"),
@@ -254,10 +406,29 @@ const KEYS: &[Key] = &[
 
 impl Screen for Transactions {
     fn leader_ok(&self) -> bool {
-        !self.editing
+        !self.editing && self.login.is_none()
+    }
+
+    fn tick(&mut self) -> Action {
+        let Some((job, rx)) = &self.job else {
+            return Action::None;
+        };
+        let job = *job;
+        match rx.try_recv() {
+            Ok(out) => {
+                self.job = None;
+                self.job_done(job, out)
+            }
+            Err(std::sync::mpsc::TryRecvError::Empty) => Action::None,
+            Err(std::sync::mpsc::TryRecvError::Disconnected) => {
+                self.job = None;
+                Action::None
+            }
+        }
     }
 
     fn draw(&mut self, frame: &mut Frame) {
+        self.dirty = false;
         let t = self.theme;
         let area = frame.area();
         frame.render_widget(Block::new().style(t.base()), area);
@@ -296,6 +467,33 @@ impl Screen for Transactions {
             }
         }
 
+        if let Some(l) = &self.login {
+            let w = 64.min(area.width.saturating_sub(4));
+            let r = ratatui::layout::Rect {
+                x: area.x + (area.width.saturating_sub(w)) / 2,
+                y: area.y + area.height / 3,
+                width: w,
+                height: 5,
+            };
+            frame.render_widget(ratatui::widgets::Clear, r);
+            let lines = vec![
+                Line::styled("approve fl on E*TRADE's page, then type the code", t.dim()),
+                Line::from(vec![
+                    Span::styled("code ", t.accent()),
+                    Span::styled(format!("{}█", l.code), t.base()),
+                ]),
+                Line::styled("enter submit · ^o reopen page · esc cancel", t.dim()),
+            ];
+            frame.render_widget(
+                Paragraph::new(lines).block(
+                    Block::bordered()
+                        .title(" E*TRADE login ")
+                        .border_style(t.accent()),
+                ),
+                r,
+            );
+        }
+
         let status_line = match &self.flash {
             Some(f) => f.clone(),
             None => {
@@ -318,7 +516,7 @@ impl Screen for Transactions {
     }
 
     fn takes_text(&self) -> bool {
-        self.editing
+        self.editing || self.login.is_some()
     }
 
     fn help(&self) -> Help {
@@ -327,6 +525,10 @@ impl Screen for Transactions {
 
     fn on_key(&mut self, key: KeyEvent) -> Action {
         self.flash = None;
+        self.dirty = true;
+        if self.login.is_some() {
+            return self.on_login_key(key);
+        }
         if self.editing {
             return self.on_filter_key(key);
         }
@@ -344,6 +546,10 @@ impl Screen for Transactions {
                 }
             }
             KeyCode::Char('q') if !ctrl => Action::Quit,
+            KeyCode::Char('R') => {
+                self.pull();
+                Action::None
+            }
             KeyCode::Char('/') if !ctrl => {
                 self.editing = true;
                 Action::None
@@ -399,10 +605,11 @@ impl Screen for Transactions {
 
     fn set_flash(&mut self, msg: String) {
         self.flash = Some(msg);
+        self.dirty = true;
     }
 
     fn needs_redraw(&self) -> bool {
-        false
+        self.dirty || self.job.is_some()
     }
 
     fn claude_context(&self) -> Option<String> {
@@ -622,6 +829,31 @@ mod tests {
             })
             .collect::<Vec<_>>()
             .join("\n")
+    }
+
+    #[test]
+    fn pull_output_asks_for_login_or_reloads() {
+        let login = r#"{"auth_required": true, "authorize_url": "https://us.etrade.com/e/t/etws/authorize?key=k&token=t", "request_token": "t", "request_token_secret": "s"}"#;
+        assert_eq!(
+            parse_pull(Ok(login.into())),
+            Pulled::Login {
+                url: "https://us.etrade.com/e/t/etws/authorize?key=k&token=t".into(),
+                token: "t".into(),
+                secret: "s".into()
+            }
+        );
+        assert_eq!(parse_pull(Ok("{\"ok\": true}".into())), Pulled::Ok);
+        assert!(matches!(parse_pull(Err("x\nboom".into())), Pulled::Err(e) if e == "boom"));
+        let mut s = sample();
+        let a = s.job_done(Job::Pull, Ok(login.into()));
+        assert!(matches!(a, Action::OpenBrowser(_)));
+        assert!(s.takes_text());
+        for c in "AB12".chars() {
+            press(&mut s, key(KeyCode::Char(c)));
+        }
+        assert_eq!(s.login.as_ref().unwrap().code, "AB12");
+        press(&mut s, key(KeyCode::Esc));
+        assert!(s.login.is_none());
     }
 
     #[test]

@@ -62,7 +62,6 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         'z',
     ),
     ("Events", "events", "catalyst calendar", 'v'),
-    ("Chat", "chat", "ask Claude; open the tickers it names", 'a'),
     (
         "Candles",
         "candles",
@@ -90,12 +89,6 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         'N',
     ),
     (
-        "Menu",
-        "menu",
-        "filterable list of standalone commands",
-        'M',
-    ),
-    (
         "Sources",
         "sources",
         "data providers, keys and schedules",
@@ -120,16 +113,10 @@ const ENTRIES: &[(&str, &str, &str, char)] = &[
         'H',
     ),
     (
-        "Claude log",
-        "claude_log",
-        "tail of the Claude background log",
-        'l',
-    ),
-    (
-        "Video",
-        "video",
-        "play docs screen recordings in the terminal",
-        'V',
+        "Chats",
+        "chats",
+        "every Claude chat fl started: cost, model, resume",
+        'L',
     ),
     (
         "Scratch",
@@ -642,7 +629,7 @@ mod tests {
         h.cursor = key_pos('h').unwrap();
         assert_eq!(press(&mut h, KeyCode::Enter), opens("chart"));
         h.cursor = key_pos('l').unwrap();
-        assert_eq!(press(&mut h, KeyCode::Enter), opens("claude_log"));
+        assert_eq!(press(&mut h, KeyCode::Enter), opens("chats"));
     }
 
     #[test]
