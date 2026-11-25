@@ -1,0 +1,57 @@
+# 1. What happens: water out, heat lifted, heat dumped
+
+The CHILLER sends CHILLED WATER to the hall's air handlers or liquid-cooling units and takes warm water back. Inside, a REFRIGERANT loop lifts that heat: it boils in the EVAPORATOR, is squeezed hot by the COMPRESSOR, gives its heat to outdoor air in the CONDENSER and drops in pressure through the EXPANSION VALVE.
+
+# 2. The parts
+
+CHILLER           a refrigeration machine that cools a water loop
+CHILLED WATER     the building loop, traditionally ~7 C, now often 15-20 C or warmer
+EVAPORATOR        shell-and-tube exchanger where refrigerant boils and takes the water's heat
+COMPRESSOR        screw or centrifugal machine that squeezes the vapour hot
+CONDENSER         coil (air-cooled) or shell (water-cooled) that sheds the heat
+EXPANSION VALVE   drops the pressure so the liquid flashes cold
+REFRIGERANT       the working fluid: R-134a, moving to R-1234ze, R-513A, R-1233zd
+FREE COOLING      cooling with cold outdoor air while the compressor rests
+DRY COOLER        coil and fans with no compressor at all
+
+# 3. The loop, in order
+
+1. warm water makes the refrigerant boil in the EVAPORATOR
+2. the vapour is drawn into the COMPRESSOR
+3. it leaves hot and dense, around 60-80 C
+4. in the CONDENSER it gives up its heat and turns liquid
+5. the EXPANSION VALVE drops its pressure; part flashes to vapour, the mix turns cold
+6. the cold mix returns to the evaporator
+
+# 4. How much heat
+
+Chillers are rated in tons of refrigeration: 1 ton = 3.517 kW, so 1 MW of cooling is about 285 tons. Large air-cooled units run roughly 1-2 MW; big water-cooled centrifugals go higher. A 130 kW GB200 NVL72 rack needs about 37 tons, so a large campus served by chillers needs dozens of units.
+
+# 5. Compressors
+
+Screw compressors (two meshing rotors) dominate mid-size air-cooled chillers. Centrifugal compressors spin an impeller and dominate large water-cooled plants. Magnetic-bearing, oil-free designs (Danfoss Turbocor, York YZ and others) float the shaft, cutting friction; the best water-cooled plants run near 0.5 kW per ton.
+
+# 6. COP and water temperature
+
+COP is heat moved divided by electrical power. Air-cooled chillers manage about 3; water-cooled about 6-7. The compressor's work depends on the lift from chilled-water to outdoor temperature, so each degree warmer on the chilled water saves roughly 2-3% of compressor power. Liquid-cooled GPUs accept 30 C+ facility water, which shrinks or eliminates the lift.
+
+# 7. Free cooling and dry coolers
+
+A FREE COOLING chiller adds a coil that pre-cools the return water with outdoor air, so the compressor can stop when it is cold enough. A DRY COOLER drops the compressor entirely and suits 30-45 C liquid loops. Adiabatic pads wet the incoming air on the hottest days, using water only a few hundred hours a year.
+
+# 8. Who makes it
+
+Trane Technologies (TT), Carrier (CARR) and Johnson Controls' York (JCI) lead large chillers; Daikin, Mitsubishi and LG compete globally. Modine (MOD) sells data-center chillers and dry coolers (Airedale); Vertiv (VRT) sells chillers alongside CDUs and air handlers. Danfoss (private) makes Turbocor oil-free compressors. Market shares are not sourced here.
+
+# 9. Chokepoints and risks
+
+- HFC phase-down: EPA rules cap the GWP of refrigerants in new chillers (700 for many chiller types), forcing redesigns.
+- Air-cooled chillers lose capacity in heat waves, exactly at peak load.
+- Long lead times on large units while data-center demand surges.
+
+# 10. Sources
+
+  [1] Refrigeration cycle, tons, COP: ASHRAE Handbook (Fundamentals; HVAC Systems and Equipment)
+  [2] Liquid-cooling water classes (W32/W40/W45): ASHRAE TC 9.9 liquid cooling guidelines
+  [3] HFC Technology Transitions rule (GWP limits for chillers): epa.gov/climate-hfcs-reduction/technology-transitions
+  [4] Data-center chillers, dry coolers, free cooling: Modine 10-K FY2026 (sec.gov); Vertiv, Trane product pages

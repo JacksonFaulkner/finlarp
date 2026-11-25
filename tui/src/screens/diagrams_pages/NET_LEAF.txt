@@ -1,0 +1,50 @@
+# 1. What happens: every server port meets the leaf
+
+Each 8-GPU server has NIC ports at 400G or 800G. In each row a LEAF SWITCH, near the top of a network rack, takes all of them: short copper DAC from the racks beside it, AOC from the far ones. Its SWITCH ASIC forwards each packet, and half its ports send traffic up over 800G OPTICS on SINGLE-MODE FIBRE to every SPINE SWITCH. That two-tier LEAF-SPINE fabric puts any two GPUs three hops apart.
+
+# 2. The parts
+
+LEAF SWITCH         the switch every server in a row plugs into (top of rack / end of row)
+SWITCH ASIC         the one chip that forwards every packet, 51.2 Tb/s today
+SERDES              the serial lanes (100G each) from the chip to each port
+OSFP                the 800G pluggable cage and module form factor
+DAC                 direct-attach copper: passive twinax, ~2 m at 800G
+AOC                 active optical cable: optics built into both plugs
+800G OPTICS         transceivers turning 8 x 100G lanes into light
+SPINE SWITCH        the tier above, joined to every leaf
+
+# 3. Downlinks: copper DAC and AOC
+
+A passive DAC is eight twinax pairs, one per 100G lane, with no electronics: cheapest, near-zero power and latency, but only about 2 m at 800G. Racks farther away use AOC (lasers in the plugs, tens of metres) or active electrical cables (AEC, Credo's niche) whose retimers stretch copper to about 7 m.
+
+# 4. Uplinks: 800G optics over single-mode fibre
+
+Uplinks leave from OSFP modules: a DSP retimes eight 100G electrical lanes and eight lasers send them on eight single-mode fibres (800G DR8, 500 m) or two duplex pairs (2xFR4, 2 km). Fibre bundles climb to overhead trays and run to the spine row, an equal share to each spine.
+
+# 5. Inside the switch
+
+A 2U box: 64 OSFP cages on the front, SerDes traces to one ASIC (Broadcom Tomahawk 5, NVIDIA Spectrum-4: 51.2 Tb/s; Tomahawk 6 doubles it to 102.4 Tb/s) under a heatsink, a shared on-chip packet buffer, a small control CPU, fans and two power supplies. With optics fitted it draws on the order of 1-2 kW, much of it in the optics.
+
+# 6. Leaf-spine and ECMP
+
+Every leaf connects to every spine, so all leaf-to-leaf paths are equal length. ECMP hashes each flow's header to pick one of the equal-cost spines; packets of one flow stay in order. AI traffic is a few huge flows, so hashes collide and links run hot; adaptive routing and packet spraying spread the load.
+
+# 7. Oversubscription
+
+OVERSUBSCRIPTION is downlink bandwidth over uplink bandwidth. Enterprise leaves often run 3:1 (48 down, 16 up). AI training fabrics run 1:1 (32 x 800G down, 32 x 800G up) because collective operations like all-reduce drive every GPU link at once, and any bottleneck stalls the whole job.
+
+# 8. Ethernet (RoCE, Ultra Ethernet) vs InfiniBand
+
+ROCE carries RDMA over Ethernet and needs a lossless network: PFC pause frames and ECN marks (DCQCN) keep queues from dropping. INFINIBAND is lossless by design with credit-based flow control; NVIDIA's Quantum-X800 runs it at 800G. ULTRA ETHERNET (spec 1.0, June 2025) adds packet spraying and NIC-side reordering. Ethernet (NVIDIA Spectrum-X, Arista, Broadcom) has been winning share in AI back-end networks.
+
+# 9. Who makes it, and the chokepoints
+
+Switches: Arista (ANET), NVIDIA (NVDA), Cisco (CSCO), Celestica (CLS) white boxes, HPE/Juniper. Chips: Broadcom (AVGO), NVIDIA, Marvell (MRVL). Copper: Amphenol (APH), Credo (CRDO). Optics: Coherent (COHR), Lumentum (LITE), Fabrinet (FN), InnoLight, Eoptolink; fibre: Corning (GLW). Risks: 800G/1.6T optics and laser supply, rising switch power, and copper reach that shrinks each speed step, pushing toward co-packaged optics. Market shares are not sourced here.
+
+# 10. Sources
+
+  [1] Tomahawk 5 / Tomahawk 6 (51.2 / 102.4 Tb/s): broadcom.com product pages and press releases (2022, 2025)
+  [2] NVIDIA Spectrum-X SN5600 (64 x 800G) and Quantum-X800: nvidia.com networking pages
+  [3] Ultra Ethernet Specification 1.0 (June 2025): ultraethernet.org
+  [4] 800G DR8 / 2xFR4 reaches: IEEE 802.3df and MSA documents
+  [5] RoCE congestion control (DCQCN): Zhu et al., SIGCOMM 2015

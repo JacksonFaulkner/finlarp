@@ -1,0 +1,111 @@
+== CDU
+# What it does
+A coolant distribution unit moves heat from the servers' sealed liquid loop into facility water, and holds that loop's temperature, pressure and flow.
+# Why it matters
+Every direct-to-chip liquid-cooled rack needs one; as rack power climbs, CDU capacity is a gating item.
+# Source
+OCP ACS guidance; vendor product pages.
+
+== SECONDARY LOOP
+# What it does
+The sealed loop from the CDU through the rack's manifolds and cold plates; OCP calls it the technology cooling system (TCS).
+# Why it matters
+Its small volume of clean, treated coolant keeps building water and debris out of the servers.
+# Source
+OCP ACS.
+
+== FACILITY LOOP
+# What it does
+The building's water loop that takes heat from the CDU to chillers, dry coolers or cooling towers.
+# Why it matters
+Warmer allowed facility water means less chiller energy, which the PHE's small approach makes possible.
+# Source
+Textbook.
+
+== PLATE HEAT EXCHANGER
+# What it does
+A stack of thin pressed plates with the two fluids in alternate gaps, usually counterflow.
+# Why it matters
+It sets how much heat the CDU can move and how close supply gets to facility water.
+# Source
+Textbook; Alfa Laval.
+
+== APPROACH
+# What it does
+The temperature gap between the cool secondary supply leaving the PHE and the facility water entering it, typically about 2-4 C.
+# Why it matters
+A smaller approach lets warmer facility water do the job.
+# Source
+Textbook.
+
+== PUMP
+# What it does
+Variable-speed centrifugal pumps drive the secondary loop, usually N+1 so one can fail.
+# Why it matters
+Losing flow overheats GPUs within seconds, so pumps are redundant and hot-swappable.
+# Source
+Vendor product pages.
+
+== FILTER
+# What it does
+A strainer on the secondary loop, often around 25-50 micron.
+# Why it matters
+Cold plate micro-channels clog easily; filtration protects them.
+# Source
+OCP ACS.
+
+== RESERVOIR
+# What it does
+An expansion tank holding spare coolant and taking up its swell as it warms.
+# Why it matters
+It keeps the pumps fed and the loop pressure steady.
+# Source
+Textbook.
+
+== CONTROLLER
+# What it does
+A PLC reading temperature, pressure, flow and leak sensors, driving pump speed and the facility valve.
+# Why it matters
+It holds supply conditions and fails over pumps without a person in the loop.
+# Source
+Vendor product pages.
+
+== COLD PLATE
+# What it does
+A copper block with fine internal channels pressed onto a GPU or CPU, carrying its heat into the coolant.
+# Why it matters
+It is where the heat enters the liquid loop.
+# Source
+Textbook.
+
+== QUICK DISCONNECT
+# What it does
+A dripless coupling joining each tray's hoses to the rack manifold.
+# Why it matters
+It lets trays be pulled without draining the loop, and it is a common leak point.
+# Source
+OCP ACS.
+
+== DEW POINT
+# What it does
+The temperature below which moisture in the room air condenses on a cold surface.
+# Why it matters
+The CDU keeps its supply above it so pipes and cold plates stay dry.
+# Source
+Textbook.
+
+== IN-RACK CDU
+# What it does
+A few-U CDU in the bottom of one rack with its own small exchanger and pumps, roughly 100-250 kW.
+# Why it matters
+No floor space and simple deployment, but sized to one rack. Supermicro sells a 250 kW unit.
+# Source
+Supermicro.
+
+== IN-ROW CDU
+# What it does
+A full cabinet in the row feeding many racks through headers, from hundreds of kW to 2 MW or more.
+# Why it matters
+Fewer, bigger units with shared redundancy; Vertiv, Schneider/Motivair and nVent lead here.
+# Source
+Vertiv; vendor pages.

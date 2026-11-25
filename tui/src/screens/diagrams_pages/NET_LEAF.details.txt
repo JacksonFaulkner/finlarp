@@ -1,0 +1,127 @@
+== LEAF SWITCH
+# What it does
+The switch every server in a row plugs into; in AI clusters a 64 x 800G box near the top of a network rack.
+# Why it matters
+It sets how many GPUs share an uplink and how far copper can reach.
+# Source
+Textbook; NVIDIA, Arista product pages.
+
+== SWITCH ASIC
+# What it does
+The single chip that parses and forwards every packet: Broadcom Tomahawk 5 and NVIDIA Spectrum-4 at 51.2 Tb/s; Tomahawk 6 at 102.4 Tb/s.
+# Why it matters
+Its bandwidth sets the port count and speed of the whole tier.
+# Source
+Broadcom press releases (2022, 2025).
+
+== SERDES
+# What it does
+Serializer/deserializer lanes, 100G each today (200G next), carrying data from the chip to the ports.
+# Why it matters
+Lane speed sets copper reach and power per bit.
+# Source
+Textbook.
+
+== OSFP
+# What it does
+The pluggable cage and module form factor used for 800G ports, larger than QSFP-DD with room for a heatsink.
+# Why it matters
+It lets one switch take copper, AOC or any optic per port.
+# Source
+OSFP MSA.
+
+== DAC
+# What it does
+Direct-attach copper: passive twinax pairs with fixed plugs, no electronics.
+# Why it matters
+Cheapest, lowest-power link, but only about 2 m at 100G per lane.
+# Source
+Vendor datasheets.
+
+== AOC
+# What it does
+Active optical cable: lasers and receivers sealed into both plugs, joined by fibre.
+# Why it matters
+Reaches tens of metres where copper cannot; costs more than DAC.
+# Source
+Vendor datasheets.
+
+== 800G OPTICS
+# What it does
+Transceivers that turn eight 100G lanes into light, e.g. DR8 (8 fibres, 500 m) or 2xFR4 (2 km).
+# Why it matters
+A large cluster uses several per GPU; supply has been tight.
+# Source
+IEEE 802.3df; vendor datasheets.
+
+== SINGLE-MODE FIBRE
+# What it does
+Fibre with a tiny core carrying one light mode, for long reach at high speed.
+# Why it matters
+Leaf-to-spine runs cross the hall, beyond multimode's reach at 100G/lane.
+# Source
+Textbook.
+
+== SPINE SWITCH
+# What it does
+The tier above the leaves; every leaf connects to every spine.
+# Why it matters
+Spine count sets the fabric's total bandwidth.
+# Source
+Textbook.
+
+== LEAF-SPINE
+# What it does
+A two-tier Clos fabric: every leaf to every spine, any two leaves three hops apart.
+# Why it matters
+Uniform latency and bandwidth between any two racks.
+# Source
+Textbook (Clos).
+
+== ECMP
+# What it does
+Equal-cost multipath: a hash of each flow's header picks one of the equal paths.
+# Why it matters
+Few huge AI flows collide on one path, so adaptive routing or spraying is added.
+# Source
+Textbook.
+
+== OVERSUBSCRIPTION
+# What it does
+Downlink bandwidth divided by uplink bandwidth on a switch.
+# Why it matters
+AI training needs 1:1; enterprise runs 3:1 or more to save cost.
+# Source
+Textbook.
+
+== PFC
+# What it does
+Priority flow control: a switch tells the upstream port to pause one traffic class.
+# Why it matters
+Makes Ethernet lossless for RoCE, but pauses can spread and deadlock.
+# Source
+IEEE 802.1Qbb.
+
+== ROCE
+# What it does
+RDMA over Converged Ethernet: GPU memory to GPU memory over Ethernet, bypassing the CPU.
+# Why it matters
+The main way AI clusters use Ethernet back-end networks.
+# Source
+IBTA RoCEv2 spec.
+
+== INFINIBAND
+# What it does
+A lossless network with credit-based flow control, sold mainly by NVIDIA (Quantum-X800 at 800G).
+# Why it matters
+The incumbent AI fabric, now contested by Ethernet.
+# Source
+NVIDIA networking pages.
+
+== ULTRA ETHERNET
+# What it does
+An Ethernet stack from the Ultra Ethernet Consortium (spec 1.0, June 2025) with packet spraying and new congestion control.
+# Why it matters
+Aims to beat InfiniBand at scale on open Ethernet.
+# Source
+ultraethernet.org.

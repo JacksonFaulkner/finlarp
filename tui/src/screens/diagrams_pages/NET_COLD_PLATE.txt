@@ -1,0 +1,58 @@
+# 1. What happens: the GPU's heat goes into water at the chip
+
+Cool coolant (water with about 25% propylene glycol) arrives from the rack's supply MANIFOLD, through a QUICK DISCONNECT and a hose, into a COLD PLATE clamped on the GPU. The chip's heat crosses a thin TIM into the copper BASE, spreads up into MICROCHANNEL fins, and the water flowing between them carries it away. It leaves warm, at about 45-60 C, and goes back up the return manifold to the CDU.
+
+# 2. The parts
+
+COLD PLATE          the copper block on the chip, with coolant running through it
+TIM                 thermal interface material between the die and the copper
+BASE                the solid copper floor that spreads the die's heat sideways
+MICROCHANNEL        fine fins and slots that give the water a huge surface to touch
+QUICK DISCONNECT    a self-sealing coupling that lets a tray come out without spilling
+MANIFOLD            the rack's vertical supply and return pipes, one tap per tray
+CDU                 the coolant distribution unit that pumps and conditions the loop
+WARM WATER          return water at 45-60 C, hot enough to cool with outside air
+
+# 3. The loop, in order
+
+1. the CDU pumps cool coolant up the supply MANIFOLD
+2. a QUICK DISCONNECT passes it into the tray
+3. a hose carries it to the COLD PLATE's inlet, right over the dies
+4. it splits along the MICROCHANNEL fins, picking up heat
+5. the warm water collects in the outlet plenum and leaves by a second hose
+6. it crosses a second QUICK DISCONNECT into the return MANIFOLD and goes back to the CDU
+
+# 4. Why liquid
+
+A Blackwell GPU draws about 1,000-1,200 W and Blackwell Ultra about 1,400 W, on a die a few centimetres across. Per litre, water holds roughly 3,500 times the heat air does, so a small flow (on the order of 1-1.5 L/min per kW) does what a wall of fans cannot. An NVL72 rack runs about 120-130 kW; air cooling tops out around 40-50 kW a rack.
+
+# 5. Microchannels and fins
+
+The fins are skived (sliced up from the solid copper) or etched, each about 0.1-0.2 mm thick with channels of similar width. Many designs drop the coolant in over the middle of the die, where it is hottest, and split it both ways along the channels. Narrower channels move more heat but need more pump pressure and clog more easily, so the coolant is filtered.
+
+# 6. TIM: the thinnest layer matters most
+
+Two flat-looking metal faces touch only at their high points; the gaps hold air, an insulator. The TIM (grease, phase-change pad, liquid metal or indium) fills them. It is a fraction of a millimetre thick but often the biggest single temperature drop between the transistor and the water.
+
+# 7. Quick disconnects and manifolds
+
+Each tray has a supply and a return QUICK DISCONNECT at its rear that blind-mate with the rack MANIFOLD when the tray slides in. Spring-loaded poppets close both halves before they part, and flat faces leave almost nothing to drip. OCP's Universal Quick Disconnect (UQD) spec lets parts from different makers mate.
+
+# 8. Who makes it
+
+Cold plates: CoolIT, Boyd, Cooler Master, AVC (3017.TW), Auras (3324.TW), Delta (2308.TW), JetCool (Flex, FLEX). Quick disconnects: Staubli, CPC, Parker (PH), Danfoss. Manifolds and CDUs: Vertiv (VRT), nVent (NVT), Schneider, Supermicro (SMCI), Delta, Modine (MOD). Market shares are not sourced here.
+
+# 9. Chokepoints and risks
+
+- A leak inside a server is the failure everyone fears; leak sensors and valves try to contain it.
+- Every GPU generation adds watts, pushing plates toward finer channels and two-phase designs.
+- Plates and quick disconnects were in short supply as NVL72 racks ramped.
+- Warm return water can skip chillers and even heat buildings, but only if the facility is built for it.
+
+# 10. Sources
+
+  [1] Direct-to-chip cold plates, CDUs, manifolds: Supermicro 10-K (2026), business section
+  [2] JetCool microconvective cold plates, 3,000 W+: Flex 10-K (2025), business section
+  [3] CDU interface to server cold plates, 100 kW+ racks: AAON 10-K (2026), business section
+  [4] GB200 NVL72 liquid cooling and rack power: docs.nvidia.com/dgx/dgxgb200-user-guide
+  [5] Universal Quick Disconnect specification: opencompute.org (OCP Cooling Environments)

@@ -1,0 +1,63 @@
+== COLD PLATE
+# What it does
+A cold plate is a copper block clamped onto a chip with coolant running through channels inside it, taking the heat straight off the die.
+# Why it matters
+It is how 1,000 W-plus GPUs and 120 kW-plus racks are cooled at all; air cannot move that much heat.
+# Source
+Supermicro 10-K (2026); NVIDIA GB200 user guide.
+
+== TIM
+# What it does
+A thermal interface material fills the microscopic gaps between the die and the cold plate so heat does not have to cross air.
+# Why it matters
+Though a fraction of a millimetre thick, it is often the largest single temperature drop in the path.
+# Source
+Textbook.
+
+== BASE
+# What it does
+The base is the solid copper floor of the plate that spreads the die's concentrated heat out under the fins.
+# Why it matters
+Hot spots on the die only cool well if the base spreads them before the water sees them.
+# Source
+Textbook.
+
+== MICROCHANNEL
+# What it does
+Microchannels are rows of fins about 0.1-0.2 mm thick with slots between, giving the coolant a large surface to pick heat from.
+# Why it matters
+Finer channels cool better but need more pump pressure and clean, filtered coolant.
+# Source
+Textbook.
+
+== QUICK DISCONNECT
+# What it does
+A quick disconnect is a self-sealing coupling: spring poppets shut both halves before they part, so a tray can be pulled without spilling.
+# Why it matters
+Every liquid-cooled tray needs a pair; supply ran short as NVL72 racks ramped. OCP's UQD spec makes them interchangeable.
+# Source
+OCP UQD specification.
+
+== MANIFOLD
+# What it does
+The rack manifold is a pair of vertical pipes, supply and return, with one quick-disconnect tap per tray.
+# Why it matters
+It ties every tray to the CDU; one manifold carries the whole rack's 120-130 kW of heat.
+# Source
+Supermicro 10-K (2026).
+
+== CDU
+# What it does
+A coolant distribution unit pumps the rack loop and passes its heat to facility water through a heat exchanger.
+# Why it matters
+It keeps the server loop clean and at the right temperature and pressure, separate from building water.
+# Source
+AAON 10-K (2026).
+
+== WARM WATER
+# What it does
+Warm-water cooling returns coolant at about 45-60 C, hot enough to reject to outside air with dry coolers.
+# Why it matters
+It cuts or removes chiller energy and makes heat reuse possible.
+# Source
+NVIDIA GB200 user guide; ASHRAE liquid cooling classes.

@@ -1,0 +1,79 @@
+== COOLING TOWER
+# What it does
+A cooling tower cools water by letting a small fraction evaporate into air drawn through it.
+# Why it matters
+It is the cheapest way to reject a water-cooled plant's heat, at the cost of water.
+# Source
+SPX Cooling Tower Fundamentals.
+
+== BASIN
+# What it does
+The basin collects cooled water at the bottom of the tower for the pumps.
+# Why it matters
+It is where make-up enters, blowdown leaves and water treatment is dosed.
+# Source
+Textbook.
+
+== LOUVERS
+# What it does
+Louvers are slanted slats on the air inlets that let air in and keep water from splashing out.
+# Why it matters
+They also block sunlight, limiting algae.
+# Source
+Textbook.
+
+== FILL
+# What it does
+Fill is packs of corrugated PVC sheets that spread falling water into thin films.
+# Why it matters
+More wet surface means a closer approach to wet-bulb for the same tower size.
+# Source
+SPX Cooling Tower Fundamentals.
+
+== SPRAY NOZZLES
+# What it does
+Nozzles on a header distribute the warm water evenly over the fill.
+# Why it matters
+Dry patches in the fill waste capacity.
+# Source
+Textbook.
+
+== DRIFT ELIMINATORS
+# What it does
+Chevron blades force the leaving air to turn; droplets cannot follow and drain back.
+# Why it matters
+They cut drift to ~0.001% of flow or less, saving water and limiting aerosols.
+# Source
+CTI; SPX.
+
+== FAN
+# What it does
+An induced-draft fan on top pulls air up through the fill and out of the tower.
+# Why it matters
+Variable-speed drives slow it when it is cool, saving power.
+# Source
+Textbook.
+
+== MAKE-UP WATER
+# What it does
+Make-up water replaces what evaporates and what is drained as blowdown, through a meter.
+# Why it matters
+It is the tower's water bill: ~1.5-2 L per kWh of heat rejected.
+# Source
+Textbook.
+
+== BLOWDOWN
+# What it does
+Blowdown bleeds off basin water so minerals left by evaporation do not build up.
+# Why it matters
+Too little causes scale and corrosion; too much wastes water.
+# Source
+Textbook.
+
+== HEAT OUT
+# What it does
+Heat out is the last step of data-center cooling: the heat leaves to the outdoor air as vapour (wet towers) or warm air (dry coolers).
+# Why it matters
+Every watt the campus draws ends here; how it leaves decides water use.
+# Source
+Textbook.

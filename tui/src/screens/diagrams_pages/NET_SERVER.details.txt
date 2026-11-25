@@ -1,0 +1,63 @@
+== HGX BASEBOARD
+# What it does
+The HGX baseboard carries eight GPUs, their NVSwitch chips and power delivery, and is sold to server makers as one module.
+# Why it matters
+Server makers like Supermicro, Dell and HPE build around the same NVIDIA board, so it sets the node's shape.
+# Source
+NVIDIA HGX page.
+
+== NVLINK
+# What it does
+NVLink is NVIDIA's GPU-to-GPU link: 18 links and 1.8 TB/s per Blackwell GPU, twice Hopper.
+# Why it matters
+It lets eight (or 72) GPUs share memory traffic fast enough to split one model across them.
+# Source
+NVIDIA HGX page.
+
+== NVSWITCH
+# What it does
+NVSwitch chips connect every GPU's NVLink to every other GPU at full speed; an HGX B200 board has two, totalling 14.4 TB/s.
+# Why it matters
+Without the switch, GPUs could only reach their neighbours directly.
+# Source
+NVIDIA HGX page.
+
+== PCIE SWITCH
+# What it does
+A PCIe switch fans a CPU's PCIe lanes out to GPUs, NICs and NVMe drives and lets them talk to each other directly.
+# Why it matters
+GPUDirect RDMA moves data GPU to NIC through it; Broadcom and Astera Labs sell into this slot.
+# Source
+Textbook; NVIDIA GPUDirect docs.
+
+== CONNECTX
+# What it does
+ConnectX is NVIDIA's NIC line: ConnectX-7 at 400 Gb/s and ConnectX-8 SuperNIC at 800 Gb/s, one per GPU on the compute fabric.
+# Why it matters
+Every GPU's share of the cluster network passes through it.
+# Source
+NVIDIA DGX B200 guide; SuperNIC page.
+
+== BLUEFIELD-3 DPU
+# What it does
+BlueField-3 is a NIC with its own Arm cores that runs storage, security and front-end networking off the host CPU.
+# Why it matters
+It keeps the user and storage network separate from the GPU fabric.
+# Source
+NVIDIA DGX B200 guide.
+
+== COLD PLATE
+# What it does
+A cold plate is a copper block with microchannels pressed onto a chip; coolant through it carries the heat away.
+# Why it matters
+At about a kilowatt per GPU, air alone no longer keeps up.
+# Source
+Textbook.
+
+== LEAF SWITCH
+# What it does
+The leaf switch is the first switch the node's NIC cables land on; in a rail-optimised fabric NIC k of every server goes to leaf k.
+# Why it matters
+It sets how many hops apart two GPUs in different servers are.
+# Source
+Textbook.

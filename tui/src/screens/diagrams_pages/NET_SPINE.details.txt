@@ -1,0 +1,63 @@
+== LEAF-SPINE
+# What it does
+A leaf-spine network has two tiers of switches: leaves that connect servers, and spines that connect every leaf to every other.
+# Why it matters
+Any two servers are the same number of hops apart, and adding spines adds bandwidth evenly.
+# Source
+Textbook (Clos network).
+
+== SPINE
+# What it does
+A spine switch connects only to leaf switches, one link to each, forming the fabric's top tier.
+# Why it matters
+The spine tier's port count and speed cap how many racks one fabric can join.
+# Source
+Textbook.
+
+== SWITCH ASIC
+# What it does
+A switch ASIC is the single chip that receives, looks up, buffers and forwards every packet in a switch.
+# Why it matters
+Its bandwidth sets the whole box's; Broadcom's Tomahawk 5 moves 51.2 Tb/s.
+# Source
+Broadcom Tomahawk 5 brief; Marvell 10-K.
+
+== SERDES
+# What it does
+SerDes circuits turn the chip's parallel data into fast serial lanes and back; Tomahawk 5 has 512 at about 100 Gb/s.
+# Why it matters
+Lane count times lane speed is the chip's bandwidth; faster SerDes drive each generation.
+# Source
+Broadcom Tomahawk 5 brief.
+
+== PAM4
+# What it does
+PAM4 signals with four voltage levels, carrying two bits per symbol instead of one.
+# Why it matters
+It doubles bits per symbol but shrinks the margin between levels, so links need equalisation and FEC.
+# Source
+Textbook (IEEE 802.3).
+
+== OSFP
+# What it does
+OSFP is a pluggable module form factor with eight electrical lanes, used for 800G optics.
+# Why it matters
+Its built-in fins let it dissipate the ~15 W an 800G optic draws.
+# Source
+OSFP MSA.
+
+== ECMP
+# What it does
+Equal-cost multipath hashes each flow's headers to pick one of several equal-length paths.
+# Why it matters
+It spreads load across all spines and reroutes around a failed one, keeping each flow in order.
+# Source
+Textbook (RFC 2992).
+
+== SHARED BUFFER
+# What it does
+A shared buffer is on-die packet memory that all ports draw from, queued by output port.
+# Why it matters
+It absorbs bursts, such as many GPUs sending to one at once, without dropping packets.
+# Source
+Textbook.

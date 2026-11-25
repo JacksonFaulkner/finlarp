@@ -1,0 +1,71 @@
+== CHILLER
+# What it does
+A chiller is a refrigeration machine that cools a loop of water for the building, using a refrigerant cycle and rejecting the heat outdoors.
+# Why it matters
+Most air-cooled and many liquid-cooled data halls depend on chilled water; chillers are one of the largest power users after the IT itself.
+# Source
+ASHRAE Handbook.
+
+== CHILLED WATER
+# What it does
+Chilled water is the building loop that carries heat from air handlers or CDUs back to the chiller.
+# Why it matters
+Its temperature sets the chiller's efficiency: warmer water (15-20 C, or 30 C+ for liquid cooling) means less compressor work.
+# Source
+ASHRAE TC 9.9.
+
+== EVAPORATOR
+# What it does
+The evaporator is a shell-and-tube heat exchanger where low-pressure refrigerant boils around tubes carrying the water.
+# Why it matters
+This is where the water gives up its heat.
+# Source
+Textbook.
+
+== COMPRESSOR
+# What it does
+The compressor squeezes refrigerant vapour to high pressure and temperature; screw and centrifugal types are common in chillers.
+# Why it matters
+It uses most of the chiller's power; magnetic-bearing centrifugals are the most efficient.
+# Source
+Textbook; Danfoss Turbocor.
+
+== CONDENSER
+# What it does
+The condenser sheds the refrigerant's heat to outdoor air (finned coils and fans) or to tower water (a shell-and-tube barrel).
+# Why it matters
+It rejects the IT heat plus the compressor's power.
+# Source
+Textbook.
+
+== EXPANSION VALVE
+# What it does
+The expansion valve drops the liquid refrigerant's pressure so part of it flashes to vapour and the mix turns cold.
+# Why it matters
+It meters refrigerant into the evaporator and closes the loop.
+# Source
+Textbook.
+
+== REFRIGERANT
+# What it does
+The working fluid that boils and condenses inside the chiller: R-134a, R-410A, and low-GWP R-1234ze, R-513A, R-1233zd.
+# Why it matters
+HFC phase-down rules force a move to low-GWP refrigerants in new chillers.
+# Source
+EPA Technology Transitions rule.
+
+== FREE COOLING
+# What it does
+Free cooling uses cold outdoor air (an extra coil, or a separate economizer) to chill the water while the compressor rests.
+# Why it matters
+With warm-water liquid cooling it can cover most hours of the year, cutting cooling energy sharply.
+# Source
+ASHRAE; Vertiv, Modine product literature.
+
+== DRY COOLER
+# What it does
+A dry cooler is a finned coil with fans and no compressor; it can only cool water to a few degrees above the air temperature.
+# Why it matters
+It uses no water and suits 30-45 C liquid-cooling loops; adiabatic pads help on hot days.
+# Source
+Modine 10-K FY2026.

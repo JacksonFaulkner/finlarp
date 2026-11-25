@@ -1,0 +1,58 @@
+# 1. What happens: warm water falls through air, heat leaves as vapour
+
+A water-cooled chiller's CONDENSER sends warm water, around 35 C, to the COOLING TOWER. The water is sprayed over FILL and falls through air pulled up by a FAN; about 1% EVAPORATES and the rest returns about 6 C cooler. The heat leaves the site as water vapour: HEAT OUT.
+
+# 2. The parts
+
+COOLING TOWER        evaporative heat rejection: water cooled by air and evaporation
+BASIN                collects the cooled water at the bottom
+LOUVERS              let air in at the sides, keep water in
+FILL                 corrugated PVC sheets that spread the water into thin films
+SPRAY NOZZLES        distribute the warm water over the fill
+DRIFT ELIMINATORS    chevron blades that catch droplets in the leaving air
+FAN                  induced-draft fan on top, usually on a variable-speed drive
+MAKE-UP WATER        replaces what evaporates and is drained
+BLOWDOWN             water bled off to control dissolved minerals
+HEAT OUT             the heat's final exit into the outdoor air
+
+# 3. Through the tower, in order
+
+1. warm water is pumped to the top
+2. SPRAY NOZZLES spread it over the FILL
+3. films on the fill meet rising air
+4. some evaporates, carrying heat away
+5. the cooled water rains into the BASIN
+6. it is pumped back to the chiller's condenser
+
+# 4. The physics: latent heat, range and approach
+
+Evaporating 1 kg of water takes about 2,400 kJ, while cooling 1 kg by 6 C releases about 25 kJ, so ~1% evaporating cools the rest ~6 C. The water can approach but not reach the air's wet-bulb temperature. RANGE is hot-in minus cold-out (~5-6 C); APPROACH is cold-out minus wet-bulb (typically 3-5 C). A closer approach needs a bigger tower.
+
+# 5. Fill and air
+
+FILL turns the water into thin films with a huge wet surface. Counterflow towers send air straight up against the falling water; crossflow towers draw it in from the sides. Induced-draft FANs on top, often several metres across and on variable-speed drives, set the airflow.
+
+# 6. Water use
+
+About 1% of the flow evaporates per ~6 C of cooling: roughly 1.5 L per kWh of heat rejected, plus BLOWDOWN. 100 MW of heat evaporates about 3.6 million litres a day; a 1 GW campus cooled this way would use about ten times that. Towers typically run at 3-6 cycles of concentration.
+
+# 7. Drift, blowdown and safety
+
+DRIFT ELIMINATORS hold droplet loss to about 0.0005-0.001% of circulating flow. BLOWDOWN keeps minerals from causing scale and corrosion. Tower water is treated with biocides and inhibitors and managed under water-management plans such as ASHRAE Standard 188 to control Legionella.
+
+# 8. Who makes it
+
+SPX Technologies (SPXC) makes Marley towers; EVAPCO and Baltimore Aircoil (Amsted) are large private makers. Johnson Controls (JCI) and Trane (TT) make the water-cooled chillers beside them; Modine (MOD) sells dry coolers, the waterless alternative; Vertiv (VRT) covers the thermal chain to the rack. Market shares are not sourced here.
+
+# 9. HEAT OUT: chokepoints and risks
+
+- Every watt a campus draws ends as heat in the outdoor air; wet towers are the cheapest way to put it there.
+- Water use draws pushback, permit fights and siting limits in dry and water-stressed regions.
+- Dry coolers use no water but more fan power and leave warmer water; warm-water liquid cooling makes them viable most of the year.
+
+# 10. Sources
+
+  [1] Cooling tower fundamentals (range, approach, evaporation, drift): SPX Cooling Tech, Cooling Tower Fundamentals; CTI
+  [2] Latent heat of water: textbook (~2,450 kJ/kg at 20-30 C)
+  [3] Legionella water management: ASHRAE Standard 188
+  [4] SPX cooling towers and data-center demand: SPX Technologies 10-K 2025 (sec.gov)

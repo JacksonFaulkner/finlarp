@@ -1,0 +1,57 @@
+# 1. What happens: every leaf, two hops to every other
+
+A packet leaves a LEAF switch on an uplink fibre, reaches a SPINE switch, and comes back down to the destination leaf. In a two-tier LEAF-SPINE fabric every leaf connects to every spine, so every trip is two hops and there are as many equal paths as spines. Inside the spine one SWITCH ASIC looks up each packet and sends it out the port facing its destination.
+
+# 2. The parts
+
+LEAF-SPINE      two switch tiers, every leaf wired to every spine (a Clos network)
+SPINE           the top tier: switches that only connect leaves to each other
+SWITCH ASIC     the single chip that forwards every packet in the box
+SERDES          serializer/deserializer: the chip's high-speed serial lanes
+PAM4            four-level signalling: two bits per symbol on each lane
+OSFP            the pluggable module form factor for 800G optics
+ECMP            equal-cost multipath: flows hashed across all equal paths
+SHARED BUFFER   on-die packet memory that absorbs bursts
+
+# 3. Through the spine, in order
+
+1. light arrives on a fibre at an 800G OSFP optic
+2. the optic's DSP turns it into eight 100G electrical lanes
+3. SERDES on the ASIC's edge receive the lanes
+4. ingress pipelines parse the headers and look up the output port
+5. the packet waits in the SHARED BUFFER, queued by output port
+6. egress pipelines rewrite and schedule it; SERDES send it out
+7. the output optic turns it back into light toward the destination leaf
+
+# 4. 51.2 Tb/s: the arithmetic
+
+Broadcom's Tomahawk 5 (announced 2022, 5 nm) has 512 SERDES lanes at about 100 Gb/s each: 51.2 Tb/s. Eight lanes make an 800G port, so one chip drives 64 x 800G, or 128 x 400G for more ports. Marvell's Teralynx reaches 51.2 Tb/s too, as does Cisco's Silicon One G200.
+
+# 5. SerDes and PAM4
+
+Each lane runs PAM4 at about 53 gigabaud: four voltage levels carry two bits per symbol, about 106 Gb/s raw and 100 Gb/s after coding. Four levels shrink the gaps between them, so links need equalisation and error correction. The next generation doubles the lane rate to 200G.
+
+# 6. The 800G optic
+
+An OSFP 800G module takes eight 100G electrical lanes from the board. A DSP retimes them, drivers modulate eight lasers, and a fibre ribbon carries the light to an MPO connector. Each draws roughly 15 W, so 64 of them approach a kilowatt; linear pluggable optics (LPO) drop the DSP to cut that.
+
+# 7. ECMP and the fabric
+
+ECMP hashes each flow's headers (addresses, ports, protocol) to pick one of the equal-cost spines, keeping each flow on one path so its packets stay in order. With four spines, losing one leaves 75% of uplink capacity. Big AI clusters use multiple fabric planes and newer protocols to spread traffic more evenly than plain hashing.
+
+# 8. Who makes it
+
+Switch ASICs: Broadcom (AVGO), Marvell (MRVL), Cisco (CSCO) and NVIDIA (NVDA, Spectrum-X). Switches: Arista (ANET), Cisco, and white boxes from Celestica (CLS). Optics: Coherent (COHR), Lumentum (LITE), Fabrinet (FN, contract manufacturing), Applied Optoelectronics (AAOI), InnoLight; Credo (CRDO) for copper cables and DSPs. Market shares are not sourced here.
+
+# 9. Chokepoints and risks
+
+- Bandwidth doubles every couple of years: Tomahawk 6 is 102.4 Tb/s.
+- Optics power rivals the chip's; co-packaged optics move lasers next to the die.
+- Air cooling is near its limit; new switch platforms add liquid cooling.
+
+# 10. Sources
+
+  [1] Tomahawk 5, 51.2 Tb/s, 512 x 100G SerDes: broadcom.com (Tomahawk 5 product brief, 2022)
+  [2] Teralynx up to 51.2 Tb/s: Marvell 10-K, 2026-03-11 (business)
+  [3] 1.6T platforms, LPO ~60% interconnect power cut, multi-planar leaf-spine: Arista Q2 2026 earnings release, 2026-08-04
+  [4] Tomahawk 6, 102.4 Tb/s: broadcom.com (2025)

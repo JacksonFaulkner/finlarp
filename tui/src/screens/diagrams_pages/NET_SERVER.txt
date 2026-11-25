@@ -1,0 +1,56 @@
+# 1. What happens: eight GPUs, one node, two networks
+
+An 8-GPU server is the building block of an AI cluster. Inside the node, the GPUs talk to each other over NVLINK through two NVSWITCH chips on the HGX BASEBOARD. To reach GPUs in other servers, each GPU sends data over PCIe through a PCIE SWITCH to its own NIC (CONNECTX), which drives a cable to the LEAF SWITCH. Two DPUs (BLUEFIELD-3 DPU) carry storage and front-end traffic on a separate network, and a COLD PLATE on every GPU carries the heat into liquid.
+
+# 2. The parts
+
+HGX BASEBOARD     the board holding eight GPUs and the NVSwitch chips
+NVLINK            NVIDIA's GPU-to-GPU link: 1.8 TB/s per Blackwell GPU
+NVSWITCH          switch chips that connect every GPU's NVLink to every other
+PCIE SWITCH       fans the CPU's PCIe out to GPUs, NICs and NVMe drives
+CONNECTX          NVIDIA's NIC; one per GPU on the compute fabric
+BLUEFIELD-3 DPU   a NIC with its own Arm cores, for storage and front end
+COLD PLATE        a copper block with microchannels that liquid runs through
+LEAF SWITCH       the first switch the node's cables land on
+
+# 3. A packet's path, in order
+
+1. data leaves the GPU's HBM
+2. it crosses the baseboard and a cable to a PCIE SWITCH
+3. the switch hands it to the GPU's own NIC (GPUDirect RDMA: no CPU copy)
+4. the NIC frames it as InfiniBand or Ethernet and pushes it out an OSFP cage
+5. a transceiver turns it into light (or a copper cable carries it)
+6. it lands on a port of the LEAF SWITCH, the first hop of the fabric
+
+# 4. NVLink and NVSwitch
+
+Each Blackwell GPU has 18 fifth-generation NVLink links, 1.8 TB/s in all, twice Hopper's 900 GB/s. On an HGX B200 baseboard two NVSwitch chips connect all eight GPUs at full speed, 14.4 TB/s in total, so the node behaves like one large GPU for tensor-parallel work. The earlier HGX H100 board used four third-generation NVSwitch chips.
+
+# 5. PCIe switches and the CPU
+
+The two host CPUs (Intel Xeon in the DGX B200, AMD EPYC in many HGX builds) run the operating system from about 2 TB of DDR5. They reach the GPUs, NICs and NVMe drives through PCIe Gen5 switches, typically four in a node, each pairing two GPUs with two NICs. GPUDirect RDMA lets a NIC read GPU memory straight through the switch without touching CPU memory. Broadcom's PEX switches and Astera Labs' retimers and Scorpio switches sit on this path.
+
+# 6. NICs, SuperNICs and the DPU
+
+The DGX B200 has eight single-port ConnectX-7 NICs at 400 Gb/s, one per GPU, for the compute fabric, and two dual-port BlueField-3 DPUs for storage and the front-end network. Blackwell Ultra (HGX B300) moves to ConnectX-8 SuperNICs at 800 Gb/s per GPU, with a PCIe Gen6 switch built into the NIC. Eight NICs at 800 Gb/s is 6.4 Tb/s leaving a single node.
+
+# 7. Cooling the node
+
+A DGX B200 draws about 14.3 kW. Air-cooled versions need a 10U chassis full of fans; liquid-cooled HGX systems put a COLD PLATE on every GPU and CPU. Coolant comes from the rack manifold through quick disconnects, runs a supply rail to each plate, and leaves warm on a return rail back to the CDU. Each GPU puts roughly a kilowatt into the water.
+
+# 8. Who makes it
+
+NVIDIA (NVDA) makes the GPUs, NVSwitch, baseboard, NICs and DPUs. SK hynix, Micron (MU) and Samsung supply the HBM. Broadcom (AVGO) and Astera Labs (ALAB) supply PCIe switches and retimers; Intel (INTC) and AMD (AMD) the CPUs. Supermicro (SMCI), Dell (DELL), HPE (HPE) and Foxconn build the servers; Vertiv (VRT), CoolIT and Boyd the liquid cooling. Market shares are not sourced here.
+
+# 9. Chokepoints and risks
+
+- Network bandwidth per GPU doubles each generation (400G to 800G), and every port needs optics.
+- PCIe lanes are shared by GPUs, NICs and drives; Gen6 is arriving to keep up.
+- About 14 kW in one chassis makes liquid cooling the default.
+
+# 10. Sources
+
+  [1] DGX B200 hardware (GPUs, NVSwitch, NICs, DPUs, CPUs, power): docs.nvidia.com/dgx/dgxb200-user-guide/introduction-to-dgxb200.html
+  [2] HGX platform (NVLink 1.8 TB/s, 14.4 TB/s): nvidia.com/en-us/data-center/hgx/
+  [3] ConnectX-8 SuperNIC (800 Gb/s, PCIe Gen6 switch): nvidia.com/en-us/networking/products/ethernet/supernic/
+  [4] GPUDirect RDMA: docs.nvidia.com/cuda/gpudirect-rdma/

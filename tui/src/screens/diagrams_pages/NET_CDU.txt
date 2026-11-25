@@ -1,0 +1,58 @@
+# 1. What happens: heat leaves the GPU and ends up in facility water
+
+Each GPU's heat goes into a COLD PLATE. A sealed SECONDARY LOOP carries it out of the rack to the CDU, whose PUMP drives the coolant round. In the PLATE HEAT EXCHANGER the heat crosses thin steel plates into the FACILITY LOOP, which carries it to a chiller, dry cooler or cooling tower.
+
+# 2. The parts
+
+PLATE HEAT EXCHANGER   stacked steel plates; two fluids in alternate gaps
+FACILITY LOOP          the building's water, from the chiller or cooling tower
+SECONDARY LOOP         the sealed, filtered loop to the cold plates (also TCS)
+PUMP                   variable-speed pumps, usually N+1
+FILTER                 strains particles out of the secondary coolant
+RESERVOIR              expansion tank; holds spare coolant, steadies pressure
+CONTROLLER             a PLC reading temperature, pressure and flow sensors
+QUICK DISCONNECT       dripless couplings where each tray meets the manifold
+
+# 3. Round the loop, in order
+
+1. warm coolant returns from the rack's return manifold
+2. it enters the RESERVOIR
+3. the running PUMP draws it out
+4. the FILTER strains it
+5. it climbs the PLATE HEAT EXCHANGER and gives up its heat
+6. cool supply leaves for the rack's supply manifold
+7. it passes through every COLD PLATE and comes back about 10 C warmer
+
+# 4. Why two loops
+
+Facility water is a large shared system that can carry scale, debris and pressure swings, so it stops at the exchanger and never enters a server. The secondary loop holds only tens to hundreds of litres of treated coolant (often water with 25% propylene glycol, PG25), filtered fine, so a leak spills little. The CDU holds its supply temperature, flow and pressure where the servers need them, and above the room's DEW POINT so nothing condenses on the pipes.
+
+# 5. The plate heat exchanger
+
+A CDU's exchanger stacks a hundred or more thin pressed stainless plates in a bolted frame. Secondary and facility water flow through alternate gaps in opposite directions (counterflow), so the supply can leave within about 2-4 C of the incoming facility water (the APPROACH). More plates mean more capacity. A rough rule: about 1.5 L/min of water per kW at a 10 C rise.
+
+# 6. Pumps, filters and controls
+
+Two or more variable-speed pumps run N+1: one can fail and the other carries the full flow. A canister FILTER on the discharge (often around 25-50 micron) protects the cold plates' fine channels; its pressure drop says when to change it. The CONTROLLER reads temperature, pressure and flow, moves a valve on the facility side to hold supply temperature, swaps pumps, and raises leak alarms.
+
+# 7. In-rack vs in-row
+
+An IN-RACK CDU is a few rack units at the bottom of one rack, with a brazed-plate exchanger and small pumps; it serves that rack only, roughly 100-250 kW (Supermicro sells a 250 kW unit). An IN-ROW CDU is a full cabinet in the row that feeds many racks through headers, rated from a few hundred kW to 2 MW or more (Vertiv's CoolChip range spans in-rack to multi-megawatt row units). A GB200 NVL72 rack dissipates about 120-130 kW.
+
+# 8. Who makes it
+
+Vertiv (VRT), Schneider Electric (with Motivair), nVent (NVT), Modine (MOD), Supermicro (SMCI), CoolIT, Boyd, Delta, Nidec and LiquidStack build CDUs; Alfa Laval, Danfoss and others make plate heat exchangers. Market shares are not sourced here.
+
+# 9. Chokepoints and risks
+
+- Leaks: water near servers; hoses and quick disconnects are the usual points.
+- One in-row CDU can serve many racks, so its pumps and controls need redundancy.
+- Rack heat keeps rising (about 130 kW now, 600 kW+ planned), so CDUs need more flow and bigger exchangers.
+
+# 10. Sources
+
+  [1] Supermicro 10-K (FY2026): CDUs, cooling distribution manifolds, DLC-2 (sec.gov)
+  [2] Modine 10-K (FY2025, FY2026): CDU launch in data center cooling (sec.gov)
+  [3] Vertiv CoolChip CDU product pages (vertiv.com)
+  [4] OCP Advanced Cooling Solutions: CDU and TCS guidance (opencompute.org)
+  [5] NVIDIA GB200 NVL72 rack specifications (nvidia.com)
