@@ -1,23 +1,40 @@
-// AI-universe treemap (ai_universe / ai_universe_category, loaded from
-// data/ai_stocks_reviewed.json by db.load_universe). Every basket is a box on
-// one plain-ASCII map: its colour is the return over the range (green up, red
-// down), its size is its share of the view. Market cap by default; `w` switches
-// to equal weights, where every tile gets the same area (five tiles, a fifth
-// each) and the map always fills the body. Sub-sectors nest under their
-// primary, one treemap per primary with a label row above it. Funds sit outside
-// the sector tree; Enter on a fund opens its page: the returns summary on top,
-// a map of its top holdings below. Enter on a ticker opens its dossier.
-// Prices are the Databento daily bars (parquet beside the DuckDB), with Yahoo
-// history as the fallback for funds the bars don't cover.
+// The AI universe as a fake oil.nvim buffer. The bottom quarter lists a directory of the
+// universe tree (the same layout as data/universe, see universe_fs): the primaries, then
+// their sub-sectors, then the names, plus funds/, regions/ and ~grids/. j/k move, enter goes
+// into a directory (on a fund: its holdings), - goes back up with the cursor on where you
+// came from, _ jumps to the top. The top three quarters preview what the cursor is on:
 //
-//   hjkl / arrows  move to the neighbouring box      g / G   largest / smallest
-//   [ ]            step range preset                  r       edit range (30d, 6m, ytd, 2026-01-01[..2026-03-01])
-//   w              cap / equal / exposure weight      H / L   primary / sub / region / funds / favorites
-//   enter          drill in, or dossier / fund page   esc     back
+//   a directory  its contents as a heatmap (colour = return over the range, size = its share
+//                under the weighting: cap / equal / exposure, `w`)
+//   a ticker     the expanded view (universe_monitor): price line, chart, peers
+//
+// Tickers in the buffer carry live quotes (the intraday feed, subscribed to the listing on
+// screen); { } step to the previous / next sibling directory; s sorts the names, t switches
+// the chart between the range and today, [ ] / r set the range.
+//
+// Real nvim is kept as a side door: E opens the user's own nvim + oil on the same tree
+// beside the screen (universe_nvim), and the buffer follows oil's cursor (ctrl-p: off).
+// ~grids is plain directories, so grids made in oil show up here.
+//
+// Prices are the Databento daily bars (parquet beside the DuckDB), with Yahoo history as the
+// fallback for funds the bars don't cover.
+
+#[path = "universe_monitor.rs"]
+mod monitor;
+#[path = "universe_nvim.rs"]
+mod nvim;
+#[path = "universe_fs.rs"]
+mod tree_fs;
 
 use std::collections::HashMap;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::time::{Instant, SystemTime};
+
+use self::monitor::{Basket, Chart, Monitor, Row, Sort};
+use crate::ui::pic_chart::PicChart;
+use self::nvim::NvimPane;
+use self::tree_fs::{Spot, Tree};
 
 use chrono::{Datelike, Months, NaiveDate};
 use ratatui::Frame;
@@ -62,18 +79,42 @@ const GROUPS_SQL: &str = "
 const NOT_LOADED: &str = "The AI universe isn't loaded into DuckDB yet.\n\n  \
     python -c 'from core import db; db.load_universe()'   (from the repo root)";
 
-const PRESETS: [&str; 8] = ["1d", "1w", "1m", "3m", "6m", "ytd", "1y", "max"];
-const LEVELS: [(&str, &str); 5] = [
-    ("primary", "Primary"),
-    ("sub", "Sub-sector"),
-    ("region", "Region"),
-    ("fund", "Funds"),
-    ("favorites", "Favorites"),
-];
-/// The fund page's returns summary: name, last close, blank, then one line per preset.
-const FUND_SUMMARY_H: u16 = 3 + PRESETS.len() as u16;
+const PRESETS: [&str; 9] = ["live", "1d", "1w", "1m", "3m", "6m", "ytd", "1y", "max"];
+/// The `live` range: the last close before today to the latest print (pre/post included).
+const LIVE: &str = "live";
+/// How often the live range asks Yahoo again.
+const LIVE_EVERY: std::time::Duration = std::time::Duration::from_secs(60);
+
+/// The `live` range's moves, from `yahoo.py since-close` (one batched v7 quote call).
+#[derive(Default)]
+struct Live {
+    /// Percent move per ticker since the last close before today.
+    rets: HashMap<String, f64>,
+    /// When the moves were priced (unix seconds), per Yahoo's reply.
+    asof: Option<i64>,
+    /// The pull in flight.
+    rx: Option<std::sync::mpsc::Receiver<Result<String, String>>>,
+    /// When the last pull started.
+    asked: Option<Instant>,
+}
+
+/// `yahoo.py since-close` JSON -> (moves, asof).
+fn parse_live(json: &str) -> Result<(HashMap<String, f64>, Option<i64>), String> {
+    let v: serde_json::Value = serde_json::from_str(json).map_err(|e| format!("live: {e}"))?;
+    let rets = v["moves"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|m| Some((m["symbol"].as_str()?.to_string(), m["pct"].as_f64()?)))
+        .collect();
+    Ok((rets, v["asof"].as_i64()))
+}
+/// How often the open pane re-reads ~grids for edits made in oil.
+const GRIDS_EVERY: std::time::Duration = std::time::Duration::from_secs(1);
 const NO_HOLDINGS: &str = "No fund holdings loaded yet.\n\n  \
     uv run sources/yahoo.py universe holdings   (from py/)";
+/// `sel` when the preview heatmap has no cursor: every box at full colour.
+const NO_SEL: usize = usize::MAX;
 /// How much of an unselected tile's colour survives.
 const DIM: f64 = 0.55;
 /// The smallest box a tile gets, in cells, so a tiny weight still shows its label.
@@ -104,9 +145,7 @@ struct Group {
 struct Tile {
     title: String,
     sub: String,
-    order: i32,
     ret: Option<f64>,
-    value: String,
     /// Share of the view: market cap, equal (1 per tile) or category weight.
     weight: f64,
     /// Nested view: the primary this sub-sector sits under.
@@ -140,22 +179,27 @@ impl Weighting {
             Weighting::Exposure => Weighting::Cap,
         }
     }
-
-    fn label(self) -> &'static str {
-        match self {
-            Weighting::Cap => "cap-wt ",
-            Weighting::Equal => "equal-wt ",
-            Weighting::Exposure => "exposure-wt ",
-        }
-    }
 }
 
-#[derive(PartialEq)]
-enum View {
-    Groups,
-    Members(usize),
-    /// One fund's returns page, by ticker.
-    Fund(String),
+/// A directory of the fake oil buffer. Paths match the tree on disk (universe_fs).
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+enum Dir {
+    Root,
+    /// A primary: its sub-sectors.
+    Primary(usize),
+    /// A basket's names: a sub-sector, the fund list, a region or a grid.
+    Basket(usize),
+    Regions,
+    Grids,
+    /// A fund's top holdings.
+    Holdings(String),
+}
+
+/// One line of the buffer.
+#[derive(Clone, PartialEq, Debug)]
+enum Entry {
+    Dir(Dir),
+    Ticker(String),
 }
 
 pub struct Universe {
@@ -174,14 +218,44 @@ pub struct Universe {
     weighting: Weighting,
     /// Market cap in USD per universe name, from `ai_market_cap`.
     caps: HashMap<String, f64>,
-    level: usize,
-    view: View,
+    /// The directory the buffer lists, its lines, and the cursor.
+    dir: Dir,
+    entries: Vec<Entry>,
+    cur: usize,
+    /// Where the cursor was in each directory left, so coming back lands there.
+    marks: HashMap<Dir, usize>,
+    /// The preview heatmap: its boxes, its selected box (NO_SEL: none), and whether
+    /// sub-sectors nest under their primary.
     tiles: Vec<Tile>,
     sel: usize,
+    nest: bool,
     editing: Option<String>,
     flash: String,
     /// The map's body as last drawn; cursor moves read its geometry.
     body: Rect,
+    /// The baskets as directories (universe_fs), for nvim.
+    tree: Tree,
+    /// Index of the first `grid` group: grids sit last so reloading them keeps the rest.
+    grids_from: usize,
+    grids_read: Instant,
+    /// The nvim pane, once `-` first opened it.
+    nvim: Option<NvimPane>,
+    pane_open: bool,
+    /// Keys go to nvim (otherwise to the map).
+    nvim_focus: bool,
+    /// The map follows oil's cursor.
+    follow: bool,
+    /// `.cursor`'s mtime and text when last read.
+    cursor_seen: Option<SystemTime>,
+    cursor_rel: String,
+    /// A reveal waiting for nvim's socket (the pane was just started).
+    pending_reveal: Option<(String, Option<String>)>,
+    /// nvim's screen, the followed map or a quote changed since the last draw.
+    dirty: bool,
+    /// The basket view's quotes, closes and settings.
+    monitor: Monitor,
+    /// The `live` range's moves.
+    live: Live,
 }
 
 pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
@@ -198,18 +272,35 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
         latest: NaiveDate::MIN,
         weighting: Weighting::Cap,
         caps: HashMap::new(),
-        level: 0,
-        view: View::Groups,
+        dir: Dir::Root,
+        entries: Vec::new(),
+        cur: 0,
+        marks: HashMap::new(),
         tiles: Vec::new(),
-        sel: 0,
+        sel: NO_SEL,
+        nest: false,
         editing: None,
         flash: String::new(),
         body: Rect::default(),
+        tree: Tree::default(),
+        grids_from: 0,
+        grids_read: Instant::now(),
+        nvim: None,
+        pane_open: false,
+        nvim_focus: false,
+        follow: true,
+        cursor_seen: None,
+        cursor_rel: String::new(),
+        pending_reveal: None,
+        dirty: false,
+        monitor: Monitor::default(),
+        live: Live::default(),
     };
     match load_groups(ctx) {
         Ok(g) => u.groups = g,
         Err(e) => u.flash = e,
     }
+    u.write_tree();
     let funds: Vec<String> = u
         .groups
         .iter()
@@ -227,23 +318,11 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
     // Without the latest bar date there is no range to price against; keep
     // its error on screen rather than letting the range step overwrite it.
     match latest_bar(&u.db_path) {
-        Ok(d) => {
-            u.latest = d;
-            u.apply_spec("1m");
-        }
+        Ok(d) => u.latest = d,
         Err(e) => u.flash = e,
     }
-    // "level|category" opens that basket's members directly.
-    if let Some((level, cat)) = arg.as_deref().and_then(|a| a.split_once('|')) {
-        if let Some(i) = u
-            .groups
-            .iter()
-            .position(|g| g.level == level && g.name == cat)
-        {
-            u.level = LEVELS.iter().position(|(l, _)| *l == level).unwrap_or(0);
-            u.view = View::Members(i);
-        }
-    }
+    // Opens on the move since the last close: the bars lag, Yahoo is today.
+    u.apply_spec(LIVE);
     match load_caps(&u.db_path) {
         Ok(c) => u.caps = c,
         Err(e) => {
@@ -252,7 +331,23 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Universe> {
             u.flash = e;
         }
     }
-    u.rebuild();
+    u.cd(Dir::Root);
+    // "level|category" opens that basket directly.
+    if let Some((level, cat)) = arg.as_deref().and_then(|a| a.split_once('|')) {
+        if let Some(i) = u
+            .groups
+            .iter()
+            .position(|g| g.level == level && g.name == cat)
+        {
+            u.cd(if level == "primary" {
+                Dir::Primary(i)
+            } else {
+                Dir::Basket(i)
+            });
+        }
+    }
+    // the expanded chart draws candles as a picture where the terminal can
+    u.monitor.pic = Some(PicChart::probe(&ctx.theme, 1));
     Ok(u)
 }
 
@@ -788,6 +883,14 @@ fn fit(s: &str, max: usize) -> String {
 
 impl Universe {
     fn apply_spec(&mut self, spec: &str) -> bool {
+        if spec.trim().eq_ignore_ascii_case(LIVE) {
+            self.spec = LIVE.into();
+            let today = chrono::Local::now().date_naive();
+            (self.from, self.to) = (today, today);
+            self.monitor.chart = Chart::Today;
+            self.ask_live();
+            return true;
+        }
         match parse_range(spec, self.latest) {
             Some((from, to)) => {
                 self.spec = spec.trim().to_lowercase();
@@ -818,6 +921,9 @@ impl Universe {
     /// One name's return over the range. Funds come from their own daily
     /// series, so the Yahoo fallback counts; everything else from the bars pull.
     fn ret_of(&self, ticker: &str) -> Option<f64> {
+        if self.spec == LIVE {
+            return self.live.rets.get(ticker).copied();
+        }
         match self.fund_series.get(ticker) {
             Some(s) => span_return(s, self.from, self.to).map(|(r, _)| r),
             None => self.returns.get(ticker).copied(),
@@ -852,9 +958,7 @@ impl Universe {
         Tile {
             title: m.ticker.clone(),
             sub: m.name.clone(),
-            order: 0,
             ret: self.ret_of(&m.ticker),
-            value: m.ticker.clone(),
             weight: self.weight_of(m),
             parent: None,
         }
@@ -874,12 +978,6 @@ impl Universe {
         }
     }
 
-    fn open_fund(&mut self, ticker: String) {
-        self.view = View::Fund(ticker);
-        self.sel = 0;
-        self.rebuild();
-    }
-
     /// Basket return: equal-weight mean, or category-weight weighted, over
     /// members that have prices. (return, members priced)
     fn basket(&self, g: &Group) -> (Option<f64>, usize) {
@@ -895,82 +993,56 @@ impl Universe {
         ((den > 0.0).then(|| num / den), n)
     }
 
-    /// Sub-sectors are drawn nested under their primary (the Sub-sector level, at the top).
+    /// Sub-sectors are drawn nested under their primary.
     fn nested(&self) -> bool {
-        matches!(self.view, View::Groups) && LEVELS[self.level].0 == "sub"
+        self.nest
     }
 
-    fn rebuild(&mut self) {
-        let level = LEVELS[self.level].0;
-        let mut tiles: Vec<Tile> = match self.view {
-            View::Fund(ref ticker) => self
+    /// A basket's box: its return, its share under the weighting, `value` = group index.
+    fn group_tile(&self, i: usize) -> Tile {
+        let g = &self.groups[i];
+        let (ret, n) = self.basket(g);
+        let sub = match &g.parent {
+            Some(p) => format!("{p} - {n}"),
+            None => format!("{n}/{} priced", g.members.len()),
+        };
+        Tile {
+            title: g.label.clone(),
+            sub,
+            ret,
+            weight: self.group_weight(g),
+            parent: g.parent.clone(),
+        }
+    }
+
+    /// The heatmap that previews directory `d`: a box per thing inside it, heaviest first.
+    fn preview_tiles(&self, d: &Dir) -> Vec<Tile> {
+        let mut tiles: Vec<Tile> = match d {
+            Dir::Holdings(t) => self
                 .holdings
-                .get(ticker)
+                .get(t)
                 .map(|ms| ms.iter().map(|m| self.holding_tile(m)).collect())
                 .unwrap_or_default(),
-            // Funds have no basket: each fund is its own tile. Favorites are single names,
-            // so they show the same way: one tile per ticker.
-            View::Groups if level == "fund" || level == "favorites" => self
-                .groups
-                .iter()
-                .filter(|g| g.level == level)
-                .flat_map(|g| &g.members)
-                .map(|m| self.member_tile(m))
-                .collect(),
-            View::Groups => self
-                .groups
-                .iter()
-                .enumerate()
-                .filter(|(_, g)| g.level == level)
-                .map(|(i, g)| {
-                    let (ret, n) = self.basket(g);
-                    let sub = match &g.parent {
-                        Some(p) => format!("{p} - {n}"),
-                        None => format!("{n}/{} priced", g.members.len()),
-                    };
-                    Tile {
-                        title: g.label.clone(),
-                        order: g.order,
-                        sub,
-                        ret,
-                        value: i.to_string(),
-                        weight: self.group_weight(g),
-                        parent: g.parent.clone(),
-                    }
-                })
-                .collect(),
-            View::Members(i) => self.groups[i]
+            Dir::Basket(i) => self.groups[*i]
                 .members
                 .iter()
                 .map(|m| self.member_tile(m))
                 .collect(),
+            _ => self
+                .entries_of(d)
+                .iter()
+                .filter_map(|e| match e {
+                    Entry::Dir(Dir::Primary(i) | Dir::Basket(i)) => Some(self.group_tile(*i)),
+                    _ => None,
+                })
+                .collect(),
         };
-        if self.nested() {
-            // Primaries in taxonomy order; each one's sub-sectors stay together, heaviest first.
-            let mut first: HashMap<String, i32> = HashMap::new();
-            for t in &tiles {
-                let e = first
-                    .entry(t.parent.clone().unwrap_or_default())
-                    .or_insert(i32::MAX);
-                *e = (*e).min(t.order);
-            }
-            let key = |t: &Tile| t.parent.clone().unwrap_or_default();
-            tiles.sort_by(|a, b| {
-                first[&key(a)]
-                    .cmp(&first[&key(b)])
-                    .then_with(|| key(a).cmp(&key(b)))
-                    .then_with(|| b.weight.total_cmp(&a.weight))
-                    .then_with(|| a.title.cmp(&b.title))
-            });
-        } else {
-            tiles.sort_by(|a, b| {
-                b.weight
-                    .total_cmp(&a.weight)
-                    .then_with(|| a.title.cmp(&b.title))
-            });
-        }
-        self.tiles = tiles;
-        self.sel = self.sel.min(self.tiles.len().saturating_sub(1));
+        tiles.sort_by(|a, b| {
+            b.weight
+                .total_cmp(&a.weight)
+                .then_with(|| a.title.cmp(&b.title))
+        });
+        tiles
     }
 
     /// A tile's background: heat colour by return. The selected tile keeps full colour; the rest
@@ -1057,105 +1129,67 @@ impl Universe {
         out
     }
 
-    /// The fund page: name, last close, and the return over each range.
-    fn draw_fund(&self, frame: &mut Frame, area: Rect, ticker: &str) {
-        let t = self.theme;
-        let name = self
+    /// Every name the screen can show: basket members, funds and fund holdings.
+    fn all_tickers(&self) -> Vec<String> {
+        let mut out: Vec<String> = self
             .groups
             .iter()
             .flat_map(|g| &g.members)
-            .find(|m| m.ticker == ticker)
-            .map_or("", |m| m.name.as_str());
-        let Some(series) = self.fund_series.get(ticker).filter(|s| !s.is_empty()) else {
-            let msg = format!("no daily prices for {ticker} (no bars, no Yahoo history cached)");
-            frame.render_widget(Paragraph::new(msg).style(t.dim()), area);
-            return;
-        };
-        let (last_day, last) = series[series.len() - 1];
-        let mut lines = vec![
-            Line::from(vec![
-                Span::styled(format!(" {ticker}  "), t.title()),
-                Span::styled(name.to_string(), t.base()),
-            ]),
-            Line::styled(
-                format!(
-                    " last ${last:.2} on {last_day} | {} daily closes since {}",
-                    series.len(),
-                    series[0].0
-                ),
-                t.dim(),
-            ),
-            Line::default(),
-        ];
-        for spec in PRESETS {
-            let label = Span::styled(format!(" {spec:<5}"), t.dim());
-            let window = parse_range(spec, self.latest);
-            let ret = window.and_then(|(f, to)| span_return(series, f, to).map(|x| (x, f)));
-            lines.push(match ret {
-                Some(((r, base), from)) => {
-                    // The history starts after the window: say so, or "1y" reads as the full year.
-                    let note = if base > from {
-                        format!("   from {base} (history starts there)")
-                    } else {
-                        format!("   from {base}")
-                    };
-                    Line::from(vec![
-                        label,
-                        Span::styled(format!("{r:>+8.1}%"), t.signed(r)),
-                        Span::styled(note, t.dim()),
-                    ])
-                }
-                None => Line::from(vec![label, Span::styled("     n/a", t.dim())]),
-            });
-        }
-        frame.render_widget(Paragraph::new(lines), area);
+            .chain(self.holdings.values().flatten())
+            .map(|m| m.ticker.clone())
+            .chain(self.holdings.keys().cloned())
+            .collect();
+        out.sort();
+        out.dedup();
+        out
     }
 
-    fn header(&self) -> Vec<Span<'static>> {
-        let t = self.theme;
-        let mut spans = vec![
-            Span::styled(" AI universe ", t.title()),
-            Span::styled(
-                format!("{} -> {}  ({}) ", self.from, self.to, self.spec),
-                t.accent(),
-            ),
-            Span::styled(self.weighting.label(), t.dim()),
-        ];
-        match &self.view {
-            View::Groups => {
-                for (i, (_, label)) in LEVELS.iter().enumerate() {
-                    let st = if i == self.level {
-                        t.selected()
-                    } else {
-                        t.dim()
-                    };
-                    spans.push(Span::styled(format!(" {label} "), st));
+    /// Starts a `since-close` pull for every name unless one is in flight.
+    fn ask_live(&mut self) {
+        if self.live.rx.is_some() || cfg!(test) {
+            return;
+        }
+        let syms = self.all_tickers().join(",");
+        if syms.is_empty() {
+            return;
+        }
+        self.live.asked = Some(Instant::now());
+        self.live.rx = Some(crate::pyrun::spawn_script(
+            "py/sources/yahoo.py",
+            &["since-close", &syms],
+        ));
+    }
+
+    /// Takes in a finished live pull and starts the next one when due. True when the map moved.
+    fn poll_live(&mut self) -> bool {
+        if self.spec != LIVE {
+            return false;
+        }
+        let mut changed = false;
+        if let Some(rx) = &self.live.rx {
+            match rx.try_recv() {
+                Ok(res) => {
+                    self.live.rx = None;
+                    match res.and_then(|s| parse_live(&s)) {
+                        Ok((rets, asof)) => {
+                            self.live.rets = rets;
+                            self.live.asof = asof;
+                        }
+                        Err(e) => self.flash = e,
+                    }
+                    self.refresh();
+                    changed = true;
                 }
-            }
-            View::Members(i) => {
-                let g = &self.groups[*i];
-                let (ret, n) = self.basket(g);
-                spans.push(Span::styled(format!("> {} ", g.label), t.title()));
-                if let Some(r) = ret {
-                    spans.push(Span::styled(format!("{r:+.1}% "), t.signed(r)));
-                }
-                spans.push(Span::styled(format!("{n} priced"), t.dim()));
-            }
-            View::Fund(ticker) => {
-                spans.push(Span::styled(format!("> Funds > {ticker} "), t.title()));
-                let held: &[Member] = self.holdings.get(ticker).map_or(&[], Vec::as_slice);
-                spans.push(Span::styled(
-                    format!(
-                        "{} holdings, {:.0}% of fund",
-                        held.len(),
-                        covered(held) * 100.0
-                    ),
-                    t.dim(),
-                ));
+                Err(std::sync::mpsc::TryRecvError::Disconnected) => self.live.rx = None,
+                Err(std::sync::mpsc::TryRecvError::Empty) => {}
             }
         }
-        spans
+        if self.live.asked.is_none_or(|t| t.elapsed() >= LIVE_EVERY) {
+            self.ask_live();
+        }
+        changed
     }
+
 
     /// One tile's text, centred in its box both ways: the ticker, the return, then the sub-label
     /// wrapped below, as one block.
@@ -1217,7 +1251,7 @@ impl Universe {
             match p {
                 Plate::Tile(r, i) => {
                     let tile = &self.tiles[*i];
-                    let selected = *i == self.sel;
+                    let selected = *i == self.sel || self.sel == NO_SEL;
                     let fill = self.tile_bg(tile.ret, scale, selected);
                     let mut st = Style::new().fg(t.fg).bg(fill);
                     if selected {
@@ -1246,80 +1280,717 @@ impl Universe {
         let plates = self.plates(body);
         self.draw_map(frame, body, &plates);
     }
+}
 
-    /// Moves the cursor to the box that lies that way (dx, dy) from the current one: the nearest,
-    /// with a penalty for drifting off the line. Stays put when nothing lies that way.
-    fn step(&mut self, dx: i32, dy: i32) {
-        let plates = self.plates(self.body);
-        // Centres in square units, so distances are the same both ways.
-        let centre = |r: Rect| {
-            (
-                f64::from(r.x) + f64::from(r.width) / 2.0,
-                (f64::from(r.y) + f64::from(r.height) / 2.0) * CELL_ASPECT,
-            )
-        };
-        let cur = plates.iter().find_map(|p| match p {
-            Plate::Tile(r, i) if *i == self.sel => Some(*r),
-            _ => None,
-        });
-        let Some(cur) = cur else { return };
-        let (cx, cy) = centre(cur);
-        let (dx, dy) = (f64::from(dx), f64::from(dy));
-        let mut best: Option<(f64, usize)> = None;
-        for p in &plates {
-            let Plate::Tile(r, i) = p else { continue };
-            if *i == self.sel {
-                continue;
-            }
-            let (x, y) = centre(*r);
-            let (vx, vy) = (x - cx, y - cy);
-            let along = vx * dx + vy * dy;
-            if along <= 0.0 {
-                continue;
-            }
-            let score = along + 2.0 * (vx * dy - vy * dx).abs();
-            if best.is_none_or(|(s, _)| score < s) {
-                best = Some((score, *i));
-            }
+/// The tree on disk and the nvim pane beside the map.
+impl Universe {
+    /// data/universe, beside the DuckDB file.
+    fn tree_root(&self) -> PathBuf {
+        self.db_path
+            .parent()
+            .unwrap_or(Path::new("."))
+            .join("universe")
+    }
+
+    /// Writes the baskets as directories (universe_fs), then reads ~grids in as groups.
+    fn write_tree(&mut self) {
+        let root = self.tree_root();
+        let nodes: Vec<tree_fs::Node> = self
+            .groups
+            .iter()
+            .map(|g| tree_fs::Node {
+                level: &g.level,
+                label: &g.label,
+                parent: g.parent.as_deref(),
+                members: g
+                    .members
+                    .iter()
+                    .map(|m| (m.ticker.as_str(), m.name.as_str()))
+                    .collect(),
+            })
+            .collect();
+        let favorites: Vec<&str> = self
+            .groups
+            .iter()
+            .filter(|g| g.level == "favorites")
+            .flat_map(|g| g.members.iter().map(|m| m.ticker.as_str()))
+            .collect();
+        match Tree::write(&root, &nodes, &favorites) {
+            Ok(t) => self.tree = t,
+            Err(e) => self.flash = format!("universe tree in {}: {e}", root.display()),
         }
-        if let Some((_, i)) = best {
-            self.sel = i;
+        self.grids_from = self.groups.len();
+        self.reload_grids();
+    }
+
+    /// Re-reads ~grids into the `grid` groups (kept last). Rebuilds the map only on a change.
+    fn reload_grids(&mut self) {
+        self.grids_read = Instant::now();
+        let grids = Tree::grids(&self.tree_root());
+        let current: Vec<(String, Vec<String>)> = self.groups[self.grids_from..]
+            .iter()
+            .map(|g| {
+                (
+                    g.name.clone(),
+                    g.members.iter().map(|m| m.ticker.clone()).collect(),
+                )
+            })
+            .collect();
+        if current == grids {
+            return;
+        }
+        let names: HashMap<String, String> = self.groups[..self.grids_from]
+            .iter()
+            .flat_map(|g| &g.members)
+            .map(|m| (m.ticker.clone(), m.name.clone()))
+            .collect();
+        self.groups.truncate(self.grids_from);
+        self.tree.clear_grids();
+        for (k, (name, tickers)) in grids.into_iter().enumerate() {
+            self.tree.add_grid(&name, self.grids_from + k);
+            self.groups.push(Group {
+                level: "grid".into(),
+                label: name.clone(),
+                order: k as i32,
+                parent: None,
+                members: tickers
+                    .into_iter()
+                    .map(|t| Member {
+                        name: names.get(&t).cloned().unwrap_or_default(),
+                        ticker: t,
+                        weight: 1.0,
+                    })
+                    .collect(),
+                name,
+            });
+        }
+        if matches!(self.dir, Dir::Basket(i) if i >= self.groups.len()) {
+            self.cur = 0;
+        }
+        self.refresh();
+    }
+
+    /// Where `E` opens oil: the buffer's directory with the cursor on the same entry.
+    /// (directory relative to the root, entry)
+    fn selection_path(&self) -> (String, Option<String>) {
+        let last = |rel: &str| rel.rsplit('/').next().unwrap_or(rel).to_string();
+        let entry = self.hovered().and_then(|e| match e {
+            Entry::Ticker(t) => Some(t.clone()),
+            Entry::Dir(Dir::Primary(i) | Dir::Basket(i)) => self.tree.path_of(*i).map(last),
+            Entry::Dir(Dir::Grids) => Some(tree_fs::GRIDS.to_string()),
+            Entry::Dir(_) => None,
+        });
+        match &self.dir {
+            // holdings aren't on disk: open the fund list on the fund
+            Dir::Holdings(t) => (tree_fs::FUNDS.into(), Some(t.clone())),
+            d => (self.rel_of(d), entry),
+        }
+    }
+
+    /// Keys go to nvim right now.
+    fn nvim_keys(&self) -> bool {
+        self.pane_open && self.nvim_focus
+    }
+
+    /// `-`: opens the nvim pane with focus, oil on the selected box.
+    fn open_pane(&mut self) {
+        if self.nvim.is_none() {
+            self.nvim = Some(NvimPane::new(&self.tree_root()));
+        }
+        self.pane_open = true;
+        self.nvim_focus = true;
+        self.pending_reveal = Some(self.selection_path());
+    }
+
+    /// Follows oil: when `.cursor` changed, moves the map to the place it names. True when
+    /// the map moved.
+    fn follow_cursor(&mut self) -> bool {
+        let path = self.tree_root().join(tree_fs::CURSOR);
+        let Ok(mtime) = std::fs::metadata(&path).and_then(|m| m.modified()) else {
+            return false;
+        };
+        if self.cursor_seen == Some(mtime) {
+            return false;
+        }
+        self.cursor_seen = Some(mtime);
+        let Ok(text) = std::fs::read_to_string(&path) else {
+            return false;
+        };
+        let rel = text.trim().to_string();
+        if rel == self.cursor_rel {
+            return false;
+        }
+        if rel.starts_with(tree_fs::GRIDS) {
+            self.reload_grids();
+        }
+        let groups = &self.groups;
+        let spot = self.tree.locate(&rel, |i| {
+            groups.get(i).map(|g| g.level.clone()).unwrap_or_default()
+        });
+        self.cursor_rel = rel;
+        match spot {
+            Some(spot) => {
+                self.go_to(spot);
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// Puts the buffer where oil's cursor is: `spot`'s directory, cursor on its entry.
+    fn go_to(&mut self, spot: Spot) {
+        let level_of = |u: &Self, i: usize| u.groups.get(i).map(|g| g.level.clone());
+        let (dir, on): (Dir, Option<Entry>) = match spot {
+            Spot::Groups { level, pick } => {
+                let picked = pick.as_deref().and_then(|p| p.parse::<usize>().ok());
+                match (level.as_str(), picked) {
+                    ("fund", _) => match self.funds_group() {
+                        Some(f) => (Dir::Basket(f), pick.map(Entry::Ticker)),
+                        None => (Dir::Root, None),
+                    },
+                    ("grid", Some(i)) => (Dir::Grids, Some(Entry::Dir(Dir::Basket(i)))),
+                    ("grid", None) => (Dir::Root, Some(Entry::Dir(Dir::Grids))),
+                    ("primary", Some(i)) => (Dir::Root, Some(Entry::Dir(Dir::Primary(i)))),
+                    ("sub", Some(i)) => {
+                        let up = self.parent(&Dir::Basket(i)).unwrap_or(Dir::Root);
+                        (up, Some(Entry::Dir(Dir::Basket(i))))
+                    }
+                    _ => (Dir::Root, None),
+                }
+            }
+            Spot::Members { group, pick } => {
+                if level_of(self, group).is_none() {
+                    return;
+                }
+                (Dir::Basket(group), pick.map(Entry::Ticker))
+            }
+        };
+        if dir != self.dir {
+            self.cd(dir);
+        }
+        if let Some(e) = on {
+            self.select(&e);
         }
     }
 }
 
+/// The fake oil buffer: directories, the cursor, and what the panes show for them.
+impl Universe {
+    /// Groups at `level` in taxonomy order (sub-sectors grouped under their primary).
+    fn groups_at(&self, level: &str) -> Vec<usize> {
+        let primary_order: HashMap<&str, i32> = self
+            .groups
+            .iter()
+            .filter(|g| g.level == "primary")
+            .map(|g| (g.label.as_str(), g.order))
+            .collect();
+        let mut out: Vec<usize> = (0..self.groups.len())
+            .filter(|&i| self.groups[i].level == level)
+            .collect();
+        out.sort_by_key(|&i| {
+            let g = &self.groups[i];
+            let p = g
+                .parent
+                .as_deref()
+                .and_then(|p| primary_order.get(p))
+                .copied()
+                .unwrap_or(i32::MAX);
+            (p, g.order, g.label.clone())
+        });
+        out
+    }
+
+    fn funds_group(&self) -> Option<usize> {
+        self.groups.iter().position(|g| g.level == "fund")
+    }
+
+    /// The lines of directory `d`.
+    fn entries_of(&self, d: &Dir) -> Vec<Entry> {
+        let dirs = |v: Vec<usize>| -> Vec<Entry> {
+            v.into_iter().map(|i| Entry::Dir(Dir::Basket(i))).collect()
+        };
+        match d {
+            Dir::Root => {
+                let mut v: Vec<Entry> = self
+                    .groups_at("primary")
+                    .into_iter()
+                    .map(|i| Entry::Dir(Dir::Primary(i)))
+                    .collect();
+                if let Some(f) = self.funds_group() {
+                    v.push(Entry::Dir(Dir::Basket(f)));
+                }
+                if self.groups.iter().any(|g| g.level == "region") {
+                    v.push(Entry::Dir(Dir::Regions));
+                }
+                v.push(Entry::Dir(Dir::Grids));
+                v
+            }
+            Dir::Primary(i) => {
+                let label = self.groups[*i].label.as_str();
+                dirs(
+                    self.groups_at("sub")
+                        .into_iter()
+                        .filter(|&j| self.groups[j].parent.as_deref() == Some(label))
+                        .collect(),
+                )
+            }
+            Dir::Regions => {
+                let mut v = self.groups_at("region");
+                v.sort_by_key(|&i| std::cmp::Reverse(self.groups[i].members.len()));
+                dirs(v)
+            }
+            Dir::Grids => dirs(self.groups_at("grid")),
+            Dir::Basket(i) => self.tickers(&self.groups[*i].members, false),
+            Dir::Holdings(t) => self.tickers(self.holdings.get(t).map_or(&[], Vec::as_slice), true),
+        }
+    }
+
+    /// Ticker lines in the monitor's order. `held`: fund holdings, whose weight is the fund's.
+    fn tickers(&self, members: &[Member], held: bool) -> Vec<Entry> {
+        let mut ms: Vec<&Member> = members.iter().collect();
+        let key = |v: Option<f64>| v.unwrap_or(f64::NEG_INFINITY);
+        let m = &self.monitor;
+        match m.sort {
+            Sort::Weight if held => ms.sort_by(|a, b| b.weight.total_cmp(&a.weight)),
+            Sort::Weight => ms.sort_by(|a, b| {
+                self.weight_of(b)
+                    .total_cmp(&self.weight_of(a))
+                    .then_with(|| a.ticker.cmp(&b.ticker))
+            }),
+            Sort::Chg => ms.sort_by(|a, b| key(m.chg(&b.ticker)).total_cmp(&key(m.chg(&a.ticker)))),
+            Sort::Range => ms.sort_by(|a, b| {
+                key(self.ret_of(&b.ticker)).total_cmp(&key(self.ret_of(&a.ticker)))
+            }),
+            Sort::Ticker => ms.sort_by(|a, b| a.ticker.cmp(&b.ticker)),
+        }
+        ms.dedup_by(|a, b| a.ticker == b.ticker);
+        ms.into_iter()
+            .map(|m| Entry::Ticker(m.ticker.clone()))
+            .collect()
+    }
+
+    /// The directory above `d`.
+    fn parent(&self, d: &Dir) -> Option<Dir> {
+        Some(match d {
+            Dir::Root => return None,
+            Dir::Primary(_) | Dir::Regions | Dir::Grids => Dir::Root,
+            Dir::Holdings(_) => self.funds_group().map_or(Dir::Root, Dir::Basket),
+            Dir::Basket(i) => {
+                let g = &self.groups[*i];
+                match g.level.as_str() {
+                    "sub" => g
+                        .parent
+                        .as_deref()
+                        .and_then(|p| {
+                            self.groups
+                                .iter()
+                                .position(|x| x.level == "primary" && x.label == p)
+                        })
+                        .map_or(Dir::Root, Dir::Primary),
+                    "region" => Dir::Regions,
+                    "grid" => Dir::Grids,
+                    _ => Dir::Root,
+                }
+            }
+        })
+    }
+
+    /// `d`'s path in the tree, relative to the root (empty for the root and regions).
+    fn rel_of(&self, d: &Dir) -> String {
+        match d {
+            Dir::Primary(i) | Dir::Basket(i) => self.tree.path_of(*i).unwrap_or_default().into(),
+            Dir::Grids => tree_fs::GRIDS.into(),
+            Dir::Holdings(t) => format!("{}/{t}", tree_fs::FUNDS),
+            Dir::Regions => "regions".into(),
+            Dir::Root => String::new(),
+        }
+    }
+
+    /// An entry's name in the buffer: `memory_storage/`, `funds/`, `MU`.
+    fn entry_name(&self, e: &Entry) -> String {
+        match e {
+            Entry::Ticker(t) => t.clone(),
+            Entry::Dir(Dir::Regions) => "regions/".into(),
+            Entry::Dir(Dir::Grids) => format!("{}/", tree_fs::GRIDS),
+            Entry::Dir(Dir::Root) => "/".into(),
+            Entry::Dir(Dir::Holdings(t)) => format!("{t}/"),
+            Entry::Dir(Dir::Primary(i) | Dir::Basket(i)) => {
+                let g = &self.groups[*i];
+                match g.level.as_str() {
+                    "fund" => format!("{}/", tree_fs::FUNDS),
+                    "grid" => format!("{}/", g.name),
+                    _ => format!("{}/", tree_fs::slug(&g.label)),
+                }
+            }
+        }
+    }
+
+    /// A directory's title, return over the range, and how many names it holds.
+    fn dir_info(&self, d: &Dir) -> (String, Option<f64>, usize) {
+        match d {
+            Dir::Primary(i) | Dir::Basket(i) => {
+                let g = &self.groups[*i];
+                (g.label.clone(), self.basket(g).0, g.members.len())
+            }
+            Dir::Regions => ("Regions".into(), None, self.groups_at("region").len()),
+            Dir::Grids => ("Grids".into(), None, self.groups_at("grid").len()),
+            Dir::Holdings(t) => {
+                let held = self.holdings.get(t).map_or(&[][..], Vec::as_slice);
+                let (mut num, mut den) = (0.0, 0.0);
+                for m in held {
+                    if let Some(r) = self.ret_of(&m.ticker) {
+                        num += m.weight * r;
+                        den += m.weight;
+                    }
+                }
+                (
+                    format!("{t} holdings, {:.0}% of fund", covered(held) * 100.0),
+                    (den > 0.0).then(|| num / den),
+                    held.len(),
+                )
+            }
+            Dir::Root => ("AI universe".into(), None, self.groups_at("primary").len()),
+        }
+    }
+
+    fn hovered(&self) -> Option<&Entry> {
+        self.entries.get(self.cur)
+    }
+
+    /// Lists `d` with the cursor where it was last time there.
+    fn cd(&mut self, d: Dir) {
+        self.marks.insert(self.dir.clone(), self.cur);
+        self.entries = self.entries_of(&d);
+        self.cur = self
+            .marks
+            .get(&d)
+            .copied()
+            .unwrap_or(0)
+            .min(self.entries.len().saturating_sub(1));
+        self.dir = d;
+        self.load_listing();
+        self.on_move();
+    }
+
+    /// `-`: the directory above, with the cursor on the one just left.
+    fn up(&mut self) {
+        let Some(p) = self.parent(&self.dir) else {
+            return;
+        };
+        let from = match &self.dir {
+            Dir::Holdings(t) => Entry::Ticker(t.clone()),
+            d => Entry::Dir(d.clone()),
+        };
+        self.cd(p);
+        self.select(&from);
+    }
+
+    /// Puts the cursor on `e` if it is in the listing.
+    fn select(&mut self, e: &Entry) {
+        if let Some(i) = self.entries.iter().position(|x| x == e) {
+            self.cur = i;
+            self.on_move();
+        }
+    }
+
+    /// `{ }`: the sibling directory `step` away (the next sub-sector in this primary, the next
+    /// grid...), wrapping around.
+    fn sibling(&mut self, step: isize) {
+        let Some(p) = self.parent(&self.dir) else {
+            return;
+        };
+        let dirs: Vec<Dir> = self
+            .entries_of(&p)
+            .into_iter()
+            .filter_map(|e| match e {
+                Entry::Dir(d) => Some(d),
+                Entry::Ticker(_) => None,
+            })
+            .collect();
+        let Some(at) = dirs.iter().position(|d| *d == self.dir) else {
+            return;
+        };
+        let n = dirs.len() as isize;
+        let next = dirs[((at as isize + step).rem_euclid(n)) as usize].clone();
+        self.cd(next);
+    }
+
+    /// Re-lists the directory (after a sort, range or weighting change), cursor kept on its entry.
+    fn refresh(&mut self) {
+        let on = self.hovered().cloned();
+        self.entries = self.entries_of(&self.dir);
+        self.cur = self.cur.min(self.entries.len().saturating_sub(1));
+        if let Some(e) = on {
+            self.select(&e);
+        }
+        self.on_move();
+    }
+
+    fn move_cursor(&mut self, to: usize) {
+        self.cur = to.min(self.entries.len().saturating_sub(1));
+        self.on_move();
+    }
+
+    /// The cursor moved: rebuild the preview when it is on a directory.
+    fn on_move(&mut self) {
+        self.dirty = true;
+        if let Some(Entry::Dir(d)) = self.hovered().cloned() {
+            self.tiles = self.preview_tiles(&d);
+            self.sel = NO_SEL;
+            self.nest = false;
+        }
+    }
+
+    /// Feeds the listing's tickers to the monitor: their daily closes (once per ticker) and
+    /// the live quotes.
+    fn load_listing(&mut self) {
+        let tickers: Vec<String> = self
+            .entries
+            .iter()
+            .filter_map(|e| match e {
+                Entry::Ticker(t) => Some(t.clone()),
+                Entry::Dir(_) => None,
+            })
+            .collect();
+        let missing: Vec<String> = tickers
+            .iter()
+            .filter(|t| !self.monitor.closes.contains_key(*t))
+            .cloned()
+            .collect();
+        if !missing.is_empty() && !cfg!(test) {
+            match load_fund_series(&self.db_path, &missing) {
+                Ok(mut got) => {
+                    for t in missing {
+                        // an empty entry marks "asked, none on file" so it isn't asked again
+                        let v = got.remove(&t).unwrap_or_default();
+                        self.monitor.closes.insert(t, v);
+                    }
+                }
+                Err(e) => self.flash = e,
+            }
+        }
+        self.monitor.watch(&tickers);
+    }
+
+    /// The listing as monitor rows.
+    fn rows(&self) -> Vec<Row> {
+        let name_of: HashMap<&str, &str> = self
+            .groups
+            .iter()
+            .flat_map(|g| &g.members)
+            .chain(self.holdings.values().flatten())
+            .map(|m| (m.ticker.as_str(), m.name.as_str()))
+            .collect();
+        self.entries
+            .iter()
+            .map(|e| match e {
+                Entry::Ticker(t) => Row {
+                    ticker: t.clone(),
+                    name: name_of.get(t.as_str()).copied().unwrap_or("").to_string(),
+                    ret: self.ret_of(t),
+                    cap: self.caps.get(t).copied(),
+                    names: None,
+                },
+                Entry::Dir(d) => {
+                    let (label, ret, n) = self.dir_info(d);
+                    Row {
+                        ticker: self.entry_name(e),
+                        name: label,
+                        ret,
+                        cap: None,
+                        names: Some(n),
+                    }
+                }
+            })
+            .collect()
+    }
+
+    /// The listing's place among its siblings, 1-based (0 of 0 at the top).
+    fn sibling_pos(&self) -> (usize, usize) {
+        let Some(p) = self.parent(&self.dir) else {
+            return (0, 0);
+        };
+        let dirs: Vec<Entry> = self
+            .entries_of(&p)
+            .into_iter()
+            .filter(|e| matches!(e, Entry::Dir(_)))
+            .collect();
+        let at = dirs.iter().position(|e| *e == Entry::Dir(self.dir.clone()));
+        at.map_or((0, 0), |i| (i + 1, dirs.len()))
+    }
+
+    /// Both panes: the preview over the top, the buffer under it.
+    fn draw_oil(&mut self, frame: &mut Frame, body: Rect) {
+        let t = self.theme;
+        // the listing at the bottom gets 3 rows more than its share
+        let list_h = (body.height as u32 * monitor::MONITOR_PCT as u32 / 100) as u16 + 3;
+        let [top, bottom] = Layout::vertical([
+            Constraint::Min(1),
+            Constraint::Length(list_h.min(body.height.saturating_sub(4))),
+        ])
+        .areas(body);
+        let rows = self.rows();
+        let (label, ret, _) = self.dir_info(&self.dir);
+        let parent_label = self
+            .parent(&self.dir)
+            .filter(|p| *p != Dir::Root)
+            .map(|p| self.dir_info(&p).0);
+        let basket = Basket {
+            label: &label,
+            parent: parent_label.as_deref(),
+            ret,
+            pos: self.sibling_pos(),
+            spec: &self.spec,
+            from: self.from,
+            to: self.to,
+        };
+        match self.hovered().cloned() {
+            Some(Entry::Ticker(_)) => {
+                let ticker_rows: Vec<Row> = rows
+                    .iter()
+                    .filter(|r| r.names.is_none())
+                    .map(|r| Row {
+                        ticker: r.ticker.clone(),
+                        name: r.name.clone(),
+                        ret: r.ret,
+                        cap: r.cap,
+                        names: None,
+                    })
+                    .collect();
+                if let Some(row) = rows.get(self.cur) {
+                    self.monitor
+                        .draw_expanded(frame, top, row, &ticker_rows, &basket, &t);
+                }
+            }
+            Some(Entry::Dir(d)) => {
+                let (dl, dr, n) = self.dir_info(&d);
+                let mut title = vec![
+                    Span::styled(
+                        format!(" {} ", self.entry_name(&Entry::Dir(d.clone()))),
+                        t.title(),
+                    ),
+                    Span::styled(format!("{dl}  "), t.base()),
+                ];
+                if let Some(r) = dr {
+                    title.push(Span::styled(format!("{r:+.1}%  "), t.signed(r)));
+                }
+                title.push(Span::styled(format!("{n} names "), t.dim()));
+                let block = Block::new()
+                    .borders(ratatui::widgets::Borders::ALL)
+                    .border_style(t.border())
+                    .title(Line::from(title));
+                let inner = block.inner(top);
+                frame.render_widget(block, top);
+                if self.tiles.is_empty() {
+                    frame.render_widget(Paragraph::new("empty").style(t.dim()), inner);
+                } else {
+                    let plates = self.plates(inner);
+                    self.draw_map(frame, inner, &plates);
+                }
+            }
+            None => {
+                frame.render_widget(Paragraph::new("empty directory").style(t.dim()), top);
+            }
+        }
+        self.monitor
+            .draw_table(frame, bottom, &rows, self.cur, &basket, &t);
+    }
+}
+
 const KEYS: &[Key] = &[
-    key("hjkl", "move"),
-    key("g/G", "first / last"),
-    key("↵", "open (dossier for a fund)"),
-    key("H/L", "level (groups)"),
-    key("[ ]", "range"),
+    key("j/k", "move in the buffer"),
+    key("g/G", "first / last line"),
+    key(
+        "↵",
+        "into a directory (a fund: its holdings); on a name: its dossier",
+    ),
+    key("-", "up a directory, cursor on where you were"),
+    key("_", "the top of the tree"),
+    key("{ }", "previous / next sibling directory"),
+    key("D", "dossier for the name under the cursor"),
+    key("s", "sort names: weight, today, range, ticker"),
+    key("t", "chart: range / today"),
+    key("[ ]", "range (live: last close -> now, incl. pre/post)"),
     key("r", "edit the range"),
     key("w", "weighting"),
-    key("q/esc", "back"),
+    key("E", "the same tree in your nvim (oil), beside the screen"),
+    key("ctrl-/ ctrl-7", "keys to nvim / back to the buffer"),
+    key("ctrl-p", "buffer follows oil's cursor: on / off"),
+    key("q", "quit (closes nvim first)"),
+    key("esc", "up a directory; at the top, quit"),
 ];
 
 impl Screen for Universe {
     fn leader_ok(&self) -> bool {
-        self.editing.is_none()
+        self.editing.is_none() && !self.nvim_keys()
     }
 
+    /// Quotes and nvim change on their own: redraw when either did.
     fn needs_redraw(&self) -> bool {
-        false
+        self.dirty
+    }
+
+    fn tick(&mut self) -> Action {
+        if self.monitor.poll() {
+            self.dirty = true;
+        }
+        if self.poll_live() {
+            self.dirty = true;
+        }
+        if !self.pane_open {
+            return Action::None;
+        }
+        if let Some(nv) = self.nvim.as_mut() {
+            if nv.ready() {
+                if let Some((rel, name)) = self.pending_reveal.take() {
+                    nv.reveal(&rel, name.as_deref());
+                }
+            }
+            if nv.refresh() {
+                self.dirty = true;
+            }
+        }
+        if self.follow && self.follow_cursor() {
+            self.dirty = true;
+        }
+        if self.grids_read.elapsed() >= GRIDS_EVERY {
+            self.reload_grids();
+        }
+        Action::None
+    }
+
+    /// Frame rate right after a key to nvim, so its echo shows at once; the usual pace else.
+    fn poll_interval(&self) -> std::time::Duration {
+        let hot = self.pane_open && self.nvim.as_ref().is_some_and(NvimPane::hot);
+        std::time::Duration::from_millis(if hot { 12 } else { 100 })
     }
 
     fn draw(&mut self, frame: &mut Frame) {
+        self.dirty = false;
         let t = self.theme;
-        let area = frame.area();
-        frame.render_widget(Block::new().style(t.base()), area);
+        let full = frame.area();
+        frame.render_widget(Block::new().style(t.base()), full);
+        let area = if self.pane_open {
+            let w = (full.width * 2 / 5)
+                .max(34)
+                .min(full.width.saturating_sub(20));
+            let [map, pane] =
+                Layout::horizontal([Constraint::Min(1), Constraint::Length(w)]).areas(full);
+            let focus = self.nvim_focus;
+            if let Some(nv) = self.nvim.as_mut() {
+                nv.draw(frame, pane, focus, &t);
+            }
+            map
+        } else {
+            full
+        };
         // The bottom row exists only while the range prompt is open.
-        let [head, body, foot] = Layout::vertical([
-            Constraint::Length(2),
+        // no title row: the map starts at the top
+        let [body, foot] = Layout::vertical([
             Constraint::Min(1),
             Constraint::Length(u16::from(self.editing.is_some())),
         ])
         .areas(area);
-        frame.render_widget(Paragraph::new(Line::from(self.header())), head);
 
         if let Some(buf) = &self.editing {
             let line = Line::from(vec![
@@ -1330,24 +2001,11 @@ impl Screen for Universe {
             frame.render_widget(Paragraph::new(line), foot);
         }
 
-        if let View::Fund(ticker) = &self.view {
-            let ticker = ticker.clone();
-            let [summary, holdings] =
-                Layout::vertical([Constraint::Length(FUND_SUMMARY_H), Constraint::Min(1)])
-                    .areas(body);
-            self.draw_fund(frame, summary, &ticker);
-            if self.tiles.is_empty() {
-                let msg = if self.holdings.is_empty() {
-                    NO_HOLDINGS.to_string()
-                } else {
-                    format!("no holdings for {ticker}")
-                };
-                frame.render_widget(Paragraph::new(msg).style(t.dim()), holdings);
-            } else {
-                self.draw_body(frame, holdings);
-            }
+        if !self.entries.is_empty() {
+            self.draw_oil(frame, body);
             return;
         }
+        // No tree (the universe isn't loaded): the map of whatever tiles there are.
         if self.tiles.is_empty() {
             frame.render_widget(Paragraph::new(NOT_LOADED).style(t.dim()), body);
             return;
@@ -1356,7 +2014,7 @@ impl Screen for Universe {
     }
 
     fn takes_text(&self) -> bool {
-        self.editing.is_some()
+        self.editing.is_some() || self.nvim_keys()
     }
 
     fn flash_text(&self) -> Option<&str> {
@@ -1375,7 +2033,7 @@ impl Screen for Universe {
                     let spec = std::mem::take(buf);
                     self.editing = None;
                     if self.apply_spec(&spec) {
-                        self.rebuild();
+                        self.refresh();
                     }
                 }
                 KeyCode::Backspace => {
@@ -1387,77 +2045,100 @@ impl Screen for Universe {
             return Action::None;
         }
 
-        let n = self.tiles.len();
+        // ctrl-/ is byte 0x1f, which crossterm reports as `7` with ctrl
+        let ctrl = key.modifiers.contains(KeyModifiers::CONTROL);
+        let ctrl_slash = key.code == KeyCode::Char('7') && ctrl;
+        if self.nvim_keys() {
+            if ctrl_slash {
+                self.nvim_focus = false;
+            } else if let Some(nv) = self.nvim.as_mut() {
+                nv.send_key(key);
+            }
+            return Action::None;
+        }
+        if ctrl_slash {
+            if self.pane_open {
+                self.nvim_focus = true;
+            }
+            return Action::None;
+        }
+        if key.code == KeyCode::Char('p') && ctrl {
+            self.follow = !self.follow;
+            self.flash = if self.follow {
+                "buffer follows oil's cursor".into()
+            } else {
+                "buffer stays put".into()
+            };
+            return Action::None;
+        }
+        if self.pane_open && matches!(key.code, KeyCode::Esc | KeyCode::Char('q')) {
+            self.pane_open = false;
+            return Action::None;
+        }
+
+        let n = self.entries.len();
         match key.code {
-            KeyCode::Esc | KeyCode::Char('q') => match self.view {
-                View::Groups => return Action::Quit,
-                View::Members(_) | View::Fund(_) => {
-                    self.view = View::Groups;
-                    self.sel = 0;
-                    self.rebuild();
-                }
-            },
-            KeyCode::Char('l') | KeyCode::Right => self.step(1, 0),
-            KeyCode::Char('h') | KeyCode::Left => self.step(-1, 0),
-            KeyCode::Char('j') | KeyCode::Down => self.step(0, 1),
-            KeyCode::Char('k') | KeyCode::Up => self.step(0, -1),
-            KeyCode::Char('g') => self.sel = 0,
-            KeyCode::Char('G') => self.sel = n.saturating_sub(1),
-            KeyCode::Char('H' | 'L') if self.view == View::Groups => {
-                let d = if key.code == KeyCode::Char('L') {
-                    1
-                } else {
-                    LEVELS.len() - 1
+            KeyCode::Char('q') => return Action::Quit,
+            KeyCode::Esc if self.dir == Dir::Root => return Action::Quit,
+            KeyCode::Esc | KeyCode::Char('-') => self.up(),
+            KeyCode::Char('_') => self.cd(Dir::Root),
+            KeyCode::Char('j') | KeyCode::Down => self.move_cursor(self.cur + 1),
+            KeyCode::Char('k') | KeyCode::Up => self.move_cursor(self.cur.saturating_sub(1)),
+            KeyCode::Char('g') => self.move_cursor(0),
+            KeyCode::Char('G') => self.move_cursor(n.saturating_sub(1)),
+            KeyCode::Char('}') => self.sibling(1),
+            KeyCode::Char('{') => self.sibling(-1),
+            KeyCode::Char('E') => self.open_pane(),
+            KeyCode::Char('s') => {
+                self.monitor.sort = self.monitor.sort.next();
+                self.refresh();
+            }
+            KeyCode::Char('t') => {
+                self.monitor.chart = match self.monitor.chart {
+                    Chart::Range => Chart::Today,
+                    Chart::Today => Chart::Range,
                 };
-                self.level = (self.level + d) % LEVELS.len();
-                self.sel = 0;
-                self.rebuild();
             }
             KeyCode::Char('r') => self.editing = Some(String::new()),
             KeyCode::Char('w') => {
                 self.weighting = self.weighting.next();
-                self.rebuild();
+                self.refresh();
             }
             KeyCode::Char(c @ ('[' | ']')) => {
                 let cur = PRESETS.iter().position(|p| *p == self.spec);
                 let next = match (cur, c) {
                     (Some(i), ']') => (i + 1).min(PRESETS.len() - 1),
                     (Some(i), _) => i.saturating_sub(1),
-                    (None, _) => 2,
+                    (None, _) => 3,
                 };
                 if self.apply_spec(PRESETS[next]) {
-                    self.rebuild();
+                    self.refresh();
                 }
             }
-            KeyCode::Enter => {
-                let Some(tile) = self.tiles.get(self.sel) else {
-                    return Action::None;
-                };
-                let value = tile.value.clone();
-                match self.view {
-                    View::Groups if LEVELS[self.level].0 == "fund" => self.open_fund(value),
-                    View::Groups if LEVELS[self.level].0 == "favorites" => {
+            KeyCode::Char('D') => {
+                if let Some(Entry::Ticker(t)) = self.hovered() {
+                    return Action::Route(Route::Screen {
+                        screen: "dossier".into(),
+                        arg: Some(t.clone()),
+                    });
+                }
+            }
+            KeyCode::Enter => match self.hovered().cloned() {
+                Some(Entry::Dir(d)) => self.cd(d),
+                Some(Entry::Ticker(t)) => {
+                    let in_funds =
+                        matches!(self.dir, Dir::Basket(i) if Some(i) == self.funds_group());
+                    if in_funds && self.holdings.get(&t).is_some_and(|h| !h.is_empty()) {
+                        self.cd(Dir::Holdings(t));
+                    } else {
                         return Action::Route(Route::Screen {
                             screen: "dossier".into(),
-                            arg: Some(value),
-                        });
-                    }
-                    View::Groups => {
-                        if let Ok(i) = value.parse::<usize>() {
-                            self.view = View::Members(i);
-                            self.sel = 0;
-                            self.rebuild();
-                        }
-                    }
-                    View::Members(i) if self.groups[i].level == "fund" => self.open_fund(value),
-                    View::Members(_) | View::Fund(_) => {
-                        return Action::Route(Route::Screen {
-                            screen: "dossier".into(),
-                            arg: Some(value),
+                            arg: Some(t),
                         });
                     }
                 }
-            }
+                None => {}
+            },
             _ => {}
         }
         Action::None
@@ -1503,7 +2184,7 @@ mod tests {
         let mut u = open(&ctx, None).unwrap();
         eprintln!("{}", render(&mut u, 160, 48));
         let key = |c| KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE);
-        u.on_key(key('L'));
+        u.on_key(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE));
         eprintln!("{}", render(&mut u, 160, 48));
         u.on_key(key('w'));
         eprintln!("{}", render(&mut u, 160, 48));
@@ -1629,7 +2310,7 @@ mod tests {
             sub("Memory", "Compute", 1.0),
             sub("Power", "Energy", 1.0),
         ]);
-        u.level = 1;
+        u.nest = true;
         let plates = u.plates(Rect::new(0, 0, 80, 24));
         let labels: Vec<&str> = plates
             .iter()
@@ -1644,51 +2325,6 @@ mod tests {
             .filter(|p| matches!(p, Plate::Tile(..)))
             .count();
         assert_eq!(tiles, 3);
-    }
-
-    #[test]
-    fn arrows_move_to_a_box_that_lies_that_way() {
-        let mut u = bare(vec![
-            tile("A", 4.0, Some(1.0)),
-            tile("B", 2.0, Some(1.0)),
-            tile("C", 1.0, Some(1.0)),
-            tile("D", 1.0, Some(1.0)),
-        ]);
-        u.body = Rect::new(0, 0, 60, 16);
-        let key = |c| KeyEvent::new(KeyCode::Char(c), KeyModifiers::NONE);
-        let centre = |u: &Universe, i: usize| {
-            let r = u
-                .plates(u.body)
-                .iter()
-                .find_map(|p| match p {
-                    Plate::Tile(r, j) if *j == i => Some(*r),
-                    _ => None,
-                })
-                .unwrap();
-            (
-                f64::from(r.x) + f64::from(r.width) / 2.0,
-                (f64::from(r.y) + f64::from(r.height) / 2.0) * CELL_ASPECT,
-            )
-        };
-        for start in 0..u.tiles.len() {
-            for (c, dx, dy) in [
-                ('l', 1.0, 0.0),
-                ('h', -1.0, 0.0),
-                ('j', 0.0, 1.0),
-                ('k', 0.0, -1.0),
-            ] {
-                u.sel = start;
-                u.on_key(key(c));
-                if u.sel != start {
-                    let (a, b) = (centre(&u, start), centre(&u, u.sel));
-                    assert!(
-                        (b.0 - a.0) * dx + (b.1 - a.1) * dy > 0.0,
-                        "{c} from {start} went to {}",
-                        u.sel
-                    );
-                }
-            }
-        }
     }
 
     #[test]
@@ -1741,6 +2377,159 @@ mod tests {
         assert_eq!(Weighting::Exposure.next(), Weighting::Cap);
     }
 
+    /// Two primaries, three sub-sectors, a fund list with holdings.
+    fn tree() -> Universe {
+        let m = |t: &str| Member {
+            ticker: t.into(),
+            name: format!("{t} Inc"),
+            weight: 0.5,
+        };
+        let g = |level: &str, label: &str, order: i32, parent: Option<&str>, ms: &[&str]| Group {
+            level: level.into(),
+            name: label.to_lowercase(),
+            label: label.into(),
+            order,
+            parent: parent.map(String::from),
+            members: ms.iter().map(|t| m(t)).collect(),
+        };
+        let mut u = bare(vec![]);
+        u.groups = vec![
+            g("primary", "Compute & Semis", 1, None, &["MU", "NVDA"]),
+            g("primary", "Power & Energy", 2, None, &["VST"]),
+            g(
+                "sub",
+                "Memory & Storage",
+                2,
+                Some("Compute & Semis"),
+                &["MU", "SNDK"],
+            ),
+            g("sub", "Processors", 1, Some("Compute & Semis"), &["NVDA"]),
+            g("sub", "Utilities", 1, Some("Power & Energy"), &["VST"]),
+            g("fund", "Funds", 0, None, &["DRAM", "QQQ"]),
+        ];
+        u.holdings = HashMap::from([("DRAM".to_string(), vec![m("MU"), m("SNDK")])]);
+        u.caps = HashMap::from([("MU".to_string(), 1e11), ("SNDK".to_string(), 2e11)]);
+        u.weighting = Weighting::Cap;
+        u.cd(Dir::Root);
+        u
+    }
+
+    fn press(u: &mut Universe, code: KeyCode) {
+        u.on_key(KeyEvent::new(code, KeyModifiers::NONE));
+    }
+
+    fn names(u: &Universe) -> Vec<String> {
+        u.entries.iter().map(|e| u.entry_name(e)).collect()
+    }
+
+    #[test]
+    fn the_buffer_walks_the_tree_like_oil() {
+        let mut u = tree();
+        assert_eq!(
+            names(&u),
+            ["compute_semis/", "power_energy/", "funds/", "~grids/"]
+        );
+        press(&mut u, KeyCode::Enter);
+        assert_eq!(u.dir, Dir::Primary(0));
+        // sub-sectors in taxonomy order
+        assert_eq!(names(&u), ["processors/", "memory_storage/"]);
+        press(&mut u, KeyCode::Char('j'));
+        press(&mut u, KeyCode::Enter);
+        assert_eq!(u.dir, Dir::Basket(2));
+        // names by market cap under cap weighting
+        assert_eq!(names(&u), ["SNDK", "MU"]);
+        // - goes up with the cursor on the directory just left
+        press(&mut u, KeyCode::Char('-'));
+        assert_eq!(u.dir, Dir::Primary(0));
+        assert_eq!(u.hovered(), Some(&Entry::Dir(Dir::Basket(2))));
+        press(&mut u, KeyCode::Char('-'));
+        assert_eq!(u.hovered(), Some(&Entry::Dir(Dir::Primary(0))));
+        // esc at the top quits
+        assert!(matches!(
+            u.on_key(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE)),
+            Action::Quit
+        ));
+    }
+
+    #[test]
+    fn a_directory_under_the_cursor_previews_as_a_heatmap() {
+        let mut u = tree();
+        // on compute_semis/: one box per sub-sector inside it
+        let titles: Vec<&str> = u.tiles.iter().map(|t| t.title.as_str()).collect();
+        assert_eq!(titles.len(), 2);
+        assert!(titles.contains(&"Memory & Storage") && titles.contains(&"Processors"));
+        press(&mut u, KeyCode::Char('j'));
+        let titles: Vec<&str> = u.tiles.iter().map(|t| t.title.as_str()).collect();
+        assert_eq!(titles, ["Utilities"]);
+    }
+
+    #[test]
+    fn braces_step_to_the_next_sibling_and_wrap() {
+        let mut u = tree();
+        u.cd(Dir::Basket(3)); // processors
+        press(&mut u, KeyCode::Char('}'));
+        assert_eq!(u.dir, Dir::Basket(2));
+        press(&mut u, KeyCode::Char('}'));
+        assert_eq!(u.dir, Dir::Basket(3), "wraps within the primary");
+        press(&mut u, KeyCode::Char('{'));
+        assert_eq!(u.dir, Dir::Basket(2));
+    }
+
+    #[test]
+    fn enter_on_a_fund_lists_its_holdings_and_minus_comes_back_to_it() {
+        let mut u = tree();
+        u.cd(Dir::Basket(5));
+        assert_eq!(u.hovered(), Some(&Entry::Ticker("DRAM".into())));
+        press(&mut u, KeyCode::Enter);
+        assert_eq!(u.dir, Dir::Holdings("DRAM".into()));
+        assert_eq!(
+            names(&u),
+            ["MU", "SNDK"],
+            "the fund's own weights order them"
+        );
+        press(&mut u, KeyCode::Char('-'));
+        assert_eq!(u.dir, Dir::Basket(5));
+        assert_eq!(u.hovered(), Some(&Entry::Ticker("DRAM".into())));
+        // enter on a plain name opens its dossier
+        u.move_cursor(1);
+        assert!(matches!(
+            u.on_key(KeyEvent::new(KeyCode::Enter, KeyModifiers::NONE)),
+            Action::Route(_)
+        ));
+    }
+
+    #[test]
+    fn oil_cursor_lands_the_buffer_on_the_same_entry() {
+        let mut u = tree();
+        u.go_to(Spot::Groups {
+            level: "sub".into(),
+            pick: Some("2".into()),
+        });
+        assert_eq!(u.dir, Dir::Primary(0));
+        assert_eq!(u.hovered(), Some(&Entry::Dir(Dir::Basket(2))));
+        u.go_to(Spot::Members {
+            group: 2,
+            pick: Some("MU".into()),
+        });
+        assert_eq!(u.dir, Dir::Basket(2));
+        assert_eq!(u.hovered(), Some(&Entry::Ticker("MU".into())));
+    }
+
+    #[test]
+    fn live_range_reads_since_close_moves() {
+        let (rets, asof) = parse_live(
+            r#"{"asof": 1795443889, "moves": [{"symbol": "NVDA", "pct": 31.4}, {"symbol": "X"}]}"#,
+        )
+        .unwrap();
+        assert_eq!(asof, Some(1795443889));
+        assert_eq!(rets.len(), 1);
+        let mut u = tree();
+        u.live.rets = rets;
+        assert!(u.apply_spec("live"));
+        assert_eq!(u.ret_of("NVDA"), Some(31.4));
+        assert_eq!(u.ret_of("MU"), None);
+    }
+
     fn bare(tiles: Vec<Tile>) -> Universe {
         Universe {
             theme: Theme::default(),
@@ -1755,13 +2544,29 @@ mod tests {
             latest: NaiveDate::MIN,
             weighting: Weighting::Exposure,
             caps: HashMap::new(),
-            level: 0,
-            view: View::Groups,
+            dir: Dir::Root,
+            entries: Vec::new(),
+            cur: 0,
+            marks: HashMap::new(),
             tiles,
             sel: 0,
+            nest: false,
             editing: None,
             flash: String::new(),
             body: Rect::default(),
+            tree: Tree::default(),
+            grids_from: 0,
+            grids_read: Instant::now(),
+            nvim: None,
+            pane_open: false,
+            nvim_focus: false,
+            follow: true,
+            cursor_seen: None,
+            cursor_rel: String::new(),
+            pending_reveal: None,
+            dirty: false,
+            monitor: Monitor::default(),
+            live: Live::default(),
         }
     }
 
@@ -1769,9 +2574,7 @@ mod tests {
         Tile {
             title: title.into(),
             sub: String::new(),
-            order: 0,
             ret,
-            value: title.into(),
             weight,
             parent: None,
         }
