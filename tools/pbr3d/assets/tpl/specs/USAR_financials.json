@@ -1,0 +1,1 @@
+{"beats": [{"panel": "bars", "points": [["Q1'25", 0.0], ["Q2'25", 0.0], ["Q1'26", 5.7], ["Q2'26", 5.8]], "title": "Quarterly revenue", "unit": "$M"}, {"items": [["Non Us", 1.5], ["US", 0.1]], "panel": "donut", "title": "Geography", "unit": "$M"}], "kit": "3ca4737b65cc", "name": "USAR_financials"}

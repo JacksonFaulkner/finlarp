@@ -118,6 +118,8 @@ _MEMBER_ALIAS = {
     "TimingOfTransferOfGoodsOrServices": "Timing of transfer", "ConsolidationItems": "Consolidation items",
     "SalesChannelDirectlyToConsumer": "Direct to consumer", "SalesChannelThroughIntermediary": "Through intermediary",
     "TransferredAtPointInTime": "Point in time", "TransferredOverTime": "Over time",
+    # company product names CamelCase splitting mangles ("I Phone", "Homeand")
+    "IPhone": "iPhone", "IPad": "iPad", "WearablesHomeandAccessories": "Wearables, Home and Accessories",
 }
 _SMALL = {"and", "or", "of", "to", "the", "in", "for", "by", "with", "from", "at", "on", "excluding", "including"}
 _TAIL = {"Channel", "Segment", "Segments", "Sector", "Region", "Domain"}
@@ -355,7 +357,15 @@ def build(ticker: str) -> dict:
     sections = [s for s in (
         [_section(fn, t, con, F, prof, health=health, sid=sid) for sid, fn in TAB_BUILDERS]
         + [_section(sec_patents_, t, con, health=health), _section(profile_, t, prof, health=health)]) if s]
+    # template / stack diagrams above a tab: re-render a tab's diagram when its data changed
+    from derive.dossier_diagrams import render, scene_for, specs_for_sections
+    try:
+        render(specs_for_sections(t, sections, con, F))
+    except Exception as e:  # no Blender here, or it failed: the tab still shows its data
+        print(f"{t}: diagrams not rendered: {e}", file=sys.stderr)
     for s in sections:
+        if scene := scene_for(t, s["id"]):
+            s["scene"] = scene
         rows = [it for b in s["blocks"] for it in b.get("rows", [])]
         s["new"] = any(it.get("new") for it in rows)
         n_new = sum(1 for it in rows if it.get("new"))

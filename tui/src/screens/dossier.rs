@@ -54,6 +54,7 @@ const NAV_KEYS: &[Key] = &[
     key("tab h/l", "focus nav / detail / header"),
     key("/", "jump to section"),
     key("c", "CANSLIM for this ticker"),
+    key("F", "this ticker's filings"),
     key("q", "quit"),
 ];
 
@@ -145,7 +146,8 @@ pub fn open(ctx: &Ctx, arg: Option<String>) -> io::Result<Dossier> {
         Err(msg) => Dossier::empty(&symbol, msg, ctx.theme),
     };
     d.db_path = ctx.db_path.clone();
-    if is_memory_page(&symbol) {
+    // Every dossier may carry tab pictures (memory pages, template diagrams, stack diagrams).
+    if !symbol.is_empty() {
         d.scene = crate::screens::memory_scene::MemoryScene::query();
     }
     if let Some(ticker) = symbol.strip_prefix("MEM:") {
@@ -615,6 +617,12 @@ impl Screen for Dossier {
                 return Action::Route(Route::Screen {
                     screen: "canslim".into(),
                     arg: Some(self.symbol.clone()),
+                });
+            }
+            KeyCode::Char('F') => {
+                return Action::Route(Route::Screen {
+                    screen: "filings".into(),
+                    arg: Some(format!("t:{}", self.symbol)),
                 });
             }
             KeyCode::Char('i') => match self.selected_source().cloned() {
@@ -1243,5 +1251,28 @@ mod tests {
                 "one document per group"
             );
         }
+    }
+
+    /// Every page in the stack map (py/derive/dossier_stack.json, the Profile tab's picture) is a
+    /// diagrams node with a 3D overview, so a ticker never points at a page that cannot play.
+    #[test]
+    fn stack_pages_have_overviews() {
+        let map: serde_json::Value =
+            serde_json::from_str(include_str!("../../../py/derive/dossier_stack.json")).unwrap();
+        let mut n = 0;
+        for (ticker, pages) in map.as_object().unwrap() {
+            if ticker.starts_with('_') {
+                continue;
+            }
+            for p in pages.as_array().unwrap() {
+                let p = p.as_str().unwrap();
+                assert!(
+                    crate::screens::diagrams_nodes::overview(p).is_some(),
+                    "{ticker}: {p} has no 3D overview"
+                );
+                n += 1;
+            }
+        }
+        assert!(n >= 50, "stack pages checked: {n}");
     }
 }

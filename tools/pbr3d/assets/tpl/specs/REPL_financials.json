@@ -1,0 +1,1 @@
+{"beats": [{"panel": "bars", "points": [["2018-06", 0.0], ["2018-09", 0.0], ["2018-12", 0.0]], "title": "Quarterly revenue", "unit": "$M"}, {"panel": "bars", "points": [["2018-06", -7.0], ["2018-09", -6.4], ["2018-12", -6.7]], "title": "Free cash flow", "unit": "$M"}], "kit": "3ca4737b65cc", "name": "REPL_financials"}

@@ -1,0 +1,195 @@
+{
+ "_doc": "ticker -> diagrams pages (tui/src/screens/diagrams_nodes) showing where it sits in the AI hardware stack, most specific first. The dossier's Profile tab plays the first. Each page must have a Blender overview (tested in tui dossier.rs).",
+ "NVDA": [
+  "LOGIC DIE",
+  "ASSEMBLY"
+ ],
+ "AMD": [
+  "LOGIC DIE",
+  "ASSEMBLY"
+ ],
+ "AVGO": [
+  "LOGIC DIE",
+  "PAM4 DSP"
+ ],
+ "MU": [
+  "HBM STACK",
+  "CELL"
+ ],
+ "000660.KS": [
+  "HBM STACK",
+  "CELL"
+ ],
+ "005930.KS": [
+  "HBM STACK",
+  "GATE-ALL-AROUND"
+ ],
+ "688825.SS": [
+  "CELL"
+ ],
+ "SNDK": [
+  "HBF",
+  "WAFER"
+ ],
+ "TSM": [
+  "GATE-ALL-AROUND",
+  "FINFET",
+  "INTERPOSER"
+ ],
+ "INTC": [
+  "GATE-ALL-AROUND",
+  "FINFET"
+ ],
+ "GFS": [
+  "PLANAR"
+ ],
+ "UMC": [
+  "PLANAR"
+ ],
+ "TSEM": [
+  "PLANAR"
+ ],
+ "ASML": [
+  "EXPOSE",
+  "LITHO"
+ ],
+ "AMAT": [
+  "DEPOSIT",
+  "IMPLANT"
+ ],
+ "LRCX": [
+  "ETCH",
+  "DEPOSIT"
+ ],
+ "8035.T": [
+  "COAT",
+  "DEVELOP"
+ ],
+ "ACLS": [
+  "IMPLANT"
+ ],
+ "ACMR": [
+  "CLEAN"
+ ],
+ "VECO": [
+  "DEPOSIT"
+ ],
+ "FORM": [
+  "WAFER SORT"
+ ],
+ "TER": [
+  "FINAL TEST"
+ ],
+ "6857.T": [
+  "FINAL TEST"
+ ],
+ "COHU": [
+  "FINAL TEST"
+ ],
+ "AEHR": [
+  "FINAL TEST"
+ ],
+ "6146.T": [
+  "DICE"
+ ],
+ "KLIC": [
+  "MICROBUMP",
+  "ASSEMBLY"
+ ],
+ "AMKR": [
+  "ASSEMBLY",
+  "SUBSTRATE"
+ ],
+ "ASX": [
+  "ASSEMBLY",
+  "SUBSTRATE"
+ ],
+ "3711.TW": [
+  "ASSEMBLY",
+  "SUBSTRATE"
+ ],
+ "TTMI": [
+  "BOARD"
+ ],
+ "WOLF": [
+  "INGOT"
+ ],
+ "AXTI": [
+  "INGOT"
+ ],
+ "COHR": [
+  "LASER",
+  "TRANSCEIVER"
+ ],
+ "LITE": [
+  "LASER",
+  "CPO"
+ ],
+ "AAOI": [
+  "TRANSCEIVER",
+  "LASER"
+ ],
+ "FN": [
+  "TRANSCEIVER"
+ ],
+ "MRVL": [
+  "PAM4 DSP",
+  "LOGIC DIE"
+ ],
+ "CRDO": [
+  "PAM4 DSP"
+ ],
+ "GLW": [
+  "OPTICAL FIBER"
+ ],
+ "CIEN": [
+  "TRANSCEIVER",
+  "OPTICAL FIBER"
+ ],
+ "POET": [
+  "CPO",
+  "LASER"
+ ],
+ "VRT": [
+  "RACK POWER",
+  "UPS"
+ ],
+ "2308.TW": [
+  "RACK POWER"
+ ],
+ "ETN": [
+  "SWITCHGEAR",
+  "UPS"
+ ],
+ "POWL": [
+  "SWITCHGEAR"
+ ],
+ "ABBNY": [
+  "SWITCHGEAR",
+  "SUBSTATION"
+ ],
+ "SBGSF": [
+  "UPS",
+  "SWITCHGEAR"
+ ],
+ "HUBB": [
+  "SUBSTATION"
+ ],
+ "GEV": [
+  "GRID",
+  "SUBSTATION"
+ ],
+ "PWR": [
+  "GRID",
+  "SUBSTATION"
+ ],
+ "MTZ": [
+  "GRID"
+ ],
+ "MPWR": [
+  "VRM"
+ ],
+ "NVTS": [
+  "VRM"
+ ]
+}
